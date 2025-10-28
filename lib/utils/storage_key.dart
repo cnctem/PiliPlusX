@@ -56,6 +56,7 @@ abstract final class SettingBoxKey {
       applyFilterToRelatedVideos = 'applyFilterToRelatedVideos',
       autoUpdate = 'autoUpdate',
       maxCacheSize = 'maxCacheSize',
+      apiHKUrl = 'apiHKUrl',
       defaultShowComment = 'defaultShowComment',
       replySortType = 'replySortType',
       defaultDynamicType = 'defaultDynamicType',
