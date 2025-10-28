@@ -634,6 +634,70 @@ List<SettingsModel> get extraSettings => [
       }
     },
   ),
+  SettingsModel(
+    settingsType: SettingsType.normal,
+    title: '设置港澳台代理',
+    getSubtitle: () {
+      final url = Pref.apiHKUrl;
+      return '当前港澳台代理: 「${url == '' ? '不代理' : Pref.apiHKUrl}」';
+    },
+    onTap: (setState) {
+      showDialog(
+        context: Get.context!,
+        builder: (context) {
+          String valueStr = '';
+          return AlertDialog(
+            title: const Text('港澳台代理链接'),
+            content: TextField(
+              autofocus: true,
+              onChanged: (value) => valueStr = value,
+              keyboardType: TextInputType.url,
+              decoration: const InputDecoration(
+                hintText: '请输入URL如:https://app.bilibili.com',
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: Get.back,
+                child: Text(
+                  '取消',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () async {
+                  if (!valueStr.isNotEmpty) {
+                    Get.snackbar('格式错误', '代理链接不能为空');
+                    return;
+                  }
+                  if (!valueStr.toLowerCase().startsWith('http')) {
+                    Get.snackbar('格式错误', '代理链接格式错误');
+                    return;
+                  }
+
+                  if (valueStr.toLowerCase().endsWith('/')) {
+                    Get.snackbar('格式错误', '末尾不能有/');
+                    return;
+                  }
+
+                  Get.back();
+                  await GStorage.setting.put(
+                    SettingBoxKey.apiHKUrl,
+                    valueStr,
+                  );
+                  setState();
+                },
+                child: const Text('确定'),
+              ),
+            ],
+          );
+        },
+      );
+    },
+    leading: const Icon(Icons.sailing_rounded),
+  ),
 ];
 
 Future<void> audioNormalization(
