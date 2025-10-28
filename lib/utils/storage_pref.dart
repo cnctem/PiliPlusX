@@ -588,6 +588,9 @@ abstract final class Pref {
   static num get maxCacheSize =>
       _setting.get(SettingBoxKey.maxCacheSize) ?? pow(1024, 3);
 
+  static String get apiHKUrl =>
+      _setting.get(SettingBoxKey.apiHKUrl, defaultValue: '');
+
   static bool get optTabletNav =>
       _setting.get(SettingBoxKey.optTabletNav, defaultValue: true);
 

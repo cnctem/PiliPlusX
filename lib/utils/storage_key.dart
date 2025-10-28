@@ -58,6 +58,7 @@ abstract final class SettingBoxKey {
       autoUpdate = 'autoUpdate',
       autoClearCache = 'autoClearCache',
       maxCacheSize = 'maxCacheSize',
+      apiHKUrl = 'apiHKUrl',
       defaultShowComment = 'defaultShowComment',
       replySortType = 'replySortType',
       defaultDynamicType = 'defaultDynamicType',
