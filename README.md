@@ -217,6 +217,30 @@
 
 <br/>
 
+## 港澳台代理
+
+由于PiliPlus使用了web接口,所以不能直接使用哔哩漫游的公共服务器
+
+搭建方法: 直接反向代理api.bilibili.com或添加下面几个路由的支持:
+```text
+/x/web-interface/view
+/x/web-interface/wbi/search/type
+/x/player/wbi/playurl
+/pgc/season/index/result
+/pgc/web/timeline
+/pgc/season/index/condition
+/pgc/player/web/v2/playurl
+/pgc/view/web/season
+```
+
+可用的公共服务器:
+
+注意:由于请求代理服务器会携带cookie，所以请使用可信任的代理服务器或不登录账号进行使用
+
+|提供者|服务器|捐赠|
+|------|------|:----:|
+|gucooing|https://blblapi.alsl.xyz||
+
 ## 声明
 
 此项目（PiliPlus）是个人为了兴趣而开发，仅用于学习和测试，请于下载后24小时内删除。
