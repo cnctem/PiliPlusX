@@ -172,6 +172,12 @@ Commit Hash: ${BuildConfig.commitHash}''',
           ListTile(
             onTap: () => PageUtils.launchURL(Constants.sourceCodeUrl),
             leading: const Icon(Icons.code),
+            title: const Text('上游仓库 Code'),
+            subtitle: Text(Constants.upstreamCodeUrl, style: subTitleStyle),
+          ),
+          ListTile(
+            onTap: () => PageUtils.launchURL(Constants.sourceCodeUrl),
+            leading: const Icon(Icons.code),
             title: const Text('Source Code'),
             subtitle: Text(Constants.sourceCodeUrl, style: subTitleStyle),
           ),

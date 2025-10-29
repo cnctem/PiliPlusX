@@ -1,4 +1,4 @@
-package com.example.piliplus
+package com.gucooing.piliplus
 
 import android.app.PictureInPictureParams
 import android.app.SearchManager
