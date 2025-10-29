@@ -13,6 +13,7 @@ import 'package:PiliPlus/models_new/search/search_rcmd/data.dart';
 import 'package:PiliPlus/models_new/search/search_trending/data.dart';
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/wbi_sign.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -59,7 +60,8 @@ abstract final class SearchHttp {
     String? gaiaVtoken,
     required ValueChanged<String> onSuccess,
   }) async {
-    final params = await WbiSign.makSign({
+    String api = Api.searchByType;
+    var params = await WbiSign.makSign({
       'search_type': searchType.name,
       'keyword': keyword,
       'page': page,
@@ -76,8 +78,15 @@ abstract final class SearchHttp {
       'web_location': 1430654,
       'gaia_vtoken': ?gaiaVtoken,
     });
-    final res = await Request().get(
-      Api.searchByType,
+    if (searchType == SearchType.media_hk_bangumi) {
+      if (Pref.apiHKUrl.isEmpty) {
+        return const Error('请在 设置-其他设置-港澳台代理 中设置代理服务器');
+      }
+      params['search_type'] = SearchType.media_bangumi.name;
+      api = Pref.apiHKUrl + Api.searchByType;
+    }
+    var res = await Request().get(
+      api,
       queryParameters: params,
       options: Options(
         headers: {
@@ -109,7 +118,7 @@ abstract final class SearchHttp {
             case SearchType.bili_user:
               data = SearchUserData.fromJson(dataData);
               break;
-            case SearchType.media_bangumi || SearchType.media_ft:
+            case SearchType.media_bangumi || SearchType.media_ft || SearchType.media_hk_bangumi:
               data = SearchPgcData.fromJson(dataData);
               break;
             case SearchType.article:

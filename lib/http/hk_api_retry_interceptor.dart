@@ -9,7 +9,7 @@ class HkApiRetryInterceptor extends Interceptor {
   void onResponse(Response response, ResponseInterceptorHandler handler) async {
     String apiHKUrl = Pref.apiHKUrl;
     final originalOptions = response.requestOptions;
-    if ((originalOptions.method == 'GET') && (apiHKUrl != '')) {
+    if ((originalOptions.method == 'GET') && (apiHKUrl.isNotEmpty)) {
       final data = response.data;
       if (data is Map &&
           ((data['code'] == -404) || (data['code'] == -10403))) {
