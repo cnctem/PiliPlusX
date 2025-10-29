@@ -100,8 +100,9 @@ class PgcController
       return;
     }
     followLoading = true;
-    final res = await FavHttp.favPgc(
-      type: tabType == HomeTabType.bangumi ? 1 : 2,
+    var res = await FavHttp.favPgc(
+      mid: accountService.mid,
+      type: tabType == HomeTabType.bangumi || tabType == HomeTabType.hk_bangumi ? 1 : 2,
       pn: followPage,
     );
 
