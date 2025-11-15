@@ -356,6 +356,7 @@ class _MediaPageState extends CommonPageState<MinePage, MineController>
                           value: hasLevel
                               ? levelInfo.currentExp! / levelInfo.nextExp!
                               : 0,
+                          trackGap: hasLevel ? null : 0,
                           backgroundColor: theme.colorScheme.outline.withValues(
                             alpha: 0.4,
                           ),
