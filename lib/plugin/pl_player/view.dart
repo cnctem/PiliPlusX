@@ -72,7 +72,6 @@ import 'package:get/get.dart' hide ContextExtensionss;
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:window_manager/window_manager.dart';
 
 class PLVideoPlayer extends StatefulWidget {
@@ -149,20 +148,11 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   StreamSubscription? _controlsListener;
 
   bool _pauseDueToPauseUponEnteringBackgroundMode = false;
-  StreamSubscription<bool>? wakeLock;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-
-    late final player = plPlayerController.videoController?.player;
-    if (player != null && player.state.playing) {
-      WakelockPlus.enable();
-    }
-    wakeLock = player?.stream.playing.listen(
-      (v) => WakelockPlus.toggle(enable: v),
-    );
 
     _controlsListener = plPlayerController.showControls.listen((bool val) {
       final visible = val && !plPlayerController.controlsLock.value;
@@ -304,10 +294,6 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    wakeLock?.cancel();
-    WakelockPlus.enabled.then((i) {
-      if (i) WakelockPlus.disable();
-    });
     _danmakuListener?.cancel();
     _tapGestureRecognizer.dispose();
     _longPressRecognizer?.dispose();

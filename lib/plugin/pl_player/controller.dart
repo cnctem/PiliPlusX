@@ -56,6 +56,7 @@ import 'package:hive/hive.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:path/path.dart' as path;
+import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:window_manager/window_manager.dart';
 
 class PlPlayerController {
@@ -606,14 +607,6 @@ class PlPlayerController {
         }
       });
     }
-
-    // _playerEventSubs = onPlayerStatusChanged.listen((PlayerStatus status) {
-    //   if (status == PlayerStatus.playing) {
-    //     WakelockPlus.enable();
-    //   } else {
-    //     WakelockPlus.disable();
-    //   }
-    // });
   }
 
   // 获取实例 传参
@@ -1044,6 +1037,7 @@ class PlPlayerController {
   void startListeners() {
     subscriptions = {
       videoPlayerController!.stream.playing.listen((event) {
+        WakelockPlus.toggle(enable: event);
         if (event) {
           if (_shouldSetPip) {
             if (_isCurrVideoPage) {
@@ -1777,6 +1771,9 @@ class PlPlayerController {
     // dataStatus.status.close();
 
     await removeListeners();
+    if (playerStatus.playing) {
+      WakelockPlus.disable();
+    }
     _videoPlayerController?.dispose();
     _videoPlayerController = null;
     _videoController = null;
