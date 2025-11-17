@@ -936,7 +936,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   }
 
   void _onInteractionUpdate(ScaleUpdateDetails details) {
-    showRestoreScaleBtn.value = transformationController.value.row0.x != 1.0;
+    showRestoreScaleBtn.value =
+        transformationController.value.storage[0] != 1.0;
     if (interacting || plPlayerController.initialFocalPoint == Offset.zero) {
       return;
     }
@@ -2071,6 +2072,13 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
               : EdgeInsets.zero,
           panAxis: PanAxis.aligned,
           transformationController: transformationController,
+          onTranslate: () {
+            final storage = transformationController.value.storage;
+            showRestoreScaleBtn.value =
+                storage[12].abs() > 2.0 ||
+                storage[13].abs() > 2.0 ||
+                storage[0] != 1.0;
+          },
           childKey: _videoKey,
           child: RepaintBoundary(
             key: _videoKey,

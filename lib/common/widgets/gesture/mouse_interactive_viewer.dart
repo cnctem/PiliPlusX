@@ -36,9 +36,9 @@ class MouseInteractiveViewer extends StatefulWidget {
     this.transformationController,
     this.alignment,
     this.trackpadScrollCausesScale = false,
-
     required this.childKey,
     required this.child,
+    required this.onTranslate,
   }) : assert(minScale > 0),
        assert(interactionEndFrictionCoefficient > 0),
        assert(maxScale > 0),
@@ -66,6 +66,7 @@ class MouseInteractiveViewer extends StatefulWidget {
   final GestureScaleUpdateCallback? onInteractionUpdate;
   final TransformationController? transformationController;
   final GlobalKey childKey;
+  final VoidCallback onTranslate;
 
   static const double _kDrag = 0.0000135;
 
@@ -641,6 +642,8 @@ class _MouseInteractiveViewerState extends State<MouseInteractiveViewer>
       _transformer.value,
       newFocalPointScene - focalPointScene,
     );
+
+    widget.onTranslate();
   }
 
   void _handleInertiaAnimation() {

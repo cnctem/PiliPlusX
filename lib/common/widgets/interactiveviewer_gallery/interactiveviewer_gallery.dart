@@ -359,7 +359,7 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
 
   void onDoubleTap() {
     Matrix4 matrix = _transformationController.value.clone();
-    double currentScale = matrix.row0.x;
+    double currentScale = matrix.storage[0];
 
     double targetScale = widget.minScale;
 

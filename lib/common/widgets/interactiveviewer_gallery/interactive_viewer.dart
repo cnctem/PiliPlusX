@@ -740,7 +740,7 @@ class _InteractiveViewerState extends State<InteractiveViewer>
   // with GestureDetector's scale gesture.
   void _onScaleStart(ScaleStartDetails details) {
     if (widget.isAnimating?.call() == true ||
-        (details.pointerCount < 2 && _transformer.value.row0.x == 1.0)) {
+        (details.pointerCount < 2 && _transformer.value.storage[0] == 1.0)) {
       widget.onPanStart?.call(details);
       return;
     }
@@ -773,7 +773,7 @@ class _InteractiveViewerState extends State<InteractiveViewer>
   // handled with GestureDetector's scale gesture.
   void _onScaleUpdate(ScaleUpdateDetails details) {
     if (widget.isAnimating?.call() == true ||
-        (details.pointerCount < 2 && _transformer.value.row0.x == 1.0)) {
+        (details.pointerCount < 2 && _transformer.value.storage[0] == 1.0)) {
       widget.onPanUpdate?.call(details);
       return;
     }
@@ -873,11 +873,11 @@ class _InteractiveViewerState extends State<InteractiveViewer>
   // Handle the end of a gesture of _GestureType. All of pan, scale, and rotate
   // are handled with GestureDetector's scale gesture.
   void _onScaleEnd(ScaleEndDetails details) {
-    if (_transformer.value.row0.x == 1.0) {
+    if (_transformer.value.storage[0] == 1.0) {
       widget.onReset?.call();
     }
     if (widget.isAnimating?.call() == true ||
-        (details.pointerCount < 2 && _transformer.value.row0.x == 1.0)) {
+        (details.pointerCount < 2 && _transformer.value.storage[0] == 1.0)) {
       widget.onPanEnd?.call(details);
       return;
     }
