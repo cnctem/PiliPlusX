@@ -1836,8 +1836,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           ),
 
         // 锁
-        if (!isLive &&
-            plPlayerController.showFsLockBtn &&
+        if (plPlayerController.showFsLockBtn &&
             (isFullScreen || plPlayerController.isDesktopPip))
           ViewSafeArea(
             right: false,
