@@ -109,7 +109,7 @@ abstract final class DownloadHttp {
           orElse: () => videosList.first,
         );
 
-        final videoUrl = VideoUtils.getCdnUrl(videoDash);
+        final videoUrl = VideoUtils.getCdnUrl(videoDash.playUrls);
 
         final Type2File videoFile = Type2File(
           id: videoDash.id!,
@@ -143,7 +143,10 @@ abstract final class DownloadHttp {
             (e) => e.id == closestNumber,
             orElse: () => audioDashList.first,
           );
-          final audioUrl = VideoUtils.getCdnUrl(audioDash);
+          final audioUrl = VideoUtils.getCdnUrl(
+            audioDash.playUrls,
+            isAudio: true,
+          );
           audioFileList = [
             Type2File(
               id: audioDash.id!,
@@ -177,7 +180,7 @@ abstract final class DownloadHttp {
             md5: '',
             metaUrl: '',
             order: first.order!,
-            url: first.backupUrl?.lastOrNull ?? first.url!,
+            url: VideoUtils.getCdnUrl(first.playUrls),
           ),
         ];
         final FormatItem? formatItem = data.supportFormats?.firstWhereOrNull(
@@ -189,6 +192,7 @@ abstract final class DownloadHttp {
             formatItem?.quality ?? VideoQuality.clear480.code;
 
         entry
+          ..mediaType = 1
           ..typeTag = targetVideoQa.toString()
           ..videoQuality = targetVideoQa
           ..preferedVideoQuality = targetVideoQa
@@ -204,7 +208,7 @@ abstract final class DownloadHttp {
             useIjkMediaCodec: false,
           ),
         ];
-        entry.mediaType = 1;
+
         return Type1(
           from: pageData?.from ?? ep?.from,
           quality: entry.preferedVideoQuality,

@@ -703,7 +703,6 @@ class PlPlayerController {
         seekTo,
         volume,
       );
-      callback?.call();
       // 获取视频时长 00:00
       _duration.value = duration ?? _videoPlayerController!.state.duration;
       _position.value = _buffered.value = _sliderPosition.value =
@@ -718,6 +717,7 @@ class PlPlayerController {
       // listen the video player events
       startListeners();
       await _initializePlayer();
+      callback?.call();
     } catch (err, stackTrace) {
       dataStatus.status.value = DataStatus.error;
       if (kDebugMode) {
@@ -830,6 +830,7 @@ class PlPlayerController {
             bufferSize: Pref.expandBuffer
                 ? (isLive ? 64 * 1024 * 1024 : 32 * 1024 * 1024)
                 : (isLive ? 16 * 1024 * 1024 : 4 * 1024 * 1024),
+            logLevel: kDebugMode ? MPVLogLevel.warn : MPVLogLevel.error,
           ),
         );
     final pp = player.platform!;
@@ -888,8 +889,7 @@ class PlPlayerController {
 
     final Map<String, String>? filters;
     if (Platform.isAndroid) {
-      String audioNormalization = '';
-      audioNormalization = AudioNormalization.getParamFromConfig(
+      String audioNormalization = AudioNormalization.getParamFromConfig(
         Pref.audioNormalization,
       );
       if (volume != null && volume.isNotEmpty) {
@@ -1109,12 +1109,13 @@ class PlPlayerController {
       }),
       if (kDebugMode)
         videoPlayerController!.stream.log.listen(((PlayerLog log) {
-          debugPrint(log.toString());
+          if (log.level == 'error' || log.level == 'fatal') {
+            Utils.reportError(log.text, null, log.prefix);
+          } else {
+            debugPrint(log.toString());
+          }
         })),
       videoPlayerController!.stream.error.listen((String event) {
-        if (kDebugMode) {
-          debugPrint('MPV Exception: $event');
-        }
         if (isFileSource && event.startsWith("Failed to open file")) {
           return;
         }

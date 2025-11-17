@@ -3,10 +3,10 @@ import 'dart:math';
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/button/icon_button.dart';
+import 'package:PiliPlus/common/widgets/flutter/page/tabs.dart';
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/keep_alive_wrapper.dart';
-import 'package:PiliPlus/common/widgets/page/tabs.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart';
 import 'package:PiliPlus/common/widgets/stat/stat.dart';
 import 'package:PiliPlus/http/fav.dart';
@@ -123,6 +123,7 @@ class _EpisodePanelState extends State<EpisodePanel>
       return;
     }
 
+    @pragma('vm:notify-debugger-on-exception')
     void jumpToCurrent() {
       final newItemIndex = _findCurrentItemIndex;
       if (_currentItemIndex != newItemIndex) {
@@ -131,8 +132,8 @@ class _EpisodePanelState extends State<EpisodePanel>
           _itemScrollController[_currentTabIndex.value].jumpTo(
             _calcItemOffset(newItemIndex),
           );
-        } catch (_) {
-          if (kDebugMode) rethrow;
+        } catch (e, s) {
+          Utils.reportError(e, s);
         }
       }
     }

@@ -238,10 +238,12 @@ abstract class Pref {
   static String get videoSync =>
       _setting.get(SettingBoxKey.videoSync, defaultValue: 'display-resample');
 
-  static String get defaultCDNService => _setting.get(
-    SettingBoxKey.CDNService,
-    defaultValue: CDNService.backupUrl.code,
-  );
+  static CDNService get defaultCDNService {
+    if (_setting.get(SettingBoxKey.CDNService) case final String cdnName) {
+      return CDNService.values.byName(cdnName);
+    }
+    return CDNService.backupUrl;
+  }
 
   static String get banWordForRecommend =>
       _setting.get(SettingBoxKey.banWordForRecommend, defaultValue: '');
@@ -870,4 +872,6 @@ abstract class Pref {
       _setting.get(SettingBoxKey.setSystemBrightness, defaultValue: false);
 
   static String? get downloadPath => _setting.get(SettingBoxKey.downloadPath);
+
+  static String? get liveCdnUrl => _setting.get(SettingBoxKey.liveCdnUrl);
 }

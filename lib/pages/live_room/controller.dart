@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:PiliPlus/common/widgets/text_field/controller.dart';
+import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
 import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/http/live.dart';
 import 'package:PiliPlus/http/video.dart';
@@ -164,7 +164,7 @@ class LiveRoomController extends GetxController {
       }).toList();
       currentQnDesc.value =
           LiveQuality.fromCode(currentQn)?.desc ?? currentQn.toString();
-      videoUrl = VideoUtils.getCdnUrl(item);
+      videoUrl = VideoUtils.getLiveCdnUrl(item);
       await playerInit();
       isLoaded.value = true;
     } else {
@@ -333,81 +333,83 @@ class LiveRoomController extends GetxController {
                 .map((host) => 'wss://${host.host}:${host.wssPort}/sub')
                 .toList(),
           )
-          ..addEventListener((obj) {
-            try {
-              // logger.i(' 原始弹幕消息 ======> ${jsonEncode(obj)}');
-              switch (obj['cmd']) {
-                case 'DANMU_MSG':
-                  final info = obj['info'];
-                  final first = info[0];
-                  final content = first[15];
-                  final Map<String, dynamic> extra = jsonDecode(
-                    content['extra'],
-                  );
-                  final user = content['user'];
-                  // final midHash = first[7];
-                  final uid = user['uid'];
-                  final name = user['base']['name'];
-                  final msg = info[1];
-                  BaseEmote? uemote;
-                  if (first[13] case Map<String, dynamic> map) {
-                    uemote = BaseEmote.fromJson(map);
-                  }
-                  messages.add(
-                    DanmakuMsg(
-                      name: name,
-                      uid: uid,
-                      text: msg,
-                      emots: (extra['emots'] as Map<String, dynamic>?)?.map(
-                        (k, v) => MapEntry(k, BaseEmote.fromJson(v)),
-                      ),
-                      uemote: uemote,
-                    ),
-                  );
-
-                  if (plPlayerController.showDanmaku) {
-                    final checkInfo = info[9];
-                    danmakuController?.addDanmaku(
-                      DanmakuContentItem(
-                        msg,
-                        color: plPlayerController.blockColorful
-                            ? Colors.white
-                            : DmUtils.decimalToColor(extra['color']),
-                        type: DmUtils.getPosition(extra['mode']),
-                        selfSend: extra['send_from_me'] ?? false,
-                        extra: LiveDanmaku(
-                          id: extra['id_str'],
-                          mid: uid,
-                          dmType: extra['dm_type'],
-                          ts: checkInfo['ts'],
-                          ct: checkInfo['ct'],
-                        ),
-                      ),
-                    );
-                    if (!disableAutoScroll.value) {
-                      EasyThrottle.throttle(
-                        'liveDm',
-                        const Duration(milliseconds: 500),
-                        () => WidgetsBinding.instance.addPostFrameCallback(
-                          scrollToBottom,
-                        ),
-                      );
-                    }
-                  }
-                  break;
-                case 'SUPER_CHAT_MESSAGE' when showSuperChat:
-                  final item = SuperChatItem.fromJson(obj['data']);
-                  superChatMsg.insert(0, item);
-                  if (isFullScreen || plPlayerController.isDesktopPip) {
-                    fsSC.value = item;
-                  }
-                  break;
-              }
-            } catch (_) {
-              if (kDebugMode) rethrow;
-            }
-          })
+          ..addEventListener(_danmakuListener)
           ..init();
+  }
+
+  void _danmakuListener(dynamic obj) {
+    try {
+      // logger.i(' 原始弹幕消息 ======> ${jsonEncode(obj)}');
+      switch (obj['cmd']) {
+        case 'DANMU_MSG':
+          final info = obj['info'];
+          final first = info[0];
+          final content = first[15];
+          final Map<String, dynamic> extra = jsonDecode(
+            content['extra'],
+          );
+          final user = content['user'];
+          // final midHash = first[7];
+          final uid = user['uid'];
+          final name = user['base']['name'];
+          final msg = info[1];
+          BaseEmote? uemote;
+          if (first[13] case Map<String, dynamic> map) {
+            uemote = BaseEmote.fromJson(map);
+          }
+          messages.add(
+            DanmakuMsg(
+              name: name,
+              uid: uid,
+              text: msg,
+              emots: (extra['emots'] as Map<String, dynamic>?)?.map(
+                (k, v) => MapEntry(k, BaseEmote.fromJson(v)),
+              ),
+              uemote: uemote,
+            ),
+          );
+
+          if (plPlayerController.showDanmaku) {
+            final checkInfo = info[9];
+            danmakuController?.addDanmaku(
+              DanmakuContentItem(
+                msg,
+                color: plPlayerController.blockColorful
+                    ? Colors.white
+                    : DmUtils.decimalToColor(extra['color']),
+                type: DmUtils.getPosition(extra['mode']),
+                selfSend: extra['send_from_me'] ?? false,
+                extra: LiveDanmaku(
+                  id: extra['id_str'],
+                  mid: uid,
+                  dmType: extra['dm_type'],
+                  ts: checkInfo['ts'],
+                  ct: checkInfo['ct'],
+                ),
+              ),
+            );
+            if (!disableAutoScroll.value) {
+              EasyThrottle.throttle(
+                'liveDm',
+                const Duration(milliseconds: 500),
+                () => WidgetsBinding.instance.addPostFrameCallback(
+                  scrollToBottom,
+                ),
+              );
+            }
+          }
+          break;
+        case 'SUPER_CHAT_MESSAGE' when showSuperChat:
+          final item = SuperChatItem.fromJson(obj['data']);
+          superChatMsg.insert(0, item);
+          if (isFullScreen || plPlayerController.isDesktopPip) {
+            fsSC.value = item;
+          }
+          break;
+      }
+    } catch (_) {
+      if (kDebugMode) rethrow;
+    }
   }
 
   final RxInt likeClickTime = 0.obs;

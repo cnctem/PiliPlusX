@@ -23,6 +23,7 @@ abstract class ImageUtils {
   static String get time =>
       DateFormat('yyyy-MM-dd_HH-mm-ss').format(DateTime.now());
   static bool silentDownImg = Pref.silentDownImg;
+  static const _androidRelativePath = 'Pictures/${Constants.appName}';
 
   // 图片分享
   static Future<void> onShareImg(String url) async {
@@ -189,23 +190,11 @@ abstract class ImageUtils {
 
         if (file == null) {
           final String filePath = '$tmpDirPath/$name';
-
           final response = await Request().downloadFile(
             url.http2https,
             filePath,
             cancelToken: cancelToken,
           );
-
-          if (Platform.isAndroid) {
-            if (response.statusCode == 200) {
-              await SaverGallery.saveFile(
-                filePath: filePath,
-                fileName: name,
-                androidRelativePath: "Pictures/${Constants.appName}",
-                skipIfExists: false,
-              ).whenComplete(File(filePath).tryDel);
-            }
-          }
           return (
             filePath: filePath,
             name: name,
@@ -213,20 +202,35 @@ abstract class ImageUtils {
             del: true,
           );
         } else {
-          if (Platform.isAndroid) {
-            await SaverGallery.saveFile(
-              filePath: file.path,
-              fileName: name,
-              androidRelativePath: "Pictures/${Constants.appName}",
-              skipIfExists: false,
-            );
-          }
-
-          return (filePath: file.path, name: name, statusCode: 200, del: false);
+          return (
+            filePath: file.path,
+            name: name,
+            statusCode: 200,
+            del: false,
+          );
         }
       });
       final result = await Future.wait(futures, eagerError: true);
-      if (!Platform.isAndroid) {
+      if (Utils.isMobile) {
+        final delList = <String>[];
+        final saveList = <SaveFileData>[];
+        for (var i in result) {
+          if (i.del) delList.add(i.filePath);
+          if (i.statusCode == 200) {
+            saveList.add(
+              SaveFileData(
+                filePath: i.filePath,
+                fileName: i.name,
+                androidRelativePath: _androidRelativePath,
+              ),
+            );
+          }
+        }
+        await SaverGallery.saveFiles(saveList, skipIfExists: false);
+        for (var i in delList) {
+          File(i).tryDel();
+        }
+      } else {
         for (var res in result) {
           if (res.statusCode == 200) {
             await saveFileImg(
@@ -293,7 +297,7 @@ abstract class ImageUtils {
       result = await SaverGallery.saveImage(
         bytes,
         fileName: fileName,
-        androidRelativePath: "Pictures/${Constants.appName}",
+        androidRelativePath: _androidRelativePath,
         skipIfExists: false,
       );
       SmartDialog.dismiss();
@@ -336,7 +340,7 @@ abstract class ImageUtils {
       result = await SaverGallery.saveFile(
         filePath: filePath,
         fileName: fileName,
-        androidRelativePath: "Pictures/${Constants.appName}",
+        androidRelativePath: _androidRelativePath,
         skipIfExists: false,
       );
       if (del) file.tryDel();

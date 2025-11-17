@@ -121,7 +121,7 @@ class VideoDetailController extends GetxController
   final videoPlayerKey = GlobalKey();
   final childKey = GlobalKey<ScaffoldState>();
 
-  PlPlayerController plPlayerController = PlPlayerController.getInstance()
+  final plPlayerController = PlPlayerController.getInstance()
     ..setCurrBrightness(-1.0);
   bool get setSystemBrightness => plPlayerController.setSystemBrightness;
 
@@ -755,7 +755,7 @@ class VideoDetailController extends GetxController
   Future<void> handleSBData(List<SegmentItemModel> list) async {
     if (list.isNotEmpty) {
       try {
-        Completer? completer;
+        Future? future;
         final duration = list.first.videoDuration ?? data.timeLength!;
         // segmentList
         segmentList.addAll(
@@ -813,21 +813,20 @@ class VideoDetailController extends GetxController
                         case SkipType.alwaysSkip:
                         case SkipType.skipOnce:
                           segmentModel.hasSkipped = true;
-                          completer = Completer();
                           final videoPlayerController =
                               plPlayerController.videoPlayerController!;
                           if (videoPlayerController.state.playing) {
-                            onSkip(
+                            future = onSkip(
                               segmentModel,
-                            ).whenComplete(completer!.complete);
+                            );
                           } else {
                             videoPlayerController.stream.playing.firstWhere((
                               e,
                             ) {
                               if (e) {
-                                onSkip(
+                                future = onSkip(
                                   segmentModel,
-                                ).whenComplete(completer!.complete);
+                                );
                                 return true;
                               }
                               return false;
@@ -860,7 +859,7 @@ class VideoDetailController extends GetxController
 
         if (positionSubscription == null &&
             (autoPlay.value || plPlayerController.preInitPlayer)) {
-          await completer?.future;
+          await future;
           initSkip();
         }
       } catch (e) {
@@ -1126,7 +1125,7 @@ class VideoDetailController extends GetxController
       currentDecodeFormats = VideoDecodeFormatType.fromString(video.codecs!);
     }
     firstVideo = video;
-    videoUrl = VideoUtils.getCdnUrl(firstVideo);
+    videoUrl = VideoUtils.getCdnUrl(firstVideo.playUrls);
 
     /// 根据currentAudioQa 重新设置audioUrl
     if (currentAudioQa != null) {
@@ -1134,7 +1133,7 @@ class VideoDetailController extends GetxController
         (i) => i.id == currentAudioQa!.code,
         orElse: () => data.dash!.audio!.first,
       );
-      audioUrl = VideoUtils.getCdnUrl(firstAudio);
+      audioUrl = VideoUtils.getCdnUrl(firstAudio.playUrls, isAudio: true);
     }
 
     playerInit();
@@ -1190,11 +1189,11 @@ class VideoDetailController extends GetxController
       seasonId: isUgc ? null : seasonId,
       pgcType: isUgc ? null : pgcType,
       videoType: videoType,
-      callback: () {
+      callback: () async {
         if (videoState.value is! Success) {
           videoState.value = const Success(null);
         }
-        setSubtitle(vttSubtitlesIndex.value);
+        await setSubtitle(vttSubtitlesIndex.value);
       },
       width: firstVideo.width,
       height: firstVideo.height,
@@ -1309,7 +1308,7 @@ class VideoDetailController extends GetxController
       }
       if (data.dash == null && data.durl != null) {
         final first = data.durl!.first;
-        videoUrl = first.backupUrl?.lastOrNull ?? first.url!;
+        videoUrl = VideoUtils.getCdnUrl(first.playUrls);
         audioUrl = '';
 
         // 实际为FLV/MP4格式，但已被淘汰，这里仅做兜底处理
@@ -1396,7 +1395,7 @@ class VideoDetailController extends GetxController
       );
       setVideoHeight();
 
-      videoUrl = VideoUtils.getCdnUrl(firstVideo);
+      videoUrl = VideoUtils.getCdnUrl(firstVideo.playUrls);
 
       /// 优先顺序 设置中指定质量 -> 当前可选的最高质量
       AudioItem? firstAudio;
@@ -1415,7 +1414,7 @@ class VideoDetailController extends GetxController
           (e) => e.id == closestNumber,
           orElse: () => audioList.first,
         );
-        audioUrl = VideoUtils.getCdnUrl(firstAudio);
+        audioUrl = VideoUtils.getCdnUrl(firstAudio.playUrls, isAudio: true);
         if (firstAudio.id case final int id?) {
           currentAudioQa = AudioQuality.fromCode(id);
         }
@@ -1486,16 +1485,16 @@ class VideoDetailController extends GetxController
   // 设定字幕轨道
   Future<void> setSubtitle(int index) async {
     if (index <= 0) {
-      plPlayerController.videoPlayerController?.setSubtitleTrack(
+      await plPlayerController.videoPlayerController?.setSubtitleTrack(
         SubtitleTrack.no(),
       );
       vttSubtitlesIndex.value = index;
       return;
     }
 
-    void setSub(String subtitle) {
+    Future<void> setSub(String subtitle) async {
       final sub = subtitles[index - 1];
-      plPlayerController.videoPlayerController?.setSubtitleTrack(
+      await plPlayerController.videoPlayerController?.setSubtitleTrack(
         SubtitleTrack.data(
           subtitle,
           title: sub.lanDoc,
@@ -1507,14 +1506,14 @@ class VideoDetailController extends GetxController
 
     String? subtitle = vttSubtitles[index - 1];
     if (subtitle != null) {
-      setSub(subtitle);
+      await setSub(subtitle);
     } else {
       var result = await VideoHttp.vttSubtitles(
         subtitles[index - 1].subtitleUrl!,
       );
       if (result != null) {
         vttSubtitles[index - 1] = result;
-        setSub(result);
+        await setSub(result);
       }
     }
   }
@@ -1634,7 +1633,7 @@ class VideoDetailController extends GetxController
                 ? 1
                 : 0,
         };
-        setSubtitle(idx);
+        await setSubtitle(idx);
       }
     }
   }
@@ -1816,6 +1815,7 @@ class VideoDetailController extends GetxController
     }
   }
 
+  @pragma('vm:notify-debugger-on-exception')
   bool onSkipSegment() {
     try {
       if (plPlayerController.enableSponsorBlock) {
@@ -1825,8 +1825,8 @@ class VideoDetailController extends GetxController
           return true;
         }
       }
-    } catch (_) {
-      if (kDebugMode) rethrow;
+    } catch (e, s) {
+      Utils.reportError(e, s);
     }
     return false;
   }
@@ -2002,13 +2002,14 @@ class VideoDetailController extends GetxController
     );
     SmartDialog.dismiss();
     if (res.isSuccess) {
-      final PlayUrlModel data = res.data;
+      final data = res.data;
       final first = data.durl?.firstOrNull;
-      final url = first?.backupUrl?.lastOrNull ?? first?.url;
-      if (url == null || url.isEmpty) {
+      if (first == null || first.playUrls.isEmpty) {
         SmartDialog.showToast('不支持投屏');
         return;
       }
+      final url = VideoUtils.getCdnUrl(first.playUrls);
+
       String? title;
       try {
         if (isUgc) {

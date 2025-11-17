@@ -368,14 +368,12 @@ class MyApp extends StatelessWidget {
 }
 
 class _CustomHttpOverrides extends HttpOverrides {
-  final badCertificateCallback = kDebugMode || Pref.badCertificateCallback;
-
   @override
   HttpClient createHttpClient(SecurityContext? context) {
     final client = super.createHttpClient(context)
       // ..maxConnectionsPerHost = 32
       ..idleTimeout = const Duration(seconds: 15);
-    if (badCertificateCallback) {
+    if (kDebugMode || Pref.badCertificateCallback) {
       client.badCertificateCallback = (cert, host, port) => true;
     }
     return client;

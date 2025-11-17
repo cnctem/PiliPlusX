@@ -54,9 +54,9 @@ List<SettingsModel> get videoSettings => [
     title: 'CDN 设置',
     leading: const Icon(MdiIcons.cloudPlusOutline),
     getSubtitle: () =>
-        '当前使用：${CDNService.fromCode(VideoUtils.cdnService).desc}，部分 CDN 可能失效，如无法播放请尝试切换',
+        '当前使用：${VideoUtils.cdnService.desc}，部分 CDN 可能失效，如无法播放请尝试切换',
     onTap: (setState) async {
-      String? result = await showDialog(
+      CDNService? result = await showDialog(
         context: Get.context!,
         builder: (context) {
           return const CdnSelectDialog();
@@ -64,7 +64,57 @@ List<SettingsModel> get videoSettings => [
       );
       if (result != null) {
         VideoUtils.cdnService = result;
-        await GStorage.setting.put(SettingBoxKey.CDNService, result);
+        await GStorage.setting.put(SettingBoxKey.CDNService, result.name);
+        setState();
+      }
+    },
+  ),
+  SettingsModel(
+    settingsType: SettingsType.normal,
+    title: '直播 CDN 设置',
+    leading: const Icon(MdiIcons.cloudPlusOutline),
+    getSubtitle: () => '当前使用：${Pref.liveCdnUrl ?? "默认"}',
+    onTap: (setState) async {
+      String? result = await showDialog<String>(
+        context: Get.context!,
+        builder: (context) {
+          String host = Pref.liveCdnUrl ?? '';
+          return AlertDialog(
+            title: const Text('输入CDN host'),
+            content: TextFormField(
+              initialValue: host,
+              autofocus: true,
+              onChanged: (value) => host = value,
+            ),
+            actions: [
+              TextButton(
+                onPressed: Get.back,
+                child: Text(
+                  '取消',
+                  style: TextStyle(
+                    color: ColorScheme.of(context).outline,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Get.back(result: host),
+                child: const Text('确定'),
+              ),
+            ],
+          );
+        },
+      );
+      if (result != null) {
+        if (result.isEmpty) {
+          result = null;
+          await GStorage.setting.delete(SettingBoxKey.liveCdnUrl);
+        } else {
+          if (!result.startsWith('http')) {
+            result = 'https://$result';
+          }
+          await GStorage.setting.put(SettingBoxKey.liveCdnUrl, result);
+        }
+        VideoUtils.liveCdnUrl = result;
         setState();
       }
     },
