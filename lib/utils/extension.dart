@@ -7,7 +7,6 @@ import 'package:PiliPlus/grpc/bilibili/app/im/v1.pbenum.dart'
 import 'package:PiliPlus/pages/common/common_whisper_controller.dart';
 import 'package:PiliPlus/pages/contact/view.dart';
 import 'package:PiliPlus/pages/whisper_settings/view.dart';
-import 'package:PiliPlus/utils/app_scheme.dart';
 import 'package:floating/floating.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -218,9 +217,7 @@ extension ThreeDotItemTypeExt on ThreeDotItemType {
           ),
         );
       case ThreeDotItemType.THREE_DOT_ITEM_TYPE_UP_HELPER:
-        dynamic talkerId = PiliScheme.uriDigitRegExp
-            .firstMatch(item.url)
-            ?.group(1);
+        dynamic talkerId = RegExp(r'/(\d{3,})').firstMatch(item.url)?.group(1);
         if (talkerId != null) {
           talkerId = int.parse(talkerId);
           Get.toNamed(
