@@ -71,11 +71,17 @@ class LiveHeaderControl extends StatelessWidget {
       title: Row(
         spacing: 10,
         children: [
-          if (isFullScreen)
+          if (isFullScreen || plPlayerController.isDesktopPip)
             ComBtn(
               tooltip: '返回',
               icon: const Icon(FontAwesomeIcons.arrowLeft, size: 15),
-              onTap: () => plPlayerController.triggerFullScreen(status: false),
+              onTap: () {
+                if (plPlayerController.isDesktopPip) {
+                  plPlayerController.exitDesktopPip();
+                } else {
+                  plPlayerController.triggerFullScreen(status: false);
+                }
+              },
             ),
           child,
           ComBtn(
