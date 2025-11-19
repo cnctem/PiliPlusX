@@ -5,7 +5,6 @@
 /// @docImport 'package:flutter/cupertino.dart';
 library;
 
-import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui'
     as ui
@@ -17,9 +16,9 @@ import 'dart:ui'
         TextBox;
 
 import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
+import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
@@ -153,7 +152,10 @@ class VerticalCaretMovementRun implements Iterator<TextPosition> {
     final TextPosition closestPosition = _editable._textPainter
         .getPositionForOffset(newOffset);
     final MapEntry<Offset, TextPosition> position =
-        MapEntry<Offset, TextPosition>(newOffset, closestPosition);
+        MapEntry<Offset, TextPosition>(
+          newOffset,
+          closestPosition,
+        );
     _positionCache[lineNumber] = position;
     return position;
   }
@@ -294,8 +296,8 @@ class RenderEditable extends RenderBox
     bool paintCursorAboveText = false,
     Offset cursorOffset = Offset.zero,
     double devicePixelRatio = 1.0,
-    ui.BoxHeightStyle selectionHeightStyle = ui.BoxHeightStyle.tight,
-    ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.tight,
+    ui.BoxHeightStyle selectionHeightStyle = ui.BoxHeightStyle.max,
+    ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.max,
     bool? enableInteractiveSelection,
     this.floatingCursorAddedMargin = const EdgeInsets.fromLTRB(4, 4, 4, 5),
     TextRange? promptRectRange,
@@ -1301,7 +1303,7 @@ class RenderEditable extends RenderBox
   // can be re-used when [assembleSemanticsNode] is called again. This ensures
   // stable ids for the [SemanticsNode]s of [TextSpan]s across
   // [assembleSemanticsNode] invocations.
-  LinkedHashMap<Key, SemanticsNode>? _cachedChildNodes;
+  Map<Key, SemanticsNode>? _cachedChildNodes;
 
   /// Returns a list of rects that bound the given selection, and the text
   /// direction. The text direction is used by the engine to calculate
@@ -1311,7 +1313,11 @@ class RenderEditable extends RenderBox
   List<TextBox> getBoxesForSelection(TextSelection selection) {
     _computeTextMetricsIfNeeded();
     return _textPainter
-        .getBoxesForSelection(selection)
+        .getBoxesForSelection(
+          selection,
+          boxHeightStyle: selectionHeightStyle,
+          boxWidthStyle: selectionWidthStyle,
+        )
         .map(
           (TextBox textBox) => TextBox.fromLTRBD(
             textBox.left + _paintOffset.dx,
@@ -1381,6 +1387,7 @@ class RenderEditable extends RenderBox
       ..isMultiline = _isMultiline
       ..textDirection = textDirection
       ..isFocused = hasFocus
+      ..isFocusable = true
       ..isTextField = true
       ..isReadOnly = readOnly
       // This is the default for customer that uses RenderEditable directly.
@@ -1437,8 +1444,7 @@ class RenderEditable extends RenderBox
     int placeholderIndex = 0;
     int childIndex = 0;
     RenderBox? child = firstChild;
-    final LinkedHashMap<Key, SemanticsNode> newChildCache =
-        LinkedHashMap<Key, SemanticsNode>();
+    final Map<Key, SemanticsNode> newChildCache = <Key, SemanticsNode>{};
     _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
     for (final InlineSpanSemanticsInformation info
         in _cachedCombinedSemanticsInfos!) {
@@ -1507,8 +1513,9 @@ class RenderEditable extends RenderBox
             onDoubleTap: final VoidCallback? handler,
           ):
             if (handler != null) {
-              configuration.onTap = handler;
-              configuration.isLink = true;
+              configuration
+                ..onTap = handler
+                ..isLink = true;
             }
           case LongPressGestureRecognizer(
             onLongPress: final GestureLongPressCallback? onLongPress,
@@ -2203,17 +2210,14 @@ class RenderEditable extends RenderBox
     Offset? to,
     required SelectionChangedCause cause,
   }) {
-    final localFrom = globalToLocal(from);
     _computeTextMetricsIfNeeded();
+    final localFrom = globalToLocal(from);
     final TextPosition fromPosition = _textPainter.getPositionForOffset(
       localFrom - _paintOffset,
     );
-
     final TextPosition? toPosition = to == null
         ? null
-        : _textPainter.getPositionForOffset(
-            globalToLocal(to) - _paintOffset,
-          );
+        : _textPainter.getPositionForOffset(globalToLocal(to) - _paintOffset);
 
     int baseOffset = fromPosition.offset;
     int extentOffset = toPosition?.offset ?? fromPosition.offset;
@@ -2265,7 +2269,6 @@ class RenderEditable extends RenderBox
   /// beginning and end of a word respectively.
   ///
   /// {@macro flutter.rendering.RenderEditable.selectPosition}
-
   void selectWordsInRange({
     required Offset from,
     Offset? to,
@@ -2278,9 +2281,7 @@ class RenderEditable extends RenderBox
     final TextSelection fromWord = getWordAtOffset(fromPosition);
     final TextPosition toPosition = to == null
         ? fromPosition
-        : _textPainter.getPositionForOffset(
-            globalToLocal(to) - _paintOffset,
-          );
+        : _textPainter.getPositionForOffset(globalToLocal(to) - _paintOffset);
     final TextSelection toWord = toPosition == fromPosition
         ? fromWord
         : getWordAtOffset(toPosition);
@@ -2526,9 +2527,7 @@ class RenderEditable extends RenderBox
       ..layout(minWidth: minWidth, maxWidth: maxWidth);
     final double width = forceLine
         ? constraints.maxWidth
-        : constraints.constrainWidth(
-            _textIntrinsics.size.width + _caretMargin,
-          );
+        : constraints.constrainWidth(_textIntrinsics.size.width + _caretMargin);
     return Size(
       width,
       constraints.constrainHeight(_preferredHeight(constraints.maxWidth)),
@@ -2603,8 +2602,9 @@ class RenderEditable extends RenderBox
     _backgroundRenderObject?.layout(painterConstraints);
 
     _maxScrollExtent = _getMaxScrollExtent(contentSize);
-    offset.applyViewportDimension(_viewportExtent);
-    offset.applyContentDimensions(0.0, _maxScrollExtent);
+    offset
+      ..applyViewportDimension(_viewportExtent)
+      ..applyContentDimensions(0.0, _maxScrollExtent);
   }
 
   // The relative origin in relation to the distance the user has theoretically
@@ -2942,28 +2942,29 @@ class RenderEditable extends RenderBox
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(ColorProperty('cursorColor', cursorColor));
-    properties.add(
-      DiagnosticsProperty<ValueNotifier<bool>>('showCursor', showCursor),
-    );
-    properties.add(IntProperty('maxLines', maxLines));
-    properties.add(IntProperty('minLines', minLines));
-    properties.add(
-      DiagnosticsProperty<bool>('expands', expands, defaultValue: false),
-    );
-    properties.add(ColorProperty('selectionColor', selectionColor));
-    properties.add(
-      DiagnosticsProperty<TextScaler>(
-        'textScaler',
-        textScaler,
-        defaultValue: TextScaler.noScaling,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<Locale>('locale', locale, defaultValue: null),
-    );
-    properties.add(DiagnosticsProperty<TextSelection>('selection', selection));
-    properties.add(DiagnosticsProperty<ViewportOffset>('offset', offset));
+    properties
+      ..add(ColorProperty('cursorColor', cursorColor))
+      ..add(
+        DiagnosticsProperty<ValueNotifier<bool>>('showCursor', showCursor),
+      )
+      ..add(IntProperty('maxLines', maxLines))
+      ..add(IntProperty('minLines', minLines))
+      ..add(
+        DiagnosticsProperty<bool>('expands', expands, defaultValue: false),
+      )
+      ..add(ColorProperty('selectionColor', selectionColor))
+      ..add(
+        DiagnosticsProperty<TextScaler>(
+          'textScaler',
+          textScaler,
+          defaultValue: TextScaler.noScaling,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<Locale>('locale', locale, defaultValue: null),
+      )
+      ..add(DiagnosticsProperty<TextSelection>('selection', selection))
+      ..add(DiagnosticsProperty<ViewportOffset>('offset', offset));
   }
 
   @override
@@ -3154,11 +3155,13 @@ class _TextHighlightPainter extends RenderEditablePainter {
 
     highlightPaint.color = color;
     final TextPainter textPainter = renderEditable._textPainter;
-    final List<TextBox> boxes = textPainter.getBoxesForSelection(
-      TextSelection(baseOffset: range.start, extentOffset: range.end),
-      boxHeightStyle: selectionHeightStyle,
-      boxWidthStyle: selectionWidthStyle,
-    );
+    final Set<TextBox> boxes = textPainter
+        .getBoxesForSelection(
+          TextSelection(baseOffset: range.start, extentOffset: range.end),
+          boxHeightStyle: selectionHeightStyle,
+          boxWidthStyle: selectionWidthStyle,
+        )
+        .toSet();
 
     for (final TextBox box in boxes) {
       canvas.drawRect(
@@ -3215,7 +3218,7 @@ class _CaretPainter extends RenderEditablePainter {
   Color? get caretColor => _caretColor;
   Color? _caretColor;
   set caretColor(Color? value) {
-    if (caretColor?.value == value?.value) {
+    if (caretColor?.toARGB32() == value?.toARGB32()) {
       return;
     }
 
@@ -3246,7 +3249,7 @@ class _CaretPainter extends RenderEditablePainter {
   Color? get backgroundCursorColor => _backgroundCursorColor;
   Color? _backgroundCursorColor;
   set backgroundCursorColor(Color? value) {
-    if (backgroundCursorColor?.value == value?.value) {
+    if (backgroundCursorColor?.toARGB32() == value?.toARGB32()) {
       return;
     }
 
@@ -3318,7 +3321,7 @@ class _CaretPainter extends RenderEditablePainter {
       paintRegularCursor(canvas, renderEditable, caretColor, caretTextPosition);
     }
 
-    final Color? floatingCursorColor = this.caretColor?.withOpacity(0.75);
+    final Color? floatingCursorColor = this.caretColor?.withValues(alpha: 0.75);
     // Floating Cursor.
     if (floatingCursorRect == null ||
         floatingCursorColor == null ||

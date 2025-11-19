@@ -6,6 +6,7 @@
 library;
 
 import 'package:PiliPlus/common/widgets/flutter/text_field/editable_text.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide EditableText, EditableTextState;
 import 'package:flutter/services.dart';
 
@@ -80,7 +81,7 @@ class SystemContextMenu extends StatefulWidget {
         ),
       ),
       items: items ?? getDefaultItems(editableTextState),
-      onSystemHide: editableTextState.hideToolbar,
+      onSystemHide: () => editableTextState.hideToolbar(false),
     );
   }
 
@@ -96,6 +97,13 @@ class SystemContextMenu extends StatefulWidget {
   /// of the input.
   ///
   /// Defaults to the result of [getDefaultItems].
+  ///
+  /// To add custom menu items, pass [IOSSystemContextMenuItemCustom] instances
+  /// in the [items] list. Each custom item requires a title and an onPressed callback.
+  ///
+  /// See also:
+  ///
+  ///  * [IOSSystemContextMenuItemCustom], which creates custom menu items.
   final List<IOSSystemContextMenuItem> items;
 
   /// Called when the system hides this context menu.
@@ -110,8 +118,30 @@ class SystemContextMenu extends StatefulWidget {
   /// Whether the current device supports showing the system context menu.
   ///
   /// Currently, this is only supported on newer versions of iOS.
+  ///
+  /// See also:
+  ///
+  ///  * [isSupportedByField], which uses this method and determines whether an
+  ///    individual [EditableTextState] supports the system context menu.
   static bool isSupported(BuildContext context) {
-    return MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false;
+    return defaultTargetPlatform == TargetPlatform.iOS &&
+        (MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false);
+  }
+
+  /// Whether the given field supports showing the system context menu.
+  ///
+  /// Currently [SystemContextMenu] is only supported with an active
+  /// [TextInputConnection]. In cases where this isn't possible, such as in a
+  /// read-only field, fall back to using a Flutter-rendered context menu like
+  /// [AdaptiveTextSelectionToolbar].
+  ///
+  /// See also:
+  ///
+  ///  * [isSupported], which is used by this method and determines whether the
+  ///    platform in general supports showing the system context menu.
+  static bool isSupportedByField(EditableTextState editableTextState) {
+    return !editableTextState.widget.readOnly &&
+        isSupported(editableTextState.context);
   }
 
   /// The default [items] for the given [EditableTextState].
@@ -136,6 +166,8 @@ class SystemContextMenu extends StatefulWidget {
         const IOSSystemContextMenuItemLookUp(),
       if (editableTextState.searchWebEnabled)
         const IOSSystemContextMenuItemSearchWeb(),
+      if (editableTextState.liveTextInputEnabled)
+        const IOSSystemContextMenuItemLiveText(),
     ];
   }
 
@@ -177,259 +209,3 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
     return const SizedBox.shrink();
   }
 }
-
-/// Describes a context menu button that will be rendered in the iOS system
-/// context menu and not by Flutter itself.
-///
-/// See also:
-///
-///  * [SystemContextMenu], a widget that can be used to display the system
-///    context menu.
-///  * [IOSSystemContextMenuItemData], which performs a similar role but at the
-///    method channel level and mirrors the requirements of the method channel
-///    API.
-///  * [ContextMenuButtonItem], which performs a similar role for Flutter-drawn
-///    context menus.
-@immutable
-sealed class IOSSystemContextMenuItem {
-  const IOSSystemContextMenuItem();
-
-  /// The text to display to the user.
-  ///
-  /// Not exposed for some built-in menu items whose title is always set by the
-  /// platform.
-  String? get title => null;
-
-  /// Returns the representation of this class used by method channels.
-  IOSSystemContextMenuItemData getData(WidgetsLocalizations localizations);
-
-  @override
-  int get hashCode => title.hashCode;
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is IOSSystemContextMenuItem && other.title == title;
-  }
-}
-
-/// Creates an instance of [IOSSystemContextMenuItem] for the system's built-in
-/// copy button.
-///
-/// Should only appear when there is a selection that can be copied.
-///
-/// The title and action are both handled by the platform.
-///
-/// See also:
-///
-///  * [SystemContextMenu], a widget that can be used to display the system
-///    context menu.
-///  * [IOSSystemContextMenuItemDataCopy], which specifies the data to be sent to
-///    the platform for this same button.
-final class IOSSystemContextMenuItemCopy extends IOSSystemContextMenuItem {
-  /// Creates an instance of [IOSSystemContextMenuItemCopy].
-  const IOSSystemContextMenuItemCopy();
-
-  @override
-  IOSSystemContextMenuItemDataCopy getData(WidgetsLocalizations localizations) {
-    return const IOSSystemContextMenuItemDataCopy();
-  }
-}
-
-/// Creates an instance of [IOSSystemContextMenuItem] for the system's built-in
-/// cut button.
-///
-/// Should only appear when there is a selection that can be cut.
-///
-/// The title and action are both handled by the platform.
-///
-/// See also:
-///
-///  * [SystemContextMenu], a widget that can be used to display the system
-///    context menu.
-///  * [IOSSystemContextMenuItemDataCut], which specifies the data to be sent to
-///    the platform for this same button.
-final class IOSSystemContextMenuItemCut extends IOSSystemContextMenuItem {
-  /// Creates an instance of [IOSSystemContextMenuItemCut].
-  const IOSSystemContextMenuItemCut();
-
-  @override
-  IOSSystemContextMenuItemDataCut getData(WidgetsLocalizations localizations) {
-    return const IOSSystemContextMenuItemDataCut();
-  }
-}
-
-/// Creates an instance of [IOSSystemContextMenuItem] for the system's built-in
-/// paste button.
-///
-/// Should only appear when the field can receive pasted content.
-///
-/// The title and action are both handled by the platform.
-///
-/// See also:
-///
-///  * [SystemContextMenu], a widget that can be used to display the system
-///    context menu.
-///  * [IOSSystemContextMenuItemDataPaste], which specifies the data to be sent
-///     to the platform for this same button.
-final class IOSSystemContextMenuItemPaste extends IOSSystemContextMenuItem {
-  /// Creates an instance of [IOSSystemContextMenuItemPaste].
-  const IOSSystemContextMenuItemPaste();
-
-  @override
-  IOSSystemContextMenuItemDataPaste getData(
-    WidgetsLocalizations localizations,
-  ) {
-    return const IOSSystemContextMenuItemDataPaste();
-  }
-}
-
-/// Creates an instance of [IOSSystemContextMenuItem] for the system's built-in
-/// select all button.
-///
-/// Should only appear when the field can have its selection changed.
-///
-/// The title and action are both handled by the platform.
-///
-/// See also:
-///
-///  * [SystemContextMenu], a widget that can be used to display the system
-///    context menu.
-///  * [IOSSystemContextMenuItemDataSelectAll], which specifies the data to be
-///     sent to the platform for this same button.
-final class IOSSystemContextMenuItemSelectAll extends IOSSystemContextMenuItem {
-  /// Creates an instance of [IOSSystemContextMenuItemSelectAll].
-  const IOSSystemContextMenuItemSelectAll();
-
-  @override
-  IOSSystemContextMenuItemDataSelectAll getData(
-    WidgetsLocalizations localizations,
-  ) {
-    return const IOSSystemContextMenuItemDataSelectAll();
-  }
-}
-
-/// Creates an instance of [IOSSystemContextMenuItem] for the
-/// system's built-in look up button.
-///
-/// Should only appear when content is selected.
-///
-/// The [title] is optional, but it must be specified before being sent to the
-/// platform. Typically it should be set to
-/// [WidgetsLocalizations.lookUpButtonLabel].
-///
-/// The action is handled by the platform.
-///
-/// See also:
-///
-///  * [SystemContextMenu], a widget that can be used to display the system
-///    context menu.
-///  * [IOSSystemContextMenuItemDataLookUp], which specifies the data to be sent
-///    to the platform for this same button.
-final class IOSSystemContextMenuItemLookUp extends IOSSystemContextMenuItem {
-  /// Creates an instance of [IOSSystemContextMenuItemLookUp].
-  const IOSSystemContextMenuItemLookUp({this.title});
-
-  @override
-  final String? title;
-
-  @override
-  IOSSystemContextMenuItemDataLookUp getData(
-    WidgetsLocalizations localizations,
-  ) {
-    return IOSSystemContextMenuItemDataLookUp(
-      title: title ?? localizations.lookUpButtonLabel,
-    );
-  }
-
-  @override
-  String toString() {
-    return 'IOSSystemContextMenuItemLookUp(title: $title)';
-  }
-}
-
-/// Creates an instance of [IOSSystemContextMenuItem] for the
-/// system's built-in search web button.
-///
-/// Should only appear when content is selected.
-///
-/// The [title] is optional, but it must be specified before being sent to the
-/// platform. Typically it should be set to
-/// [WidgetsLocalizations.searchWebButtonLabel].
-///
-/// The action is handled by the platform.
-///
-/// See also:
-///
-///  * [SystemContextMenu], a widget that can be used to display the system
-///    context menu.
-///  * [IOSSystemContextMenuItemDataSearchWeb], which specifies the data to be
-///    sent to the platform for this same button.
-final class IOSSystemContextMenuItemSearchWeb extends IOSSystemContextMenuItem {
-  /// Creates an instance of [IOSSystemContextMenuItemSearchWeb].
-  const IOSSystemContextMenuItemSearchWeb({this.title});
-
-  @override
-  final String? title;
-
-  @override
-  IOSSystemContextMenuItemDataSearchWeb getData(
-    WidgetsLocalizations localizations,
-  ) {
-    return IOSSystemContextMenuItemDataSearchWeb(
-      title: title ?? localizations.searchWebButtonLabel,
-    );
-  }
-
-  @override
-  String toString() {
-    return 'IOSSystemContextMenuItemSearchWeb(title: $title)';
-  }
-}
-
-/// Creates an instance of [IOSSystemContextMenuItem] for the
-/// system's built-in share button.
-///
-/// Opens the system share dialog.
-///
-/// Should only appear when shareable content is selected.
-///
-/// The [title] is optional, but it must be specified before being sent to the
-/// platform. Typically it should be set to
-/// [WidgetsLocalizations.shareButtonLabel].
-///
-/// See also:
-///
-///  * [SystemContextMenu], a widget that can be used to display the system
-///    context menu.
-///  * [IOSSystemContextMenuItemDataShare], which specifies the data to be sent
-///    to the platform for this same button.
-final class IOSSystemContextMenuItemShare extends IOSSystemContextMenuItem {
-  /// Creates an instance of [IOSSystemContextMenuItemShare].
-  const IOSSystemContextMenuItemShare({this.title});
-
-  @override
-  final String? title;
-
-  @override
-  IOSSystemContextMenuItemDataShare getData(
-    WidgetsLocalizations localizations,
-  ) {
-    return IOSSystemContextMenuItemDataShare(
-      title: title ?? localizations.shareButtonLabel,
-    );
-  }
-
-  @override
-  String toString() {
-    return 'IOSSystemContextMenuItemShare(title: $title)';
-  }
-}
-
-// TODO(justinmc): Support the "custom" type.
-// https://github.com/flutter/flutter/issues/103163

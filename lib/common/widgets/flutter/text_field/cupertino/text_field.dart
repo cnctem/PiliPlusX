@@ -5,24 +5,25 @@
 /// @docImport 'package:flutter/material.dart';
 library;
 
+import 'dart:math' as math;
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
-import 'package:PiliPlus/common/widgets/flutter/text_field/cupertino/cupertino_adaptive_text_selection_toolbar.dart';
-import 'package:PiliPlus/common/widgets/flutter/text_field/cupertino/cupertino_spell_check_suggestions_toolbar.dart';
+import 'package:PiliPlus/common/widgets/flutter/text_field/cupertino/adaptive_text_selection_toolbar.dart';
+import 'package:PiliPlus/common/widgets/flutter/text_field/cupertino/spell_check_suggestions_toolbar.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/editable_text.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/spell_check.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/system_context_menu.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/text_selection.dart';
 import 'package:flutter/cupertino.dart'
     hide
-        SpellCheckConfiguration,
-        EditableTextContextMenuBuilder,
         EditableText,
         EditableTextState,
-        SystemContextMenu,
         CupertinoSpellCheckSuggestionsToolbar,
+        EditableTextContextMenuBuilder,
+        SystemContextMenu,
         CupertinoAdaptiveTextSelectionToolbar,
+        SpellCheckConfiguration,
         TextSelectionGestureDetectorBuilderDelegate,
         TextSelectionGestureDetectorBuilder,
         TextSelectionOverlay;
@@ -30,14 +31,6 @@ import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-
-export 'package:flutter/services.dart'
-    show
-        SmartDashesType,
-        SmartQuotesType,
-        TextCapitalization,
-        TextInputAction,
-        TextInputType;
 
 const TextStyle _kDefaultPlaceholderStyle = TextStyle(
   fontWeight: FontWeight.w400,
@@ -88,30 +81,6 @@ const CupertinoDynamicColor _kClearButtonColor =
 // This value is in device pixels, not logical pixels as is typically used
 // throughout the codebase.
 const int _iOSHorizontalCursorOffsetPixels = -2;
-
-/// Visibility of text field overlays based on the state of the current text entry.
-///
-/// Used to toggle the visibility behavior of the optional decorating widgets
-/// surrounding the [EditableText] such as the clear text button.
-enum OverlayVisibilityMode {
-  /// Overlay will never appear regardless of the text entry state.
-  never,
-
-  /// Overlay will only appear when the current text entry is not empty.
-  ///
-  /// This includes prefilled text that the user did not type in manually. But
-  /// does not include text in placeholders.
-  editing,
-
-  /// Overlay will only appear when the current text entry is empty.
-  ///
-  /// This also includes not having prefilled text that the user did not type
-  /// in manually. Texts in placeholders are ignored.
-  notEditing,
-
-  /// Always show the overlay regardless of the text entry state.
-  always,
-}
 
 class _CupertinoTextFieldSelectionGestureDetectorBuilder
     extends TextSelectionGestureDetectorBuilder {
@@ -226,7 +195,8 @@ class CupertinoRichTextField extends StatefulWidget {
   ///
   /// The [selectionHeightStyle] and [selectionWidthStyle] properties allow
   /// changing the shape of the selection highlighting. These properties default
-  /// to [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight], respectively.
+  /// to [EditableText.defaultSelectionHeightStyle] and
+  /// [EditableText.defaultSelectionWidthStyle], respectively.
   ///
   /// The [autocorrect], [autofocus], [clearButtonMode], [dragStartBehavior],
   /// [expands], [obscureText], [prefixMode], [readOnly], [scrollPadding],
@@ -248,7 +218,6 @@ class CupertinoRichTextField extends StatefulWidget {
     this.groupId = EditableText,
     required this.controller,
     this.focusNode,
-    this.undoController,
     this.decoration = _kDefaultRoundedBorderDecoration,
     this.padding = const EdgeInsets.all(7.0),
     this.placeholder,
@@ -302,12 +271,13 @@ class CupertinoRichTextField extends StatefulWidget {
     this.cursorRadius = const Radius.circular(2.0),
     this.cursorOpacityAnimates = true,
     this.cursorColor,
-    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
-    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
+    this.selectionHeightStyle,
+    this.selectionWidthStyle,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.dragStartBehavior = DragStartBehavior.start,
     bool? enableInteractiveSelection,
+    this.selectAllOnFocus,
     this.selectionControls,
     this.onTap,
     this.scrollController,
@@ -397,7 +367,6 @@ class CupertinoRichTextField extends StatefulWidget {
     this.groupId = EditableText,
     required this.controller,
     this.focusNode,
-    this.undoController,
     this.decoration,
     this.padding = const EdgeInsets.all(7.0),
     this.placeholder,
@@ -427,7 +396,7 @@ class CupertinoRichTextField extends StatefulWidget {
     this.autofocus = false,
     this.obscuringCharacter = '•',
     this.obscureText = false,
-    this.autocorrect = true,
+    this.autocorrect,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
@@ -448,12 +417,13 @@ class CupertinoRichTextField extends StatefulWidget {
     this.cursorRadius = const Radius.circular(2.0),
     this.cursorOpacityAnimates = true,
     this.cursorColor,
-    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
-    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
+    this.selectionHeightStyle,
+    this.selectionWidthStyle,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.dragStartBehavior = DragStartBehavior.start,
     bool? enableInteractiveSelection,
+    this.selectAllOnFocus,
     this.selectionControls,
     this.onTap,
     this.scrollController,
@@ -653,7 +623,7 @@ class CupertinoRichTextField extends StatefulWidget {
   final bool obscureText;
 
   /// {@macro flutter.widgets.editableText.autocorrect}
-  final bool autocorrect;
+  final bool? autocorrect;
 
   /// {@macro flutter.services.TextInputConfiguration.smartDashesType}
   final SmartDashesType smartDashesType;
@@ -763,12 +733,12 @@ class CupertinoRichTextField extends StatefulWidget {
   /// Controls how tall the selection highlight boxes are computed to be.
   ///
   /// See [ui.BoxHeightStyle] for details on available styles.
-  final ui.BoxHeightStyle selectionHeightStyle;
+  final ui.BoxHeightStyle? selectionHeightStyle;
 
   /// Controls how wide the selection highlight boxes are computed to be.
   ///
   /// See [ui.BoxWidthStyle] for details on available styles.
-  final ui.BoxWidthStyle selectionWidthStyle;
+  final ui.BoxWidthStyle? selectionWidthStyle;
 
   /// The appearance of the keyboard.
   ///
@@ -782,6 +752,9 @@ class CupertinoRichTextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.enableInteractiveSelection}
   final bool enableInteractiveSelection;
+
+  /// {@macro flutter.widgets.editableText.selectAllOnFocus}
+  final bool? selectAllOnFocus;
 
   /// {@macro flutter.widgets.editableText.selectionControls}
   final TextSelectionControls? selectionControls;
@@ -842,8 +815,7 @@ class CupertinoRichTextField extends StatefulWidget {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    if (defaultTargetPlatform == TargetPlatform.iOS &&
-        SystemContextMenu.isSupported(context)) {
+    if (SystemContextMenu.isSupportedByField(editableTextState)) {
       return SystemContextMenu.editableText(
         editableTextState: editableTextState,
       );
@@ -914,257 +886,252 @@ class CupertinoRichTextField extends StatefulWidget {
     );
   }
 
-  /// {@macro flutter.widgets.undoHistory.controller}
-  final UndoHistoryController? undoController;
-
   @override
   State<CupertinoRichTextField> createState() => _CupertinoRichTextFieldState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(
-      DiagnosticsProperty<RichTextEditingController>(
-        'controller',
-        controller,
-        defaultValue: null,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<FocusNode>(
-        'focusNode',
-        focusNode,
-        defaultValue: null,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<UndoHistoryController>(
-        'undoController',
-        undoController,
-        defaultValue: null,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<BoxDecoration>('decoration', decoration),
-    );
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
-    properties.add(StringProperty('placeholder', placeholder));
-    properties.add(
-      DiagnosticsProperty<TextStyle>('placeholderStyle', placeholderStyle),
-    );
-    properties.add(
-      DiagnosticsProperty<OverlayVisibilityMode>(
-        'prefix',
-        prefix == null ? null : prefixMode,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<OverlayVisibilityMode>(
-        'suffix',
-        suffix == null ? null : suffixMode,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<OverlayVisibilityMode>(
-        'clearButtonMode',
-        clearButtonMode,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<String>(
-        'clearButtonSemanticLabel',
-        clearButtonSemanticLabel,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<TextInputType>(
-        'keyboardType',
-        keyboardType,
-        defaultValue: TextInputType.text,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<TextStyle>('style', style, defaultValue: null),
-    );
-    properties.add(
-      DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false),
-    );
-    properties.add(
-      DiagnosticsProperty<String>(
-        'obscuringCharacter',
-        obscuringCharacter,
-        defaultValue: '•',
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<bool>(
-        'obscureText',
-        obscureText,
-        defaultValue: false,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true),
-    );
-    properties.add(
-      EnumProperty<SmartDashesType>(
-        'smartDashesType',
-        smartDashesType,
-        defaultValue: obscureText
-            ? SmartDashesType.disabled
-            : SmartDashesType.enabled,
-      ),
-    );
-    properties.add(
-      EnumProperty<SmartQuotesType>(
-        'smartQuotesType',
-        smartQuotesType,
-        defaultValue: obscureText
-            ? SmartQuotesType.disabled
-            : SmartQuotesType.enabled,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<bool>(
-        'enableSuggestions',
-        enableSuggestions,
-        defaultValue: true,
-      ),
-    );
-    properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
-    properties.add(IntProperty('minLines', minLines, defaultValue: null));
-    properties.add(
-      DiagnosticsProperty<bool>('expands', expands, defaultValue: false),
-    );
-    properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
-    properties.add(
-      EnumProperty<MaxLengthEnforcement>(
-        'maxLengthEnforcement',
-        maxLengthEnforcement,
-        defaultValue: null,
-      ),
-    );
-    properties.add(
-      DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0),
-    );
-    properties.add(
-      DoubleProperty('cursorHeight', cursorHeight, defaultValue: null),
-    );
-    properties.add(
-      DiagnosticsProperty<Radius>(
-        'cursorRadius',
-        cursorRadius,
-        defaultValue: null,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<bool>(
-        'cursorOpacityAnimates',
-        cursorOpacityAnimates,
-        defaultValue: true,
-      ),
-    );
-    properties.add(
-      createCupertinoColorProperty(
-        'cursorColor',
-        cursorColor,
-        defaultValue: null,
-      ),
-    );
-    properties.add(
-      FlagProperty(
-        'selectionEnabled',
-        value: selectionEnabled,
-        defaultValue: true,
-        ifFalse: 'selection disabled',
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<TextSelectionControls>(
-        'selectionControls',
-        selectionControls,
-        defaultValue: null,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<ScrollController>(
-        'scrollController',
-        scrollController,
-        defaultValue: null,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<ScrollPhysics>(
-        'scrollPhysics',
-        scrollPhysics,
-        defaultValue: null,
-      ),
-    );
-    properties.add(
-      EnumProperty<TextAlign>(
-        'textAlign',
-        textAlign,
-        defaultValue: TextAlign.start,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<TextAlignVertical>(
-        'textAlignVertical',
-        textAlignVertical,
-        defaultValue: null,
-      ),
-    );
-    properties.add(
-      EnumProperty<TextDirection>(
-        'textDirection',
-        textDirection,
-        defaultValue: null,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<Clip>(
-        'clipBehavior',
-        clipBehavior,
-        defaultValue: Clip.hardEdge,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<bool>(
-        'scribbleEnabled',
-        scribbleEnabled,
-        defaultValue: true,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<bool>(
-        'stylusHandwritingEnabled',
-        stylusHandwritingEnabled,
-        defaultValue: EditableText.defaultStylusHandwritingEnabled,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<bool>(
-        'enableIMEPersonalizedLearning',
-        enableIMEPersonalizedLearning,
-        defaultValue: true,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<SpellCheckConfiguration>(
-        'spellCheckConfiguration',
-        spellCheckConfiguration,
-        defaultValue: null,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<List<String>>(
-        'contentCommitMimeTypes',
-        contentInsertionConfiguration?.allowedMimeTypes ?? const <String>[],
-        defaultValue: contentInsertionConfiguration == null
-            ? const <String>[]
-            : kDefaultContentInsertionMimeTypes,
-      ),
-    );
+    properties
+      ..add(
+        DiagnosticsProperty<RichTextEditingController>(
+          'controller',
+          controller,
+          defaultValue: null,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<FocusNode>(
+          'focusNode',
+          focusNode,
+          defaultValue: null,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<BoxDecoration>('decoration', decoration),
+      )
+      ..add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding))
+      ..add(StringProperty('placeholder', placeholder))
+      ..add(
+        DiagnosticsProperty<TextStyle>('placeholderStyle', placeholderStyle),
+      )
+      ..add(
+        DiagnosticsProperty<OverlayVisibilityMode>(
+          'prefix',
+          prefix == null ? null : prefixMode,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<OverlayVisibilityMode>(
+          'suffix',
+          suffix == null ? null : suffixMode,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<OverlayVisibilityMode>(
+          'clearButtonMode',
+          clearButtonMode,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<String>(
+          'clearButtonSemanticLabel',
+          clearButtonSemanticLabel,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<TextInputType>(
+          'keyboardType',
+          keyboardType,
+          defaultValue: TextInputType.text,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<TextStyle>('style', style, defaultValue: null),
+      )
+      ..add(
+        DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false),
+      )
+      ..add(
+        DiagnosticsProperty<String>(
+          'obscuringCharacter',
+          obscuringCharacter,
+          defaultValue: '•',
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<bool>(
+          'obscureText',
+          obscureText,
+          defaultValue: false,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<bool>(
+          'autocorrect',
+          autocorrect,
+          defaultValue: null,
+        ),
+      )
+      ..add(
+        EnumProperty<SmartDashesType>(
+          'smartDashesType',
+          smartDashesType,
+          defaultValue: obscureText
+              ? SmartDashesType.disabled
+              : SmartDashesType.enabled,
+        ),
+      )
+      ..add(
+        EnumProperty<SmartQuotesType>(
+          'smartQuotesType',
+          smartQuotesType,
+          defaultValue: obscureText
+              ? SmartQuotesType.disabled
+              : SmartQuotesType.enabled,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<bool>(
+          'enableSuggestions',
+          enableSuggestions,
+          defaultValue: true,
+        ),
+      )
+      ..add(IntProperty('maxLines', maxLines, defaultValue: 1))
+      ..add(IntProperty('minLines', minLines, defaultValue: null))
+      ..add(
+        DiagnosticsProperty<bool>('expands', expands, defaultValue: false),
+      )
+      ..add(IntProperty('maxLength', maxLength, defaultValue: null))
+      ..add(
+        EnumProperty<MaxLengthEnforcement>(
+          'maxLengthEnforcement',
+          maxLengthEnforcement,
+          defaultValue: null,
+        ),
+      )
+      ..add(
+        DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0),
+      )
+      ..add(
+        DoubleProperty('cursorHeight', cursorHeight, defaultValue: null),
+      )
+      ..add(
+        DiagnosticsProperty<Radius>(
+          'cursorRadius',
+          cursorRadius,
+          defaultValue: null,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<bool>(
+          'cursorOpacityAnimates',
+          cursorOpacityAnimates,
+          defaultValue: true,
+        ),
+      )
+      ..add(
+        createCupertinoColorProperty(
+          'cursorColor',
+          cursorColor,
+          defaultValue: null,
+        ),
+      )
+      ..add(
+        FlagProperty(
+          'selectionEnabled',
+          value: selectionEnabled,
+          defaultValue: true,
+          ifFalse: 'selection disabled',
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<TextSelectionControls>(
+          'selectionControls',
+          selectionControls,
+          defaultValue: null,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<ScrollController>(
+          'scrollController',
+          scrollController,
+          defaultValue: null,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<ScrollPhysics>(
+          'scrollPhysics',
+          scrollPhysics,
+          defaultValue: null,
+        ),
+      )
+      ..add(
+        EnumProperty<TextAlign>(
+          'textAlign',
+          textAlign,
+          defaultValue: TextAlign.start,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<TextAlignVertical>(
+          'textAlignVertical',
+          textAlignVertical,
+          defaultValue: null,
+        ),
+      )
+      ..add(
+        EnumProperty<TextDirection>(
+          'textDirection',
+          textDirection,
+          defaultValue: null,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<Clip>(
+          'clipBehavior',
+          clipBehavior,
+          defaultValue: Clip.hardEdge,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<bool>(
+          'scribbleEnabled',
+          scribbleEnabled,
+          defaultValue: true,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<bool>(
+          'stylusHandwritingEnabled',
+          stylusHandwritingEnabled,
+          defaultValue: EditableText.defaultStylusHandwritingEnabled,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<bool>(
+          'enableIMEPersonalizedLearning',
+          enableIMEPersonalizedLearning,
+          defaultValue: true,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<SpellCheckConfiguration>(
+          'spellCheckConfiguration',
+          spellCheckConfiguration,
+          defaultValue: null,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<List<String>>(
+          'contentCommitMimeTypes',
+          contentInsertionConfiguration?.allowedMimeTypes ?? const <String>[],
+          defaultValue: contentInsertionConfiguration == null
+              ? const <String>[]
+              : kDefaultContentInsertionMimeTypes,
+        ),
+      );
   }
 
   static final TextMagnifierConfiguration _iosMagnifierConfiguration =
@@ -1220,9 +1187,7 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
     implements TextSelectionGestureDetectorBuilderDelegate, AutofillClient {
   final GlobalKey _clearGlobalKey = GlobalKey();
 
-  // RestorableRichTextEditingController? _controller;
   RichTextEditingController get _effectiveController => widget.controller;
-  // widget.controller ?? _controller!.value;
 
   FocusNode? _focusNode;
   FocusNode get _effectiveFocusNode =>
@@ -1257,9 +1222,6 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
           state: this,
           controller: widget.controller,
         );
-    // if (widget.controller == null) {
-    //   _createLocalController();
-    // }
     _effectiveFocusNode.canRequestFocus = widget.enabled;
     _effectiveFocusNode.addListener(_handleFocusChanged);
   }
@@ -1267,13 +1229,6 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
   @override
   void didUpdateWidget(CupertinoRichTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // if (widget.controller == null && oldWidget.controller != null) {
-    //   _createLocalController(oldWidget.controller!.value);
-    // } else if (widget.controller != null && oldWidget.controller == null) {
-    //   unregisterFromRestoration(_controller!);
-    //   _controller!.dispose();
-    //   _controller = null;
-    // }
 
     if (widget.focusNode != oldWidget.focusNode) {
       (oldWidget.focusNode ?? _focusNode)?.removeListener(_handleFocusChanged);
@@ -1283,27 +1238,7 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
   }
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-    // if (_controller != null) {
-    //   _registerController();
-    // }
-  }
-
-  // void _registerController() {
-  //   assert(_controller != null);
-  //   registerForRestoration(_controller!, 'controller');
-  //   _controller!.value.addListener(updateKeepAlive);
-  // }
-
-  // void _createLocalController([TextEditingValue? value]) {
-  //   assert(_controller == null);
-  //   _controller = value == null
-  //       ? RestorableRichTextEditingController()
-  //       : RestorableRichTextEditingController.fromValue(value);
-  //   if (!restorePending) {
-  //     _registerController();
-  //   }
-  // }
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {}
 
   @override
   String? get restorationId => widget.restorationId;
@@ -1312,7 +1247,6 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
   void dispose() {
     _effectiveFocusNode.removeListener(_handleFocusChanged);
     _focusNode?.dispose();
-    // _controller?.dispose();
     super.dispose();
   }
 
@@ -1331,8 +1265,9 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
 
   bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
     // When the text field is activated by something that doesn't trigger the
-    // selection overlay, we shouldn't show the handles either.
-    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar) {
+    // selection toolbar, we shouldn't show the handles either.
+    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar ||
+        !_selectionGestureDetectorBuilder.shouldShowSelectionHandles) {
       return false;
     }
 
@@ -1541,14 +1476,17 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
             // In the middle part, stack the placeholder on top of the main EditableText
             // if needed.
             Expanded(
-              child: Stack(
-                // Ideally this should be baseline aligned. However that comes at
-                // the cost of the ability to compute the intrinsic dimensions of
-                // this widget.
-                // See also https://github.com/flutter/flutter/issues/13715.
-                alignment: AlignmentDirectional.center,
-                textDirection: widget.textDirection,
-                children: <Widget>[?placeholder, editableText],
+              child: Directionality(
+                textDirection:
+                    widget.textDirection ?? Directionality.of(context),
+                child: _BaselineAlignedStack(
+                  placeholder: placeholder,
+                  editableText: editableText,
+                  editableTextBaseline:
+                      textStyle.textBaseline ?? TextBaseline.alphabetic,
+                  placeholderBaseline:
+                      placeholderStyle.textBaseline ?? TextBaseline.alphabetic,
+                ),
               ),
             ),
             ?suffixWidget,
@@ -1714,7 +1652,7 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
           DefaultSelectionStyle.of(context).selectionColor,
           context,
         ) ??
-        CupertinoTheme.of(context).primaryColor.withOpacity(0.2);
+        CupertinoTheme.of(context).primaryColor.withValues(alpha: 0.2);
 
     // Set configuration as disabled if not otherwise specified. If specified,
     // ensure that configuration uses Cupertino text style for misspelled words
@@ -1792,6 +1730,7 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
             scrollController: widget.scrollController,
             scrollPhysics: widget.scrollPhysics,
             enableInteractiveSelection: widget.enableInteractiveSelection,
+            selectAllOnFocus: widget.selectAllOnFocus,
             autofillClient: this,
             clipBehavior: widget.clipBehavior,
             restorationId: 'editable',
@@ -1874,6 +1813,265 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
           ),
         ),
       ),
+    );
+  }
+}
+
+enum _BaselineAlignedStackSlot { placeholder, editableText }
+
+class _BaselineAlignedStack
+    extends
+        SlottedMultiChildRenderObjectWidget<
+          _BaselineAlignedStackSlot,
+          RenderBox
+        > {
+  const _BaselineAlignedStack({
+    required this.editableTextBaseline,
+    required this.placeholderBaseline,
+    required this.editableText,
+    this.placeholder,
+  });
+
+  final TextBaseline editableTextBaseline;
+  final TextBaseline placeholderBaseline;
+  final Widget? placeholder;
+  final Widget editableText;
+
+  @override
+  Iterable<_BaselineAlignedStackSlot> get slots =>
+      _BaselineAlignedStackSlot.values;
+
+  @override
+  Widget? childForSlot(_BaselineAlignedStackSlot slot) {
+    return switch (slot) {
+      _BaselineAlignedStackSlot.placeholder => placeholder,
+      _BaselineAlignedStackSlot.editableText => editableText,
+    };
+  }
+
+  @override
+  _RenderBaselineAlignedStack createRenderObject(BuildContext context) {
+    return _RenderBaselineAlignedStack(
+      editableTextBaseline: editableTextBaseline,
+      placeholderBaseline: placeholderBaseline,
+    );
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderBaselineAlignedStack renderObject,
+  ) {
+    renderObject
+      ..editableTextBaseline = editableTextBaseline
+      ..placeholderBaseline = placeholderBaseline;
+  }
+}
+
+class _BaselineAlignedStackParentData
+    extends ContainerBoxParentData<RenderBox> {}
+
+class _RenderBaselineAlignedStack extends RenderBox
+    with
+        SlottedContainerRenderObjectMixin<
+          _BaselineAlignedStackSlot,
+          RenderBox
+        > {
+  _RenderBaselineAlignedStack({
+    required TextBaseline editableTextBaseline,
+    required TextBaseline placeholderBaseline,
+  }) : _editableTextBaseline = editableTextBaseline,
+       _placeholderBaseline = placeholderBaseline;
+
+  TextBaseline get editableTextBaseline => _editableTextBaseline;
+  TextBaseline _editableTextBaseline;
+  set editableTextBaseline(TextBaseline value) {
+    if (_editableTextBaseline == value) {
+      return;
+    }
+    _editableTextBaseline = value;
+    markNeedsLayout();
+  }
+
+  TextBaseline get placeholderBaseline => _placeholderBaseline;
+  TextBaseline _placeholderBaseline;
+  set placeholderBaseline(TextBaseline value) {
+    if (_placeholderBaseline == value) {
+      return;
+    }
+    _placeholderBaseline = value;
+    markNeedsLayout();
+  }
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! _BaselineAlignedStackParentData) {
+      child.parentData = _BaselineAlignedStackParentData();
+    }
+  }
+
+  RenderBox? get _placeholderChild {
+    return childForSlot(_BaselineAlignedStackSlot.placeholder);
+  }
+
+  RenderBox get _editableTextChild {
+    final RenderBox? child = childForSlot(
+      _BaselineAlignedStackSlot.editableText,
+    );
+    assert(child != null);
+    return child!;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    return math.max(
+      _placeholderChild?.getMinIntrinsicHeight(width) ?? 0.0,
+      _editableTextChild.getMinIntrinsicHeight(width),
+    );
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    return math.max(
+      _placeholderChild?.getMaxIntrinsicHeight(width) ?? 0.0,
+      _editableTextChild.getMaxIntrinsicHeight(width),
+    );
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    return math.max(
+      _placeholderChild?.getMinIntrinsicWidth(height) ?? 0.0,
+      _editableTextChild.getMinIntrinsicWidth(height),
+    );
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    return math.max(
+      _placeholderChild?.getMaxIntrinsicWidth(height) ?? 0.0,
+      _editableTextChild.getMaxIntrinsicWidth(height),
+    );
+  }
+
+  @override
+  void performLayout() {
+    assert(constraints.hasTightWidth);
+    final RenderBox? placeholder = _placeholderChild;
+    final RenderBox editableText = _editableTextChild;
+
+    final _BaselineAlignedStackParentData editableTextParentData =
+        editableText.parentData! as _BaselineAlignedStackParentData;
+    final _BaselineAlignedStackParentData? placeholderParentData =
+        placeholder?.parentData as _BaselineAlignedStackParentData?;
+
+    size = _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.layoutChild,
+      getBaseline: ChildLayoutHelper.getBaseline,
+    );
+
+    final double editableTextBaselineValue = editableText.getDistanceToBaseline(
+      editableTextBaseline,
+    )!;
+    final double? placeholderBaselineValue = placeholder?.getDistanceToBaseline(
+      placeholderBaseline,
+    );
+
+    assert(placeholder != null || placeholderBaselineValue == null);
+    final double placeholderY = placeholderBaselineValue != null
+        ? editableTextBaselineValue - placeholderBaselineValue
+        : 0.0;
+
+    final double offsetYAdjustment = math.max(0, placeholderY);
+    editableTextParentData.offset = Offset(0, offsetYAdjustment);
+    placeholderParentData?.offset = Offset(0, placeholderY + offsetYAdjustment);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final RenderBox? placeholder = _placeholderChild;
+    final RenderBox editableText = _editableTextChild;
+
+    if (placeholder != null) {
+      final _BaselineAlignedStackParentData placeholderParentData =
+          placeholder.parentData! as _BaselineAlignedStackParentData;
+      context.paintChild(placeholder, offset + placeholderParentData.offset);
+    }
+
+    final _BaselineAlignedStackParentData editableTextParentData =
+        editableText.parentData! as _BaselineAlignedStackParentData;
+    context.paintChild(editableText, offset + editableTextParentData.offset);
+  }
+
+  @override
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    return _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.dryLayoutChild,
+      getBaseline: ChildLayoutHelper.getDryBaseline,
+    );
+  }
+
+  Size _computeSize({
+    required BoxConstraints constraints,
+    required ChildLayouter layoutChild,
+    required ChildBaselineGetter getBaseline,
+  }) {
+    double width = constraints.minWidth;
+    double height = constraints.minHeight;
+
+    final RenderBox editableText = _editableTextChild;
+    final Size editableTextSize = layoutChild(editableText, constraints);
+    final double editableTextBaselineValue = getBaseline(
+      editableText,
+      constraints,
+      editableTextBaseline,
+    )!;
+    final double editableTextDescent =
+        editableTextSize.height - editableTextBaselineValue;
+
+    Size? placeholderSize;
+    double? placeholderBaselineValue;
+    final RenderBox? placeholder = _placeholderChild;
+    if (placeholder != null) {
+      placeholderSize = layoutChild(placeholder, constraints);
+      width = math.max(width, placeholderSize.width);
+      placeholderBaselineValue = getBaseline(
+        placeholder,
+        constraints,
+        placeholderBaseline,
+      );
+      final double placeholderDescent =
+          placeholderSize.height - placeholderBaselineValue!;
+      // The size is the sum of the placeholder's max ascent and descent and the
+      // editable text's max ascent and descent.
+      final double maxExtentBaseline =
+          math.max(editableTextBaselineValue, placeholderBaselineValue) +
+          math.max(editableTextDescent, placeholderDescent);
+      height = math.max(height, maxExtentBaseline);
+    }
+
+    height = math.max(height, editableTextSize.height);
+    width = math.max(width, editableTextSize.width);
+    final Size size = Size(width, height);
+    assert(size.isFinite);
+    return constraints.constrain(size);
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    final RenderBox editableText = _editableTextChild;
+    final _BaselineAlignedStackParentData editableTextParentData =
+        editableText.parentData! as _BaselineAlignedStackParentData;
+
+    return result.addWithPaintOffset(
+      offset: editableTextParentData.offset,
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset transformed) {
+        assert(transformed == position - editableTextParentData.offset);
+        return editableText.hitTest(result, position: transformed);
+      },
     );
   }
 }

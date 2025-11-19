@@ -15,8 +15,8 @@ import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:PiliPlus/common/widgets/flutter/text_field/adaptive_text_selection_toolbar.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
-import 'package:PiliPlus/common/widgets/flutter/text_field/cupertino/cupertino_spell_check_suggestions_toolbar.dart';
-import 'package:PiliPlus/common/widgets/flutter/text_field/cupertino/cupertino_text_field.dart';
+import 'package:PiliPlus/common/widgets/flutter/text_field/cupertino/spell_check_suggestions_toolbar.dart';
+import 'package:PiliPlus/common/widgets/flutter/text_field/cupertino/text_field.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/editable_text.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/spell_check.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/spell_check_suggestions_toolbar.dart';
@@ -26,61 +26,30 @@ import 'package:flutter/cupertino.dart'
     hide
         EditableText,
         EditableTextState,
-        CupertinoSpellCheckSuggestionsToolbar,
-        SystemContextMenu,
-        SpellCheckConfiguration,
         EditableTextContextMenuBuilder,
-        buildTextSpanWithSpellCheckSuggestions,
+        SystemContextMenu,
+        CupertinoSpellCheckSuggestionsToolbar,
+        SpellCheckConfiguration,
         CupertinoTextField,
-        TextSelectionGestureDetectorBuilderDelegate,
         TextSelectionGestureDetectorBuilder,
-        TextSelectionOverlay;
+        TextSelectionOverlay,
+        TextSelectionGestureDetectorBuilderDelegate;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart'
     hide
         EditableText,
         EditableTextState,
-        SpellCheckSuggestionsToolbar,
+        EditableTextContextMenuBuilder,
         AdaptiveTextSelectionToolbar,
         SystemContextMenu,
+        SpellCheckSuggestionsToolbar,
         SpellCheckConfiguration,
-        EditableTextContextMenuBuilder,
-        buildTextSpanWithSpellCheckSuggestions,
-        TextSelectionGestureDetectorBuilderDelegate,
         TextSelectionGestureDetectorBuilder,
-        TextSelectionOverlay;
+        TextSelectionOverlay,
+        TextSelectionGestureDetectorBuilderDelegate;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-
-export 'package:flutter/services.dart'
-    show
-        SmartDashesType,
-        SmartQuotesType,
-        TextCapitalization,
-        TextInputAction,
-        TextInputType;
-
-// Examples can assume:
-// late BuildContext context;
-// late FocusNode myFocusNode;
-
-/// Signature for the [RichTextField.buildCounter] callback.
-typedef InputCounterWidgetBuilder =
-    Widget? Function(
-      /// The build context for the TextField.
-      BuildContext context, {
-
-      /// The length of the string currently in the input.
-      required int currentLength,
-
-      /// The maximum string length that can be entered into the TextField.
-      required int? maxLength,
-
-      /// Whether or not the TextField is currently focused. Mainly provided for
-      /// the [liveRegion] parameter in the [Semantics] widget for accessibility.
-      required bool isFocused,
-    });
 
 class _TextFieldSelectionGestureDetectorBuilder
     extends TextSelectionGestureDetectorBuilder {
@@ -209,6 +178,14 @@ class _TextFieldSelectionGestureDetectorBuilder
 /// [RichTextField] to ensure proper scroll coordination for [RichTextField] and its
 /// components like [TextSelectionOverlay].
 ///
+/// {@tool dartpad}
+/// This sample demonstrates how to use the [Shortcuts] and [Actions] widgets
+/// to create a custom `Shift+Enter` keyboard shortcut for inserting a new line
+/// in a [RichTextField].
+///
+/// ** See code in examples/api/lib/material/text_field/text_field.3.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [TextFormField], which integrates with the [Form] widget.
@@ -262,7 +239,8 @@ class RichTextField extends StatefulWidget {
   ///
   /// The [selectionHeightStyle] and [selectionWidthStyle] properties allow
   /// changing the shape of the selection highlighting. These properties default
-  /// to [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight], respectively.
+  /// to [EditableText.defaultSelectionHeightStyle] and
+  /// [EditableText.defaultSelectionHeightStyle], respectively.
   ///
   /// See also:
   ///
@@ -293,7 +271,7 @@ class RichTextField extends StatefulWidget {
     this.statesController,
     this.obscuringCharacter = '•',
     this.obscureText = false,
-    this.autocorrect = true,
+    this.autocorrect,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
@@ -315,12 +293,13 @@ class RichTextField extends StatefulWidget {
     this.cursorOpacityAnimates,
     this.cursorColor,
     this.cursorErrorColor,
-    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
-    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
+    this.selectionHeightStyle,
+    this.selectionWidthStyle,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.dragStartBehavior = DragStartBehavior.start,
     bool? enableInteractiveSelection,
+    this.selectAllOnFocus,
     this.selectionControls,
     this.onTap,
     this.onTapAlwaysCalled = false,
@@ -346,6 +325,7 @@ class RichTextField extends StatefulWidget {
     this.canRequestFocus = true,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
+    this.hintLocales,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType =
            smartDashesType ??
@@ -526,7 +506,7 @@ class RichTextField extends StatefulWidget {
   final bool obscureText;
 
   /// {@macro flutter.widgets.editableText.autocorrect}
-  final bool autocorrect;
+  final bool? autocorrect;
 
   /// {@macro flutter.services.TextInputConfiguration.smartDashesType}
   final SmartDashesType smartDashesType;
@@ -578,6 +558,8 @@ class RichTextField extends StatefulWidget {
   /// field showing how many characters have been entered. If set to a number
   /// greater than 0, it will also display the maximum number allowed. If set
   /// to [RichTextField.noMaxLength] then only the current character count is displayed.
+  /// To remove the counter, set [InputDecoration.counterText] to an empty string or
+  /// return null from [RichTextField.buildCounter] callback.
   ///
   /// After [maxLength] characters have been input, additional input
   /// is ignored, unless [maxLengthEnforcement] is set to
@@ -642,6 +624,27 @@ class RichTextField extends StatefulWidget {
   ///
   /// If non-null this property overrides the [decoration]'s
   /// [InputDecoration.enabled] property.
+  ///
+  /// When a text field is disabled, all of its children widgets are also
+  /// disabled, including the [InputDecoration.suffixIcon]. If you need to keep
+  /// the suffix icon interactive while disabling the text field, consider using
+  /// [readOnly] and [enableInteractiveSelection] instead:
+  ///
+  /// ```dart
+  /// TextField(
+  ///   enabled: true,
+  ///   readOnly: true,
+  ///   enableInteractiveSelection: false,
+  ///   decoration: InputDecoration(
+  ///     suffixIcon: IconButton(
+  ///       onPressed: () {
+  ///         // This will work because the TextField is enabled
+  ///       },
+  ///       icon: const Icon(Icons.edit_outlined),
+  ///     ),
+  ///   ),
+  /// )
+  /// ```
   final bool? enabled;
 
   /// Determines whether this widget ignores pointer events.
@@ -683,12 +686,12 @@ class RichTextField extends StatefulWidget {
   /// Controls how tall the selection highlight boxes are computed to be.
   ///
   /// See [ui.BoxHeightStyle] for details on available styles.
-  final ui.BoxHeightStyle selectionHeightStyle;
+  final ui.BoxHeightStyle? selectionHeightStyle;
 
   /// Controls how wide the selection highlight boxes are computed to be.
   ///
   /// See [ui.BoxWidthStyle] for details on available styles.
-  final ui.BoxWidthStyle selectionWidthStyle;
+  final ui.BoxWidthStyle? selectionWidthStyle;
 
   /// The appearance of the keyboard.
   ///
@@ -702,6 +705,9 @@ class RichTextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.enableInteractiveSelection}
   final bool enableInteractiveSelection;
+
+  /// {@macro flutter.widgets.editableText.selectAllOnFocus}
+  final bool? selectAllOnFocus;
 
   /// {@macro flutter.widgets.editableText.selectionControls}
   final TextSelectionControls? selectionControls;
@@ -837,7 +843,7 @@ class RichTextField extends StatefulWidget {
   /// offset and - if no [controller] has been provided - the content of the
   /// text field. If a [controller] has been provided, it is the responsibility
   /// of the owner of that controller to persist and restore it, e.g. by using
-  /// a [RestorableTextEditingController].
+  /// a [RestorableRichTextEditingController].
   ///
   /// The state of this widget is persisted in a [RestorationBucket] claimed
   /// from the surrounding [RestorationScope] using the provided restoration ID.
@@ -883,12 +889,14 @@ class RichTextField extends StatefulWidget {
   /// be possible to move the focus to the text field with tab key.
   final bool canRequestFocus;
 
+  /// {@macro flutter.services.TextInputConfiguration.hintLocales}
+  final List<Locale>? hintLocales;
+
   static Widget _defaultContextMenuBuilder(
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    if (defaultTargetPlatform == TargetPlatform.iOS &&
-        SystemContextMenu.isSupported(context)) {
+    if (SystemContextMenu.isSupportedByField(editableTextState)) {
       return SystemContextMenu.editableText(
         editableTextState: editableTextState,
       );
@@ -991,7 +999,9 @@ class RichTextField extends StatefulWidget {
           defaultValue: null,
         ),
       )
-      ..add(DiagnosticsProperty<bool>('enabled', enabled, defaultValue: null))
+      ..add(
+        DiagnosticsProperty<bool>('enabled', enabled, defaultValue: null),
+      )
       ..add(
         DiagnosticsProperty<InputDecoration>(
           'decoration',
@@ -1006,7 +1016,9 @@ class RichTextField extends StatefulWidget {
           defaultValue: TextInputType.text,
         ),
       )
-      ..add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null))
+      ..add(
+        DiagnosticsProperty<TextStyle>('style', style, defaultValue: null),
+      )
       ..add(
         DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false),
       )
@@ -1028,7 +1040,7 @@ class RichTextField extends StatefulWidget {
         DiagnosticsProperty<bool>(
           'autocorrect',
           autocorrect,
-          defaultValue: true,
+          defaultValue: null,
         ),
       )
       ..add(
@@ -1058,7 +1070,9 @@ class RichTextField extends StatefulWidget {
       )
       ..add(IntProperty('maxLines', maxLines, defaultValue: 1))
       ..add(IntProperty('minLines', minLines, defaultValue: null))
-      ..add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false))
+      ..add(
+        DiagnosticsProperty<bool>('expands', expands, defaultValue: false),
+      )
       ..add(IntProperty('maxLength', maxLength, defaultValue: null))
       ..add(
         EnumProperty<MaxLengthEnforcement>(
@@ -1102,8 +1116,12 @@ class RichTextField extends StatefulWidget {
           defaultValue: null,
         ),
       )
-      ..add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0))
-      ..add(DoubleProperty('cursorHeight', cursorHeight, defaultValue: null))
+      ..add(
+        DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0),
+      )
+      ..add(
+        DoubleProperty('cursorHeight', cursorHeight, defaultValue: null),
+      )
       ..add(
         DiagnosticsProperty<Radius>(
           'cursorRadius',
@@ -1118,7 +1136,9 @@ class RichTextField extends StatefulWidget {
           defaultValue: null,
         ),
       )
-      ..add(ColorProperty('cursorColor', cursorColor, defaultValue: null))
+      ..add(
+        ColorProperty('cursorColor', cursorColor, defaultValue: null),
+      )
       ..add(
         ColorProperty('cursorErrorColor', cursorErrorColor, defaultValue: null),
       )
@@ -1208,6 +1228,13 @@ class RichTextField extends StatefulWidget {
               ? const <String>[]
               : kDefaultContentInsertionMimeTypes,
         ),
+      )
+      ..add(
+        DiagnosticsProperty<List<Locale>?>(
+          'hintLocales',
+          hintLocales,
+          defaultValue: null,
+        ),
       );
   }
 }
@@ -1215,9 +1242,7 @@ class RichTextField extends StatefulWidget {
 class RichTextFieldState extends State<RichTextField>
     with RestorationMixin
     implements TextSelectionGestureDetectorBuilderDelegate, AutofillClient {
-  // RestorableRichTextEditingController? _controller;
   RichTextEditingController get _effectiveController => widget.controller;
-  // widget.controller ?? _controller!.value;
 
   FocusNode? _focusNode;
   FocusNode get _effectiveFocusNode =>
@@ -1260,13 +1285,7 @@ class RichTextFieldState extends State<RichTextField>
   bool get _hasIntrinsicError =>
       widget.maxLength != null &&
       widget.maxLength! > 0 &&
-      (
-      // widget.controller == null
-      //   ? !restorePending &&
-      //       _effectiveController.value.text.characters.length >
-      //           widget.maxLength!
-      //   :
-      _effectiveController.value.text.characters.length > widget.maxLength!);
+      _effectiveController.value.text.characters.length > widget.maxLength!;
 
   bool get _hasError =>
       widget.decoration?.errorText != null ||
@@ -1288,7 +1307,10 @@ class RichTextFieldState extends State<RichTextField>
             .applyDefaults(themeData.inputDecorationTheme)
             .copyWith(
               enabled: _isEnabled,
-              hintMaxLines: widget.decoration?.hintMaxLines ?? widget.maxLines,
+              hintMaxLines:
+                  widget.decoration?.hintMaxLines ??
+                  themeData.inputDecorationTheme.hintMaxLines ??
+                  widget.maxLines,
             );
 
     // No need to build anything if counter or counterText were given directly.
@@ -1368,9 +1390,6 @@ class RichTextFieldState extends State<RichTextField>
           state: this,
           controller: widget.controller,
         );
-    // if (widget.controller == null) {
-    //   _createLocalController();
-    // }
     _effectiveFocusNode.canRequestFocus = widget.canRequestFocus && _isEnabled;
     _effectiveFocusNode.addListener(_handleFocusChanged);
     _initStatesController();
@@ -1394,13 +1413,6 @@ class RichTextFieldState extends State<RichTextField>
   @override
   void didUpdateWidget(RichTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // if (widget.controller == null && oldWidget.controller != null) {
-    //   _createLocalController(oldWidget.controller!.value);
-    // } else if (widget.controller != null && oldWidget.controller == null) {
-    //   unregisterFromRestoration(_controller!);
-    //   _controller!.dispose();
-    //   _controller = null;
-    // }
 
     if (widget.focusNode != oldWidget.focusNode) {
       (oldWidget.focusNode ?? _focusNode)?.removeListener(_handleFocusChanged);
@@ -1434,26 +1446,7 @@ class RichTextFieldState extends State<RichTextField>
   }
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-    // if (_controller != null) {
-    //   _registerController();
-    // }
-  }
-
-  // void _registerController() {
-  //   assert(_controller != null);
-  //   registerForRestoration(_controller!, 'controller');
-  // }
-
-  // void _createLocalController([TextEditingValue? value]) {
-  //   assert(_controller == null);
-  //   _controller = value == null
-  //       ? RestorableRichTextEditingController()
-  //       : RestorableRichTextEditingController.fromValue(value);
-  //   if (!restorePending) {
-  //     _registerController();
-  //   }
-  // }
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {}
 
   @override
   String? get restorationId => widget.restorationId;
@@ -1462,7 +1455,6 @@ class RichTextFieldState extends State<RichTextField>
   void dispose() {
     _effectiveFocusNode.removeListener(_handleFocusChanged);
     _focusNode?.dispose();
-    // _controller?.dispose();
     _statesController.removeListener(_handleStatesControllerChange);
     _internalStatesController?.dispose();
     super.dispose();
@@ -1476,8 +1468,9 @@ class RichTextFieldState extends State<RichTextField>
 
   bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
     // When the text field is activated by something that doesn't trigger the
-    // selection overlay, we shouldn't show the handles either.
-    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar) {
+    // selection toolbar, we shouldn't show the handles either.
+    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar ||
+        !_selectionGestureDetectorBuilder.shouldShowSelectionHandles) {
       return false;
     }
 
@@ -1570,7 +1563,7 @@ class RichTextFieldState extends State<RichTextField>
   WidgetStatesController? _internalStatesController;
 
   void _handleStatesControllerChange() {
-    // Force a rebuild to resolve MaterialStateProperty properties.
+    // Force a rebuild to resolve WidgetStateProperty properties.
     setState(() {});
   }
 
@@ -1581,11 +1574,12 @@ class RichTextFieldState extends State<RichTextField>
     if (widget.statesController == null) {
       _internalStatesController = WidgetStatesController();
     }
-    _statesController.update(WidgetState.disabled, !_isEnabled);
-    _statesController.update(WidgetState.hovered, _isHovering);
-    _statesController.update(WidgetState.focused, _effectiveFocusNode.hasFocus);
-    _statesController.update(WidgetState.error, _hasError);
-    _statesController.addListener(_handleStatesControllerChange);
+    _statesController
+      ..update(WidgetState.disabled, !_isEnabled)
+      ..update(WidgetState.hovered, _isHovering)
+      ..update(WidgetState.focused, _effectiveFocusNode.hasFocus)
+      ..update(WidgetState.error, _hasError)
+      ..addListener(_handleStatesControllerChange);
   }
 
   // AutofillClient implementation start.
@@ -1716,7 +1710,7 @@ class RichTextFieldState extends State<RichTextField>
                   cupertinoTheme.primaryColor;
         selectionColor =
             selectionStyle.selectionColor ??
-            cupertinoTheme.primaryColor.withOpacity(0.40);
+            cupertinoTheme.primaryColor.withValues(alpha: 0.40);
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(
           iOSHorizontalOffset / MediaQuery.devicePixelRatioOf(context),
@@ -1737,7 +1731,7 @@ class RichTextFieldState extends State<RichTextField>
                   cupertinoTheme.primaryColor;
         selectionColor =
             selectionStyle.selectionColor ??
-            cupertinoTheme.primaryColor.withOpacity(0.40);
+            cupertinoTheme.primaryColor.withValues(alpha: 0.40);
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(
           iOSHorizontalOffset / MediaQuery.devicePixelRatioOf(context),
@@ -1767,7 +1761,7 @@ class RichTextFieldState extends State<RichTextField>
                   theme.colorScheme.primary;
         selectionColor =
             selectionStyle.selectionColor ??
-            theme.colorScheme.primary.withOpacity(0.40);
+            theme.colorScheme.primary.withValues(alpha: 0.40);
 
       case TargetPlatform.linux:
         forcePressEnabled = false;
@@ -1781,7 +1775,7 @@ class RichTextFieldState extends State<RichTextField>
                   theme.colorScheme.primary;
         selectionColor =
             selectionStyle.selectionColor ??
-            theme.colorScheme.primary.withOpacity(0.40);
+            theme.colorScheme.primary.withValues(alpha: 0.40);
         handleDidGainAccessibilityFocus = () {
           // Automatically activate the TextField when it receives accessibility focus.
           if (!_effectiveFocusNode.hasFocus &&
@@ -1805,7 +1799,7 @@ class RichTextFieldState extends State<RichTextField>
                   theme.colorScheme.primary;
         selectionColor =
             selectionStyle.selectionColor ??
-            theme.colorScheme.primary.withOpacity(0.40);
+            theme.colorScheme.primary.withValues(alpha: 0.40);
         handleDidGainAccessibilityFocus = () {
           // Automatically activate the TextField when it receives accessibility focus.
           if (!_effectiveFocusNode.hasFocus &&
@@ -1876,9 +1870,11 @@ class RichTextFieldState extends State<RichTextField>
           scrollPadding: widget.scrollPadding,
           keyboardAppearance: keyboardAppearance,
           enableInteractiveSelection: widget.enableInteractiveSelection,
+          selectAllOnFocus: widget.selectAllOnFocus,
           dragStartBehavior: widget.dragStartBehavior,
           scrollController: widget.scrollController,
           scrollPhysics: widget.scrollPhysics,
+          autofillHints: widget.autofillHints,
           autofillClient: this,
           autocorrectionTextRectColor: autocorrectionTextRectColor,
           clipBehavior: widget.clipBehavior,
@@ -1892,6 +1888,7 @@ class RichTextFieldState extends State<RichTextField>
           magnifierConfiguration:
               widget.magnifierConfiguration ??
               TextMagnifier.adaptiveMagnifierConfiguration,
+          hintLocales: widget.hintLocales,
         ),
       ),
     );
@@ -2026,26 +2023,17 @@ TextStyle _m2CounterErrorStyle(BuildContext context) => Theme.of(
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
 // dart format off
-TextStyle? _m3StateInputStyle(BuildContext context) =>
-    WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
-      if (states.contains(WidgetState.disabled)) {
-        return TextStyle(
-            color: Theme.of(context)
-                .textTheme
-                .bodyLarge!
-                .color
-                ?.withOpacity(0.38));
-      }
-      return TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color);
-    });
+TextStyle? _m3StateInputStyle(BuildContext context) => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
+  if (states.contains(WidgetState.disabled)) {
+    return TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color?.withValues(alpha:0.38));
+  }
+  return TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color);
+});
 
-TextStyle _m3InputStyle(BuildContext context) =>
-    Theme.of(context).textTheme.bodyLarge!;
+TextStyle _m3InputStyle(BuildContext context) => Theme.of(context).textTheme.bodyLarge!;
 
-TextStyle _m3CounterErrorStyle(BuildContext context) => Theme.of(context)
-    .textTheme
-    .bodySmall!
-    .copyWith(color: Theme.of(context).colorScheme.error);
+TextStyle _m3CounterErrorStyle(BuildContext context) =>
+  Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.error);
 // dart format on
 
 // END GENERATED TOKEN PROPERTIES - TextField
