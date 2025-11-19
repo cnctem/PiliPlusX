@@ -214,6 +214,9 @@ class _LiveRoomPageState extends State<LiveRoomPage>
     Alignment alignment = Alignment.center,
     bool needDm = true,
   }) {
+    if (!plPlayerController.isLive) {
+      return const SizedBox.shrink();
+    }
     if (!isFullScreen && !plPlayerController.isDesktopPip) {
       _liveRoomController.fsSC.value = null;
     }
