@@ -19,13 +19,14 @@ library;
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:PiliPlus/common/widgets/flutter/page/scrollable_helpers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart' hide Scrollable, ScrollableState;
+import 'package:flutter/material.dart'
+    hide Scrollable, ScrollableState, EdgeDraggingAutoScroller;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 
 export 'package:flutter/physics.dart' show Tolerance;
 
@@ -933,7 +934,7 @@ class CustomScrollableState extends State<CustomScrollable>
       if (_animController.value * _maxWidth +
               (_isRTL ? (_maxWidth - dx) : dx) >=
           100) {
-        Get.back();
+        Navigator.pop(context);
       } else {
         _animController.reverse();
       }
@@ -1937,7 +1938,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
       if (child.isTagged(RenderViewport.excludeFromScrolling)) {
         excluded.add(child);
       } else {
-        if (!child.hasFlag(SemanticsFlag.isHidden)) {
+        if (!child.flagsCollection.isHidden) {
           firstVisibleIndex ??= child.indexInParent;
         }
         included.add(child);
@@ -1981,223 +1982,4 @@ class _RestorableScrollOffset extends RestorableValue<double?> {
 
   @override
   bool get enabled => value != null;
-}
-
-// 2D SCROLLING
-
-/// Specifies how to configure the [DragGestureRecognizer]s of a
-/// [TwoDimensionalScrollable].
-// TODO(Piinks): Add sample code, https://github.com/flutter/flutter/issues/126298
-enum DiagonalDragBehavior {
-  /// This behavior will not allow for any diagonal scrolling.
-  ///
-  /// Drag gestures in one direction or the other will lock the input axis until
-  /// the gesture is released.
-  none,
-
-  /// This behavior will only allow diagonal scrolling on a weighted
-  /// scale per gesture event.
-  ///
-  /// This means that after initially evaluating the drag gesture, the weighted
-  /// evaluation (based on [kTouchSlop]) stands until the gesture is released.
-  weightedEvent,
-
-  /// This behavior will only allow diagonal scrolling on a weighted
-  /// scale that is evaluated throughout a gesture event.
-  ///
-  /// This means that during each update to the drag gesture, the scrolling
-  /// axis will be allowed to scroll diagonally if it exceeds the
-  /// [kTouchSlop].
-  weightedContinuous,
-
-  /// This behavior allows free movement in any and all directions when
-  /// dragging.
-  free,
-}
-
-/// An auto scroller that scrolls the [scrollable] if a drag gesture drags close
-/// to its edge.
-///
-/// The scroll velocity is controlled by the [velocityScalar]:
-///
-/// velocity = (distance of overscroll) * [velocityScalar].
-class EdgeDraggingAutoScroller {
-  /// Creates a auto scroller that scrolls the [scrollable].
-  EdgeDraggingAutoScroller(
-    this.scrollable, {
-    this.onScrollViewScrolled,
-    required this.velocityScalar,
-  });
-
-  /// The [CustomScrollable] this auto scroller is scrolling.
-  final CustomScrollableState scrollable;
-
-  /// Called when a scroll view is scrolled.
-  ///
-  /// The scroll view may be scrolled multiple times in a row until the drag
-  /// target no longer triggers the auto scroll. This callback will be called
-  /// in between each scroll.
-  final VoidCallback? onScrollViewScrolled;
-
-  /// {@template flutter.widgets.EdgeDraggingAutoScroller.velocityScalar}
-  /// The velocity scalar per pixel over scroll.
-  ///
-  /// It represents how the velocity scale with the over scroll distance. The
-  /// auto-scroll velocity = (distance of overscroll) * velocityScalar.
-  /// {@endtemplate}
-  final double velocityScalar;
-
-  late Rect _dragTargetRelatedToScrollOrigin;
-
-  /// Whether the auto scroll is in progress.
-  bool get scrolling => _scrolling;
-  bool _scrolling = false;
-
-  double _offsetExtent(Offset offset, Axis scrollDirection) {
-    return switch (scrollDirection) {
-      Axis.horizontal => offset.dx,
-      Axis.vertical => offset.dy,
-    };
-  }
-
-  double _sizeExtent(Size size, Axis scrollDirection) {
-    return switch (scrollDirection) {
-      Axis.horizontal => size.width,
-      Axis.vertical => size.height,
-    };
-  }
-
-  AxisDirection get _axisDirection => scrollable.axisDirection;
-  Axis get _scrollDirection => axisDirectionToAxis(_axisDirection);
-
-  /// Starts the auto scroll if the [dragTarget] is close to the edge.
-  ///
-  /// The scroll starts to scroll the [scrollable] if the target rect is close
-  /// to the edge of the [scrollable]; otherwise, it remains stationary.
-  ///
-  /// If the scrollable is already scrolling, calling this method updates the
-  /// previous dragTarget to the new value and continues scrolling if necessary.
-  void startAutoScrollIfNecessary(Rect dragTarget) {
-    final Offset deltaToOrigin = scrollable.deltaToScrollOrigin;
-    _dragTargetRelatedToScrollOrigin = dragTarget.translate(
-      deltaToOrigin.dx,
-      deltaToOrigin.dy,
-    );
-    if (_scrolling) {
-      // The change will be picked up in the next scroll.
-      return;
-    }
-    assert(!_scrolling);
-    _scroll();
-  }
-
-  /// Stop any ongoing auto scrolling.
-  void stopAutoScroll() {
-    _scrolling = false;
-  }
-
-  Future<void> _scroll() async {
-    final RenderBox scrollRenderBox =
-        scrollable.context.findRenderObject()! as RenderBox;
-    final Rect globalRect = MatrixUtils.transformRect(
-      scrollRenderBox.getTransformTo(null),
-      Rect.fromLTWH(
-        0,
-        0,
-        scrollRenderBox.size.width,
-        scrollRenderBox.size.height,
-      ),
-    );
-    assert(
-      globalRect.size.width >= _dragTargetRelatedToScrollOrigin.size.width &&
-          globalRect.size.height >=
-              _dragTargetRelatedToScrollOrigin.size.height,
-      'Drag target size is larger than scrollable size, which may cause bouncing',
-    );
-    _scrolling = true;
-    double? newOffset;
-    const double overDragMax = 20.0;
-
-    final Offset deltaToOrigin = scrollable.deltaToScrollOrigin;
-    final Offset viewportOrigin = globalRect.topLeft.translate(
-      deltaToOrigin.dx,
-      deltaToOrigin.dy,
-    );
-    final double viewportStart = _offsetExtent(
-      viewportOrigin,
-      _scrollDirection,
-    );
-    final double viewportEnd =
-        viewportStart + _sizeExtent(globalRect.size, _scrollDirection);
-
-    final double proxyStart = _offsetExtent(
-      _dragTargetRelatedToScrollOrigin.topLeft,
-      _scrollDirection,
-    );
-    final double proxyEnd = _offsetExtent(
-      _dragTargetRelatedToScrollOrigin.bottomRight,
-      _scrollDirection,
-    );
-    switch (_axisDirection) {
-      case AxisDirection.up:
-      case AxisDirection.left:
-        if (proxyEnd > viewportEnd &&
-            scrollable.position.pixels > scrollable.position.minScrollExtent) {
-          final double overDrag = math.min(proxyEnd - viewportEnd, overDragMax);
-          newOffset = math.max(
-            scrollable.position.minScrollExtent,
-            scrollable.position.pixels - overDrag,
-          );
-        } else if (proxyStart < viewportStart &&
-            scrollable.position.pixels < scrollable.position.maxScrollExtent) {
-          final double overDrag = math.min(
-            viewportStart - proxyStart,
-            overDragMax,
-          );
-          newOffset = math.min(
-            scrollable.position.maxScrollExtent,
-            scrollable.position.pixels + overDrag,
-          );
-        }
-      case AxisDirection.right:
-      case AxisDirection.down:
-        if (proxyStart < viewportStart &&
-            scrollable.position.pixels > scrollable.position.minScrollExtent) {
-          final double overDrag = math.min(
-            viewportStart - proxyStart,
-            overDragMax,
-          );
-          newOffset = math.max(
-            scrollable.position.minScrollExtent,
-            scrollable.position.pixels - overDrag,
-          );
-        } else if (proxyEnd > viewportEnd &&
-            scrollable.position.pixels < scrollable.position.maxScrollExtent) {
-          final double overDrag = math.min(proxyEnd - viewportEnd, overDragMax);
-          newOffset = math.min(
-            scrollable.position.maxScrollExtent,
-            scrollable.position.pixels + overDrag,
-          );
-        }
-    }
-
-    if (newOffset == null ||
-        (newOffset - scrollable.position.pixels).abs() < 1.0) {
-      // Drag should not trigger scroll.
-      _scrolling = false;
-      return;
-    }
-    final Duration duration = Duration(
-      milliseconds: (1000 / velocityScalar).round(),
-    );
-    await scrollable.position.animateTo(
-      newOffset,
-      duration: duration,
-      curve: Curves.linear,
-    );
-    onScrollViewScrolled?.call();
-    if (_scrolling) {
-      await _scroll();
-    }
-  }
 }

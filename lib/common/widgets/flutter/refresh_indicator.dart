@@ -1,3 +1,12 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// ignore_for_file: uri_does_not_exist_in_doc_import
+
+/// @docImport 'color_scheme.dart';
+library;
+
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -6,25 +15,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/material.dart' hide RefreshIndicator;
 
-Widget refreshIndicator({
-  required RefreshCallback onRefresh,
-  required Widget child,
-}) {
-  return RefreshIndicator(
-    displacement: displacement,
-    onRefresh: onRefresh,
-    child: child,
-  );
-}
-
-// Copyright 2014 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+double displacement = Pref.refreshDisplacement;
 
 // The over-scroll distance that moves the indicator to its maximum
 // displacement, as a percentage of the scrollable's container extent.
-
-double displacement = Pref.refreshDisplacement;
 double kDragContainerExtentPercentage = Pref.refreshDragPercentage;
 
 // How much the scroll's drag gesture can overshoot the RefreshIndicator's
@@ -761,4 +755,15 @@ class RefreshIndicatorState extends State<RefreshIndicator>
       ],
     );
   }
+}
+
+Widget refreshIndicator({
+  required RefreshCallback onRefresh,
+  required Widget child,
+}) {
+  return RefreshIndicator(
+    displacement: displacement,
+    onRefresh: onRefresh,
+    child: child,
+  );
 }

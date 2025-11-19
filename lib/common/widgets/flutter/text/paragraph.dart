@@ -9,7 +9,6 @@
 /// @docImport 'editable.dart';
 library;
 
-import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui'
     as ui
@@ -46,6 +45,15 @@ typedef _TextBoundaryAtPositionInText =
 
 const String _kEllipsis = '\u2026';
 
+class _UnspecifiedTextScaler extends TextScaler {
+  const _UnspecifiedTextScaler();
+  @override
+  Never get textScaleFactor => throw UnimplementedError();
+
+  @override
+  Never scale(double fontSize) => throw UnimplementedError();
+}
+
 /// A render object that displays a paragraph of text.
 class RenderParagraph extends RenderBox
     with
@@ -68,7 +76,7 @@ class RenderParagraph extends RenderBox
       'This feature was deprecated after v3.12.0-2.0.pre.',
     )
     double textScaleFactor = 1.0,
-    TextScaler textScaler = TextScaler.noScaling,
+    TextScaler textScaler = const _UnspecifiedTextScaler(),
     int? maxLines,
     Locale? locale,
     StrutStyle? strutStyle,
@@ -80,26 +88,22 @@ class RenderParagraph extends RenderBox
     required Color primary,
     VoidCallback? onShowMore,
   }) : assert(text.debugAssertIsValid()),
+       assert(maxLines == null || maxLines > 0),
        assert(
-         maxLines == null ||
-             (maxLines > 0 &&
-                 overflow != TextOverflow.ellipsis &&
-                 overflow != TextOverflow.fade),
-       ),
-       assert(
-         identical(textScaler, TextScaler.noScaling) || textScaleFactor == 1.0,
+         identical(textScaler, const _UnspecifiedTextScaler()) ||
+             textScaleFactor == 1.0,
          'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
        ),
        _primary = primary,
+       _onShowMore = onShowMore,
        _softWrap = softWrap,
        _overflow = overflow,
        _selectionColor = selectionColor,
-       _onShowMore = onShowMore,
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
          textDirection: textDirection,
-         textScaler: textScaler == TextScaler.noScaling
+         textScaler: textScaler == const _UnspecifiedTextScaler()
              ? TextScaler.linear(textScaleFactor)
              : textScaler,
          maxLines: maxLines,
@@ -842,6 +846,11 @@ class RenderParagraph extends RenderBox
       }
     }
 
+    assert(() {
+      _textPainter.debugPaintTextLayoutBoxes = debugPaintTextLayoutBoxes;
+      return true;
+    }());
+
     _textPainter.paint(context.canvas, offset);
 
     paintInlineChildren(context, offset);
@@ -1013,8 +1022,9 @@ class RenderParagraph extends RenderBox
     }
 
     if (needsAssembleSemanticsNode) {
-      config.explicitChildNodes = true;
-      config.isSemanticBoundary = true;
+      config
+        ..explicitChildNodes = true
+        ..isSemanticBoundary = true;
     } else if (needsChildConfigurationsDelegate) {
       config.childConfigurationsDelegate =
           _childSemanticsConfigurationsDelegate;
@@ -1043,8 +1053,9 @@ class RenderParagraph extends RenderBox
           AttributedString(buffer.toString(), attributes: attributes),
         ];
       }
-      config.attributedLabel = _cachedAttributedLabels![0];
-      config.textDirection = textDirection;
+      config
+        ..attributedLabel = _cachedAttributedLabels![0]
+        ..textDirection = textDirection;
     }
   }
 
@@ -1126,7 +1137,7 @@ class RenderParagraph extends RenderBox
   // can be re-used when [assembleSemanticsNode] is called again. This ensures
   // stable ids for the [SemanticsNode]s of [TextSpan]s across
   // [assembleSemanticsNode] invocations.
-  LinkedHashMap<Key, SemanticsNode>? _cachedChildNodes;
+  Map<Key, SemanticsNode>? _cachedChildNodes;
 
   @override
   void assembleSemanticsNode(
@@ -1143,8 +1154,7 @@ class RenderParagraph extends RenderBox
     int placeholderIndex = 0;
     int childIndex = 0;
     RenderBox? child = firstChild;
-    final LinkedHashMap<Key, SemanticsNode> newChildCache =
-        LinkedHashMap<Key, SemanticsNode>();
+    final Map<Key, SemanticsNode> newChildCache = <Key, SemanticsNode>{};
     _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
     for (final InlineSpanSemanticsInformation info
         in _cachedCombinedSemanticsInfos!) {
@@ -1214,8 +1224,9 @@ class RenderParagraph extends RenderBox
             onDoubleTap: final VoidCallback? handler,
           ):
             if (handler != null) {
-              configuration.onTap = handler;
-              configuration.isLink = true;
+              configuration
+                ..onTap = handler
+                ..isLink = true;
             }
           case LongPressGestureRecognizer(
             onLongPress: final GestureLongPressCallback? onLongPress,
@@ -1285,29 +1296,30 @@ class RenderParagraph extends RenderBox
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<TextAlign>('textAlign', textAlign));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection));
-    properties.add(
-      FlagProperty(
-        'softWrap',
-        value: softWrap,
-        ifTrue: 'wrapping at box width',
-        ifFalse: 'no wrapping except at line break characters',
-        showName: true,
-      ),
-    );
-    properties.add(EnumProperty<TextOverflow>('overflow', overflow));
-    properties.add(
-      DiagnosticsProperty<TextScaler>(
-        'textScaler',
-        textScaler,
-        defaultValue: TextScaler.noScaling,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<Locale>('locale', locale, defaultValue: null),
-    );
-    properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
+    properties
+      ..add(EnumProperty<TextAlign>('textAlign', textAlign))
+      ..add(EnumProperty<TextDirection>('textDirection', textDirection))
+      ..add(
+        FlagProperty(
+          'softWrap',
+          value: softWrap,
+          ifTrue: 'wrapping at box width',
+          ifFalse: 'no wrapping except at line break characters',
+          showName: true,
+        ),
+      )
+      ..add(EnumProperty<TextOverflow>('overflow', overflow))
+      ..add(
+        DiagnosticsProperty<TextScaler>(
+          'textScaler',
+          textScaler,
+          defaultValue: TextScaler.noScaling,
+        ),
+      )
+      ..add(
+        DiagnosticsProperty<Locale>('locale', locale, defaultValue: null),
+      )
+      ..add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
   }
 }
 
@@ -1768,8 +1780,7 @@ class _SelectableFragment
     final TextPosition? existingSelectionEnd = _textSelectionEnd;
 
     _setSelectionPosition(null, isEnd: isEnd);
-    final Matrix4 transform = paragraph.getTransformTo(null);
-    transform.invert();
+    final Matrix4 transform = paragraph.getTransformTo(null)..invert();
     final Offset localPosition = MatrixUtils.transformPoint(
       transform,
       globalPosition,
@@ -1842,8 +1853,7 @@ class _SelectableFragment
     required bool isEnd,
   }) {
     _setSelectionPosition(null, isEnd: isEnd);
-    final Matrix4 transform = paragraph.getTransformTo(null);
-    transform.invert();
+    final Matrix4 transform = paragraph.getTransformTo(null)..invert();
     final Offset localPosition = MatrixUtils.transformPoint(
       transform,
       globalPosition,
@@ -2348,8 +2358,8 @@ class _SelectableFragment
           existingSelectionEnd,
         );
       }
-      final Matrix4 originTransform = originParagraph.getTransformTo(null);
-      originTransform.invert();
+      final Matrix4 originTransform = originParagraph.getTransformTo(null)
+        ..invert();
       final Offset originParagraphLocalPosition = MatrixUtils.transformPoint(
         originTransform,
         globalPosition,
@@ -2653,8 +2663,8 @@ class _SelectableFragment
           existingSelectionEnd,
         );
       }
-      final Matrix4 originTransform = originParagraph.getTransformTo(null);
-      originTransform.invert();
+      final Matrix4 originTransform = originParagraph.getTransformTo(null)
+        ..invert();
       final Offset originParagraphLocalPosition = MatrixUtils.transformPoint(
         originTransform,
         globalPosition,
@@ -3116,8 +3126,7 @@ class _SelectableFragment
     RenderObject? current = paragraph;
     while (current != null) {
       if (current is RenderParagraph) {
-        final Matrix4 currentTransform = current.getTransformTo(null);
-        currentTransform.invert();
+        final Matrix4 currentTransform = current.getTransformTo(null)..invert();
         final Offset currentParagraphLocalPosition = MatrixUtils.transformPoint(
           currentTransform,
           globalPosition,
@@ -3809,13 +3818,14 @@ class _SelectableFragment
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(
-      DiagnosticsProperty<String>(
-        'textInsideRange',
-        range.textInside(fullText),
-      ),
-    );
-    properties.add(DiagnosticsProperty<TextRange>('range', range));
-    properties.add(DiagnosticsProperty<String>('fullText', fullText));
+    properties
+      ..add(
+        DiagnosticsProperty<String>(
+          'textInsideRange',
+          range.textInside(fullText),
+        ),
+      )
+      ..add(DiagnosticsProperty<TextRange>('range', range))
+      ..add(DiagnosticsProperty<String>('fullText', fullText));
   }
 }

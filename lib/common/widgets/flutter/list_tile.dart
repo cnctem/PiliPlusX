@@ -914,10 +914,7 @@ class ListTile extends StatelessWidget {
         WidgetState.disabled,
     };
     final MouseCursor effectiveMouseCursor =
-        WidgetStateProperty.resolveAs<MouseCursor?>(
-          mouseCursor,
-          mouseStates,
-        ) ??
+        WidgetStateProperty.resolveAs<MouseCursor?>(mouseCursor, mouseStates) ??
         tileTheme.mouseCursor?.resolve(mouseStates) ??
         WidgetStateMouseCursor.clickable.resolve(mouseStates);
 
@@ -1330,12 +1327,7 @@ class _RenderListTile extends RenderBox
   @override
   Iterable<RenderBox> get children {
     final RenderBox? title = childForSlot(_ListTileSlot.title);
-    return <RenderBox>[
-      ?leading,
-      ?title,
-      ?subtitle,
-      ?trailing,
-    ];
+    return <RenderBox>[?leading, ?title, ?subtitle, ?trailing];
   }
 
   bool get isDense => _isDense;
