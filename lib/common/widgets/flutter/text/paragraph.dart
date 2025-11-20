@@ -150,7 +150,22 @@ class RenderParagraph extends RenderBox
 
   /// The text to display.
   InlineSpan get text => _textPainter.text!;
-  set text(InlineSpan value) {
+  set text(({InlineSpan text, Color primary}) params) {
+    final value = params.text;
+    _primary = params.primary;
+    if (_morePainter case final textPainter?) {
+      final textSpan = _moreTextSpan(params.text.style);
+      switch (textPainter.text!.compareTo(textSpan)) {
+        case RenderComparison.paint:
+          textPainter.text = textSpan;
+        case RenderComparison.layout:
+          textPainter
+            ..text = textSpan
+            ..layout();
+        default:
+      }
+    }
+
     switch (_textPainter.text!.compareTo(value)) {
       case RenderComparison.identical:
         return;
@@ -567,7 +582,7 @@ class RenderParagraph extends RenderBox
         if (position.dx < textPainter.width &&
             position.dy > height &&
             position.dy < height + textPainter.height) {
-          result.add(HitTestEntry(_moreTextSpan));
+          result.add(HitTestEntry(textPainter.text as TextSpan));
           return true;
         }
       }
@@ -693,13 +708,6 @@ class RenderParagraph extends RenderBox
 
   Color _primary;
 
-  set primary(Color primary) {
-    if (_primary != primary) {
-      _primary = primary;
-      _morePainter?.text = _moreTextSpan;
-    }
-  }
-
   VoidCallback? _onShowMore;
   set onShowMore(VoidCallback? onShowMore) {
     if (_onShowMore != onShowMore) {
@@ -710,8 +718,8 @@ class RenderParagraph extends RenderBox
 
   TapGestureRecognizer? _tapGestureRecognizer;
 
-  TextSpan get _moreTextSpan => TextSpan(
-    style: text.style!.copyWith(color: _primary),
+  TextSpan _moreTextSpan([TextStyle? style]) => TextSpan(
+    style: (style ?? text.style!).copyWith(color: _primary),
     text: '查看更多',
     recognizer: _tapGestureRecognizer,
   );
@@ -744,7 +752,7 @@ class RenderParagraph extends RenderBox
         _tapGestureRecognizer ??= TapGestureRecognizer()..onTap = _onShowMore;
       }
       _morePainter ??= TextPainter(
-        text: _moreTextSpan,
+        text: _moreTextSpan(),
         textDirection: textDirection,
         textScaler: textScaler,
         locale: locale,

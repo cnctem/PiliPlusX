@@ -264,7 +264,7 @@ class RichText extends MultiChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderParagraph renderObject) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
     renderObject
-      ..text = text
+      ..text = (text: text, primary: primary)
       ..textAlign = textAlign
       ..textDirection = textDirection ?? Directionality.of(context)
       ..softWrap = softWrap
@@ -277,7 +277,6 @@ class RichText extends MultiChildRenderObjectWidget {
       ..locale = locale ?? Localizations.maybeLocaleOf(context)
       ..registrar = selectionRegistrar
       ..selectionColor = selectionColor
-      ..primary = primary
       ..onShowMore = onShowMore;
   }
 
