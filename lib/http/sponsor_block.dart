@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:PiliPlus/build_config.dart';
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -137,7 +136,7 @@ abstract final class SponsorBlock {
         'videoID': bvid,
         'cid': cid.toString(),
         'userID': Pref.blockUserID,
-        'userAgent': '${Constants.appName}/${BuildConfig.versionName}',
+        'userAgent': Constants.userAgent,
         'videoDuration': videoDuration,
         'segments': segments
             .map(

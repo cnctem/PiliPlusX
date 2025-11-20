@@ -4,6 +4,7 @@ import 'package:PiliPlus/models/common/video/audio_quality.dart';
 import 'package:PiliPlus/models/common/video/video_quality.dart';
 import 'package:PiliPlus/models_new/sponsor_block/segment_item.dart';
 import 'package:PiliPlus/utils/extension.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 
 class PlayUrlModel {
   PlayUrlModel({
@@ -87,11 +88,15 @@ class PlayUrlModel {
     //     "clipType": "CLIP_TYPE_ED",
     //   },
     // ];
-    final List? clipInfoList = json['clip_info_list'];
-    if (clipInfoList != null && clipInfoList.isNotEmpty) {
-      this.clipInfoList = clipInfoList
-          .map((e) => SegmentItemModel.fromPgcJson(e, timeLength))
-          .toList();
+    try {
+      final List? clipInfoList = json['clip_info_list'];
+      if (clipInfoList != null && clipInfoList.isNotEmpty) {
+        this.clipInfoList = clipInfoList
+            .map((e) => SegmentItemModel.fromPgcJson(e, timeLength))
+            .toList();
+      }
+    } catch (_) {
+      if (kDebugMode) rethrow;
     }
   }
 }

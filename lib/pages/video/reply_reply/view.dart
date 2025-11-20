@@ -188,7 +188,8 @@ class _VideoReplyReplyPanelState extends State<VideoReplyReplyPanel>
             : const AlwaysScrollableScrollPhysics(),
         slivers: [
           if (!isDialogue) ...[
-            if (widget.firstFloor case final firstFloor?)
+            if ((widget.firstFloor ?? _controller.firstFloor.value)
+                case final firstFloor?)
               _header(theme, firstFloor)
             else
               Obx(() {

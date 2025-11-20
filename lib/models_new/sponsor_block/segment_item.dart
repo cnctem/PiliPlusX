@@ -7,7 +7,7 @@ class SegmentItemModel {
   List<int> segment;
   String uuid;
   num? videoDuration;
-  int votes;
+  int? votes;
 
   SegmentItemModel({
     this.cid,
@@ -16,7 +16,7 @@ class SegmentItemModel {
     required this.segment,
     required this.uuid,
     this.videoDuration,
-    this.votes = 0,
+    this.votes,
   });
 
   factory SegmentItemModel.fromJson(Map<String, dynamic> json) =>
