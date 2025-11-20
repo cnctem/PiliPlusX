@@ -154,7 +154,7 @@ class RenderParagraph extends RenderBox
     final value = params.text;
     _primary = params.primary;
     if (_morePainter case final textPainter?) {
-      final textSpan = _moreTextSpan(params.text.style);
+      final textSpan = _moreTextSpan(value.style);
       switch (textPainter.text!.compareTo(textSpan)) {
         case RenderComparison.paint:
           textPainter.text = textSpan;
