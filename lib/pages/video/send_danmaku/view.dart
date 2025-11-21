@@ -186,7 +186,13 @@ class _SendDanmakuPanelState extends CommonTextPubPageState<SendDanmakuPanel> {
           const SizedBox(height: 12),
           Row(
             children: [
-              const Text('弹幕字号', style: TextStyle(fontSize: 15)),
+              Text(
+                '弹幕字号',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: themeData.colorScheme.onSurface,
+                ),
+              ),
               const SizedBox(width: 16),
               _buildFontSizeItem(18, '小'),
               const SizedBox(width: 5),
@@ -196,7 +202,13 @@ class _SendDanmakuPanelState extends CommonTextPubPageState<SendDanmakuPanel> {
           const SizedBox(height: 12),
           Row(
             children: [
-              const Text('弹幕样式', style: TextStyle(fontSize: 15)),
+              Text(
+                '弹幕样式',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: themeData.colorScheme.onSurface,
+                ),
+              ),
               const SizedBox(width: 16),
               _buildPositionItem(1, '滚动'),
               const SizedBox(width: 5),
@@ -209,7 +221,13 @@ class _SendDanmakuPanelState extends CommonTextPubPageState<SendDanmakuPanel> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('弹幕颜色', style: TextStyle(fontSize: 15)),
+              Text(
+                '弹幕颜色',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: themeData.colorScheme.onSurface,
+                ),
+              ),
               const SizedBox(width: 16),
               _buildColorPanel,
             ],

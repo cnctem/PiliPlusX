@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:PiliPlus/pages/video/widgets/header_control.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/common_btn.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
@@ -142,6 +143,18 @@ class LiveHeaderControl extends StatelessWidget {
             icon: const Icon(
               size: 18,
               Icons.schedule,
+              color: Colors.white,
+            ),
+          ),
+          ComBtn(
+            tooltip: '播放信息',
+            onTap: () => HeaderControlState.showPlayerInfo(
+              context,
+              plPlayerController: plPlayerController,
+            ),
+            icon: const Icon(
+              size: 18,
+              Icons.info_outline,
               color: Colors.white,
             ),
           ),
