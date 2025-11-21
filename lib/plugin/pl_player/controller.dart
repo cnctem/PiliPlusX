@@ -1455,10 +1455,6 @@ class PlPlayerController {
     }
   }
 
-  void hiddenControls(bool val) {
-    showControls.value = val;
-  }
-
   Timer? longPressTimer;
   void cancelLongPressTimer() {
     longPressTimer?.cancel();

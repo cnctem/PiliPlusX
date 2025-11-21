@@ -120,7 +120,7 @@ class _BottomControlState extends State<BottomControl> with HeaderMixin {
               CustomIcons.dm_settings,
               color: Colors.white,
             ),
-            onTap: showSetDanmaku,
+            onTap: () => showSetDanmaku(isLive: true),
           ),
           Obx(
             () => PopupMenuButton<VideoFitType>(

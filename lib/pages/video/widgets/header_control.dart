@@ -102,7 +102,7 @@ mixin HeaderMixin<T extends StatefulWidget> on State<T> {
   }
 
   /// 弹幕功能
-  void showSetDanmaku() {
+  void showSetDanmaku({bool isLive = false}) {
     // 屏蔽类型
     const List<({int value, String label})> blockTypesList = [
       (value: 5, label: '顶部'),
@@ -278,49 +278,51 @@ mixin HeaderMixin<T extends StatefulWidget> on State<T> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Text('智能云屏蔽 $danmakuWeight 级'),
-                      const Spacer(),
-                      TextButton(
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        onPressed: () => Get
-                          ..back()
-                          ..toNamed(
-                            '/danmakuBlock',
-                            arguments: plPlayerController,
+                  if (!isLive) ...[
+                    Row(
+                      children: [
+                        Text('智能云屏蔽 $danmakuWeight 级'),
+                        const Spacer(),
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
-                        child: Text(
-                          "屏蔽管理(${plPlayerController.filters.count})",
+                          onPressed: () => Get
+                            ..back()
+                            ..toNamed(
+                              '/danmakuBlock',
+                              arguments: plPlayerController,
+                            ),
+                          child: Text(
+                            "屏蔽管理(${plPlayerController.filters.count})",
+                          ),
+                        ),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        top: 0,
+                        bottom: 6,
+                        left: 10,
+                        right: 10,
+                      ),
+                      child: SliderTheme(
+                        data: sliderTheme,
+                        child: Slider(
+                          min: 0,
+                          max: 10,
+                          value: danmakuWeight.toDouble(),
+                          divisions: 10,
+                          label: '$danmakuWeight',
+                          onChanged: updateDanmakuWeight,
+                          onChangeEnd: (_) =>
+                              plPlayerController.putDanmakuSettings(),
                         ),
                       ),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      top: 0,
-                      bottom: 6,
-                      left: 10,
-                      right: 10,
                     ),
-                    child: SliderTheme(
-                      data: sliderTheme,
-                      child: Slider(
-                        min: 0,
-                        max: 10,
-                        value: danmakuWeight.toDouble(),
-                        divisions: 10,
-                        label: '$danmakuWeight',
-                        onChanged: updateDanmakuWeight,
-                        onChangeEnd: (_) =>
-                            plPlayerController.putDanmakuSettings(),
-                      ),
-                    ),
-                  ),
+                  ],
                   const Text('按类型屏蔽'),
                   Padding(
                     padding: const EdgeInsets.only(top: 12),
@@ -2290,8 +2292,8 @@ class HeaderControlState extends State<HeaderControl> with HeaderMixin {
                     return ListTile(
                       dense: true,
                       onTap: () {
-                        plPlayerController.setPlayRepeat(i);
                         Get.back();
+                        plPlayerController.setPlayRepeat(i);
                       },
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 20,
@@ -2317,13 +2319,16 @@ class HeaderControlState extends State<HeaderControl> with HeaderMixin {
   static final _format = DateFormat('HH:mm');
 
   void startClock() {
-    clock ??= Timer.periodic(const Duration(seconds: 1), (Timer t) {
-      if (!mounted) {
-        cancelClock();
-        return;
-      }
+    if (clock == null) {
       now.value = _format.format(DateTime.now());
-    });
+      clock = Timer.periodic(const Duration(seconds: 1), (Timer t) {
+        if (!mounted) {
+          cancelClock();
+          return;
+        }
+        now.value = _format.format(DateTime.now());
+      });
+    }
   }
 
   void cancelClock() {
@@ -2339,6 +2344,12 @@ class HeaderControlState extends State<HeaderControl> with HeaderMixin {
     final isFSOrPip = isFullScreen || plPlayerController.isDesktopPip;
     final showFSActionItem =
         !isFileSource && plPlayerController.showFSActionItem && isFSOrPip;
+    final showCurrTime = !isPortrait && (isFullScreen || !horizontalScreen);
+    if (showCurrTime) {
+      startClock();
+    } else {
+      cancelClock();
+    }
     return AppBar(
       elevation: 0,
       scrolledUnderElevation: 0,
@@ -2457,22 +2468,16 @@ class HeaderControlState extends State<HeaderControl> with HeaderMixin {
               else
                 const Spacer(),
               // show current datetime
-              Obx(
-                () {
-                  if ((this.isFullScreen || !horizontalScreen) && !isPortrait) {
-                    startClock();
-                    return Text(
-                      now.value,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
-                      ),
-                    );
-                  }
-                  cancelClock();
-                  return const SizedBox.shrink();
-                },
-              ),
+              if (showCurrTime)
+                Obx(
+                  () => Text(
+                    now.value,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
               if (!isFileSource) ...[
                 if (!isFSOrPip) ...[
                   if (videoDetailCtr.isUgc)
@@ -2629,7 +2634,7 @@ class HeaderControlState extends State<HeaderControl> with HeaderMixin {
                         return;
                       }
                       if (await Floating().isPipAvailable) {
-                        plPlayerController.hiddenControls(false);
+                        plPlayerController.showControls.value = false;
                         if (context.mounted &&
                             !videoPlayerServiceHandler!.enableBackgroundPlay) {
                           final theme = Theme.of(context);

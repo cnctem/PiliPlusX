@@ -1237,6 +1237,12 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       final buttons = event.buttons;
       final isSecondaryBtn = buttons == kSecondaryMouseButton;
       if (isSecondaryBtn || buttons == kMiddleMouseButton) {
+        final isFullScreen = this.isFullScreen;
+        if (isFullScreen && plPlayerController.controlsLock.value) {
+          plPlayerController
+            ..controlsLock.value = false
+            ..showControls.value = false;
+        }
         plPlayerController
             .triggerFullScreen(
               status: !isFullScreen,
@@ -1836,85 +1842,86 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             maxHeight,
           ),
 
-        // 锁
-        if (plPlayerController.showFsLockBtn &&
-            (isFullScreen || plPlayerController.isDesktopPip))
-          ViewSafeArea(
-            right: false,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: FractionalTranslation(
-                translation: const Offset(1, -0.4),
-                child: Obx(
-                  () => Offstage(
-                    offstage: !plPlayerController.showControls.value,
-                    child: DecoratedBox(
-                      decoration: const BoxDecoration(
-                        color: Color(0x45000000),
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                      ),
-                      child: Obx(() {
-                        final controlsLock =
-                            plPlayerController.controlsLock.value;
-                        return ComBtn(
-                          tooltip: controlsLock ? '解锁' : '锁定',
-                          icon: controlsLock
-                              ? const Icon(
-                                  FontAwesomeIcons.lock,
-                                  size: 15,
-                                  color: Colors.white,
-                                )
-                              : const Icon(
-                                  FontAwesomeIcons.lockOpen,
-                                  size: 15,
-                                  color: Colors.white,
-                                ),
-                          onTap: () =>
-                              plPlayerController.onLockControl(!controlsLock),
-                        );
-                      }),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-        // 截图
-        if (isFullScreen && plPlayerController.showFsScreenshotBtn)
-          ViewSafeArea(
-            left: false,
-            child: Obx(
-              () => Align(
-                alignment: Alignment.centerRight,
+        if (isFullScreen || plPlayerController.isDesktopPip) ...[
+          // 锁
+          if (plPlayerController.showFsLockBtn)
+            ViewSafeArea(
+              right: false,
+              child: Align(
+                alignment: Alignment.centerLeft,
                 child: FractionalTranslation(
-                  translation: const Offset(-1, -0.4),
-                  child: Offstage(
-                    offstage: !plPlayerController.showControls.value,
-                    child: DecoratedBox(
-                      decoration: const BoxDecoration(
-                        color: Color(0x45000000),
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                      ),
-                      child: ComBtn(
-                        tooltip: '截图',
-                        icon: const Icon(
-                          Icons.photo_camera,
-                          size: 20,
-                          color: Colors.white,
+                  translation: const Offset(1, -0.4),
+                  child: Obx(
+                    () => Offstage(
+                      offstage: !plPlayerController.showControls.value,
+                      child: DecoratedBox(
+                        decoration: const BoxDecoration(
+                          color: Color(0x45000000),
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
                         ),
-                        onLongPress:
-                            (Platform.isAndroid || kDebugMode) && !isLive
-                            ? screenshotWebp
-                            : null,
-                        onTap: plPlayerController.takeScreenshot,
+                        child: Obx(() {
+                          final controlsLock =
+                              plPlayerController.controlsLock.value;
+                          return ComBtn(
+                            tooltip: controlsLock ? '解锁' : '锁定',
+                            icon: controlsLock
+                                ? const Icon(
+                                    FontAwesomeIcons.lock,
+                                    size: 15,
+                                    color: Colors.white,
+                                  )
+                                : const Icon(
+                                    FontAwesomeIcons.lockOpen,
+                                    size: 15,
+                                    color: Colors.white,
+                                  ),
+                            onTap: () =>
+                                plPlayerController.onLockControl(!controlsLock),
+                          );
+                        }),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
+
+          // 截图
+          if (plPlayerController.showFsScreenshotBtn)
+            ViewSafeArea(
+              left: false,
+              child: Obx(
+                () => Align(
+                  alignment: Alignment.centerRight,
+                  child: FractionalTranslation(
+                    translation: const Offset(-1, -0.4),
+                    child: Offstage(
+                      offstage: !plPlayerController.showControls.value,
+                      child: DecoratedBox(
+                        decoration: const BoxDecoration(
+                          color: Color(0x45000000),
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                        ),
+                        child: ComBtn(
+                          tooltip: '截图',
+                          icon: const Icon(
+                            Icons.photo_camera,
+                            size: 20,
+                            color: Colors.white,
+                          ),
+                          onLongPress:
+                              (Platform.isAndroid || kDebugMode) && !isLive
+                              ? screenshotWebp
+                              : null,
+                          onTap: plPlayerController.takeScreenshot,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
 
         Obx(() {
           if (plPlayerController.dataStatus.loading ||

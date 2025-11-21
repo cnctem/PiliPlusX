@@ -127,7 +127,7 @@ class LiveHeaderControl extends StatelessWidget {
                 }
                 if (await Floating().isPipAvailable) {
                   plPlayerController
-                    ..hiddenControls(false)
+                    ..showControls.value = false
                     ..enterPip();
                 }
               },
