@@ -79,13 +79,13 @@ abstract class Pref {
         defaultValue: 0,
       )];
 
-  static int get themeTypeInt => _setting.get(
+  static int get _themeTypeInt => _setting.get(
     SettingBoxKey.themeMode,
     defaultValue: ThemeType.system.index,
   );
 
   static ThemeMode get themeMode {
-    return switch (themeTypeInt) {
+    return switch (_themeTypeInt) {
       0 => ThemeMode.light,
       1 => ThemeMode.dark,
       _ => ThemeMode.system,
@@ -142,7 +142,7 @@ abstract class Pref {
   static int get picQuality =>
       _setting.get(SettingBoxKey.defaultPicQa, defaultValue: 10);
 
-  static ThemeType get themeType => ThemeType.values[themeTypeInt];
+  static ThemeType get themeType => ThemeType.values[_themeTypeInt];
 
   static DynamicBadgeMode get dynamicBadgeType =>
       DynamicBadgeMode.values[_setting.get(
