@@ -42,10 +42,13 @@ import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:PiliPlus/utils/video_utils.dart';
+import 'package:battery_plus/battery_plus.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:dio/dio.dart';
+import 'package:easy_debounce/easy_throttle.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:floating/floating.dart';
 import 'package:flutter/foundation.dart';
@@ -56,6 +59,108 @@ import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+
+mixin TimeBatteryMixin<T extends StatefulWidget> on State<T> {
+  ContextSingleTicker? provider;
+  ContextSingleTicker get effectiveProvider =>
+      provider ??= ContextSingleTicker(context, autoStart: false);
+
+  bool get isPortrait;
+  bool get isFullScreen;
+  bool get horizontalScreen;
+
+  Timer? _clock;
+  RxString now = ''.obs;
+
+  static final _format = DateFormat('HH:mm');
+
+  @override
+  void dispose() {
+    stopClock();
+    super.dispose();
+  }
+
+  void startClock() {
+    if (!_showCurrTime) return;
+    if (_clock == null) {
+      now.value = _format.format(DateTime.now());
+      _clock ??= Timer.periodic(const Duration(seconds: 1), (Timer t) {
+        if (!mounted) {
+          stopClock();
+          return;
+        }
+        now.value = _format.format(DateTime.now());
+      });
+    }
+  }
+
+  void stopClock() {
+    _clock?.cancel();
+    _clock = null;
+  }
+
+  bool _showCurrTime = false;
+  void showCurrTimeIfNeeded(bool isFullScreen) {
+    _showCurrTime = !isPortrait && (isFullScreen || !horizontalScreen);
+    if (_showCurrTime) {
+      now.value = _format.format(DateTime.now());
+      getBatteryLevelIfNeeded();
+    } else {
+      stopClock();
+    }
+  }
+
+  late final _battery = Battery();
+  late final RxnInt _batteryLevel = RxnInt();
+  late final _showBatteryLevel = Pref.showBatteryLevel;
+  void getBatteryLevelIfNeeded() {
+    if (!_showCurrTime || !_showBatteryLevel) return;
+    EasyThrottle.throttle(
+      'getBatteryLevel$hashCode',
+      const Duration(seconds: 30),
+      () async {
+        try {
+          _batteryLevel.value = await _battery.batteryLevel;
+        } catch (_) {}
+      },
+    );
+  }
+
+  List<Widget>? get timeBatteryWidgets {
+    if (_showCurrTime) {
+      return [
+        if (_showBatteryLevel) ...[
+          Obx(
+            () {
+              final batteryLevel = _batteryLevel.value;
+              if (batteryLevel == null) {
+                return const SizedBox.shrink();
+              }
+              return Text(
+                '$batteryLevel%',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 10),
+        ],
+        Obx(
+          () => Text(
+            now.value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 13,
+            ),
+          ),
+        ),
+      ];
+    }
+    return null;
+  }
+}
 
 mixin HeaderMixin<T extends StatefulWidget> on State<T> {
   PlPlayerController get plPlayerController;
@@ -134,7 +239,7 @@ mixin HeaderMixin<T extends StatefulWidget> on State<T> {
     final DanmakuController<DanmakuExtra>? danmakuController =
         plPlayerController.danmakuController;
 
-    final isFullScreen = plPlayerController.isFullScreen.value;
+    final isFullScreen = this.isFullScreen;
 
     showBottomSheet(
       (context, setState) {
@@ -819,7 +924,8 @@ class HeaderControl extends StatefulWidget {
   }
 }
 
-class HeaderControlState extends State<HeaderControl> with HeaderMixin {
+class HeaderControlState extends State<HeaderControl>
+    with HeaderMixin, TimeBatteryMixin {
   @override
   late final PlPlayerController plPlayerController = widget.controller;
   late final VideoDetailController videoDetailCtr = widget.videoDetailCtr;
@@ -837,13 +943,12 @@ class HeaderControlState extends State<HeaderControl> with HeaderMixin {
       ? ugcIntroController
       : pgcIntroController;
 
+  @override
   bool get isPortrait => widget.isPortrait;
+  @override
   late final horizontalScreen = videoDetailCtr.horizontalScreen;
-  RxString now = ''.obs;
-  Timer? clock;
 
   Box setting = GStorage.setting;
-  late final provider = ContextSingleTicker(context, autoStart: false);
 
   @override
   void initState() {
@@ -855,12 +960,6 @@ class HeaderControlState extends State<HeaderControl> with HeaderMixin {
     } else {
       introController = Get.find<PgcIntroController>(tag: heroTag);
     }
-  }
-
-  @override
-  void dispose() {
-    cancelClock();
-    super.dispose();
   }
 
   /// 设置面板
@@ -2316,26 +2415,6 @@ class HeaderControlState extends State<HeaderControl> with HeaderMixin {
     );
   }
 
-  static final _format = DateFormat('HH:mm');
-
-  void startClock() {
-    if (clock == null) {
-      now.value = _format.format(DateTime.now());
-      clock = Timer.periodic(const Duration(seconds: 1), (Timer t) {
-        if (!mounted) {
-          cancelClock();
-          return;
-        }
-        now.value = _format.format(DateTime.now());
-      });
-    }
-  }
-
-  void cancelClock() {
-    clock?.cancel();
-    clock = null;
-  }
-
   late final isFileSource = videoDetailCtr.isFileSource;
 
   @override
@@ -2344,11 +2423,65 @@ class HeaderControlState extends State<HeaderControl> with HeaderMixin {
     final isFSOrPip = isFullScreen || plPlayerController.isDesktopPip;
     final showFSActionItem =
         !isFileSource && plPlayerController.showFSActionItem && isFSOrPip;
-    final showCurrTime = !isPortrait && (isFullScreen || !horizontalScreen);
-    if (showCurrTime) {
-      startClock();
+    showCurrTimeIfNeeded(isFullScreen);
+    Widget title;
+    if (introController.videoDetail.value.title != null &&
+        (isFullScreen ||
+            ((!horizontalScreen || plPlayerController.isDesktopPip) &&
+                !isPortrait))) {
+      title = Padding(
+        padding: isPortrait
+            ? EdgeInsets.zero
+            : const EdgeInsets.only(right: 10),
+        child: Obx(
+          () {
+            final videoDetail = introController.videoDetail.value;
+            final String title;
+            if (isFileSource || videoDetail.videos == 1) {
+              title = videoDetail.title!;
+            } else {
+              title =
+                  videoDetail.pages
+                      ?.firstWhereOrNull(
+                        (e) => e.cid == videoDetailCtr.cid.value,
+                      )
+                      ?.part ??
+                  videoDetail.title!;
+            }
+            return MarqueeText(
+              title,
+              spacing: 30,
+              velocity: 30,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+              provider: effectiveProvider,
+            );
+          },
+        ),
+      );
+      if (introController.isShowOnlineTotal) {
+        title = Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            title,
+            Obx(
+              () => Text(
+                '${introController.total.value}人正在看',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                ),
+              ),
+            ),
+          ],
+        );
+      }
+      title = Expanded(child: title);
     } else {
-      cancelClock();
+      title = const Spacer();
     }
     return AppBar(
       elevation: 0,
@@ -2409,75 +2542,9 @@ class HeaderControlState extends State<HeaderControl> with HeaderMixin {
                     },
                   ),
                 ),
-              if (introController.videoDetail.value.title != null &&
-                  (isFullScreen ||
-                      ((!horizontalScreen || plPlayerController.isDesktopPip) &&
-                          !isPortrait)))
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: isPortrait
-                            ? EdgeInsets.zero
-                            : const EdgeInsets.only(right: 10),
-                        child: Obx(
-                          () {
-                            final videoDetail =
-                                introController.videoDetail.value;
-                            final String title;
-                            if (isFileSource || videoDetail.videos == 1) {
-                              title = videoDetail.title!;
-                            } else {
-                              title =
-                                  videoDetail.pages
-                                      ?.firstWhereOrNull(
-                                        (e) =>
-                                            e.cid == videoDetailCtr.cid.value,
-                                      )
-                                      ?.part ??
-                                  videoDetail.title!;
-                            }
-                            return MarqueeText(
-                              title,
-                              spacing: 30,
-                              velocity: 30,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
-                              provider: provider,
-                            );
-                          },
-                        ),
-                      ),
-                      if (introController.isShowOnlineTotal)
-                        Obx(
-                          () => Text(
-                            '${introController.total.value}人正在看',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                )
-              else
-                const Spacer(),
+              title,
               // show current datetime
-              if (showCurrTime)
-                Obx(
-                  () => Text(
-                    now.value,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                    ),
-                  ),
-                ),
+              ...?timeBatteryWidgets,
               if (!isFileSource) ...[
                 if (!isFSOrPip) ...[
                   if (videoDetailCtr.isUgc)

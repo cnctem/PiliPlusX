@@ -767,9 +767,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                                                       ),
                                                 ),
                                                 onPressed: () =>
-                                                    videoDetailController
-                                                        .headerCtrKey
-                                                        .currentState
+                                                    (videoDetailController
+                                                                .headerCtrKey
+                                                                .currentState
+                                                            as HeaderControlState?)
                                                         ?.showSettingSheet(),
                                                 icon: Icon(
                                                   Icons.more_vert_outlined,

@@ -874,4 +874,9 @@ abstract class Pref {
   static String? get downloadPath => _setting.get(SettingBoxKey.downloadPath);
 
   static String? get liveCdnUrl => _setting.get(SettingBoxKey.liveCdnUrl);
+
+  static bool get showBatteryLevel => _setting.get(
+    SettingBoxKey.showBatteryLevel,
+    defaultValue: Utils.isMobile,
+  );
 }

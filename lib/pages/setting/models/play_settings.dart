@@ -67,6 +67,13 @@ List<SettingsModel> get playSettings => [
     setKey: SettingBoxKey.showFsScreenshotBtn,
     defaultVal: true,
   ),
+  SettingsModel(
+    settingsType: SettingsType.sw1tch,
+    title: '全屏显示电池电量',
+    leading: const Icon(Icons.battery_3_bar),
+    setKey: SettingBoxKey.showBatteryLevel,
+    defaultVal: Utils.isMobile,
+  ),
   const SettingsModel(
     settingsType: SettingsType.sw1tch,
     title: '双击快退/快进',

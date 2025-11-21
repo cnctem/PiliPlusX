@@ -288,7 +288,7 @@ class _BounceMarqueeRender extends MarqueeRender {
         context.clipRectAndPaint(rect, clipBehavior, rect, paintChild);
       }
     } else {
-      paintCenter(context, offset);
+      context.paintChild(child!, offset);
     }
   }
 }
@@ -348,7 +348,7 @@ class _NormalMarqueeRender extends MarqueeRender {
         context.clipRectAndPaint(rect, clipBehavior, rect, paintChild);
       }
     } else {
-      paintCenter(context, offset);
+      context.paintChild(child, offset);
     }
   }
 }

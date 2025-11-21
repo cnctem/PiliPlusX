@@ -156,12 +156,22 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
     _controlsListener = plPlayerController.showControls.listen((bool val) {
       final visible = val && !plPlayerController.controlsLock.value;
-      if (widget.videoDetailController?.headerCtrKey.currentState?.provider
-          case final provider?) {
-        provider
-          ..startIfNeeded()
-          ..muted = !visible;
+
+      if ((widget.headerControl.key as GlobalKey<TimeBatteryMixin>).currentState
+          case final state?) {
+        if (state.mounted) {
+          state.getBatteryLevelIfNeeded();
+          state.provider
+            ?..startIfNeeded()
+            ..muted = !visible;
+          if (visible) {
+            state.startClock();
+          } else {
+            state.stopClock();
+          }
+        }
       }
+
       if (visible) {
         animationController.forward();
       } else {

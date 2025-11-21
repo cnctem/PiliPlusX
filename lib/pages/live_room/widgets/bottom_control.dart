@@ -88,6 +88,7 @@ class _BottomControlState extends State<BottomControl> with HeaderMixin {
               final enableShowLiveDanmaku =
                   plPlayerController.enableShowDanmaku.value;
               return ComBtn(
+                height: 30,
                 tooltip: "${enableShowLiveDanmaku ? '关闭' : '开启'}弹幕",
                 icon: enableShowLiveDanmaku
                     ? const Icon(
@@ -114,6 +115,7 @@ class _BottomControlState extends State<BottomControl> with HeaderMixin {
             },
           ),
           ComBtn(
+            height: 30,
             tooltip: '弹幕设置',
             icon: const Icon(
               size: 18,
