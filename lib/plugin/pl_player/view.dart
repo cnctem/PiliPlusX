@@ -1787,7 +1787,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                         0,
                       ),
                     ),
-                    if (plPlayerController.enableSponsorBlock &&
+                    if (plPlayerController.enableBlock &&
                         videoDetailController.segmentProgressList.isNotEmpty)
                       Positioned(
                         left: 0,

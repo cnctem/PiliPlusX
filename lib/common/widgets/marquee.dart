@@ -399,12 +399,12 @@ class _MarqueeSimulation extends Simulation {
 class ContextSingleTicker implements TickerProvider {
   Ticker? _ticker;
   BuildContext context;
-  final bool autoStart;
+  final bool Function()? autoStart;
 
-  ContextSingleTicker(this.context, {this.autoStart = true});
+  ContextSingleTicker(this.context, {this.autoStart});
 
   void initStart() {
-    if (autoStart) {
+    if (autoStart?.call() ?? true) {
       _ticker?.start();
     }
   }

@@ -1613,7 +1613,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
           }),
           manualPlayerWidget,
 
-          if (videoDetailController.plPlayerController.enableSponsorBlock ||
+          if (videoDetailController.plPlayerController.enableBlock ||
               videoDetailController.continuePlayingPart)
             Positioned(
               left: 16,
