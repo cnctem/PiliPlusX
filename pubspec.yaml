@@ -190,7 +190,7 @@ dependencies:
   #解压直播消息
   brotli: ^0.6.0
   expandable: ^5.0.1
-  flex_seed_scheme: ^3.4.1
+  flex_seed_scheme: ^4.0.1
   live_photo_maker: ^0.0.6
   fl_chart: ^1.0.0
   synchronized: ^3.3.0

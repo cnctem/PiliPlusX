@@ -262,6 +262,7 @@ class MyApp extends StatelessWidget {
             variant: variant,
             // dynamicSchemeVariant: dynamicSchemeVariant,
             // tones: FlexTones.soft(Brightness.light),
+            useExpressiveOnContainerColors: false,
           );
           darkColorScheme = SeedColorScheme.fromSeeds(
             primaryKey: brandColor,
@@ -269,6 +270,7 @@ class MyApp extends StatelessWidget {
             variant: variant,
             // dynamicSchemeVariant: dynamicSchemeVariant,
             // tones: FlexTones.soft(Brightness.dark),
+            useExpressiveOnContainerColors: false,
           );
         }
 

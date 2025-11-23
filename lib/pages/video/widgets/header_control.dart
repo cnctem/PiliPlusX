@@ -63,6 +63,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 
 mixin TimeBatteryMixin<T extends StatefulWidget> on State<T> {
   PlPlayerController get plPlayerController;
+  late final titleKey = GlobalKey();
   ContextSingleTicker? provider;
   ContextSingleTicker get effectiveProvider => provider ??= ContextSingleTicker(
     context,
@@ -1423,7 +1424,10 @@ class HeaderControlState extends State<HeaderControl>
         return AlertDialog(
           title: const Text('播放信息'),
           contentPadding: const EdgeInsets.only(top: 16),
-          constraints: const BoxConstraints(maxWidth: 425),
+          constraints: const BoxConstraints(
+            minWidth: 280,
+            maxWidth: 425,
+          ),
           content: Material(
             type: MaterialType.transparency,
             child: ListTileTheme(
@@ -2418,7 +2422,6 @@ class HeaderControlState extends State<HeaderControl>
     );
   }
 
-  late final _titleKey = GlobalKey();
   late final isFileSource = videoDetailCtr.isFileSource;
 
   @override
@@ -2453,7 +2456,7 @@ class HeaderControlState extends State<HeaderControl>
                   videoDetail.title!;
             }
             return MarqueeText(
-              key: _titleKey,
+              key: titleKey,
               title,
               spacing: 30,
               velocity: 30,

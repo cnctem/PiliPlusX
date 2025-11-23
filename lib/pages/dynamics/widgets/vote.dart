@@ -436,18 +436,19 @@ Future showVoteDialog(
       showDialog(
         context: context,
         builder: (context) => Dialog(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 625),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: VotePanel(
-                voteInfo: voteInfo.data,
-                callback: (votes, anonymity) => DynamicsHttp.doVote(
-                  voteId: voteId,
-                  votes: votes.toList(),
-                  anonymity: anonymity,
-                  dynamicId: dynamicId,
-                ),
+          constraints: const BoxConstraints(
+            minWidth: 280,
+            maxWidth: 625,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: VotePanel(
+              voteInfo: voteInfo.data,
+              callback: (votes, anonymity) => DynamicsHttp.doVote(
+                voteId: voteId,
+                votes: votes.toList(),
+                anonymity: anonymity,
+                dynamicId: dynamicId,
               ),
             ),
           ),
