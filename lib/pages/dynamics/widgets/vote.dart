@@ -234,7 +234,7 @@ class _VotePanelState extends State<VotePanel> {
                         ),
                       ),
                     ),
-                    if (_enabled)
+                    if (_enabled || selected)
                       Positioned(
                         right: 4,
                         top: 4,

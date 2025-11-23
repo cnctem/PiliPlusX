@@ -162,10 +162,11 @@ class _AtMePageState extends State<AtMePage> {
                         ),
                       ],
                     ),
-                    trailing: item.item?.image != null && item.item?.image != ""
+                    trailing: item.item?.image?.isNotEmpty == true
                         ? NetworkImgLayer(
                             width: 45,
                             height: 45,
+                            radius: 8,
                             src: item.item?.image,
                           )
                         : null,

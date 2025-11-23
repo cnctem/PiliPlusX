@@ -149,7 +149,7 @@ Widget addWidget(
                       builder: (context) {
                         final btn = reserve.button!;
                         final isReserved = btn.status == btn.type;
-                        final bool canJump = btn.jumpUrl != null;
+                        final bool canJump = btn.jumpUrl?.isNotEmpty == true;
                         return FilledButton.tonal(
                           style: FilledButton.styleFrom(
                             foregroundColor: canJump

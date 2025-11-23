@@ -1,5 +1,7 @@
 import 'package:PiliPlus/common/widgets/custom_icon.dart';
 import 'package:PiliPlus/pages/live_room/controller.dart';
+import 'package:PiliPlus/pages/video/widgets/header_control.dart'
+    show HeaderMixin;
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/video_fit_type.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/common_btn.dart';
@@ -10,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
-class BottomControl extends StatelessWidget {
+class BottomControl extends StatefulWidget {
   const BottomControl({
     super.key,
     required this.plPlayerController,
@@ -26,6 +28,15 @@ class BottomControl extends StatelessWidget {
 
   final TextStyle subTitleStyle;
   final TextStyle titleStyle;
+
+  @override
+  State<BottomControl> createState() => _BottomControlState();
+}
+
+class _BottomControlState extends State<BottomControl> with HeaderMixin {
+  late final LiveRoomController liveRoomCtr = widget.liveRoomCtr;
+  @override
+  late final PlPlayerController plPlayerController = widget.plPlayerController;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +58,7 @@ class BottomControl extends StatelessWidget {
               size: 18,
               color: Colors.white,
             ),
-            onTap: onRefresh,
+            onTap: widget.onRefresh,
           ),
           const Spacer(),
           ComBtn(
@@ -77,6 +88,7 @@ class BottomControl extends StatelessWidget {
               final enableShowLiveDanmaku =
                   plPlayerController.enableShowDanmaku.value;
               return ComBtn(
+                height: 30,
                 tooltip: "${enableShowLiveDanmaku ? '关闭' : '开启'}弹幕",
                 icon: enableShowLiveDanmaku
                     ? const Icon(
@@ -101,6 +113,16 @@ class BottomControl extends StatelessWidget {
                 },
               );
             },
+          ),
+          ComBtn(
+            height: 30,
+            tooltip: '弹幕设置',
+            icon: const Icon(
+              size: 18,
+              CustomIcons.dm_settings,
+              color: Colors.white,
+            ),
+            onTap: () => showSetDanmaku(isLive: true),
           ),
           Obx(
             () => PopupMenuButton<VideoFitType>(

@@ -164,6 +164,38 @@ class _LikeMePageState extends State<LikeMePage> {
     MsgLikeItem item,
     ValueChanged<int?> onRemove,
   ) {
+    final firstUser = item.users!.first;
+    Widget avatar;
+    if (item.users!.length == 1) {
+      avatar = NetworkImgLayer(
+        width: 45,
+        height: 45,
+        type: ImageType.avatar,
+        src: firstUser.avatar,
+      );
+    } else {
+      avatar = SizedBox(
+        width: 45,
+        height: 45,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            for (var j = 0; j < item.users!.length && j < 4; j++) ...[
+              Positioned(
+                left: 15.0 * (j % 2),
+                top: 15.0 * (j ~/ 2),
+                child: NetworkImgLayer(
+                  width: 30,
+                  height: 30,
+                  type: ImageType.avatar,
+                  src: item.users![j].avatar,
+                ),
+              ),
+            ],
+          ],
+        ),
+      );
+    }
     void onLongPress() => showDialog(
       context: context,
       builder: (context) {
@@ -240,42 +272,12 @@ class _LikeMePageState extends State<LikeMePage> {
       },
       onLongPress: onLongPress,
       onSecondaryTap: Utils.isMobile ? null : onLongPress,
-      leading: Column(
-        children: [
-          const Spacer(),
-          SizedBox(
-            width: 50,
-            height: 50,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                for (
-                  var j = 0;
-                  j < item.users!.length && j < 4;
-                  j++
-                ) ...<Widget>[
-                  Positioned(
-                    left: 15 * (j % 2).toDouble(),
-                    top: 15 * (j ~/ 2).toDouble(),
-                    child: NetworkImgLayer(
-                      width: item.users!.length > 1 ? 30 : 45,
-                      height: item.users!.length > 1 ? 30 : 45,
-                      type: ImageType.avatar,
-                      src: item.users![j].avatar,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          const Spacer(),
-        ],
-      ),
+      leading: avatar,
       title: Text.rich(
         TextSpan(
           children: [
             TextSpan(
-              text: "${item.users![0].nickname}",
+              text: firstUser.nickname,
               style: theme.textTheme.titleSmall!.copyWith(
                 height: 1.5,
                 color: theme.colorScheme.primary,
@@ -290,7 +292,7 @@ class _LikeMePageState extends State<LikeMePage> {
                 ),
               ),
             TextSpan(
-              text: " 赞了我的${item.item?.business}",
+              text: ' 赞了我的${item.item?.business}',
               style: theme.textTheme.titleSmall!.copyWith(
                 height: 1.5,
                 color: theme.colorScheme.onSurfaceVariant,
@@ -333,6 +335,7 @@ class _LikeMePageState extends State<LikeMePage> {
             NetworkImgLayer(
               width: 45,
               height: 45,
+              radius: 8,
               src: item.item!.image,
             ),
           if (item.noticeState == 1) ...[

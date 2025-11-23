@@ -30,11 +30,13 @@ class MineController
   // 用户状态 动态、关注、粉丝
   Rx<UserStat> userStat = UserStat().obs;
 
-  Rx<ThemeType> themeType = ThemeType.system.obs;
-  static RxBool anonymity =
-      (Accounts.account.isNotEmpty && !Accounts.heartbeat.isLogin).obs;
+  Rx<ThemeType> themeType = Pref.themeType.obs;
+
   ThemeType get nextThemeType =>
       ThemeType.values[(themeType.value.index + 1) % ThemeType.values.length];
+
+  static RxBool anonymity =
+      (Accounts.account.isNotEmpty && !Accounts.heartbeat.isLogin).obs;
 
   late final list =
       <({IconData icon, double size, String title, VoidCallback onTap})>[

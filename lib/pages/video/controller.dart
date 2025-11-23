@@ -134,7 +134,7 @@ class VideoDetailController extends GetxController
   // 亮度
   double? brightness;
 
-  late final headerCtrKey = GlobalKey<HeaderControlState>();
+  late final headerCtrKey = GlobalKey<TimeBatteryMixin>();
 
   Box setting = GStorage.setting;
 
@@ -1185,7 +1185,7 @@ class VideoDetailController extends GetxController
     );
 
     if (!isFileSource) {
-      if (plPlayerController.enableSponsorBlock) {
+      if (plPlayerController.enableBlock) {
         initSkip();
       }
 
@@ -1707,7 +1707,7 @@ class VideoDetailController extends GetxController
       }
 
       // sponsor block
-      if (plPlayerController.enableSponsorBlock) {
+      if (plPlayerController.enableBlock) {
         _lastPos = null;
         positionSubscription?.cancel();
         positionSubscription = null;
@@ -1799,7 +1799,7 @@ class VideoDetailController extends GetxController
   @pragma('vm:notify-debugger-on-exception')
   bool onSkipSegment() {
     try {
-      if (plPlayerController.enableSponsorBlock) {
+      if (plPlayerController.enableBlock) {
         if (listData.lastOrNull case SegmentModel item) {
           onSkip(item, isSeek: false);
           onRemoveItem(listData.indexOf(item), item);

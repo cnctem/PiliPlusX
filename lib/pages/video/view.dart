@@ -767,9 +767,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                                                       ),
                                                 ),
                                                 onPressed: () =>
-                                                    videoDetailController
-                                                        .headerCtrKey
-                                                        .currentState
+                                                    (videoDetailController
+                                                                .headerCtrKey
+                                                                .currentState
+                                                            as HeaderControlState?)
                                                         ?.showSettingSheet(),
                                                 icon: Icon(
                                                   Icons.more_vert_outlined,
@@ -1612,7 +1613,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
           }),
           manualPlayerWidget,
 
-          if (videoDetailController.plPlayerController.enableSponsorBlock ||
+          if (videoDetailController.plPlayerController.enableBlock ||
               videoDetailController.continuePlayingPart)
             Positioned(
               left: 16,

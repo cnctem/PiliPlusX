@@ -166,7 +166,7 @@ abstract class Utils {
   static void reportError(
     Object exception, [
     StackTrace? stack,
-    String? library = 'PiliPlus',
+    String? library = Constants.appName,
     bool silent = false,
   ]) {
     FlutterError.reportError(

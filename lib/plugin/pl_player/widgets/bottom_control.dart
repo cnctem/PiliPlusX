@@ -132,7 +132,7 @@ class BottomControl extends StatelessWidget {
                 alignment: Alignment.bottomCenter,
                 children: [
                   progressBar(),
-                  if (controller.enableSponsorBlock &&
+                  if (controller.enableBlock &&
                       videoDetailController.segmentProgressList.isNotEmpty)
                     Positioned(
                       left: 0,

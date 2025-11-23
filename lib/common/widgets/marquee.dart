@@ -288,7 +288,7 @@ class _BounceMarqueeRender extends MarqueeRender {
         context.clipRectAndPaint(rect, clipBehavior, rect, paintChild);
       }
     } else {
-      paintCenter(context, offset);
+      context.paintChild(child!, offset);
     }
   }
 }
@@ -348,7 +348,7 @@ class _NormalMarqueeRender extends MarqueeRender {
         context.clipRectAndPaint(rect, clipBehavior, rect, paintChild);
       }
     } else {
-      paintCenter(context, offset);
+      context.paintChild(child, offset);
     }
   }
 }
@@ -399,12 +399,12 @@ class _MarqueeSimulation extends Simulation {
 class ContextSingleTicker implements TickerProvider {
   Ticker? _ticker;
   BuildContext context;
-  final bool autoStart;
+  final bool Function()? autoStart;
 
-  ContextSingleTicker(this.context, {this.autoStart = true});
+  ContextSingleTicker(this.context, {this.autoStart});
 
   void initStart() {
-    if (autoStart) {
+    if (autoStart?.call() ?? true) {
       _ticker?.start();
     }
   }

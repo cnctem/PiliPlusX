@@ -156,12 +156,22 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
     _controlsListener = plPlayerController.showControls.listen((bool val) {
       final visible = val && !plPlayerController.controlsLock.value;
-      if (widget.videoDetailController?.headerCtrKey.currentState?.provider
-          case final provider?) {
-        provider
-          ..startIfNeeded()
-          ..muted = !visible;
+
+      if ((widget.headerControl.key as GlobalKey<TimeBatteryMixin>).currentState
+          case final state?) {
+        if (state.mounted) {
+          state.getBatteryLevelIfNeeded();
+          state.provider
+            ?..startIfNeeded()
+            ..muted = !visible;
+          if (visible) {
+            state.startClock();
+          } else {
+            state.stopClock();
+          }
+        }
       }
+
       if (visible) {
         animationController.forward();
       } else {
@@ -1237,6 +1247,12 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       final buttons = event.buttons;
       final isSecondaryBtn = buttons == kSecondaryMouseButton;
       if (isSecondaryBtn || buttons == kMiddleMouseButton) {
+        final isFullScreen = this.isFullScreen;
+        if (isFullScreen && plPlayerController.controlsLock.value) {
+          plPlayerController
+            ..controlsLock.value = false
+            ..showControls.value = false;
+        }
         plPlayerController
             .triggerFullScreen(
               status: !isFullScreen,
@@ -1771,7 +1787,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                         0,
                       ),
                     ),
-                    if (plPlayerController.enableSponsorBlock &&
+                    if (plPlayerController.enableBlock &&
                         videoDetailController.segmentProgressList.isNotEmpty)
                       Positioned(
                         left: 0,
@@ -1836,85 +1852,86 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             maxHeight,
           ),
 
-        // 锁
-        if (plPlayerController.showFsLockBtn &&
-            (isFullScreen || plPlayerController.isDesktopPip))
-          ViewSafeArea(
-            right: false,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: FractionalTranslation(
-                translation: const Offset(1, -0.4),
-                child: Obx(
-                  () => Offstage(
-                    offstage: !plPlayerController.showControls.value,
-                    child: DecoratedBox(
-                      decoration: const BoxDecoration(
-                        color: Color(0x45000000),
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                      ),
-                      child: Obx(() {
-                        final controlsLock =
-                            plPlayerController.controlsLock.value;
-                        return ComBtn(
-                          tooltip: controlsLock ? '解锁' : '锁定',
-                          icon: controlsLock
-                              ? const Icon(
-                                  FontAwesomeIcons.lock,
-                                  size: 15,
-                                  color: Colors.white,
-                                )
-                              : const Icon(
-                                  FontAwesomeIcons.lockOpen,
-                                  size: 15,
-                                  color: Colors.white,
-                                ),
-                          onTap: () =>
-                              plPlayerController.onLockControl(!controlsLock),
-                        );
-                      }),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-        // 截图
-        if (isFullScreen && plPlayerController.showFsScreenshotBtn)
-          ViewSafeArea(
-            left: false,
-            child: Obx(
-              () => Align(
-                alignment: Alignment.centerRight,
+        if (isFullScreen || plPlayerController.isDesktopPip) ...[
+          // 锁
+          if (plPlayerController.showFsLockBtn)
+            ViewSafeArea(
+              right: false,
+              child: Align(
+                alignment: Alignment.centerLeft,
                 child: FractionalTranslation(
-                  translation: const Offset(-1, -0.4),
-                  child: Offstage(
-                    offstage: !plPlayerController.showControls.value,
-                    child: DecoratedBox(
-                      decoration: const BoxDecoration(
-                        color: Color(0x45000000),
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                      ),
-                      child: ComBtn(
-                        tooltip: '截图',
-                        icon: const Icon(
-                          Icons.photo_camera,
-                          size: 20,
-                          color: Colors.white,
+                  translation: const Offset(1, -0.4),
+                  child: Obx(
+                    () => Offstage(
+                      offstage: !plPlayerController.showControls.value,
+                      child: DecoratedBox(
+                        decoration: const BoxDecoration(
+                          color: Color(0x45000000),
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
                         ),
-                        onLongPress:
-                            (Platform.isAndroid || kDebugMode) && !isLive
-                            ? screenshotWebp
-                            : null,
-                        onTap: plPlayerController.takeScreenshot,
+                        child: Obx(() {
+                          final controlsLock =
+                              plPlayerController.controlsLock.value;
+                          return ComBtn(
+                            tooltip: controlsLock ? '解锁' : '锁定',
+                            icon: controlsLock
+                                ? const Icon(
+                                    FontAwesomeIcons.lock,
+                                    size: 15,
+                                    color: Colors.white,
+                                  )
+                                : const Icon(
+                                    FontAwesomeIcons.lockOpen,
+                                    size: 15,
+                                    color: Colors.white,
+                                  ),
+                            onTap: () =>
+                                plPlayerController.onLockControl(!controlsLock),
+                          );
+                        }),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
+
+          // 截图
+          if (plPlayerController.showFsScreenshotBtn)
+            ViewSafeArea(
+              left: false,
+              child: Obx(
+                () => Align(
+                  alignment: Alignment.centerRight,
+                  child: FractionalTranslation(
+                    translation: const Offset(-1, -0.4),
+                    child: Offstage(
+                      offstage: !plPlayerController.showControls.value,
+                      child: DecoratedBox(
+                        decoration: const BoxDecoration(
+                          color: Color(0x45000000),
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                        ),
+                        child: ComBtn(
+                          tooltip: '截图',
+                          icon: const Icon(
+                            Icons.photo_camera,
+                            size: 20,
+                            color: Colors.white,
+                          ),
+                          onLongPress:
+                              (Platform.isAndroid || kDebugMode) && !isLive
+                              ? screenshotWebp
+                              : null,
+                          onTap: plPlayerController.takeScreenshot,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
 
         Obx(() {
           if (plPlayerController.dataStatus.loading ||
