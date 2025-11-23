@@ -118,6 +118,7 @@ class VideoPopupMenu extends StatelessWidget {
                                   return Dialog(
                                     child: ConstrainedBox(
                                       constraints: const BoxConstraints(
+                                        minWidth: 280,
                                         maxWidth: 420,
                                       ),
                                       child: Padding(

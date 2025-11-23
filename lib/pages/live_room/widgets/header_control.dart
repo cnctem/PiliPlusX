@@ -54,6 +54,7 @@ class _LiveHeaderControlState extends State<LiveHeaderControl>
     Widget child;
     if (widget.title case final title?) {
       child = MarqueeText(
+        key: titleKey,
         title,
         spacing: 30,
         velocity: 30,
