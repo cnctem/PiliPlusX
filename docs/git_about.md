@@ -1,5 +1,5 @@
 ### 远程仓库配置
-- origin : https://github.com/cnctem/piliplusx.git (你的原始仓库)
+- origin : https://github.com/cnctem/PiliPlusX.git (你的原始仓库)
 - upstream : https://github.com/bggRGjQaUbCoE/PiliPlus.git (上游主仓库)
 - gucooing : https://github.com/gucooing/PiliPlus.git (新添加的fork)
 

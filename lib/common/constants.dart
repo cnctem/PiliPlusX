@@ -13,7 +13,7 @@ class StyleString {
 
 class Constants {
   static const appName = 'PiliPlusX';
-  static const sourceCodeUrl = 'https://github.com/cnctem/piliplusx';
+  static const sourceCodeUrl = 'https://github.com/cnctem/PiliPlusX';
   static const upstreamCodeUrl = 'https://github.com/bggRGjQaUbCoE/PiliPlus';
 
   // 27eb53fc9058f8c3  移动端 Android
