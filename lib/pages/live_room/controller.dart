@@ -21,7 +21,9 @@ import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/tcp/live.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/danmaku_utils.dart';
+import 'package:PiliPlus/utils/duration_utils.dart';
 import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/num_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:PiliPlus/utils/video_utils.dart';
@@ -62,6 +64,28 @@ class LiveRoomController extends GetxController {
     liveTimeTimer = null;
   }
 
+  Widget get timeWidget => Obx(() {
+    final liveTime = this.liveTime.value;
+    String text = '';
+    if (liveTime != null) {
+      final duration = DurationUtils.formatDurationBetween(
+        liveTime * 1000,
+        DateTime.now().millisecondsSinceEpoch,
+      );
+      text += duration.isEmpty ? '刚刚开播' : '开播$duration';
+    }
+    if (text.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 12,
+        color: Colors.white,
+      ),
+    );
+  });
+
   // dm
   LiveDmInfoData? dmInfo;
   List<RichTextItem>? savedDanmaku;
@@ -90,6 +114,36 @@ class LiveRoomController extends GetxController {
   final showSuperChat = Pref.showSuperChat;
 
   final headerKey = GlobalKey<TimeBatteryMixin>();
+
+  final RxString title = ''.obs;
+
+  final RxnString onlineCount = RxnString();
+  Widget get onlineWidget => Obx(() {
+    if (onlineCount.value case final onlineCount?) {
+      return Text(
+        '高能观众($onlineCount)',
+        style: const TextStyle(
+          fontSize: 12,
+          color: Colors.white,
+        ),
+      );
+    }
+    return const SizedBox.shrink();
+  });
+
+  final RxnString watchedShow = RxnString();
+  Widget get watchedWidget => Obx(() {
+    if (watchedShow.value case final watchedShow?) {
+      return Text(
+        watchedShow,
+        style: const TextStyle(
+          fontSize: 12,
+          color: Colors.white,
+        ),
+      );
+    }
+    return const SizedBox.shrink();
+  });
 
   @override
   void onInit() {
@@ -179,6 +233,8 @@ class LiveRoomController extends GetxController {
     if (res['status']) {
       RoomInfoH5Data data = res['data'];
       roomInfoH5.value = data;
+      title.value = data.roomInfo?.title ?? '';
+      watchedShow.value = data.watchedShow?.textLarge;
       videoPlayerServiceHandler?.onVideoDetailChange(data, roomId, heroTag);
     } else {
       if (res['msg'] != null) {
@@ -347,9 +403,7 @@ class LiveRoomController extends GetxController {
           final info = obj['info'];
           final first = info[0];
           final content = first[15];
-          final Map<String, dynamic> extra = jsonDecode(
-            content['extra'],
-          );
+          final Map<String, dynamic> extra = jsonDecode(content['extra']);
           final user = content['user'];
           // final midHash = first[7];
           final uid = user['uid'];
@@ -407,6 +461,15 @@ class LiveRoomController extends GetxController {
           if (isFullScreen || plPlayerController.isDesktopPip) {
             fsSC.value = item;
           }
+          break;
+        case 'WATCHED_CHANGE':
+          watchedShow.value = obj['data']['text_large'];
+          break;
+        case 'ONLINE_RANK_COUNT':
+          onlineCount.value = NumUtils.numFormat(obj['data']['count']);
+          break;
+        case 'ROOM_CHANGE':
+          title.value = obj['data']['title'];
           break;
       }
     } catch (_) {}

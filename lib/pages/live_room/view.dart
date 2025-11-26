@@ -23,7 +23,6 @@ import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/plugin/pl_player/view.dart';
 import 'package:PiliPlus/services/service_locator.dart';
-import 'package:PiliPlus/utils/duration_utils.dart';
 import 'package:PiliPlus/utils/extension.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
@@ -240,6 +239,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
               onSendDanmaku: _liveRoomController.onSendDanmaku,
               onPlayAudio: _liveRoomController.queryLiveUrl,
               isPortrait: isPortrait,
+              liveController: _liveRoomController,
             ),
             bottomControl: BottomControl(
               plPlayerController: plPlayerController,
@@ -493,62 +493,65 @@ class _LiveRoomPageState extends State<LiveRoomPage>
       backgroundColor: Colors.transparent,
       foregroundColor: Colors.white,
       titleTextStyle: const TextStyle(color: Colors.white),
-      title: Obx(
-        () {
-          RoomInfoH5Data? roomInfoH5 = _liveRoomController.roomInfoH5.value;
-          if (roomInfoH5 == null) {
-            return const SizedBox.shrink();
-          }
-          return GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () => Get.toNamed('/member?mid=${roomInfoH5.roomInfo?.uid}'),
-            child: Row(
-              spacing: 10,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                NetworkImgLayer(
-                  width: 34,
-                  height: 34,
-                  type: ImageType.avatar,
-                  src: roomInfoH5.anchorInfo!.baseInfo!.face,
-                ),
-                Column(
-                  spacing: 1,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      roomInfoH5.anchorInfo!.baseInfo!.uname!,
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                    Obx(() {
-                      final liveTime = _liveRoomController.liveTime.value;
-                      final textLarge = roomInfoH5.watchedShow?.textLarge;
-                      String text = '';
-                      if (textLarge != null) {
-                        text += textLarge;
-                      }
-                      if (liveTime != null) {
-                        if (text.isNotEmpty) {
-                          text += '  ';
-                        }
-                        final duration = DurationUtils.formatDurationBetween(
-                          liveTime * 1000,
-                          DateTime.now().millisecondsSinceEpoch,
-                        );
-                        text += duration.isEmpty ? '刚刚开播' : '开播$duration';
-                      }
-                      if (text.isEmpty) {
-                        return const SizedBox.shrink();
-                      }
-                      return Text(text, style: const TextStyle(fontSize: 12));
-                    }),
-                  ],
-                ),
-              ],
+      title: isFullScreen || plPlayerController.isDesktopPip
+          ? null
+          : Obx(
+              () {
+                RoomInfoH5Data? roomInfoH5 =
+                    _liveRoomController.roomInfoH5.value;
+                if (roomInfoH5 == null) {
+                  return const SizedBox.shrink();
+                }
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () =>
+                      Get.toNamed('/member?mid=${roomInfoH5.roomInfo?.uid}'),
+                  child: Row(
+                    spacing: 10,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      NetworkImgLayer(
+                        width: 34,
+                        height: 34,
+                        type: ImageType.avatar,
+                        src: roomInfoH5.anchorInfo!.baseInfo!.face,
+                      ),
+                      Expanded(
+                        child: Column(
+                          spacing: 1,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              spacing: 10,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    roomInfoH5.anchorInfo!.baseInfo!.uname!,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                _liveRoomController.onlineWidget,
+                              ],
+                            ),
+                            Row(
+                              spacing: 10,
+                              children: [
+                                _liveRoomController.watchedWidget,
+                                _liveRoomController.timeWidget,
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
       actions: [
         // IconButton(
         //   tooltip: '刷新',
