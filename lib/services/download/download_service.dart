@@ -458,7 +458,7 @@ class DownloadService extends GetxService {
 
   void _onDone([Object? error]) {
     if (error != null) {
-      _updateCurStatus(DownloadStatus.failDownload);
+      _updateCurStatus(_downloadManager?.status ?? DownloadStatus.pause);
       return;
     }
 
