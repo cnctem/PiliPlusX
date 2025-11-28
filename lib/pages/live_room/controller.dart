@@ -459,7 +459,9 @@ class LiveRoomController extends GetxController {
           final item = SuperChatItem.fromJson(obj['data']);
           superChatMsg.insert(0, item);
           if (isFullScreen || plPlayerController.isDesktopPip) {
-            fsSC.value = item;
+            fsSC.value = item.copyWith(
+              endTime: DateTime.now().millisecondsSinceEpoch ~/ 1000 + 10,
+            );
           }
           break;
         case 'WATCHED_CHANGE':
