@@ -8,7 +8,6 @@ mixin MultiSelectData {
 
 mixin MultiSelectBase<T extends MultiSelectData> {
   RxBool get enableMultiSelect;
-  RxBool get allSelected;
 
   int get checkedCount;
 
@@ -19,9 +18,6 @@ mixin MultiSelectBase<T extends MultiSelectData> {
 
 mixin BaseMultiSelectMixin<T extends MultiSelectData>
     implements MultiSelectBase<T> {
-  @override
-  late final allSelected = false.obs;
-
   late final RxInt rxCount = 0.obs;
   @override
   int get checkedCount => rxCount.value;
@@ -57,8 +53,6 @@ mixin BaseMultiSelectMixin<T extends MultiSelectData>
     state.refresh();
     if (checkedCount == 0) {
       enableMultiSelect.value = false;
-    } else {
-      allSelected.value = checkedCount == list.length;
     }
   }
 }
@@ -67,8 +61,7 @@ mixin CommonMultiSelectMixin<T extends MultiSelectData>
     implements MultiSelectBase<T> {
   @override
   late final RxBool enableMultiSelect = false.obs;
-  @override
-  late final allSelected = false.obs;
+  RxBool? get allSelected => null;
 
   Rx<LoadingState<List<T>?>> get loadingState;
   late final RxInt rxCount = 0.obs;
@@ -92,7 +85,7 @@ mixin CommonMultiSelectMixin<T extends MultiSelectData>
     if (checkedCount == 0) {
       enableMultiSelect.value = false;
     } else {
-      allSelected.value = checkedCount == list.length;
+      allSelected?.value = checkedCount == list.length;
     }
   }
 
