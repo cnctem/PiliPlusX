@@ -57,7 +57,8 @@ class DetailItem extends StatelessWidget {
     final outline = theme.colorScheme.outline;
     final cid = entry.source?.cid ?? entry.pageData?.cid;
     final canDel = onDelete != null;
-    void onLongPress() => canDel
+    final enableMultiSelect = controller.enableMultiSelect.value;
+    void onLongPress() => canDel && !enableMultiSelect
         ? showDialog(
             context: context,
             builder: (context) {
@@ -116,7 +117,7 @@ class DetailItem extends StatelessWidget {
             Get.to(const DownloadingPage());
             return;
           }
-          if (controller.enableMultiSelect.value) {
+          if (enableMultiSelect) {
             (onSelect ?? controller.onSelect).call(entry);
             return;
           }

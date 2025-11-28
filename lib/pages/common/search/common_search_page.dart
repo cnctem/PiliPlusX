@@ -13,7 +13,7 @@ abstract class CommonSearchPageState<S extends StatefulWidget, R, T>
 
   List<Widget>? get extraActions => null;
 
-  List<Widget>? get multiSelectChildren => null;
+  List<Widget>? get multiSelectActions => null;
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +84,7 @@ abstract class CommonSearchPageState<S extends StatefulWidget, R, T>
     if (multiSelect) {
       return MultiSelectAppBarWidget(
         ctr: controller as MultiSelectBase,
-        children: multiSelectChildren,
+        actions: multiSelectActions,
         child: bar,
       );
     }

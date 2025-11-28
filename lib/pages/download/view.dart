@@ -8,6 +8,7 @@ import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/select_mask.dart';
 import 'package:PiliPlus/models/common/badge_type.dart';
+import 'package:PiliPlus/models_new/download/bili_download_entry_info.dart';
 import 'package:PiliPlus/models_new/download/download_info.dart';
 import 'package:PiliPlus/pages/download/controller.dart';
 import 'package:PiliPlus/pages/download/detail/view.dart';
@@ -57,6 +58,38 @@ class _DownloadPageState extends State<DownloadPage> {
           resizeToAvoidBottomInset: false,
           appBar: MultiSelectAppBarWidget(
             ctr: _controller,
+            actions: [
+              TextButton(
+                style: TextButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                ),
+                onPressed: () async {
+                  final allChecked = _controller.allChecked.toSet();
+                  _controller.handleSelect();
+                  final list = <BiliDownloadEntryInfo>[];
+                  for (var page in allChecked) {
+                    list.addAll(page.entrys);
+                  }
+                  final res = await Future.wait(
+                    list.map(
+                      (e) => _downloadService.downloadDanmaku(
+                        entry: e,
+                        isUpdate: true,
+                      ),
+                    ),
+                  );
+                  if (res.every((e) => e)) {
+                    SmartDialog.showToast('更新成功');
+                  } else {
+                    SmartDialog.showToast('更新失败');
+                  }
+                },
+                child: Text(
+                  '更新',
+                  style: TextStyle(color: theme.colorScheme.onSurface),
+                ),
+              ),
+            ],
             child: AppBar(
               title: const Text('离线缓存'),
               actions: [
@@ -169,7 +202,7 @@ class _DownloadPageState extends State<DownloadPage> {
                                 controller: _controller,
                               );
                             }
-                            return _buildItem(theme, item);
+                            return _buildItem(theme, item, enableMultiSelect);
                           },
                           itemCount: _controller.pages.length,
                         ),
@@ -192,66 +225,72 @@ class _DownloadPageState extends State<DownloadPage> {
     });
   }
 
-  Widget _buildItem(ThemeData theme, DownloadPageInfo pageInfo) {
-    void onLongPress() => showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          clipBehavior: Clip.hardEdge,
-          contentPadding: const EdgeInsets.symmetric(vertical: 12),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                onTap: () {
-                  Get.back();
-                  showConfirmDialog(
-                    context: context,
-                    title: '确定删除？',
-                    onConfirm: () async {
-                      await GStorage.watchProgress.deleteAll(
-                        pageInfo.entrys.map((e) => e.cid.toString()),
-                      );
-                      _downloadService.deletePage(
-                        pageDirPath: pageInfo.dirPath,
-                      );
-                    },
-                  );
-                },
-                dense: true,
-                title: const Text(
-                  '删除',
-                  style: TextStyle(fontSize: 14),
-                ),
-              ),
-              ListTile(
-                onTap: () async {
-                  Get.back();
-                  final res = await Future.wait(
-                    pageInfo.entrys.map(
-                      (e) => _downloadService.downloadDanmaku(
-                        entry: e,
-                        isUpdate: true,
+  Widget _buildItem(
+    ThemeData theme,
+    DownloadPageInfo pageInfo,
+    bool enableMultiSelect,
+  ) {
+    void onLongPress() => enableMultiSelect
+        ? null
+        : showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                clipBehavior: Clip.hardEdge,
+                contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      onTap: () {
+                        Get.back();
+                        showConfirmDialog(
+                          context: context,
+                          title: '确定删除？',
+                          onConfirm: () async {
+                            await GStorage.watchProgress.deleteAll(
+                              pageInfo.entrys.map((e) => e.cid.toString()),
+                            );
+                            _downloadService.deletePage(
+                              pageDirPath: pageInfo.dirPath,
+                            );
+                          },
+                        );
+                      },
+                      dense: true,
+                      title: const Text(
+                        '删除',
+                        style: TextStyle(fontSize: 14),
                       ),
                     ),
-                  );
-                  if (res.every((e) => e)) {
-                    SmartDialog.showToast('更新成功');
-                  } else {
-                    SmartDialog.showToast('更新失败');
-                  }
-                },
-                dense: true,
-                title: const Text(
-                  '更新弹幕',
-                  style: TextStyle(fontSize: 14),
+                    ListTile(
+                      onTap: () async {
+                        Get.back();
+                        final res = await Future.wait(
+                          pageInfo.entrys.map(
+                            (e) => _downloadService.downloadDanmaku(
+                              entry: e,
+                              isUpdate: true,
+                            ),
+                          ),
+                        );
+                        if (res.every((e) => e)) {
+                          SmartDialog.showToast('更新成功');
+                        } else {
+                          SmartDialog.showToast('更新失败');
+                        }
+                      },
+                      dense: true,
+                      title: const Text(
+                        '更新弹幕',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+              );
+            },
+          );
     final first = pageInfo.entrys.first;
     return Material(
       type: MaterialType.transparency,

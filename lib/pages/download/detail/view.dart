@@ -94,6 +94,34 @@ class _DownloadDetailPageState extends State<DownloadDetailPage>
           resizeToAvoidBottomInset: false,
           appBar: MultiSelectAppBarWidget(
             ctr: this,
+            actions: [
+              TextButton(
+                style: TextButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                ),
+                onPressed: () async {
+                  final allChecked = this.allChecked.toSet();
+                  handleSelect();
+                  final res = await Future.wait(
+                    allChecked.map(
+                      (e) => _downloadService.downloadDanmaku(
+                        entry: e,
+                        isUpdate: true,
+                      ),
+                    ),
+                  );
+                  if (res.every((e) => e)) {
+                    SmartDialog.showToast('更新成功');
+                  } else {
+                    SmartDialog.showToast('更新失败');
+                  }
+                },
+                child: Text(
+                  '更新',
+                  style: TextStyle(color: Get.theme.colorScheme.onSurface),
+                ),
+              ),
+            ],
             child: AppBar(
               title: Text(widget.title),
               actions: [
