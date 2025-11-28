@@ -13,6 +13,7 @@ import 'package:PiliPlus/http/danmaku.dart';
 import 'package:PiliPlus/http/danmaku_block.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/live.dart';
+import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/video.dart';
 import 'package:PiliPlus/models/common/super_resolution_type.dart';
 import 'package:PiliPlus/models/common/video/audio_quality.dart';
@@ -212,11 +213,12 @@ mixin HeaderMixin<T extends StatefulWidget> on State<T> {
   /// 弹幕功能
   void showSetDanmaku({bool isLive = false}) {
     // 屏蔽类型
-    const List<({int value, String label})> blockTypesList = [
+    const blockTypesList = [
       (value: 5, label: '顶部'),
       (value: 2, label: '滚动'),
       (value: 4, label: '底部'),
       (value: 6, label: '彩色'),
+      (value: 7, label: '高级'),
     ];
     final blockTypes = plPlayerController.blockTypes;
     // 智能云屏蔽
@@ -456,6 +458,7 @@ mixin HeaderMixin<T extends StatefulWidget> on State<T> {
                                     hideTop: blockTypes.contains(5),
                                     hideBottom: blockTypes.contains(4),
                                     hideScroll: blockTypes.contains(2),
+                                    hideSpecial: blockTypes.contains(7),
                                     // 添加或修改其他需要修改的选项属性
                                   ),
                                 );
@@ -827,6 +830,13 @@ class HeaderControl extends StatefulWidget {
       return true;
     } else {
       res.toast();
+      if ((res as Error).code == 65006) {
+        extra.isLike = true;
+        return true;
+      } else if (res.code == 65004) {
+        extra.isLike = false;
+        return true;
+      }
       return false;
     }
   }
