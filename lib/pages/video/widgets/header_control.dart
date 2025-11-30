@@ -214,8 +214,8 @@ mixin HeaderMixin<T extends StatefulWidget> on State<T> {
   void showSetDanmaku({bool isLive = false}) {
     // 屏蔽类型
     const blockTypesList = [
-      (value: 5, label: '顶部'),
       (value: 2, label: '滚动'),
+      (value: 5, label: '顶部'),
       (value: 4, label: '底部'),
       (value: 6, label: '彩色'),
       (value: 7, label: '高级'),
@@ -370,6 +370,30 @@ mixin HeaderMixin<T extends StatefulWidget> on State<T> {
           setState(() {});
         }
 
+        void onUpdateBlockType(int blockType) {
+          if (blockTypes.contains(blockType)) {
+            blockTypes.remove(blockType);
+          } else {
+            blockTypes.add(blockType);
+          }
+          plPlayerController
+            ..blockTypes = blockTypes
+            ..blockColorful = blockTypes.contains(6)
+            ..putDanmakuSettings();
+          setState(() {});
+          try {
+            danmakuController?.updateOption(
+              danmakuController.option.copyWith(
+                hideTop: blockTypes.contains(5),
+                hideBottom: blockTypes.contains(4),
+                hideScroll: blockTypes.contains(2),
+                hideSpecial: blockTypes.contains(7),
+                // 添加或修改其他需要修改的选项属性
+              ),
+            );
+          } catch (_) {}
+        }
+
         return Padding(
           padding: const EdgeInsets.all(12),
           child: Material(
@@ -436,40 +460,20 @@ mixin HeaderMixin<T extends StatefulWidget> on State<T> {
                   const Text('按类型屏蔽'),
                   Padding(
                     padding: const EdgeInsets.only(top: 12),
-                    child: Row(
-                      children: [
-                        for (final (value: value, label: label)
-                            in blockTypesList) ...[
-                          ActionRowLineItem(
-                            onTap: () {
-                              if (blockTypes.contains(value)) {
-                                blockTypes.remove(value);
-                              } else {
-                                blockTypes.add(value);
-                              }
-                              plPlayerController
-                                ..blockTypes = blockTypes
-                                ..blockColorful = blockTypes.contains(6)
-                                ..putDanmakuSettings();
-                              setState(() {});
-                              try {
-                                danmakuController?.updateOption(
-                                  danmakuController.option.copyWith(
-                                    hideTop: blockTypes.contains(5),
-                                    hideBottom: blockTypes.contains(4),
-                                    hideScroll: blockTypes.contains(2),
-                                    hideSpecial: blockTypes.contains(7),
-                                    // 添加或修改其他需要修改的选项属性
-                                  ),
-                                );
-                              } catch (_) {}
-                            },
-                            text: label,
-                            selectStatus: blockTypes.contains(value),
-                          ),
-                          const SizedBox(width: 10),
-                        ],
-                      ],
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        spacing: 10,
+                        children: blockTypesList
+                            .map(
+                              (e) => ActionRowLineItem(
+                                onTap: () => onUpdateBlockType(e.value),
+                                text: e.label,
+                                selectStatus: blockTypes.contains(e.value),
+                              ),
+                            )
+                            .toList(),
+                      ),
                     ),
                   ),
                   SetSwitchItem(
