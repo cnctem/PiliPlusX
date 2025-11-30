@@ -117,6 +117,7 @@ jobs:
               with:
                   tag_name: ${{ github.event_name == 'push' && github.ref_name || github.event.inputs.tag }}
                   name: ${{ github.event_name == 'push' && github.ref_name || github.event.inputs.tag }}
+                  draft: true
                   prerelease: true
                   files: |
                       PiliPlusX_android_*.apk

@@ -229,6 +229,7 @@ jobs:
         with:
           tag_name: ${{ inputs.tag }}
           name: ${{ inputs.tag }}
+          draft: true
           prerelease: true
           files: |
             PiliPlus_linux_*.tar.gz

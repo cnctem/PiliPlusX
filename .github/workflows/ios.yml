@@ -42,6 +42,7 @@ jobs:
         with:
           tag_name: ${{ inputs.tag }}
           name: ${{ inputs.tag }}
+          draft: true
           prerelease: true
           files: |
             PiliPlusX_ios_*.ipa
