@@ -370,8 +370,8 @@ mixin HeaderMixin<T extends StatefulWidget> on State<T> {
           setState(() {});
         }
 
-        void onUpdateBlockType(int blockType) {
-          if (blockTypes.contains(blockType)) {
+        void onUpdateBlockType(int blockType, bool blocked) {
+          if (blocked) {
             blockTypes.remove(blockType);
           } else {
             blockTypes.add(blockType);
@@ -464,15 +464,16 @@ mixin HeaderMixin<T extends StatefulWidget> on State<T> {
                       scrollDirection: Axis.horizontal,
                       child: Row(
                         spacing: 10,
-                        children: blockTypesList
-                            .map(
-                              (e) => ActionRowLineItem(
-                                onTap: () => onUpdateBlockType(e.value),
-                                text: e.label,
-                                selectStatus: blockTypes.contains(e.value),
-                              ),
-                            )
-                            .toList(),
+                        children: blockTypesList.map(
+                          (e) {
+                            final blocked = blockTypes.contains(e.value);
+                            return ActionRowLineItem(
+                              onTap: () => onUpdateBlockType(e.value, blocked),
+                              text: e.label,
+                              selectStatus: blocked,
+                            );
+                          },
+                        ).toList(),
                       ),
                     ),
                   ),
