@@ -238,7 +238,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: dev
+      ref: main
       resolved-ref: "f0ed7e169f63344d4738360be23cd0d158929de0"
       url: "https://github.com/cnctem/canvas_danmaku.git"
     source: git
