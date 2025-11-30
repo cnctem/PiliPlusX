@@ -166,13 +166,11 @@ class ImGrpc {
   }
 
   static Future<LoadingState<SetImSettingsReply>> setImSettings({
-    PbMap<int, Setting>? settings,
+    Map<int, Setting>? settings,
   }) {
     return GrpcReq.request(
       GrpcUrl.setImSettings,
-      SetImSettingsReq(
-        settings: settings?.entries,
-      ),
+      SetImSettingsReq(settings: settings?.entries),
       SetImSettingsReply.fromBuffer,
     );
   }

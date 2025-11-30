@@ -6,9 +6,8 @@ mixin MultiSelectData {
   bool? checked;
 }
 
-abstract class MultiSelectBase<T> {
+mixin MultiSelectBase<T extends MultiSelectData> {
   RxBool get enableMultiSelect;
-  RxBool get allSelected;
 
   int get checkedCount;
 
@@ -17,12 +16,52 @@ abstract class MultiSelectBase<T> {
   void onRemove();
 }
 
+mixin BaseMultiSelectMixin<T extends MultiSelectData>
+    implements MultiSelectBase<T> {
+  late final RxInt rxCount = 0.obs;
+  @override
+  int get checkedCount => rxCount.value;
+
+  @override
+  final RxBool enableMultiSelect = false.obs;
+
+  RxObjectMixin get state;
+  List<T> get list;
+
+  Iterable<T> get allChecked => list.where((v) => v.checked == true);
+
+  @override
+  void handleSelect({bool checked = false, bool disableSelect = true}) {
+    for (var item in list) {
+      item.checked = checked;
+    }
+    state.refresh();
+    rxCount.value = checked ? list.length : 0;
+    if (disableSelect && !checked) {
+      enableMultiSelect.value = false;
+    }
+  }
+
+  @override
+  void onSelect(T item) {
+    item.checked = !(item.checked ?? false);
+    if (item.checked!) {
+      rxCount.value++;
+    } else {
+      rxCount.value--;
+    }
+    state.refresh();
+    if (checkedCount == 0) {
+      enableMultiSelect.value = false;
+    }
+  }
+}
+
 mixin CommonMultiSelectMixin<T extends MultiSelectData>
     implements MultiSelectBase<T> {
   @override
   late final RxBool enableMultiSelect = false.obs;
-  @override
-  late final allSelected = false.obs;
+  RxBool? get allSelected => null;
 
   Rx<LoadingState<List<T>?>> get loadingState;
   late final RxInt rxCount = 0.obs;
@@ -46,7 +85,7 @@ mixin CommonMultiSelectMixin<T extends MultiSelectData>
     if (checkedCount == 0) {
       enableMultiSelect.value = false;
     } else {
-      allSelected.value = checkedCount == list.length;
+      allSelected?.value = checkedCount == list.length;
     }
   }
 

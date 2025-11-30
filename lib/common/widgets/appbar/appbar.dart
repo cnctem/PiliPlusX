@@ -7,13 +7,13 @@ class MultiSelectAppBarWidget extends StatelessWidget
   final MultiSelectBase ctr;
   final bool? visible;
   final AppBar child;
-  final List<Widget>? children;
+  final List<Widget>? actions;
 
   const MultiSelectAppBarWidget({
     super.key,
     required this.ctr,
     this.visible,
-    this.children,
+    this.actions,
     required this.child,
   });
 
@@ -36,12 +36,17 @@ class MultiSelectAppBarWidget extends StatelessWidget
             onPressed: () => ctr.handleSelect(checked: true),
             child: const Text('全选'),
           ),
-          ...?children,
+          ...?actions,
           TextButton(
             style: TextButton.styleFrom(
               visualDensity: VisualDensity.compact,
             ),
-            onPressed: ctr.onRemove,
+            onPressed: () {
+              if (ctr.checkedCount == 0) {
+                return;
+              }
+              ctr.onRemove();
+            },
             child: Text(
               '移除',
               style: TextStyle(color: Get.theme.colorScheme.error),

@@ -128,7 +128,7 @@ dependencies:
     git:
       url: https://github.com/bggRGjQaUbCoE/auto_orientation.git
       ref: master
-  protobuf: ^5.0.0
+  protobuf: ^6.0.0
   # animations: ^2.0.11
 
   # 获取appx信息

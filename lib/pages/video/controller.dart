@@ -122,7 +122,7 @@ class VideoDetailController extends GetxController
   final childKey = GlobalKey<ScaffoldState>();
 
   final plPlayerController = PlPlayerController.getInstance()
-    ..setCurrBrightness(-1.0);
+    ..brightness.value = -1;
   bool get setSystemBrightness => plPlayerController.setSystemBrightness;
 
   late VideoItem firstVideo;
@@ -1885,9 +1885,10 @@ class VideoDetailController extends GetxController
       if (!context.mounted) {
         return;
       }
-      final Set<int?> cidSet = downloadService.downloadList
-          .map((e) => e.cid)
-          .toSet();
+      final Set<int?> cidSet =
+          (downloadService.downloadList + downloadService.waitDownloadQueue)
+              .map((e) => e.cid)
+              .toSet();
       final index = episodes!.indexWhere(
         (e) => e.cid == (seasonCid ?? cid.value),
       );

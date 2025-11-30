@@ -13,6 +13,7 @@ import 'package:PiliPlus/http/danmaku.dart';
 import 'package:PiliPlus/http/danmaku_block.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/live.dart';
+import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/video.dart';
 import 'package:PiliPlus/models/common/super_resolution_type.dart';
 import 'package:PiliPlus/models/common/video/audio_quality.dart';
@@ -213,11 +214,12 @@ mixin HeaderMixin<T extends StatefulWidget> on State<T> {
   /// 弹幕功能
   void showSetDanmaku({bool isLive = false}) {
     // 屏蔽类型
-    const List<({int value, String label})> blockTypesList = [
-      (value: 5, label: '顶部'),
+    const blockTypesList = [
       (value: 2, label: '滚动'),
+      (value: 5, label: '顶部'),
       (value: 4, label: '底部'),
       (value: 6, label: '彩色'),
+      (value: 7, label: '高级'),
     ];
     final blockTypes = plPlayerController.blockTypes;
     // 智能云屏蔽
@@ -369,6 +371,30 @@ mixin HeaderMixin<T extends StatefulWidget> on State<T> {
           setState(() {});
         }
 
+        void onUpdateBlockType(int blockType, bool blocked) {
+          if (blocked) {
+            blockTypes.remove(blockType);
+          } else {
+            blockTypes.add(blockType);
+          }
+          plPlayerController
+            ..blockTypes = blockTypes
+            ..blockColorful = blockTypes.contains(6)
+            ..putDanmakuSettings();
+          setState(() {});
+          try {
+            danmakuController?.updateOption(
+              danmakuController.option.copyWith(
+                hideTop: blockTypes.contains(5),
+                hideBottom: blockTypes.contains(4),
+                hideScroll: blockTypes.contains(2),
+                hideSpecial: blockTypes.contains(7),
+                // 添加或修改其他需要修改的选项属性
+              ),
+            );
+          } catch (_) {}
+        }
+
         return Padding(
           padding: const EdgeInsets.all(12),
           child: Material(
@@ -435,39 +461,21 @@ mixin HeaderMixin<T extends StatefulWidget> on State<T> {
                   const Text('按类型屏蔽'),
                   Padding(
                     padding: const EdgeInsets.only(top: 12),
-                    child: Row(
-                      children: [
-                        for (final (value: value, label: label)
-                            in blockTypesList) ...[
-                          ActionRowLineItem(
-                            onTap: () {
-                              if (blockTypes.contains(value)) {
-                                blockTypes.remove(value);
-                              } else {
-                                blockTypes.add(value);
-                              }
-                              plPlayerController
-                                ..blockTypes = blockTypes
-                                ..blockColorful = blockTypes.contains(6)
-                                ..putDanmakuSettings();
-                              setState(() {});
-                              try {
-                                danmakuController?.updateOption(
-                                  danmakuController.option.copyWith(
-                                    hideTop: blockTypes.contains(5),
-                                    hideBottom: blockTypes.contains(4),
-                                    hideScroll: blockTypes.contains(2),
-                                    // 添加或修改其他需要修改的选项属性
-                                  ),
-                                );
-                              } catch (_) {}
-                            },
-                            text: label,
-                            selectStatus: blockTypes.contains(value),
-                          ),
-                          const SizedBox(width: 10),
-                        ],
-                      ],
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        spacing: 10,
+                        children: blockTypesList.map(
+                          (e) {
+                            final blocked = blockTypes.contains(e.value);
+                            return ActionRowLineItem(
+                              onTap: () => onUpdateBlockType(e.value, blocked),
+                              text: e.label,
+                              selectStatus: blocked,
+                            );
+                          },
+                        ).toList(),
+                      ),
                     ),
                   ),
                   SetSwitchItem(
@@ -828,6 +836,13 @@ class HeaderControl extends StatefulWidget {
       return true;
     } else {
       res.toast();
+      if ((res as Error).code == 65006) {
+        extra.isLike = true;
+        return true;
+      } else if (res.code == 65004) {
+        extra.isLike = false;
+        return true;
+      }
       return false;
     }
   }

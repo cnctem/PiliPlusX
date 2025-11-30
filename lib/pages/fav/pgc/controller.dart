@@ -24,6 +24,9 @@ class FavPgcController
   }
 
   @override
+  final RxBool allSelected = false.obs;
+
+  @override
   void handleSelect({bool checked = false, bool disableSelect = true}) {
     allSelected.value = checked;
     super.handleSelect(checked: checked, disableSelect: disableSelect);

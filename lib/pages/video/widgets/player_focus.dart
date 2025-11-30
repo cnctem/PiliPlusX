@@ -209,6 +209,14 @@ class PlayerFocus extends StatelessWidget {
           }
           return true;
 
+        case LogicalKeyboardKey.keyL:
+          if (isFullScreen || plPlayerController.isDesktopPip) {
+            plPlayerController.onLockControl(
+              !plPlayerController.controlsLock.value,
+            );
+          }
+          return true;
+
         case LogicalKeyboardKey.enter:
           if (onSkipSegment?.call() ?? false) {
             return true;
@@ -245,14 +253,6 @@ class PlayerFocus extends StatelessWidget {
           case LogicalKeyboardKey.keyG:
             if (introController case UgcIntroController ugcCtr) {
               ugcCtr.actionRelationMod(Get.context!);
-            }
-            return true;
-
-          case LogicalKeyboardKey.keyL:
-            if (isFullScreen || plPlayerController.isDesktopPip) {
-              plPlayerController.onLockControl(
-                !plPlayerController.controlsLock.value,
-              );
             }
             return true;
 
