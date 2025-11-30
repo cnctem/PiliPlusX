@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:PiliPlus/common/widgets/progress_bar/audio_video_progress_bar.dart';
 import 'package:PiliPlus/common/widgets/progress_bar/segment_progress_bar.dart';
 import 'package:PiliPlus/pages/video/controller.dart';
@@ -9,7 +7,6 @@ import 'package:PiliPlus/utils/extension.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 
 class BottomControl extends StatelessWidget {
@@ -36,9 +33,6 @@ class BottomControl extends StatelessWidget {
         : colorScheme.primary;
     final thumbGlowColor = primary.withAlpha(80);
     final bufferedBarColor = primary.withValues(alpha: 0.4);
-    //阅读器限制
-    Timer? accessibilityDebounce;
-    double lastAnnouncedValue = -1;
     void onDragStart(ThumbDragDetails duration) {
       feedBack();
       controller.onChangedSliderStart(duration.timeStamp);
@@ -46,27 +40,9 @@ class BottomControl extends StatelessWidget {
 
     void onDragUpdate(ThumbDragDetails duration, int max) {
       if (!controller.isFileSource && controller.showSeekPreview) {
-        controller.updatePreviewIndex(
-          duration.timeStamp.inSeconds,
-        );
+        controller.updatePreviewIndex(duration.timeStamp.inSeconds);
       }
-      double newProgress = duration.timeStamp.inSeconds / max;
-      if ((newProgress - lastAnnouncedValue).abs() > 0.02) {
-        accessibilityDebounce?.cancel();
-        accessibilityDebounce = Timer(
-          const Duration(milliseconds: 200),
-          () {
-            SemanticsService.announce(
-              "${(newProgress * 100).round()}%",
-              TextDirection.ltr,
-            );
-            lastAnnouncedValue = newProgress;
-          },
-        );
-      }
-      controller.onUpdatedSliderProgress(
-        duration.timeStamp,
-      );
+      controller.onUpdatedSliderProgress(duration.timeStamp);
     }
 
     void onSeek(Duration duration, int max) {
@@ -76,14 +52,7 @@ class BottomControl extends StatelessWidget {
       controller
         ..onChangedSliderEnd()
         ..onChangedSlider(duration.inSeconds.toDouble())
-        ..seekTo(
-          Duration(seconds: duration.inSeconds),
-          isSeek: false,
-        );
-      SemanticsService.announce(
-        "${(duration.inSeconds / max * 100).round()}%",
-        TextDirection.ltr,
-      );
+        ..seekTo(Duration(seconds: duration.inSeconds), isSeek: false);
     }
 
     Widget progressBar() {
