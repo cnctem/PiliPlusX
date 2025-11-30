@@ -148,7 +148,7 @@ dependencies:
   canvas_danmaku:
     git:
       url: https://github.com/cnctem/canvas_danmaku.git
-      ref: main
+      ref: dev
   # 状态栏图标控制
   # status_bar_control: ^3.2.1
   # 代理
