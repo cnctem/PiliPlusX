@@ -19,6 +19,7 @@ Future<void> autoWrapReportDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
+        constraints: const BoxConstraints(minWidth: 280, maxWidth: 420),
         title: const Text('举报'),
         titlePadding: const EdgeInsets.only(left: 22, top: 16, right: 22),
         contentPadding: const EdgeInsets.symmetric(vertical: 5),

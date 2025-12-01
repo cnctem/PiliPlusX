@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
+const _reason = ['头像违规', '昵称违规', '签名违规'];
+
+const _reasonV2 = ['色情低俗', '不实信息', '违禁', '人身攻击', '赌博诈骗', '违规引流外链'];
+
 Future<void> showMemberReportDialog(
   BuildContext context, {
   required Object? name,
@@ -17,13 +21,11 @@ Future<void> showMemberReportDialog(
       final theme = Theme.of(context);
       return AlertDialog(
         clipBehavior: Clip.hardEdge,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 16,
-        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 16),
         titleTextStyle: theme.textTheme.bodyMedium,
         title: Column(
           spacing: 4,
+          crossAxisAlignment: .start,
           children: [
             Text(
               '举报: $name',
@@ -34,53 +36,101 @@ Future<void> showMemberReportDialog(
         ),
         content: SingleChildScrollView(
           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: .min,
+            crossAxisAlignment: .start,
             children: [
-              const Text('举报内容（必选，可多选）'),
+              const Padding(
+                padding: .only(left: 18),
+                child: Text('举报内容（必选，可多选）'),
+              ),
               ...List.generate(
                 3,
                 (index) => Builder(
-                  builder: (context) => CheckboxListTile(
-                    dense: true,
-                    value: reason.contains(index + 1),
-                    controlAffinity: ListTileControlAffinity.leading,
-                    contentPadding: EdgeInsets.zero,
-                    onChanged: (value) {
-                      if (value!) {
-                        reason.add(index + 1);
-                      } else {
-                        reason.remove(index + 1);
-                      }
-                      (context as Element).markNeedsBuild();
-                    },
-                    title: Text(const ['头像违规', '昵称违规', '签名违规'][index]),
-                  ),
+                  builder: (context) {
+                    final checked = reason.contains(index + 1);
+                    return ListTile(
+                      dense: true,
+                      minTileHeight: 40,
+                      onTap: () {
+                        if (!checked) {
+                          reason.add(index + 1);
+                        } else {
+                          reason.remove(index + 1);
+                        }
+                        (context as Element).markNeedsBuild();
+                      },
+                      title: Row(
+                        spacing: 8,
+                        children: [
+                          checked
+                              ? Icon(
+                                  size: 22,
+                                  Icons.check_box,
+                                  color: theme.colorScheme.primary,
+                                )
+                              : Icon(
+                                  size: 22,
+                                  Icons.check_box_outline_blank,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                          Expanded(
+                            child: Text(
+                              _reason[index],
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ),
-              const Text('举报理由（单选，非必选）'),
+              const Padding(
+                padding: .only(left: 18),
+                child: Text('举报理由（单选，非必选）'),
+              ),
               Builder(
-                builder: (context) => RadioGroup<int>(
-                  onChanged: (v) {
-                    reasonV2 = v;
-                    (context as Element).markNeedsBuild();
-                  },
-                  groupValue: reasonV2,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: List.generate(
-                      5,
-                      (index) => RadioListTile<int>(
-                        toggleable: true,
-                        controlAffinity: ListTileControlAffinity.leading,
-                        contentPadding: const EdgeInsets.only(left: 4),
+                builder: (context) => Column(
+                  crossAxisAlignment: .start,
+                  children: List.generate(
+                    _reasonV2.length,
+                    (index) {
+                      final checked = index == reasonV2;
+                      return ListTile(
                         dense: true,
-                        value: index,
-                        title: Text(
-                          const ['色情低俗', '不实信息', '违禁', '人身攻击', '赌博诈骗'][index],
+                        minTileHeight: 40,
+                        onTap: () {
+                          if (checked) {
+                            reasonV2 = null;
+                          } else {
+                            reasonV2 = index;
+                          }
+                          (context as Element).markNeedsBuild();
+                        },
+                        title: Row(
+                          spacing: 8,
+                          children: [
+                            checked
+                                ? Icon(
+                                    size: 22,
+                                    Icons.radio_button_checked,
+                                    color: theme.colorScheme.primary,
+                                  )
+                                : Icon(
+                                    size: 22,
+                                    Icons.radio_button_off,
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                            Expanded(
+                              child: Text(
+                                _reasonV2[index],
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ),
+                      );
+                    },
                   ),
                 ),
               ),
