@@ -112,9 +112,15 @@ class Language {
 
   Language.fromJson(Map<String, dynamic> json) {
     support = json['support'];
-    items = (json['items'] as List?)
-        ?.map((e) => LanguageItem.fromJson(e))
-        .toList();
+    items =
+        (json['items'] as List?)?.map((e) => LanguageItem.fromJson(e)).toList()
+          ?..sort((a, b) {
+            final aHasZh = a.lang?.contains('zh') ?? false;
+            final bHasZh = b.lang?.contains('zh') ?? false;
+            if (aHasZh != bHasZh) return aHasZh ? -1 : 1;
+            if (a.isAi != b.isAi) return a.isAi ? 1 : -1;
+            return 0;
+          });
   }
 }
 
@@ -128,10 +134,12 @@ class LanguageItem {
   String? lang;
   String? title;
   String? subtitleLang;
+  bool isAi = false;
 
   LanguageItem.fromJson(Map<String, dynamic> json) {
     lang = json['lang'];
-    title = '${json['title']}${json['production_type'] == 2 ? '（AI）' : ''}';
+    isAi = json['production_type'] == 2;
+    title = '${json['title']}${isAi ? '（AI）' : ''}';
     subtitleLang = json['subtitle_lang'];
   }
 }
