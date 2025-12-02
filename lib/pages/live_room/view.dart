@@ -30,6 +30,7 @@ import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
+import 'package:floating/floating.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -183,7 +184,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
   @override
   Widget build(BuildContext context) {
     Widget child;
-    if (plPlayerController.isPipMode) {
+    if (Platform.isAndroid && Floating().isPipMode) {
       child = videoPlayerPanel(
         isFullScreen,
         width: maxWidth,
@@ -361,7 +362,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
 
   Widget get childWhenDisabled {
     return Obx(() {
-      final isFullScreen = this.isFullScreen;
+      final isFullScreen = this.isFullScreen || plPlayerController.isDesktopPip;
       return Stack(
         clipBehavior: Clip.none,
         children: [
@@ -988,7 +989,10 @@ class _LiveDanmakuState extends State<LiveDanmaku> {
     );
   }
 
-  double get _fontSize => !widget.isFullScreen || widget.isPipMode
+  double get _fontSize =>
+      plPlayerController.isDesktopPip ||
+          !widget.isFullScreen ||
+          widget.isPipMode
       ? 15 * plPlayerController.danmakuFontScale
       : 15 * plPlayerController.danmakuFontScaleFS;
 
