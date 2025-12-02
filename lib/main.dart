@@ -117,15 +117,13 @@ void main() async {
   Request();
   Request.setCookie();
   RequestUtils.syncHistoryStatus();
-  if (Utils.isMobile) {
-    PiliScheme.init();
-  }
 
   SmartDialog.config.toast = SmartConfigToast(
     displayType: SmartToastType.onlyRefresh,
   );
 
   if (Utils.isMobile) {
+    PiliScheme.init();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
@@ -135,6 +133,22 @@ void main() async {
         systemNavigationBarContrastEnforced: false,
       ),
     );
+    if (Platform.isAndroid) {
+      late List<DisplayMode> modes;
+      FlutterDisplayMode.supported.then((value) {
+        modes = value;
+        final String? storageDisplay = GStorage.setting.get(
+          SettingBoxKey.displayMode,
+        );
+        DisplayMode? displayMode;
+        if (storageDisplay != null) {
+          displayMode = modes.firstWhereOrNull(
+            (e) => e.toString() == storageDisplay,
+          );
+        }
+        FlutterDisplayMode.setPreferredMode(displayMode ?? DisplayMode.auto);
+      });
+    }
   } else if (Utils.isDesktop) {
     await windowManager.ensureInitialized();
 
@@ -159,10 +173,12 @@ void main() async {
 
   if (Pref.enableLog) {
     // 异常捕获 logo记录
-    String buildConfig =
-        '''\n
+    final customParameters = {
+      'BuildConfig':
+          '''\n
 Build Time: ${DateFormatUtils.format(BuildConfig.buildTime, format: DateFormatUtils.longFormatDs)}
-Commit Hash: ${BuildConfig.commitHash}''';
+Commit Hash: ${BuildConfig.commitHash}''',
+    };
     final Catcher2Options debugConfig = Catcher2Options(
       SilentReportMode(),
       [
@@ -173,30 +189,22 @@ Commit Hash: ${BuildConfig.commitHash}''';
           enableCustomParameters: true,
         ),
       ],
-      customParameters: {
-        'BuildConfig': buildConfig,
-      },
+      customParameters: customParameters,
     );
 
     final Catcher2Options releaseConfig = Catcher2Options(
       SilentReportMode(),
       [
         FileHandler(await LoggerUtils.getLogsPath()),
-        ConsoleHandler(
-          enableCustomParameters: true,
-        ),
+        ConsoleHandler(enableCustomParameters: true),
       ],
-      customParameters: {
-        'BuildConfig': buildConfig,
-      },
+      customParameters: customParameters,
     );
 
     Catcher2(
       debugConfig: debugConfig,
       releaseConfig: releaseConfig,
-      runAppFunction: () {
-        runApp(const MyApp());
-      },
+      runAppFunction: () => runApp(const MyApp()),
     );
   } else {
     runApp(const MyApp());
@@ -208,168 +216,148 @@ class MyApp extends StatelessWidget {
 
   static ThemeData? darkThemeData;
 
-  @override
-  Widget build(BuildContext context) {
-    Color brandColor = colorThemeTypes[Pref.customColor].color;
-    bool isDynamicColor = Pref.dynamicColor;
-    FlexSchemeVariant variant = FlexSchemeVariant.values[Pref.schemeVariant];
-
-    // 强制设置高帧率
-    if (Platform.isAndroid) {
-      late List<DisplayMode> modes;
-      FlutterDisplayMode.supported.then((value) {
-        modes = value;
-        final String? storageDisplay = GStorage.setting.get(
-          SettingBoxKey.displayMode,
-        );
-        DisplayMode? displayMode;
-        if (storageDisplay != null) {
-          displayMode = modes.firstWhereOrNull(
-            (e) => e.toString() == storageDisplay,
-          );
-        }
-        displayMode ??= DisplayMode.auto;
-        FlutterDisplayMode.setPreferredMode(displayMode);
-      });
+  static void _onBack() {
+    if (SmartDialog.checkExist()) {
+      SmartDialog.dismiss();
+      return;
     }
 
-    return DynamicColorBuilder(
-      builder: ((ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-        ColorScheme? lightColorScheme;
-        ColorScheme? darkColorScheme;
-        if (lightDynamic != null && darkDynamic != null && isDynamicColor) {
-          // dynamic取色成功
-          lightColorScheme = lightDynamic.harmonized();
-          darkColorScheme = darkDynamic.harmonized();
-        } else {
-          // dynamic取色失败，采用品牌色
-          lightColorScheme = SeedColorScheme.fromSeeds(
-            primaryKey: brandColor,
-            brightness: Brightness.light,
-            variant: variant,
-            // dynamicSchemeVariant: dynamicSchemeVariant,
-            // tones: FlexTones.soft(Brightness.light),
-            useExpressiveOnContainerColors: false,
+    if (Get.isDialogOpen ?? Get.isBottomSheetOpen ?? false) {
+      Get.back();
+      return;
+    }
+
+    final plCtr = PlPlayerController.instance;
+    if (plCtr != null) {
+      if (plCtr.isFullScreen.value) {
+        plCtr
+          ..triggerFullScreen(status: false)
+          ..controlsLock.value = false
+          ..showControls.value = false;
+        return;
+      }
+
+      if (plCtr.isDesktopPip) {
+        plCtr
+          ..exitDesktopPip().whenComplete(
+            () => plCtr.initialFocalPoint = Offset.zero,
+          )
+          ..controlsLock.value = false
+          ..showControls.value = false;
+        return;
+      }
+    }
+
+    Get.back();
+  }
+
+  static Widget _build({
+    ColorScheme? lightColorScheme,
+    ColorScheme? darkColorScheme,
+  }) {
+    late final brandColor = colorThemeTypes[Pref.customColor].color;
+    late final variant = FlexSchemeVariant.values[Pref.schemeVariant];
+    return GetMaterialApp(
+      title: Constants.appName,
+      theme: ThemeUtils.getThemeData(
+        colorScheme:
+            lightColorScheme ??
+            SeedColorScheme.fromSeeds(
+              variant: variant,
+              primaryKey: brandColor,
+              brightness: Brightness.light,
+              useExpressiveOnContainerColors: false,
+            ),
+        isDynamic: lightColorScheme != null,
+      ),
+      darkTheme: ThemeUtils.getThemeData(
+        isDark: true,
+        colorScheme:
+            darkColorScheme ??
+            SeedColorScheme.fromSeeds(
+              variant: variant,
+              primaryKey: brandColor,
+              brightness: Brightness.dark,
+              useExpressiveOnContainerColors: false,
+            ),
+        isDynamic: darkColorScheme != null,
+      ),
+      themeMode: Pref.themeMode,
+      localizationsDelegates: const [
+        GlobalCupertinoLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      locale: const Locale("zh", "CN"),
+      fallbackLocale: const Locale("zh", "CN"),
+      supportedLocales: const [Locale("zh", "CN"), Locale("en", "US")],
+      initialRoute: '/',
+      getPages: Routes.getPages,
+      builder: FlutterSmartDialog.init(
+        toastBuilder: (String msg) => CustomToast(msg: msg),
+        loadingBuilder: (msg) => LoadingWidget(msg: msg),
+        builder: (context, child) {
+          child = MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: TextScaler.linear(Pref.defaultTextScale),
+            ),
+            child: child!,
           );
-          darkColorScheme = SeedColorScheme.fromSeeds(
-            primaryKey: brandColor,
-            brightness: Brightness.dark,
-            variant: variant,
-            // dynamicSchemeVariant: dynamicSchemeVariant,
-            // tones: FlexTones.soft(Brightness.dark),
-            useExpressiveOnContainerColors: false,
-          );
-        }
-
-        // 图片缓存
-        // PaintingBinding.instance.imageCache.maximumSizeBytes = 1000 << 20;
-        return GetMaterialApp(
-          title: Constants.appName,
-          theme: ThemeUtils.getThemeData(
-            colorScheme: lightColorScheme,
-            isDynamic: lightDynamic != null && isDynamicColor,
-            variant: variant,
-          ),
-          darkTheme: ThemeUtils.getThemeData(
-            colorScheme: darkColorScheme,
-            isDynamic: darkDynamic != null && isDynamicColor,
-            isDark: true,
-            variant: variant,
-          ),
-          themeMode: Pref.themeMode,
-          localizationsDelegates: const [
-            GlobalCupertinoLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-          ],
-          locale: const Locale("zh", "CN"),
-          supportedLocales: const [Locale("zh", "CN"), Locale("en", "US")],
-          fallbackLocale: const Locale("zh", "CN"),
-          getPages: Routes.getPages,
-          initialRoute: '/',
-          builder: FlutterSmartDialog.init(
-            toastBuilder: (String msg) => CustomToast(msg: msg),
-            loadingBuilder: (msg) => LoadingWidget(msg: msg),
-            builder: (context, child) {
-              child = MediaQuery(
-                data: MediaQuery.of(context).copyWith(
-                  textScaler: TextScaler.linear(Pref.defaultTextScale),
-                ),
-                child: child!,
-              );
-              if (Utils.isDesktop) {
-                void onBack() {
-                  if (SmartDialog.checkExist()) {
-                    SmartDialog.dismiss();
-                    return;
-                  }
-
-                  if (Get.isDialogOpen ?? Get.isBottomSheetOpen ?? false) {
-                    Get.back();
-                    return;
-                  }
-
-                  final plCtr = PlPlayerController.instance;
-                  if (plCtr != null) {
-                    if (plCtr.isFullScreen.value) {
-                      plCtr
-                        ..triggerFullScreen(status: false)
-                        ..controlsLock.value = false
-                        ..showControls.value = false;
-                      return;
-                    }
-
-                    if (plCtr.isDesktopPip) {
-                      plCtr
-                        ..exitDesktopPip().whenComplete(
-                          () => plCtr.initialFocalPoint = Offset.zero,
-                        )
-                        ..controlsLock.value = false
-                        ..showControls.value = false;
-                      return;
-                    }
-                  }
-
-                  Get.back();
+          if (Utils.isDesktop) {
+            return Focus(
+              canRequestFocus: false,
+              onKeyEvent: (_, event) {
+                if (event.logicalKey == LogicalKeyboardKey.escape &&
+                    event is KeyDownEvent) {
+                  _onBack();
+                  return KeyEventResult.handled;
                 }
-
-                return Focus(
-                  canRequestFocus: false,
-                  onKeyEvent: (_, event) {
-                    if (event.logicalKey == LogicalKeyboardKey.escape &&
-                        event is KeyDownEvent) {
-                      onBack();
-                      return KeyEventResult.handled;
-                    }
-                    return KeyEventResult.ignored;
-                  },
-                  child: MouseBackDetector(
-                    onTapDown: onBack,
-                    child: child,
-                  ),
-                );
-              }
-              return child;
-            },
-          ),
-          navigatorObservers: [
-            FlutterSmartDialog.observer,
-            PageUtils.routeObserver,
-          ],
-          scrollBehavior: const MaterialScrollBehavior().copyWith(
-            scrollbars: false,
-            dragDevices: {
-              PointerDeviceKind.touch,
-              PointerDeviceKind.stylus,
-              PointerDeviceKind.invertedStylus,
-              PointerDeviceKind.trackpad,
-              PointerDeviceKind.unknown,
-              if (Utils.isDesktop) PointerDeviceKind.mouse,
-            },
-          ),
-        );
-      }),
+                return KeyEventResult.ignored;
+              },
+              child: MouseBackDetector(
+                onTapDown: _onBack,
+                child: child,
+              ),
+            );
+          }
+          return child;
+        },
+      ),
+      navigatorObservers: [
+        PageUtils.routeObserver,
+        FlutterSmartDialog.observer,
+      ],
+      scrollBehavior: const MaterialScrollBehavior().copyWith(
+        scrollbars: false,
+        dragDevices: {
+          PointerDeviceKind.touch,
+          PointerDeviceKind.stylus,
+          PointerDeviceKind.invertedStylus,
+          PointerDeviceKind.trackpad,
+          PointerDeviceKind.unknown,
+          if (Utils.isDesktop) PointerDeviceKind.mouse,
+        },
+      ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!Platform.isIOS && Pref.dynamicColor) {
+      return DynamicColorBuilder(
+        builder: ((ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+          if (lightDynamic != null && darkDynamic != null) {
+            return _build(
+              lightColorScheme: lightDynamic.harmonized(),
+              darkColorScheme: darkDynamic.harmonized(),
+            );
+          } else {
+            return _build();
+          }
+        }),
+      );
+    }
+    return _build();
   }
 }
 
