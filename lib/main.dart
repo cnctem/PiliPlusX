@@ -179,10 +179,11 @@ void main() async {
 Build Time: ${DateFormatUtils.format(BuildConfig.buildTime, format: DateFormatUtils.longFormatDs)}
 Commit Hash: ${BuildConfig.commitHash}''',
     };
+    final fileHandler = FileHandler(await LoggerUtils.getLogsPath());
     final Catcher2Options debugConfig = Catcher2Options(
       SilentReportMode(),
       [
-        FileHandler(await LoggerUtils.getLogsPath()),
+        fileHandler,
         ConsoleHandler(
           enableDeviceParameters: false,
           enableApplicationParameters: false,
@@ -195,7 +196,7 @@ Commit Hash: ${BuildConfig.commitHash}''',
     final Catcher2Options releaseConfig = Catcher2Options(
       SilentReportMode(),
       [
-        FileHandler(await LoggerUtils.getLogsPath()),
+        fileHandler,
         ConsoleHandler(enableCustomParameters: true),
       ],
       customParameters: customParameters,
