@@ -1,7 +1,9 @@
 import 'dart:math';
 
+import 'package:PiliPlus/common/widgets/custom_sliver_persistent_header_delegate.dart';
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
+import 'package:PiliPlus/common/widgets/scroll_physics.dart';
 import 'package:PiliPlus/common/widgets/video_card/video_card_h.dart';
 import 'package:PiliPlus/common/widgets/view_sliver_safe_area.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -40,7 +42,7 @@ class _PopularSeriesPageState extends State<PopularSeriesPage> with GridMixin {
       body: refreshIndicator(
         onRefresh: _controller.onRefresh,
         child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
+          physics: ReloadScrollPhysics(controller: _controller),
           slivers: [
             ViewSliverSafeArea(
               sliver: Obx(() => _buildBody(_controller.loadingState.value)),
@@ -205,10 +207,17 @@ class _PopularSeriesPageState extends State<PopularSeriesPage> with GridMixin {
         ],
       );
     }
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.only(left: 14, bottom: 7),
-        child: child,
+    final height = MediaQuery.textScalerOf(context).scale(27);
+    return SliverPersistentHeader(
+      floating: true,
+      delegate: CustomSliverPersistentHeaderDelegate(
+        extent: height,
+        child: Container(
+          height: height,
+          padding: const EdgeInsets.only(left: 14, bottom: 7),
+          child: child,
+        ),
+        bgColor: colorScheme.surface,
       ),
     );
   }
