@@ -25,7 +25,7 @@ class MemberFavorite extends StatefulWidget {
 }
 
 class _MemberFavoriteState extends State<MemberFavorite>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, GridMixin {
   @override
   bool get wantKeepAlive => true;
 
@@ -115,6 +115,9 @@ class _MemberFavoriteState extends State<MemberFavorite>
                       _controller.setExpand(isFav);
                       (context as Element).markNeedsBuild();
                       data.refresh();
+                      if (!isEnd.value) {
+                        isEnd.refresh();
+                      }
                     },
                     child: Container(
                       height: 45,
@@ -159,18 +162,11 @@ class _MemberFavoriteState extends State<MemberFavorite>
           if (!_controller.isExpand(isFav)) {
             return const SliverToBoxAdapter();
           }
-          final end = isEnd.value;
           if (list != null && list.isNotEmpty) {
-            return SliverList.builder(
-              itemCount: list.length + (end ? 0 : 1),
+            return SliverGrid.builder(
+              gridDelegate: gridDelegate,
+              itemCount: list.length,
               itemBuilder: (context, index) {
-                if (!end && index == list.length) {
-                  return Obx(
-                    () => isEnd.value
-                        ? const SizedBox.shrink()
-                        : _buildLoadMoreItem(theme, isFav),
-                  );
-                }
                 final item = list[index];
                 return SizedBox(
                   height: 98,
@@ -190,6 +186,11 @@ class _MemberFavoriteState extends State<MemberFavorite>
           }
           return const SliverToBoxAdapter();
         }),
+        Obx(
+          () => isEnd.value || !_controller.isExpand(isFav)
+              ? const SliverToBoxAdapter()
+              : SliverToBoxAdapter(child: _buildLoadMoreItem(theme, isFav)),
+        ),
       ],
     );
   }

@@ -4,6 +4,7 @@ import 'package:PiliPlus/common/widgets/pendant_avatar.dart';
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/models/common/image_preview_type.dart';
 import 'package:PiliPlus/models/common/image_type.dart';
+import 'package:PiliPlus/models/common/member/user_info_type.dart';
 import 'package:PiliPlus/models_new/space/space/card.dart';
 import 'package:PiliPlus/models_new/space/space/followings_followed_upper.dart';
 import 'package:PiliPlus/models_new/space/space/images.dart';
@@ -24,17 +25,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide ContextExtensionss;
 
-enum _UserInfoType {
-  fan('粉丝', .centerLeft),
-  follow('关注', .center),
-  like('获赞', .centerRight),
-  ;
-
-  final String title;
-  final Alignment alignment;
-
-  const _UserInfoType(this.title, this.alignment);
-}
 
 class UserInfoCard extends StatelessWidget {
   const UserInfoCard({
@@ -71,24 +61,24 @@ class UserInfoCard extends StatelessWidget {
 
   Widget _countWidget({
     required ColorScheme colorScheme,
-    required _UserInfoType type,
+    required UserInfoType type,
   }) {
     int? count;
     VoidCallback? onTap;
     switch (type) {
-      case _UserInfoType.fan:
+      case UserInfoType.fan:
         count = card.fans;
         onTap = () => FansPage.toFansPage(
           mid: card.mid,
           name: card.name,
         );
-      case _UserInfoType.follow:
+      case UserInfoType.follow:
         count = card.attention;
         onTap = () => FollowPage.toFollowPage(
           mid: card.mid,
           name: card.name,
         );
-      case _UserInfoType.like:
+      case UserInfoType.like:
         count = card.likes?.likeNum;
     }
     return GestureDetector(
@@ -352,7 +342,7 @@ class UserInfoCard extends StatelessWidget {
     mainAxisSize: MainAxisSize.min,
     children: [
       Row(
-        children: _UserInfoType.values
+        children: UserInfoType.values
             .map(
               (e) => Expanded(
                 child: _countWidget(

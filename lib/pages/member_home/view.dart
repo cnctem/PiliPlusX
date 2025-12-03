@@ -181,14 +181,13 @@ class _MemberHomeState extends State<MemberHome>
                       param1: 'opus',
                       count: res.article!.count!,
                     ),
-                    SliverGrid.builder(
-                      gridDelegate: gridDelegate,
-                      itemBuilder: (context, index) {
-                        return MemberArticleItem(
-                          item: res.article!.item![index],
-                        );
-                      },
-                      itemCount: isVertical ? 1 : res.article!.item!.length,
+                    SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: 98,
+                        child: MemberArticleItem(
+                          item: res.article!.item!.first,
+                        ),
+                      ),
                     ),
                   ],
                   if (res.audios?.item?.isNotEmpty == true) ...[
@@ -206,7 +205,7 @@ class _MemberHomeState extends State<MemberHome>
                           item: res.audios!.item![index],
                         );
                       },
-                      itemCount: isVertical ? 1 : min(2, res.audios!.count!),
+                      itemCount: isVertical ? 1 : min(3, res.audios!.count!),
                     ),
                   ],
                   if (res.comic?.item?.isNotEmpty == true) ...[
@@ -222,7 +221,7 @@ class _MemberHomeState extends State<MemberHome>
                       itemBuilder: (context, index) {
                         return MemberComicItem(item: res.comic!.item![index]);
                       },
-                      itemCount: isVertical ? 1 : min(2, res.comic!.count!),
+                      itemCount: isVertical ? 1 : min(3, res.comic!.count!),
                     ),
                   ],
                   if (res.season?.item?.isNotEmpty == true) ...[
