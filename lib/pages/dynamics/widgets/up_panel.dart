@@ -16,6 +16,7 @@ class UpPanel extends StatefulWidget {
     required this.dynamicsController,
     super.key,
   });
+
   final DynamicsController dynamicsController;
 
   @override
@@ -141,10 +142,49 @@ class _UpPanelState extends State<UpPanel> {
   Widget upItemBuild(ThemeData theme, UpItem data) {
     final currentMid = controller.currentMid;
     final isLive = data is LiveUserItem;
-    bool isCurrent = isLive || currentMid == data.mid || currentMid == -1;
+    final isCurrent = isLive || currentMid == data.mid || currentMid == -1;
 
     final isAll = data.mid == -1;
     void toMemberPage() => Get.toNamed('/member?mid=${data.mid}');
+
+    Widget avatar;
+    if (isAll) {
+      avatar = const CircleAvatar(
+        backgroundColor: Color(0xFF5CB67B),
+        backgroundImage: AssetImage('assets/images/logo/logo.png'),
+      );
+    } else {
+      avatar = Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: NetworkImgLayer(
+              width: 38,
+              height: 38,
+              src: data.face,
+              type: ImageType.avatar,
+            ),
+          ),
+          Positioned(
+            top: isLive && !isTop ? -5 : 0,
+            right: isLive ? -6 : 4,
+            child: Badge(
+              smallSize: 8,
+              label: isLive ? const Text(' Live ') : null,
+              textColor: theme.colorScheme.onSecondaryContainer,
+              alignment: AlignmentDirectional.topStart,
+              isLabelVisible: isLive || (data.hasUpdate ?? false),
+              backgroundColor: isLive
+                  ? theme.colorScheme.secondaryContainer.withValues(
+                      alpha: 0.75,
+                    )
+                  : theme.colorScheme.primary,
+            ),
+          ),
+        ],
+      );
+    }
 
     return SizedBox(
       height: 76,
@@ -152,63 +192,23 @@ class _UpPanelState extends State<UpPanel> {
       child: InkWell(
         onTap: () {
           feedBack();
-          switch (data) {
-            case LiveUserItem():
-              PageUtils.toLiveRoom(data.roomId);
-            case UpItem():
-              _onSelect(data);
-              break;
+          if (isLive) {
+            PageUtils.toLiveRoom(data.roomId);
+          } else {
+            _onSelect(data);
           }
         },
         // onDoubleTap: isLive ? () => _onSelect(data) : null,
         onLongPress: !isAll ? toMemberPage : null,
         onSecondaryTap: !isAll && !Utils.isMobile ? toMemberPage : null,
-        child: AnimatedOpacity(
+        child: Opacity(
           opacity: isCurrent ? 1 : 0.6,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeInOut,
           child: Column(
+            spacing: 4,
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: data.face != ''
-                        ? NetworkImgLayer(
-                            width: 38,
-                            height: 38,
-                            src: data.face,
-                            type: ImageType.avatar,
-                          )
-                        : const CircleAvatar(
-                            backgroundColor: Color(0xFF5CB67B),
-                            backgroundImage: AssetImage(
-                              'assets/images/logo/logo.png',
-                            ),
-                          ),
-                  ),
-                  Positioned(
-                    top: isLive && !isTop ? -5 : 0,
-                    right: isLive ? -6 : 4,
-                    child: Badge(
-                      smallSize: 8,
-                      label: isLive ? const Text(' Live ') : null,
-                      textColor: theme.colorScheme.onSecondaryContainer,
-                      alignment: AlignmentDirectional.topStart,
-                      isLabelVisible: isLive || (data.hasUpdate ?? false),
-                      backgroundColor: isLive
-                          ? theme.colorScheme.secondaryContainer.withValues(
-                              alpha: 0.75,
-                            )
-                          : theme.colorScheme.primary,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
+              avatar,
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: Text(
