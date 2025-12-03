@@ -13,6 +13,7 @@ class DownloadManager {
   final void Function([Object? error]) onDone;
 
   DownloadStatus _status = DownloadStatus.downloading;
+
   DownloadStatus get status => _status;
   final _cancelToken = CancelToken();
   late Future<void> task;
@@ -78,11 +79,16 @@ class DownloadManager {
       onReceiveProgress?.call(0, contentLength);
     }
 
+    int? last;
     try {
       await for (final chunk in data.stream) {
         sink.add(chunk);
         received += chunk.length;
-        onReceiveProgress?.call(received, contentLength);
+        final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+        if (last != now) {
+          last = now;
+          onReceiveProgress?.call(received, contentLength);
+        }
       }
       await sink.close();
       _status = DownloadStatus.completed;
