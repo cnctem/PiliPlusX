@@ -63,7 +63,7 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
       final index = res.response?.indexWhere((e) => e.bvid == _bvid) ?? -1;
       if (index != -1) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          _controller.scrollController.jumpTo(100.0 * index + 40);
+          _controller.scrollController.jumpTo(100.0 * index);
         });
       }
     }
