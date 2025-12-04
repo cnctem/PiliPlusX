@@ -35,7 +35,7 @@ class _FavSortPageState extends State<FavSortPage> {
         if (_favDetailController.loadingState.value.isSuccess) {
           List<FavDetailItemModel> list =
               _favDetailController.loadingState.value.data!;
-          sortList.addAll(list.sublist(sortList.length));
+          sortList.addAll(list.skip(sortList.length));
           if (mounted) {
             setState(() {});
           }

@@ -1025,7 +1025,7 @@ List<SettingsModel> get extraSettings => [
             title: '动态展示',
             value: Pref.defaultDynamicType,
             values: DynamicsTabType.values
-                .sublist(0, 4)
+                .take(4)
                 .map((e) => (e.index, e.label))
                 .toList(),
           );

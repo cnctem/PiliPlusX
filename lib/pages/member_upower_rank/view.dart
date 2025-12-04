@@ -141,7 +141,7 @@ class _UpowerRankPageState extends State<UpowerRankPage>
                                           builder: (context) => child,
                                         ),
                                         ...tabs
-                                            .sublist(1)
+                                            .skip(1)
                                             .map(
                                               (e) => UpowerRankPage(
                                                 upMid: _upMid,
