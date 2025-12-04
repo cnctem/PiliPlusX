@@ -64,7 +64,7 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
         children: [
           ListTile(
             onTap: () async {
-              ThemeType? result = await showDialog(
+              final result = await showDialog<ThemeType>(
                 context: context,
                 builder: (context) {
                   return SelectDialog<ThemeType>(

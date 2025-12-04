@@ -56,7 +56,7 @@ List<SettingsModel> get videoSettings => [
     getSubtitle: () =>
         '当前使用：${VideoUtils.cdnService.desc}，部分 CDN 可能失效，如无法播放请尝试切换',
     onTap: (setState) async {
-      CDNService? result = await showDialog(
+      final result = await showDialog<CDNService>(
         context: Get.context!,
         builder: (context) {
           return const CdnSelectDialog();
@@ -145,7 +145,7 @@ List<SettingsModel> get videoSettings => [
     getSubtitle: () =>
         '当前画质：${VideoQuality.fromCode(Pref.defaultVideoQa).desc}',
     onTap: (setState) async {
-      int? result = await showDialog(
+      final result = await showDialog<int>(
         context: Get.context!,
         builder: (context) {
           return SelectDialog<int>(
@@ -168,7 +168,7 @@ List<SettingsModel> get videoSettings => [
     getSubtitle: () =>
         '当前画质：${VideoQuality.fromCode(Pref.defaultVideoQaCellular).desc}',
     onTap: (setState) async {
-      int? result = await showDialog(
+      final result = await showDialog<int>(
         context: Get.context!,
         builder: (context) {
           return SelectDialog<int>(
@@ -194,7 +194,7 @@ List<SettingsModel> get videoSettings => [
     getSubtitle: () =>
         '当前音质：${AudioQuality.fromCode(Pref.defaultAudioQa).desc}',
     onTap: (setState) async {
-      int? result = await showDialog(
+      final result = await showDialog<int>(
         context: Get.context!,
         builder: (context) {
           return SelectDialog<int>(
@@ -217,7 +217,7 @@ List<SettingsModel> get videoSettings => [
     getSubtitle: () =>
         '当前音质：${AudioQuality.fromCode(Pref.defaultAudioQaCellular).desc}',
     onTap: (setState) async {
-      int? result = await showDialog(
+      final result = await showDialog<int>(
         context: Get.context!,
         builder: (context) {
           return SelectDialog<int>(
@@ -242,7 +242,7 @@ List<SettingsModel> get videoSettings => [
     leading: const Icon(Icons.video_settings_outlined),
     getSubtitle: () => '当前画质：${LiveQuality.fromCode(Pref.liveQuality)?.desc}',
     onTap: (setState) async {
-      int? result = await showDialog(
+      final result = await showDialog<int>(
         context: Get.context!,
         builder: (context) {
           return SelectDialog<int>(
@@ -265,7 +265,7 @@ List<SettingsModel> get videoSettings => [
     getSubtitle: () =>
         '当前画质：${LiveQuality.fromCode(Pref.liveQualityCellular)?.desc}',
     onTap: (setState) async {
-      int? result = await showDialog(
+      final result = await showDialog<int>(
         context: Get.context!,
         builder: (context) {
           return SelectDialog<int>(
@@ -288,7 +288,7 @@ List<SettingsModel> get videoSettings => [
     getSubtitle: () =>
         '首选解码格式：${VideoDecodeFormatType.fromCode(Pref.defaultDecode).description}，请根据设备支持情况与需求调整',
     onTap: (setState) async {
-      String? result = await showDialog(
+      final result = await showDialog<String>(
         context: Get.context!,
         builder: (context) {
           return SelectDialog<String>(
@@ -313,7 +313,7 @@ List<SettingsModel> get videoSettings => [
         '非杜比视频次选：${VideoDecodeFormatType.fromCode(Pref.secondDecode).description}，仍无则选择首个提供的解码格式',
     leading: const Icon(Icons.swap_horizontal_circle_outlined),
     onTap: (setState) async {
-      String? result = await showDialog(
+      final result = await showDialog<String>(
         context: Get.context!,
         builder: (context) {
           return SelectDialog<String>(
@@ -355,7 +355,7 @@ List<SettingsModel> get videoSettings => [
     leading: const Icon(Icons.view_timeline_outlined),
     getSubtitle: () => '当前：${Pref.videoSync}（此项即mpv的--video-sync）',
     onTap: (setState) async {
-      String? result = await showDialog(
+      final result = await showDialog<String>(
         context: Get.context!,
         builder: (context) {
           return SelectDialog<String>(

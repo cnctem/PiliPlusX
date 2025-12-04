@@ -678,10 +678,11 @@ abstract class Pref {
   static bool get enableMYBar =>
       _setting.get(SettingBoxKey.enableMYBar, defaultValue: true);
 
-  static int get pageTransition => _setting.get(
-    SettingBoxKey.pageTransition,
-    defaultValue: Transition.native.index,
-  );
+  static Transition get pageTransition =>
+      Transition.values[_setting.get(
+        SettingBoxKey.pageTransition,
+        defaultValue: Transition.native.index,
+      )];
 
   static bool get enableQuickDouble =>
       _setting.get(SettingBoxKey.enableQuickDouble, defaultValue: true);

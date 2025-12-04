@@ -137,7 +137,7 @@ List<SettingsModel> get playSettings => [
     getSubtitle: () =>
         '当前选择偏好：${SubtitlePrefType.values[Pref.subtitlePreferenceV2].desc}',
     onTap: (setState) async {
-      int? result = await showDialog(
+      final result = await showDialog<int>(
         context: Get.context!,
         builder: (context) {
           return SelectDialog<int>(
@@ -284,7 +284,7 @@ List<SettingsModel> get playSettings => [
     getSubtitle: () =>
         '当前全屏方向：${FullScreenMode.values[Pref.fullScreenMode].desc}',
     onTap: (setState) async {
-      int? result = await showDialog(
+      final result = await showDialog<int>(
         context: Get.context!,
         builder: (context) {
           return SelectDialog<int>(
@@ -309,7 +309,7 @@ List<SettingsModel> get playSettings => [
     getSubtitle: () =>
         '当前展示方式：${BtmProgressBehavior.values[Pref.btmProgressBehavior].desc}',
     onTap: (setState) async {
-      int? result = await showDialog(
+      final result = await showDialog<int>(
         context: Get.context!,
         builder: (context) {
           return SelectDialog<int>(

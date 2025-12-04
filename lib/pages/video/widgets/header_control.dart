@@ -1156,7 +1156,7 @@ class HeaderControlState extends State<HeaderControl>
                     ),
                     onTap: () async {
                       Get.back();
-                      CDNService? result = await showDialog(
+                      final result = await showDialog<CDNService>(
                         context: context,
                         builder: (context) {
                           return CdnSelectDialog(

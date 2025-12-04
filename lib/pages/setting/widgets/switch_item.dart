@@ -91,7 +91,9 @@ class _SetSwitchItemState extends State<SetSwitchItem> {
                 );
                 val = true;
                 SmartDialog.showToast('重启生效');
-                setState(() {});
+                if (mounted) {
+                  setState(() {});
+                }
               },
               child: const Text('确认'),
             ),
@@ -113,7 +115,9 @@ class _SetSwitchItemState extends State<SetSwitchItem> {
     if (widget.needReboot) {
       SmartDialog.showToast('重启生效');
     }
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
