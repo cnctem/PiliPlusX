@@ -294,6 +294,11 @@ class MainController extends GetxController
         checkUnread();
       } else if (currentNav == NavigationBarType.dynamics) {
         setDynCount();
+      } else if (currentNav == NavigationBarType.mine) {
+        // 检查是否默认打开稍后再看
+        if (Pref.defaultShowWatchLater && accountService.isLogin.value) {
+          Get.toNamed('/later');
+        }
       }
     } else {
       int now = DateTime.now().millisecondsSinceEpoch;

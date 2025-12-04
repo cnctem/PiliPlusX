@@ -21,7 +21,11 @@ class Owner implements BaseOwner {
   String? face;
 
   Owner.fromJson(Map<String, dynamic> json) {
-    mid = Utils.safeToInt(json["mid"]);
+    mid = switch (json["mid"]) {
+      int e => e,
+      String e => int.tryParse(e),
+      _ => null,
+    };
     name = json["name"];
     face = json['face'];
   }

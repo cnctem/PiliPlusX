@@ -1,3 +1,4 @@
+import 'package:PiliPlus/http/api.dart';
 import 'package:PiliPlus/http/fav.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/pgc.dart';
@@ -19,7 +20,8 @@ class PgcController
   final HomeTabType tabType;
 
   late final showPgcTimeline =
-      tabType == HomeTabType.bangumi && Pref.showPgcTimeline;
+      (tabType == HomeTabType.bangumi || tabType == HomeTabType.hk_bangumi)
+          && Pref.showPgcTimeline;
 
   AccountService accountService = Get.find<AccountService>();
 
@@ -64,9 +66,13 @@ class PgcController
       LoadingState<List<TimelineResult>?>.loading().obs;
 
   Future<void> queryPgcTimeline() async {
+    String apiUrl = Api.pgcTimeline;
+    if (tabType == HomeTabType.hk_bangumi && Pref.apiHKUrl.isNotEmpty) {
+      apiUrl = Pref.apiHKUrl+ Api.pgcTimeline;
+    }
     final res = await Future.wait([
-      PgcHttp.pgcTimeline(types: 1, before: 6, after: 6),
-      PgcHttp.pgcTimeline(types: 4, before: 6, after: 6),
+      PgcHttp.pgcTimeline(types: 1, before: 6, after: 6,apiUrl:apiUrl),
+      PgcHttp.pgcTimeline(types: 4, before: 6, after: 6,apiUrl:Api.pgcTimeline),
     ]);
     var list1 = res.first.dataOrNull;
     var list2 = res[1].dataOrNull;
@@ -93,7 +99,7 @@ class PgcController
     followLoading = true;
     var res = await FavHttp.favPgc(
       mid: accountService.mid,
-      type: tabType == HomeTabType.bangumi ? 1 : 2,
+      type: tabType == HomeTabType.bangumi || tabType == HomeTabType.hk_bangumi ? 1 : 2,
       pn: followPage,
     );
 
@@ -132,10 +138,24 @@ class PgcController
   }
 
   @override
-  Future<LoadingState<List<PgcIndexItem>?>> customGetData() => PgcHttp.pgcIndex(
-    page: page,
-    indexType: tabType == HomeTabType.cinema ? 102 : null,
-  );
+  Future<LoadingState<List<PgcIndexItem>?>> customGetData() async {
+    String apiUrl = Api.pgcIndexResult;
+    if (tabType == HomeTabType.hk_bangumi) {
+      if (Pref.apiHKUrl.isEmpty) {
+        return const Error('请在 设置-其他设置-港澳台代理 中设置代理服务器');
+      }
+      apiUrl = Pref.apiHKUrl+ Api.pgcIndexResult;
+    }
+
+    return PgcHttp.pgcIndex(
+      page: page,
+      indexType: tabType == HomeTabType.cinema ? 102 : null,
+      apiUrl: apiUrl,
+    );
+  }
+
+
+
 
   @override
   void onClose() {

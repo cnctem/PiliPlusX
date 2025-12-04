@@ -1,6 +1,7 @@
 import 'package:PiliPlus/http/api.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
+import 'package:PiliPlus/models/common/home_tab_type.dart';
 import 'package:PiliPlus/models/common/pgc_review_type.dart';
 import 'package:PiliPlus/models_new/pgc/pgc_index_condition/data.dart';
 import 'package:PiliPlus/models_new/pgc/pgc_index_result/data.dart';
@@ -60,9 +61,10 @@ class PgcHttp {
   static Future<LoadingState<List<PgcIndexItem>?>> pgcIndex({
     int? page,
     int? indexType,
+    required String apiUrl,
   }) async {
     var res = await Request().get(
-      Api.pgcIndexResult,
+      apiUrl,
       queryParameters: {
         'st': 1,
         'order': 3,
@@ -94,9 +96,10 @@ class PgcHttp {
     int types = 1, // 1：`番剧`<br />3：`电影`<br />4：`国创` |
     required int before,
     required int after,
+    required String apiUrl,
   }) async {
     var res = await Request().get(
-      Api.pgcTimeline,
+      apiUrl,
       queryParameters: {
         'types': types,
         'before': before,

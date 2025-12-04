@@ -466,6 +466,15 @@ List<SettingsModel> get extraSettings => [
       DynamicsDataModel.enableFilter = value.pattern.isNotEmpty;
     },
   ),
+  if (Platform.isAndroid) ...[
+    getSaveImgPathModel(
+      context: Get.context!,
+      title: '图片&截图 保存路径',
+      key1: SettingBoxKey.saveImgPath,
+      key2: SettingBoxKey.saveScreenshotPath,
+      suffix: 'bili',
+    ),
+  ],
   const SettingsModel(
     settingsType: SettingsType.sw1tch,
     title: '使用外部浏览器打开链接',
@@ -484,10 +493,10 @@ List<SettingsModel> get extraSettings => [
         context: Get.context!,
         builder: (context) {
           return SlideDialog(
-            title: '刷新滑动距离',
-            min: 0.1,
+            title: '刷新滑动距离(默认0.25)',
+            min: 0,
             max: 0.5,
-            divisions: 8,
+            divisions: 10,
             precise: 2,
             value: Pref.refreshDragPercentage,
             suffix: 'x',
@@ -845,8 +854,9 @@ List<SettingsModel> get extraSettings => [
     subtitle: '点击设置默认收藏夹\n点按收藏至默认，长按选择文件夹',
     leading: const Icon(Icons.bookmark_add_outlined),
     setKey: SettingBoxKey.enableQuickFav,
-    onTap: () async {
-      if (Accounts.main.isLogin) {
+    defaultVal: false,
+    onChanged: (value) async {
+      if (value && Accounts.main.isLogin) {
         final res = await FavHttp.allFavFolders(Accounts.main.mid);
         if (res.isSuccess) {
           final list = res.data.list;
@@ -886,7 +896,72 @@ List<SettingsModel> get extraSettings => [
         }
       }
     },
+  ),
+  SettingsModel(
+    settingsType: SettingsType.sw1tch,
+    title: '快速分享给指定用户',
+    subtitle: '长按分享触发，点击指定用户',
+    leading: const Icon(FontAwesomeIcons.shareFromSquare),
+    setKey: SettingBoxKey.enableQuickShare,
     defaultVal: false,
+    onChanged: (value) async {
+      if (value && Accounts.main.isLogin) {
+        final TextEditingController controller = TextEditingController();
+        final quickShareId = Pref.quickShareId;
+        if (quickShareId != null && quickShareId != 1004428694) {
+          controller.text = quickShareId.toString();
+        }
+        final result = await Get.dialog(
+          AlertDialog(
+            title: const Text('默认分享对象的mid'),
+            content: TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                hintText: '空白默认为开发者mid',
+              ),
+              keyboardType: TextInputType.number,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Get.back(result: false);
+                },
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Get.back(result: true);
+                },
+                child: const Text('确定'),
+              ),
+            ],
+          ),
+        );
+        
+        if (result == true) {
+          final inputText = controller.text.trim();
+          if (inputText.isEmpty) {
+            // 如果为空，使用默认值
+            await GStorage.setting.put(SettingBoxKey.quickShareId, 1004428694);
+            SmartDialog.showToast('设置成功');
+          } else {
+            final mid = int.tryParse(inputText);
+            if (mid != null) {
+              // 如果是有效的整数，保存
+              await GStorage.setting.put(SettingBoxKey.quickShareId, mid);
+              SmartDialog.showToast('设置成功');
+            } else {
+              // 如果不是有效的整数，显示错误并关闭选项
+              SmartDialog.showToast('请输入正确mid');
+              await GStorage.setting.put(SettingBoxKey.enableQuickShare, false);
+            }
+          }
+        } else {
+          // 用户点击取消，关闭选项
+          await GStorage.setting.put(SettingBoxKey.enableQuickShare, false);
+        }
+      }
+    },
   ),
   SettingsModel(
     settingsType: SettingsType.sw1tch,
@@ -984,6 +1059,20 @@ List<SettingsModel> get extraSettings => [
       }
     },
   ),
+  const SettingsModel(
+    settingsType: SettingsType.sw1tch,
+    title: '长按展示视频卡片替换为加入稍后再看',
+    leading: const Icon(Icons.watch_later_outlined),
+    setKey: SettingBoxKey.defaultAddWatchLater,
+    defaultVal: false,
+  ),
+  const SettingsModel(
+    settingsType: SettingsType.sw1tch,
+    title: '"我的"页默认打开稍后再看',
+    leading: const Icon(Icons.watch_later_outlined),
+    setKey: SettingBoxKey.defaultShowWatchLater,
+    defaultVal: false,
+  ),
   SettingsModel(
     settingsType: SettingsType.normal,
     title: '评论展示',
@@ -1068,82 +1157,6 @@ List<SettingsModel> get extraSettings => [
     defaultVal: false,
     onChanged: (value) => MemberTabType.showMemberShop = value,
   ),
-  SettingsModel(
-    settingsType: SettingsType.sw1tch,
-    onTap: () {
-      String systemProxyHost = Pref.systemProxyHost;
-      String systemProxyPort = Pref.systemProxyPort;
-
-      showDialog(
-        context: Get.context!,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('设置代理'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(height: 6),
-                TextFormField(
-                  initialValue: systemProxyHost,
-                  decoration: const InputDecoration(
-                    isDense: true,
-                    labelText: '请输入Host，使用 . 分割',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(6)),
-                    ),
-                  ),
-                  onChanged: (e) => systemProxyHost = e,
-                ),
-                const SizedBox(height: 10),
-                TextFormField(
-                  initialValue: systemProxyPort,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    isDense: true,
-                    labelText: '请输入Port',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(6)),
-                    ),
-                  ),
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  onChanged: (e) => systemProxyPort = e,
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: Get.back,
-                child: Text(
-                  '取消',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  Get.back();
-                  GStorage.setting.put(
-                    SettingBoxKey.systemProxyHost,
-                    systemProxyHost,
-                  );
-                  GStorage.setting.put(
-                    SettingBoxKey.systemProxyPort,
-                    systemProxyPort,
-                  );
-                },
-                child: const Text('确认'),
-              ),
-            ],
-          );
-        },
-      );
-    },
-    leading: const Icon(Icons.airplane_ticket_outlined),
-    title: '设置代理',
-    subtitle: '设置代理 host:port',
-    setKey: SettingBoxKey.enableSystemProxy,
-  ),
   const SettingsModel(
     settingsType: SettingsType.sw1tch,
     title: '自动清除缓存',
@@ -1216,6 +1229,150 @@ List<SettingsModel> get extraSettings => [
         Update.checkUpdate(false);
       }
     },
+  ),
+
+  SettingsModel(
+    settingsType: SettingsType.sw1tch,
+    title: '设置代理',
+    subtitle: '设置代理 host:port',
+    leading: const Icon(Icons.airplane_ticket_outlined),
+    setKey: SettingBoxKey.enableSystemProxy,
+    onChanged: (value) {
+      if (value) {
+        String systemProxyHost = Pref.systemProxyHost;
+        String systemProxyPort = Pref.systemProxyPort;
+
+        showDialog(
+          context: Get.context!,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('设置代理'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 6),
+                  TextFormField(
+                    initialValue: systemProxyHost,
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      labelText: '请输入Host，使用 . 分割',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(6)),
+                      ),
+                    ),
+                    onChanged: (e) => systemProxyHost = e,
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    initialValue: systemProxyPort,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      labelText: '请输入Port',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(6)),
+                      ),
+                    ),
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    onChanged: (e) => systemProxyPort = e,
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: Get.back,
+                  child: Text(
+                    '取消',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Get.back();
+                    GStorage.setting.put(
+                      SettingBoxKey.systemProxyHost,
+                      systemProxyHost,
+                    );
+                    GStorage.setting.put(
+                      SettingBoxKey.systemProxyPort,
+                      systemProxyPort,
+                    );
+                  },
+                  child: const Text('确认'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    },
+  ),
+  
+  SettingsModel(
+    settingsType: SettingsType.normal,
+    title: '设置港澳台代理',
+    getSubtitle: () {
+      final url = Pref.apiHKUrl;
+      return '当前港澳台代理: 「${url == '' ? '不代理' : Pref.apiHKUrl}」';
+    },
+    onTap: (setState) {
+      showDialog(
+        context: Get.context!,
+        builder: (context) {
+          String valueStr = '';
+          return AlertDialog(
+            title: const Text('港澳台代理链接'),
+            content: TextField(
+              autofocus: true,
+              onChanged: (value) => valueStr = value,
+              keyboardType: TextInputType.url,
+              decoration: const InputDecoration(
+                hintText: '请输入URL如:https://app.bilibili.com',
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: Get.back,
+                child: Text(
+                  '取消',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () async {
+                  if (!valueStr.isNotEmpty) {
+                    Get.snackbar('格式错误', '代理链接不能为空');
+                    return;
+                  }
+                  if (!valueStr.toLowerCase().startsWith('http')) {
+                    Get.snackbar('格式错误', '代理链接格式错误');
+                    return;
+                  }
+
+                  if (valueStr.toLowerCase().endsWith('/')) {
+                    Get.snackbar('格式错误', '末尾不能有/');
+                    return;
+                  }
+
+                  Get.back();
+                  await GStorage.setting.put(
+                    SettingBoxKey.apiHKUrl,
+                    valueStr,
+                  );
+                  setState();
+                },
+                child: const Text('确定'),
+              ),
+            ],
+          );
+        },
+      );
+    },
+    leading: const Icon(Icons.sailing_rounded),
   ),
 ];
 

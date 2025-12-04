@@ -9,6 +9,7 @@ import 'package:PiliPlus/pages/search/widgets/search_text.dart';
 import 'package:PiliPlus/pages/video/ai_conclusion/view.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';
 import 'package:PiliPlus/utils/accounts.dart';
+import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -66,6 +67,19 @@ class VideoPopupMenu extends StatelessWidget {
                           ],
                         ),
                         () => Utils.copyText(videoItem.bvid!),
+                      ),
+                      _VideoCustomAction(
+                        '保存封面图',
+                        const Icon(MdiIcons.image, size: 16),
+                        () async {
+                          bool saveStatus = await ImageUtils.downloadImg(
+                            context,
+                            [videoItem.cover!],
+                          );
+                          if (saveStatus) {
+                            SmartDialog.dismiss();
+                          }
+                        },
                       ),
                       _VideoCustomAction(
                         '稍后再看',

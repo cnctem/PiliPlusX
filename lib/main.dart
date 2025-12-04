@@ -12,6 +12,12 @@ import 'package:PiliPlus/services/account_service.dart';
 import 'package:PiliPlus/services/download/download_service.dart';
 import 'package:PiliPlus/services/logger.dart';
 import 'package:PiliPlus/services/service_locator.dart';
+import 'package:PiliPlus/models/common/nav_bar_config.dart';
+import 'package:PiliPlus/pages/common/common_controller.dart';
+import 'package:PiliPlus/pages/dynamics/controller.dart';
+import 'package:PiliPlus/pages/home/controller.dart';
+import 'package:PiliPlus/pages/main/controller.dart';
+
 import 'package:PiliPlus/utils/app_scheme.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
 import 'package:PiliPlus/utils/calc_window_position.dart';
@@ -24,6 +30,8 @@ import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/theme_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/utils/platform_shortcuts.dart';
+import 'package:PiliPlus/utils/window_control.dart';
 import 'package:catcher_2/catcher_2.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
@@ -139,7 +147,7 @@ void main() async {
     await windowManager.ensureInitialized();
 
     WindowOptions windowOptions = WindowOptions(
-      minimumSize: const Size(400, 720),
+      minimumSize: const Size(140, 140),
       skipTaskbar: false,
       titleBarStyle: Pref.showWindowTitleBar
           ? TitleBarStyle.normal
@@ -154,6 +162,11 @@ void main() async {
       if (Pref.isWindowMaximized) await windowManager.maximize();
       await windowManager.show();
       await windowManager.focus();
+      
+      // Restore window from minimized state on Windows
+      if (Platform.isWindows) {
+        await WindowControl.restoreWindow();
+      }
     });
   }
 
@@ -249,6 +262,7 @@ class MyApp extends StatelessWidget {
             variant: variant,
             // dynamicSchemeVariant: dynamicSchemeVariant,
             // tones: FlexTones.soft(Brightness.light),
+            useExpressiveOnContainerColors: false,
           );
           darkColorScheme = SeedColorScheme.fromSeeds(
             primaryKey: brandColor,
@@ -256,6 +270,7 @@ class MyApp extends StatelessWidget {
             variant: variant,
             // dynamicSchemeVariant: dynamicSchemeVariant,
             // tones: FlexTones.soft(Brightness.dark),
+            useExpressiveOnContainerColors: false,
           );
         }
 
@@ -334,6 +349,13 @@ class MyApp extends StatelessWidget {
                 return Focus(
                   canRequestFocus: false,
                   onKeyEvent: (_, event) {
+                    // 处理刷新快捷键
+                    final refreshResult = _handleRefreshKey(event);
+                    if (refreshResult != null) {
+                      return refreshResult;
+                    }
+                    
+                    // 处理Escape键返回功能
                     if (event.logicalKey == LogicalKeyboardKey.escape &&
                         event is KeyDownEvent) {
                       onBack();
@@ -368,6 +390,67 @@ class MyApp extends StatelessWidget {
         );
       }),
     );
+  }
+}
+
+// 处理刷新快捷键
+KeyEventResult? _handleRefreshKey(KeyEvent event) {
+  if (event is! KeyDownEvent) return null;
+
+  // 1. 先匹配字母 R
+  if (event.logicalKey != LogicalKeyboardKey.keyR) {
+    return null;
+  }
+
+  // 2. 再判断本平台的"主修饰键"是否按下
+  if (!isPrimaryModifierPressed) return null;
+
+  // 3. 防止 Shift/Alt/等其它修饰符干扰（可选）
+  if (HardwareKeyboard.instance.isShiftPressed ||
+      HardwareKeyboard.instance.isAltPressed) {
+    return null;
+  }
+
+  // 4. 真正干活
+  _handleRefreshShortcut();
+  return KeyEventResult.handled;
+}
+
+// 处理Control+R快捷键刷新
+void _handleRefreshShortcut() {
+  // 获取当前路由
+  final context = Get.context;
+  if (context == null) return;
+
+  // 尝试获取当前页面的控制器
+  final currentController = _getCurrentPageController();
+  if (currentController != null) {
+    // 如果当前控制器有onRefresh方法，则调用它
+    if (currentController is ScrollOrRefreshMixin) {
+      currentController.onRefresh();
+    }
+  }
+}
+
+// 获取当前页面的控制器
+dynamic _getCurrentPageController() {
+  try {
+    // 获取主页控制器
+    final mainController = Get.find<MainController>();
+    final currentIndex = mainController.selectedIndex.value;
+
+    // 根据当前索引获取对应的控制器
+    if (mainController.navigationBars[currentIndex] == NavigationBarType.home) {
+      final homeController = Get.find<HomeController>();
+      return homeController.controller;
+    } else if (mainController.navigationBars[currentIndex] ==
+        NavigationBarType.dynamics) {
+      return Get.find<DynamicsController>();
+    }
+
+    return null;
+  } catch (e) {
+    return null;
   }
 }
 

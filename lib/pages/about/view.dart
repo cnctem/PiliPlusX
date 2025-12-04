@@ -41,6 +41,8 @@ class AboutPage extends StatefulWidget {
 class _AboutPageState extends State<AboutPage> {
   final currentVersion =
       '${BuildConfig.versionName}+${BuildConfig.versionCode}';
+  final versionTag = 
+      '${BuildConfig.versionTag}+${BuildConfig.versionCode}';
   RxString cacheSize = ''.obs;
 
   late int _pressCount = 0;
@@ -108,7 +110,7 @@ class _AboutPageState extends State<AboutPage> {
               child: Image.asset(
                 width: 150,
                 height: 150,
-                'assets/images/logo/logo.png',
+                'assets/images/logo/logo_X.png',
               ),
             ),
           ),
@@ -143,7 +145,7 @@ class _AboutPageState extends State<AboutPage> {
             title: const Text('当前版本'),
             leading: const Icon(Icons.commit_outlined),
             trailing: Text(
-              currentVersion,
+              versionTag,
               style: subTitleStyle,
             ),
           ),
@@ -167,6 +169,12 @@ Commit Hash: ${BuildConfig.commitHash}''',
             thickness: 1,
             height: 30,
             color: theme.colorScheme.outlineVariant,
+          ),
+          ListTile(
+            onTap: () => PageUtils.launchURL(Constants.upstreamCodeUrl),
+            leading: const Icon(Icons.code),
+            title: const Text('Upstream Code'),
+            subtitle: Text(Constants.upstreamCodeUrl, style: subTitleStyle),
           ),
           ListTile(
             onTap: () => PageUtils.launchURL(Constants.sourceCodeUrl),

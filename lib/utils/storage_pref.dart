@@ -512,6 +512,11 @@ abstract class Pref {
     defaultValue: LiveQuality.superHD.code,
   );
 
+  static bool get useSystemFont => _setting.get(
+    SettingBoxKey.useSystemFont,
+    defaultValue: false,
+  );
+
   static int get appFontWeight =>
       _setting.get(SettingBoxKey.appFontWeight, defaultValue: -1);
 
@@ -520,6 +525,9 @@ abstract class Pref {
 
   static int get fastForBackwardDuration =>
       _setting.get(SettingBoxKey.fastForBackwardDuration, defaultValue: 10);
+
+  static int get fastForBackwardDuration_ =>
+      _setting.get(SettingBoxKey.fastForBackwardDuration_, defaultValue: 10);
 
   static bool get recordSearchHistory =>
       _setting.get(SettingBoxKey.recordSearchHistory, defaultValue: true);
@@ -541,6 +549,9 @@ abstract class Pref {
 
   static num get maxCacheSize =>
       _setting.get(SettingBoxKey.maxCacheSize) ?? pow(1024, 3);
+
+  static String get apiHKUrl =>
+      _setting.get(SettingBoxKey.apiHKUrl, defaultValue: '');
 
   static bool get optTabletNav =>
       _setting.get(SettingBoxKey.optTabletNav, defaultValue: true);
@@ -645,6 +656,9 @@ abstract class Pref {
 
   static bool get enableQuickFav =>
       _setting.get(SettingBoxKey.enableQuickFav, defaultValue: false);
+
+  static bool get enableQuickShare =>
+      _setting.get(SettingBoxKey.enableQuickShare, defaultValue: false);
 
   static bool get p1080 =>
       _setting.get(SettingBoxKey.p1080, defaultValue: true);
@@ -756,6 +770,12 @@ abstract class Pref {
   static bool get defaultShowComment =>
       _setting.get(SettingBoxKey.defaultShowComment, defaultValue: false);
 
+  static bool get defaultShowWatchLater =>
+      _setting.get(SettingBoxKey.defaultShowWatchLater, defaultValue: false);
+
+  static bool get defaultAddWatchLater =>
+      _setting.get(SettingBoxKey.defaultAddWatchLater, defaultValue: false);
+
   static bool get enableTrending =>
       _setting.get(SettingBoxKey.enableHotKey, defaultValue: true);
 
@@ -785,6 +805,8 @@ abstract class Pref {
       _localCache.get(LocalCacheKey.historyPause, defaultValue: false);
 
   static int? get quickFavId => _setting.get(SettingBoxKey.quickFavId);
+
+  static int? get quickShareId => _setting.get(SettingBoxKey.quickShareId);
 
   static bool get tempPlayerConf =>
       _setting.get(SettingBoxKey.tempPlayerConf, defaultValue: false);
@@ -869,6 +891,10 @@ abstract class Pref {
       _setting.get(SettingBoxKey.setSystemBrightness, defaultValue: false);
 
   static String? get downloadPath => _setting.get(SettingBoxKey.downloadPath);
+
+  static String? get saveImgPath => _setting.get(SettingBoxKey.saveImgPath);
+
+  static String? get saveScreenshotPath => _setting.get(SettingBoxKey.saveScreenshotPath);
 
   static String? get liveCdnUrl => _setting.get(SettingBoxKey.liveCdnUrl);
 
