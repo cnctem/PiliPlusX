@@ -52,7 +52,7 @@ class DownloadPageController extends GetxController
             ..cover = entry.cover
             ..sortKey = aSortKey;
         }
-        page.entrys.add(entry);
+        page.entries.add(entry);
       } else {
         list.add(
           DownloadPageInfo(
@@ -62,7 +62,7 @@ class DownloadPageController extends GetxController
             cover: entry.cover,
             sortKey: entry.sortKey,
             seasonType: entry.ep?.seasonType,
-            entrys: [entry],
+            entries: [entry],
           ),
         );
       }
@@ -82,7 +82,7 @@ class DownloadPageController extends GetxController
         final watchProgress = GStorage.watchProgress;
         for (var page in allChecked) {
           await watchProgress.deleteAll(
-            page.entrys.map((e) => e.cid.toString()),
+            page.entries.map((e) => e.cid.toString()),
           );
           await _downloadService.deletePage(
             pageDirPath: page.dirPath,

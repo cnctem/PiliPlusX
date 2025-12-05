@@ -224,7 +224,7 @@ class VideoDetailController extends GetxController
               this.videoHeight = minVideoHeight;
               animationController.forward(from: 1);
             } else if (currentHeight < minVideoHeightPrecise) {
-              // expande
+              // expand
               isExpanding = true;
               animationController.forward(from: currentHeight / minVideoHeight);
               this.videoHeight = minVideoHeight;
@@ -1729,7 +1729,7 @@ class VideoDetailController extends GetxController
 
   late final Rx<LoadingState<List<double>>?> dmTrend =
       Rx<LoadingState<List<double>>?>(null);
-  late final RxBool showDmTreandChart = true.obs;
+  late final RxBool showDmTrendChart = true.obs;
 
   Future<void> _getDmTrend() async {
     dmTrend.value = LoadingState<List<double>>.loading();

@@ -54,7 +54,7 @@ class LocalIntroController extends CommonIntroController {
     final controller = Get.find<DownloadPageController>();
     final list = <BiliDownloadEntryInfo>[];
     for (final e in controller.pages) {
-      final items = e.entrys..sort((a, b) => a.sortKey.compareTo(b.sortKey));
+      final items = e.entries..sort((a, b) => a.sortKey.compareTo(b.sortKey));
       final completed = items.where((e) => e.isCompleted);
       list.addAllIf(completed.isNotEmpty, completed);
       if (completed.length == 1) {

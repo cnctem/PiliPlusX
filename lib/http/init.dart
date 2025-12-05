@@ -22,7 +22,7 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 
 class Request {
   static const _gzipDecoder = GZipDecoder();
-  static const _brotilDecoder = BrotliDecoder();
+  static const _brotliDecoder = BrotliDecoder();
 
   static final Request _instance = Request._internal();
   static late AccountManager accountManager;
@@ -55,8 +55,8 @@ class Request {
 
   static Future<void> buvidActive(Account account) async {
     // 这样线程不安全, 但仍按预期进行
-    if (account.activited) return;
-    account.activited = true;
+    if (account.activated) return;
+    account.activated = true;
     try {
       // final html = await Request().get(Api.dynamicSpmPrefix,
       //     options: Options(extra: {'account': account}));
@@ -274,7 +274,7 @@ class Request {
     Map<String, List<String>> headers,
   ) => switch (headers['content-encoding']?.firstOrNull) {
     'gzip' => _gzipDecoder.decodeBytes(responseBytes),
-    'br' => _brotilDecoder.convert(responseBytes),
+    'br' => _brotliDecoder.convert(responseBytes),
     _ => responseBytes,
   };
 

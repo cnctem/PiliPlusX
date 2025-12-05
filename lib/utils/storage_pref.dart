@@ -333,11 +333,11 @@ abstract class Pref {
   static bool get showBangumiReply =>
       _setting.get(SettingBoxKey.showBangumiReply, defaultValue: true);
 
-  static bool get alwaysExapndIntroPanel =>
-      _setting.get(SettingBoxKey.alwaysExapndIntroPanel, defaultValue: false);
+  static bool get alwaysExpandIntroPanel =>
+      _setting.get(SettingBoxKey.alwaysExpandIntroPanel, defaultValue: false);
 
-  static bool get exapndIntroPanelH =>
-      _setting.get(SettingBoxKey.exapndIntroPanelH, defaultValue: false);
+  static bool get expandIntroPanelH =>
+      _setting.get(SettingBoxKey.expandIntroPanelH, defaultValue: false);
 
   static bool get horizontalSeasonPanel =>
       _setting.get(SettingBoxKey.horizontalSeasonPanel, defaultValue: false);
@@ -371,8 +371,8 @@ abstract class Pref {
   static int get subtitlePaddingB =>
       _setting.get(SettingBoxKey.subtitlePaddingB, defaultValue: 24);
 
-  static double get subtitleBgOpaticy =>
-      _setting.get(SettingBoxKey.subtitleBgOpaticy, defaultValue: 0.67);
+  static double get subtitleBgOpacity =>
+      _setting.get(SettingBoxKey.subtitleBgOpacity, defaultValue: 0.67);
 
   static double get subtitleStrokeWidth =>
       _setting.get(SettingBoxKey.subtitleStrokeWidth, defaultValue: 2.0);

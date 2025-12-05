@@ -25,7 +25,7 @@ import 'package:PiliPlus/models_new/video/video_detail/section.dart';
 import 'package:PiliPlus/models_new/video/video_detail/ugc_season.dart';
 import 'package:PiliPlus/models_new/video/video_shot/data.dart';
 import 'package:PiliPlus/pages/common/common_intro_controller.dart';
-import 'package:PiliPlus/pages/danmaku/dnamaku_model.dart';
+import 'package:PiliPlus/pages/danmaku/danmaku_model.dart';
 import 'package:PiliPlus/pages/live_room/widgets/bottom_control.dart'
     as live_bottom;
 import 'package:PiliPlus/pages/video/controller.dart';
@@ -419,7 +419,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
               width: widgetWidth,
               height: 30,
               tooltip: '高能进度条',
-              icon: videoDetailController.showDmTreandChart.value
+              icon: videoDetailController.showDmTrendChart.value
                   ? const Icon(
                       Icons.show_chart,
                       size: 22,
@@ -441,8 +441,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                         ),
                       ],
                     ),
-              onTap: () => videoDetailController.showDmTreandChart.value =
-                  !videoDetailController.showDmTreandChart.value,
+              onTap: () => videoDetailController.showDmTrendChart.value =
+                  !videoDetailController.showDmTrendChart.value,
             );
           }
           return const SizedBox.shrink();
@@ -765,14 +765,14 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           }
           final List<FormatItem> videoFormat = videoInfo.supportFormats!;
           final int totalQaSam = videoFormat.length;
-          int userfulQaSam = 0;
+          int usefulQaSam = 0;
           final List<VideoItem> video = videoInfo.dash!.video!;
           final Set<int> idSet = {};
           for (final VideoItem item in video) {
             final int id = item.id!;
             if (!idSet.contains(id)) {
               idSet.add(id);
-              userfulQaSam++;
+              usefulQaSam++;
             }
           }
           return PopupMenuButton<int>(
@@ -785,7 +785,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 totalQaSam,
                 (index) {
                   final item = videoFormat[index];
-                  final enabled = index >= totalQaSam - userfulQaSam;
+                  final enabled = index >= totalQaSam - usefulQaSam;
                   return PopupMenuItem<int>(
                     enabled: enabled,
                     height: 35,
@@ -1835,7 +1835,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                         ),
                     ],
                     if (plPlayerController.showDmChart &&
-                        videoDetailController.showDmTreandChart.value)
+                        videoDetailController.showDmTrendChart.value)
                       if (videoDetailController.dmTrend.value?.dataOrNull
                           case final list?)
                         buildDmChart(primary, list, videoDetailController),

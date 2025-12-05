@@ -148,7 +148,7 @@ class BottomControl extends StatelessWidget {
                         maxWidth - 40,
                       ),
                   ],
-                  if (videoDetailController.showDmTreandChart.value)
+                  if (videoDetailController.showDmTrendChart.value)
                     if (videoDetailController.dmTrend.value?.dataOrNull
                         case final list?)
                       buildDmChart(primary, list, videoDetailController, 4.5),

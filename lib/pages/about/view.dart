@@ -239,7 +239,7 @@ Commit Hash: ${BuildConfig.commitHash}''',
           ListTile(
             title: const Text('导入/导出登录信息'),
             leading: const Icon(Icons.import_export_outlined),
-            onTap: () => showInportExportDialog<Map>(
+            onTap: () => showImportExportDialog<Map>(
               context,
               title: '登录信息',
               toJson: () => Utils.jsonEncoder.convert(Accounts.account.toMap()),
@@ -261,7 +261,7 @@ Commit Hash: ${BuildConfig.commitHash}''',
             title: const Text('导入/导出设置'),
             dense: false,
             leading: const Icon(Icons.import_export_outlined),
-            onTap: () => showInportExportDialog(
+            onTap: () => showImportExportDialog(
               context,
               title: '设置',
               label: GStorage.setting.name,
@@ -319,7 +319,7 @@ Commit Hash: ${BuildConfig.commitHash}''',
   }
 }
 
-Future<void> showInportExportDialog<T>(
+Future<void> showImportExportDialog<T>(
   BuildContext context, {
   required String title,
   String? label,

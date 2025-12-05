@@ -270,14 +270,14 @@ List<SettingsModel> get extraSettings => [
     settingsType: SettingsType.sw1tch,
     title: '默认展开视频简介',
     leading: Icon(Icons.expand_more),
-    setKey: SettingBoxKey.alwaysExapndIntroPanel,
+    setKey: SettingBoxKey.alwaysExpandIntroPanel,
     defaultVal: false,
   ),
   const SettingsModel(
     settingsType: SettingsType.sw1tch,
     title: '横屏自动展开视频简介',
     leading: Icon(Icons.expand_more),
-    setKey: SettingBoxKey.exapndIntroPanelH,
+    setKey: SettingBoxKey.expandIntroPanelH,
     defaultVal: false,
   ),
   const SettingsModel(

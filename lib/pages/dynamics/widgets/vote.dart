@@ -93,7 +93,7 @@ class _VotePanelState extends State<VotePanel> {
         ),
       ),
       if (_enabled) ...[
-        _checkBoxs,
+        _checkBoxes,
         Padding(
           padding: const EdgeInsets.only(top: 8),
           child: Obx(
@@ -182,7 +182,7 @@ class _VotePanelState extends State<VotePanel> {
     return child;
   }
 
-  Widget get _checkBoxs => Row(
+  Widget get _checkBoxes => Row(
     spacing: 16,
     children: [
       CheckBoxText(

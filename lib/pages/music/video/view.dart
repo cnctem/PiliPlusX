@@ -11,14 +11,14 @@ import 'package:PiliPlus/utils/grid.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class MusicRecommandPage extends StatefulWidget {
-  const MusicRecommandPage({super.key});
+class MusicRecommendPage extends StatefulWidget {
+  const MusicRecommendPage({super.key});
 
   @override
-  State<MusicRecommandPage> createState() => _MusicRecommandPageState();
+  State<MusicRecommendPage> createState() => _MusicRecommendPageState();
 }
 
-class _MusicRecommandPageState extends State<MusicRecommandPage>
+class _MusicRecommendPageState extends State<MusicRecommendPage>
     with GridMixin {
   late final MusicRecommendController _controller = Get.putOrFind(
     MusicRecommendController.new,

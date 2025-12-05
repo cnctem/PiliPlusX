@@ -68,11 +68,11 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
   @override
   void onInit() {
     super.onInit();
-    bool alwaysExapndIntroPanel = Pref.alwaysExapndIntroPanel;
+    bool alwaysExpandIntroPanel = Pref.alwaysExpandIntroPanel;
     expandableCtr = ExpandableController(
-      initialExpanded: alwaysExapndIntroPanel,
+      initialExpanded: alwaysExpandIntroPanel,
     );
-    if (!alwaysExapndIntroPanel && Pref.exapndIntroPanelH) {
+    if (!alwaysExpandIntroPanel && Pref.expandIntroPanelH) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!expandableCtr.expanded && Get.context!.isLandscape) {
           expandableCtr.toggle();

@@ -91,12 +91,12 @@ class _PgcIntroPageState extends State<PgcIntroPage> {
       ),
     );
     if (!introController.isPgc) {
-      final breif = _buildBreif(item);
-      if (breif != null) {
+      final brief = _buildBrief(item);
+      if (brief != null) {
         sliver = SliverMainAxisGroup(
           slivers: [
             sliver,
-            breif,
+            brief,
           ],
         );
       }
@@ -109,7 +109,7 @@ class _PgcIntroPageState extends State<PgcIntroPage> {
     );
   }
 
-  Widget? _buildBreif(PgcInfoModel item) {
+  Widget? _buildBrief(PgcInfoModel item) {
     final img = item.brief?.img;
     if (img != null && img.isNotEmpty) {
       final maxWidth = widget.maxWidth - 24;

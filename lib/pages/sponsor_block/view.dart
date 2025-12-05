@@ -133,7 +133,7 @@ class _SponsorBlockPageState extends State<SponsorBlockPage> {
     },
   );
 
-  Widget _aboudItem(TextStyle titleStyle, TextStyle subTitleStyle) => ListTile(
+  Widget _aboutItem(TextStyle titleStyle, TextStyle subTitleStyle) => ListTile(
     dense: true,
     title: Text('关于空降助手', style: titleStyle),
     subtitle: Text(_url, style: subTitleStyle),
@@ -521,7 +521,7 @@ class _SponsorBlockPageState extends State<SponsorBlockPage> {
             child: _blockServerItem(theme, titleStyle, subTitleStyle),
           ),
           dividerL,
-          SliverToBoxAdapter(child: _aboudItem(titleStyle, subTitleStyle)),
+          SliverToBoxAdapter(child: _aboutItem(titleStyle, subTitleStyle)),
           dividerL,
           SliverToBoxAdapter(
             child: SizedBox(

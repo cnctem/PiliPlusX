@@ -208,13 +208,13 @@ class _MusicDetailPageState extends CommonDynPageState<MusicDetailPage> {
       int? count,
       bool status = false,
       required VoidCallback onPressed,
-      IconData? activitedIcon,
+      IconData? activatedIcon,
     }) {
       final color = status ? theme.colorScheme.primary : outline;
       return TextButton.icon(
         onPressed: onPressed,
         icon: Icon(
-          status ? activitedIcon : icon,
+          status ? activatedIcon : icon,
           size: 16,
           color: color,
         ),
@@ -298,7 +298,7 @@ class _MusicDetailPageState extends CommonDynPageState<MusicDetailPage> {
                           child: Builder(
                             builder: (context) => textIconButton(
                               icon: FontAwesomeIcons.thumbsUp,
-                              activitedIcon: FontAwesomeIcons.solidThumbsUp,
+                              activatedIcon: FontAwesomeIcons.solidThumbsUp,
                               text: '点赞',
                               count: item.wishCount,
                               status: item.wishListen ?? false,
@@ -568,7 +568,7 @@ class _MusicDetailPageState extends CommonDynPageState<MusicDetailPage> {
                     '使用稿件量',
                     theme,
                     () => Get.to(
-                      const MusicRecommandPage(),
+                      const MusicRecommendPage(),
                       arguments: (id: controller.musicId, item: item),
                     ),
                   ),

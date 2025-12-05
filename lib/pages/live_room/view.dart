@@ -10,7 +10,7 @@ import 'package:PiliPlus/common/widgets/scroll_physics.dart';
 import 'package:PiliPlus/models/common/image_type.dart';
 import 'package:PiliPlus/models_new/live/live_room_info_h5/data.dart';
 import 'package:PiliPlus/models_new/live/live_superchat/item.dart';
-import 'package:PiliPlus/pages/danmaku/dnamaku_model.dart';
+import 'package:PiliPlus/pages/danmaku/danmaku_model.dart';
 import 'package:PiliPlus/pages/live_room/controller.dart';
 import 'package:PiliPlus/pages/live_room/superchat/superchat_card.dart';
 import 'package:PiliPlus/pages/live_room/superchat/superchat_panel.dart';
@@ -657,8 +657,8 @@ class _LiveRoomPageState extends State<LiveRoomPage>
   Widget _buildBodyH(bool isFullScreen) {
     double videoWidth =
         clampDouble(maxHeight / maxWidth * 1.08, 0.56, 0.7) * maxWidth;
-    final rigthWidth = min(400.0, maxWidth - videoWidth - padding.horizontal);
-    videoWidth = maxWidth - rigthWidth - padding.horizontal;
+    final rightWidth = min(400.0, maxWidth - videoWidth - padding.horizontal);
+    videoWidth = maxWidth - rightWidth - padding.horizontal;
     final videoHeight = maxHeight - padding.top;
     final width = isFullScreen ? maxWidth : videoWidth;
     final height = isFullScreen ? maxHeight - padding.top : videoHeight;
@@ -682,7 +682,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
           Offstage(
             offstage: isFullScreen,
             child: SizedBox(
-              width: rigthWidth,
+              width: rightWidth,
               height: videoHeight,
               child: _buildBottomWidget,
             ),

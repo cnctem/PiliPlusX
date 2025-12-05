@@ -4,7 +4,7 @@ import 'package:PiliPlus/common/widgets/disabled_icon.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/loading_widget.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models_new/search/search_rcmd/data.dart';
-import 'package:PiliPlus/pages/about/view.dart' show showInportExportDialog;
+import 'package:PiliPlus/pages/about/view.dart' show showImportExportDialog;
 import 'package:PiliPlus/pages/search/controller.dart';
 import 'package:PiliPlus/pages/search/widgets/hot_keyword.dart';
 import 'package:PiliPlus/pages/search/widgets/search_text.dart';
@@ -331,7 +331,7 @@ class _SearchPageState extends State<SearchPage> {
                         );
                       },
                     ),
-                    _exportHsitory(theme),
+                    _exportHistory(theme),
                     const Spacer(),
                     SizedBox(
                       height: 34,
@@ -381,7 +381,7 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  Widget _exportHsitory(ThemeData theme) => SizedBox(
+  Widget _exportHistory(ThemeData theme) => SizedBox(
     width: 34,
     height: 34,
     child: IconButton(
@@ -392,7 +392,7 @@ class _SearchPageState extends State<SearchPage> {
         color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
       ),
       style: IconButton.styleFrom(padding: EdgeInsets.zero),
-      onPressed: () => showInportExportDialog<List>(
+      onPressed: () => showImportExportDialog<List>(
         context,
         title: '历史记录',
         toJson: () => jsonEncode(_searchController.historyList),

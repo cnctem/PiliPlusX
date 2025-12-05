@@ -12,10 +12,10 @@ class LoginDevicesPage extends StatefulWidget {
   const LoginDevicesPage({super.key});
 
   @override
-  State<LoginDevicesPage> createState() => LloginDevicesPageState();
+  State<LoginDevicesPage> createState() => LoginDevicesPageState();
 }
 
-class LloginDevicesPageState extends State<LoginDevicesPage> {
+class LoginDevicesPageState extends State<LoginDevicesPage> {
   final _controller = Get.put(LoginDevicesController());
 
   @override

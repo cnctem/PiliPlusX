@@ -58,7 +58,7 @@ class _UpowerRankPageState extends State<UpowerRankPage>
           SliverPadding(
             padding: EdgeInsets.only(bottom: padding.bottom + 100),
             sliver: Obx(
-              () => _bilidBody(theme, _controller.loadingState.value),
+              () => _buildBody(theme, _controller.loadingState.value),
             ),
           ),
         ],
@@ -169,7 +169,7 @@ class _UpowerRankPageState extends State<UpowerRankPage>
     }
   }
 
-  Widget _bilidBody(
+  Widget _buildBody(
     ThemeData theme,
     LoadingState<List<UpowerRankInfo>?> loadingState,
   ) {

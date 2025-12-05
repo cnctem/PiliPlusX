@@ -23,7 +23,7 @@ class MineController
     extends CommonDataController<FavFolderData, FavFolderData> {
   AccountService accountService = Get.find<AccountService>();
 
-  int? favFoldercount;
+  int? favFolderCount;
 
   // 用户信息 头像、昵称、lv
   Rx<UserInfoData> userInfo = UserInfoData().obs;
@@ -135,7 +135,7 @@ class MineController
 
   @override
   bool customHandleResponse(bool isRefresh, Success<FavFolderData> response) {
-    favFoldercount = response.response.count;
+    favFolderCount = response.response.count;
     loadingState.value = response;
     return true;
   }

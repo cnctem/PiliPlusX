@@ -5,9 +5,9 @@ import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models_new/live/live_area_list/area_item.dart';
 import 'package:PiliPlus/pages/common/common_list_controller.dart';
 
-class LiveAreaDatailController
+class LiveAreaDetailController
     extends CommonListController<List<AreaItem>?, AreaItem> {
-  LiveAreaDatailController(this.areaId, this.parentAreaId);
+  LiveAreaDetailController(this.areaId, this.parentAreaId);
   final dynamic areaId;
   final dynamic parentAreaId;
 

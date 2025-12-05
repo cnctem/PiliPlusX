@@ -902,10 +902,10 @@ class RichTextEditingController extends TextEditingController {
       // emoji tap
       if (offset == range.start) {
         if (e.emote != null) {
-          final cloestOffset = textPainter.getClosestGlyphForOffset(localPos);
-          if (cloestOffset != null) {
-            final offsetRect = cloestOffset.graphemeClusterLayoutBounds;
-            final offsetRange = cloestOffset.graphemeClusterCodeUnitRange;
+          final closestOffset = textPainter.getClosestGlyphForOffset(localPos);
+          if (closestOffset != null) {
+            final offsetRect = closestOffset.graphemeClusterLayoutBounds;
+            final offsetRange = closestOffset.graphemeClusterCodeUnitRange;
             if (lastTapDownPosition.dx > offsetRect.right) {
               return offsetRange.end;
             } else {

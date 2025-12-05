@@ -92,7 +92,7 @@ abstract class CommonIntroController extends GetxController
     }
   }
 
-  void canelTimer() {
+  void cancelTimer() {
     timer?.cancel();
     timer = null;
   }
@@ -114,7 +114,7 @@ abstract class CommonIntroController extends GetxController
 
   @override
   void onClose() {
-    canelTimer();
+    cancelTimer();
     super.onClose();
   }
 
