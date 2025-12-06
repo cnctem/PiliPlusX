@@ -16,7 +16,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -68,13 +68,13 @@ jobs:
             PiliPlus-Win-Setup/PiliPlus_windows_*.exe
 
       - name: Upload windows file release
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Windows-file-x64-release
           path: Release
 
       - name: Upload windows setup release
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Windows-setup-x64-release
           path: PiliPlus-Win-Setup

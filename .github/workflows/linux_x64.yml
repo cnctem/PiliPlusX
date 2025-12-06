@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -179,7 +179,7 @@ jobs:
 
           printf "完成: PiliPlus_linux_%s_amd64.rpm\n" "${{ env.version }}"
         shell: bash
-      
+
       - name: Package AppImage
         run: |
           printf "下载 appimagetool...\n"
@@ -195,13 +195,13 @@ jobs:
 
           printf "复制应用文件...\n"
           cp -r build/linux/x64/release/bundle/* "$APPDIR/usr/bin/"
-          
+
           printf "复制桌面文件和图标...\n"
           cp assets/linux/piliplus.desktop "$APPDIR/piliplus.desktop"
           cp assets/linux/piliplus.desktop "$APPDIR/usr/share/applications/piliplus.desktop"
           cp assets/images/logo/logo.png "$APPDIR/piliplus.png"
           cp assets/images/logo/logo.png "$APPDIR/usr/share/icons/hicolor/512x512/apps/piliplus.png"
-          
+
           printf "创建 AppRun 启动脚本...\n"
           cat > "$APPDIR/AppRun" <<'APPRUN_EOF'
           #!/bin/bash
@@ -219,7 +219,7 @@ jobs:
 
           printf "打包 AppImage...\n"
           ARCH=x86_64 ./appimagetool-x86_64.AppImage "$APPDIR" "PiliPlus_linux_${{ env.version }}_amd64.AppImage"
-          
+
           printf "完成: PiliPlus_linux_%s_amd64.AppImage\n" "${{ env.version }}"
         shell: bash
 
@@ -236,25 +236,25 @@ jobs:
             PiliPlus_linux_*.AppImage
 
       - name: Upload linux targz package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Linux_targz_amd64_packege
           path: PiliPlus_linux_*.tar.gz
 
       - name: Upload linux deb package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Linux_deb_amd64_package
           path: PiliPlus_linux_*.deb
 
       - name: Upload linux rpm package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Linux_rpm_amd64_package
           path: PiliPlus_linux_*.rpm
-      
+
       - name: Upload linux AppImage package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Linux_AppImage_amd64_package
           path: PiliPlus_linux_*.AppImage

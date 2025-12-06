@@ -56,7 +56,7 @@ jobs:
 
         steps:
             - name: 代码迁出
-              uses: actions/checkout@v5
+              uses: actions/checkout@v6
               with:
                   fetch-depth: 0
 
@@ -119,21 +119,21 @@ jobs:
                       PiliPlus_android_*.apk
 
             - name: 上传
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v5
               with:
                   name: Android_arm64-v8a
                   path: |
                       PiliPlus_android_*_arm64-v8a.apk
 
             - name: 上传
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v5
               with:
                   name: Android_armeabi-v7a
                   path: |
                       PiliPlus_android_*_armeabi-v7a.apk
 
             - name: 上传
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v5
               with:
                   name: Android_x86_64
                   path: |
