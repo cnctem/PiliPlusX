@@ -55,7 +55,7 @@ class DownloadSearchController
       title: '确定删除选中视频？',
       onConfirm: () async {
         SmartDialog.showLoading();
-        final allChecked = this.allChecked.toList();
+        final allChecked = this.allChecked.toSet();
         for (var entry in allChecked) {
           await GStorage.watchProgress.delete(entry.cid.toString());
           await _downloadService.deleteDownload(
