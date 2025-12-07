@@ -5,6 +5,7 @@ import 'package:PiliPlus/common/widgets/pair.dart';
 import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/models/common/dynamic/dynamic_badge_mode.dart';
 import 'package:PiliPlus/models/common/dynamic/up_panel_position.dart';
+import 'package:PiliPlus/models/common/follow_order_type.dart';
 import 'package:PiliPlus/models/common/member/tab_type.dart';
 import 'package:PiliPlus/models/common/msg/msg_unread_type.dart';
 import 'package:PiliPlus/models/common/sponsor_block/segment_type.dart';
@@ -877,4 +878,10 @@ abstract class Pref {
     SettingBoxKey.showBatteryLevel,
     defaultValue: Utils.isMobile,
   );
+
+  static FollowOrderType get followOrderType =>
+      FollowOrderType.values[_setting.get(
+        SettingBoxKey.followOrderType,
+        defaultValue: FollowOrderType.def.index,
+      )];
 }
