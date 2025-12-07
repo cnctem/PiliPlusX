@@ -207,9 +207,9 @@ class _RepostPanelState extends CommonRichTextPubPageState<RepostPanel> {
     onTap: () {
       setState(() => _isMax = true);
       Future.delayed(const Duration(milliseconds: 300), () {
-        _isExpanded = true;
         if (mounted) {
           focusNode.requestFocus();
+          setState(() => _isExpanded = true);
         }
       });
     },

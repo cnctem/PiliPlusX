@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:PiliPlus/common/constants.dart';
+import 'package:PiliPlus/common/widgets/button/icon_button.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/loading_widget.dart';
 import 'package:PiliPlus/services/logger.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
@@ -213,7 +214,7 @@ class InfoCard extends StatelessWidget {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: color,
-            fontSize: 16,
+            fontSize: 15,
           ),
         ),
         ...map.entries.map(
@@ -252,17 +253,15 @@ class InfoCard extends StatelessWidget {
               '相关信息',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: 15,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          IconButton(
-            style: IconButton.styleFrom(
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              visualDensity: VisualDensity.compact,
-            ),
+          iconButton(
+            size: 34,
+            iconSize: 22,
             icon: Icon(
               report.isExpanded ? Icons.expand_less : Icons.expand_more,
             ),
@@ -306,26 +305,36 @@ class ReportCard extends StatelessWidget {
     final dateTime = DateFormatUtils.longFormatDs.format(report.dateTime);
     return _card([
       Row(
+        crossAxisAlignment: .start,
         children: [
-          Icon(Icons.error_outline, color: colorScheme.error, size: 22),
-          const SizedBox(width: 8),
           Expanded(
-            child: Text(
-              report.error.toString(),
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            child: Column(
+              spacing: 6,
+              crossAxisAlignment: .start,
+              children: [
+                Text(
+                  report.error.toString(),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  dateTime,
+                  style: TextStyle(
+                    height: 1.2,
+                    color: colorScheme.outline,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
             ),
           ),
-          TextButton.icon(
-            style: TextButton.styleFrom(
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              visualDensity: VisualDensity.compact,
-              foregroundColor: colorScheme.secondary,
-            ),
+          iconButton(
+            size: 34,
+            iconSize: 22,
             onPressed: () {
               Utils.copyText('```\n$report```', needToast: false);
               ScaffoldMessenger.of(context).showSnackBar(
@@ -336,13 +345,10 @@ class ReportCard extends StatelessWidget {
               Icons.copy_outlined,
               size: 16,
             ),
-            label: const Text('复制'),
           ),
-          IconButton(
-            style: IconButton.styleFrom(
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              visualDensity: VisualDensity.compact,
-            ),
+          iconButton(
+            size: 34,
+            iconSize: 22,
             icon: Icon(
               report.isExpanded ? Icons.expand_less : Icons.expand_more,
             ),
@@ -353,24 +359,6 @@ class ReportCard extends StatelessWidget {
           ),
         ],
       ),
-      const SizedBox(height: 8),
-      Row(
-        spacing: 4,
-        children: [
-          Icon(
-            Icons.access_time,
-            size: 16,
-            color: colorScheme.outline,
-          ),
-          Text(
-            dateTime,
-            style: TextStyle(
-              height: 1.2,
-              color: colorScheme.outline,
-            ),
-          ),
-        ],
-      ),
       if (report.isExpanded) ...[
         const SizedBox(height: 16),
         Text(
@@ -378,7 +366,7 @@ class ReportCard extends StatelessWidget {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: colorScheme.error,
-            fontSize: 16,
+            fontSize: 15,
           ),
         ),
         const SizedBox(height: 8),
@@ -407,7 +395,7 @@ class ReportCard extends StatelessWidget {
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: colorScheme.error,
-              fontSize: 16,
+              fontSize: 15,
             ),
           ),
           const SizedBox(height: 8),

@@ -1013,7 +1013,7 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
                 (item) => SearchText(
                   fontSize: 13,
                   text: switch (item.tagType) {
-                    'bgm' => item.tagName!.replaceFirst('发现', '\u{1f3b5}BGM：'),
+                    'bgm' => item.tagName!.replaceFirst('发现', '♫ BGM：'),
                     'topic' => '#${item.tagName}',
                     _ => item.tagName!,
                   },
