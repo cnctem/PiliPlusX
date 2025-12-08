@@ -38,7 +38,7 @@ on:
             build_linux_x64:
                 description: "Build Linux-x64"
                 required: false
-                default: true
+                default: false
                 type: boolean
 
             tag:
