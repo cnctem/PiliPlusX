@@ -16,6 +16,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
+const _snackBarDisplayDuration = Duration(seconds: 1);
+
 class LogsPage extends StatefulWidget {
   const LogsPage({super.key});
 
@@ -77,7 +79,10 @@ class _LogsPageState extends State<LogsPage> {
     );
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('复制成功')),
+        const SnackBar(
+          content: Text('复制成功'),
+          duration: _snackBarDisplayDuration,
+        ),
       );
     }
   }
@@ -86,7 +91,10 @@ class _LogsPageState extends State<LogsPage> {
     if (await LoggerUtils.clearLogs()) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('已清空')),
+          const SnackBar(
+            content: Text('已清空'),
+            duration: _snackBarDisplayDuration,
+          ),
         );
         logsContent.clear();
         setState(() {});
@@ -338,7 +346,10 @@ class ReportCard extends StatelessWidget {
             onPressed: () {
               Utils.copyText('```\n$report```', needToast: false);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('已将 $dateTime 复制至剪贴板')),
+                SnackBar(
+                  content: Text('已将 $dateTime 复制至剪贴板'),
+                  duration: _snackBarDisplayDuration,
+                ),
               );
             },
             icon: const Icon(
