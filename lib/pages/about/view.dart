@@ -434,6 +434,78 @@ Future<void> showImportExportDialog<T>(
             );
           },
         ),
+        ListTile(
+          dense: true,
+          title: Text('输入$title', style: style),
+          onTap: () {
+            Get.back();
+            final key = GlobalKey<FormFieldState<String>>();
+            late T json;
+            String? forceErrorText;
+
+            showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text('输入$title'),
+                  constraints: const BoxConstraints(
+                    minWidth: 420,
+                    maxWidth: 420,
+                  ),
+                  content: TextFormField(
+                    key: key,
+                    minLines: 4,
+                    maxLines: 12,
+                    autofocus: true,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      errorMaxLines: 3,
+                    ),
+                    validator: (value) {
+                      if (forceErrorText != null) return forceErrorText;
+                      try {
+                        json = jsonDecode(value!) as T;
+                        return null;
+                      } catch (e) {
+                        if (e is FormatException) {}
+                        return '解析json失败：$e';
+                      }
+                    },
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: Get.back,
+                      child: Text(
+                        '取消',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        if (key.currentState?.validate() == true) {
+                          try {
+                            if (await fromJson(json)) {
+                              Get.back();
+                              SmartDialog.showToast('导入成功');
+                              return;
+                            }
+                          } catch (e) {
+                            forceErrorText = '导入失败：$e';
+                          }
+                          key.currentState?.validate();
+                          forceErrorText = null;
+                        }
+                      },
+                      child: const Text('确定'),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        ),
       ],
     );
   },
