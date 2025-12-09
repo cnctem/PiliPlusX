@@ -11,21 +11,37 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
 class MemberFavoriteCtr
-    extends CommonDataController<List<SpaceFavData>?, dynamic> {
+    extends CommonDataController<List<SpaceFavData>?, List<SpaceFavData>?> {
   MemberFavoriteCtr({
     required this.mid,
   });
 
   final int mid;
 
-  Rx<SpaceFavData> first = SpaceFavData().obs;
-  Rx<SpaceFavData> second = SpaceFavData().obs;
+  late int favPage = 2;
+  bool _favExpand = true;
+  final RxBool favEnd = true.obs;
+  final Rx<SpaceFavData> favState = SpaceFavData().obs;
 
-  RxBool firstEnd = true.obs;
-  RxBool secondEnd = true.obs;
+  late int subPage = 2;
+  bool _subExpand = true;
+  final RxBool subEnd = true.obs;
+  final Rx<SpaceFavData> subState = SpaceFavData().obs;
 
-  late int page = 2;
-  late int page1 = 2;
+  bool isExpand(bool isFav) {
+    return isFav ? _favExpand : _subExpand;
+  }
+
+  void setExpand(bool isFav) {
+    if (isFav) {
+      flag = _favExpand;
+      _favExpand = !_favExpand;
+    } else {
+      _subExpand = !_subExpand;
+    }
+  }
+
+  bool flag = false;
 
   @override
   void onInit() {
@@ -35,8 +51,8 @@ class MemberFavoriteCtr
 
   @override
   Future<void> onRefresh() {
-    page = 2;
-    page1 = 2;
+    favPage = 2;
+    subPage = 2;
     return super.onRefresh();
   }
 
@@ -47,13 +63,13 @@ class MemberFavoriteCtr
   ) {
     try {
       List<SpaceFavData> res = response.response!;
-      first.value = res.first;
-      second.value = res[1];
+      favState.value = res.first;
+      subState.value = res[1];
 
-      firstEnd.value =
+      favEnd.value =
           (res.first.mediaListResponse?.count ?? -1) <=
           (res.first.mediaListResponse?.list?.length ?? -1);
-      secondEnd.value =
+      subEnd.value =
           (res[1].mediaListResponse?.count ?? -1) <=
           (res[1].mediaListResponse?.list?.length ?? -1);
     } catch (e) {
@@ -63,62 +79,76 @@ class MemberFavoriteCtr
     return true;
   }
 
-  Future<void> userfavFolder() async {
-    var res = await Request().get(
-      Api.userFavFolder,
-      queryParameters: {
-        'pn': page,
-        'ps': 20,
-        'up_mid': mid,
-      },
-    );
-    if (res.data['code'] == 0) {
-      page++;
-      firstEnd.value = res.data['data']['has_more'] == false;
-      if (res.data['data'] != null) {
-        List<SpaceFavItemModel> list =
-            (res.data['data']?['list'] as List<dynamic>?)
-                ?.map((item) => SpaceFavItemModel.fromJson(item))
-                .toList() ??
-            <SpaceFavItemModel>[];
-        first
-          ..value.mediaListResponse?.list?.addAll(list)
-          ..refresh();
+  Future<void> userFavFolder() async {
+    try {
+      final res = await Request().get(
+        Api.userFavFolder,
+        queryParameters: {
+          'pn': favPage,
+          'ps': 20,
+          'up_mid': mid,
+        },
+      );
+      if (res.data['code'] == 0) {
+        favPage++;
+        final data = res.data['data'];
+        if (data != null) {
+          favEnd.value = data['has_more'] == false;
+          final list = (data['list'] as List<dynamic>?)
+              ?.map((item) => SpaceFavItemModel.fromJson(item))
+              .toList();
+          if (list != null && list.isNotEmpty) {
+            favState
+              ..value.mediaListResponse!.list!.addAll(list)
+              ..refresh();
+          } else {
+            favEnd.value = true;
+          }
+        } else {
+          favEnd.value = true;
+        }
       } else {
-        firstEnd.value = true;
+        SmartDialog.showToast(res.data['message']);
       }
-    } else {
-      SmartDialog.showToast(res.data['message'] ?? '账号未登录');
+    } catch (e) {
+      SmartDialog.showToast(e.toString());
     }
   }
 
   Future<void> userSubFolder() async {
-    var res = await Request().get(
-      Api.userSubFolder,
-      queryParameters: {
-        'up_mid': mid,
-        'ps': 20,
-        'pn': page1,
-        'platform': 'web',
-      },
-    );
-    if (res.data['code'] == 0) {
-      page++;
-      secondEnd.value = res.data['data']['has_more'] == false;
-      if (res.data['data'] != null) {
-        List<SpaceFavItemModel> list =
-            (res.data['data']?['list'] as List<dynamic>?)
-                ?.map((item) => SpaceFavItemModel.fromJson(item))
-                .toList() ??
-            <SpaceFavItemModel>[];
-        second
-          ..value.mediaListResponse?.list?.addAll(list)
-          ..refresh();
+    try {
+      final res = await Request().get(
+        Api.userSubFolder,
+        queryParameters: {
+          'up_mid': mid,
+          'ps': 20,
+          'pn': subPage,
+          'platform': 'web',
+        },
+      );
+      if (res.data['code'] == 0) {
+        subPage++;
+        final data = res.data['data'];
+        if (data != null) {
+          subEnd.value = data['has_more'] == false;
+          final list = (data['list'] as List<dynamic>?)
+              ?.map((item) => SpaceFavItemModel.fromJson(item))
+              .toList();
+          if (list != null && list.isNotEmpty) {
+            subState
+              ..value.mediaListResponse!.list!.addAll(list)
+              ..refresh();
+          } else {
+            subEnd.value = true;
+          }
+        } else {
+          subEnd.value = true;
+        }
       } else {
-        secondEnd.value = true;
+        SmartDialog.showToast(res.data['message']);
       }
-    } else {
-      SmartDialog.showToast(res.data['message'] ?? '账号未登录');
+    } catch (e) {
+      SmartDialog.showToast(e.toString());
     }
   }
 

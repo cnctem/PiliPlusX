@@ -70,7 +70,7 @@ class _DownloadDetailPageState extends State<DownloadDetailPage>
     final list =
         _controller.pages
             .firstWhereOrNull((e) => e.pageId == widget.pageId)
-            ?.entrys
+            ?.entries
           ?..sort((a, b) => a.sortKey.compareTo(b.sortKey));
     if (list != null) {
       _downloadItems.value = list;

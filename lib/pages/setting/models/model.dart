@@ -116,7 +116,7 @@ SettingsModel getBanwordModel({
               ),
               TextButton(
                 child: const Text('保存'),
-                onPressed: () async {
+                onPressed: () {
                   Get.back();
                   setState();
                   onChanged(RegExp(banWord, caseSensitive: false));

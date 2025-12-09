@@ -31,7 +31,7 @@ class PagesPanel extends StatefulWidget {
   final Function? showEpisodes;
   final UgcIntroController ugcIntroController;
 
-  final Set<int?>? cidSet;
+  final Set<int>? cidSet;
   final bool Function(Part part)? onDownload;
 
   @override

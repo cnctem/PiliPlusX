@@ -61,10 +61,15 @@ class MemberFavItem extends StatelessWidget {
               Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  NetworkImgLayer(
-                    src: item.cover,
-                    width: 140.8,
-                    height: 88,
+                  AspectRatio(
+                    aspectRatio: StyleString.aspectRatio,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) => NetworkImgLayer(
+                        src: item.cover,
+                        width: constraints.maxWidth,
+                        height: constraints.maxHeight,
+                      ),
+                    ),
                   ),
                   if (item.type == 21)
                     const PBadge(

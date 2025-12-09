@@ -247,7 +247,7 @@ Commit Hash: ${BuildConfig.commitHash}''',
           ListTile(
             title: const Text('导入/导出登录信息'),
             leading: const Icon(Icons.import_export_outlined),
-            onTap: () => showInportExportDialog<Map>(
+            onTap: () => showImportExportDialog<Map>(
               context,
               title: '登录信息',
               toJson: () => Utils.jsonEncoder.convert(Accounts.account.toMap()),
@@ -269,7 +269,7 @@ Commit Hash: ${BuildConfig.commitHash}''',
             title: const Text('导入/导出设置'),
             dense: false,
             leading: const Icon(Icons.import_export_outlined),
-            onTap: () => showInportExportDialog(
+            onTap: () => showImportExportDialog(
               context,
               title: '设置',
               label: GStorage.setting.name,
@@ -327,7 +327,7 @@ Commit Hash: ${BuildConfig.commitHash}''',
   }
 }
 
-Future<void> showInportExportDialog<T>(
+Future<void> showImportExportDialog<T>(
   BuildContext context, {
   required String title,
   String? label,
@@ -432,6 +432,78 @@ Future<void> showInportExportDialog<T>(
                           }
                         } catch (e) {
                           SmartDialog.showToast('导入失败：$e');
+                        }
+                      },
+                      child: const Text('确定'),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        ),
+        ListTile(
+          dense: true,
+          title: Text('输入$title', style: style),
+          onTap: () {
+            Get.back();
+            final key = GlobalKey<FormFieldState<String>>();
+            late T json;
+            String? forceErrorText;
+
+            showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text('输入$title'),
+                  constraints: const BoxConstraints(
+                    minWidth: 420,
+                    maxWidth: 420,
+                  ),
+                  content: TextFormField(
+                    key: key,
+                    minLines: 4,
+                    maxLines: 12,
+                    autofocus: true,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      errorMaxLines: 3,
+                    ),
+                    validator: (value) {
+                      if (forceErrorText != null) return forceErrorText;
+                      try {
+                        json = jsonDecode(value!) as T;
+                        return null;
+                      } catch (e) {
+                        if (e is FormatException) {}
+                        return '解析json失败：$e';
+                      }
+                    },
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: Get.back,
+                      child: Text(
+                        '取消',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        if (key.currentState?.validate() == true) {
+                          try {
+                            if (await fromJson(json)) {
+                              Get.back();
+                              SmartDialog.showToast('导入成功');
+                              return;
+                            }
+                          } catch (e) {
+                            forceErrorText = '导入失败：$e';
+                          }
+                          key.currentState?.validate();
+                          forceErrorText = null;
                         }
                       },
                       child: const Text('确定'),

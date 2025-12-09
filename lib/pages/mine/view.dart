@@ -224,7 +224,7 @@ class _MediaPageState extends CommonPageState<MinePage, MineController>
       fontSize: theme.textTheme.titleMedium!.fontSize,
       fontWeight: FontWeight.bold,
     );
-    final lebelStyle = theme.textTheme.labelMedium!.copyWith(
+    final labelStyle = theme.textTheme.labelMedium!.copyWith(
       color: theme.colorScheme.outline,
     );
     final coinLabelStyle = TextStyle(
@@ -378,21 +378,21 @@ class _MediaPageState extends CommonPageState<MinePage, MineController>
                 count: userStat.dynamicCount,
                 countStyle: style,
                 name: '动态',
-                lebelStyle: lebelStyle,
+                labelStyle: labelStyle,
                 onTap: () => controller.push('memberDynamics'),
               ),
               _btn(
                 count: userStat.following,
                 countStyle: style,
                 name: '关注',
-                lebelStyle: lebelStyle,
+                labelStyle: labelStyle,
                 onTap: () => controller.push('follow'),
               ),
               _btn(
                 count: userStat.follower,
                 countStyle: style,
                 name: '粉丝',
-                lebelStyle: lebelStyle,
+                labelStyle: labelStyle,
                 onTap: () => controller.push('fan'),
               ),
             ],
@@ -406,7 +406,7 @@ class _MediaPageState extends CommonPageState<MinePage, MineController>
     required int? count,
     required TextStyle countStyle,
     required String name,
-    required TextStyle? lebelStyle,
+    required TextStyle? labelStyle,
     required VoidCallback onTap,
   }) {
     return Flexible(
@@ -428,7 +428,7 @@ class _MediaPageState extends CommonPageState<MinePage, MineController>
                 const SizedBox(height: 4),
                 Text(
                   name,
-                  style: lebelStyle,
+                  style: labelStyle,
                 ),
               ],
             ),
@@ -465,9 +465,9 @@ class _MediaPageState extends CommonPageState<MinePage, MineController>
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  if (controller.favFoldercount != null)
+                  if (controller.favFolderCount != null)
                     TextSpan(
-                      text: "${controller.favFoldercount}  ",
+                      text: "${controller.favFolderCount}  ",
                       style: TextStyle(
                         fontSize: theme.textTheme.titleSmall!.fontSize,
                         color: secondary,
@@ -508,7 +508,7 @@ class _MediaPageState extends CommonPageState<MinePage, MineController>
           if (favFolderList == null || favFolderList.isEmpty) {
             return const SizedBox.shrink();
           }
-          bool flag = (controller.favFoldercount ?? 0) > favFolderList.length;
+          bool flag = (controller.favFolderCount ?? 0) > favFolderList.length;
           return SizedBox(
             height: 200,
             child: ListView.separated(

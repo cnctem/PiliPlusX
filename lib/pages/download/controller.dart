@@ -52,7 +52,7 @@ class DownloadPageController extends GetxController
             ..cover = entry.cover
             ..sortKey = aSortKey;
         }
-        page.entrys.add(entry);
+        page.entries.add(entry);
       } else {
         list.add(
           DownloadPageInfo(
@@ -62,7 +62,7 @@ class DownloadPageController extends GetxController
             cover: entry.cover,
             sortKey: entry.sortKey,
             seasonType: entry.ep?.seasonType,
-            entrys: [entry],
+            entries: [entry],
           ),
         );
       }
@@ -78,11 +78,11 @@ class DownloadPageController extends GetxController
       title: '确定删除选中视频？',
       onConfirm: () async {
         SmartDialog.showLoading();
-        final allChecked = this.allChecked.toList();
+        final allChecked = this.allChecked.toSet();
         final watchProgress = GStorage.watchProgress;
         for (var page in allChecked) {
           await watchProgress.deleteAll(
-            page.entrys.map((e) => e.cid.toString()),
+            page.entries.map((e) => e.cid.toString()),
           );
           await _downloadService.deletePage(
             pageDirPath: page.dirPath,

@@ -163,7 +163,7 @@ class WhisperSessionItem extends StatelessWidget {
           final pendant = item.sessionInfo.avatar.fallbackLayers.layers
               .getOrNull(1)
               ?.resource;
-          final offcial = item
+          final official = item
               .sessionInfo
               .avatar
               .fallbackLayers
@@ -187,8 +187,8 @@ class WhisperSessionItem extends StatelessWidget {
                   ? pendant!.resImage.imageSrc.remote.url
                   : pendant?.resAnimation.webpSrc.remote.url,
               isVip: vipInfo?['status'] != null && vipInfo!['status'] > 0,
-              officialType: offcial?.hasLocalValue() == true
-                  ? switch (offcial!.localValue) {
+              officialType: official?.hasLocalValue() == true
+                  ? switch (official!.localValue) {
                       3 => 0,
                       4 => 1,
                       _ => null,

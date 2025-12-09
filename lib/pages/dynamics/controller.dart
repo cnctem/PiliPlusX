@@ -9,6 +9,7 @@ import 'package:PiliPlus/models_new/follow/data.dart';
 import 'package:PiliPlus/pages/common/common_controller.dart';
 import 'package:PiliPlus/pages/dynamics_tab/controller.dart';
 import 'package:PiliPlus/services/account_service.dart';
+import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/extension.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:easy_debounce/easy_throttle.dart';
@@ -17,7 +18,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
 class DynamicsController extends GetxController
-    with GetSingleTickerProviderStateMixin, ScrollOrRefreshMixin {
+    with GetSingleTickerProviderStateMixin, ScrollOrRefreshMixin, AccountMixin {
   @override
   final ScrollController scrollController = ScrollController();
   late final TabController tabController = TabController(
@@ -41,7 +42,8 @@ class DynamicsController extends GetxController
 
   final upPanelPosition = Pref.upPanelPosition;
 
-  AccountService accountService = Get.find<AccountService>();
+  @override
+  final AccountService accountService = Get.find<AccountService>();
 
   DynamicsTabController? get controller {
     try {
@@ -96,7 +98,7 @@ class DynamicsController extends GetxController
     isQuerying = true;
 
     final res = await FollowHttp.followings(
-      vmid: accountService.mid,
+      vmid: Accounts.main.mid,
       pn: _upPage,
       orderType: 'attention',
       ps: 50,
@@ -137,7 +139,7 @@ class DynamicsController extends GetxController
       DynamicsHttp.followUp(),
       if (_showAllUp)
         FollowHttp.followings(
-          vmid: accountService.mid,
+          vmid: Accounts.main.mid,
           pn: _upPage,
           orderType: 'attention',
           ps: 50,
@@ -189,7 +191,7 @@ class DynamicsController extends GetxController
   }
 
   @override
-  Future<void> onRefresh() async {
+  Future<void> onRefresh() {
     if (_showAllUp) {
       _upPage = 1;
       _cacheUpList = null;
@@ -236,4 +238,7 @@ class DynamicsController extends GetxController
     scrollController.dispose();
     super.onClose();
   }
+
+  @override
+  void onChangeAccount(bool isLogin) => onRefresh();
 }

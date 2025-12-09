@@ -110,7 +110,7 @@ class _RepostPanelState extends CommonRichTextPubPageState<RepostPanel> {
           buildPanelContainer(theme, Colors.transparent),
         ] else ...[
           ..._buildEditPanel(theme),
-          ..._biuldDismiss(theme),
+          ..._buildDismiss(theme),
         ],
       ],
     );
@@ -207,9 +207,9 @@ class _RepostPanelState extends CommonRichTextPubPageState<RepostPanel> {
     onTap: () {
       setState(() => _isMax = true);
       Future.delayed(const Duration(milliseconds: 300), () {
-        _isExpanded = true;
         if (mounted) {
           focusNode.requestFocus();
+          setState(() => _isExpanded = true);
         }
       });
     },
@@ -347,7 +347,7 @@ class _RepostPanelState extends CommonRichTextPubPageState<RepostPanel> {
     ),
   );
 
-  List<Widget> _biuldDismiss(ThemeData theme) => [
+  List<Widget> _buildDismiss(ThemeData theme) => [
     const SizedBox(height: 10),
     Divider(
       height: 1,

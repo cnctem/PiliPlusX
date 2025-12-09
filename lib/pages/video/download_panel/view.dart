@@ -50,7 +50,7 @@ class DownloadPanel extends StatefulWidget {
   final VideoDetailController videoDetailController;
   final String heroTag;
   final UgcIntroController? ugcIntroController;
-  final Set<int?> cidSet;
+  final Set<int> cidSet;
 
   @override
   State<DownloadPanel> createState() => _DownloadPanelState();
@@ -226,7 +226,7 @@ class _DownloadPanelState extends State<DownloadPanel> {
 
     if (cidSet.contains(cid)) {
       if (kDebugMode) {
-        SmartDialog.showToast('downloded');
+        SmartDialog.showToast('downloaded');
       }
       return false;
     }

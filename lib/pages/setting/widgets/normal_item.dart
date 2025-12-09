@@ -39,7 +39,9 @@ class _NormalItemState extends State<NormalItem> {
     return ListTile(
       contentPadding: widget.contentPadding,
       onTap: () => widget.onTap?.call(() {
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       }),
       title: Text(
         widget.title ?? widget.getTitle!(),

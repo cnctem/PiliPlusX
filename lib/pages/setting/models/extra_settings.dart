@@ -270,14 +270,14 @@ List<SettingsModel> get extraSettings => [
     settingsType: SettingsType.sw1tch,
     title: '默认展开视频简介',
     leading: Icon(Icons.expand_more),
-    setKey: SettingBoxKey.alwaysExapndIntroPanel,
+    setKey: SettingBoxKey.alwaysExpandIntroPanel,
     defaultVal: false,
   ),
   const SettingsModel(
     settingsType: SettingsType.sw1tch,
     title: '横屏自动展开视频简介',
     leading: Icon(Icons.expand_more),
-    setKey: SettingBoxKey.exapndIntroPanelH,
+    setKey: SettingBoxKey.expandIntroPanelH,
     defaultVal: false,
   ),
   const SettingsModel(
@@ -489,7 +489,7 @@ List<SettingsModel> get extraSettings => [
     setKey: SettingBoxKey.refreshDragPercentage,
     getSubtitle: () => '当前滑动距离: ${Pref.refreshDragPercentage}x',
     onTap: (setState) async {
-      double? result = await showDialog(
+      final result = await showDialog<double>(
         context: Get.context!,
         builder: (context) {
           return SlideDialog(
@@ -518,7 +518,7 @@ List<SettingsModel> get extraSettings => [
     setKey: SettingBoxKey.refreshDisplacement,
     getSubtitle: () => '当前指示器高度: ${Pref.refreshDisplacement}',
     onTap: (setState) async {
-      double? result = await showDialog(
+      final result = await showDialog<double>(
         context: Get.context!,
         builder: (context) {
           return SlideDialog(
@@ -594,7 +594,7 @@ List<SettingsModel> get extraSettings => [
     getSubtitle: () =>
         '当前:「${Pref.superResolutionType.title}」\n默认设置对番剧生效, 其他视频默认关闭\n超分辨率需要启用硬件解码, 若启用硬件解码后仍然不生效, 尝试切换硬件解码器为 auto-copy',
     onTap: (setState) async {
-      SuperResolutionType? result = await showDialog(
+      final result = await showDialog<SuperResolutionType>(
         context: Get.context!,
         builder: (context) {
           return SelectDialog<SuperResolutionType>(
@@ -1081,7 +1081,7 @@ List<SettingsModel> get extraSettings => [
     getSubtitle: () =>
         '当前优先展示「${ReplySortType.values[Pref.replySortType].title}」',
     onTap: (setState) async {
-      int? result = await showDialog(
+      final result = await showDialog<int>(
         context: Get.context!,
         builder: (context) {
           return SelectDialog<int>(
@@ -1107,14 +1107,14 @@ List<SettingsModel> get extraSettings => [
     getSubtitle: () =>
         '当前优先展示「${DynamicsTabType.values[Pref.defaultDynamicType].label}」',
     onTap: (setState) async {
-      int? result = await showDialog(
+      final result = await showDialog<int>(
         context: Get.context!,
         builder: (context) {
           return SelectDialog<int>(
             title: '动态展示',
             value: Pref.defaultDynamicType,
             values: DynamicsTabType.values
-                .sublist(0, 4)
+                .take(4)
                 .map((e) => (e.index, e.label))
                 .toList(),
           );
@@ -1133,7 +1133,7 @@ List<SettingsModel> get extraSettings => [
     leading: const Icon(Icons.tab),
     getSubtitle: () => '当前优先展示「${Pref.memberTab.title}」',
     onTap: (setState) async {
-      MemberTabType? result = await showDialog(
+      final result = await showDialog<MemberTabType>(
         context: Get.context!,
         builder: (context) {
           return SelectDialog<MemberTabType>(

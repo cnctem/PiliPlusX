@@ -81,8 +81,8 @@ abstract class SettingBoxKey {
       showRelatedVideo = 'showRelatedVideo',
       showVideoReply = 'showVideoReply',
       showBangumiReply = 'showBangumiReply',
-      alwaysExapndIntroPanel = 'alwaysExapndIntroPanel',
-      exapndIntroPanelH = 'exapndIntroPanelH',
+      alwaysExpandIntroPanel = 'alwaysExapndIntroPanel',
+      expandIntroPanelH = 'exapndIntroPanelH',
       horizontalSeasonPanel = 'horizontalSeasonPanel',
       horizontalMemberPage = 'horizontalMemberPage',
       replyLengthLimit = 'replyLengthLimit',
@@ -154,6 +154,7 @@ abstract class SettingBoxKey {
       downloadPath = 'downloadPath',
       saveImgPath = 'saveImgPath',
       saveScreenshotPath = 'saveScreenshotPath';
+      followOrderType = 'followOrderType';
 
   static const String minimizeOnExit = 'minimizeOnExit',
       windowSize = 'windowSize',
@@ -167,7 +168,7 @@ abstract class SettingBoxKey {
       enableDragSubtitle = 'enableDragSubtitle',
       subtitlePaddingH = 'subtitlePaddingH',
       subtitlePaddingB = 'subtitlePaddingB',
-      subtitleBgOpaticy = 'subtitleBgOpaticy',
+      subtitleBgOpacity = 'subtitleBgOpaticy',
       subtitleStrokeWidth = 'subtitleStrokeWidth',
       subtitleFontScale = 'subtitleFontScale',
       subtitleFontScaleFS = 'subtitleFontScaleFS',

@@ -133,7 +133,7 @@ class _SponsorBlockPageState extends State<SponsorBlockPage> {
     },
   );
 
-  Widget _aboudItem(TextStyle titleStyle, TextStyle subTitleStyle) => ListTile(
+  Widget _aboutItem(TextStyle titleStyle, TextStyle subTitleStyle) => ListTile(
     dense: true,
     title: Text('关于空降助手', style: titleStyle),
     subtitle: Text(_url, style: subTitleStyle),
@@ -151,30 +151,29 @@ class _SponsorBlockPageState extends State<SponsorBlockPage> {
         title: Text('用户ID', style: titleStyle),
         subtitle: Text(_userId, style: subTitleStyle),
         onTap: () {
-          final key = GlobalKey<FormState>();
+          final key = GlobalKey<FormFieldState<String>>();
           _textController.text = _userId;
           showDialog(
             context: context,
             builder: (_) {
               return AlertDialog(
                 title: Text('用户ID', style: titleStyle),
-                content: Form(
+                content: TextFormField(
                   key: key,
-                  child: TextFormField(
-                    minLines: 1,
-                    maxLines: 4,
-                    autofocus: true,
-                    controller: _textController,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\d]+')),
-                    ],
-                    validator: (value) {
-                      if ((value?.length ?? -1) < 30) {
-                        return '用户ID要求至少为30个字符长度的纯字符串';
-                      }
-                      return null;
-                    },
-                  ),
+                  minLines: 1,
+                  maxLines: 4,
+                  autofocus: true,
+                  controller: _textController,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\d]+')),
+                  ],
+                  decoration: const InputDecoration(errorMaxLines: 2),
+                  validator: (value) {
+                    if ((value?.length ?? -1) < 30) {
+                      return '用户ID要求至少为30个字符长度的纯字符串';
+                    }
+                    return null;
+                  },
                 ),
                 actions: [
                   TextButton(
@@ -521,7 +520,7 @@ class _SponsorBlockPageState extends State<SponsorBlockPage> {
             child: _blockServerItem(theme, titleStyle, subTitleStyle),
           ),
           dividerL,
-          SliverToBoxAdapter(child: _aboudItem(titleStyle, subTitleStyle)),
+          SliverToBoxAdapter(child: _aboutItem(titleStyle, subTitleStyle)),
           dividerL,
           SliverToBoxAdapter(
             child: SizedBox(

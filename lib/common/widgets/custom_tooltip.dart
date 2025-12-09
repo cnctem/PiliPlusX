@@ -121,7 +121,7 @@ class CustomTooltipState extends State<CustomTooltip>
 
     final _CustomTooltipOverlay overlayChild = _CustomTooltipOverlay(
       verticalOffset: box.size.height / 2,
-      horizontslOffset: box.size.width / 2,
+      horizontalOffset: box.size.width / 2,
       type: widget.type,
       animation: _overlayAnimation,
       target: target,
@@ -175,7 +175,7 @@ class CustomTooltipState extends State<CustomTooltip>
 class _CustomTooltipOverlay extends StatelessWidget {
   const _CustomTooltipOverlay({
     required this.verticalOffset,
-    required this.horizontslOffset,
+    required this.horizontalOffset,
     required this.type,
     required this.animation,
     required this.target,
@@ -185,7 +185,7 @@ class _CustomTooltipOverlay extends StatelessWidget {
   });
 
   final double verticalOffset;
-  final double horizontslOffset;
+  final double horizontalOffset;
   final TooltipType type;
   final Animation<double> animation;
   final Offset target;
@@ -200,7 +200,7 @@ class _CustomTooltipOverlay extends StatelessWidget {
         type: type,
         target: target,
         verticalOffset: verticalOffset,
-        horizontslOffset: horizontslOffset,
+        horizontslOffset: horizontalOffset,
         preferBelow: false,
       ),
       children: [

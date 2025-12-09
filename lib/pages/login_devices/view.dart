@@ -12,10 +12,10 @@ class LoginDevicesPage extends StatefulWidget {
   const LoginDevicesPage({super.key});
 
   @override
-  State<LoginDevicesPage> createState() => LloginDevicesPageState();
+  State<LoginDevicesPage> createState() => LoginDevicesPageState();
 }
 
-class LloginDevicesPageState extends State<LoginDevicesPage> {
+class LoginDevicesPageState extends State<LoginDevicesPage> {
   final _controller = Get.put(LoginDevicesController());
 
   @override
@@ -57,12 +57,12 @@ class LloginDevicesPageState extends State<LoginDevicesPage> {
     return switch (loadingState) {
       Loading() => const SliverToBoxAdapter(),
       Success<List<LoginDevice>?>(:var response) =>
-        response?.isNotEmpty == true
+        response != null && response.isNotEmpty
             ? SliverList.separated(
                 itemBuilder: (context, index) {
                   return _buildItem(colorScheme, response[index]);
                 },
-                itemCount: response!.length,
+                itemCount: response.length,
                 separatorBuilder: (_, _) => divider,
               )
             : HttpError(onReload: _controller.onReload),

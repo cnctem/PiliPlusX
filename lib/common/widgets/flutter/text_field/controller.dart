@@ -704,11 +704,11 @@ class RichTextEditingController extends TextEditingController {
         }
     }
 
-    if (addIndex != null && toAdd?.isNotEmpty == true) {
-      items.insertAll(addIndex, toAdd!);
+    if (addIndex != null && toAdd != null && toAdd.isNotEmpty) {
+      items.insertAll(addIndex, toAdd);
     }
-    if (toDel?.isNotEmpty == true) {
-      for (var item in toDel!) {
+    if (toDel != null && toDel.isNotEmpty) {
+      for (var item in toDel) {
         items.remove(item);
       }
     }
@@ -902,10 +902,10 @@ class RichTextEditingController extends TextEditingController {
       // emoji tap
       if (offset == range.start) {
         if (e.emote != null) {
-          final cloestOffset = textPainter.getClosestGlyphForOffset(localPos);
-          if (cloestOffset != null) {
-            final offsetRect = cloestOffset.graphemeClusterLayoutBounds;
-            final offsetRange = cloestOffset.graphemeClusterCodeUnitRange;
+          final closestOffset = textPainter.getClosestGlyphForOffset(localPos);
+          if (closestOffset != null) {
+            final offsetRect = closestOffset.graphemeClusterLayoutBounds;
+            final offsetRange = closestOffset.graphemeClusterCodeUnitRange;
             if (lastTapDownPosition.dx > offsetRect.right) {
               return offsetRange.end;
             } else {

@@ -25,7 +25,7 @@ import 'package:PiliPlus/models_new/video/video_detail/section.dart';
 import 'package:PiliPlus/models_new/video/video_detail/ugc_season.dart';
 import 'package:PiliPlus/models_new/video/video_shot/data.dart';
 import 'package:PiliPlus/pages/common/common_intro_controller.dart';
-import 'package:PiliPlus/pages/danmaku/dnamaku_model.dart';
+import 'package:PiliPlus/pages/danmaku/danmaku_model.dart';
 import 'package:PiliPlus/pages/live_room/widgets/bottom_control.dart'
     as live_bottom;
 import 'package:PiliPlus/pages/video/controller.dart';
@@ -57,6 +57,7 @@ import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
+import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -419,7 +420,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
               width: widgetWidth,
               height: 30,
               tooltip: '高能进度条',
-              icon: videoDetailController.showDmTreandChart.value
+              icon: videoDetailController.showDmTrendChart.value
                   ? const Icon(
                       Icons.show_chart,
                       size: 22,
@@ -441,8 +442,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                         ),
                       ],
                     ),
-              onTap: () => videoDetailController.showDmTreandChart.value =
-                  !videoDetailController.showDmTreandChart.value,
+              onTap: () => videoDetailController.showDmTrendChart.value =
+                  !videoDetailController.showDmTrendChart.value,
             );
           }
           return const SizedBox.shrink();
@@ -655,7 +656,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
       /// 字幕
       BottomControlType.subtitle => Obx(
-        () => videoDetailController.subtitles.isEmpty == true
+        () => videoDetailController.subtitles.isEmpty
             ? const SizedBox.shrink()
             : PopupMenuButton<int>(
                 tooltip: '字幕',
@@ -765,14 +766,14 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           }
           final List<FormatItem> videoFormat = videoInfo.supportFormats!;
           final int totalQaSam = videoFormat.length;
-          int userfulQaSam = 0;
+          int usefulQaSam = 0;
           final List<VideoItem> video = videoInfo.dash!.video!;
           final Set<int> idSet = {};
           for (final VideoItem item in video) {
             final int id = item.id!;
             if (!idSet.contains(id)) {
               idSet.add(id);
-              userfulQaSam++;
+              usefulQaSam++;
             }
           }
           return PopupMenuButton<int>(
@@ -785,7 +786,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 totalQaSam,
                 (index) {
                   final item = videoFormat[index];
-                  final enabled = index >= totalQaSam - userfulQaSam;
+                  final enabled = index >= totalQaSam - usefulQaSam;
                   return PopupMenuItem<int>(
                     enabled: enabled,
                     height: 35,
@@ -1835,7 +1836,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                         ),
                     ],
                     if (plPlayerController.showDmChart &&
-                        videoDetailController.showDmTreandChart.value)
+                        videoDetailController.showDmTrendChart.value)
                       if (videoDetailController.dmTrend.value?.dataOrNull
                           case final list?)
                         buildDmChart(primary, list, videoDetailController),
@@ -2132,9 +2133,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   Future<void> screenshotWebp() async {
     final videoInfo = videoDetailController.data;
     final ids = videoInfo.dash!.video!.map((i) => i.id!).toSet();
-    final video = videoDetailController.findVideoByQa(
-      ids.reduce((p, n) => p < n ? p : n),
-    );
+    final video = videoDetailController.findVideoByQa(ids.min);
 
     VideoQuality qa = video.quality;
     String? url = video.baseUrl;
@@ -2513,7 +2512,7 @@ Widget buildDmChart(
           minX: 0,
           maxX: (dmTrend.length - 1).toDouble(),
           minY: 0,
-          maxY: dmTrend.reduce((a, b) => a > b ? a : b).toDouble(),
+          maxY: dmTrend.max,
           lineBarsData: [
             LineChartBarData(
               spots: List.generate(

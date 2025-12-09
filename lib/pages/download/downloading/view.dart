@@ -84,6 +84,9 @@ class _DownloadingPageState extends State<DownloadingPage>
                           onDelete: () => _downloadService.deleteDownload(
                             entry: entry,
                             removeQueue: true,
+                            downloadNext:
+                                isCurr &&
+                                entry.status == DownloadStatus.downloading,
                           ),
                           controller: this,
                         );
@@ -107,7 +110,10 @@ class _DownloadingPageState extends State<DownloadingPage>
       title: '确定删除选中视频？',
       onConfirm: () async {
         SmartDialog.showLoading();
-        final allChecked = this.allChecked.toList();
+        final allChecked = this.allChecked.toSet();
+        final isDownloading =
+            _downloadService.curDownload.value?.status ==
+            DownloadStatus.downloading;
         for (var entry in allChecked) {
           await _downloadService.deleteDownload(
             entry: entry,
@@ -116,7 +122,7 @@ class _DownloadingPageState extends State<DownloadingPage>
           );
         }
         _downloadService.waitDownloadQueue.removeWhere(allChecked.contains);
-        if (_downloadService.curDownload.value == null) {
+        if (isDownloading && _downloadService.curDownload.value == null) {
           _downloadService.nextDownload();
         }
         if (enableMultiSelect.value) {

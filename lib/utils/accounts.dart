@@ -77,7 +77,7 @@ abstract class Accounts {
       }
     }
     await Future.wait(
-      (accountMode.toSet()..removeWhere((i) => i.activited)).map(
+      (accountMode.toSet()..removeWhere((i) => i.activated)).map(
         Request.buvidActive,
       ),
     );
@@ -93,23 +93,23 @@ abstract class Accounts {
   }
 
   static Future<void> deleteAll(Set<Account> accounts) async {
-    var isloginMain = Accounts.main.isLogin;
+    var isLoginMain = Accounts.main.isLogin;
     for (int i = 0; i < AccountType.values.length; i++) {
       if (accounts.contains(accountMode[i])) {
         accountMode[i] = AnonymousAccount();
       }
     }
     await Future.wait(accounts.map((i) => i.delete()));
-    if (isloginMain && !Accounts.main.isLogin) {
+    if (isLoginMain && !Accounts.main.isLogin) {
       await LoginUtils.onLogoutMain();
     }
   }
 
   static Future<void> set(AccountType key, Account account) async {
-    await (accountMode[key.index]..type.remove(key)).onChange();
+    final oldAccount = accountMode[key.index]..type.remove(key);
     accountMode[key.index] = account..type.add(key);
-    await account.onChange();
-    if (!account.activited) await Request.buvidActive(account);
+    await Future.wait([account.onChange(), oldAccount.onChange()]);
+    if (!account.activated) await Request.buvidActive(account);
     switch (key) {
       case AccountType.main:
         await (account.isLogin

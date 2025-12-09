@@ -5,6 +5,7 @@ import 'package:PiliPlus/common/widgets/pair.dart';
 import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/models/common/dynamic/dynamic_badge_mode.dart';
 import 'package:PiliPlus/models/common/dynamic/up_panel_position.dart';
+import 'package:PiliPlus/models/common/follow_order_type.dart';
 import 'package:PiliPlus/models/common/member/tab_type.dart';
 import 'package:PiliPlus/models/common/msg/msg_unread_type.dart';
 import 'package:PiliPlus/models/common/sponsor_block/segment_type.dart';
@@ -333,11 +334,11 @@ abstract class Pref {
   static bool get showBangumiReply =>
       _setting.get(SettingBoxKey.showBangumiReply, defaultValue: true);
 
-  static bool get alwaysExapndIntroPanel =>
-      _setting.get(SettingBoxKey.alwaysExapndIntroPanel, defaultValue: false);
+  static bool get alwaysExpandIntroPanel =>
+      _setting.get(SettingBoxKey.alwaysExpandIntroPanel, defaultValue: false);
 
-  static bool get exapndIntroPanelH =>
-      _setting.get(SettingBoxKey.exapndIntroPanelH, defaultValue: false);
+  static bool get expandIntroPanelH =>
+      _setting.get(SettingBoxKey.expandIntroPanelH, defaultValue: false);
 
   static bool get horizontalSeasonPanel =>
       _setting.get(SettingBoxKey.horizontalSeasonPanel, defaultValue: false);
@@ -371,8 +372,8 @@ abstract class Pref {
   static int get subtitlePaddingB =>
       _setting.get(SettingBoxKey.subtitlePaddingB, defaultValue: 24);
 
-  static double get subtitleBgOpaticy =>
-      _setting.get(SettingBoxKey.subtitleBgOpaticy, defaultValue: 0.67);
+  static double get subtitleBgOpacity =>
+      _setting.get(SettingBoxKey.subtitleBgOpacity, defaultValue: 0.67);
 
   static double get subtitleStrokeWidth =>
       _setting.get(SettingBoxKey.subtitleStrokeWidth, defaultValue: 2.0);
@@ -667,7 +668,7 @@ abstract class Pref {
       _setting.get(SettingBoxKey.customColor, defaultValue: 0);
 
   static bool get dynamicColor =>
-      _setting.get(SettingBoxKey.dynamicColor, defaultValue: true);
+      _setting.get(SettingBoxKey.dynamicColor, defaultValue: !Platform.isIOS);
 
   static bool get autoClearCache =>
       _setting.get(SettingBoxKey.autoClearCache, defaultValue: false);
@@ -692,10 +693,11 @@ abstract class Pref {
   static bool get enableMYBar =>
       _setting.get(SettingBoxKey.enableMYBar, defaultValue: true);
 
-  static int get pageTransition => _setting.get(
-    SettingBoxKey.pageTransition,
-    defaultValue: Transition.native.index,
-  );
+  static Transition get pageTransition =>
+      Transition.values[_setting.get(
+        SettingBoxKey.pageTransition,
+        defaultValue: Transition.native.index,
+      )];
 
   static bool get enableQuickDouble =>
       _setting.get(SettingBoxKey.enableQuickDouble, defaultValue: true);
@@ -902,4 +904,10 @@ abstract class Pref {
     SettingBoxKey.showBatteryLevel,
     defaultValue: Utils.isMobile,
   );
+
+  static FollowOrderType get followOrderType =>
+      FollowOrderType.values[_setting.get(
+        SettingBoxKey.followOrderType,
+        defaultValue: FollowOrderType.def.index,
+      )];
 }

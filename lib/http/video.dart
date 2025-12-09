@@ -919,14 +919,14 @@ class VideoHttp {
       for (var i in res.data['data']['list']) {
         if (_canAddRank(i)) {
           list.add(HotVideoItemModel.fromJson(i));
-          final List? others = i['others'];
-          if (others != null && others.isNotEmpty) {
-            for (var j in others) {
-              if (_canAddRank(j)) {
-                list.add(HotVideoItemModel.fromJson(j));
-              }
-            }
-          }
+          // final List? others = i['others'];
+          // if (others != null && others.isNotEmpty) {
+          //   for (var j in others) {
+          //     if (_canAddRank(j)) {
+          //       list.add(HotVideoItemModel.fromJson(j));
+          //     }
+          //   }
+          // }
         }
       }
       return Success(list);

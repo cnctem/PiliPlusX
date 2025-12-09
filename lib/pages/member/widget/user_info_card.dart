@@ -4,6 +4,7 @@ import 'package:PiliPlus/common/widgets/pendant_avatar.dart';
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/models/common/image_preview_type.dart';
 import 'package:PiliPlus/models/common/image_type.dart';
+import 'package:PiliPlus/models/common/member/user_info_type.dart';
 import 'package:PiliPlus/models_new/space/space/card.dart';
 import 'package:PiliPlus/models_new/space/space/followings_followed_upper.dart';
 import 'package:PiliPlus/models_new/space/space/images.dart';
@@ -59,29 +60,49 @@ class UserInfoCard extends StatelessWidget {
 
   Widget _countWidget({
     required ColorScheme colorScheme,
-    required String title,
-    required int? count,
-    required VoidCallback onTap,
+    required UserInfoType type,
   }) {
+    int? count;
+    VoidCallback? onTap;
+    switch (type) {
+      case UserInfoType.fan:
+        count = card.fans;
+        onTap = () => FansPage.toFansPage(
+          mid: card.mid,
+          name: card.name,
+        );
+      case UserInfoType.follow:
+        count = card.attention;
+        onTap = () => FollowPage.toFollowPage(
+          mid: card.mid,
+          name: card.name,
+        );
+      case UserInfoType.like:
+        count = card.likes?.likeNum;
+    }
     return GestureDetector(
+      behavior: .opaque,
       onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            NumUtils.numFormat(count),
-            style: const TextStyle(fontSize: 14),
-          ),
-          Text(
-            title,
-            style: TextStyle(
-              height: 1.2,
-              fontSize: 12,
-              color: colorScheme.outline,
+      child: Align(
+        alignment: type.alignment,
+        widthFactor: 1.0,
+        child: Column(
+          mainAxisSize: .min,
+          children: [
+            Text(
+              NumUtils.numFormat(count),
+              style: const TextStyle(fontSize: 14),
             ),
-          ),
-        ],
+            Text(
+              type.title,
+              style: TextStyle(
+                height: 1.2,
+                fontSize: 12,
+                color: colorScheme.outline,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -320,33 +341,25 @@ class UserInfoCard extends StatelessWidget {
     mainAxisSize: MainAxisSize.min,
     children: [
       Row(
-        children: List.generate(
-          5,
-          (index) => index.isEven
-              ? _countWidget(
+        children: UserInfoType.values
+            .map(
+              (e) => Expanded(
+                child: _countWidget(
                   colorScheme: colorScheme,
-                  title: ['粉丝', '关注', '获赞'][index ~/ 2],
-                  count: index == 0
-                      ? card.fans
-                      : index == 2
-                      ? card.attention
-                      : card.likes?.likeNum,
-                  onTap: () {
-                    if (index == 0) {
-                      FansPage.toFansPage(mid: card.mid, name: card.name);
-                    } else if (index == 2) {
-                      FollowPage.toFollowPage(mid: card.mid, name: card.name);
-                    }
-                  },
-                )
-              : const Expanded(
-                  child: SizedBox(
-                    height: 15,
-                    width: 1,
-                    child: VerticalDivider(),
-                  ),
+                  type: e,
                 ),
-        ),
+              ),
+            )
+            .expand((child) sync* {
+              yield const SizedBox(
+                height: 15,
+                width: 1,
+                child: VerticalDivider(),
+              );
+              yield child;
+            })
+            .skip(1)
+            .toList(),
       ),
       const SizedBox(height: 5),
       Row(

@@ -15,7 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class PgcController
-    extends CommonListController<List<PgcIndexItem>?, PgcIndexItem> {
+    extends CommonListController<List<PgcIndexItem>?, PgcIndexItem>
+    with AccountMixin {
   PgcController({required this.tabType});
   final HomeTabType tabType;
 
@@ -23,7 +24,8 @@ class PgcController
       (tabType == HomeTabType.bangumi || tabType == HomeTabType.hk_bangumi)
           && Pref.showPgcTimeline;
 
-  AccountService accountService = Get.find<AccountService>();
+  @override
+  final accountService = Get.find<AccountService>();
 
   @override
   void onInit() {
@@ -81,7 +83,7 @@ class PgcController
         list1.isNotEmpty &&
         list2.isNotEmpty) {
       for (var i = 0; i < list1.length; i++) {
-        list1[i] + list2[i];
+        list1[i].addAll(list2[i]);
       }
     } else {
       list1 ??= list2;
@@ -161,5 +163,16 @@ class PgcController
   void onClose() {
     followController?.dispose();
     super.onClose();
+  }
+
+  @override
+  void onChangeAccount(bool isLogin) {
+    if (isLogin) {
+      followPage = 1;
+      followEnd = false;
+      queryPgcFollow();
+    } else {
+      followState.value = LoadingState.loading();
+    }
   }
 }

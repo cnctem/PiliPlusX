@@ -12,9 +12,9 @@ sealed class Account {
 
   Set<AccountType> get type => const {};
 
-  bool get activited => false;
+  bool get activated => false;
 
-  set activited(bool value) => throw UnimplementedError();
+  set activated(bool value) => throw UnimplementedError();
 
   String? get accessKey => throw UnimplementedError();
 
@@ -53,7 +53,7 @@ class LoginAccount extends Account {
   final Set<AccountType> type;
 
   @override
-  bool activited = false;
+  bool activated = false;
 
   @override
   late final int mid = int.parse(_midStr);
@@ -141,7 +141,7 @@ class AnonymousAccount extends Account {
   final Map<String, String> headers = Constants.baseHeaders;
 
   @override
-  bool activited = false;
+  bool activated = false;
 
   @override
   Future<void> delete() async {

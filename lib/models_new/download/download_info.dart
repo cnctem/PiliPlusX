@@ -9,7 +9,7 @@ class DownloadPageInfo with MultiSelectData {
   String cover;
   int sortKey;
   final int? seasonType;
-  final List<BiliDownloadEntryInfo> entrys;
+  final List<BiliDownloadEntryInfo> entries;
 
   DownloadPageInfo({
     required this.pageId,
@@ -18,6 +18,6 @@ class DownloadPageInfo with MultiSelectData {
     required this.cover,
     required this.sortKey,
     this.seasonType,
-    required this.entrys,
+    required this.entries,
   });
 }

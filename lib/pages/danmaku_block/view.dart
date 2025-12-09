@@ -34,7 +34,7 @@ class _DanmakuBlockPageState extends State<DanmakuBlockPage> {
 
   @override
   void dispose() {
-    final ruleFilter = RuleFilter.fromRuleTypeEntires(_controller.rules);
+    final ruleFilter = RuleFilter.fromRuleTypeEntries(_controller.rules);
     plPlayerController.filters = ruleFilter;
     GStorage.localCache.put(LocalCacheKey.danmakuFilterRules, ruleFilter);
     super.dispose();

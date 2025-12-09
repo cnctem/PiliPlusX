@@ -111,7 +111,7 @@ class _MemberPageState extends State<MemberPage> {
     ),
     PopupMenuButton(
       icon: const Icon(Icons.more_vert),
-      itemBuilder: (BuildContext context) => <PopupMenuEntry>[
+      itemBuilder: (_) => <PopupMenuEntry>[
         if (_userController.account.isLogin &&
             _userController.account.mid != _mid) ...[
           PopupMenuItem(

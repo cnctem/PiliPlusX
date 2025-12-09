@@ -175,7 +175,7 @@ class _SettingPageState extends State<SettingPage> {
       children: [
         _buildSearchItem(theme),
         ..._items
-            .sublist(0, _items.length - 1)
+            .take(_items.length - 1)
             .map(
               (item) => ListTile(
                 tileColor: _getTileColor(theme, item.type),

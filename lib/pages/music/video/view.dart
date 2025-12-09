@@ -11,14 +11,14 @@ import 'package:PiliPlus/utils/grid.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class MusicRecommandPage extends StatefulWidget {
-  const MusicRecommandPage({super.key});
+class MusicRecommendPage extends StatefulWidget {
+  const MusicRecommendPage({super.key});
 
   @override
-  State<MusicRecommandPage> createState() => _MusicRecommandPageState();
+  State<MusicRecommendPage> createState() => _MusicRecommendPageState();
 }
 
-class _MusicRecommandPageState extends State<MusicRecommandPage>
+class _MusicRecommendPageState extends State<MusicRecommendPage>
     with GridMixin {
   late final MusicRecommendController _controller = Get.putOrFind(
     MusicRecommendController.new,
@@ -58,12 +58,12 @@ class _MusicRecommandPageState extends State<MusicRecommandPage>
     return switch (loadingState) {
       Loading() => gridSkeleton,
       Success(:var response) =>
-        response?.isNotEmpty == true
+        response != null && response.isNotEmpty
             ? SliverGrid.builder(
                 gridDelegate: gridDelegate,
                 itemBuilder: (context, index) =>
                     MusicVideoCardH(videoItem: response[index]),
-                itemCount: response!.length,
+                itemCount: response.length,
               )
             : HttpError(onReload: _controller.onReload),
       Error(:var errMsg) => HttpError(

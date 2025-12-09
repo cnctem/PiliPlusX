@@ -15,7 +15,7 @@ class RuleFilter {
         count ?? dmFilterString.length + dmRegExp.length + dmUid.length;
   }
 
-  RuleFilter.fromRuleTypeEntires(List<List<SimpleRule>> rules) {
+  RuleFilter.fromRuleTypeEntries(List<List<SimpleRule>> rules) {
     dmFilterString = rules[0].map((e) => e.filter).toList();
 
     dmRegExp = rules[1]

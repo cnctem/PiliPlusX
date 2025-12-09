@@ -195,7 +195,7 @@ class _EpisodePanelState extends State<EpisodePanel>
   Widget buildPage(ThemeData theme) {
     final isMulti = widget.type == EpisodeType.season && widget.list.length > 1;
 
-    Widget tabbar() => TabBar(
+    Widget tabBar() => TabBar(
       controller: _tabController,
       padding: const EdgeInsets.only(right: 60),
       isScrollable: true,
@@ -213,7 +213,7 @@ class _EpisodePanelState extends State<EpisodePanel>
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildToolbar(theme),
-            tabbar(),
+            tabBar(),
           ],
         ),
         children: List.generate(
@@ -234,7 +234,7 @@ class _EpisodePanelState extends State<EpisodePanel>
         children: [
           _buildToolbar(theme),
           if (isMulti) ...[
-            tabbar(),
+            tabBar(),
             Expanded(
               child: tabBarView(
                 controller: _tabController,

@@ -219,14 +219,14 @@ class _DynamicDetailPageState extends CommonDynPageState<DynamicDetailPage> {
               required String text,
               required DynamicStat? stat,
               required VoidCallback onPressed,
-              IconData? activitedIcon,
+              IconData? activatedIcon,
             }) {
               final status = stat?.status == true;
               final color = status ? primary : outline;
               return TextButton.icon(
                 onPressed: onPressed,
                 icon: Icon(
-                  status ? activitedIcon : icon,
+                  status ? activatedIcon : icon,
                   size: 16,
                   color: color,
                 ),
@@ -309,7 +309,7 @@ class _DynamicDetailPageState extends CommonDynPageState<DynamicDetailPage> {
                           builder: (context) {
                             return textIconButton(
                               icon: FontAwesomeIcons.thumbsUp,
-                              activitedIcon: FontAwesomeIcons.solidThumbsUp,
+                              activatedIcon: FontAwesomeIcons.solidThumbsUp,
                               text: '点赞',
                               stat: moduleStat?.like,
                               onPressed: () => RequestUtils.onLikeDynamic(

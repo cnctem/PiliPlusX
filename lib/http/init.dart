@@ -23,7 +23,7 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 
 class Request {
   static const _gzipDecoder = GZipDecoder();
-  static const _brotilDecoder = BrotliDecoder();
+  static const _brotliDecoder = BrotliDecoder();
 
   static final Request _instance = Request._internal();
   static late AccountManager accountManager;
@@ -56,20 +56,26 @@ class Request {
 
   static Future<void> buvidActive(Account account) async {
     // 这样线程不安全, 但仍按预期进行
-    if (account.activited) return;
-    account.activited = true;
+    if (account.activated) return;
+    account.activated = true;
     try {
       // final html = await Request().get(Api.dynamicSpmPrefix,
       //     options: Options(extra: {'account': account}));
       // final String spmPrefix = _spmPrefixExp.firstMatch(html.data)!.group(1)!;
-      final String randPngEnd = base64.encode(
-        List<int>.generate(32, (_) => Utils.random.nextInt(256)) +
-            List<int>.filled(4, 0) +
-            [73, 69, 78, 68] +
-            List<int>.generate(4, (_) => Utils.random.nextInt(256)),
-      );
+      final String randPngEnd = base64.encode([
+        ...Iterable<int>.generate(32, (_) => Utils.random.nextInt(256)),
+        0,
+        0,
+        0,
+        0,
+        73,
+        69,
+        78,
+        68,
+        ...Iterable<int>.generate(4, (_) => Utils.random.nextInt(256)),
+      ]);
 
-      String jsonData = json.encode({
+      final jsonData = json.encode({
         '3064': 1,
         '39c8': '333.1387.fp.risk',
         '3c43': {
@@ -278,7 +284,7 @@ class Request {
     Map<String, List<String>> headers,
   ) => switch (headers['content-encoding']?.firstOrNull) {
     'gzip' => _gzipDecoder.decodeBytes(responseBytes),
-    'br' => _brotilDecoder.convert(responseBytes),
+    'br' => _brotliDecoder.convert(responseBytes),
     _ => responseBytes,
   };
 

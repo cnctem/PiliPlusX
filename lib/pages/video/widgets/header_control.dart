@@ -23,7 +23,7 @@ import 'package:PiliPlus/models/common/video/video_quality.dart';
 import 'package:PiliPlus/models/video/play/url.dart';
 import 'package:PiliPlus/models_new/video/video_play_info/subtitle.dart';
 import 'package:PiliPlus/pages/common/common_intro_controller.dart';
-import 'package:PiliPlus/pages/danmaku/dnamaku_model.dart';
+import 'package:PiliPlus/pages/danmaku/danmaku_model.dart';
 import 'package:PiliPlus/pages/setting/widgets/select_dialog.dart';
 import 'package:PiliPlus/pages/setting/widgets/switch_item.dart';
 import 'package:PiliPlus/pages/video/controller.dart';
@@ -1157,7 +1157,7 @@ class HeaderControlState extends State<HeaderControl>
                     ),
                     onTap: () async {
                       Get.back();
-                      CDNService? result = await showDialog(
+                      final result = await showDialog<CDNService>(
                         context: context,
                         builder: (context) {
                           return CdnSelectDialog(
@@ -1586,14 +1586,14 @@ class HeaderControlState extends State<HeaderControl>
     final int totalQaSam = videoFormat.length;
 
     /// 可用的质量分类
-    int userfulQaSam = 0;
+    int usefulQaSam = 0;
     final List<VideoItem> video = videoInfo.dash!.video!;
     final Set<int> idSet = {};
     for (final VideoItem item in video) {
       final int id = item.id!;
       if (!idSet.contains(id)) {
         idSet.add(id);
-        userfulQaSam++;
+        usefulQaSam++;
       }
     }
 
@@ -1662,7 +1662,7 @@ class HeaderControlState extends State<HeaderControl>
                         }
                       },
                       // 可能包含会员解锁画质
-                      enabled: index >= totalQaSam - userfulQaSam,
+                      enabled: index >= totalQaSam - usefulQaSam,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 20,
                       ),
@@ -1920,7 +1920,7 @@ class HeaderControlState extends State<HeaderControl>
     double subtitleFontScaleFS = plPlayerController.subtitleFontScaleFS;
     int subtitlePaddingH = plPlayerController.subtitlePaddingH;
     int subtitlePaddingB = plPlayerController.subtitlePaddingB;
-    double subtitleBgOpaticy = plPlayerController.subtitleBgOpaticy;
+    double subtitleBgOpacity = plPlayerController.subtitleBgOpacity;
     double subtitleStrokeWidth = plPlayerController.subtitleStrokeWidth;
     int subtitleFontWeight = plPlayerController.subtitleFontWeight;
 
@@ -1947,9 +1947,9 @@ class HeaderControlState extends State<HeaderControl>
         }
 
         void updateOpacity(double val) {
-          subtitleBgOpaticy = val.toPrecision(2);
+          subtitleBgOpacity = val.toPrecision(2);
           plPlayerController
-            ..subtitleBgOpaticy = subtitleBgOpaticy
+            ..subtitleBgOpacity = subtitleBgOpacity
             ..updateSubtitleStyle();
           setState(() {});
         }
@@ -2217,7 +2217,7 @@ class HeaderControlState extends State<HeaderControl>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('背景不透明度 ${(subtitleBgOpaticy * 100).toInt()}%'),
+                      Text('背景不透明度 ${(subtitleBgOpacity * 100).toInt()}%'),
                       resetBtn(
                         theme,
                         '67%',
@@ -2238,7 +2238,7 @@ class HeaderControlState extends State<HeaderControl>
                       child: Slider(
                         min: 0,
                         max: 1,
-                        value: subtitleBgOpaticy,
+                        value: subtitleBgOpacity,
                         onChanged: updateOpacity,
                         onChangeEnd: (_) =>
                             plPlayerController.putSubtitleSettings(),

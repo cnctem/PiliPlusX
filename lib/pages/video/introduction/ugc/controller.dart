@@ -68,11 +68,11 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
   @override
   void onInit() {
     super.onInit();
-    bool alwaysExapndIntroPanel = Pref.alwaysExapndIntroPanel;
+    bool alwaysExpandIntroPanel = Pref.alwaysExpandIntroPanel;
     expandableCtr = ExpandableController(
-      initialExpanded: alwaysExapndIntroPanel,
+      initialExpanded: alwaysExpandIntroPanel,
     );
-    if (!alwaysExapndIntroPanel && Pref.exapndIntroPanelH) {
+    if (!alwaysExpandIntroPanel && Pref.expandIntroPanelH) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!expandableCtr.expanded && Get.context!.isLandscape) {
           expandableCtr.toggle();
@@ -133,11 +133,11 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
 
   // 获取up主粉丝数
   Future<void> queryUserStat(List<Staff>? staff) async {
-    if (staff?.isNotEmpty == true) {
+    if (staff != null && staff.isNotEmpty) {
       Request()
           .get(
             Api.relations,
-            queryParameters: {'fids': staff!.map((item) => item.mid).join(',')},
+            queryParameters: {'fids': staff.map((item) => item.mid).join(',')},
           )
           .then((res) {
             if (res.data['code'] == 0) {
@@ -581,7 +581,7 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
       (e) =>
           e.cid ==
           (skipPart
-              ? videoDetail.isPageReversed == true
+              ? videoDetail.isPageReversed
                     ? videoDetail.pages!.last.cid
                     : videoDetail.pages!.first.cid
               : this.cid.value),
@@ -663,7 +663,7 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
         (e) =>
             e.cid ==
             (skipPart
-                ? videoDetail.isPageReversed == true
+                ? videoDetail.isPageReversed
                       ? videoDetail.pages!.last.cid
                       : videoDetail.pages!.first.cid
                 : this.cid.value),

@@ -22,7 +22,6 @@ import 'package:PiliPlus/pages/setting/widgets/multi_select_dialog.dart';
 import 'package:PiliPlus/pages/setting/widgets/select_dialog.dart';
 import 'package:PiliPlus/pages/setting/widgets/slide_dialog.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
-import 'package:PiliPlus/router/app_pages.dart';
 import 'package:PiliPlus/utils/global_data.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
@@ -124,20 +123,19 @@ List<SettingsModel> get styleSettings => [
     settingsType: SettingsType.normal,
     title: '页面过渡动画',
     leading: const Icon(Icons.animation),
-    getSubtitle: () => '当前：${CustomGetPage.pageTransition.name}',
+    getSubtitle: () => '当前：${Pref.pageTransition.name}',
     onTap: (setState) async {
-      Transition? result = await showDialog(
+      final result = await showDialog<Transition>(
         context: Get.context!,
         builder: (context) {
           return SelectDialog<Transition>(
             title: '页面过渡动画',
-            value: CustomGetPage.pageTransition,
+            value: Pref.pageTransition,
             values: Transition.values.map((e) => (e, e.name)).toList(),
           );
         },
       );
       if (result != null) {
-        CustomGetPage.pageTransition = result;
         await GStorage.setting.put(SettingBoxKey.pageTransition, result.index);
         SmartDialog.showToast('重启生效');
         setState();
@@ -164,7 +162,7 @@ List<SettingsModel> get styleSettings => [
   SettingsModel(
     settingsType: SettingsType.normal,
     onTap: (setState) async {
-      double? result = await showDialog(
+      final result = await showDialog<double>(
         context: Get.context!,
         builder: (context) {
           return SlideDialog(
@@ -215,7 +213,7 @@ List<SettingsModel> get styleSettings => [
     leading: const Icon(Icons.person_outlined),
     getSubtitle: () => '当前：${Pref.upPanelPosition.label}',
     onTap: (setState) async {
-      UpPanelPosition? result = await showDialog(
+      final result = await showDialog<UpPanelPosition>(
         context: Get.context!,
         builder: (context) {
           return SelectDialog<UpPanelPosition>(
@@ -249,7 +247,7 @@ List<SettingsModel> get styleSettings => [
   SettingsModel(
     settingsType: SettingsType.normal,
     onTap: (setState) async {
-      DynamicBadgeMode? result = await showDialog(
+      final result = await showDialog<DynamicBadgeMode>(
         context: Get.context!,
         builder: (context) {
           return SelectDialog<DynamicBadgeMode>(
@@ -280,7 +278,7 @@ List<SettingsModel> get styleSettings => [
   SettingsModel(
     settingsType: SettingsType.normal,
     onTap: (setState) async {
-      DynamicBadgeMode? result = await showDialog(
+      final result = await showDialog<DynamicBadgeMode>(
         context: Get.context!,
         builder: (context) {
           return SelectDialog<DynamicBadgeMode>(
@@ -530,7 +528,7 @@ List<SettingsModel> get styleSettings => [
   SettingsModel(
     settingsType: SettingsType.normal,
     onTap: (setState) async {
-      double? result = await showDialog(
+      final result = await showDialog<double>(
         context: Get.context!,
         builder: (context) {
           return SlideDialog(
@@ -563,7 +561,7 @@ List<SettingsModel> get styleSettings => [
   SettingsModel(
     settingsType: SettingsType.normal,
     onTap: (setState) async {
-      ThemeType? result = await showDialog(
+      final result = await showDialog<ThemeType>(
         context: Get.context!,
         builder: (context) {
           return SelectDialog<ThemeType>(
@@ -610,7 +608,7 @@ List<SettingsModel> get styleSettings => [
   SettingsModel(
     settingsType: SettingsType.normal,
     onTap: (setState) async {
-      int? result = await showDialog(
+      final result = await showDialog<int>(
         context: Get.context!,
         builder: (context) {
           return SelectDialog<int>(

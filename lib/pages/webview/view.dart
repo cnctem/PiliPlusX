@@ -137,7 +137,7 @@ class _WebviewPageState extends State<WebviewPage> {
                   },
                   itemBuilder: (context) => <PopupMenuEntry<WebviewMenuItem>>[
                     ...WebviewMenuItem.values
-                        .sublist(0, WebviewMenuItem.values.length - 1)
+                        .take(WebviewMenuItem.values.length - 1)
                         .map(
                           (item) => PopupMenuItem(
                             value: item,
