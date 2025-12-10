@@ -73,14 +73,16 @@ List<SettingsModel> get styleSettings => [
     defaultVal: false,
     needReboot: true,
   ),
-  const SwitchModel(
-    title: '使用系统字体（若系统字体错误请关闭）',
-    subtitle: '关闭后将使用内置HarmonyOS Sans字体，macOS系统下此选项无效',
-    leading: Icon(Icons.font_download_outlined),
-    setKey: SettingBoxKey.useSystemFont,
-    defaultVal: true,
-    needReboot: false,
-  ),
+  if (!Platform.isMacOS) ...[
+    const SwitchModel(
+      title: '使用系统字体',
+      subtitle: '关闭后将使用内置HarmonyOS Sans字体',
+      leading: Icon(Icons.font_download_outlined),
+      setKey: SettingBoxKey.useSystemFont,
+      defaultVal: true,
+      needReboot: false,
+    ),
+  ],
   SwitchModel(
     title: 'App字体字重',
     subtitle: '点击设置字重，iOS使用此选项需要开启“使用系统字体”',
@@ -112,6 +114,20 @@ List<SettingsModel> get styleSettings => [
     onChanged: (value) {
       Get.forceAppUpdate();
     },
+  ),
+  NormalModel(
+    onTap: (context, setState) async {
+      var result = await Get.toNamed('/fontSizeSetting');
+      if (result != null) {
+        Get.put(ColorSelectController()).currentTextScale.value = result;
+      }
+    },
+    title: '字体大小',
+    leading: const Icon(Icons.format_size_outlined),
+    getSubtitle: () =>
+        Get.put(ColorSelectController()).currentTextScale.value == 1.0
+        ? '默认'
+        : Get.put(ColorSelectController()).currentTextScale.value.toString(),
   ),
   NormalModel(
     title: '页面过渡动画',
@@ -671,20 +687,6 @@ List<SettingsModel> get styleSettings => [
         },
       );
     },
-  ),
-  NormalModel(
-    onTap: (context, setState) async {
-      var result = await Get.toNamed('/fontSizeSetting');
-      if (result != null) {
-        Get.put(ColorSelectController()).currentTextScale.value = result;
-      }
-    },
-    title: '字体大小',
-    leading: const Icon(Icons.format_size_outlined),
-    getSubtitle: () =>
-        Get.put(ColorSelectController()).currentTextScale.value == 1.0
-        ? '默认'
-        : Get.put(ColorSelectController()).currentTextScale.value.toString(),
   ),
   NormalModel(
     onTap: (context, setState) => Get.toNamed(
