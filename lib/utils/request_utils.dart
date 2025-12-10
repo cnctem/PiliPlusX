@@ -67,6 +67,7 @@ abstract class RequestUtils {
     required int receiverId,
     required Map content,
     String? message,
+    bool avoidGetBack = false,
   }) async {
     SmartDialog.showLoading();
 
@@ -88,14 +89,18 @@ abstract class RequestUtils {
           content: jsonEncode({"content": message}),
           msgType: 1,
         );
-        Get.back();
+        if (!avoidGetBack) {
+          Get.back();
+        }
         if (msgRes['status']) {
           SmartDialog.showToast('分享成功');
         } else {
           SmartDialog.showToast('内容分享成功，但消息分享失败: ${msgRes['msg']}');
         }
       } else {
-        Get.back();
+        if (!avoidGetBack) {
+          Get.back();
+        }
         SmartDialog.showToast('分享成功');
       }
     } else {

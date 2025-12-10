@@ -235,7 +235,7 @@ class _PgcPageState extends CommonPageState<PgcPage, PgcController>
           moreTextButton(
             padding: const EdgeInsets.symmetric(vertical: 2),
             onTap: () {
-              if (widget.tabType == HomeTabType.bangumi) {
+              if (widget.tabType == HomeTabType.bangumi || widget.tabType == HomeTabType.hk_bangumi) {
                 Get.to(const PgcIndexPage());
               } else {
                 List<String> titles = const [

@@ -73,9 +73,18 @@ List<SettingsModel> get styleSettings => [
     defaultVal: false,
     needReboot: true,
   ),
-  SwitchModel(
+  const SwitchModel(
+    title: '使用系统字体（若系统字体错误请关闭）',
+    subtitle: '关闭后将使用内置HarmonyOS Sans字体，macOS系统下此选项无效',
+    leading: Icon(Icons.font_download_outlined),
+    setKey: SettingBoxKey.useSystemFont,
+    defaultVal: true,
+    needReboot: false,
+  ),
+  const SwitchModel(
     title: 'App字体字重',
-    subtitle: '点击设置',
+    subtitle: '点击设置字重，iOS使用此选项需要开启“使用系统字体”',
+    leading: Icon(Icons.text_fields),
     setKey: SettingBoxKey.appFontWeight,
     defaultVal: false,
     onTap: (context) {

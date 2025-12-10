@@ -2,6 +2,7 @@ import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/video.dart';
 import 'package:PiliPlus/pages/common/common_list_controller.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 class RcmdController extends CommonListController {
   late bool enableSaveLastData = Pref.enableSaveLastData;
@@ -41,9 +42,11 @@ class RcmdController extends CommonListController {
   }
 
   @override
-  Future<void> onRefresh() {
+  Future<void> onRefresh() async {
     page = 0;
     isEnd = false;
-    return queryData();
+    await queryData();
+    // 显示自定义刷新消息
+    SmartDialog.showToast('推荐已刷新');
   }
 }

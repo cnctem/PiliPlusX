@@ -14,6 +14,7 @@ import 'package:PiliPlus/utils/extension.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
 class DynamicsController extends GetxController
@@ -201,6 +202,9 @@ class DynamicsController extends GetxController
       _cacheUpList = null;
     }
     queryFollowUp();
+    await controller?.onRefresh();
+    // 刷新完成后显示提示消息
+    SmartDialog.showToast('动态已刷新');
   }
 
   @override
@@ -221,7 +225,9 @@ class DynamicsController extends GetxController
         EasyThrottle.throttle(
           'topOrRefresh',
           const Duration(milliseconds: 500),
-          onRefresh,
+          () async {
+            await onRefresh();
+          },
         );
       } else {
         animateToTop();

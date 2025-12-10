@@ -1011,6 +1011,7 @@ class _LiveDanmakuState extends State<LiveDanmaku> {
                   plPlayerController.danmakuController = e;
             },
             option: DanmakuOption(
+              fontFamily: 'HarmonyOS_Sans',
               fontSize: _fontSize,
               fontWeight: plPlayerController.danmakuFontWeight,
               area: plPlayerController.showArea,

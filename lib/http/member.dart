@@ -434,6 +434,10 @@ class MemberHttp {
       } catch (e, s) {
         return Error('$e\n\n$s');
       }
+      // return Success(data);
+      // } catch (err) {
+      //   return Error(err.toString());
+      // }
     } else {
       Map errMap = const {
         -352: '风控校验失败，请检查登录状态',

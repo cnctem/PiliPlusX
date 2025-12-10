@@ -5,6 +5,7 @@ import 'package:PiliPlus/models/common/video/subtitle_pref_type.dart';
 import 'package:PiliPlus/pages/main/controller.dart';
 import 'package:PiliPlus/pages/setting/models/model.dart';
 import 'package:PiliPlus/pages/setting/widgets/select_dialog.dart';
+import 'package:PiliPlus/pages/setting/widgets/shortcut_keys_dialog.dart';
 import 'package:PiliPlus/plugin/pl_player/models/bottom_progress_behavior.dart';
 import 'package:PiliPlus/plugin/pl_player/models/fullscreen_mode.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart'
@@ -93,9 +94,19 @@ List<SettingsModel> get playSettings => [
     defaultVal: true,
   ),
   getVideoFilterSelectModel(
-    title: '双击快进/快退时长',
+    context: Get.context!,
+    title: '双击快进时长',
     suffix: 's',
     key: SettingBoxKey.fastForBackwardDuration,
+    values: [5, 10, 15],
+    defaultValue: 10,
+    isFilter: false,
+  ),
+  getVideoFilterSelectModel(
+    context: Get.context!,
+    title: '双击快退时长',
+    suffix: 's',
+    key: SettingBoxKey.fastForBackwardDuration_,
     values: [5, 10, 15],
     defaultValue: 10,
     isFilter: false,
@@ -153,9 +164,18 @@ List<SettingsModel> get playSettings => [
     ),
   const SwitchModel(
     title: '启用键盘控制',
+    subtitle: '点击查看快捷键',
     leading: Icon(Icons.keyboard_alt_outlined),
     setKey: SettingBoxKey.keyboardControl,
     defaultVal: true,
+    onTap: () {
+      showDialog(
+        context: Get.context!,
+        builder: (context) {
+          return const ShortcutKeysDialog();
+        },
+      );
+    },
   ),
   const SwitchModel(
     title: '显示 SuperChat (醒目留言)',
