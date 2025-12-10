@@ -226,7 +226,6 @@ abstract class SettingBoxKey {
       hideSearchBar = 'hideSearchBar',
       hideTabBar = 'hideTabBar',
       scrollThreshold = 'scrollThreshold',
-      enableScrollThreshold = 'enableScrollThreshold',
       tabBarSort = 'tabBarSort',
       dynamicBadgeMode = 'dynamicBadgeMode',
       msgBadgeMode = 'msgBadgeMode',

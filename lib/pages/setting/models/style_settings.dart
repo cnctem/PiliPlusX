@@ -341,14 +341,11 @@ List<SettingsModel> get styleSettings => [
     defaultVal: true,
     needReboot: true,
   ),
-  SwitchModel(
+  NormalModel(
     title: '顶/底栏滚动阈值',
     subtitle: '滚动多少像素后收起/展开顶底栏，默认50像素',
     leading: const Icon(Icons.swipe_vertical),
-    defaultVal: false,
-    setKey: SettingBoxKey.enableScrollThreshold,
-    needReboot: true,
-    onTap: (context) {
+    onTap: (context, setState) {
       String scrollThreshold = Pref.scrollThreshold.toString();
       showDialog(
         context: context,
