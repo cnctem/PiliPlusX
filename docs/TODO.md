@@ -55,5 +55,6 @@
 - [ ]  增加消息通知功能-基于“消息”-点击跳转对应界面 -dby
 - [ ]  直播间竖屏界面下面的弹幕调用弹幕复制组件 -hcz
 - [ ] 双指双击切换弹幕开关 -dby
+- [ ] 鼠标右键事件 -[Issue3](https://github.com/cnctem/PiliPlusX/issues/3)
 
 欢迎在 [Issues](https://github.com/cnctem/PiliPlusX/issues) 提交建议和问题反馈
