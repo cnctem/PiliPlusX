@@ -9,6 +9,7 @@ import 'package:PiliPlus/models_new/pgc/pgc_index_result/list.dart';
 import 'package:PiliPlus/models_new/pgc/pgc_timeline/result.dart';
 import 'package:PiliPlus/pages/common/common_list_controller.dart';
 import 'package:PiliPlus/services/account_service.dart';
+import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/extension.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/material.dart';
@@ -21,8 +22,8 @@ class PgcController
   final HomeTabType tabType;
 
   late final showPgcTimeline =
-      (tabType == HomeTabType.bangumi || tabType == HomeTabType.hk_bangumi)
-          && Pref.showPgcTimeline;
+      (tabType == HomeTabType.bangumi || tabType == HomeTabType.hk_bangumi) &&
+      Pref.showPgcTimeline;
 
   @override
   final accountService = Get.find<AccountService>();
@@ -74,11 +75,16 @@ class PgcController
   Future<void> queryPgcTimeline() async {
     String apiUrl = Api.pgcTimeline;
     if (tabType == HomeTabType.hk_bangumi && Pref.apiHKUrl.isNotEmpty) {
-      apiUrl = Pref.apiHKUrl+ Api.pgcTimeline;
+      apiUrl = Pref.apiHKUrl + Api.pgcTimeline;
     }
     final res = await Future.wait([
-      PgcHttp.pgcTimeline(types: 1, before: 6, after: 6,apiUrl:apiUrl),
-      PgcHttp.pgcTimeline(types: 4, before: 6, after: 6,apiUrl:Api.pgcTimeline),
+      PgcHttp.pgcTimeline(types: 1, before: 6, after: 6, apiUrl: apiUrl),
+      PgcHttp.pgcTimeline(
+        types: 4,
+        before: 6,
+        after: 6,
+        apiUrl: Api.pgcTimeline,
+      ),
     ]);
     var list1 = res.first.dataOrNull;
     var list2 = res[1].dataOrNull;
@@ -104,8 +110,10 @@ class PgcController
     }
     followLoading = true;
     var res = await FavHttp.favPgc(
-      mid: accountService.mid,
-      type: tabType == HomeTabType.bangumi || tabType == HomeTabType.hk_bangumi ? 1 : 2,
+      mid: Accounts.main.mid,
+      type: tabType == HomeTabType.bangumi || tabType == HomeTabType.hk_bangumi
+          ? 1
+          : 2,
       pn: followPage,
     );
 
@@ -150,7 +158,7 @@ class PgcController
       if (Pref.apiHKUrl.isEmpty) {
         return const Error('请在 设置-其他设置-港澳台代理 中设置代理服务器');
       }
-      apiUrl = Pref.apiHKUrl+ Api.pgcIndexResult;
+      apiUrl = Pref.apiHKUrl + Api.pgcIndexResult;
     }
 
     return PgcHttp.pgcIndex(
@@ -159,9 +167,6 @@ class PgcController
       apiUrl: apiUrl,
     );
   }
-
-
-
 
   @override
   void onClose() {

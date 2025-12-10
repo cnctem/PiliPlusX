@@ -81,10 +81,10 @@ List<SettingsModel> get styleSettings => [
     defaultVal: true,
     needReboot: false,
   ),
-  const SwitchModel(
+  SwitchModel(
     title: 'App字体字重',
     subtitle: '点击设置字重，iOS使用此选项需要开启“使用系统字体”',
-    leading: Icon(Icons.text_fields),
+    leading: const Icon(Icons.text_fields),
     setKey: SettingBoxKey.appFontWeight,
     defaultVal: false,
     onTap: (context) {
@@ -109,7 +109,6 @@ List<SettingsModel> get styleSettings => [
         }
       });
     },
-    leading: const Icon(Icons.text_fields),
     onChanged: (value) {
       Get.forceAppUpdate();
     },

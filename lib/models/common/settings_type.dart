@@ -1,0 +1,4 @@
+enum SettingsType {
+  normal,
+  switchType,
+}

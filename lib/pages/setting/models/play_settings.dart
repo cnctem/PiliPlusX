@@ -162,15 +162,15 @@ List<SettingsModel> get playSettings => [
         } catch (_) {}
       },
     ),
-  const SwitchModel(
+  SwitchModel(
     title: '启用键盘控制',
     subtitle: '点击查看快捷键',
-    leading: Icon(Icons.keyboard_alt_outlined),
+    leading: const Icon(Icons.keyboard_alt_outlined),
     setKey: SettingBoxKey.keyboardControl,
     defaultVal: true,
-    onTap: () {
+    onTap: (context) {
       showDialog(
-        context: Get.context!,
+        context: context,
         builder: (context) {
           return const ShortcutKeysDialog();
         },

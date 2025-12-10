@@ -152,7 +152,7 @@ abstract class SettingBoxKey {
       enableTapDm = 'enableTapDm',
       setSystemBrightness = 'setSystemBrightness',
       downloadPath = 'downloadPath',
-      followOrderType = 'followOrderType';
+      followOrderType = 'followOrderType',
       saveImgPath = 'saveImgPath',
       saveScreenshotPath = 'saveScreenshotPath';
 

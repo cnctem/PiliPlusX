@@ -1,5 +1,4 @@
 import 'package:PiliPlus/common/constants.dart';
-import 'package:PiliPlus/models/common/settings_type.dart';
 import 'package:PiliPlus/pages/setting/widgets/normal_item.dart';
 import 'package:PiliPlus/pages/setting/widgets/select_dialog.dart';
 import 'package:PiliPlus/pages/setting/widgets/switch_item.dart';
@@ -178,6 +177,7 @@ SettingsModel getVideoFilterSelectModel({
   int defaultValue = 0,
   bool isFilter = true,
   ValueChanged<int>? onChanged,
+  BuildContext? context,
 }) {
   assert(!isFilter || onChanged != null);
   int value = GStorage.setting.get(key, defaultValue: defaultValue);
@@ -266,12 +266,11 @@ SettingsModel getSaveImgPathModel({
   String defaultValue = 'Pictures/${Constants.appName}',
 }) {
   String value = GStorage.setting.get(key1, defaultValue: defaultValue);
-  return SettingsModel(
-    settingsType: SettingsType.normal,
+  return NormalModel(
     title: title,
     leading: const Icon(Icons.folder),
     getSubtitle: () => value,
-    onTap: (setState) async {
+    onTap: (context, setState) async {
       var result = await showDialog<String>(
         context: context,
         builder: (context) {
@@ -292,7 +291,7 @@ SettingsModel getSaveImgPathModel({
         result = 'Pictures/$suffix/screenshot';
         GStorage.setting.put(key2, result);
         return;
-      } 
+      }
       if (result == 'Pictures/${Constants.appName}') {
         value = result!;
         setState();

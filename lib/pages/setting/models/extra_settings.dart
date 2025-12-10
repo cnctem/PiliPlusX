@@ -875,7 +875,7 @@ List<SettingsModel> get extraSettings => [
             ],
           ),
         );
-        
+
         if (result == true) {
           final inputText = controller.text.trim();
           if (inputText.isEmpty) {
@@ -1307,15 +1307,14 @@ List<SettingsModel> get extraSettings => [
       }
     },
   ),
-  
-  SettingsModel(
-    settingsType: SettingsType.normal,
+
+  NormalModel(
     title: '设置港澳台代理',
     getSubtitle: () {
       final url = Pref.apiHKUrl;
       return '当前港澳台代理: 「${url == '' ? '不代理' : Pref.apiHKUrl}」';
     },
-    onTap: (setState) {
+    onTap: (context, setState) {
       showDialog(
         context: Get.context!,
         builder: (context) {

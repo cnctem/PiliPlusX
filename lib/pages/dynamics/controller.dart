@@ -196,12 +196,12 @@ class DynamicsController extends GetxController
     return controller!.onRefresh();
   }
 
-  void _refreshFollowUp() {
+  Future<void> _refreshFollowUp() async {
     if (_showAllUp) {
       _upPage = 1;
       _cacheUpList = null;
     }
-    queryFollowUp();
+    await queryFollowUp();
     await controller?.onRefresh();
     // 刷新完成后显示提示消息
     SmartDialog.showToast('动态已刷新');
