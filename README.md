@@ -29,6 +29,8 @@
 - [快捷键功能说明](#快捷键功能)
 - [港澳台代理](#港澳台代理)
 - [致谢](#致谢)
+- [TODO List](docs/TODO.md)
+- [Issues](https://github.com/cnctem/PiliPlusX/issues)
 
 ## 适配平台
 
@@ -36,7 +38,6 @@
 - [x] iOS
 - [x] Pad
 - [x] Windows
-- [x] Linux
 - [x] macOS
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/piliplus.svg)](https://repology.org/project/piliplus/versions)

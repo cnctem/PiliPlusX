@@ -1,21 +1,11 @@
 ### 远程仓库配置
-- origin : https://github.com/cnctem/PiliPlusX.git (你的原始仓库)
-- upstream : https://github.com/bggRGjQaUbCoE/PiliPlus.git (上游主仓库)
-- gucooing : https://github.com/gucooing/PiliPlus.git (新添加的fork)
+- origin : https://github.com/cnctem/PiliPlusX.git
+- upstream : https://github.com/bggRGjQaUbCoE/PiliPlus.git
+- gucooing : https://github.com/gucooing/PiliPlus.git
 
-```zsh
-git fetch gucooing
-```
+### 分支配置
 
-* dev
-  fail1
-  main
-  ohos
-  origin
-  remotes/gucooing/dev
-  remotes/gucooing/main
-  remotes/origin/HEAD -> origin/main
-  remotes/origin/main
-  remotes/upstream/HEAD -> upstream/main
-  remotes/upstream/dev
-  remotes/upstream/main
+- main : 主分支，用于发布稳定版本
+- dev : 开发分支，用于日常开发和测试
+- ohos : 鸿蒙分支，用于开发纯血鸿蒙版本，flutter3.32.4-ohos
+- oddo : flutter3.35.7分支，对应上游flutter_3.35.7，异版
