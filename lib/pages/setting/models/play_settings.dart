@@ -68,13 +68,6 @@ List<SettingsModel> get playSettings => [
     defaultVal: Utils.isMobile,
   ),
   const SwitchModel(
-    title: '双击快退/快进',
-    subtitle: '左侧双击快退/右侧双击快进，关闭则双击均为暂停/播放',
-    leading: Icon(Icons.touch_app_outlined),
-    setKey: SettingBoxKey.enableQuickDouble,
-    defaultVal: false,
-  ),
-  const SwitchModel(
     title: '左右侧滑动调节亮度/音量',
     leading: Icon(MdiIcons.tuneVerticalVariant),
     setKey: SettingBoxKey.enableSlideVolumeBrightness,
@@ -92,6 +85,13 @@ List<SettingsModel> get playSettings => [
     leading: Icon(MdiIcons.panVertical),
     setKey: SettingBoxKey.enableSlideFS,
     defaultVal: true,
+  ),
+  const SwitchModel(
+    title: '双击快退/快进',
+    subtitle: '左侧双击快退/右侧双击快进，关闭则双击均为暂停/播放',
+    leading: Icon(Icons.touch_app_outlined),
+    setKey: SettingBoxKey.enableQuickDouble,
+    defaultVal: false,
   ),
   getVideoFilterSelectModel(
     context: Get.context!,
