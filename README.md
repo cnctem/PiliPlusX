@@ -23,7 +23,7 @@
 
 <br/>
 
-## 空降指挥部
+## 千岛路书
 
 - [特色功能](#功能)
 - [快捷键功能说明](#快捷键功能)
@@ -31,6 +31,8 @@
 - [致谢](#致谢)
 - [TODO List](docs/TODO.md)
 - [Issues](https://github.com/cnctem/PiliPlusX/issues)
+- [Latest Release (Download)](https://github.com/cnctem/PiliPlusX/releases/latest)
+- [flutter3.35.7 Version (v1.0.8-oppo)](https://github.com/cnctem/PiliPlusX/releases/tag/v1.0.8-oddo)
 
 ## 适配平台
 

@@ -21,8 +21,8 @@
 - [X]  弹幕、字幕 字体修复
 - [X]  手动获取更新
 - [X]  win端点关闭以后到后台托盘，从桌面打不开，需要从托盘里面才能打开
+- [x] mac端不显示字体开关 -Issue1
 - [ ] 弹幕字体绑设置项（ios描边错误）
-- [ ] mac端不显示字体开关 -Issue1
 - [ ] 暗黑模式下，阅读专栏字体颜色出错 -[Issue4](https://github.com/cnctem/PiliPlusX/issues/4) 
 - [ ] mac command+Q 有时候会失效无法关闭
 
@@ -56,4 +56,4 @@
 - [ ]  直播间竖屏界面下面的弹幕调用弹幕复制组件 -hcz
 - [ ] 双指双击切换弹幕开关 -dby
 
-欢迎在 [Issues](https://github.com/cnctem/PiliPlusX/issues) 提交建议和问题
+欢迎在 [Issues](https://github.com/cnctem/PiliPlusX/issues) 提交建议和问题反馈
