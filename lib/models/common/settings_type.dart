@@ -1,4 +1,0 @@
-enum SettingsType {
-  normal,
-  switchType,
-}
