@@ -84,7 +84,7 @@ class _BlackListPageState extends State<BlackListPage> {
                   }
                   final item = response[index];
                   return ListTile(
-                    visualDensity: .standard,
+                    visualDensity: VisualDensity.standard,
                     onTap: () => Get.toNamed('/member?mid=${item.mid}'),
                     leading: NetworkImgLayer(
                       width: 45,

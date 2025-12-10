@@ -121,13 +121,13 @@ class _MemberFavoriteState extends State<MemberFavorite>
                     },
                     child: Container(
                       height: 45,
-                      alignment: .centerLeft,
-                      padding: const .only(left: 12),
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.only(left: 12),
                       child: Text.rich(
                         TextSpan(
                           children: [
                             WidgetSpan(
-                              alignment: .middle,
+                              alignment: PlaceholderAlignment.middle,
                               child: Icon(
                                 _controller.isExpand(isFav)
                                     ? Icons.expand_less
@@ -197,7 +197,7 @@ class _MemberFavoriteState extends State<MemberFavorite>
 
   Widget _buildLoadMoreItem(ThemeData theme, bool isFav) {
     return Padding(
-      padding: const .only(top: 7),
+      padding: const EdgeInsets.only(top: 7),
       child: InkWell(
         onTap: () {
           if (isFav) {
@@ -208,7 +208,7 @@ class _MemberFavoriteState extends State<MemberFavorite>
         },
         child: Container(
           height: 40,
-          alignment: .center,
+          alignment: Alignment.center,
           child: Text(
             '查看更多内容',
             textAlign: TextAlign.center,

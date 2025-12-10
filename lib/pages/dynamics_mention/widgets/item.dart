@@ -23,7 +23,7 @@ class DynMentionItem extends StatelessWidget {
       child: ListTile(
         dense: true,
         onTap: onTap,
-        visualDensity: .standard,
+        visualDensity: VisualDensity.standard,
         leading: NetworkImgLayer(
           src: item.face,
           width: 42,

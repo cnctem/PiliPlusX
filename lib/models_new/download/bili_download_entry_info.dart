@@ -393,7 +393,8 @@ enum DownloadStatus {
   failDanmaku('获取弹幕失败'),
   failPlayUrl('获取播放地址失败'),
   pause('暂停中'),
-  wait('等待中');
+  wait('等待中')
+  ;
 
   final String message;
   const DownloadStatus(this.message);

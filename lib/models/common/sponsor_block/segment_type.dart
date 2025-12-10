@@ -97,7 +97,8 @@ enum SegmentType {
     '仅用于对整个视频进行标记。适用于展示UP主免费或获得补贴后使用的产品、服务或场地的视频。',
     Color(0xFF008a5c),
     [ActionType.full],
-  );
+  )
+  ;
 
   /// from https://github.com/hanydd/BilibiliSponsorBlock/blob/master/public/_locales/zh_CN/messages.json
   final String title;

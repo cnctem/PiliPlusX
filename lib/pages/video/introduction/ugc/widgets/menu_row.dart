@@ -52,8 +52,7 @@ class ActionRowLineItem extends StatelessWidget {
                       ? theme.colorScheme.onSecondaryContainer
                       : theme.colorScheme.outline,
                 )
-              else if (icon != null)
-                icon!,
+              else ?icon,
               AnimatedOpacity(
                 opacity: isLoading ? 0 : 1,
                 duration: const Duration(milliseconds: 200),

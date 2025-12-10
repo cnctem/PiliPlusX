@@ -22,7 +22,8 @@ enum NavigationBarType implements EnumWithLabel {
     Icon(Icons.person_outline, size: 21),
     Icon(Icons.person, size: 21),
     MinePage(),
-  );
+  )
+  ;
 
   @override
   final String label;

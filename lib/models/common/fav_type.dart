@@ -13,7 +13,8 @@ enum FavTabType {
   article('专栏', FavArticlePage()),
   note('笔记', FavNotePage()),
   topic('话题', FavTopicPage()),
-  cheese('课堂', FavCheesePage());
+  cheese('课堂', FavCheesePage())
+  ;
 
   final String title;
   final Widget page;

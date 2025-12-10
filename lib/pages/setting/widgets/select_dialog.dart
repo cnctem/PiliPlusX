@@ -39,7 +39,7 @@ class SelectDialog<T> extends StatelessWidget {
           : null,
       contentPadding: const EdgeInsets.symmetric(vertical: 12),
       content: Material(
-        type: .transparency,
+        type: MaterialType.transparency,
         child: SingleChildScrollView(
           child: RadioGroup<T>(
             onChanged: (v) => Navigator.of(context).pop(v ?? value),

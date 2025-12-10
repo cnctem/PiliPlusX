@@ -3,7 +3,8 @@ enum PlayRepeat {
   listOrder('顺序播放'),
   singleCycle('单个循环'),
   listCycle('列表循环'),
-  autoPlayRelated('自动连播');
+  autoPlayRelated('自动连播')
+  ;
 
   final String desc;
   const PlayRepeat(this.desc);

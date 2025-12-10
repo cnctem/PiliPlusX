@@ -9,7 +9,8 @@ enum VideoFitType {
   none('原始', boxFit: BoxFit.none),
   scaleDown('限制', boxFit: BoxFit.scaleDown),
   ratio_4x3('4:3', aspectRatio: 4 / 3),
-  ratio_16x9('16:9', aspectRatio: 16 / 9);
+  ratio_16x9('16:9', aspectRatio: 16 / 9)
+  ;
 
   final String desc;
   final BoxFit boxFit;

@@ -211,7 +211,7 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
 
   Widget _buildUserInfo(ThemeData theme, MemberInfoModel memberInfoModel) {
     return Padding(
-      padding: const .only(left: 16, top: 10, right: 16, bottom: 3),
+      padding: const EdgeInsets.only(left: 16, top: 10, right: 16, bottom: 3),
       child: Row(
         spacing: 10,
         children: [
@@ -291,7 +291,7 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
                     ? theme.colorScheme.outline
                     : null,
                 padding: EdgeInsets.zero,
-                tapTargetSize: .shrinkWrap,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 visualDensity: const VisualDensity(vertical: -2),
               ),
               onPressed: () {
@@ -329,7 +329,7 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
             child: OutlinedButton(
               style: OutlinedButton.styleFrom(
                 padding: EdgeInsets.zero,
-                tapTargetSize: .shrinkWrap,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 visualDensity: const VisualDensity(vertical: -2),
               ),
               onPressed: () => Get.toNamed('/member?mid=${widget.mid}'),

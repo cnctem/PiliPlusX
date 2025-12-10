@@ -38,7 +38,7 @@ class _OrderedMultiSelectDialogState<T>
       title: Text(widget.title),
       contentPadding: const EdgeInsets.only(top: 12),
       content: Material(
-        type: .transparency,
+        type: MaterialType.transparency,
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,

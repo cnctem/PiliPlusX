@@ -180,7 +180,7 @@ class _LogsPageState extends State<LogsPage> {
                   if (latestLog != null)
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const .only(bottom: 12),
+                        padding: const EdgeInsets.only(bottom: 12),
                         child: InfoCard(report: latestLog!),
                       ),
                     ),
@@ -316,12 +316,12 @@ class ReportCard extends StatelessWidget {
     final dateTime = DateFormatUtils.longFormatDs.format(report.dateTime);
     return _card([
       Row(
-        crossAxisAlignment: .start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: Column(
               spacing: 6,
-              crossAxisAlignment: .start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   report.error.toString(),
@@ -440,9 +440,9 @@ class ReportCard extends StatelessWidget {
 Widget _card(List<Widget> contents) {
   return Card(
     child: Padding(
-      padding: const .all(12),
+      padding: const EdgeInsets.all(12),
       child: Column(
-        crossAxisAlignment: .stretch,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: contents,
       ),
     ),

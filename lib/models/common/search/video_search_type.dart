@@ -2,7 +2,8 @@ enum VideoPubTimeType {
   all('不限'),
   day('最近一天'),
   week('最近一周'),
-  halfYear('最近半年');
+  halfYear('最近半年')
+  ;
 
   final String label;
   const VideoPubTimeType(this.label);
@@ -13,7 +14,8 @@ enum VideoDurationType {
   tenMins('0-10分钟'),
   halfHour('10-30分钟'),
   hour('30-60分钟'),
-  hourPlus('60分钟+');
+  hourPlus('60分钟+')
+  ;
 
   final String label;
   const VideoDurationType(this.label);
@@ -41,7 +43,8 @@ enum VideoZoneType {
   cinephile('影视', tids: 181),
   documentary('记录', tids: 177),
   movie('电影', tids: 23),
-  tv('电视', tids: 11);
+  tv('电视', tids: 11)
+  ;
 
   final String label;
   final int? tids;
@@ -55,7 +58,8 @@ enum ArchiveFilterType {
   pubdate('新发布'),
   dm('弹幕多'),
   stow('收藏多'),
-  scores('评论多');
+  scores('评论多')
+  ;
   // 专栏
   // attention('最多喜欢'),
 

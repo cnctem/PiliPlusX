@@ -8,7 +8,8 @@ enum MemberTabType {
   favorite('收藏'),
   bangumi('番剧'),
   cheese('课堂'),
-  shop('小店');
+  shop('小店')
+  ;
 
   static bool showMemberShop = Pref.showMemberShop;
 

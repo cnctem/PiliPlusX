@@ -13,7 +13,8 @@ enum VideoType {
     type: 10,
     replyType: 33,
     api: Api.pugvUrl,
-  );
+  )
+  ;
 
   final int type;
   final String api;

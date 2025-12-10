@@ -53,7 +53,7 @@ class _DualSlideDialogState extends State<DualSlideDialog> {
         bottom: 8,
       ),
       content: Column(
-        mainAxisSize: .min,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(widget.description1),
           Builder(

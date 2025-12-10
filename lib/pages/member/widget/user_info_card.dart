@@ -81,13 +81,13 @@ class UserInfoCard extends StatelessWidget {
         count = card.likes?.likeNum;
     }
     return GestureDetector(
-      behavior: .opaque,
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Align(
         alignment: type.alignment,
         widthFactor: 1.0,
         child: Column(
-          mainAxisSize: .min,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               NumUtils.numFormat(count),

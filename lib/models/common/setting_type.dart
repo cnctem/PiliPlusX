@@ -6,7 +6,8 @@ enum SettingType {
   styleSetting('外观设置'),
   extraSetting('其它设置'),
   webdavSetting('WebDAV 设置'),
-  about('关于');
+  about('关于')
+  ;
 
   final String title;
   const SettingType(this.title);
