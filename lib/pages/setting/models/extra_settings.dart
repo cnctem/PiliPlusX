@@ -998,8 +998,10 @@ List<SettingsModel> get extraSettings => [
     setKey: SettingBoxKey.defaultAddWatchLater,
     defaultVal: false,
   ),
+  // TODO: 二次点击"我的"事件，"我的"点击事件 路径 lib/pages/main/controller.dart,稍后再看在'我的'下`'/later'`,账号选择器（设置账号模式）是 LoginPageController.switchAccountDialog(context)。
   const SwitchModel(
-    title: '"我的"页默认打开稍后再看',
+    title: '二次点击"我的"打开稍后再看',
+    subtitle: '默认打开账号选择器',
     leading: const Icon(Icons.watch_later_outlined),
     setKey: SettingBoxKey.defaultShowWatchLater,
     defaultVal: false,
