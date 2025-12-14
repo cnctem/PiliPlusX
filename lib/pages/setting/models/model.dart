@@ -31,8 +31,8 @@ sealed class SettingsModel {
 class NormalModel extends SettingsModel {
   @override
   final String? title;
-  final StringGetter? getTitle;
-  final StringGetter? getSubtitle;
+  final ValueGetter<String>? getTitle;
+  final ValueGetter<String>? getSubtitle;
   final Widget Function()? getTrailing;
   final void Function(BuildContext context, void Function() setState)? onTap;
 

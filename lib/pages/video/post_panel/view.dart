@@ -361,7 +361,7 @@ class _PostPanelState extends State<PostPanel>
                   children: [
                     PopupMenuText(
                       title: '分类',
-                      initialValue: item.category,
+                      value: () => item.category,
                       onSelected: (e) {
                         bool flag = false;
                         if (item.category == SegmentType.exclusive_access ||
@@ -406,7 +406,7 @@ class _PostPanelState extends State<PostPanel>
                     ),
                     PopupMenuText(
                       title: '行为类别',
-                      initialValue: item.actionType,
+                      value: () => item.actionType,
                       onSelected: (e) {
                         bool flag = false;
                         if (item.actionType == ActionType.full) {

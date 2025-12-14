@@ -649,7 +649,7 @@ abstract class PageUtils {
   static void showVideoBottomSheet(
     BuildContext context, {
     required Widget child,
-    required bool Function() isFullScreen,
+    required ValueGetter<bool> isFullScreen,
     double? padding,
   }) {
     if (!context.mounted) {

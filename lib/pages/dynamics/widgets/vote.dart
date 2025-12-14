@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/dialog/report.dart';
@@ -7,6 +8,8 @@ import 'package:PiliPlus/http/dynamics.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models/common/badge_type.dart';
 import 'package:PiliPlus/models/dynamics/vote_model.dart';
+import 'package:PiliPlus/models_new/followee_votes/vote.dart';
+import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/num_utils.dart';
@@ -28,7 +31,7 @@ class VotePanel extends StatefulWidget {
 }
 
 class _VotePanelState extends State<VotePanel> {
-  bool anonymity = false;
+  late bool anonymous = false;
 
   late VoteInfo _voteInfo;
   late final RxList<int> groupValue =
@@ -39,11 +42,20 @@ class _VotePanelState extends State<VotePanel> {
       _voteInfo.endTime! * 1000 > DateTime.now().millisecondsSinceEpoch;
   late bool _showPercentage = !_enabled;
   late final _maxCnt = _voteInfo.choiceCnt ?? _voteInfo.options.length;
+  final isLogin = Accounts.main.isLogin;
+  late final Rxn<List<FolloweeVote>> followeeVote = Rxn<List<FolloweeVote>>();
 
   @override
   void initState() {
     super.initState();
     _voteInfo = widget.voteInfo;
+    if (isLogin) {
+      DynamicsHttp.followeeVotes(voteId: _voteInfo.voteId).then((res) {
+        if (mounted && res.isSuccess) {
+          followeeVote.value = res.data;
+        }
+      });
+    }
   }
 
   @override
@@ -102,7 +114,7 @@ class _VotePanelState extends State<VotePanel> {
                   ? () async {
                       final res = await widget.callback(
                         groupValue.toSet(),
-                        anonymity,
+                        anonymous,
                       );
                       if (res.isSuccess) {
                         if (mounted) {
@@ -124,12 +136,153 @@ class _VotePanelState extends State<VotePanel> {
         ),
       ],
     ];
+    Widget title = Text(
+      _voteInfo.title ?? '',
+      style: theme.textTheme.titleMedium,
+    );
+    if (isLogin) {
+      title = Row(
+        spacing: 3,
+        crossAxisAlignment: .start,
+        children: [
+          Expanded(child: title),
+          Obx(() {
+            final list = followeeVote.value;
+            if (list != null && list.isNotEmpty) {
+              Widget child;
+              const size = 22.0;
+              const gap = 6.0;
+              const offset = size - gap;
+              if (list.length == 1) {
+                child = NetworkImgLayer(
+                  src: list.first.face,
+                  width: size,
+                  height: size,
+                );
+              } else {
+                final decoration = BoxDecoration(
+                  shape: .circle,
+                  border: Border.all(color: theme.colorScheme.surface),
+                );
+                child = SizedBox(
+                  height: size,
+                  width: offset * min(3, list.length) + gap,
+                  child: Stack(
+                    clipBehavior: .none,
+                    children: list
+                        .take(3)
+                        .indexed
+                        .map(
+                          (e) => Positioned(
+                            top: 0,
+                            left: e.$1 * offset,
+                            bottom: 0,
+                            child: DecoratedBox(
+                              decoration: decoration,
+                              child: Padding(
+                                padding: const .all(.8),
+                                child: NetworkImgLayer(
+                                  src: e.$2.face,
+                                  width: size - .8,
+                                  height: size - .8,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                );
+              }
+              return GestureDetector(
+                behavior: .opaque,
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      final colorScheme = ColorScheme.of(context);
+                      return AlertDialog(
+                        clipBehavior: .hardEdge,
+                        title: const Text('关注的人的投票'),
+                        contentPadding: const .only(top: 10, bottom: 12),
+                        constraints: const BoxConstraints(
+                          minWidth: 280,
+                          maxWidth: 420,
+                        ),
+                        content: SingleChildScrollView(
+                          child: Column(
+                            mainAxisSize: .min,
+                            children: list
+                                .map(
+                                  (e) => ListTile(
+                                    dense: true,
+                                    onTap: () =>
+                                        Get.toNamed('/member?mid=${e.uid}'),
+                                    leading: NetworkImgLayer(
+                                      src: e.face,
+                                      width: 40,
+                                      height: 40,
+                                      type: .avatar,
+                                    ),
+                                    title: Text.rich(
+                                      style: const TextStyle(fontSize: 13),
+                                      TextSpan(
+                                        children: [
+                                          TextSpan(text: e.name),
+                                          TextSpan(
+                                            text: ' 投给了',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: colorScheme.outline,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      style: const TextStyle(fontSize: 13),
+                                      e.votes
+                                          .map(
+                                            (vote) => _voteInfo.options
+                                                .firstWhereOrNull(
+                                                  (e) => e.optIdx == vote,
+                                                )
+                                                ?.optDesc,
+                                          )
+                                          .join('、'),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+                child: Row(
+                  mainAxisSize: .min,
+                  children: [
+                    child,
+                    Icon(
+                      size: 18,
+                      color: theme.colorScheme.outline.withValues(alpha: .7),
+                      Icons.keyboard_arrow_right,
+                    ),
+                  ],
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          }),
+        ],
+      );
+    }
     Widget child = Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (_voteInfo.title != null)
-          Text(_voteInfo.title!, style: theme.textTheme.titleMedium),
+        title,
         if (_voteInfo.desc != null)
           Text(
             _voteInfo.desc!,
@@ -196,8 +349,8 @@ class _VotePanelState extends State<VotePanel> {
       ),
       CheckBoxText(
         text: '匿名',
-        selected: anonymity,
-        onChanged: (val) => anonymity = val,
+        selected: anonymous,
+        onChanged: (val) => anonymous = val,
       ),
     ],
   );
@@ -444,10 +597,10 @@ Future showVoteDialog(
             padding: const EdgeInsets.all(24),
             child: VotePanel(
               voteInfo: voteInfo.data,
-              callback: (votes, anonymity) => DynamicsHttp.doVote(
+              callback: (votes, anonymous) => DynamicsHttp.doVote(
                 voteId: voteId,
                 votes: votes.toList(),
-                anonymity: anonymity,
+                anonymous: anonymous,
                 dynamicId: dynamicId,
               ),
             ),

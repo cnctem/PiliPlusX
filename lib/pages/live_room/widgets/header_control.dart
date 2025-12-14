@@ -121,6 +121,26 @@ class _LiveHeaderControlState extends State<LiveHeaderControl>
           child,
           ...?timeBatteryWidgets,
           const SizedBox(width: 10),
+          if (Utils.isDesktop && !plPlayerController.isDesktopPip)
+            Obx(() {
+              final isAlwaysOnTop = plPlayerController.isAlwaysOnTop.value;
+              return ComBtn(
+                height: 30,
+                tooltip: '${isAlwaysOnTop ? '取消' : ''}置顶',
+                icon: isAlwaysOnTop
+                    ? const Icon(
+                        size: 18,
+                        Icons.push_pin,
+                        color: Colors.white,
+                      )
+                    : const Icon(
+                        size: 18,
+                        Icons.push_pin_outlined,
+                        color: Colors.white,
+                      ),
+                onTap: () => plPlayerController.setAlwaysOnTop(!isAlwaysOnTop),
+              );
+            }),
           ComBtn(
             height: 30,
             tooltip: '发弹幕',

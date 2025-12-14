@@ -37,15 +37,15 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart' hide ContextExtensionss;
 import 'package:gt3_flutter_plugin/gt3_flutter_plugin.dart';
 
-abstract class RequestUtils {
+abstract final class RequestUtils {
   static Future<void> syncHistoryStatus() async {
     final account = Accounts.history;
     if (!account.isLogin) {
       return;
     }
     var res = await UserHttp.historyStatus(account: account);
-    if (res['status']) {
-      GStorage.localCache.put(LocalCacheKey.historyPause, res['data']);
+    if (res case Success(:final response)) {
+      GStorage.localCache.put(LocalCacheKey.historyPause, response);
     }
   }
 
@@ -126,9 +126,11 @@ abstract class RequestUtils {
         act: 1,
         reSrc: 11,
       );
-      SmartDialog.showToast(res['status'] ? "关注成功" : res['msg']);
-      if (res['status']) {
+      if (res.isSuccess) {
+        SmartDialog.showToast('关注成功');
         callback?.call(2);
+      } else {
+        res.toast();
       }
     } else {
       if (followStatus?['tag'] == null) {
@@ -161,11 +163,11 @@ abstract class RequestUtils {
                         fid: mid,
                         isAdd: !isSpecialFollowed,
                       );
-                      if (res['status']) {
+                      if (res.isSuccess) {
                         SmartDialog.showToast('$text成功');
                         callback?.call(isSpecialFollowed ? 2 : -10);
                       } else {
-                        SmartDialog.showToast(res['msg']);
+                        res.toast();
                       }
                     },
                     title: Text(
@@ -225,11 +227,11 @@ abstract class RequestUtils {
                         act: 2,
                         reSrc: 11,
                       );
-                      SmartDialog.showToast(
-                        res['status'] ? "取消关注成功" : res['msg'],
-                      );
-                      if (res['status']) {
+                      if (res.isSuccess) {
+                        SmartDialog.showToast('取消关注成功');
                         callback?.call(0);
+                      } else {
+                        res.toast();
                       }
                     },
                     title: const Text(
@@ -376,7 +378,7 @@ abstract class RequestUtils {
     bool status = like?.status ?? false;
     int up = status ? 2 : 1;
     var res = await DynamicsHttp.thumbDynamic(dynamicId: dynamicId, up: up);
-    if (res['status']) {
+    if (res.isSuccess) {
       SmartDialog.showToast(!status ? '点赞成功' : '取消赞');
       if (up == 1) {
         like
@@ -389,7 +391,7 @@ abstract class RequestUtils {
       }
       onSuccess();
     } else {
-      SmartDialog.showToast(res['msg']);
+      res.toast();
     }
   }
 

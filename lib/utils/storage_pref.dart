@@ -107,22 +107,24 @@ abstract class Pref {
 
   static List<Pair<SegmentType, SkipType>> get blockSettings {
     final list = _setting.get(SettingBoxKey.blockSettings) as List?;
-    if (list == null) {
+    if (list == null || list.length != SegmentType.values.length) {
       return SegmentType.values
           .map((i) => Pair(first: i, second: SkipType.skipOnce))
           .toList();
     }
     return SegmentType.values
         .map(
-          (item) =>
-              Pair(first: item, second: SkipType.values[list[item.index]]),
+          (item) => Pair(
+            first: item,
+            second: SkipType.values[list[item.index]],
+          ),
         )
         .toList();
   }
 
   static List<Color> get blockColor {
     final list = _setting.get(SettingBoxKey.blockColor) as List?;
-    if (list == null) {
+    if (list == null || list.length != SegmentType.values.length) {
       return SegmentType.values.map((i) => i.color).toList();
     }
     return SegmentType.values.map(
@@ -133,9 +135,6 @@ abstract class Pref {
       },
     ).toList();
   }
-
-  static bool get hiddenSettingUnlocked =>
-      _setting.get(SettingBoxKey.hiddenSettingUnlocked, defaultValue: false);
 
   static bool get feedBackEnable =>
       _setting.get(SettingBoxKey.feedBackEnable, defaultValue: false);

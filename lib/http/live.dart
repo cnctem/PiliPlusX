@@ -10,6 +10,7 @@ import 'package:PiliPlus/models_new/live/live_area_list/area_item.dart';
 import 'package:PiliPlus/models_new/live/live_area_list/area_list.dart';
 import 'package:PiliPlus/models_new/live/live_dm_block/data.dart';
 import 'package:PiliPlus/models_new/live/live_dm_block/shield_info.dart';
+import 'package:PiliPlus/models_new/live/live_dm_block/shield_user_list.dart';
 import 'package:PiliPlus/models_new/live/live_dm_info/data.dart';
 import 'package:PiliPlus/models_new/live/live_emote/data.dart';
 import 'package:PiliPlus/models_new/live/live_emote/datum.dart';
@@ -29,7 +30,7 @@ import 'package:dio/dio.dart';
 abstract final class LiveHttp {
   static Account get recommend => Accounts.get(AccountType.recommend);
 
-  static Future sendLiveMsg({
+  static Future<LoadingState<Null>> sendLiveMsg({
     required Object roomId,
     required Object msg,
     Object? dmType,
@@ -64,21 +65,15 @@ abstract final class LiveHttp {
       }),
     );
     if (res.data['code'] == 0) {
-      return {
-        'status': true,
-        'data': res.data['data'],
-      };
+      return const Success(null);
     } else {
-      return {
-        'status': false,
-        'msg': res.data['message'],
-      };
+      return Error(res.data['message']);
     }
   }
 
   static Future<LoadingState<RoomPlayInfoData>> liveRoomInfo({
-    roomId,
-    qn,
+    required Object roomId,
+    Object? qn,
     bool onlyAudio = false,
   }) async {
     var res = await Request().get(
@@ -88,7 +83,7 @@ abstract final class LiveHttp {
         'protocol': '0,1',
         'format': '0,1,2',
         'codec': '0,1,2',
-        'qn': qn,
+        'qn': ?qn,
         'platform': 'web',
         'ptype': 8,
         'dolby': 5,
@@ -104,7 +99,9 @@ abstract final class LiveHttp {
     }
   }
 
-  static Future liveRoomInfoH5({roomId, qn}) async {
+  static Future<LoadingState<RoomInfoH5Data>> liveRoomInfoH5({
+    required Object roomId,
+  }) async {
     var res = await Request().get(
       Api.liveRoomInfoH5,
       queryParameters: {
@@ -112,16 +109,13 @@ abstract final class LiveHttp {
       },
     );
     if (res.data['code'] == 0) {
-      return {
-        'status': true,
-        'data': RoomInfoH5Data.fromJson(res.data['data']),
-      };
+      return Success(RoomInfoH5Data.fromJson(res.data['data']));
     } else {
-      return {'status': false, 'msg': res.data['message']};
+      return Error(res.data['message']);
     }
   }
 
-  static Future liveRoomDanmaPrefetch({roomId}) async {
+  static Future liveRoomDanmaPrefetch({required Object roomId}) async {
     var res = await Request().get(
       Api.liveRoomDmPrefetch,
       queryParameters: {'roomid': roomId},
@@ -139,7 +133,9 @@ abstract final class LiveHttp {
     }
   }
 
-  static Future liveRoomGetDanmakuToken({roomId}) async {
+  static Future<LoadingState<LiveDmInfoData>> liveRoomGetDanmakuToken({
+    required Object roomId,
+  }) async {
     var res = await Request().get(
       Api.liveRoomDmToken,
       queryParameters: await WbiSign.makSign({
@@ -148,12 +144,9 @@ abstract final class LiveHttp {
       }),
     );
     if (res.data['code'] == 0) {
-      return {
-        'status': true,
-        'data': LiveDmInfoData.fromJson(res.data['data']),
-      };
+      return Success(LiveDmInfoData.fromJson(res.data['data']));
     } else {
-      return {'status': false, 'msg': res.data['message']};
+      return Error(res.data['message']);
     }
   }
 
@@ -382,7 +375,7 @@ abstract final class LiveHttp {
     }
   }
 
-  static Future setLiveFavTag({
+  static Future<LoadingState<Null>> setLiveFavTag({
     required String ids,
   }) async {
     final data = {
@@ -410,9 +403,9 @@ abstract final class LiveHttp {
     );
 
     if (res.data['code'] == 0) {
-      return {'status': true};
+      return const Success(null);
     } else {
-      return {'status': false, 'msg': res.data['message']};
+      return Error(res.data['message']);
     }
   }
 
@@ -490,7 +483,7 @@ abstract final class LiveHttp {
   }
 
   static Future<LoadingState<ShieldInfo?>> getLiveInfoByUser(
-    dynamic roomId,
+    Object roomId,
   ) async {
     var res = await Request().get(
       Api.getLiveInfoByUser,
@@ -508,7 +501,7 @@ abstract final class LiveHttp {
     }
   }
 
-  static Future liveSetSilent({
+  static Future<LoadingState<Null>> liveSetSilent({
     required String type,
     required int level,
   }) async {
@@ -524,13 +517,13 @@ abstract final class LiveHttp {
       options: Options(contentType: Headers.formUrlEncodedContentType),
     );
     if (res.data['code'] == 0) {
-      return {'status': true};
+      return const Success(null);
     } else {
-      return {'status': false, 'msg': res.data['message']};
+      return Error(res.data['message']);
     }
   }
 
-  static Future addShieldKeyword({
+  static Future<LoadingState<Null>> addShieldKeyword({
     required String keyword,
   }) async {
     final csrf = Accounts.main.csrf;
@@ -544,13 +537,13 @@ abstract final class LiveHttp {
       options: Options(contentType: Headers.formUrlEncodedContentType),
     );
     if (res.data['code'] == 0) {
-      return {'status': true};
+      return const Success(null);
     } else {
-      return {'status': false, 'msg': res.data['message']};
+      return Error(res.data['message']);
     }
   }
 
-  static Future delShieldKeyword({
+  static Future<LoadingState<Null>> delShieldKeyword({
     required String keyword,
   }) async {
     final csrf = Accounts.main.csrf;
@@ -564,15 +557,15 @@ abstract final class LiveHttp {
       options: Options(contentType: Headers.formUrlEncodedContentType),
     );
     if (res.data['code'] == 0) {
-      return {'status': true};
+      return const Success(null);
     } else {
-      return {'status': false, 'msg': res.data['message']};
+      return Error(res.data['message']);
     }
   }
 
-  static Future liveShieldUser({
-    required dynamic uid,
-    required dynamic roomid,
+  static Future<LoadingState<ShieldUserList>> liveShieldUser({
+    required Object uid,
+    required Object roomid,
     required int type,
   }) async {
     final csrf = Accounts.main.csrf;
@@ -588,17 +581,17 @@ abstract final class LiveHttp {
       options: Options(contentType: Headers.formUrlEncodedContentType),
     );
     if (res.data['code'] == 0) {
-      return {'status': true, 'data': res.data['data']};
+      return Success(ShieldUserList.fromJson(res.data['data']));
     } else {
-      return {'status': false, 'msg': res.data['message']};
+      return Error(res.data['message']);
     }
   }
 
-  static Future liveLikeReport({
+  static Future<LoadingState<Null>> liveLikeReport({
     required int clickTime,
-    required dynamic roomId,
-    required dynamic uid,
-    required dynamic anchorId,
+    required Object roomId,
+    required Object uid,
+    Object? anchorId,
   }) async {
     var res = await Request().post(
       Api.liveLikeReport,
@@ -606,16 +599,16 @@ abstract final class LiveHttp {
         'click_time': clickTime,
         'room_id': roomId,
         'uid': uid,
-        'anchor_id': anchorId,
+        'anchor_id': ?anchorId,
         'web_location': 444.8,
         'csrf': Accounts.heartbeat.csrf,
       }),
       options: Options(contentType: Headers.formUrlEncodedContentType),
     );
     if (res.data['code'] == 0) {
-      return {'status': true};
+      return const Success(null);
     } else {
-      return {'status': false, 'msg': res.data['message']};
+      return Error(res.data['message']);
     }
   }
 

@@ -367,7 +367,7 @@ class _ReplyPageState extends CommonRichTextPubPageState<ReplyPage> {
               icon: Icon(Icons.my_location, size: 28, color: color),
               title: '视频进度',
             ),
-            if (isRoot)
+            if (isRoot && widget.canUploadPic)
               item(
                 onTap: () async {
                   if (pathList.length >= limit) {

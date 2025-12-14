@@ -331,7 +331,7 @@ Future<void> showImportExportDialog<T>(
   BuildContext context, {
   required String title,
   String? label,
-  required String Function() toJson,
+  required ValueGetter<String> toJson,
   required FutureOr<bool> Function(T json) fromJson,
 }) => showDialog(
   context: context,

@@ -193,7 +193,7 @@ class _PayCoinsPageState extends State<PayCoinsPage>
       ),
     );
 
-    _scale();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scale());
   }
 
   @override

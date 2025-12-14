@@ -28,8 +28,8 @@ class PlayerFocus extends StatelessWidget {
   final PlPlayerController plPlayerController;
   final CommonIntroController? introController;
   final VoidCallback onSendDanmaku;
-  final bool Function()? canPlay;
-  final bool Function()? onSkipSegment;
+  final ValueGetter<bool>? canPlay;
+  final ValueGetter<bool>? onSkipSegment;
 
   static bool _shouldHandle(LogicalKeyboardKey logicalKey) {
     return logicalKey == LogicalKeyboardKey.tab ||

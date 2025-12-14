@@ -974,4 +974,7 @@ class Api {
   static const String sameFollowing = '/x/relation/same/followings';
 
   static const String seasonStatus = '/pgc/view/web/season/user/status';
+
+  static const String followeeVotes =
+      '${HttpString.tUrl}/vote_svr/v1/vote_svr/followee_votes';
 }

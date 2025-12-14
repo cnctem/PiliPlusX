@@ -33,7 +33,7 @@ class DownloadService extends GetxService {
 
   final _lock = Lock();
 
-  final flagNotifier = <void Function()>{};
+  final flagNotifier = <VoidCallback>{};
   final waitDownloadQueue = RxList<BiliDownloadEntryInfo>();
   final downloadList = <BiliDownloadEntryInfo>[];
 
