@@ -231,7 +231,8 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
       children: [
         InteractiveViewerBoundary(
           controller: _transformationController,
-          boundaryWidth: MediaQuery.widthOf(context),
+        // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+          boundaryWidth: MediaQuery.of(context).size.width,
           onScaleChanged: _onScaleChanged,
           onLeftBoundaryHit: _onLeftBoundaryHit,
           onRightBoundaryHit: _onRightBoundaryHit,

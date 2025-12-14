@@ -8,12 +8,18 @@ extension ContextExtensions on BuildContext {
   /// The same of [MediaQuery.of(context).size.height]
   /// Note: updates when you rezise your screen (like on a browser or
   /// desktop window)
-  double get height => MediaQuery.heightOf(this);
+  // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+  // double get height => MediaQuery.heightOf(this);
+  double get height => MediaQuery.of(this).size.height;
+  // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
 
   /// The same of [MediaQuery.of(context).size.width]
   /// Note: updates when you resize your screen (like on a browser or
   /// desktop window)
-  double get width => MediaQuery.widthOf(this);
+  // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+  // double get width => MediaQuery.widthOf(this);
+  double get width => MediaQuery.of(this).size.width;
+  // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
 
   /// similar to [MediaQuery.of(context).padding]
   ThemeData get theme => Theme.of(this);

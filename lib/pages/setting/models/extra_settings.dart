@@ -800,24 +800,25 @@ List<SettingsModel> get extraSettings => [
               title: const Text('选择默认收藏夹'),
               contentPadding: const EdgeInsets.only(top: 5, bottom: 18),
               content: SingleChildScrollView(
-                child: RadioGroup(
-                  onChanged: (value) {
-                    Get.back();
-                    GStorage.setting.put(SettingBoxKey.quickFavId, value);
-                    SmartDialog.showToast('设置成功');
-                  },
-                  groupValue: quickFavId,
-                  child: Column(
-                    children: list.map((item) {
-                      return RadioListTile(
-                        toggleable: true,
-                        dense: true,
-                        title: Text(item.title),
-                        value: item.id,
-                      );
-                    }).toList(),
-                  ),
-                ),
+                // TODO flutter 3.32.4-ohos-0.0.1不支持的代码
+                // child: RadioGroup(
+                //   onChanged: (value) {
+                //     Get.back();
+                //     GStorage.setting.put(SettingBoxKey.quickFavId, value);
+                //     SmartDialog.showToast('设置成功');
+                //   },
+                //   groupValue: quickFavId,
+                //   child: Column(
+                //     children: list.map((item) {
+                //       return RadioListTile(
+                //         toggleable: true,
+                //         dense: true,
+                //         title: Text(item.title),
+                //         value: item.id,
+                //       );
+                //     }).toList(),
+                //   ),
+                // ),
               ),
             ),
           );

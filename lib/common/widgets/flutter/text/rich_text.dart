@@ -264,7 +264,8 @@ class RichText extends MultiChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderParagraph renderObject) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
     renderObject
-      ..text = (text: text, primary: primary)
+      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      ..setText = (text: text, primary: primary)
       ..textAlign = textAlign
       ..textDirection = textDirection ?? Directionality.of(context)
       ..softWrap = softWrap

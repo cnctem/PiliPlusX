@@ -1903,20 +1903,14 @@ class RenderEditable extends RenderBox
       caretPrototype,
     );
     switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        // Center the caret vertically along the text.
-        final double heightDiff = fullHeight - caretRect.height;
-        caretRect = Rect.fromLTWH(
-          caretRect.left,
-          caretRect.top + heightDiff / 2,
-          caretRect.width,
-          caretRect.height,
-        );
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
+      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      // case TargetPlatform.iOS:
+      // case TargetPlatform.macOS:
+      // case TargetPlatform.android:
+      // case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
+      case TargetPlatform.macOS:
         // Override the height to take the full height of the glyph at the TextPosition
         // when not on iOS. iOS has special handling that creates a taller caret.
         // TODO(garyq): see https://github.com/flutter/flutter/issues/120836.
@@ -1929,6 +1923,16 @@ class RenderEditable extends RenderBox
           caretRect.width,
           caretHeight,
         );
+      default:
+        // Center the caret vertically along the text.
+        final double heightDiff = fullHeight - caretRect.height;
+        caretRect = Rect.fromLTWH(
+          caretRect.left,
+          caretRect.top + heightDiff / 2,
+          caretRect.width,
+          caretRect.height,
+        );
+      // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
     }
 
     caretRect = caretRect.shift(_paintOffset);
@@ -2377,7 +2381,28 @@ class RenderEditable extends RenderBox
         TextLayoutMetrics.isWhitespace(plainText.codeUnitAt(effectiveOffset))) {
       final TextRange? previousWord = _getPreviousWord(word.start);
       switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
+        // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+        // case TargetPlatform.iOS:
+        // case TargetPlatform.android:
+        // case TargetPlatform.fuchsia:
+        case TargetPlatform.macOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          break;
+        case TargetPlatform.android:
+          if (readOnly) {
+            if (previousWord == null) {
+              return TextSelection(
+                baseOffset: position.offset,
+                extentOffset: position.offset + 1,
+              );
+            }
+            return TextSelection(
+              baseOffset: previousWord.start,
+              extentOffset: position.offset,
+            );
+          }
+        default:
           if (previousWord == null) {
             final TextRange? nextWord = _getNextWord(word.start);
             if (nextWord == null) {
@@ -2392,24 +2417,7 @@ class RenderEditable extends RenderBox
             baseOffset: previousWord.start,
             extentOffset: position.offset,
           );
-        case TargetPlatform.android:
-          if (readOnly) {
-            if (previousWord == null) {
-              return TextSelection(
-                baseOffset: position.offset,
-                extentOffset: position.offset + 1,
-              );
-            }
-            return TextSelection(
-              baseOffset: previousWord.start,
-              extentOffset: position.offset,
-            );
-          }
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.macOS:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          break;
+        // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
       }
     }
 
@@ -2471,24 +2479,28 @@ class RenderEditable extends RenderBox
   /// comparison.
   void _computeCaretPrototype() {
     switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        _caretPrototype = Rect.fromLTWH(
-          0.0,
-          0.0,
-          cursorWidth,
-          cursorHeight + 2,
-        );
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
+      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      // case TargetPlatform.iOS:
+      // case TargetPlatform.macOS:
+      // case TargetPlatform.android:
+      // case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
+      case TargetPlatform.macOS:
         _caretPrototype = Rect.fromLTWH(
           0.0,
           _kCaretHeightOffset,
           cursorWidth,
           cursorHeight - 2.0 * _kCaretHeightOffset,
         );
+      default:
+        _caretPrototype = Rect.fromLTWH(
+          0.0,
+          0.0,
+          cursorWidth,
+          cursorHeight + 2,
+        );
+      // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
     }
   }
 

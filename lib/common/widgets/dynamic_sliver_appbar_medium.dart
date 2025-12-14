@@ -118,7 +118,9 @@ class _DynamicSliverAppBarMediumState extends State<DynamicSliverAppBarMedium> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final width = MediaQuery.widthOf(context);
+    // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+    final width = MediaQuery.of(context).size.width;
+    // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
     if (_width != width) {
       _width = width;
       _height = 0;

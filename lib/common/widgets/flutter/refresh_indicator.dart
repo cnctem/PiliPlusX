@@ -732,14 +732,18 @@ class RefreshIndicatorState extends State<RefreshIndicator>
                           case _IndicatorType.adaptive:
                             final ThemeData theme = Theme.of(context);
                             switch (theme.platform) {
-                              case TargetPlatform.android:
-                              case TargetPlatform.fuchsia:
-                              case TargetPlatform.linux:
-                              case TargetPlatform.windows:
-                                return materialIndicator;
+                              // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+                              // case TargetPlatform.android:
+                              // case TargetPlatform.fuchsia:
+                              // case TargetPlatform.linux:
+                              // case TargetPlatform.windows:
+                              //   return materialIndicator;
                               case TargetPlatform.iOS:
                               case TargetPlatform.macOS:
                                 return cupertinoIndicator;
+                              default:
+                                return materialIndicator;
+                              // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
                             }
 
                           case _IndicatorType.noSpinner:

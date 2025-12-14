@@ -172,7 +172,10 @@ List<SettingsModel> get styleSettings => [
     leading: const Icon(Icons.calendar_view_week_outlined),
     title: '列表宽度（dp）限制',
     getSubtitle: () =>
-        '当前: 主页${Pref.recommendCardWidth.toInt()}dp 其他${Pref.smallCardWidth.toInt()}dp，屏幕宽度:${MediaQuery.widthOf(Get.context!).toPrecision(2)}dp。宽度越小列数越多。',
+        // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+        // '当前: 主页${Pref.recommendCardWidth.toInt()}dp 其他${Pref.smallCardWidth.toInt()}dp，屏幕宽度:${MediaQuery.widthOf(Get.context!).toPrecision(2)}dp。宽度越小列数越多。',
+        '当前: 主页${Pref.recommendCardWidth.toInt()}dp 其他${Pref.smallCardWidth.toInt()}dp，屏幕宽度:${MediaQuery.of(Get.context!).size.width.toPrecision(2)}dp。宽度越小列数越多。',
+    // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
   ),
   SwitchModel(
     title: '视频播放页使用深色主题',

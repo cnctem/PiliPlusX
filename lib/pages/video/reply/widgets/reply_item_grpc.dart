@@ -1028,10 +1028,11 @@ class ReplyItemGrpc extends StatelessWidget {
                 context: context,
                 builder: (context) {
                   return Dialog(
-                    constraints: const BoxConstraints(
-                      minWidth: 280,
-                      maxWidth: 425,
-                    ),
+                    // TODO flutter 3.32.4-ohos-0.0.1不支持的代码
+                    // constraints: const BoxConstraints(
+                    //   minWidth: 280,
+                    //   maxWidth: 425,
+                    // ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20,

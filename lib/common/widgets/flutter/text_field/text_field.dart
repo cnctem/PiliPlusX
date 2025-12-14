@@ -943,18 +943,22 @@ class RichTextField extends StatefulWidget {
     EditableTextState editableTextState,
   ) {
     switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        return CupertinoSpellCheckSuggestionsToolbar.editableText(
-          editableTextState: editableTextState,
-        );
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
+      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      // case TargetPlatform.iOS:
+      // case TargetPlatform.macOS:
+      // case TargetPlatform.android:
+      // case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
+      case TargetPlatform.macOS:
         return SpellCheckSuggestionsToolbar.editableText(
           editableTextState: editableTextState,
         );
+      default:
+        return CupertinoSpellCheckSuggestionsToolbar.editableText(
+          editableTextState: editableTextState,
+        );
+      // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
     }
   }
 
@@ -1309,7 +1313,8 @@ class RichTextFieldState extends State<RichTextField>
               enabled: _isEnabled,
               hintMaxLines:
                   widget.decoration?.hintMaxLines ??
-                  themeData.inputDecorationTheme.hintMaxLines ??
+                  // TODO flutter 3.32.4-ohos-0.0.1不支持的代码
+                  // themeData.inputDecorationTheme.hintMaxLines ??
                   widget.maxLines,
             );
 
@@ -1517,29 +1522,23 @@ class RichTextFieldState extends State<RichTextField>
       });
     }
 
-    switch (Theme.of(context).platform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.android:
-        if (cause == SelectionChangedCause.longPress) {
-          _editableText?.bringIntoView(selection.extent);
-        }
+    // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+    if (cause == SelectionChangedCause.longPress) {
+      _editableText?.bringIntoView(selection.extent);
     }
+    // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
 
     switch (Theme.of(context).platform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.android:
-        break;
+      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         if (cause == SelectionChangedCause.drag) {
           _editableText?.hideToolbar();
         }
+      default:
+        break;
+      // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
     }
   }
 
@@ -1675,10 +1674,8 @@ class RichTextFieldState extends State<RichTextField>
             CupertinoRichTextField.inferIOSSpellCheckConfiguration(
               widget.spellCheckConfiguration,
             );
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
+      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      default:
         spellCheckConfiguration =
             RichTextField.inferAndroidSpellCheckConfiguration(
               widget.spellCheckConfiguration,
@@ -1747,21 +1744,7 @@ class RichTextFieldState extends State<RichTextField>
         handleDidLoseAccessibilityFocus = () {
           _effectiveFocusNode.unfocus();
         };
-
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        forcePressEnabled = false;
-        textSelectionControls ??= materialTextSelectionHandleControls;
-        paintCursorAboveText = false;
-        cursorOpacityAnimates ??= false;
-        cursorColor = _hasError
-            ? _errorColor
-            : widget.cursorColor ??
-                  selectionStyle.cursorColor ??
-                  theme.colorScheme.primary;
-        selectionColor =
-            selectionStyle.selectionColor ??
-            theme.colorScheme.primary.withValues(alpha: 0.40);
+      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
 
       case TargetPlatform.linux:
         forcePressEnabled = false;
@@ -1810,6 +1793,20 @@ class RichTextFieldState extends State<RichTextField>
         handleDidLoseAccessibilityFocus = () {
           _effectiveFocusNode.unfocus();
         };
+
+      default:
+        forcePressEnabled = false;
+        textSelectionControls ??= materialTextSelectionHandleControls;
+        paintCursorAboveText = false;
+        cursorOpacityAnimates ??= false;
+        cursorColor = _hasError
+            ? _errorColor
+            : widget.cursorColor ??
+                  selectionStyle.cursorColor ??
+                  theme.colorScheme.primary;
+        selectionColor =
+            selectionStyle.selectionColor ??
+            theme.colorScheme.primary.withValues(alpha: 0.40);
     }
 
     Widget child = RepaintBoundary(

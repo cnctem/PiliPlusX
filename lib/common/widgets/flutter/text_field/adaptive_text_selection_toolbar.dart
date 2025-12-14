@@ -216,10 +216,13 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
           context,
           buttonItem,
         );
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
+      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      // case TargetPlatform.android:
+      // case TargetPlatform.fuchsia:
+      // case TargetPlatform.linux:
+      // case TargetPlatform.windows:
+      default:
+        // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
         assert(debugCheckHasMaterialLocalizations(context));
         final MaterialLocalizations localizations = MaterialLocalizations.of(
           context,
@@ -271,24 +274,25 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
             buttonItem: buttonItem,
           );
         });
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.android:
-        final List<Widget> buttons = <Widget>[];
-        for (int i = 0; i < buttonItems.length; i++) {
-          final ContextMenuButtonItem buttonItem = buttonItems[i];
-          buttons.add(
-            TextSelectionToolbarTextButton(
-              padding: TextSelectionToolbarTextButton.getPadding(
-                i,
-                buttonItems.length,
-              ),
-              onPressed: buttonItem.onPressed,
-              alignment: AlignmentDirectional.centerStart,
-              child: Text(getButtonLabel(context, buttonItem)),
-            ),
-          );
-        }
-        return buttons;
+      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      // case TargetPlatform.fuchsia:
+      // case TargetPlatform.android:
+      //   final List<Widget> buttons = <Widget>[];
+      //   for (int i = 0; i < buttonItems.length; i++) {
+      //     final ContextMenuButtonItem buttonItem = buttonItems[i];
+      //     buttons.add(
+      //       TextSelectionToolbarTextButton(
+      //         padding: TextSelectionToolbarTextButton.getPadding(
+      //           i,
+      //           buttonItems.length,
+      //         ),
+      //         onPressed: buttonItem.onPressed,
+      //         alignment: AlignmentDirectional.centerStart,
+      //         child: Text(getButtonLabel(context, buttonItem)),
+      //       ),
+      //     );
+      //   }
+      //   return buttons;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         return buttonItems.map((ContextMenuButtonItem buttonItem) {
@@ -305,6 +309,24 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
             text: getButtonLabel(context, buttonItem),
           );
         });
+      default:
+        final List<Widget> buttons = <Widget>[];
+        for (int i = 0; i < buttonItems.length; i++) {
+          final ContextMenuButtonItem buttonItem = buttonItems[i];
+          buttons.add(
+            TextSelectionToolbarTextButton(
+              padding: TextSelectionToolbarTextButton.getPadding(
+                i,
+                buttonItems.length,
+              ),
+              onPressed: buttonItem.onPressed,
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(getButtonLabel(context, buttonItem)),
+            ),
+          );
+        }
+        return buttons;
+      // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
     }
   }
 
@@ -328,14 +350,15 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
               : anchors.secondaryAnchor!,
           children: resultChildren,
         );
-      case TargetPlatform.android:
-        return TextSelectionToolbar(
-          anchorAbove: anchors.primaryAnchor,
-          anchorBelow: anchors.secondaryAnchor == null
-              ? anchors.primaryAnchor
-              : anchors.secondaryAnchor!,
-          children: resultChildren,
-        );
+      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      // case TargetPlatform.android:
+      //   return TextSelectionToolbar(
+      //     anchorAbove: anchors.primaryAnchor,
+      //     anchorBelow: anchors.secondaryAnchor == null
+      //         ? anchors.primaryAnchor
+      //         : anchors.secondaryAnchor!,
+      //     children: resultChildren,
+      //   );
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
@@ -348,6 +371,15 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
           anchor: anchors.primaryAnchor,
           children: resultChildren,
         );
+      default:
+        return TextSelectionToolbar(
+          anchorAbove: anchors.primaryAnchor,
+          anchorBelow: anchors.secondaryAnchor == null
+              ? anchors.primaryAnchor
+              : anchors.secondaryAnchor!,
+          children: resultChildren,
+        );
+      // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
     }
   }
 }

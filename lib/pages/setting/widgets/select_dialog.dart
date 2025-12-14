@@ -34,36 +34,38 @@ class SelectDialog<T> extends StatelessWidget {
     return AlertDialog(
       clipBehavior: Clip.hardEdge,
       title: Text(title),
-      constraints: subtitleBuilder != null
-          ? const BoxConstraints(maxWidth: 320, minWidth: 320)
-          : null,
+                    // TODO flutter 3.32.4-ohos-0.0.1不支持的代码
+      // constraints: subtitleBuilder != null
+      //     ? const BoxConstraints(maxWidth: 320, minWidth: 320)
+      //     : null,
       contentPadding: const EdgeInsets.symmetric(vertical: 12),
       content: Material(
         type: MaterialType.transparency,
         child: SingleChildScrollView(
-          child: RadioGroup<T>(
-            onChanged: (v) => Navigator.of(context).pop(v ?? value),
-            groupValue: value,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: List.generate(
-                values.length,
-                (index) {
-                  final item = values[index];
-                  return RadioListTile<T>(
-                    toggleable: toggleable,
-                    dense: true,
-                    value: item.$1,
-                    title: Text(
-                      item.$2,
-                      style: titleMedium,
-                    ),
-                    subtitle: subtitleBuilder?.call(context, index),
-                  );
-                },
-              ),
-            ),
-          ),
+                    // TODO flutter 3.32.4-ohos-0.0.1不支持的代码
+          // child: RadioGroup<T>(
+          //   onChanged: (v) => Navigator.of(context).pop(v ?? value),
+          //   groupValue: value,
+          //   child: Column(
+          //     mainAxisSize: MainAxisSize.min,
+          //     children: List.generate(
+          //       values.length,
+          //       (index) {
+          //         final item = values[index];
+          //         return RadioListTile<T>(
+          //           toggleable: toggleable,
+          //           dense: true,
+          //           value: item.$1,
+          //           title: Text(
+          //             item.$2,
+          //             style: titleMedium,
+          //           ),
+          //           subtitle: subtitleBuilder?.call(context, index),
+          //         );
+          //       },
+          //     ),
+          //   ),
+          // ),
         ),
       ),
     );

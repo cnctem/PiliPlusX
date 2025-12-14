@@ -1143,17 +1143,24 @@ class CupertinoRichTextField extends StatefulWidget {
               ValueNotifier<MagnifierInfo> magnifierInfo,
             ) {
               switch (defaultTargetPlatform) {
-                case TargetPlatform.android:
-                case TargetPlatform.iOS:
-                  return CupertinoTextMagnifier(
-                    controller: controller,
-                    magnifierInfo: magnifierInfo,
-                  );
+                // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+                // case TargetPlatform.android:
+                // case TargetPlatform.iOS:
+                //   return CupertinoTextMagnifier(
+                //     controller: controller,
+                //     magnifierInfo: magnifierInfo,
+                //   );
                 case TargetPlatform.fuchsia:
                 case TargetPlatform.linux:
                 case TargetPlatform.macOS:
                 case TargetPlatform.windows:
                   return null;
+                default:
+                  return CupertinoTextMagnifier(
+                    controller: controller,
+                    magnifierInfo: magnifierInfo,
+                  );
+                // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
               }
             },
       );
@@ -1303,28 +1310,35 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
     }
 
     switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.android:
+      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      // case TargetPlatform.iOS:
+      // case TargetPlatform.macOS:
+      // case TargetPlatform.linux:
+      // case TargetPlatform.windows:
+      // case TargetPlatform.fuchsia:
+      // case TargetPlatform.android:
+      default:
+        // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
         if (cause == SelectionChangedCause.longPress) {
           _editableText.bringIntoView(selection.extent);
         }
     }
 
     switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.android:
-        break;
+      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      // case TargetPlatform.iOS:
+      // case TargetPlatform.fuchsia:
+      // case TargetPlatform.android:
+      //   break;
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         if (cause == SelectionChangedCause.drag) {
           _editableText.hideToolbar();
         }
+      default:
+        break;
+      // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
     }
   }
 
@@ -1534,10 +1548,11 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
     VoidCallback? handleDidGainAccessibilityFocus;
     VoidCallback? handleDidLoseAccessibilityFocus;
     switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        textSelectionControls ??= cupertinoTextSelectionHandleControls;
+    // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      // case TargetPlatform.iOS:
+      // case TargetPlatform.android:
+      // case TargetPlatform.fuchsia:
+      //   textSelectionControls ??= cupertinoTextSelectionHandleControls;
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
@@ -1552,6 +1567,9 @@ class _CupertinoRichTextFieldState extends State<CupertinoRichTextField>
         handleDidLoseAccessibilityFocus = () {
           _effectiveFocusNode.unfocus();
         };
+      default:
+        textSelectionControls ??= cupertinoTextSelectionHandleControls;
+    // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
     }
 
     final bool enabled = widget.enabled;

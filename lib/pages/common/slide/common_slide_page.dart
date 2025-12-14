@@ -1,7 +1,6 @@
 import 'dart:math' show max;
 
 import 'package:PiliPlus/utils/storage_pref.dart';
-import 'package:flutter/gestures.dart' show PositionedGestureDetails;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -80,8 +79,8 @@ mixin CommonSlideMixin<T extends CommonSlidePage> on State<T>, TickerProvider {
     isSliding = null;
   }
 
-  void onPan(PositionedGestureDetails details) {
-    final localPosition = details.localPosition;
+  // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+  void onPan(Offset localPosition) {
     if (isSliding == false) {
       return;
     } else if (isSliding == null) {
@@ -98,7 +97,7 @@ mixin CommonSlideMixin<T extends CommonSlidePage> on State<T>, TickerProvider {
       }
     } else if (isSliding == true) {
       final from = downPos!.dx;
-      final to = details.localPosition.dx;
+      final to = localPosition.dx;
       _animController!.value =
           max(0, _isRTL ? from - to : to - from) / maxWidth;
     }
@@ -119,8 +118,9 @@ mixin CommonSlideMixin<T extends CommonSlidePage> on State<T>, TickerProvider {
 
   Widget slideList(ThemeData theme) => GestureDetector(
     onPanDown: onPanDown,
-    onPanStart: onPan,
-    onPanUpdate: onPan,
+    // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+    onPanStart: (details) => onPan(details.localPosition),
+    onPanUpdate: (details) => onPan(details.localPosition),
     onPanCancel: onDismiss,
     onPanEnd: onDismiss,
     child: buildList(theme),

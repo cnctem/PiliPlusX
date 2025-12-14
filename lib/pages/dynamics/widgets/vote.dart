@@ -436,10 +436,11 @@ Future showVoteDialog(
       showDialog(
         context: context,
         builder: (context) => Dialog(
-          constraints: const BoxConstraints(
-            minWidth: 280,
-            maxWidth: 625,
-          ),
+        // TODO flutter 3.32.4-ohos-0.0.1不支持的代码
+          // constraints: const BoxConstraints(
+          //   minWidth: 280,
+          //   maxWidth: 625,
+          // ),
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: VotePanel(

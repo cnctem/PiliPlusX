@@ -150,7 +150,8 @@ class RenderParagraph extends RenderBox
 
   /// The text to display.
   InlineSpan get text => _textPainter.text!;
-  set text(({InlineSpan text, Color primary}) params) {
+  // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+  set setText(({InlineSpan text, Color primary}) params) {
     final value = params.text;
     _primary = params.primary;
     if (_morePainter case final textPainter?) {

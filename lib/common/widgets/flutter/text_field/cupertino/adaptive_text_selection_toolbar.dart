@@ -187,14 +187,15 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
     List<ContextMenuButtonItem> buttonItems,
   ) {
     switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-        return buttonItems.map((ContextMenuButtonItem buttonItem) {
-          return CupertinoTextSelectionToolbarButton.buttonItem(
-            buttonItem: buttonItem,
-          );
-        });
+      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      // case TargetPlatform.android:
+      // case TargetPlatform.fuchsia:
+      // case TargetPlatform.iOS:
+      //   return buttonItems.map((ContextMenuButtonItem buttonItem) {
+      //     return CupertinoTextSelectionToolbarButton.buttonItem(
+      //       buttonItem: buttonItem,
+      //     );
+      //   });
       case TargetPlatform.linux:
       case TargetPlatform.windows:
       case TargetPlatform.macOS:
@@ -203,6 +204,13 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
             buttonItem: buttonItem,
           );
         });
+      default:
+        return buttonItems.map((ContextMenuButtonItem buttonItem) {
+          return CupertinoTextSelectionToolbarButton.buttonItem(
+            buttonItem: buttonItem,
+          );
+        });
+      // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
     }
   }
 
@@ -217,14 +225,15 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
         children ?? getAdaptiveButtons(context, buttonItems!).toList();
 
     switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-      case TargetPlatform.fuchsia:
-        return CupertinoTextSelectionToolbar(
-          anchorAbove: anchors.primaryAnchor,
-          anchorBelow: anchors.secondaryAnchor ?? anchors.primaryAnchor,
-          children: resultChildren,
-        );
+      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      // case TargetPlatform.android:
+      // case TargetPlatform.iOS:
+      // case TargetPlatform.fuchsia:
+      //   return CupertinoTextSelectionToolbar(
+      //     anchorAbove: anchors.primaryAnchor,
+      //     anchorBelow: anchors.secondaryAnchor ?? anchors.primaryAnchor,
+      //     children: resultChildren,
+      //   );
       case TargetPlatform.linux:
       case TargetPlatform.windows:
       case TargetPlatform.macOS:
@@ -232,6 +241,13 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
           anchor: anchors.primaryAnchor,
           children: resultChildren,
         );
+      default:
+        return CupertinoTextSelectionToolbar(
+          anchorAbove: anchors.primaryAnchor,
+          anchorBelow: anchors.secondaryAnchor ?? anchors.primaryAnchor,
+          children: resultChildren,
+        );
+      // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
     }
   }
 }

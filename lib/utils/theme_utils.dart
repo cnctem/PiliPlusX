@@ -111,7 +111,8 @@ abstract class ThemeUtils {
         ),
       ),
       cupertinoOverrideTheme: CupertinoThemeData(
-        selectionHandleColor: colorScheme.primary,
+        // TODO flutter 3.32.4-ohos-0.0.1不支持的代码
+        // selectionHandleColor: colorScheme.primary,
       ),
       switchTheme: const SwitchThemeData(
         thumbIcon: WidgetStateProperty<Icon?>.fromMap(

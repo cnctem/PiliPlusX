@@ -1938,9 +1938,10 @@ class _RenderScrollSemantics extends RenderProxyBox {
       if (child.isTagged(RenderViewport.excludeFromScrolling)) {
         excluded.add(child);
       } else {
-        if (!child.flagsCollection.isHidden) {
-          firstVisibleIndex ??= child.indexInParent;
-        }
+        // TODO flutter 3.32.4-ohos-0.0.1不支持的代码
+        // if (!child.flagsCollection.isHidden) {
+        //   firstVisibleIndex ??= child.indexInParent;
+        // }
         included.add(child);
       }
     }

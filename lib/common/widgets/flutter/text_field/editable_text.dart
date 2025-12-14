@@ -1713,12 +1713,15 @@ class EditableText extends StatefulWidget {
       return true;
     }
     return switch (defaultTargetPlatform) {
-      TargetPlatform.android => false,
-      TargetPlatform.iOS => false,
-      TargetPlatform.fuchsia => false,
+      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      // TargetPlatform.android => false,
+      // TargetPlatform.iOS => false,
+      // TargetPlatform.fuchsia => false,
       TargetPlatform.linux => true,
       TargetPlatform.macOS => true,
       TargetPlatform.windows => true,
+      _ => false,
+      // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
     };
   }
 
@@ -1827,7 +1830,16 @@ class EditableText extends StatefulWidget {
     }
 
     switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
+      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      // case TargetPlatform.iOS:
+      // case TargetPlatform.macOS:
+      // case TargetPlatform.android:
+      // case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+      case TargetPlatform.macOS:
+        break;
+      default:
         // username, password and newPassword are password related hint.
         // newUsername is not supported on iOS.
         final bool passwordRelatedHint = autofillHints.any(
@@ -1841,12 +1853,7 @@ class EditableText extends StatefulWidget {
           // Set autocorrect to false to prevent password bar from flashing.
           return false;
         }
-      case TargetPlatform.macOS:
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        break;
+      // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
     }
 
     return true;
@@ -1873,8 +1880,16 @@ class EditableText extends StatefulWidget {
     // (even within a native app). Tested on iOS 13.5.
     if (!kIsWeb) {
       switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
+        // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+        // case TargetPlatform.iOS:
+        // case TargetPlatform.macOS:
+        // case TargetPlatform.android:
+        // case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
         case TargetPlatform.macOS:
+          break;
+        default:
           const Map<String, TextInputType>
           iOSKeyboardType = <String, TextInputType>{
             AutofillHints.addressCity: TextInputType.name,
@@ -1919,11 +1934,7 @@ class EditableText extends StatefulWidget {
           if (keyboardType != null) {
             return keyboardType;
           }
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          break;
+        // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
       }
     }
 
@@ -2387,18 +2398,22 @@ class EditableTextState extends State<EditableText>
     }
 
     switch (defaultTargetPlatform) {
-      case TargetPlatform.macOS:
-        return false;
-      case TargetPlatform.iOS:
-        return textEditingValue.text.isNotEmpty &&
-            textEditingValue.selection.isCollapsed;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
+      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      // case TargetPlatform.iOS:
+      // case TargetPlatform.macOS:
+      // case TargetPlatform.android:
+      // case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
+      case TargetPlatform.macOS:
         return textEditingValue.text.isNotEmpty &&
             !(textEditingValue.selection.start == 0 &&
                 textEditingValue.selection.end == textEditingValue.text.length);
+      default:
+        return textEditingValue.text.isNotEmpty &&
+            !(textEditingValue.selection.start == 0 &&
+                textEditingValue.selection.end == textEditingValue.text.length);
+      // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
     }
   }
 
@@ -2428,19 +2443,23 @@ class EditableTextState extends State<EditableText>
   @override
   bool get shareEnabled {
     switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
+      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      // case TargetPlatform.iOS:
+      // case TargetPlatform.android:
+      // case TargetPlatform.macOS:
+      // case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+      case TargetPlatform.macOS:
+        return false;
+      default:
         return !widget.obscureText &&
             !textEditingValue.selection.isCollapsed &&
             textEditingValue.selection
                     .textInside(textEditingValue.text)
                     .trim() !=
                 '';
-      case TargetPlatform.macOS:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return false;
+      // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
     }
   }
 
@@ -2489,13 +2508,16 @@ class EditableTextState extends State<EditableText>
       hideToolbar(false);
 
       switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
-        case TargetPlatform.macOS:
+        // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+        // case TargetPlatform.iOS:
+        // case TargetPlatform.macOS:
+        // case TargetPlatform.android:
+        // case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
+        case TargetPlatform.macOS:
           break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
+        default:
           // Collapse the selection and hide the toolbar and handles.
           userUpdateTextEditingValue(
             TextEditingValue(
@@ -2506,6 +2528,7 @@ class EditableTextState extends State<EditableText>
             ),
             SelectionChangedCause.toolbar,
           );
+        // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
       }
     }
     clipboardStatus.update();
@@ -2625,24 +2648,34 @@ class EditableTextState extends State<EditableText>
 
     if (cause == SelectionChangedCause.toolbar) {
       switch (defaultTargetPlatform) {
-        case TargetPlatform.android:
-        case TargetPlatform.iOS:
-        case TargetPlatform.fuchsia:
-          break;
-        case TargetPlatform.macOS:
+        // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+        // case TargetPlatform.android:
+        // case TargetPlatform.iOS:
+        // case TargetPlatform.fuchsia:
+        // case TargetPlatform.macOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
+        case TargetPlatform.macOS:
           hideToolbar();
+        default:
+          break;
+        // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
       }
       switch (defaultTargetPlatform) {
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
+        // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+        // case TargetPlatform.android:
+        // case TargetPlatform.fuchsia:
+        // case TargetPlatform.linux:
+        // case TargetPlatform.windows:
+        // case TargetPlatform.macOS:
+        // case TargetPlatform.iOS:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
-          bringIntoView(textEditingValue.selection.extent);
         case TargetPlatform.macOS:
-        case TargetPlatform.iOS:
           break;
+        default:
+          bringIntoView(textEditingValue.selection.extent);
+        // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
       }
     }
   }
@@ -4007,11 +4040,14 @@ class EditableTextState extends State<EditableText>
   }
 
   final bool _platformSupportsFadeOnScroll = switch (defaultTargetPlatform) {
-    TargetPlatform.android || TargetPlatform.iOS => true,
-    TargetPlatform.fuchsia ||
+    // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+    // TargetPlatform.android || TargetPlatform.iOS => true,
+    // TargetPlatform.fuchsia ||
     TargetPlatform.linux ||
     TargetPlatform.macOS ||
     TargetPlatform.windows => false,
+    _ => true,
+    // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
   };
 
   bool _isInternalScrollableNotification(BuildContext? notificationContext) {
@@ -4529,16 +4565,14 @@ class EditableTextState extends State<EditableText>
     SelectionChangedCause? cause,
   ) {
     switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        if (cause == SelectionChangedCause.longPress ||
-            cause == SelectionChangedCause.drag) {
-          bringIntoView(newSelection.extent);
-        }
+      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      // case TargetPlatform.iOS:
+      // case TargetPlatform.macOS:
+      // case TargetPlatform.android:
+      // case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.android:
+      case TargetPlatform.macOS:
         if (cause == SelectionChangedCause.drag) {
           if (oldSelection.baseOffset != newSelection.baseOffset) {
             bringIntoView(newSelection.base);
@@ -4546,6 +4580,12 @@ class EditableTextState extends State<EditableText>
             bringIntoView(newSelection.extent);
           }
         }
+      default:
+        if (cause == SelectionChangedCause.longPress ||
+            cause == SelectionChangedCause.drag) {
+          bringIntoView(newSelection.extent);
+        }
+      // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
     }
   }
 
@@ -5177,7 +5217,8 @@ class EditableTextState extends State<EditableText>
       allowedMimeTypes: widget.contentInsertionConfiguration == null
           ? const <String>[]
           : widget.contentInsertionConfiguration!.allowedMimeTypes,
-      hintLocales: widget.hintLocales,
+      // TODO flutter 3.32.4-ohos-0.0.1不支持的代码
+      // hintLocales: widget.hintLocales,
     );
   }
 
@@ -6898,9 +6939,15 @@ class _EditableTextTapOutsideAction
   void invoke(EditableTextTapOutsideIntent intent, [BuildContext? context]) {
     // The focus dropping behavior is only present on desktop platforms.
     switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-      case TargetPlatform.fuchsia:
+      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      // case TargetPlatform.android:
+      // case TargetPlatform.iOS:
+      // case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        intent.focusNode.unfocus();
+      default:
         // On mobile platforms, we don't unfocus on touch events unless they're
         // in the web browser, but we do unfocus for all other kinds of events.
         switch (intent.pointerDownEvent.kind) {
@@ -6918,10 +6965,7 @@ class _EditableTextTapOutsideAction
               'Unexpected pointer down event for trackpad',
             );
         }
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        intent.focusNode.unfocus();
+      // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
     }
   }
 }

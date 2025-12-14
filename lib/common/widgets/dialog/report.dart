@@ -19,7 +19,8 @@ Future<void> autoWrapReportDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
-        constraints: const BoxConstraints(minWidth: 280, maxWidth: 420),
+        // TODO flutter 3.32.4-ohos-0.0.1不支持的代码
+        // constraints: const BoxConstraints(minWidth: 280, maxWidth: 420),
         title: const Text('举报'),
         titlePadding: const EdgeInsets.only(left: 22, top: 16, right: 22),
         contentPadding: const EdgeInsets.symmetric(vertical: 5),
@@ -48,22 +49,23 @@ Future<void> autoWrapReportDialog(
                           ),
                           child: Text('请选择举报的理由：'),
                         ),
-                        RadioGroup(
-                          onChanged: (value) {
-                            reasonType = value;
-                            (context as Element).markNeedsBuild();
-                          },
-                          groupValue: reasonType,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: options.entries.map((entry) {
-                              return WrapRadioOptionsGroup<int>(
-                                groupTitle: entry.key,
-                                options: entry.value,
-                              );
-                            }).toList(),
-                          ),
-                        ),
+                        // TODO flutter 3.32.4-ohos-0.0.1不支持的代码
+                        // RadioGroup(
+                        //   onChanged: (value) {
+                        //     reasonType = value;
+                        //     (context as Element).markNeedsBuild();
+                        //   },
+                        //   groupValue: reasonType,
+                        //   child: Column(
+                        //     crossAxisAlignment: CrossAxisAlignment.start,
+                        //     children: options.entries.map((entry) {
+                        //       return WrapRadioOptionsGroup<int>(
+                        //         groupTitle: entry.key,
+                        //         options: entry.value,
+                        //       );
+                        //     }).toList(),
+                        //   ),
+                        // ),
                         if (reasonType == 0)
                           Padding(
                             padding: const EdgeInsets.only(

@@ -166,8 +166,9 @@ class SystemContextMenu extends StatefulWidget {
         const IOSSystemContextMenuItemLookUp(),
       if (editableTextState.searchWebEnabled)
         const IOSSystemContextMenuItemSearchWeb(),
-      if (editableTextState.liveTextInputEnabled)
-        const IOSSystemContextMenuItemLiveText(),
+        // TODO flutter 3.32.4-ohos-0.0.1不支持的代码
+      // if (editableTextState.liveTextInputEnabled)
+      //   const IOSSystemContextMenuItemLiveText(),
     ];
   }
 

@@ -159,7 +159,8 @@ class _MouseInteractiveViewerState extends State<MouseInteractiveViewer>
     }
 
     final Matrix4 nextMatrix = matrix.clone()
-      ..translateByDouble(alignedTranslation.dx, alignedTranslation.dy, 0, 1);
+      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      ..translate(alignedTranslation.dx, alignedTranslation.dy, 0);
 
     final Quad nextViewport = _transformViewport(nextMatrix, _viewport);
 
@@ -246,7 +247,8 @@ class _MouseInteractiveViewerState extends State<MouseInteractiveViewer>
     );
     final double clampedScale = clampedTotalScale / currentScale;
     return matrix.clone()
-      ..scaleByDouble(clampedScale, clampedScale, clampedScale, 1);
+        // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      ..scale(clampedScale, clampedScale, clampedScale);
   }
 
   Matrix4 _matrixRotate(Matrix4 matrix, double rotation, Offset focalPoint) {
@@ -255,9 +257,11 @@ class _MouseInteractiveViewerState extends State<MouseInteractiveViewer>
     }
     final Offset focalPointScene = _transformer.toScene(focalPoint);
     return matrix.clone()
-      ..translateByDouble(focalPointScene.dx, focalPointScene.dy, 0, 1)
+        // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      ..translate(focalPointScene.dx, focalPointScene.dy, 0)
       ..rotateZ(-rotation)
-      ..translateByDouble(-focalPointScene.dx, -focalPointScene.dy, 0, 1);
+        // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      ..translate(-focalPointScene.dx, -focalPointScene.dy, 0);
   }
 
   bool _gestureIsSupported(_GestureType? gestureType) {
@@ -838,9 +842,11 @@ Quad _transformViewport(Matrix4 matrix, Rect viewport) {
 
 Quad _getAxisAlignedBoundingBoxWithRotation(Rect rect, double rotation) {
   final Matrix4 rotationMatrix = Matrix4.identity()
-    ..translateByDouble(rect.size.width / 2, rect.size.height / 2, 0, 1)
+        // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+    ..translate(rect.size.width / 2, rect.size.height / 2, 0)
     ..rotateZ(rotation)
-    ..translateByDouble(-rect.size.width / 2, -rect.size.height / 2, 0, 1);
+        // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+    ..translate(-rect.size.width / 2, -rect.size.height / 2, 0);
   final Quad boundariesRotated = Quad.points(
     rotationMatrix.transform3(Vector3(rect.left, rect.top, 0.0)),
     rotationMatrix.transform3(Vector3(rect.right, rect.top, 0.0)),
