@@ -27,6 +27,7 @@ import 'package:PiliPlus/utils/extension.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
@@ -1011,7 +1012,9 @@ class _LiveDanmakuState extends State<LiveDanmaku> {
                   plPlayerController.danmakuController = e;
             },
             option: DanmakuOption(
-              fontFamily: 'HarmonyOS_Sans',
+              fontFamily: !Pref.useSystemFont && Platform.isAndroid
+                  ? 'HarmonyOS_Sans'
+                  : null,
               fontSize: _fontSize,
               fontWeight: plPlayerController.danmakuFontWeight,
               area: plPlayerController.showArea,
