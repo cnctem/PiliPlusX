@@ -238,6 +238,10 @@ dependencies:
   characters: any
 
 dependency_overrides:
+  flutter_inappwebview:
+    git:
+      url: "https://gitcode.com/openharmony-sig/flutter_inappwebview.git"
+      path: "flutter_inappwebview"
   auto_orientation: # 自动旋转.鸿蒙适配
     git:
       url: "https://gitcode.com/openharmony-sig/fluttertpc_auto_orientation"

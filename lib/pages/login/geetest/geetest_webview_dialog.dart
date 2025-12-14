@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/ua_type.dart';
-import 'package:PiliPlus/main.dart';
 import 'package:PiliPlus/utils/accounts/account.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -71,7 +70,7 @@ class GeetestWebviewDialog extends StatelessWidget {
         width: 300,
         height: 400,
         child: InAppWebView(
-          webViewEnvironment: webViewEnvironment,
+          // webViewEnvironment: webViewEnvironment,
           initialSettings: InAppWebViewSettings(
             clearCache: true,
             javaScriptEnabled: true,

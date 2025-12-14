@@ -32,7 +32,6 @@ import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
@@ -41,11 +40,11 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:window_manager/window_manager.dart' hide calcWindowPosition;
 
-WebViewEnvironment? webViewEnvironment;
+// WebViewEnvironment? webViewEnvironment;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  MediaKit.ensureInitialized();
+  if (defaultTargetPlatform.name != 'ohos') MediaKit.ensureInitialized();
   tmpDirPath = (await getTemporaryDirectory()).path;
   appSupportDirPath = (await getApplicationSupportDirectory()).path;
   try {
@@ -55,6 +54,8 @@ void main() async {
     if (kDebugMode) debugPrint('GStorage init error: $e');
     exit(0);
   }
+
+  // 设置下载路径
   if (Utils.isDesktop) {
     final customDownPath = Pref.downloadPath;
     if (customDownPath != null && customDownPath.isNotEmpty) {
@@ -82,9 +83,13 @@ void main() async {
   } else {
     downloadPath = defDownloadPath;
   }
+
+  // 初始化get
   Get
     ..lazyPut(AccountService.new)
     ..lazyPut(DownloadService.new);
+
+  // 配置网络请求
   HttpOverrides.global = _CustomHttpOverrides();
 
   CacheManager.autoClearCache();
@@ -104,15 +109,15 @@ void main() async {
     ]);
   }
 
-  if (Platform.isWindows) {
-    if (await WebViewEnvironment.getAvailableVersion() != null) {
-      webViewEnvironment = await WebViewEnvironment.create(
-        settings: WebViewEnvironmentSettings(
-          userDataFolder: path.join(appSupportDirPath, 'flutter_inappwebview'),
-        ),
-      );
-    }
-  }
+  // if (Platform.isWindows) {
+  //   if (await WebViewEnvironment.getAvailableVersion() != null) {
+  //     webViewEnvironment = await WebViewEnvironment.create(
+  //       settings: WebViewEnvironmentSettings(
+  //         userDataFolder: path.join(appSupportDirPath, 'flutter_inappwebview'),
+  //       ),
+  //     );
+  //   }
+  // }
 
   Request();
   Request.setCookie();
