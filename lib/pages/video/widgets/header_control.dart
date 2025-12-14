@@ -15,6 +15,7 @@ import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/live.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/video.dart';
+import 'package:PiliPlus/media_kit_adapt/media_kit_adapt.dart';
 import 'package:PiliPlus/models/common/super_resolution_type.dart';
 import 'package:PiliPlus/models/common/video/audio_quality.dart';
 import 'package:PiliPlus/models/common/video/cdn_type.dart';
@@ -1427,7 +1428,7 @@ class HeaderControlState extends State<HeaderControl>
       SmartDialog.showToast('播放器未初始化');
       return;
     }
-    final hwdec = await player.platform!.getProperty(
+    final hwdec = await player.platform!.maybeAsNativePlayer.getProperty(
       'hwdec-current',
     );
     if (!context.mounted) return;

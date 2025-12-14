@@ -273,9 +273,9 @@ dependency_overrides:
   rxdart: ^0.28.0
   media_kit:
     git:
-      url: https://github.com/bggRGjQaUbCoE/media-kit.git
+      url: https://github.com/ErBWs/media-kit.git
       path: media_kit
-      ref: version_1.2.5
+      ref: feat-ohos
   media_kit_video:
     git:
       url: https://github.com/bggRGjQaUbCoE/media-kit.git

@@ -9,6 +9,7 @@ import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/ua_type.dart';
 import 'package:PiliPlus/http/video.dart';
+import 'package:PiliPlus/media_kit_adapt/media_kit_adapt.dart';
 import 'package:PiliPlus/models/common/account_type.dart';
 import 'package:PiliPlus/models/common/audio_normalization.dart';
 import 'package:PiliPlus/models/common/sponsor_block/skip_type.dart';
@@ -741,7 +742,7 @@ class PlPlayerController {
         setting.put(SettingBoxKey.superResolutionType, type.index);
       }
     }
-    pp ??= _videoPlayerController!.platform!;
+    pp ??= _videoPlayerController!.platform!.maybeAsNativePlayer;
     await pp.waitForPlayerInitialization;
     await pp.waitForVideoControllerInitializationIfAttached;
     switch (type) {
@@ -799,7 +800,7 @@ class PlPlayerController {
             logLevel: kDebugMode ? MPVLogLevel.warn : MPVLogLevel.error,
           ),
         );
-    final pp = player.platform!;
+    final pp = player.platform!.maybeAsNativePlayer;
     if (_videoPlayerController == null) {
       if (Utils.isDesktop) {
         pp.setVolume(this.volume.value * 100);
@@ -936,7 +937,7 @@ class PlPlayerController {
       if (dataSource.audioSource.isNullOrEmpty) {
         SmartDialog.showToast('音频源为空');
       } else {
-        await (_videoPlayerController!.platform!).setProperty(
+        await (_videoPlayerController!.platform!).maybeAsNativePlayer.setProperty(
           'audio-files',
           Platform.isWindows
               ? dataSource.audioSource!.replaceAll(';', '\\;')
