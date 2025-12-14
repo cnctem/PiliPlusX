@@ -23,16 +23,17 @@
 
 <br/>
 
-## 千岛路书
+## 空降指挥部
 
 - [特色功能](#功能)
 - [快捷键功能说明](#快捷键功能)
 - [港澳台代理](#港澳台代理)
 - [致谢](#致谢)
-- [TODO List](docs/TODO.md)
-- [Issues](https://github.com/cnctem/PiliPlusX/issues)
-- [Latest Release (Download)](https://github.com/cnctem/PiliPlusX/releases/latest)
-- [flutter3.35.7 Version (v1.0.8-oppo)](https://github.com/cnctem/PiliPlusX/releases/tag/v1.0.8-oddo)
+
+- PiliPlusX 独家功能详见 [TODO List](docs/TODO.md) 完成项
+- [下载最新版本](https://github.com/cnctem/PiliPlusX/releases/latest)
+- [安卓字体修复版本说明](#PiliPlusX字体修复说明)
+- 请提出你的宝贵建议！[Issues](https://github.com/cnctem/PiliPlusX/issues)
 
 ## 适配平台
 
@@ -41,8 +42,8 @@
 - [x] Pad
 - [x] Windows
 - [x] macOS
-
-[![Packaging status](https://repology.org/badge/vertical-allrepos/piliplus.svg)](https://repology.org/project/piliplus/versions)
+- [ ] Harmony OS ([开发中](https://github.com/cnctem/PiliPlusX/issues/5))
+- [ ] Linux (暂时移除支持，推荐上游[PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus) 或 [bilibili-linux](https://github.com/msojocs/bilibili-linux))
 
 ## refactor
 
@@ -291,10 +292,24 @@
 |------|------|:----:|
 |gucooing|https://blblapi.alsl.xyz||
 
+## PiliPlusX版本说明
+
+- 主线版本：基于上游[`main`分支](https://github.com/bggRGjQaUbCoE/PiliPlus/tree/main)更新最及时，打包 Android、iOS、Windows、macOS 版本
+- oddo版本：基于上游[`flutter_3.35.7`分支](https://github.com/bggRGjQaUbCoE/PiliPlus/tree/flutter_3.35.7)，面向color OS等字体错误的定制安卓，仅打包 Android 版本
+- ohos版本：敬请期待
+
+## PiliPlusX字体修复说明
+
+- 字体问题由`flutter3.38.x`要求显式定义字体，而color OS及个别定制安卓的字体机制采用映射到系统Roboto的方案，导致flutter找不到定义的字体从而产生字体问题，表现为显示为一种错误的衬线字体
+- 主线版本 在关闭设置项“使用系统字体”后将字体指定为使用鸿蒙黑体，基本解决问题
+- 如果你是color OS等字体错误的定制安卓，且希望显示手机自定义主题字体，推荐使用oddo版本，通过使用`flutter3.35.7`彻底解决字体问题。下载最新版本 [v1.0.8-oddo](https://github.com/cnctem/PiliPlusX/releases/tag/v1.0.8-oddo)
+
 ## 声明
 
-此项目（PiliPlus）是个人为了兴趣而开发, 仅用于学习和测试，请于下载后24小时内删除。
+此项目（PiliPlusX）是个人学习 Flutter 而开发，仅用于交流学习 Flutter 技术，请于下载后24小时内删除，严禁在互联网上传播软件安装包！
 
+上游项目声明
+>此项目（PiliPlus）是个人为了兴趣而开发，仅用于学习和测试，请于下载后24小时内删除。
 所用API皆从官方网站收集, 不提供任何破解内容。
 
 **感谢使用**
