@@ -34,6 +34,8 @@ import 'package:PiliPlus/pages/video/post_panel/popup_menu_text.dart';
 import 'package:PiliPlus/pages/video/post_panel/view.dart';
 import 'package:PiliPlus/pages/video/widgets/header_control.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
+import 'package:PiliPlus/plugin/pl_player/gestures/two_finger_double_tap.dart';
+import 'package:flutter/services.dart';
 import 'package:PiliPlus/plugin/pl_player/models/bottom_control_type.dart';
 import 'package:PiliPlus/plugin/pl_player/models/bottom_progress_behavior.dart';
 import 'package:PiliPlus/plugin/pl_player/models/double_tap_type.dart';
@@ -2047,6 +2049,33 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   )
                 : const SizedBox.shrink();
           }),
+
+        /// 双指双击切换弹幕
+        Positioned.fill(
+          child: RawGestureDetector(
+            gestures: {
+              TwoFingerDoubleTapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TwoFingerDoubleTapGestureRecognizer>(
+                () => TwoFingerDoubleTapGestureRecognizer(),
+                (TwoFingerDoubleTapGestureRecognizer instance) {
+                  instance.onTwoFingerDoubleTap = () {
+                    // 切换弹幕开关
+                    plPlayerController.enableShowDanmaku.value = !plPlayerController.enableShowDanmaku.value;
+                    // 添加震动反馈
+                    if (Platform.isAndroid || Platform.isIOS) {
+                      HapticFeedback.lightImpact();
+                    }
+                    // 显示提示
+                    SmartDialog.showToast(
+                      plPlayerController.enableShowDanmaku.value ? '弹幕已开启' : '弹幕已关闭',
+                      displayTime: const Duration(milliseconds: 1000),
+                    );
+                  };
+                },
+              ),
+            },
+            behavior: HitTestBehavior.translucent,
+          ),
+        ),
       ],
     );
     if (Utils.isDesktop) {
