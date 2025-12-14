@@ -11,6 +11,7 @@ import 'package:PiliPlus/models_new/msgfeed_unread/data.dart';
 import 'package:PiliPlus/models_new/single_unread/data.dart';
 import 'package:PiliPlus/pages/dynamics/controller.dart';
 import 'package:PiliPlus/pages/home/controller.dart';
+import 'package:PiliPlus/pages/login/controller.dart';
 import 'package:PiliPlus/pages/mine/view.dart';
 import 'package:PiliPlus/services/account_service.dart';
 import 'package:PiliPlus/utils/extension.dart';
@@ -308,6 +309,15 @@ class MainController extends GetxController
               homeController.onRefresh();
             } else if (currentNav == NavigationBarType.dynamics) {
               dynamicController.onRefresh();
+            } else if (currentNav == NavigationBarType.mine) {
+              // 二次点击"我的"
+              if (Pref.defaultShowWatchLater) {
+                // 打开稍后再看
+                Get.toNamed('/later');
+              } else {
+                // 打开账号选择器
+                LoginPageController.switchAccountDialog(Get.context!);
+              }
             }
           },
         );

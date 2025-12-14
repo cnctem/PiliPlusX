@@ -79,8 +79,8 @@ List<SettingsModel> get styleSettings => [
       subtitle: '关闭后将使用内置HarmonyOS Sans字体',
       leading: Icon(Icons.font_download_outlined),
       setKey: SettingBoxKey.useSystemFont,
-      defaultVal: true,
-      needReboot: false,
+      defaultVal: false,
+      needReboot: true,
     ),
   ],
   SwitchModel(
