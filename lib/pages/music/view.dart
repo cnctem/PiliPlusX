@@ -16,13 +16,13 @@ import 'package:PiliPlus/pages/common/dyn/common_dyn_page.dart';
 import 'package:PiliPlus/pages/music/controller.dart';
 import 'package:PiliPlus/pages/music/video/view.dart';
 import 'package:PiliPlus/utils/accounts.dart';
-import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/extension.dart';
 import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/num_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
-import 'package:fl_chart/fl_chart.dart';
+// TODO flutter 3.32.4-ohos-0.0.1使用fl_chart报错
+// import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -603,79 +603,80 @@ class _MusicDetailPageState extends CommonDynPageState<MusicDetailPage> {
             height: maxWidth * 0.5,
             child: Padding(
               padding: const EdgeInsetsGeometry.only(top: 4, right: 22),
-              child: LineChart(
-                LineChartData(
-                  lineTouchData: const LineTouchData(enabled: false),
-                  titlesData: FlTitlesData(
-                    show: true,
-                    rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    leftTitles: const AxisTitles(
-                      sideTitles: SideTitles(
-                        reservedSize: 55,
-                        showTitles: true,
-                      ),
-                    ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 30 * sqrt2,
-                        getTitlesWidget: (index, meta) {
-                          return SideTitleWidget(
-                            angle: -pi / 4,
-                            space: 8 * sqrt2,
-                            meta: meta,
-                            child: Text(
-                              DateFormatUtils.shortFormat.format(
-                                DateTime.fromMillisecondsSinceEpoch(
-                                  heat[index.toInt()].date * 1000,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                  borderData: FlBorderData(
-                    show: true,
-                    border: Border.all(color: colorScheme.onSurface),
-                  ),
-                  minX: 0,
-                  maxX: (heat.length - 1).toDouble(),
-                  minY: minHeat.toDouble(),
-                  maxY: maxHeat.toDouble(),
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: List.generate(
-                        heat.length,
-                        (index) => FlSpot(
-                          index.toDouble(),
-                          heat[index].heat.toDouble(),
-                        ),
-                      ),
-                      color: colorScheme.primary,
-                      barWidth: 1,
-                      dotData: const FlDotData(show: false),
-                      belowBarData: BarAreaData(
-                        show: true,
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            colorScheme.primary.withValues(alpha: 0.5),
-                            colorScheme.onPrimary.withValues(alpha: 0.5),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              // TODO flutter 3.32.4-ohos-0.0.1使用fl_chart报错
+              // child: LineChart(
+              //   LineChartData(
+              //     lineTouchData: const LineTouchData(enabled: false),
+              //     titlesData: FlTitlesData(
+              //       show: true,
+              //       rightTitles: const AxisTitles(
+              //         sideTitles: SideTitles(showTitles: false),
+              //       ),
+              //       topTitles: const AxisTitles(
+              //         sideTitles: SideTitles(showTitles: false),
+              //       ),
+              //       leftTitles: const AxisTitles(
+              //         sideTitles: SideTitles(
+              //           reservedSize: 55,
+              //           showTitles: true,
+              //         ),
+              //       ),
+              //       bottomTitles: AxisTitles(
+              //         sideTitles: SideTitles(
+              //           showTitles: true,
+              //           reservedSize: 30 * sqrt2,
+              //           getTitlesWidget: (index, meta) {
+              //             return SideTitleWidget(
+              //               angle: -pi / 4,
+              //               space: 8 * sqrt2,
+              //               meta: meta,
+              //               child: Text(
+              //                 DateFormatUtils.shortFormat.format(
+              //                   DateTime.fromMillisecondsSinceEpoch(
+              //                     heat[index.toInt()].date * 1000,
+              //                   ),
+              //                 ),
+              //               ),
+              //             );
+              //           },
+              //         ),
+              //       ),
+              //     ),
+              //     borderData: FlBorderData(
+              //       show: true,
+              //       border: Border.all(color: colorScheme.onSurface),
+              //     ),
+              //     minX: 0,
+              //     maxX: (heat.length - 1).toDouble(),
+              //     minY: minHeat.toDouble(),
+              //     maxY: maxHeat.toDouble(),
+              //     lineBarsData: [
+              //       LineChartBarData(
+              //         spots: List.generate(
+              //           heat.length,
+              //           (index) => FlSpot(
+              //             index.toDouble(),
+              //             heat[index].heat.toDouble(),
+              //           ),
+              //         ),
+              //         color: colorScheme.primary,
+              //         barWidth: 1,
+              //         dotData: const FlDotData(show: false),
+              //         belowBarData: BarAreaData(
+              //           show: true,
+              //           gradient: LinearGradient(
+              //             begin: Alignment.topCenter,
+              //             end: Alignment.bottomCenter,
+              //             colors: [
+              //               colorScheme.primary.withValues(alpha: 0.5),
+              //               colorScheme.onPrimary.withValues(alpha: 0.5),
+              //             ],
+              //           ),
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
             ),
           ),
         ],

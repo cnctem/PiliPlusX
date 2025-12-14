@@ -60,7 +60,8 @@ import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:easy_debounce/easy_throttle.dart';
-import 'package:fl_chart/fl_chart.dart';
+// TODO flutter 3.32.4-ohos-0.0.1使用fl_chart报错
+// import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -2503,37 +2504,38 @@ Widget buildDmChart(
             ? 20.25 + offset
             : 4.25 + offset,
       ),
-      child: LineChart(
-        LineChartData(
-          titlesData: const FlTitlesData(show: false),
-          lineTouchData: const LineTouchData(enabled: false),
-          gridData: const FlGridData(show: false),
-          borderData: FlBorderData(show: false),
-          minX: 0,
-          maxX: (dmTrend.length - 1).toDouble(),
-          minY: 0,
-          maxY: dmTrend.max,
-          lineBarsData: [
-            LineChartBarData(
-              spots: List.generate(
-                dmTrend.length,
-                (index) => FlSpot(
-                  index.toDouble(),
-                  dmTrend[index],
-                ),
-              ),
-              isCurved: true,
-              barWidth: 1,
-              color: color,
-              dotData: const FlDotData(show: false),
-              belowBarData: BarAreaData(
-                show: true,
-                color: color.withValues(alpha: 0.4),
-              ),
-            ),
-          ],
-        ),
-      ),
+      // TODO flutter 3.32.4-ohos-0.0.1使用fl_chart报错
+      // child: LineChart(
+      //   LineChartData(
+      //     titlesData: const FlTitlesData(show: false),
+      //     lineTouchData: const LineTouchData(enabled: false),
+      //     gridData: const FlGridData(show: false),
+      //     borderData: FlBorderData(show: false),
+      //     minX: 0,
+      //     maxX: (dmTrend.length - 1).toDouble(),
+      //     minY: 0,
+      //     maxY: dmTrend.max,
+      //     lineBarsData: [
+      //       LineChartBarData(
+      //         spots: List.generate(
+      //           dmTrend.length,
+      //           (index) => FlSpot(
+      //             index.toDouble(),
+      //             dmTrend[index],
+      //           ),
+      //         ),
+      //         isCurved: true,
+      //         barWidth: 1,
+      //         color: color,
+      //         dotData: const FlDotData(show: false),
+      //         belowBarData: BarAreaData(
+      //           show: true,
+      //           color: color.withValues(alpha: 0.4),
+      //         ),
+      //       ),
+      //     ],
+      //   ),
+      // ),
     ),
   );
 }
