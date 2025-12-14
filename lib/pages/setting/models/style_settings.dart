@@ -34,6 +34,46 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
+/// 获取页面过渡动画的中文名称
+String _getTransitionLabel(Transition transition) {
+  switch (transition) {
+    case Transition.fade:
+      return 'fade (渐变动效)';
+    case Transition.fadeIn:
+      return 'fadeIn (褪色;渐变特效)';
+    case Transition.rightToLeft:
+      return 'rightToLeft (从右到左)';
+    case Transition.leftToRight:
+      return 'leftToRight (从左到右)';
+    case Transition.upToDown:
+      return 'upToDown (从上到下)';
+    case Transition.downToUp:
+      return 'downToUp (从下到上)';
+    case Transition.rightToLeftWithFade:
+      return 'rightToLeftWithFade (从右到左并渐隐)';
+    case Transition.leftToRightWithFade:
+      return 'leftToRightWithFade (从左到右并渐隐)';
+    case Transition.zoom:
+      return 'zoom (缩放)';
+    case Transition.topLevel:
+      return 'topLevel (顶级；最高级别)';
+    case Transition.noTransition:
+      return 'noTransition (无过渡)';
+    case Transition.cupertino:
+      return 'cupertino (库比蒂诺)';
+    case Transition.cupertinoDialog:
+      return 'cupertinoDialog (库比蒂诺对话框)';
+    case Transition.size:
+      return 'size (尺寸)';
+    case Transition.circularReveal:
+      return 'circularReveal (图形揭示)';
+    case Transition.native:
+      return 'native (原生样式)';
+    default:
+      return transition.name;
+  }
+}
+
 List<SettingsModel> get styleSettings => [
   if (Utils.isDesktop) ...[
     const SwitchModel(
@@ -132,7 +172,7 @@ List<SettingsModel> get styleSettings => [
   NormalModel(
     title: '页面过渡动画',
     leading: const Icon(Icons.animation),
-    getSubtitle: () => '当前：${Pref.pageTransition.name}',
+    getSubtitle: () => '当前：${_getTransitionLabel(Pref.pageTransition)}',
     onTap: (context, setState) async {
       final result = await showDialog<Transition>(
         context: context,
@@ -140,7 +180,9 @@ List<SettingsModel> get styleSettings => [
           return SelectDialog<Transition>(
             title: '页面过渡动画',
             value: Pref.pageTransition,
-            values: Transition.values.map((e) => (e, e.name)).toList(),
+            values: Transition.values
+                .map((e) => (e, _getTransitionLabel(e)))
+                .toList(),
           );
         },
       );
