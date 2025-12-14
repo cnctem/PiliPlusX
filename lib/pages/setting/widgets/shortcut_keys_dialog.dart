@@ -67,6 +67,7 @@ class ShortcutKeysDialog extends StatelessWidget {
                       '] 键 - 下一集',
                       'Enter键 - 私信发送',
                       'R键 - 刷新页面（需按住Cmd/Ctrl）',
+                      'H键 - 返回主页（需按住Alt/Command）',
                     ]),
                   ],
                 ),

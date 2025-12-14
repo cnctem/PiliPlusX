@@ -14,19 +14,18 @@
 
 - [X]  回车绑定消息发送
 - [X]  刷新快捷键，在动态页就刷新动态页，在首页就刷新首页
-- [ ] 返回默认初始页 快捷键 (Alt+H/command+H) -[Issue3](https://github.com/cnctem/PiliPlusX/issues/3)
+- [x] 返回默认初始页 快捷键 (Alt+H/command+H) -[Issue3](https://github.com/cnctem/PiliPlusX/issues/3)
 - [ ] 图片全屏时，左右方向键切换上下一张
 - [ ] 弹窗：y绑定确定，n取消
 - [ ] ctrl+1 快速改倍速为1
 
 ### 修复
 
-- [X]  字体（Flutter 3.38 导致）
-- [X]  弹幕、字幕 字体修复
-- [X]  手动获取更新
-- [X]  win端点关闭以后到后台托盘，从桌面打不开，需要从托盘里面才能打开
+- [X] 字体（Flutter 3.38 导致）
+- [X] 弹幕、字幕 字体修复
+- [X] 手动获取更新
+- [X] win端点关闭以后到后台托盘，从桌面打不开，需要从托盘里面才能打开
 - [x] mac端不显示字体开关 -Issue1
-- [ ] ios弹幕字体走默认（ios描边错误）弹幕字体单独开关？
 - [ ] mac command+Q 有时候会失效无法关闭
 - [ ] \* 暗黑模式下，阅读专栏字体颜色出错 -[Issue4](https://github.com/cnctem/PiliPlusX/issues/4) 
 
@@ -40,7 +39,7 @@
 
 ### 动画相关
 
-- [ ] 设置页面过渡动画弹窗 中文化
+- [x] 设置页面过渡动画弹窗 中文化
 - [ ] 增加对预测性返回的支持（参考Musify）
 - [ ] 对 封面-播放窗口增添 Hero 动画（参考收藏）
 

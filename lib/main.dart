@@ -326,6 +326,12 @@ class MyApp extends StatelessWidget {
                   return refreshResult;
                 }
 
+                // 处理返回主页快捷键 (Alt+H / Command+H)
+                final homeResult = _handleHomeKey(event);
+                if (homeResult != null) {
+                  return homeResult;
+                }
+
                 // 处理Escape键返回功能
                 if (event.logicalKey == LogicalKeyboardKey.escape &&
                     event is KeyDownEvent) {
@@ -404,6 +410,45 @@ KeyEventResult? _handleRefreshKey(KeyEvent event) {
   return KeyEventResult.handled;
 }
 
+// 处理返回主页快捷键 (Alt+H / Command+H)
+KeyEventResult? _handleHomeKey(KeyEvent event) {
+  if (event is! KeyDownEvent) return null;
+
+  // 1. 先匹配字母 H
+  if (event.logicalKey != LogicalKeyboardKey.keyH) {
+    return null;
+  }
+
+  // 2. 判断平台对应的修饰键是否按下
+  bool modifierPressed;
+  switch (defaultTargetPlatform) {
+    case TargetPlatform.macOS:
+    case TargetPlatform.iOS:
+      // 苹果使用 Command (Meta)
+      modifierPressed = HardwareKeyboard.instance.isMetaPressed;
+      break;
+    case TargetPlatform.windows:
+    case TargetPlatform.linux:
+    case TargetPlatform.android:
+    case TargetPlatform.fuchsia:
+      // Windows/Linux/Android 使用 Alt
+      modifierPressed = HardwareKeyboard.instance.isAltPressed;
+      break;
+  }
+
+  if (!modifierPressed) return null;
+
+  // 3. 防止 Shift/Ctrl 等其它修饰符干扰（可选）
+  if (HardwareKeyboard.instance.isShiftPressed ||
+      HardwareKeyboard.instance.isControlPressed) {
+    return null;
+  }
+
+  // 4. 真正干活
+  _handleHomeShortcut();
+  return KeyEventResult.handled;
+}
+
 // 处理Control+R快捷键刷新
 void _handleRefreshShortcut() {
   // 获取当前路由
@@ -417,6 +462,34 @@ void _handleRefreshShortcut() {
     if (currentController is ScrollOrRefreshMixin) {
       currentController.onRefresh();
     }
+  }
+}
+
+// 处理返回主页快捷键 (Alt+H / Command+H)
+void _handleHomeShortcut() {
+  try {
+    // 获取主页控制器
+    final mainController = Get.find<MainController>();
+    
+    // 获取默认主页的索引
+    final defaultHomePage = Pref.defaultHomePage;
+    
+    // 找到默认主页在当前导航栏中的索引
+    final targetIndex = mainController.navigationBars
+        .indexWhere((nav) => nav.index == defaultHomePage);
+    
+    // 如果找到了默认主页，跳转到该页面
+    if (targetIndex != -1) {
+      mainController.setIndex(targetIndex);
+      
+      // 显示底部导航栏（如果被隐藏）
+      mainController.bottomBarStream?.add(true);
+      
+      // 显示搜索栏（如果被隐藏）
+      mainController.setSearchBar();
+    }
+  } catch (e) {
+    if (kDebugMode) debugPrint('_handleHomeShortcut error: $e');
   }
 }
 

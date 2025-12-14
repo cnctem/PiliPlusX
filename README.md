@@ -27,13 +27,12 @@
 
 - [特色功能](#功能)
 - [快捷键功能说明](#快捷键功能)
-- [港澳台代理](#港澳台代理)
-- [致谢](#致谢)
-
 - PiliPlusX 独家功能详见 [TODO List](docs/TODO.md) 完成项
+- [港澳台代理](#港澳台代理)
 - [下载最新版本](https://github.com/cnctem/PiliPlusX/releases/latest)
 - [安卓字体修复版本说明](#PiliPlusX字体修复说明)
 - 请提出你的宝贵建议！[Issues](https://github.com/cnctem/PiliPlusX/issues)
+- [致谢](#致谢)
 
 ## 适配平台
 
@@ -267,6 +266,7 @@
 - ] 键 - 下一集
 - Enter键 - 私信发送
 - R键 - 刷新页面（需按住Cmd/Ctrl）
+- H键 - 返回主页（需按住Alt/Command）
 
 ## 港澳台代理
 
