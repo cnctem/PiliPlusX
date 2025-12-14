@@ -1,13 +1,11 @@
 import 'package:PiliPlus/common/widgets/flutter/list_tile.dart';
 import 'package:flutter/material.dart' hide ListTile;
 
-typedef StringGetter = String Function();
-
 class NormalItem extends StatefulWidget {
   final String? title;
-  final StringGetter? getTitle;
+  final ValueGetter<String>? getTitle;
   final String? subtitle;
-  final StringGetter? getSubtitle;
+  final ValueGetter<String>? getSubtitle;
   final Widget? leading;
   final Widget Function()? getTrailing;
   final void Function(BuildContext context, void Function() setState)? onTap;

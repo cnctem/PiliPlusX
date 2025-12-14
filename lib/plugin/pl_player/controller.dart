@@ -227,6 +227,12 @@ class PlPlayerController {
   late bool isDesktopPip = false;
   late Rect _lastWindowBounds;
 
+  late final RxBool isAlwaysOnTop = false.obs;
+  Future<void> setAlwaysOnTop(bool value) {
+    isAlwaysOnTop.value = value;
+    return windowManager.setAlwaysOnTop(value);
+  }
+
   Offset initialFocalPoint = Offset.zero;
 
   Future<void> exitDesktopPip() {
@@ -235,18 +241,8 @@ class PlPlayerController {
       windowManager.setTitleBarStyle(TitleBarStyle.normal),
       windowManager.setMinimumSize(const Size(400, 700)),
       windowManager.setBounds(_lastWindowBounds),
-      windowManager.setAlwaysOnTop(false),
+      setAlwaysOnTop(false),
       windowManager.setAspectRatio(0),
-      setting.putAll({
-        SettingBoxKey.windowSize: [
-          _lastWindowBounds.width,
-          _lastWindowBounds.height,
-        ],
-        SettingBoxKey.windowPosition: [
-          _lastWindowBounds.left,
-          _lastWindowBounds.top,
-        ],
-      }),
     ]);
   }
 
@@ -256,8 +252,6 @@ class PlPlayerController {
     isDesktopPip = true;
 
     _lastWindowBounds = await windowManager.getBounds();
-
-    windowManager.setTitleBarStyle(TitleBarStyle.hidden);
 
     late final Size size;
     final state = videoController!.player.state;
@@ -270,9 +264,9 @@ class PlPlayerController {
     }
 
     await windowManager.setMinimumSize(size);
+    setAlwaysOnTop(true);
     windowManager
       ..setSize(size)
-      ..setAlwaysOnTop(true)
       ..setAspectRatio(width / height);
   }
 
@@ -385,6 +379,9 @@ class PlPlayerController {
   late final fastForBackwardDuration = Duration(
     seconds: Pref.fastForBackwardDuration,
   );
+  late final fastForBackwardDuration_ = Duration(
+    seconds: Pref.fastForBackwardDuration_,
+  );
 
   late final horizontalSeasonPanel = Pref.horizontalSeasonPanel;
   late final preInitPlayer = Pref.preInitPlayer;
@@ -430,6 +427,9 @@ class PlPlayerController {
   late PlayRepeat playRepeat = PlayRepeat.values[Pref.playRepeat];
 
   TextStyle get subTitleStyle => TextStyle(
+    fontFamily: !Pref.useSystemFont && Platform.isAndroid
+        ? 'HarmonyOS_Sans'
+        : null,
     height: 1.5,
     fontSize:
         16 * (isFullScreen.value ? subtitleFontScaleFS : subtitleFontScale),
@@ -1716,6 +1716,7 @@ class PlPlayerController {
       }
       return;
     }
+
     _playerCount = 0;
     _stopListenerForVideoFit();
     _stopListenerForEnterFullScreen();
@@ -1739,6 +1740,10 @@ class PlPlayerController {
 
     // playerStatus.close();
     // dataStatus.status.close();
+
+    if (Utils.isDesktop && isAlwaysOnTop.value) {
+      windowManager.setAlwaysOnTop(false);
+    }
 
     await removeListeners();
     if (playerStatus.playing) {
@@ -1854,7 +1859,7 @@ class PlPlayerController {
           GestureDetector(
             onTap: () {
               Get.back();
-              ImageUtils.saveByteImg(
+              ImageUtils.saveScreenShot(
                 bytes: value,
                 fileName: 'screenshot_${ImageUtils.time}',
               );

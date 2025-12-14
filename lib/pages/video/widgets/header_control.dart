@@ -41,6 +41,7 @@ import 'package:PiliPlus/utils/accounts/account.dart';
 import 'package:PiliPlus/utils/extension.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
+import 'package:PiliPlus/utils/request_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
@@ -2931,6 +2932,31 @@ class HeaderControlState extends State<HeaderControl>
                       color: Colors.white,
                     ),
                     onTap: () => introController.actionShareVideo(context),
+                    onLongPress: () {
+                      if (!Pref.enableQuickShare) {
+                        SmartDialog.showToast('快速分享功能未开启');
+                        return;
+                      }
+                      try {
+                        final videoDetail = introController.videoDetail.value;
+                        final content = {
+                          "id": videoDetail.aid!.toString(),
+                          "title": videoDetail.title!,
+                          "headline": videoDetail.title!,
+                          "source": 5,
+                          "thumb": videoDetail.pic!,
+                          "author": videoDetail.owner!.name!,
+                          "author_id": videoDetail.owner!.mid!.toString(),
+                        };
+                        RequestUtils.pmShare(
+                          receiverId: Pref.quickShareId ?? 1004428694,
+                          content: content,
+                        );
+                        SmartDialog.showToast('快速分享成功');
+                      } catch (e) {
+                        SmartDialog.showToast('快速分享失败：${e.toString()}');
+                      }
+                    },
                     semanticsLabel: '分享',
                   ),
                 ),

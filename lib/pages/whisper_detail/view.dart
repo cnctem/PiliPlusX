@@ -19,6 +19,7 @@ import 'package:PiliPlus/utils/extension.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart' hide TextField;
+import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -267,27 +268,57 @@ class _WhisperDetailPageState
                 }
               },
               child: Obx(
-                () => RichTextField(
-                  key: key,
-                  readOnly: readOnly.value,
-                  focusNode: focusNode,
-                  controller: editController,
-                  minLines: 1,
-                  maxLines: 4,
-                  onChanged: onChanged,
+                () => RawKeyboardListener(
+                  focusNode: FocusNode(),
+                  onKey: (RawKeyEvent event) {
+                    if (event is RawKeyDownEvent && 
+                        event.logicalKey == LogicalKeyboardKey.enter) {
+                      if (HardwareKeyboard.instance.isShiftPressed) {
+                        // Shift+Enter 换行
+                        final text = editController.text;
+                        final selection = editController.selection;
+                        final newText = text.replaceRange(
+                          selection.start,
+                          selection.end,
+                          '\n',
+                        );
+                        editController.text = newText;
+                        editController.selection = TextSelection.collapsed(
+                          offset: selection.start + 1,
+                        );
+                      } else {
+                        // Enter 发送消息
+                        if (enablePublish.value && editController.text.trim().isNotEmpty) {
+                          _whisperDetailController.sendMsg(
+                            message: editController.text.trim(),
+                            onClearText: editController.clear,
+                          );
+                        }
+                      }
+                    }
+                  },
+                   child: RichTextField(
+                    key: key,
+                    readOnly: readOnly.value,
+                    focusNode: focusNode,
+                    controller: editController,
+                    minLines: 1,
+                    maxLines: 4,
+                    onChanged: onChanged,
                   textInputAction: TextInputAction.newline,
-                  decoration: InputDecoration(
-                    filled: true,
-                    hintText: '发个消息聊聊呗~',
-                    fillColor: theme.colorScheme.surface,
-                    border: const OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius: BorderRadius.all(Radius.circular(6)),
-                      gapPadding: 0,
+                    decoration: InputDecoration(
+                      filled: true,
+                      hintText: '发个消息聊聊呗~',
+                      fillColor: theme.colorScheme.surface,
+                      border: const OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.all(Radius.circular(6)),
+                        gapPadding: 0,
+                      ),
+                      contentPadding: const EdgeInsets.all(10),
                     ),
-                    contentPadding: const EdgeInsets.all(10),
+                    // inputFormatters: [LengthLimitingTextInputFormatter(500)],
                   ),
-                  // inputFormatters: [LengthLimitingTextInputFormatter(500)],
                 ),
               ),
             ),
