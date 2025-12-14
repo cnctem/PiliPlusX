@@ -125,9 +125,9 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: master
-      resolved-ref: ca2bb137bd0e4b221df3bc5ba1492d2902c78624
-      url: "https://github.com/bggRGjQaUbCoE/auto_orientation.git"
+      ref: HEAD
+      resolved-ref: "0088fe49072cea0f018687df9f9cce2bfc4beb8e"
+      url: "https://gitcode.com/openharmony-sig/fluttertpc_auto_orientation"
     source: git
     version: "2.3.1"
   battery_plus:
@@ -1278,11 +1278,12 @@ packages:
   path_provider:
     dependency: "direct main"
     description:
-      name: path_provider
-      sha256: "50c5dd5b6e1aaf6fb3a78b33f6aa3afca52bf903a8a5298f53101fdaee55bbcd"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "2.1.5"
+      path: "packages/path_provider/path_provider"
+      ref: HEAD
+      resolved-ref: "408badd41843679a3aa7a94837757f335586d8c0"
+      url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
+    source: git
+    version: "2.1.0"
   path_provider_android:
     dependency: transitive
     description:
@@ -1306,6 +1307,15 @@ packages:
       sha256: f7a1fe3a634fe7734c8d3f2766ad746ae2a2884abe22e241a8b301bf5cac3279
       url: "https://pub.flutter-io.cn"
     source: hosted
+    version: "2.2.1"
+  path_provider_ohos:
+    dependency: transitive
+    description:
+      path: "packages/path_provider/path_provider_ohos"
+      ref: HEAD
+      resolved-ref: "408badd41843679a3aa7a94837757f335586d8c0"
+      url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
+    source: git
     version: "2.2.1"
   path_provider_platform_interface:
     dependency: transitive
@@ -1542,19 +1552,21 @@ packages:
   share_plus:
     dependency: "direct main"
     description:
-      name: share_plus
-      sha256: "14c8860d4de93d3a7e53af51bff479598c4e999605290756bbbe45cf65b37840"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "12.0.1"
+      path: "packages/share_plus/share_plus"
+      ref: "br_share_plus-v10.1.1_ohos"
+      resolved-ref: "46cf97a5decaa48d8b95baee41f9f83d25a313ad"
+      url: "https://gitcode.com/openharmony-sig/flutter_plus_plugins.git"
+    source: git
+    version: "10.1.1"
   share_plus_platform_interface:
     dependency: transitive
     description:
-      name: share_plus_platform_interface
-      sha256: "88023e53a13429bd65d8e85e11a9b484f49d4c190abbd96c7932b74d6927cc9a"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "6.1.0"
+      path: "packages/share_plus/share_plus_platform_interface"
+      ref: "br_share_plus-v10.1.1_ohos"
+      resolved-ref: "46cf97a5decaa48d8b95baee41f9f83d25a313ad"
+      url: "https://gitcode.com/openharmony-sig/flutter_plus_plugins.git"
+    source: git
+    version: "5.0.1"
   shared_preferences:
     dependency: transitive
     description:
@@ -1804,11 +1816,12 @@ packages:
   url_launcher:
     dependency: "direct main"
     description:
-      name: url_launcher
-      sha256: f6a7e5c4835bb4e3026a04793a4199ca2d14c739ec378fdfe23fc8075d0439f8
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "6.3.2"
+      path: "packages/url_launcher/url_launcher"
+      ref: "br_url_launcher_v6.3.1_ohos"
+      resolved-ref: "34dd2b4ce6a6a9fe5f298d75f8a007b0de0789d2"
+      url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
+    source: git
+    version: "6.1.12"
   url_launcher_android:
     dependency: transitive
     description:
@@ -1841,6 +1854,15 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "3.2.3"
+  url_launcher_ohos:
+    dependency: transitive
+    description:
+      path: "packages/url_launcher/url_launcher_ohos"
+      ref: HEAD
+      resolved-ref: "408badd41843679a3aa7a94837757f335586d8c0"
+      url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
+    source: git
+    version: "6.0.38"
   url_launcher_platform_interface:
     dependency: transitive
     description:
@@ -1905,6 +1927,56 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.1.4"
+  video_player:
+    dependency: "direct overridden"
+    description:
+      path: "packages/video_player/video_player"
+      ref: "br_video_player-v2.9.2_ohos"
+      resolved-ref: b898226e48eb81c866d1958ee1b840530261a08c
+      url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
+    source: git
+    version: "2.9.2"
+  video_player_android:
+    dependency: transitive
+    description:
+      name: video_player_android
+      sha256: a8dc4324f67705de057678372bedb66cd08572fe7c495605ac68c5f503324a39
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.8.15"
+  video_player_avfoundation:
+    dependency: transitive
+    description:
+      name: video_player_avfoundation
+      sha256: f9a780aac57802b2892f93787e5ea53b5f43cc57dc107bee9436458365be71cd
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.8.4"
+  video_player_ohos:
+    dependency: transitive
+    description:
+      path: "packages/video_player/video_player_ohos"
+      ref: "br_video_player-v2.9.2_ohos"
+      resolved-ref: b898226e48eb81c866d1958ee1b840530261a08c
+      url: "https://gitcode.com/openharmony-sig/flutter_packages.git"
+    source: git
+    version: "1.0.0+1"
+  video_player_platform_interface:
+    dependency: transitive
+    description:
+      name: video_player_platform_interface
+      sha256: "57c5d73173f76d801129d0531c2774052c5a7c11ccb962f1830630decd9f24ec"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "6.6.0"
+  video_player_web:
+    dependency: transitive
+    description:
+      name: video_player_web
+      sha256: "9f3c00be2ef9b76a95d94ac5119fb843dca6f2c69e6c9968f6f2b6c9e7afbdeb"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.4.0"
   visibility_detector:
     dependency: transitive
     description:

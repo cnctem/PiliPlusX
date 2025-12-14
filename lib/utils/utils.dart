@@ -101,8 +101,9 @@ abstract class Utils {
       return;
     }
     try {
-      await SharePlus.instance.share(
-        ShareParams(text: text, sharePositionOrigin: await sharePositionOrigin),
+      await Share.share(
+        text,
+        sharePositionOrigin: await sharePositionOrigin,
       );
     } catch (e) {
       SmartDialog.showToast(e.toString());

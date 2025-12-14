@@ -33,14 +33,10 @@ abstract class ImageUtils {
       final res = await Request().downloadFile(url.http2https, path);
       SmartDialog.dismiss();
       if (res.statusCode == 200) {
-        await SharePlus.instance
-            .share(
-              ShareParams(
-                files: [XFile(path)],
-                sharePositionOrigin: await Utils.sharePositionOrigin,
-              ),
-            )
-            .whenComplete(File(path).tryDel);
+        await Share.shareXFiles(
+          [XFile(path)],
+          sharePositionOrigin: await Utils.sharePositionOrigin,
+        ).whenComplete(File(path).tryDel);
       }
     } catch (e) {
       SmartDialog.showToast(e.toString());

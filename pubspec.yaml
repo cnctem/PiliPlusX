@@ -238,6 +238,28 @@ dependencies:
   characters: any
 
 dependency_overrides:
+  auto_orientation: # 自动旋转.鸿蒙适配
+    git:
+      url: "https://gitcode.com/openharmony-sig/fluttertpc_auto_orientation"
+  video_player: # 视频播放器.鸿蒙适配
+    git:
+      url: https://gitcode.com/openharmony-tpc/flutter_packages.git
+      path: packages/video_player/video_player
+      ref: br_video_player-v2.9.2_ohos
+  url_launcher: # 打开链接.鸿蒙适配
+    git:
+      url: https://gitcode.com/openharmony-tpc/flutter_packages.git
+      path: packages/url_launcher/url_launcher
+      ref: br_url_launcher_v6.3.1_ohos
+  path_provider: # 应用可用路径.鸿蒙适配
+    git:
+      url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
+      path: "packages/path_provider/path_provider"
+  share_plus: # 分享.鸿蒙适配
+    git:
+      url: https://gitcode.com/openharmony-sig/flutter_plus_plugins.git
+      path: packages/share_plus/share_plus
+      ref: br_share_plus-v10.1.1_ohos
   # screen_brightness: ^2.1.
   screen_brightness_ios: ^2.1.2
   screen_brightness_android: ^2.1.3

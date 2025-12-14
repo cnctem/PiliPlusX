@@ -304,17 +304,15 @@ class _SavePanelState extends State<SavePanel> {
       if (isShare) {
         Get.back();
         SmartDialog.dismiss();
-        SharePlus.instance.share(
-          ShareParams(
-            files: [
-              XFile.fromData(
-                pngBytes,
-                name: picName,
-                mimeType: 'image/png',
-              ),
-            ],
-            sharePositionOrigin: await Utils.sharePositionOrigin,
-          ),
+        Share.shareXFiles(
+          [
+            XFile.fromData(
+              pngBytes,
+              name: picName,
+              mimeType: 'image/png',
+            ),
+          ],
+          sharePositionOrigin: await Utils.sharePositionOrigin,
         );
       } else {
         final result = await ImageUtils.saveByteImg(
