@@ -19,8 +19,39 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 abstract class Update {
   // 检查更新
   static Future<void> checkUpdate([bool isAuto = true]) async {
-    if (kDebugMode) return;
+    // if (kDebugMode) return;
     SmartDialog.dismiss();
+    if (!isAuto) {
+      SmartDialog.show(
+        builder: (context) {
+          final ThemeData theme = Theme.of(context);
+          return AlertDialog(
+            title: const Text('提示'),
+            content: Text('oddo版本不提供检查更新功能, 是否前往GitHub查看最新版本?'),
+            actions: [
+              TextButton(
+                onPressed: SmartDialog.dismiss,
+                child: Text(
+                  '取消',
+                  style: TextStyle(
+                    color: theme.colorScheme.outline,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  SmartDialog.dismiss();
+                  PageUtils.launchURL('https://github.com/cnctem/PiliPlusX#PiliPlusX字体修复说明');
+                },
+                child: const Text('确认'),
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
+    return;
     try {
       final res = await Request().get(
         Api.latestApp,
