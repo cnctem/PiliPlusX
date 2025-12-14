@@ -70,14 +70,15 @@ class TwoFingerDoubleTapGestureRecognizer extends OneSequenceGestureRecognizer {
         return;
       }
 
+      // 保存当前点击信息用于后续检查
+      final currentTapsSnapshot = Map<int, _TapDetails>.from(_currentTaps);
+      
       // 检查是否所有手指都已抬起
-      if (_currentTaps.length >= 2) {
+      if (currentTapsSnapshot.length >= 2) {
         // 延迟检查，确保所有手指都完成点击
         Future.delayed(const Duration(milliseconds: 50), () {
-          if (_currentTaps.isEmpty) {
-            // 所有手指都已抬起，检查双指双击条件
-            _checkForTwoFingerDoubleTap();
-          }
+          // 使用保存的快照进行检测，而不是当前状态
+          _checkForTwoFingerDoubleTap(currentTapsSnapshot);
         });
       }
       
@@ -94,11 +95,11 @@ class TwoFingerDoubleTapGestureRecognizer extends OneSequenceGestureRecognizer {
     }
   }
 
-  void _checkForTwoFingerDoubleTap() {
+  void _checkForTwoFingerDoubleTap(Map<int, _TapDetails> currentTapsSnapshot) {
     // 检查是否有上一轮的双指点击
     if (_previousTaps == null) {
       // 没有上一轮点击，将当前轮次保存为上一轮
-      _previousTaps = List.from(_currentTaps.values);
+      _previousTaps = List.from(currentTapsSnapshot.values);
       return;
     }
 
@@ -111,24 +112,24 @@ class TwoFingerDoubleTapGestureRecognizer extends OneSequenceGestureRecognizer {
     }
 
     // 检查当前轮次和上一轮次是否都满足双指条件
-    if (_currentTaps.length < 2 || _previousTaps!.length < 2) {
+    if (currentTapsSnapshot.length < 2 || _previousTaps!.length < 2) {
       return;
     }
 
     // 检查两轮点击之间的时间间隔（双击检测）
     final lastTapTime = _previousTaps!.first.time;
-    final currentTapTime = _currentTaps.values.first.time;
+    final currentTapTime = currentTapsSnapshot.values.first.time;
     
     if (currentTapTime.difference(lastTapTime) > _doubleTapTimeout) {
       // 超时，重置状态
-      _previousTaps = List.from(_currentTaps.values);
+      _previousTaps = List.from(currentTapsSnapshot.values);
       return;
     }
 
     // 检查点击位置是否合理（两个手指不应该太接近）
     final allPositions = [
       ..._previousTaps!.map((tap) => tap.position),
-      ..._currentTaps.values.map((tap) => tap.position),
+      ...currentTapsSnapshot.values.map((tap) => tap.position),
     ];
     
     const double minDistance = 30.0; // 最小距离30像素
@@ -147,7 +148,7 @@ class TwoFingerDoubleTapGestureRecognizer extends OneSequenceGestureRecognizer {
     
     if (!positionsValid) {
       // 位置不合理，重置状态
-      _previousTaps = List.from(_currentTaps.values);
+      _previousTaps = List.from(currentTapsSnapshot.values);
       return;
     }
 
@@ -180,9 +181,9 @@ class TwoFingerDoubleTapGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void didStopTrackingLastPointer(int pointer) {
-    // 清理所有数据
-    _currentTaps.clear();
-    _previousTaps = null;
+    // 不要立即清理所有数据，因为这可能中断正在进行的双击检测
+    // 只清理当前指针，让超时机制自然清理其他数据
+    _currentTaps.remove(pointer);
   }
 
   @override
