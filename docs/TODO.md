@@ -14,7 +14,7 @@
 
 - [X]  回车绑定消息发送
 - [X]  刷新快捷键，在动态页就刷新动态页，在首页就刷新首页
-- [x] 返回默认初始页 快捷键 (Alt+H/command+H) -[Issue3](https://github.com/cnctem/PiliPlusX/issues/3)
+- [ ] 返回默认初始页 快捷键 ( ? ) -[Issue3](https://github.com/cnctem/PiliPlusX/issues/3)
 - [ ] 图片全屏时，左右方向键切换上下一张
 - [ ] 弹窗：y绑定确定，n取消
 - [ ] ctrl+1 快速改倍速为1

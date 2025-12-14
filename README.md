@@ -302,7 +302,7 @@
 
 - 字体问题由`flutter3.38.x`要求显式定义字体，而color OS及个别定制安卓的字体机制采用映射到系统Roboto的方案，导致flutter找不到定义的字体从而产生字体问题，表现为显示为一种错误的衬线字体
 - 主线版本 在关闭设置项“使用系统字体”后将字体指定为使用鸿蒙黑体，基本解决问题
-- 如果你是color OS等字体错误的定制安卓，且希望显示手机自定义主题字体，推荐使用oddo版本，通过使用`flutter3.35.7`彻底解决字体问题。下载最新版本 [v1.0.8-oddo](https://github.com/cnctem/PiliPlusX/releases/tag/v1.0.8-oddo)
+- 如果你是color OS等字体错误的定制安卓，且希望显示手机自定义主题字体，推荐使用oddo版本，通过使用`flutter3.35.7`彻底解决字体问题。下载最新版本 [v1.0.9.2-oddo](https://github.com/cnctem/PiliPlusX/releases/tag/v1.0.9.2)
 
 ## 声明
 
