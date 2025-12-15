@@ -1346,7 +1346,8 @@ class PlPlayerController {
     if (this.volume.value != volume) {
       this.volume.value = volume;
       try {
-        if (Utils.isDesktop) {
+        // TODO: 鸿蒙 调整系统音量
+        if (Utils.isDesktop || Utils.isHarmony) {
           _videoPlayerController!.setVolume(volume * 100);
         } else {
           FlutterVolumeController.updateShowSystemUI(false);

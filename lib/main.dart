@@ -44,13 +44,7 @@ import 'package:window_manager/window_manager.dart' hide calcWindowPosition;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // if (defaultTargetPlatform.name != 'ohos')
-  try {
-    MediaKit.ensureInitialized();
-    print('MediaKit初始化成功');
-  } catch (e) {
-    print('MediaKit初始化失败：$e');
-  }
+  MediaKit.ensureInitialized();
   tmpDirPath = (await getTemporaryDirectory()).path;
   appSupportDirPath = (await getApplicationSupportDirectory()).path;
   try {

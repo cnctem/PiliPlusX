@@ -25,6 +25,8 @@ abstract class Utils {
   static final bool isDesktop =
       Platform.isWindows || Platform.isMacOS || Platform.isLinux;
 
+  static final bool isHarmony = Platform.operatingSystem == "ohos";
+
   static const jsonEncoder = JsonEncoder.withIndent('    ');
 
   static Future<void> saveBytes2File({
