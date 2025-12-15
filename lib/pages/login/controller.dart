@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:PiliPlus/adapt/radio_group.dart';
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/widgets/button/icon_button.dart';
+import 'package:PiliPlus/common/widgets/radio_widget.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/login.dart';
@@ -745,27 +747,31 @@ class LoginPageController extends GetxController
           bottom: 10,
         ),
         content: SingleChildScrollView(
-          // //  TODO 直接注释掉的代码 3.32.4-ohos-0.0.1不支持
-          // child: Column(
-          //   crossAxisAlignment: CrossAxisAlignment.start,
-          //   children: AccountType.values
-          //       .map(
-          //         (e) => Builder(
-          //           builder: (context) => RadioGroup(
-          //             groupValue: selectAccount[e.index],
-          //             onChanged: (v) {
-          //               selectAccount[e.index] = v!;
-          //               (context as Element).markNeedsBuild();
-          //             },
-          //             child: WrapRadioOptionsGroup<Account>(
-          //               groupTitle: e.title,
-          //               options: options,
-          //             ),
-          //           ),
-          //         ),
-          //       )
-          //       .toList(),
-          // ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: AccountType.values
+                .map(
+                  (e) => Builder(
+                    builder: (context) => RadioGroup(
+                      groupValue: selectAccount[e.index],
+                      onChanged: (v) {
+                        selectAccount[e.index] = v!;
+                        (context as Element).markNeedsBuild();
+                      },
+                      child: WrapRadioOptionsGroup<Account>(
+                      groupValue: selectAccount[e.index],
+                      onChanged: (v) {
+                        selectAccount[e.index] = v!;
+                        (context as Element).markNeedsBuild();
+                      },
+                        groupTitle: e.title,
+                        options: options,
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
         ),
         actions: [
           TextButton(

@@ -1,3 +1,4 @@
+import 'package:PiliPlus/adapt/radio_group.dart';
 import 'package:PiliPlus/common/widgets/radio_widget.dart';
 import 'package:PiliPlus/utils/extension.dart';
 import 'package:PiliPlus/utils/utils.dart';
@@ -49,23 +50,27 @@ Future<void> autoWrapReportDialog(
                           ),
                           child: Text('请选择举报的理由：'),
                         ),
-                        // //  TODO 直接注释掉的代码 3.32.4-ohos-0.0.1不支持
-                        // RadioGroup(
-                        //   onChanged: (value) {
-                        //     reasonType = value;
-                        //     (context as Element).markNeedsBuild();
-                        //   },
-                        //   groupValue: reasonType,
-                        //   child: Column(
-                        //     crossAxisAlignment: CrossAxisAlignment.start,
-                        //     children: options.entries.map((entry) {
-                        //       return WrapRadioOptionsGroup<int>(
-                        //         groupTitle: entry.key,
-                        //         options: entry.value,
-                        //       );
-                        //     }).toList(),
-                        //   ),
-                        // ),
+                        RadioGroup(
+                          onChanged: (value) {
+                            reasonType = value;
+                            (context as Element).markNeedsBuild();
+                          },
+                          groupValue: reasonType,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: options.entries.map((entry) {
+                              return WrapRadioOptionsGroup<int>(
+                                onChanged: (value) {
+                                  reasonType = value;
+                                  (context as Element).markNeedsBuild();
+                                },
+                                groupValue: reasonType,
+                                groupTitle: entry.key,
+                                options: entry.value,
+                              );
+                            }).toList(),
+                          ),
+                        ),
                         if (reasonType == 0)
                           Padding(
                             padding: const EdgeInsets.only(

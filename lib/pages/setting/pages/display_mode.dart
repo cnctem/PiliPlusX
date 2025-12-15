@@ -1,3 +1,4 @@
+import 'package:PiliPlus/adapt/radio_group.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
@@ -74,38 +75,44 @@ class _SetDisplayModeState extends State<SetDisplayMode> {
               style: TextStyle(color: Theme.of(context).colorScheme.outline),
             ),
           ),
-          // //  TODO 直接注释掉的代码 3.32.4-ohos-0.0.1不支持
-          // Expanded(
-          //   child: RadioGroup(
-          //     onChanged: (DisplayMode? newMode) {
-          //       FlutterDisplayMode.setPreferredMode(
-          //         newMode!,
-          //       ).whenComplete(
-          //         () => Future.delayed(
-          //           const Duration(milliseconds: 100),
-          //           fetchAll,
-          //         ),
-          //       );
-          //     },
-          //     groupValue: preferred,
-          //     child: ListView.builder(
-          //       itemCount: modes.length,
-          //       itemBuilder: (context, index) {
-          //         final DisplayMode mode = modes[index];
-          //         return RadioListTile<DisplayMode>(
-          //           value: mode,
-          //           title: mode == DisplayMode.auto
-          //               ? const Text('自动')
-          //               : Text('$mode${mode == active ? '  [系统]' : ''}'),
-          //           // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
-          //           groupValue: null,
-          //           onChanged: (DisplayMode? value) {},
-          //           // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
-          //         );
-          //       },
-          //     ),
-          //   ),
-          // ),
+          Expanded(
+            child: RadioGroup(
+              onChanged: (DisplayMode? newMode) {
+                FlutterDisplayMode.setPreferredMode(
+                  newMode!,
+                ).whenComplete(
+                  () => Future.delayed(
+                    const Duration(milliseconds: 100),
+                    fetchAll,
+                  ),
+                );
+              },
+              groupValue: preferred,
+              child: ListView.builder(
+                itemCount: modes.length,
+                itemBuilder: (context, index) {
+                  final DisplayMode mode = modes[index];
+                  return RadioListTile<DisplayMode>(
+                    value: mode,
+                    title: mode == DisplayMode.auto
+                        ? const Text('自动')
+                        : Text('$mode${mode == active ? '  [系统]' : ''}'),
+                    groupValue: preferred,
+                    onChanged: (DisplayMode? newMode) {
+                      FlutterDisplayMode.setPreferredMode(
+                        newMode!,
+                      ).whenComplete(
+                        () => Future.delayed(
+                          const Duration(milliseconds: 100),
+                          fetchAll,
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
         ],
       ),
     );

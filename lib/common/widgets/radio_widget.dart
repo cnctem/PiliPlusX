@@ -1,155 +1,187 @@
-// import 'package:flutter/material.dart';
+import 'package:PiliPlus/adapt/radio_group.dart';
+import 'package:flutter/material.dart';
 
-// //  TODO 直接注释掉的代码 3.32.4-ohos-0.0.1不支持
-// class RadioWidget<T> extends StatefulWidget {
-//   final T value;
-//   final String title;
-//   final bool tristate;
-//   final EdgeInsetsGeometry? padding;
-//   final MainAxisSize mainAxisSize;
+class RadioWidget<T> extends StatefulWidget {
+  final T value;
+  final String title;
+  final bool tristate;
+  final EdgeInsetsGeometry? padding;
+  final MainAxisSize mainAxisSize;
 
-//   const RadioWidget({
-//     super.key,
-//     required this.value,
-//     required this.title,
-//     this.tristate = false,
-//     this.padding,
-//     this.mainAxisSize = MainAxisSize.min,
-//   });
+  /// The selected value under this radio group.
+  ///
+  /// [RawRadio] under this radio group where its [RawRadio.value] equals to this
+  /// value will be selected.
+  final T? groupValue;
 
-//   @override
-//   State<RadioWidget<T>> createState() => RadioWidgetState<T>();
-// }
+  /// Called when selection has changed.
+  ///
+  /// The value can be null when unselect the [RawRadio] with
+  /// [RawRadio.toggleable] set to true.
+  final ValueChanged<T?> onChanged;
 
-// class RadioWidgetState<T> extends State<RadioWidget<T>> with RadioClient<T> {
-//   late final _RadioRegistry<T> _radioRegistry = _RadioRegistry<T>(this);
+  const RadioWidget({
+    super.key,
+    required this.value,
+    required this.title,
+    this.tristate = false,
+    this.padding,
+    this.mainAxisSize = MainAxisSize.min,
+    this.groupValue,
+    required this.onChanged,
+  });
 
-//   @override
-//   final focusNode = FocusNode();
+  @override
+  State<RadioWidget<T>> createState() => RadioWidgetState<T>();
+}
 
-//   @override
-//   T get radioValue => widget.value;
+class RadioWidgetState<T> extends State<RadioWidget<T>> with RadioClient<T> {
+  late final _RadioRegistry<T> _radioRegistry = _RadioRegistry<T>(this);
 
-//   bool get checked => radioValue == registry!.groupValue;
+  @override
+  final focusNode = FocusNode();
 
-//   @override
-//   bool get tristate => widget.tristate;
+  @override
+  T get radioValue => widget.value;
 
-//   @override
-//   void dispose() {
-//     registry = null;
-//     focusNode.dispose();
-//     super.dispose();
-//   }
+  bool get checked => radioValue == registry!.groupValue;
 
-//   @override
-//   void didChangeDependencies() {
-//     super.didChangeDependencies();
-//     registry = RadioGroup.maybeOf(context);
-//     assert(registry != null);
-//   }
+  @override
+  bool get tristate => widget.tristate;
 
-//   void _handleTap() {
-//     if (checked) {
-//       if (tristate) registry!.onChanged(null);
-//       return;
-//     }
-//     registry!.onChanged(radioValue);
-//   }
+  @override
+  void dispose() {
+    registry = null;
+    focusNode.dispose();
+    super.dispose();
+  }
 
-//   @override
-//   Widget build(BuildContext context) {
-//     final child = Row(
-//       mainAxisSize: widget.mainAxisSize,
-//       children: [
-//         Focus(
-//           parentNode: focusNode,
-//           canRequestFocus: false,
-//           skipTraversal: true,
-//           includeSemantics: true,
-//           descendantsAreFocusable: false,
-//           descendantsAreTraversable: false,
-//           child: Radio<T>(
-//             value: radioValue,
-//             groupRegistry: _radioRegistry,
-//             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-//           ),
-//         ),
-//         Text(widget.title),
-//       ],
-//     );
-//     return InkWell(
-//       onTap: _handleTap,
-//       focusNode: focusNode,
-//       child: widget.padding == null
-//           ? child
-//           : Padding(padding: widget.padding!, child: child),
-//     );
-//   }
-// }
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    registry = RadioGroup.maybeOf(context);
+    assert(registry != null);
+  }
 
-// class WrapRadioOptionsGroup<T> extends StatelessWidget {
-//   final String groupTitle;
-//   final Map<T, String> options;
-//   final EdgeInsetsGeometry? itemPadding;
+  void _handleTap() {
+    if (checked) {
+      if (tristate) registry!.onChanged(null);
+      return;
+    }
+    registry!.onChanged(radioValue);
+  }
 
-//   const WrapRadioOptionsGroup({
-//     super.key,
-//     required this.groupTitle,
-//     required this.options,
-//     this.itemPadding,
-//   });
+  @override
+  Widget build(BuildContext context) {
+    final child = Row(
+      mainAxisSize: widget.mainAxisSize,
+      children: [
+        Focus(
+          parentNode: focusNode,
+          canRequestFocus: false,
+          skipTraversal: true,
+          includeSemantics: true,
+          descendantsAreFocusable: false,
+          descendantsAreTraversable: false,
+          child: Radio<T>(
+            value: radioValue,
+            // groupRegistry: _radioRegistry,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            groupValue: widget.groupValue,
+            onChanged: widget.onChanged,
+          ),
+        ),
+        Text(widget.title),
+      ],
+    );
+    return InkWell(
+      onTap: _handleTap,
+      focusNode: focusNode,
+      child: widget.padding == null
+          ? child
+          : Padding(padding: widget.padding!, child: child),
+    );
+  }
+}
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Column(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         if (groupTitle.isNotEmpty)
-//           Padding(
-//             padding: const EdgeInsets.only(left: 22),
-//             child: Text(
-//               groupTitle,
-//               style: TextStyle(color: Theme.of(context).colorScheme.outline),
-//             ),
-//           ),
-//         Padding(
-//           padding: const EdgeInsets.symmetric(horizontal: 12),
-//           child: Wrap(
-//             children: options.entries.map((entry) {
-//               return RadioWidget<T>(
-//                 value: entry.key,
-//                 title: entry.value,
-//                 padding: itemPadding ?? const EdgeInsets.only(right: 10),
-//               );
-//             }).toList(),
-//           ),
-//         ),
-//       ],
-//     );
-//   }
-// }
+class WrapRadioOptionsGroup<T> extends StatelessWidget {
+  final String groupTitle;
+  final Map<T, String> options;
+  final EdgeInsetsGeometry? itemPadding;
 
-// /// A registry to controls internal [Radio] and hides it from [RadioGroup]
-// /// ancestor.
-// ///
-// /// [RadioListTile] implements the [RadioClient] directly to register to
-// /// [RadioGroup] ancestor. Therefore, it has to hide the internal [Radio] from
-// /// participate in the [RadioGroup] ancestor.
-// class _RadioRegistry<T> extends RadioGroupRegistry<T> {
-//   _RadioRegistry(this.state);
+  /// The selected value under this radio group.
+  ///
+  /// [RawRadio] under this radio group where its [RawRadio.value] equals to this
+  /// value will be selected.
+  final T? groupValue;
 
-//   final RadioWidgetState<T> state;
+  /// Called when selection has changed.
+  ///
+  /// The value can be null when unselect the [RawRadio] with
+  /// [RawRadio.toggleable] set to true.
+  final ValueChanged<T?> onChanged;
 
-//   @override
-//   T? get groupValue => state.registry!.groupValue;
+  const WrapRadioOptionsGroup({
+    super.key,
+    required this.groupTitle,
+    required this.options,
+    this.itemPadding,
+    this.groupValue,
+    required this.onChanged,
+  });
 
-//   @override
-//   ValueChanged<T?> get onChanged => state.registry!.onChanged;
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (groupTitle.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(left: 22),
+            child: Text(
+              groupTitle,
+              style: TextStyle(color: Theme.of(context).colorScheme.outline),
+            ),
+          ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Wrap(
+            children: options.entries.map((entry) {
+              return RadioWidget<T>(
+                groupValue: groupValue,
+                onChanged: onChanged,
+                value: entry.key,
+                title: entry.value,
+                padding: itemPadding ?? const EdgeInsets.only(right: 10),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+}
 
-//   @override
-//   void registerClient(RadioClient<T> radio) {}
+/// A registry to controls internal [Radio] and hides it from [RadioGroup]
+/// ancestor.
+///
+/// [RadioListTile] implements the [RadioClient] directly to register to
+/// [RadioGroup] ancestor. Therefore, it has to hide the internal [Radio] from
+/// participate in the [RadioGroup] ancestor.
+class _RadioRegistry<T> extends RadioGroupRegistry<T> {
+  _RadioRegistry(this.state);
 
-//   @override
-//   void unregisterClient(RadioClient<T> radio) {}
-// }
+  final RadioWidgetState<T> state;
+
+  @override
+  T? get groupValue => state.registry!.groupValue;
+
+  @override
+  ValueChanged<T?> get onChanged => state.registry!.onChanged;
+
+  @override
+  void registerClient(RadioClient<T> radio) {}
+
+  @override
+  void unregisterClient(RadioClient<T> radio) {}
+}
