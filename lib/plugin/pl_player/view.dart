@@ -1397,8 +1397,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 () => SubtitleView(
                   controller: videoController,
                   configuration: plPlayerController.subtitleConfig.value,
-                  enableDragSubtitle: plPlayerController.enableDragSubtitle,
-                  onUpdatePadding: plPlayerController.onUpdatePadding,
+                  //  TODO 直接注释掉的代码 media_kit
+                  // enableDragSubtitle: plPlayerController.enableDragSubtitle,
+                  // onUpdatePadding: plPlayerController.onUpdatePadding,
                 ),
               ),
             ),
@@ -2111,11 +2112,12 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   child: FittedBox(
                     fit: videoFit.boxFit,
                     alignment: widget.alignment,
-                    child: SimpleVideo(
-                      controller: plPlayerController.videoController!,
-                      fill: widget.fill,
-                      aspectRatio: videoFit.aspectRatio,
-                    ),
+                    //  TODO 直接注释掉的代码 media_kit
+                    // child: SimpleVideo(
+                    //   controller: plPlayerController.videoController!,
+                    //   fill: widget.fill,
+                    //   aspectRatio: videoFit.aspectRatio,
+                    // ),
                   ),
                 );
               },

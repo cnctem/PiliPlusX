@@ -436,7 +436,7 @@ Future showVoteDialog(
       showDialog(
         context: context,
         builder: (context) => Dialog(
-        // TODO flutter 3.32.4-ohos-0.0.1不支持的代码
+        // //  TODO 直接注释掉的代码 3.32.4-ohos-0.0.1不支持
           // constraints: const BoxConstraints(
           //   minWidth: 280,
           //   maxWidth: 625,

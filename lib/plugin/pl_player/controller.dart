@@ -449,23 +449,25 @@ class PlPlayerController {
     final subTitleStyle = this.subTitleStyle;
     return SubtitleViewConfiguration(
       style: subTitleStyle,
-      strokeStyle: subtitleBgOpacity == 0
-          ? subTitleStyle.copyWith(
-              color: null,
-              background: null,
-              backgroundColor: null,
-              foreground: Paint()
-                ..color = Colors.black
-                ..style = PaintingStyle.stroke
-                ..strokeWidth = subtitleStrokeWidth,
-            )
-          : null,
+      //  TODO 直接注释掉的代码 media_kit
+      // strokeStyle: subtitleBgOpacity == 0
+      //     ? subTitleStyle.copyWith(
+      //         color: null,
+      //         background: null,
+      //         backgroundColor: null,
+      //         foreground: Paint()
+      //           ..color = Colors.black
+      //           ..style = PaintingStyle.stroke
+      //           ..strokeWidth = subtitleStrokeWidth,
+      //       )
+      //     : null,
       padding: EdgeInsets.only(
         left: subtitlePaddingH.toDouble(),
         right: subtitlePaddingH.toDouble(),
         bottom: subtitlePaddingB.toDouble(),
       ),
-      textScaleFactor: 1,
+      //  TODO 直接注释掉的代码 media_kit
+      // textScaleFactor: 1,
     );
   }
 

@@ -74,7 +74,7 @@ class _SetDisplayModeState extends State<SetDisplayMode> {
               style: TextStyle(color: Theme.of(context).colorScheme.outline),
             ),
           ),
-          // TODO flutter 3.32.4-ohos-0.0.1不支持的代码
+          // //  TODO 直接注释掉的代码 3.32.4-ohos-0.0.1不支持
           // Expanded(
           //   child: RadioGroup(
           //     onChanged: (DisplayMode? newMode) {

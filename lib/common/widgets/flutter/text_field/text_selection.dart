@@ -2919,7 +2919,7 @@ class SelectionOverlay {
     // while the opposite handle was being dragged. Ensure that any logic that was
     // meant to be run in onStartHandleDragStart is still run.
     if (!_isDraggingStartHandle) {
-      // TODO flutter 3.32.4-ohos-0.0.1不支持的代码
+      // //  TODO 直接注释掉的代码 3.32.4-ohos-0.0.1不支持
       // _isDraggingStartHandle = details.kind == PointerDeviceKind.touch;
       // final DragStartDetails startDetails = DragStartDetails(
       //   globalPosition: details.globalPosition,
@@ -3042,7 +3042,7 @@ class SelectionOverlay {
     // while the opposite handle was being dragged. Ensure that any logic that was
     // meant to be run in onStartHandleDragStart is still run.
     if (!_isDraggingEndHandle) {
-      // TODO flutter 3.32.4-ohos-0.0.1不支持的代码
+      // //  TODO 直接注释掉的代码 3.32.4-ohos-0.0.1不支持
       // _isDraggingEndHandle = details.kind == PointerDeviceKind.touch;
       // final DragStartDetails startDetails = DragStartDetails(
       //   globalPosition: details.globalPosition,

@@ -34,7 +34,7 @@ class SelectDialog<T> extends StatelessWidget {
     return AlertDialog(
       clipBehavior: Clip.hardEdge,
       title: Text(title),
-                    // TODO flutter 3.32.4-ohos-0.0.1不支持的代码
+                    // //  TODO 直接注释掉的代码 3.32.4-ohos-0.0.1不支持
       // constraints: subtitleBuilder != null
       //     ? const BoxConstraints(maxWidth: 320, minWidth: 320)
       //     : null,
@@ -42,7 +42,7 @@ class SelectDialog<T> extends StatelessWidget {
       content: Material(
         type: MaterialType.transparency,
         child: SingleChildScrollView(
-                    // TODO flutter 3.32.4-ohos-0.0.1不支持的代码
+                    // //  TODO 直接注释掉的代码 3.32.4-ohos-0.0.1不支持
           // child: RadioGroup<T>(
           //   onChanged: (v) => Navigator.of(context).pop(v ?? value),
           //   groupValue: value,
