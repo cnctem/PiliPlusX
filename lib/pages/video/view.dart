@@ -474,7 +474,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     final size = MediaQuery.sizeOf(context);
     maxWidth = size.width;
     maxHeight = size.height;
-    _handleOrientationBySize(size);
 
     final shortestSide = size.shortestSide;
     final minVideoHeight = shortestSide * 9 / 16;
