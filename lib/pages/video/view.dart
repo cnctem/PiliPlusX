@@ -125,7 +125,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   final videoReplyPanelKey = GlobalKey();
   final videoRelatedKey = GlobalKey();
   final videoIntroKey = GlobalKey();
-  bool? _lastIsLandscape;
 
   @override
   void initState() {
@@ -155,7 +154,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
     videoSourceInit();
     autoScreen();
-    _lastIsLandscape = _isDeviceLandscape();
 
     WidgetsBinding.instance.addObserver(this);
   }
@@ -203,45 +201,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     } else if (state == AppLifecycleState.paused) {
       introController.cancelTimer();
       ctr.showDanmaku = false;
-    }
-  }
-
-  @override
-  void didChangeMetrics() {
-    super.didChangeMetrics();
-    _handleOrientationByMetrics();
-  }
-
-  void _handleOrientationByMetrics() {
-    _handleOrientationBySize(_getLogicalSize());
-  }
-
-  Size _getLogicalSize() {
-    final view = WidgetsBinding.instance.platformDispatcher.views.first;
-    return view.physicalSize / view.devicePixelRatio;
-  }
-
-  void _handleOrientationBySize(Size size) {
-    if (!Utils.isMobile || !Pref.allowRotateScreen) return;
-    if (plPlayerController == null) return;
-
-    final isLandscape = size.width > size.height;
-    if (_lastIsLandscape == isLandscape) return;
-    _lastIsLandscape = isLandscape;
-
-    final isVerticalVideo = videoDetailController.isVertical.value;
-    if (isLandscape && !isFullScreen && !isVerticalVideo) {
-      plPlayerController!.triggerFullScreen(
-        status: true,
-        isManualFS: false,
-      );
-    } else if (!isLandscape &&
-        isFullScreen &&
-        !plPlayerController!.isManualFS) {
-      plPlayerController!.triggerFullScreen(
-        status: false,
-        isManualFS: false,
-      );
     }
   }
 
