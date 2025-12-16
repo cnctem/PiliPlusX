@@ -114,15 +114,16 @@ void main() async {
     if (Utils.isHarmony) {
       final type = await Utils.harmonyDeviceType;
       if (type == 'phone') {
-        await SystemChrome.setPreferredOrientations(
-          [
-            DeviceOrientation.portraitUp,
-            if (Pref.horizontalScreen) ...[
-              DeviceOrientation.landscapeLeft,
-              DeviceOrientation.landscapeRight,
+        // Harmony 手机：若允许旋转则完全交给系统/传感器处理，否则锁竖屏
+        if (Pref.allowRotateScreen) {
+          await SystemChrome.setPreferredOrientations([]);
+        } else {
+          await SystemChrome.setPreferredOrientations(
+            [
+              DeviceOrientation.portraitUp,
             ],
-          ],
-        );
+          );
+        }
         return;
       }
       // 平板 / 2in1 / pc 保持系统自动旋转，不做限制
