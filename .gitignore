@@ -23,6 +23,9 @@ migrate_working_dir/
 # is commented out by default.
 .vscode/
 
+# no ohos
+ohos
+
 # Flutter repo-specific
 /bin/cache/
 /bin/internal/bootstrap.bat
