@@ -11,6 +11,14 @@
     {
       "name": "EntryAbility_label",
       "value": "piliplus"
+    },
+    {
+      "name": "perm_get_network_info_reason",
+      "value": "用于获取当前网络状态，保障视频、弹幕等内容正常加载。"
+    },
+    {
+      "name": "perm_get_wifi_info_reason",
+      "value": "用于读取 Wi‑Fi 连接信息，优化视频播放的网络选择。"
     }
   ]
 }

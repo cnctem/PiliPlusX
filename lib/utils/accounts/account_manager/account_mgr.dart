@@ -363,9 +363,14 @@ class AccountManager extends Interceptor {
       case DioExceptionType.unknown:
         String desc;
         try {
-          desc = Utils.isMobile || Utils.isHarmony
-              ? (await Connectivity().checkConnectivity()).desc
-              : '';
+          // 在 OHOS 上调用 Connectivity 可能因权限未授予而报 201，直接跳过。
+          if (Utils.isHarmony) {
+            desc = '';
+          } else if (Utils.isMobile) {
+            desc = (await Connectivity().checkConnectivity()).desc;
+          } else {
+            desc = '';
+          }
         } catch (_) {
           desc = '';
         }
