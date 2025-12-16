@@ -26,7 +26,8 @@ export default class OrientationPlugin
       binding.getBinaryMessenger(),
       'com.piliplus/orientation',
     );
-    this.channel.setMethodCallHandler(this);
+    // 必须绑定到具体函数，否则 MethodChannel 收到调用时会报 “undefined is not callable”
+    this.channel.setMethodCallHandler(this.onMethodCall.bind(this));
   }
 
   onDetachedFromEngine(_: FlutterPluginBinding): void {

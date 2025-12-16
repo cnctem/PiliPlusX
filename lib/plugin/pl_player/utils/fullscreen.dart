@@ -36,16 +36,13 @@ Future<void> exitDesktopFullscreen() async {
 //横屏
 @pragma('vm:notify-debugger-on-exception')
 Future<void> landscape() async {
+  // Harmony 端优先依赖 auto_orientation（已适配 OHOS）
   if (Utils.isHarmony) {
-    try {
-      await _orientationChannel.invokeMethod<void>('set', {
-        'orientation': 'landscape',
-        'fullscreen': true,
-      });
-    } catch (_) {}
+    await AutoOrientation.landscapeAutoMode(forceSensor: true);
     return;
   }
 
+  // 其它端走原生实现
   try {
     await AutoOrientation.landscapeAutoMode(forceSensor: true);
   } catch (_) {}
@@ -54,12 +51,7 @@ Future<void> landscape() async {
 //竖屏
 Future<void> verticalScreenForTwoSeconds() async {
   if (Utils.isHarmony) {
-    try {
-      await _orientationChannel.invokeMethod<void>('set', {
-        'orientation': 'portrait',
-        'fullscreen': false,
-      });
-    } catch (_) {}
+    await AutoOrientation.portraitAutoMode(forceSensor: true);
     await autoScreen();
     return;
   }
@@ -74,12 +66,7 @@ Future<void> autoScreen() async {
   if (!allowRotateScreen) return;
 
   if (Utils.isHarmony) {
-    try {
-      await _orientationChannel.invokeMethod<void>('set', {
-        'orientation': 'auto',
-        'fullscreen': false,
-      });
-    } catch (_) {}
+    await AutoOrientation.fullAutoMode();
     return;
   }
 
@@ -95,10 +82,7 @@ Future<void> autoScreen() async {
 
 Future<void> fullAutoModeForceSensor() {
   if (Utils.isHarmony) {
-    return _orientationChannel.invokeMethod('set', {
-      'orientation': 'auto',
-      'fullscreen': true,
-    });
+    return AutoOrientation.fullAutoMode();
   }
   return AutoOrientation.fullAutoMode();
 }
