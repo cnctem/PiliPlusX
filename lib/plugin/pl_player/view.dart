@@ -2105,6 +2105,22 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             child: Obx(
               () {
                 final videoFit = plPlayerController.videoFit.value;
+                final video = Video(
+                  controller: plPlayerController.videoController!,
+                  controls: NoVideoControls,
+                  fit: videoFit.boxFit,
+                  alignment: widget.alignment,
+                );
+
+                // 在 OHOS 上绕过复杂的缩放/翻转层级，直接渲染纹理以避免无效矩阵导致黑屏
+                if (Platform.operatingSystem == 'ohos') {
+                  return SizedBox(
+                    width: maxWidth,
+                    height: maxHeight,
+                    child: video,
+                  );
+                }
+
                 return Transform.flip(
                   flipX: plPlayerController.flipX.value,
                   flipY: plPlayerController.flipY.value,
@@ -2112,12 +2128,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   child: FittedBox(
                     fit: videoFit.boxFit,
                     alignment: widget.alignment,
-                    //  TODO 直接注释掉的代码 media_kit
-                    // child: SimpleVideo(
-                    //   controller: plPlayerController.videoController!,
-                    //   fill: widget.fill,
-                    //   aspectRatio: videoFit.aspectRatio,
-                    // ),
+                    child: video,
                   ),
                 );
               },
