@@ -103,14 +103,17 @@ dependencies:
   encrypt: ^5.0.3
 
   # 视频播放器
-  media_kit: 1.1.11 # Primary package.
-  # media_kit_video: ^1.2.5 # For video rendering.
-  media_kit_video:
+  media_kit: # 重写
+  media_kit_video: # 鸿蒙
     git:
-      url: https://github.com/bggRGjQaUbCoE/media-kit.git
-      path: media_kit_video
-      ref: version_1.2.5
-  media_kit_libs_video: 1.0.5
+      url: https://github.com/ErBWs/media-kit.git
+      ref: feat-ohos
+      path: ./media_kit_video
+  media_kit_libs_video: # 鸿蒙
+    git:
+      url: https://github.com/ErBWs/media-kit.git
+      ref: feat-ohos
+      path: ./libs/universal/media_kit_libs_video
 
   # 媒体通知
   audio_service: ^0.18.15
@@ -238,6 +241,7 @@ dependencies:
   characters: any
 
 dependency_overrides:
+  # 为鸿蒙重写
   media_kit:
     git:
       url: https://github.com/ErBWs/media-kit.git
@@ -248,16 +252,22 @@ dependency_overrides:
       url: https://github.com/ErBWs/media-kit.git
       ref: feat-ohos
       path: ./libs/ohos/media_kit_libs_ohos
-  media_kit_video:
+  # 上游PiliPlus重写
+  media_kit_native_event_loop:
     git:
-      url: https://github.com/ErBWs/media-kit.git
-      ref: feat-ohos
-      path: ./media_kit_video
-  media_kit_libs_video:
+      url: https://github.com/bggRGjQaUbCoE/media-kit.git
+      path: media_kit_native_event_loop
+      ref: version_1.2.5
+  media_kit_libs_android_video:
     git:
-      url: https://github.com/ErBWs/media-kit.git
-      ref: feat-ohos
-      path: ./libs/universal/media_kit_libs_video
+      url: https://github.com/bggRGjQaUbCoE/media-kit.git
+      path: libs/android/media_kit_libs_android_video
+      ref: version_1.2.5
+  media_kit_libs_windows_video:
+    git:
+      url: https://github.com/bggRGjQaUbCoE/media-kit.git
+      path: libs/windows/media_kit_libs_windows_video
+      ref: version_1.2.5
   flutter_inappwebview:
     git:
       url: "https://gitcode.com/openharmony-sig/flutter_inappwebview.git"
@@ -291,21 +301,6 @@ dependency_overrides:
   path: ^1.9.1
   mime: ^2.0.0
   rxdart: ^0.28.0
-  media_kit_native_event_loop:
-    git:
-      url: https://github.com/bggRGjQaUbCoE/media-kit.git
-      path: media_kit_native_event_loop
-      ref: version_1.2.5
-  media_kit_libs_android_video:
-    git:
-      url: https://github.com/bggRGjQaUbCoE/media-kit.git
-      path: libs/android/media_kit_libs_android_video
-      ref: version_1.2.5
-  media_kit_libs_windows_video:
-    git:
-      url: https://github.com/bggRGjQaUbCoE/media-kit.git
-      path: libs/windows/media_kit_libs_windows_video
-      ref: version_1.2.5
   font_awesome_flutter: 10.9.0
 
 dev_dependencies:
