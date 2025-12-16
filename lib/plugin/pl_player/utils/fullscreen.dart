@@ -42,14 +42,39 @@ Future<void> landscape() async {
 
 //竖屏
 Future<void> verticalScreenForTwoSeconds() async {
-  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  if (Utils.isHarmony) {
+    if (await Utils.isHarmonyMobile) {
+      await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    } else {
+      // Harmony 平板/2in1 直接恢复系统自动旋转
+      await SystemChrome.setPreferredOrientations([]);
+    }
+  } else {
+    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  }
   await autoScreen();
 }
 
 //全向
 bool allowRotateScreen = Pref.allowRotateScreen;
 Future<void> autoScreen() async {
-  if (Utils.isMobile && allowRotateScreen) {
+  if (!allowRotateScreen) return;
+
+  if (Utils.isHarmony) {
+    if (await Utils.isHarmonyMobile) {
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    } else {
+      // Harmony 平板/2in1 恢复系统默认（不限制方向）
+      await SystemChrome.setPreferredOrientations([]);
+    }
+    return;
+  }
+
+  if (Utils.isMobile) {
     await SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       // DeviceOrientation.portraitDown,

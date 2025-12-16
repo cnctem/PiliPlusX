@@ -45,6 +45,9 @@ import 'package:window_manager/window_manager.dart' hide calcWindowPosition;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
+  if (Utils.isHarmony) {
+    await Utils.initHarmonyDeviceType();
+  }
   tmpDirPath = (await getTemporaryDirectory()).path;
   appSupportDirPath = (await getApplicationSupportDirectory()).path;
   try {
@@ -94,9 +97,9 @@ void main() async {
 
   CacheManager.autoClearCache();
 
-  if (Utils.isMobile) {
-    await Future.wait([
-      SystemChrome.setPreferredOrientations(
+  Future<void> initOrientation() async {
+    if (Platform.isAndroid || Platform.isIOS) {
+      await SystemChrome.setPreferredOrientations(
         [
           DeviceOrientation.portraitUp,
           if (Pref.horizontalScreen) ...[
@@ -104,10 +107,33 @@ void main() async {
             DeviceOrientation.landscapeRight,
           ],
         ],
-      ),
-      setupServiceLocator(),
-    ]);
+      );
+      return;
+    }
+
+    if (Utils.isHarmony) {
+      final type = await Utils.harmonyDeviceType;
+      if (type == 'phone') {
+        await SystemChrome.setPreferredOrientations(
+          [
+            DeviceOrientation.portraitUp,
+            if (Pref.horizontalScreen) ...[
+              DeviceOrientation.landscapeLeft,
+              DeviceOrientation.landscapeRight,
+            ],
+          ],
+        );
+        return;
+      }
+      // 平板 / 2in1 / pc 保持系统自动旋转，不做限制
+      await SystemChrome.setPreferredOrientations([]);
+    }
   }
+
+  await Future.wait([
+    initOrientation(),
+    setupServiceLocator(),
+  ]);
 
   // if (Platform.isWindows) {
   //   if (await WebViewEnvironment.getAvailableVersion() != null) {
