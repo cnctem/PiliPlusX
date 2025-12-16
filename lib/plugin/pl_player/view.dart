@@ -2110,6 +2110,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   controls: NoVideoControls,
                   fit: videoFit.boxFit,
                   alignment: widget.alignment,
+                  fill: widget.fill,
+                  aspectRatio: videoFit.aspectRatio,
                 );
 
                 // 在 OHOS 上绕过复杂的缩放/翻转层级，直接渲染纹理以避免无效矩阵导致黑屏
