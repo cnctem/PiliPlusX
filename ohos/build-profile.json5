@@ -1,12 +1,27 @@
 {
   app: {
-    signingConfigs: [],
+    signingConfigs: [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "/Users/tongweijia/.ohos/config/default_ohos_o3SsH8Up0mzpW334KZdxglysgju5umrWZuFLoHjNtGw=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001ADD7B95A48DC3B616F9B08692BF6C9778382FBA64947B6F7BCD5610B97EF3799CF3B7B2CF48AD",
+          "profile": "/Users/tongweijia/.ohos/config/default_ohos_o3SsH8Up0mzpW334KZdxglysgju5umrWZuFLoHjNtGw=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "/Users/tongweijia/.ohos/config/default_ohos_o3SsH8Up0mzpW334KZdxglysgju5umrWZuFLoHjNtGw=.p12",
+          "storePassword": "0000001AFF5BC72353FF1EFCB163CB7914E4743DADBE26D8E256686756F6BA28A4EAE8C7B6CD5C9BC624"
+        }
+      }
+    ],
     products: [
       {
         name: "default",
         signingConfig: "default",
         compatibleSdkVersion: "5.0.3(15)",
         runtimeOS: "HarmonyOS",
+        "targetSdkVersion": "5.0.3(15)"
       },
     ],
     buildModeSet: [
@@ -28,7 +43,9 @@
       targets: [
         {
           name: "default",
-          applyToProducts: ["default"],
+          applyToProducts: [
+            "default"
+          ],
         },
       ],
     },

@@ -1,5 +1,6 @@
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
+import 'package:PiliPlus/utils/utils.dart';
 import 'package:audio_session/audio_session.dart';
 
 class AudioSessionHandler {
@@ -11,6 +12,7 @@ class AudioSessionHandler {
   }
 
   AudioSessionHandler() {
+    if (Utils.isHarmony) return;
     initSession();
   }
 

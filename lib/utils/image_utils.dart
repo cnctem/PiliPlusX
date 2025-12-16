@@ -104,6 +104,10 @@ abstract class ImageUtils {
     required int width,
     required int height,
   }) async {
+    if (Utils.isHarmony) {
+      SmartDialog.showToast('当前平台暂不支持 Live Photo 下载');
+      return false;
+    }
     try {
       if (Utils.isMobile && !await checkPermissionDependOnSdkInt(context)) {
         return false;

@@ -41,6 +41,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.0.3"
+  app_links_ohos:
+    dependency: "direct main"
+    description:
+      name: app_links_ohos
+      sha256: "00c85e64f8e770570748a66659f008cca0be13d18d5286afd536b7555676e2ba"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.2.0"
   app_links_platform_interface:
     dependency: transitive
     description:
@@ -134,10 +142,18 @@ packages:
     dependency: "direct main"
     description:
       name: battery_plus
-      sha256: ad16fcb55b7384be6b4bbc763d5e2031ac7ea62b2d9b6b661490c7b9741155bf
+      sha256: ba605aeafd6609cb5f8020c609a51941803a5fb2b6a7576f7c7eeeb52d29e750
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "7.0.0"
+    version: "5.0.3"
+  battery_plus_ohos:
+    dependency: "direct main"
+    description:
+      name: battery_plus_ohos
+      sha256: "94fcf4d39509c72944c86c2285fafa88b38be168e315535623d67cf84245d74e"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.0.3"
   battery_plus_platform_interface:
     dependency: transitive
     description:
@@ -312,18 +328,26 @@ packages:
     dependency: "direct main"
     description:
       name: connectivity_plus
-      sha256: "33bae12a398f841c6cda09d1064212957265869104c478e5ad51e2fb26c3973c"
+      sha256: "224a77051d52a11fbad53dd57827594d3bd24f945af28bd70bab376d68d437f0"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "7.0.0"
+    version: "5.0.2"
+  connectivity_plus_ohos:
+    dependency: "direct main"
+    description:
+      name: connectivity_plus_ohos
+      sha256: "83e1f434b1cd2a179e42aa4396928321957b894c1d187da63102518313bff8da"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.0.3"
   connectivity_plus_platform_interface:
     dependency: transitive
     description:
       name: connectivity_plus_platform_interface
-      sha256: "42657c1715d48b167930d5f34d00222ac100475f73d10162ddf43e714932f204"
+      sha256: cf1d1c28f4416f8c654d7dc3cd638ec586076255d407cef3ddbdaf178272a71a
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "2.0.1"
+    version: "1.2.4"
   convert:
     dependency: transitive
     description:
@@ -400,10 +424,18 @@ packages:
     dependency: "direct main"
     description:
       name: device_info_plus
-      sha256: "4df8babf73058181227e18b08e6ea3520cf5fc5d796888d33b7cb0f33f984b7c"
+      sha256: a7fd703482b391a87d60b6061d04dfdeab07826b96f9abd8f5ed98068acc0074
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "12.3.0"
+    version: "10.1.2"
+  device_info_plus_ohos:
+    dependency: "direct main"
+    description:
+      name: device_info_plus_ohos
+      sha256: c162bca365b854fc4e7e5c0a2414cc1595f6cc2500cdf3f3d221ca39b03adcf8
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.0.8"
   device_info_plus_platform_interface:
     dependency: transitive
     description:
@@ -529,11 +561,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: mod
-      resolved-ref: "4c03c3413a915fa82f58d4591bfe3b62709a6edf"
-      url: "https://github.com/bggRGjQaUbCoE/flutter_file_picker.git"
+      ref: "br_v10.2.0_ohos"
+      resolved-ref: "28c1b3b8a189445c9520f68ca33ce53b84c7b98e"
+      url: "https://gitcode.com/openharmony-sig/fluttertpc_file_picker.git"
     source: git
-    version: "10.3.7"
+    version: "8.0.6"
   file_selector_linux:
     dependency: transitive
     description:
@@ -712,10 +744,10 @@ packages:
     dependency: "direct dev"
     description:
       name: flutter_lints
-      sha256: "3105dc8492f6183fb076ccf1f351ac3d60564bff92e20bfc4af9cc1651f4e7e1"
+      sha256: a25a15ebbdfc33ab1cd26c63a6ee519df92338a9c10f122adda92938253bef04
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "6.0.0"
+    version: "2.0.3"
   flutter_localizations:
     dependency: "direct main"
     description: flutter
@@ -935,11 +967,12 @@ packages:
   image_picker:
     dependency: "direct main"
     description:
-      name: image_picker
-      sha256: "784210112be18ea55f69d7076e2c656a4e24949fa9e76429fe53af0c0f4fa320"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "1.2.1"
+      path: "packages/image_picker/image_picker"
+      ref: "br_image_picker-v1.1.2_ohos"
+      resolved-ref: "213ce425e799abcd6c8c4a1864adc7336add0145"
+      url: "https://gitcode.com/openharmony-sig/flutter_packages.git"
+    source: git
+    version: "1.1.2"
   image_picker_android:
     dependency: transitive
     description:
@@ -980,6 +1013,15 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.2.2"
+  image_picker_ohos:
+    dependency: transitive
+    description:
+      path: "packages/image_picker/image_picker_ohos"
+      ref: "br_image_picker-v1.1.2_ohos"
+      resolved-ref: "213ce425e799abcd6c8c4a1864adc7336add0145"
+      url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
+    source: git
+    version: "0.8.7+4"
   image_picker_platform_interface:
     dependency: transitive
     description:
@@ -1013,13 +1055,13 @@ packages:
     source: hosted
     version: "1.0.5"
   js:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: js
-      sha256: f2c445dce49627136094980615a031419f7f3eb393237e4ecd97ac15dea343f3
+      sha256: "4186c61b32f99e60f011f7160e32c89a758ae9b1d0c6d28e2c02ef0382300e2b"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "0.6.7"
+    version: "0.7.0"
   json_annotation:
     dependency: "direct main"
     description:
@@ -1056,10 +1098,10 @@ packages:
     dependency: transitive
     description:
       name: lints
-      sha256: a5e2b223cb7c9c8efdc663ef484fdd95bb243bff242ef5b13e26883547fce9a0
+      sha256: "0a217c6c989d21039f1498c3ed9f3ed71b354e69873f13a8dfc3c9fe76f1b452"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "6.0.0"
+    version: "2.1.1"
   list_counter:
     dependency: transitive
     description:
@@ -1264,18 +1306,26 @@ packages:
     dependency: "direct main"
     description:
       name: package_info_plus
-      sha256: f69da0d3189a4b4ceaeb1a3defb0f329b3b352517f52bed4290f83d4f06bc08d
+      sha256: "7e76fad405b3e4016cd39d08f455a4eb5199723cf594cd1b8916d47140d93017"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "9.0.0"
+    version: "4.2.0"
+  package_info_plus_ohos:
+    dependency: "direct main"
+    description:
+      name: package_info_plus_ohos
+      sha256: "8a22a6e393630fbf0231e9d2a9e313160230a8ae71c977070a305ec5241cd77e"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.0.7"
   package_info_plus_platform_interface:
     dependency: transitive
     description:
       name: package_info_plus_platform_interface
-      sha256: "202a487f08836a592a6bd4f901ac69b3a8f146af552bbd14407b6b41e1c3f086"
+      sha256: "9bc8ba46813a4cc42c66ab781470711781940780fd8beddd0c3da62506d3a6c6"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "3.2.1"
+    version: "2.0.1"
   path:
     dependency: "direct main"
     description:
@@ -2022,12 +2072,12 @@ packages:
     dependency: "direct main"
     description:
       name: wakelock_plus
-      sha256: "9296d40c9adbedaba95d1e704f4e0b434be446e2792948d0e4aa977048104228"
+      sha256: "26ebc8b5e0037c15e2a1b661dcec8a475cb7205befcce8a33f545ae8c86b367c"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "1.4.0"
+    version: "1.1.6"
   wakelock_plus_ohos:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: wakelock_plus_ohos
       sha256: b22af297411555b5ec0fe43ec2960cd5f019dd23b83853214ebe6dcc97b337bd
@@ -2092,21 +2142,21 @@ packages:
     source: git
     version: "1.2.2"
   win32:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: win32
-      sha256: d7cb55e04cd34096cd3a79b3330245f54cb96a370a1c27adb3c84b917de8b08e
+      sha256: "015002c060f1ae9f41a818f2d5640389cc05283e368be19dc8d77cecb43c40c9"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "5.15.0"
+    version: "5.5.3"
   win32_registry:
     dependency: transitive
     description:
       name: win32_registry
-      sha256: "6f1b564492d0147b330dd794fee8f512cec4977957f310f9951b5f9d83618dae"
+      sha256: "21ec76dfc731550fd3e2ce7a33a9ea90b828fdf19a5c3bcf556fa992cfa99852"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "2.1.0"
+    version: "1.1.5"
   window_manager:
     dependency: "direct main"
     description:
@@ -2142,4 +2192,4 @@ packages:
     version: "3.1.3"
 sdks:
   dart: ">=3.8.0 <4.0.0"
-  flutter: ">=3.32.4-ohos-0.0.1"
+  flutter: ">=3.32.4-ohos"

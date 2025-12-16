@@ -8,28 +8,43 @@ import 'package:PiliPlus/models_new/video/video_detail/page.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:PiliPlus/utils/utils.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:get/get_utils/get_utils.dart';
 
-Future<VideoPlayerServiceHandler> initAudioService() {
-  return AudioService.init(
-    builder: VideoPlayerServiceHandler.new,
-    config: const AudioServiceConfig(
-      androidNotificationChannelId: 'com.example.piliplus.audio',
-      androidNotificationChannelName: 'Audio Service ${Constants.appName}',
-      androidNotificationOngoing: true,
-      androidStopForegroundOnPause: true,
-      fastForwardInterval: Duration(seconds: 10),
-      rewindInterval: Duration(seconds: 10),
-      androidNotificationChannelDescription: 'Media notification channel',
-      androidNotificationIcon: 'drawable/ic_notification_icon',
-    ),
-  );
+Future<VideoPlayerServiceHandler> initAudioService() async {
+  // HarmonyOS 暂无 audio_service 通道，返回本地空实现以避免崩溃
+  if (Utils.isHarmony) return VideoPlayerServiceHandler.local();
+  try {
+    return await AudioService.init(
+      builder: VideoPlayerServiceHandler.new,
+      config: const AudioServiceConfig(
+        androidNotificationChannelId: 'com.example.piliplus.audio',
+        androidNotificationChannelName: 'Audio Service ${Constants.appName}',
+        androidNotificationOngoing: true,
+        androidStopForegroundOnPause: true,
+        fastForwardInterval: Duration(seconds: 10),
+        rewindInterval: Duration(seconds: 10),
+        androidNotificationChannelDescription: 'Media notification channel',
+        androidNotificationIcon: 'drawable/ic_notification_icon',
+      ),
+    );
+  } catch (_) {
+    // 若初始化失败（缺少平台实现等），降级为本地空实现
+    return VideoPlayerServiceHandler.local();
+  }
 }
 
 class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
+  VideoPlayerServiceHandler({bool? enableBackgroundPlay})
+      : enableBackgroundPlay =
+            enableBackgroundPlay ?? Pref.enableBackgroundPlay;
+
+  factory VideoPlayerServiceHandler.local() =>
+      VideoPlayerServiceHandler(enableBackgroundPlay: false);
+
   static final List<MediaItem> _item = [];
-  bool enableBackgroundPlay = Pref.enableBackgroundPlay;
+  bool enableBackgroundPlay;
 
   Function? onPlay;
   Function? onPause;

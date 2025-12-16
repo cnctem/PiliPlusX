@@ -363,8 +363,8 @@ class AccountManager extends Interceptor {
       case DioExceptionType.unknown:
         String desc;
         try {
-          desc = Utils.isMobile
-              ? (await Connectivity().checkConnectivity()).first.desc
+          desc = Utils.isMobile || Utils.isHarmony
+              ? (await Connectivity().checkConnectivity()).desc
               : '';
         } catch (_) {
           desc = '';

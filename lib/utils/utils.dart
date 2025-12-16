@@ -64,10 +64,9 @@ abstract class Utils {
 
   static Future<bool> get isWiFi async {
     try {
-      return Utils.isMobile &&
-          (await Connectivity().checkConnectivity()).contains(
-            ConnectivityResult.wifi,
-          );
+      if (!Utils.isMobile && !Utils.isHarmony) return false;
+      final result = await Connectivity().checkConnectivity();
+      return result == ConnectivityResult.wifi;
     } catch (_) {
       return true;
     }

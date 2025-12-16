@@ -137,7 +137,7 @@ class LoginPageController extends GetxController
       onSuccess();
     }
 
-    if (Utils.isDesktop) {
+    if (Utils.isDesktop || Utils.isHarmony) {
       Get.dialog<Map<String, dynamic>>(
         GeetestWebviewDialog(geeGt, geeChallenge),
       ).then((res) {
