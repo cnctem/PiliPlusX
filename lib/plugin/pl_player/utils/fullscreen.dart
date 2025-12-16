@@ -7,6 +7,7 @@ import 'package:auto_orientation/auto_orientation.dart';
 import 'package:flutter/services.dart';
 
 bool _isDesktopFullScreen = false;
+const _orientationChannel = MethodChannel('com.piliplus/orientation');
 
 @pragma('vm:notify-debugger-on-exception')
 Future<void> enterDesktopFullscreen({bool inAppFullScreen = false}) async {
@@ -35,6 +36,16 @@ Future<void> exitDesktopFullscreen() async {
 //横屏
 @pragma('vm:notify-debugger-on-exception')
 Future<void> landscape() async {
+  if (Utils.isHarmony) {
+    try {
+      await _orientationChannel.invokeMethod<void>('set', {
+        'orientation': 'landscape',
+        'fullscreen': true,
+      });
+    } catch (_) {}
+    return;
+  }
+
   try {
     await AutoOrientation.landscapeAutoMode(forceSensor: true);
   } catch (_) {}
@@ -43,15 +54,17 @@ Future<void> landscape() async {
 //竖屏
 Future<void> verticalScreenForTwoSeconds() async {
   if (Utils.isHarmony) {
-    if (await Utils.isHarmonyMobile) {
-      await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    } else {
-      // Harmony 平板/2in1 直接恢复系统自动旋转
-      await SystemChrome.setPreferredOrientations([]);
-    }
-  } else {
-    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    try {
+      await _orientationChannel.invokeMethod<void>('set', {
+        'orientation': 'portrait',
+        'fullscreen': false,
+      });
+    } catch (_) {}
+    await autoScreen();
+    return;
   }
+
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await autoScreen();
 }
 
@@ -61,16 +74,12 @@ Future<void> autoScreen() async {
   if (!allowRotateScreen) return;
 
   if (Utils.isHarmony) {
-    if (await Utils.isHarmonyMobile) {
-      await SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-      ]);
-    } else {
-      // Harmony 平板/2in1 恢复系统默认（不限制方向）
-      await SystemChrome.setPreferredOrientations([]);
-    }
+    try {
+      await _orientationChannel.invokeMethod<void>('set', {
+        'orientation': 'auto',
+        'fullscreen': false,
+      });
+    } catch (_) {}
     return;
   }
 
@@ -85,6 +94,12 @@ Future<void> autoScreen() async {
 }
 
 Future<void> fullAutoModeForceSensor() {
+  if (Utils.isHarmony) {
+    return _orientationChannel.invokeMethod('set', {
+      'orientation': 'auto',
+      'fullscreen': true,
+    });
+  }
   return AutoOrientation.fullAutoMode();
 }
 
