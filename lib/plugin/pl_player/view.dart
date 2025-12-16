@@ -2112,12 +2112,11 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   child: FittedBox(
                     fit: videoFit.boxFit,
                     alignment: widget.alignment,
-                    //  TODO 直接注释掉的代码 media_kit
-                    // child: SimpleVideo(
-                    //   controller: plPlayerController.videoController!,
-                    //   fill: widget.fill,
-                    //   aspectRatio: videoFit.aspectRatio,
-                    // ),
+                    child: Video(
+                      controller: plPlayerController.videoController!,
+                      fill: widget.fill,
+                      aspectRatio: videoFit.aspectRatio,
+                    ),
                   ),
                 );
               },
