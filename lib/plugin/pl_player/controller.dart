@@ -466,8 +466,8 @@ class PlPlayerController {
         right: subtitlePaddingH.toDouble(),
         bottom: subtitlePaddingB.toDouble(),
       ),
-      //  TODO 直接注释掉的代码 media_kit
-      // textScaleFactor: 1,
+      // 固定缩放，避免在高分辨率设备上被自动缩小
+      textScaleFactor: 1,
     );
   }
 
