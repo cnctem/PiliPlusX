@@ -1389,7 +1389,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         if (widget.danmuWidget case final danmaku?)
           Positioned.fill(top: 4, child: danmaku),
 
-        if (!isLive)
+        // 临时屏蔽可调节的自定义字幕层，避免出现双字幕（按需再打开）。
+        if (false && !isLive)
           Positioned.fill(
             child: IgnorePointer(
               ignoring: !plPlayerController.enableDragSubtitle,
