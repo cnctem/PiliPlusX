@@ -1397,7 +1397,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 () => SubtitleView(
                   controller: videoController,
                   configuration: plPlayerController.subtitleConfig.value,
-                  //  TODO 直接注释掉的代码 media_kit
+                  //  TODO 待适配 media_kit 拖拽字幕调整底部边距
                   // enableDragSubtitle: plPlayerController.enableDragSubtitle,
                   // onUpdatePadding: plPlayerController.onUpdatePadding,
                 ),

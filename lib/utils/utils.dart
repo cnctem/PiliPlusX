@@ -26,9 +26,9 @@ abstract class Utils {
   static Future<void> initHarmonyDeviceType() async {
     if (!isHarmony || _harmonyDeviceType != null) return;
     try {
-      _harmonyDeviceType ??=
-          await const MethodChannel('com.piliplus/device_info')
-              .invokeMethod<String>('DeviceType');
+      _harmonyDeviceType ??= await const MethodChannel(
+        'com.piliplus/device_info',
+      ).invokeMethod<String>('DeviceType');
     } catch (_) {
       // 保持 null，后续调用仍可重试。
     }
@@ -58,10 +58,11 @@ abstract class Utils {
 
   @pragma("vm:platform-const")
   static final bool isMobileBase = Platform.isAndroid || Platform.isIOS;
+  static final isMobile = _getIsMobile();
 
   // 同步移动端判定：Android/iOS 直接返回；Harmony 根据已缓存的设备类型，
   // 尚未获取到类型时默认按移动端处理，避免 UI 逻辑被阻塞。
-  static bool get isMobile {
+  static bool _getIsMobile() {
     if (Platform.isAndroid || Platform.isIOS) return true;
     if (isHarmony) {
       return _harmonyDeviceType == null ||
@@ -71,8 +72,9 @@ abstract class Utils {
     return false;
   }
 
+  static final isDesktop = _getIsDesktop();
   // 桌面判定：Windows / macOS / Linux 以及 Harmony 的 2in1、pc
-  static bool get isDesktop {
+  static bool _getIsDesktop() {
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) return true;
     if (isHarmony) {
       return _harmonyDeviceType == '2in1' || _harmonyDeviceType == 'pc';

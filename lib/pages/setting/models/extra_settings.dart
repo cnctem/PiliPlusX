@@ -719,11 +719,12 @@ List<SettingsModel> get extraSettings => [
     setKey: SettingBoxKey.showDynActionBar,
     defaultVal: true,
   ),
-  const SwitchModel(
+  SwitchModel(
     title: '启用拖拽字幕调整底部边距',
-    leading: Icon(MdiIcons.dragVariant),
+    leading: const Icon(MdiIcons.dragVariant),
     setKey: SettingBoxKey.enableDragSubtitle,
     defaultVal: false,
+    onChanged: (_) => SmartDialog.showToast('鸿蒙待适配 不生效'),
   ),
   const SwitchModel(
     title: '展示追番时间表',
