@@ -21,16 +21,26 @@ abstract class Utils {
   @pragma("vm:platform-const")
   // Harmony 设备类型缓存（通过 MethodChannel 异步获取）
   static String? _harmonyDeviceType;
+  // 用于防止重复发起获取请求的 Future 缓存
+  static Future<void>? _harmonyDeviceTypeFuture;
 
   /// 主动获取并缓存 Harmony 设备类型；在应用启动时调用一次即可。
   static Future<void> initHarmonyDeviceType() async {
     if (!isHarmony || _harmonyDeviceType != null) return;
-    try {
-      _harmonyDeviceType ??= await const MethodChannel(
-        'com.piliplus/device_info',
-      ).invokeMethod<String>('DeviceType');
-    } catch (_) {
-      // 保持 null，后续调用仍可重试。
+    // 如果已有进行中的请求，复用它，避免多次调用原生
+    _harmonyDeviceTypeFuture ??= () async {
+      try {
+        _harmonyDeviceType ??= await const MethodChannel(
+          'com.piliplus/device_info',
+        ).invokeMethod<String>('DeviceType');
+      } catch (_) {
+        // 保持 null，后续调用仍可重试。
+      }
+    }();
+    await _harmonyDeviceTypeFuture;
+    // 允许后续重试（若前一次失败，_harmonyDeviceType 仍为 null）
+    if (_harmonyDeviceType != null) {
+      _harmonyDeviceTypeFuture = null;
     }
   }
 
