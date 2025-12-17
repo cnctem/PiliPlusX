@@ -1,22 +1,17 @@
 # 当前分支(ohos)说明
 
-## 这是一个适配鸿蒙的分支
+这是一个适配鸿蒙的分支目前处于可用水平，大部分功能正常
+播放器已使用[ErBW_s](https://github.com/ErBWs)为 media_kit 适配鸿蒙的分支
 
-- 播放器已使用[ErBW_s](https://github.com/ErBWs)为 media_kit 适配鸿蒙的分支
+## 适配进度
 
-- 可以扫码登录，其它登录方式未验证
+- [x] 能正常登录和播放，已使用 media_kit([ErBW_s](https://github.com/ErBWs)大佬做的 media_kit 鸿蒙适配)
 
-## 存在的问题
+- [x] 亮度、音量调节(还不支持系统音量)和自动旋转等
 
-- 亮度调节
+其它进度细节可转到看板：[issues 看板](https://github.com/users/qinshah/projects/1)
 
-- 音量调节不支持系统调节
-
-- 横竖屏、全部切换等可能有很多问题
-
-- ······其它未列出或未发现的问题
-
-## 如果你也对这个项目感兴趣，欢迎加入
+## 需要更多人参与适配，让鸿蒙版 PiliPlus 更快完善
 
 ## 感谢
 
@@ -24,7 +19,7 @@
 
 - media_kit 适配者[ErBW_s](https://github.com/ErBWs)
 
-- 所有贡献者
+- ...所有依赖内容的构建者/贡献者
 
 # 以下是原上游项目 readme
 
