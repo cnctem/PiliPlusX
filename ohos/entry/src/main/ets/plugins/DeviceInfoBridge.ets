@@ -10,7 +10,7 @@ export default class DeviceInfoBridge implements FlutterPlugin {
 
   onAttachedToEngine(binding: FlutterPluginBinding): void {
     this.channel = new MethodChannel(binding.getBinaryMessenger(), 'com.piliplus/device_info');
-    this.channel.setMethodCallHandler(this.onMethodCall.bind(this));
+    this.channel.setMethodCallHandler(this);
   }
 
   onDetachedFromEngine(binding: FlutterPluginBinding): void {
