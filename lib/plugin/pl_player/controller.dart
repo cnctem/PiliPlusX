@@ -449,18 +449,18 @@ class PlPlayerController {
     final subTitleStyle = this.subTitleStyle;
     return SubtitleViewConfiguration(
       style: subTitleStyle,
-      //  TODO 直接注释掉的代码 media_kit
-      // strokeStyle: subtitleBgOpacity == 0
-      //     ? subTitleStyle.copyWith(
-      //         color: null,
-      //         background: null,
-      //         backgroundColor: null,
-      //         foreground: Paint()
-      //           ..color = Colors.black
-      //           ..style = PaintingStyle.stroke
-      //           ..strokeWidth = subtitleStrokeWidth,
-      //       )
-      //     : null,
+      // 恢复描边，使字号观感与 Android 端一致
+      strokeStyle: subtitleBgOpacity == 0
+          ? subTitleStyle.copyWith(
+              color: null,
+              background: null,
+              backgroundColor: null,
+              foreground: Paint()
+                ..color = Colors.black
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = subtitleStrokeWidth,
+            )
+          : null,
       padding: EdgeInsets.only(
         left: subtitlePaddingH.toDouble(),
         right: subtitlePaddingH.toDouble(),
