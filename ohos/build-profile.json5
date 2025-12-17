@@ -5,13 +5,13 @@
         "name": "default",
         "type": "HarmonyOS",
         "material": {
-          "certpath": "/Users/tongweijia/.ohos/config/default_ohos_o3SsH8Up0mzpW334KZdxglysgju5umrWZuFLoHjNtGw=.cer",
+          "certpath": "/Users/qshh/.ohos/config/default_ohos_1llWdKLAUrUnUDVa7Iw4XtVOrvqcENacpnPtwak6xJg=.cer",
           "keyAlias": "debugKey",
-          "keyPassword": "0000001ADD7B95A48DC3B616F9B08692BF6C9778382FBA64947B6F7BCD5610B97EF3799CF3B7B2CF48AD",
-          "profile": "/Users/tongweijia/.ohos/config/default_ohos_o3SsH8Up0mzpW334KZdxglysgju5umrWZuFLoHjNtGw=.p7b",
+          "keyPassword": "0000001AE8B7BAE140E902703D42ABE3DAF513356ABFB8F46A3836A6B82DAFE7170ECA747D6B44897C8F",
+          "profile": "/Users/qshh/.ohos/config/default_ohos_1llWdKLAUrUnUDVa7Iw4XtVOrvqcENacpnPtwak6xJg=.p7b",
           "signAlg": "SHA256withECDSA",
-          "storeFile": "/Users/tongweijia/.ohos/config/default_ohos_o3SsH8Up0mzpW334KZdxglysgju5umrWZuFLoHjNtGw=.p12",
-          "storePassword": "0000001AFF5BC72353FF1EFCB163CB7914E4743DADBE26D8E256686756F6BA28A4EAE8C7B6CD5C9BC624"
+          "storeFile": "/Users/qshh/.ohos/config/default_ohos_1llWdKLAUrUnUDVa7Iw4XtVOrvqcENacpnPtwak6xJg=.p12",
+          "storePassword": "0000001A91837549FB2CD43F023A474099673A337EB11D20A2E0E1A62114FA0A70A3E9DEB03159F7AA45"
         }
       }
     ],

@@ -1,10 +1,12 @@
 import { FlutterEngine, Log } from '@ohos/flutter_ohos';
+import AudioSessionPlugin from 'audio_session';
 import InAppWebViewFlutterPlugin from 'flutter_inappwebview_ohos';
 import ImagePickerPlugin from 'image_picker_ohos';
 import PathProviderPlugin from 'path_provider_ohos';
 import UrlLauncherPlugin from 'url_launcher_ohos';
 import VideoPlayerPlugin from 'video_player_ohos';
 import SharePlusOhosPlugin from 'share_plus';
+import AudioServicePlugin from 'audio_service';
 import AutoOrientationPlugin from 'auto_orientation';
 import MediaKitLibsOhosPlugin from 'media_kit_libs_ohos';
 import MediaKitVideoPlugin from 'media_kit_video';
@@ -29,12 +31,14 @@ export class GeneratedPluginRegistrant {
 
   static registerWith(flutterEngine: FlutterEngine) {
     try {
+      flutterEngine.getPlugins()?.add(new AudioSessionPlugin());
       flutterEngine.getPlugins()?.add(new InAppWebViewFlutterPlugin());
       flutterEngine.getPlugins()?.add(new ImagePickerPlugin());
       flutterEngine.getPlugins()?.add(new PathProviderPlugin());
       flutterEngine.getPlugins()?.add(new UrlLauncherPlugin());
       flutterEngine.getPlugins()?.add(new VideoPlayerPlugin());
       flutterEngine.getPlugins()?.add(new SharePlusOhosPlugin());
+      flutterEngine.getPlugins()?.add(new AudioServicePlugin());
       flutterEngine.getPlugins()?.add(new AutoOrientationPlugin());
       flutterEngine.getPlugins()?.add(new MediaKitLibsOhosPlugin());
       flutterEngine.getPlugins()?.add(new MediaKitVideoPlugin());

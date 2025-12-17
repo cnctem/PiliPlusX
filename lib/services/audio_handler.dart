@@ -8,13 +8,10 @@ import 'package:PiliPlus/models_new/video/video_detail/page.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
-import 'package:PiliPlus/utils/utils.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:get/get_utils/get_utils.dart';
 
 Future<VideoPlayerServiceHandler> initAudioService() async {
-  // HarmonyOS 暂无 audio_service 通道，返回本地空实现以避免崩溃
-  if (Utils.isHarmony) return VideoPlayerServiceHandler.local();
   try {
     return await AudioService.init(
       builder: VideoPlayerServiceHandler.new,
