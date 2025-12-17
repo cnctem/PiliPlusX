@@ -1389,8 +1389,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         if (widget.danmuWidget case final danmaku?)
           Positioned.fill(top: 4, child: danmaku),
 
-        // 临时屏蔽可调节的自定义字幕层，避免出现双字幕（按需再打开）。
-        if (false && !isLive)
+        // 自定义 Flutter 字幕层（可调节样式），已恢复启用
+        if (!isLive)
           Positioned.fill(
             child: IgnorePointer(
               ignoring: !plPlayerController.enableDragSubtitle,
@@ -2112,6 +2112,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   fit: videoFit.boxFit,
                   alignment: widget.alignment,
                   fill: widget.fill,
+                  // 关闭 media_kit 内置 SubtitleView，避免与外层叠加重复
+                  subtitleViewConfiguration:
+                      const SubtitleViewConfiguration(visible: false),
                   aspectRatio: videoFit.aspectRatio,
                 );
 
