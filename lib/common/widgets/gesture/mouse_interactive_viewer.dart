@@ -93,20 +93,34 @@ class _MouseInteractiveViewerState extends State<MouseInteractiveViewer>
   _GestureType? _gestureType;
 
   static final gestureSettings = DeviceGestureSettings(
-    touchSlop: Platform.isIOS ? 9 : 4,
+    // 鸿蒙平台使用更小的 touchSlop 以便在与 NestedScrollView 的手势竞争中更快识别
+    touchSlop: Platform.isIOS ? 9 : (Platform.operatingSystem == 'ohos' ? 1 : 4),
   );
 
-  late final _scaleGestureRecognizer =
-      ScaleGestureRecognizer(
-          debugOwner: this,
-          allowedButtonsFilter: (buttons) => buttons == kPrimaryButton,
-          trackpadScrollToScaleFactor: Offset(0, -1 / widget.scaleFactor),
-          trackpadScrollCausesScale: widget.trackpadScrollCausesScale,
-        )
-        ..gestureSettings = gestureSettings
-        ..onStart = _onScaleStart
-        ..onUpdate = _onScaleUpdate
-        ..onEnd = _onScaleEnd;
+  // 在鸿蒙平台上使用 GestureArenaTeam 来让 ScaleGestureRecognizer 更积极地赢得手势竞争
+  late final GestureArenaTeam? _gestureArenaTeam =
+      Platform.operatingSystem == 'ohos' ? GestureArenaTeam() : null;
+
+  late final _scaleGestureRecognizer = () {
+    final recognizer = ScaleGestureRecognizer(
+      debugOwner: this,
+      allowedButtonsFilter: (buttons) => buttons == kPrimaryButton,
+      trackpadScrollToScaleFactor: Offset(0, -1 / widget.scaleFactor),
+      trackpadScrollCausesScale: widget.trackpadScrollCausesScale,
+    )
+      ..gestureSettings = gestureSettings
+      ..onStart = _onScaleStart
+      ..onUpdate = _onScaleUpdate
+      ..onEnd = _onScaleEnd;
+
+    // 在鸿蒙平台上，将 ScaleGestureRecognizer 添加到 GestureArenaTeam 并设置为 captain
+    if (_gestureArenaTeam case final team?) {
+      recognizer.team = team;
+      team.captain = recognizer;
+    }
+
+    return recognizer;
+  }();
 
   final bool _rotateEnabled = false;
 
