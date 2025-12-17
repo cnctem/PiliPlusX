@@ -24,7 +24,7 @@ migrate_working_dir/
 .vscode/
 
 # no ohos
-ohos
+ohos/
 
 # Flutter repo-specific
 /bin/cache/
