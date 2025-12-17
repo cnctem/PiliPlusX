@@ -118,6 +118,7 @@ app.*.map.json
 # Linux
 **/linux/flutter/generated_plugin_registrant.cc
 **/linux/flutter/generated_plugin_registrant.h
+ohos/build-profile.json5
 **/linux/flutter/generated_plugins.cmake
 
 # Coverage

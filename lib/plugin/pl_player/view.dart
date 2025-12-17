@@ -1389,18 +1389,43 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         if (widget.danmuWidget case final danmaku?)
           Positioned.fill(top: 4, child: danmaku),
 
-        // 自定义 Flutter 字幕层（可调节样式），已恢复启用
+        // 自定义 Flutter 字幕层（可调节样式），使底部边距调整即时生效
         if (!isLive)
           Positioned.fill(
-            child: IgnorePointer(
-              ignoring: !plPlayerController.enableDragSubtitle,
-              child: Obx(
-                () => SubtitleView(
-                  controller: videoController,
-                  configuration: plPlayerController.subtitleConfig.value,
-                  //  TODO 待适配 media_kit 拖拽字幕调整底部边距
-                  // enableDragSubtitle: plPlayerController.enableDragSubtitle,
-                  // onUpdatePadding: plPlayerController.onUpdatePadding,
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onVerticalDragUpdate: plPlayerController.enableDragSubtitle
+                  ? (details) {
+                      final current = plPlayerController.subtitlePaddingB +
+                          (-details.delta.dy).round();
+                      final newPadding = current.clamp(0, 200);
+                      plPlayerController.onUpdatePadding(
+                        EdgeInsets.only(bottom: newPadding.toDouble()),
+                      );
+                    }
+                  : null,
+              child: IgnorePointer(
+                ignoring: !plPlayerController.enableDragSubtitle,
+                child: Obx(
+                  () {
+                    final config = plPlayerController.subtitleConfig.value;
+                    // 将 padding 外提，保证设置变更立即生效
+                    final padding = config.padding;
+                    final cfg = SubtitleViewConfiguration(
+                      visible: config.visible,
+                      style: config.style,
+                      textAlign: config.textAlign,
+                      textScaler: config.textScaler,
+                      padding: EdgeInsets.zero,
+                    );
+                    return Padding(
+                      padding: padding,
+                      child: SubtitleView(
+                        controller: videoController,
+                        configuration: cfg,
+                      ),
+                    );
+                  },
                 ),
               ),
             ),

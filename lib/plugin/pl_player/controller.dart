@@ -430,18 +430,19 @@ class PlPlayerController {
   // 播放顺序相关
   late PlayRepeat playRepeat = PlayRepeat.values[Pref.playRepeat];
 
+  // 字幕基准字号（与安卓原版一致）
   TextStyle get subTitleStyle => TextStyle(
-    height: 1.5,
-    fontSize:
-        16 * (isFullScreen.value ? subtitleFontScaleFS : subtitleFontScale),
-    letterSpacing: 0.1,
-    wordSpacing: 0.1,
-    color: Colors.white,
-    fontWeight: FontWeight.values[subtitleFontWeight],
-    backgroundColor: subtitleBgOpacity == 0
-        ? null
-        : Colors.black.withValues(alpha: subtitleBgOpacity),
-  );
+        height: 1.5,
+        fontSize:
+            16 * (isFullScreen.value ? subtitleFontScaleFS : subtitleFontScale),
+        letterSpacing: 0.1,
+        wordSpacing: 0.1,
+        color: Colors.white,
+        fontWeight: FontWeight.values[subtitleFontWeight],
+        backgroundColor: subtitleBgOpacity == 0
+            ? null
+            : Colors.black.withValues(alpha: subtitleBgOpacity),
+      );
 
   late final Rx<SubtitleViewConfiguration> subtitleConfig = _getSubConfig.obs;
 
@@ -449,25 +450,13 @@ class PlPlayerController {
     final subTitleStyle = this.subTitleStyle;
     return SubtitleViewConfiguration(
       style: subTitleStyle,
-      // 恢复描边，使字号观感与 Android 端一致
-      strokeStyle: subtitleBgOpacity == 0
-          ? subTitleStyle.copyWith(
-              color: null,
-              background: null,
-              backgroundColor: null,
-              foreground: Paint()
-                ..color = Colors.black
-                ..style = PaintingStyle.stroke
-                ..strokeWidth = subtitleStrokeWidth,
-            )
-          : null,
       padding: EdgeInsets.only(
         left: subtitlePaddingH.toDouble(),
         right: subtitlePaddingH.toDouble(),
         bottom: subtitlePaddingB.toDouble(),
       ),
-      // 固定缩放，避免在高分辨率设备上被自动缩小
-      textScaleFactor: 1,
+      // 固定文本缩放，防止在大屏上被自动缩小
+      textScaler: const TextScaler.linear(1),
     );
   }
 
