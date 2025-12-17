@@ -1,15 +1,16 @@
-name: Bug 反馈
+name: 鸿蒙版Bug 反馈
 description: 描述你所遇到的bug
-labels: [ "bug" ]
+labels: ["bug"]
 title: "[Bug] "
 body:
-
   - type: checkboxes
     id: checklist
     attributes:
       label: 检查清单
       options:
-        - label: 搜索了 [历史 issue](https://github.com/bggRGjQaUbCoE/PiliPlus/issues?q=is%3Aissue) ，并未发现相同问题
+        - label: 这是此鸿蒙版上出现的Bug，上游(如安卓版本)无此Bug
+          required: true
+        - label: 搜索了 [历史 issue](https://github.com/qinshah/PiliPlus/issues?q=is%3Aissue) ，并未发现相同问题
           required: true
         - label: 正在使用最新版本。
           required: true
@@ -19,7 +20,7 @@ body:
           required: true
         - label: 已排除设置问题
           required: true
-  
+
   - type: checkboxes
     id: assign
     attributes:
@@ -27,13 +28,6 @@ body:
       options:
         - label: self-assign
           required: false
-
-  - type: textarea
-    id: version
-    attributes:
-      label: 版本号
-    validations:
-      required: true
 
   - type: textarea
     id: steps
@@ -60,13 +54,18 @@ body:
       required: true
 
   - type: textarea
+    id: version
+    attributes:
+      label: (可选)版本号
+
+  - type: textarea
     id: log
     attributes:
-      label: 错误日志
+      label: (可选)错误日志
       description: 请提供设置->关于->错误日志中的内容，粘贴在下方代码框中。如果没有，请提供您的app版本号、系统版本、设备型号等相关信息。
 
   - type: textarea
     id: info
     attributes:
-      label: 相关信息
+      label: (可选)相关信息
       description: 请补充截图、录屏、BV号等其他有助于解决问题的信息。

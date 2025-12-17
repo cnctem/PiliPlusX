@@ -1,15 +1,16 @@
-name: 功能请求
-description: 对于功能的一些建议
-labels: [ "enhancement" ]
+name: 鸿蒙适配版功能请求
+description: 对于此鸿蒙适配版功能上的一些建议
+labels: ["enhancement"]
 title: "[FR] "
 body:
-
   - type: checkboxes
     id: checklist
     attributes:
       label: 检查清单
       options:
-        - label: 搜索了 [历史 issue](https://github.com/bggRGjQaUbCoE/PiliPlus/issues?q=is%3Aissue) ，并未发现相同功能请求
+        - label: 确定此功能鸿蒙适配版
+          required: true
+        - label: 搜索了 [历史 issue](https://github.com/qinshah/PiliPlus/issues?q=is%3Aissue) ，并未发现相同功能请求
           required: true
         - label: 正在使用最新版本。
           required: true
