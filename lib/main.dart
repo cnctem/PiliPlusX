@@ -32,6 +32,7 @@ import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
@@ -40,7 +41,7 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:window_manager/window_manager.dart' hide calcWindowPosition;
 
-// WebViewEnvironment? webViewEnvironment;
+WebViewEnvironment? webViewEnvironment;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -136,15 +137,15 @@ void main() async {
     setupServiceLocator(),
   ]);
 
-  // if (Platform.isWindows) {
-  //   if (await WebViewEnvironment.getAvailableVersion() != null) {
-  //     webViewEnvironment = await WebViewEnvironment.create(
-  //       settings: WebViewEnvironmentSettings(
-  //         userDataFolder: path.join(appSupportDirPath, 'flutter_inappwebview'),
-  //       ),
-  //     );
-  //   }
-  // }
+  if (Platform.isWindows) {
+    if (await WebViewEnvironment.getAvailableVersion() != null) {
+      webViewEnvironment = await WebViewEnvironment.create(
+        settings: WebViewEnvironmentSettings(
+          userDataFolder: path.join(appSupportDirPath, 'flutter_inappwebview'),
+        ),
+      );
+    }
+  }
 
   Request();
   Request.setCookie();

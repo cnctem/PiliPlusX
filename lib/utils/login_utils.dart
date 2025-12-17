@@ -3,6 +3,7 @@ import 'dart:io' show Platform;
 
 import 'package:PiliPlus/grpc/grpc_req.dart';
 import 'package:PiliPlus/http/user.dart';
+import 'package:PiliPlus/main.dart';
 import 'package:PiliPlus/models/user/info.dart';
 import 'package:PiliPlus/services/account_service.dart';
 import 'package:PiliPlus/utils/accounts.dart';
@@ -24,7 +25,7 @@ abstract final class LoginUtils {
     }
     final cookies = (account ?? Accounts.main).cookieJar.toList();
     final webManager = web.CookieManager.instance(
-      // webViewEnvironment: webViewEnvironment,
+      webViewEnvironment: webViewEnvironment,
     );
     final isWindows = Platform.isWindows;
     return Future.wait(
@@ -87,7 +88,7 @@ abstract final class LoginUtils {
     return Future.wait([
       if (!Platform.isLinux)
         web.CookieManager.instance(
-          // webViewEnvironment: webViewEnvironment,
+          webViewEnvironment: webViewEnvironment,
         ).deleteAllCookies(),
       GStorage.userInfo.delete('userInfoCache'),
     ]);

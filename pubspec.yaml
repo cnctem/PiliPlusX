@@ -233,6 +233,7 @@ dependencies:
   fixnum: any
   json_annotation: any
   stream_transform: any
+  screen_brightness_ohos: ^2.1.2
   screen_brightness_platform_interface: any
   mime: any
   path: any
@@ -268,6 +269,12 @@ dependency_overrides:
     git:
       url: "https://gitcode.com/openharmony-sig/flutter_inappwebview.git"
       path: "flutter_inappwebview"
+      ref: br_v6.1.5_ohos
+  flutter_inappwebview_platform_interface:
+    git:
+      url: "https://gitcode.com/openharmony-sig/flutter_inappwebview.git"
+      path: "flutter_inappwebview_platform_interface"
+      ref: "br_v6.1.5_ohos"
   auto_orientation: # 自动旋转.鸿蒙适配
     git:
       url: "https://gitcode.com/openharmony-sig/fluttertpc_auto_orientation"

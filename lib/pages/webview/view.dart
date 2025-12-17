@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:PiliPlus/http/ua_type.dart';
+import 'package:PiliPlus/main.dart';
 import 'package:PiliPlus/models/common/webview_menu_type.dart';
 import 'package:PiliPlus/utils/app_scheme.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
@@ -159,7 +160,7 @@ class _WebviewPageState extends State<WebviewPage> {
             ),
       body: SafeArea(
         child: InAppWebView(
-          // webViewEnvironment: webViewEnvironment,
+          webViewEnvironment: webViewEnvironment,
           initialSettings: InAppWebViewSettings(
             clearCache: true,
             javaScriptEnabled: true,
@@ -228,12 +229,12 @@ class _WebviewPageState extends State<WebviewPage> {
                   ''',
               );
             }
-            // _webViewController?.evaluateJavascript(
-            //   source: '''
-            //     document.querySelector('#internationalHeader').remove();
-            //     document.querySelector('#message-navbar').remove();
-            //   ''',
-            // );
+            _webViewController?.evaluateJavascript(
+              source: '''
+                document.querySelector('#internationalHeader').remove();
+                document.querySelector('#message-navbar').remove();
+              ''',
+            );
           },
           onDownloadStartRequest: Platform.isAndroid
               ? (controller, request) {
