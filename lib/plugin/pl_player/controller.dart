@@ -1182,10 +1182,6 @@ class PlPlayerController {
         // 原生返回 rotation 数字或 orientation 字符串，先兼容两种
         final oriVal = event['orientation'];
         final rotVal = event['rotation'];
-        if (rotVal is num && rotVal.toInt() == 2) {
-          // 禁止倒置竖屏 180 度方向
-          return;
-        }
         String? orientation;
         if (oriVal is String) {
           orientation = oriVal;
@@ -1193,6 +1189,12 @@ class PlPlayerController {
           orientation = oriVal % 2 == 1 ? 'landscape' : 'portrait';
         } else {
           return;
+        }
+        // 手动横屏全屏时，忽略竖屏方向，保持左右横向；自动全屏不受限
+        if (_manualLandscapeOnly) {
+          if (orientation == 'portrait') return;
+          // 仅限左右横屏：忽略非 90/270（即 rot=2 倒竖）也屏蔽
+          if (rotVal is num && rotVal.toInt() == 2) return;
         }
 
         if (_manualLandscapeOnly && orientation == 'portrait') {

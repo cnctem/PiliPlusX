@@ -54,9 +54,9 @@ Future<void> exitDesktopFullscreen() async {
 @pragma('vm:notify-debugger-on-exception')
 Future<void> landscape({bool forceLandscape = false}) async {
   if (Utils.isHarmony) {
-    // 始终允许左右横屏（auto_landscape），避免只锁定单一方向
     await _harmonyOrientationChannel.invokeMethod('set', {
-      'orientation': 'auto_landscape',
+      // 手动全屏锁定横向（90/270），自动全屏保持全向（0/90/180/270）
+      'orientation': forceLandscape ? 'auto_landscape' : 'auto',
       'fullscreen': true,
     });
     return;
@@ -70,6 +70,7 @@ Future<void> landscape({bool forceLandscape = false}) async {
   } else {
     await SystemChrome.setPreferredOrientations(const [
       DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
@@ -93,6 +94,7 @@ Future<void> verticalScreenForTwoSeconds({bool forcePortrait = false}) async {
     Future.delayed(const Duration(milliseconds: 500), () {
       SystemChrome.setPreferredOrientations(const [
         DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
         DeviceOrientation.landscapeLeft,
         DeviceOrientation.landscapeRight,
       ]);
@@ -100,6 +102,7 @@ Future<void> verticalScreenForTwoSeconds({bool forcePortrait = false}) async {
   } else {
     await SystemChrome.setPreferredOrientations(const [
       DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
