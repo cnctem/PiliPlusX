@@ -199,6 +199,7 @@ List<SettingsModel> get playSettings => [
     defaultVal: true,
     onChanged: (value) => allowRotateScreen = value,
   ),
+  // TODO 鸿蒙待适配 目前打开此功能，进入后台还是会暂停播放
   const SwitchModel(
     title: '后台播放',
     subtitle: '进入后台时继续播放',

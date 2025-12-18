@@ -1517,8 +1517,9 @@ class PlPlayerController {
     controls = !val;
   }
 
-  void toggleFullScreen(bool val) {
+  void setFullScreen(bool val) {
     isFullScreen.value = val;
+    setHarmonyMiniWindowLandscape(val);
     updateSubtitleStyle();
   }
 
@@ -1583,7 +1584,7 @@ class PlPlayerController {
         }
       }
     } finally {
-      toggleFullScreen(status);
+      setFullScreen(status);
       fsProcessing = false;
     }
   }

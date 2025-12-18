@@ -46,24 +46,38 @@ export default class OrientationPlugin
       result.error('NO_CONTEXT', 'UIAbilityContext is null', null);
       return;
     }
-
-    const orientation: string | null = call.argument('orientation');
-    const fullscreen: boolean = call.argument('fullscreen') ?? false;
-
     switch (call.method) {
+      case 'setMiniWindowLandscape': {
+        const landscape: boolean = call.argument('landscape') ?? false;
+        await this.setMiniWindowLandscape(landscape);
+        result.success(true);
+        break;
+      }
       case 'set': {
+        const orientation: string | null = call.argument('orientation');
+        const fullscreen: boolean = call.argument('fullscreen') ?? false;
         await this.applyOrientation(orientation, fullscreen);
-        result.success(null);
+        result.success(true);
         break;
       }
       case 'reset': {
+        const orientation: string | null = call.argument('orientation');
         await this.applyOrientation(orientation, false);
-        result.success(null);
+        result.success(true);
         break;
       }
       default: {
         result.notImplemented();
       }
+    }
+  }
+
+  private async setMiniWindowLandscape(landscape: boolean) {
+    const lastWindow = await window.getLastWindow(this.context!);
+    if (landscape) {
+      lastWindow.enableLandscapeMultiWindow();
+    } else {
+      lastWindow.disableLandscapeMultiWindow();
     }
   }
 

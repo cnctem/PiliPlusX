@@ -7,6 +7,7 @@ import 'package:PiliPlus/common/widgets/mouse_back.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/models/common/theme/theme_color_type.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
+import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/router/app_pages.dart';
 import 'package:PiliPlus/services/account_service.dart';
 import 'package:PiliPlus/services/download/download_service.dart';
@@ -355,6 +356,23 @@ class MyApp extends StatelessWidget {
             );
           }
           return child;
+          // ignore: dead_code
+          return Stack(
+            children: [
+              child,
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    final isLandscape =
+                        MediaQuery.of(context).orientation ==
+                        Orientation.landscape;
+                    setHarmonyMiniWindowLandscape(!isLandscape);
+                  },
+                  child: const Text('测试鸿蒙小窗横竖屏'),
+                ),
+              ),
+            ],
+          );
         },
       ),
       navigatorObservers: [

@@ -7,7 +7,17 @@ import 'package:auto_orientation/auto_orientation.dart';
 import 'package:flutter/services.dart';
 
 bool _isDesktopFullScreen = false;
-const _orientationChannel = MethodChannel('com.piliplus/orientation');
+const harmonyOrientationChannel = MethodChannel('com.piliplus/orientation');
+
+Future<bool> setHarmonyMiniWindowLandscape(bool landscape) async {
+  final result = await harmonyOrientationChannel.invokeMethod<bool>(
+    'setMiniWindowLandscape',
+    {
+      'landscape': landscape,
+    },
+  );
+  return result ?? false;
+}
 
 @pragma('vm:notify-debugger-on-exception')
 Future<void> enterDesktopFullscreen({bool inAppFullScreen = false}) async {
