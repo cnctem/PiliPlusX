@@ -52,30 +52,66 @@ Future<void> exitDesktopFullscreen() async {
 
 //横屏
 @pragma('vm:notify-debugger-on-exception')
-Future<void> landscape() async {
+Future<void> landscape({bool forceLandscape = false}) async {
   if (Utils.isHarmony) {
     await _harmonyOrientationChannel.invokeMethod('set', {
-      // 使用自动旋转，让系统继续上报传感器方向，便于自动退出全屏
-      'orientation': 'auto',
+      // 手动全屏锁定横屏；自动全屏保持全向，依赖设备当前朝向
+      'orientation': forceLandscape ? 'landscape' : 'auto',
       'fullscreen': true,
     });
     return;
   }
   setHarmonyMiniWindowLandscape(true);
-  await AutoOrientation.landscapeAutoMode(forceSensor: true);
+  if (forceLandscape) {
+    await SystemChrome.setPreferredOrientations(const [
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+  } else {
+    await SystemChrome.setPreferredOrientations(const [
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+  }
 }
 
 //竖屏
-Future<void> verticalScreenForTwoSeconds() async {
+Future<void> verticalScreenForTwoSeconds({bool forcePortrait = false}) async {
   if (Utils.isHarmony) {
-    // 退出全屏后恢复“自动”，让重力感应继续生效
     await _harmonyOrientationChannel.invokeMethod('set', {
-      'orientation': 'auto',
+      'orientation': forcePortrait ? 'portrait' : 'auto',
       'fullscreen': false,
     });
+    if (forcePortrait) {
+      // 短暂锁竖屏后恢复自动，退出全屏可继续重力感应
+      Future.delayed(const Duration(milliseconds: 500), () {
+        _harmonyOrientationChannel.invokeMethod('set', {
+          'orientation': 'auto',
+          'fullscreen': false,
+        });
+      });
+    }
     return;
   }
-  await AutoOrientation.portraitAutoMode(forceSensor: true);
+  if (forcePortrait) {
+    await SystemChrome.setPreferredOrientations(const [
+      DeviceOrientation.portraitUp,
+    ]);
+    Future.delayed(const Duration(milliseconds: 500), () {
+      SystemChrome.setPreferredOrientations(const [
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    });
+  } else {
+    await SystemChrome.setPreferredOrientations(const [
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+  }
   await autoScreen();
   SystemChrome.setEnabledSystemUIMode(
     SystemUiMode.manual,

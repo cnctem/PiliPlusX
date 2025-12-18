@@ -1000,6 +1000,7 @@ class PlPlayerController {
   final Set<Function(Duration position)> _positionListeners = {};
   final Set<Function(PlayerStatus status)> _statusListeners = {};
   bool _rotationUnlocked = false;
+  bool _manualFsLock = false; // 手动全屏后，等待首次横屏再允许自动退出
 
   void enableAutoRotationOnce() {
     if (_rotationUnlocked) return;
@@ -1192,7 +1193,6 @@ class PlPlayerController {
         } else {
           return;
         }
-        
 
         // 仅在播放或暂停且资源已加载后响应，避免未就绪时误触
         final playingOrPaused = playerStatus.value == PlayerStatus.playing ||
@@ -1640,8 +1640,8 @@ class PlPlayerController {
     try {
       mode ??= this.mode;
       this.isManualFS = isManualFS;
-
       if (status) {
+        _manualFsLock = isManualFS;
         if (Utils.isMobile) {
           hideStatusBar();
           if (mode == FullScreenMode.none) {
@@ -1656,21 +1656,22 @@ class PlPlayerController {
               (mode == FullScreenMode.auto && isVertical) ||
               (mode == FullScreenMode.ratio &&
                   (isVertical || size.height / size.width < kScreenRatio)))) {
-            await verticalScreenForTwoSeconds();
+            await verticalScreenForTwoSeconds(forcePortrait: false);
           } else {
-            await landscape();
+            await landscape(forceLandscape: isManualFS);
           }
         } else {
           await enterDesktopFullscreen(inAppFullScreen: inAppFullScreen);
         }
       } else {
+        _manualFsLock = false;
         if (Utils.isMobile) {
           showStatusBar();
           if (mode == FullScreenMode.none) {
             return;
           }
           if (!horizontalScreen) {
-            await verticalScreenForTwoSeconds();
+            await verticalScreenForTwoSeconds(forcePortrait: true);
           } else {
             await autoScreen();
           }
