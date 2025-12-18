@@ -2,8 +2,6 @@ import { FlutterAbility, FlutterEngine } from '@ohos/flutter_ohos';
 import OrientationPlugin from '../orientation/OrientationPlugin';
 import DeviceInfoBridge from '../plugins/DeviceInfoBridge';
 import { GeneratedPluginRegistrant } from '../plugins/GeneratedPluginRegistrant';
-import { display, window } from '@kit.ArkUI';
-// import WindowManagerPlugin from '../plugins/WindowManagerPlugin';
 
 export default class EntryAbility extends FlutterAbility {
   // private windowManagerPlugin: WindowManagerPlugin = new WindowManagerPlugin()
@@ -15,17 +13,17 @@ export default class EntryAbility extends FlutterAbility {
     // flutterEngine.getPlugins()?.add(this.windowManagerPlugin);
   }
 
-  async onWindowStageCreate(windowStage: window.WindowStage): Promise<void> {
-    super.onWindowStageCreate(windowStage)
-    const appWindow = await windowStage.getMainWindow();
-    let callback: Callback<number> = (data: number) => {
-      let orientation = display.getDefaultDisplaySync().orientation
-      if (orientation == 1 || orientation == 3) {
-        appWindow.enableLandscapeMultiWindow();
-      } else {
-        appWindow.disableLandscapeMultiWindow();
-      }
-    };
-    display.on('change', callback)
-  }
+  // async onWindowStageCreate(windowStage: window.WindowStage): Promise<void> {
+  //   super.onWindowStageCreate(windowStage)
+  //   const appWindow = await windowStage.getMainWindow();
+  //   let callback: Callback<number> = (data: number) => {
+  //     let orientation = display.getDefaultDisplaySync().orientation
+  //     if (orientation == 1 || orientation == 3) {
+  //       appWindow.enableLandscapeMultiWindow();
+  //     } else {
+  //       appWindow.disableLandscapeMultiWindow();
+  //     }
+  //   };
+  //   display.on('change', callback)
+  // }
 }

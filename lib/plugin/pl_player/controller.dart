@@ -1519,7 +1519,13 @@ class PlPlayerController {
 
   void setFullScreen(bool val) {
     isFullScreen.value = val;
-    // setHarmonyMiniWindowLandscape(val);
+    if (val) {
+      // 进入全屏，鸿蒙小窗横屏已单独判断
+      // TODO 解决鸿蒙小窗的顶部沉浸问题
+    } else {
+      // 退出全屏，应该、大概、肯定要取消鸿蒙小窗横屏
+      setHarmonyMiniWindowLandscape(false);
+    }
     updateSubtitleStyle();
   }
 

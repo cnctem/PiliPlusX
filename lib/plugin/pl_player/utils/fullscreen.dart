@@ -7,10 +7,11 @@ import 'package:auto_orientation/auto_orientation.dart';
 import 'package:flutter/services.dart';
 
 bool _isDesktopFullScreen = false;
-const harmonyOrientationChannel = MethodChannel('com.piliplus/orientation');
+const _harmonyOrientationChannel = MethodChannel('com.piliplus/orientation');
 
 Future<bool> setHarmonyMiniWindowLandscape(bool landscape) async {
-  final result = await harmonyOrientationChannel.invokeMethod<bool>(
+  if (!Utils.isHarmony) return false;
+  final result = await _harmonyOrientationChannel.invokeMethod<bool>(
     'setMiniWindowLandscape',
     {
       'landscape': landscape,
@@ -46,10 +47,8 @@ Future<void> exitDesktopFullscreen() async {
 //横屏
 @pragma('vm:notify-debugger-on-exception')
 Future<void> landscape() async {
-  // 其它端走原生实现
-  try {
-    await AutoOrientation.landscapeAutoMode(forceSensor: true);
-  } catch (_) {}
+  setHarmonyMiniWindowLandscape(true);
+  await AutoOrientation.landscapeAutoMode(forceSensor: true);
 }
 
 //竖屏
