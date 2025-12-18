@@ -5,9 +5,15 @@ import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:auto_orientation/auto_orientation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:async';
 
 bool _isDesktopFullScreen = false;
 const _harmonyOrientationChannel = MethodChannel('com.piliplus/orientation');
+const _harmonyOrientationEvents = EventChannel('com.piliplus/orientation/events');
+
+// OHOS 方向事件流（横竖信息）
+Stream<Map<String, dynamic>>? _harmonyOrientationStream;
 
 Future<bool> setHarmonyMiniWindowLandscape(bool landscape) async {
   if (!Utils.isHarmony) return false;
@@ -47,18 +53,30 @@ Future<void> exitDesktopFullscreen() async {
 //横屏
 @pragma('vm:notify-debugger-on-exception')
 Future<void> landscape() async {
+  if (Utils.isHarmony) {
+    await _harmonyOrientationChannel.invokeMethod('set', {
+      // 使用自动旋转，让系统继续上报传感器方向，便于自动退出全屏
+      'orientation': 'auto',
+      'fullscreen': true,
+    });
+    return;
+  }
   setHarmonyMiniWindowLandscape(true);
   await AutoOrientation.landscapeAutoMode(forceSensor: true);
 }
 
 //竖屏
 Future<void> verticalScreenForTwoSeconds() async {
+  if (Utils.isHarmony) {
+    // 退出全屏后恢复“自动”，让重力感应继续生效
+    await _harmonyOrientationChannel.invokeMethod('set', {
+      'orientation': 'auto',
+      'fullscreen': false,
+    });
+    return;
+  }
   await AutoOrientation.portraitAutoMode(forceSensor: true);
-
-  // autoScreen()已包含 await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-
   await autoScreen();
-  // 修复鸿蒙上溢出到状态栏
   SystemChrome.setEnabledSystemUIMode(
     SystemUiMode.manual,
     overlays: SystemUiOverlay.values,
@@ -71,6 +89,14 @@ bool allowRotateScreen = Pref.allowRotateScreen;
 Future<void> autoScreen() async {
   if (!allowRotateScreen) return;
 
+  if (Utils.isHarmony) {
+    await _harmonyOrientationChannel.invokeMethod('set', {
+      'orientation': 'auto',
+      'fullscreen': false,
+    });
+    return;
+  }
+
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     // DeviceOrientation.portraitDown,
@@ -80,7 +106,20 @@ Future<void> autoScreen() async {
 }
 
 Future<void> fullAutoModeForceSensor() {
+  if (Utils.isHarmony) {
+    return _harmonyOrientationChannel
+        .invokeMethod('set', {'orientation': 'auto', 'fullscreen': false})
+        .then((_) => null);
+  }
   return AutoOrientation.fullAutoMode();
+}
+
+// 订阅 Harmony 方向事件流
+Stream<Map<String, dynamic>> harmonyOrientationStream() {
+  _harmonyOrientationStream ??= _harmonyOrientationEvents
+      .receiveBroadcastStream()
+      .map((event) => Map<String, dynamic>.from(event as Map));
+  return _harmonyOrientationStream!;
 }
 
 bool _showStatusBar = true;

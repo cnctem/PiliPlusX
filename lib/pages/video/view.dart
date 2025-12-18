@@ -152,7 +152,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     }
 
     videoSourceInit();
-    autoScreen();
 
     WidgetsBinding.instance.addObserver(this);
   }
@@ -201,6 +200,21 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       introController.cancelTimer();
       ctr.showDanmaku = false;
     }
+  }
+
+  // 兜底：窗口尺寸变化时根据宽高比推送方向，避免原生事件取不到横屏
+  Orientation? _lastMetricsOrientation;
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    if (!Utils.isHarmony) return;
+    final view = WidgetsBinding.instance.platformDispatcher.views.first;
+    final size = view.physicalSize;
+    final o =
+        size.width > size.height ? Orientation.landscape : Orientation.portrait;
+    if (_lastMetricsOrientation == o) return;
+    _lastMetricsOrientation = o;
+    plPlayerController?.handleDeviceOrientation(o);
   }
 
   void playCallBack() {

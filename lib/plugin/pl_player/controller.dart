@@ -999,6 +999,15 @@ class PlPlayerController {
   Set<StreamSubscription> subscriptions = {};
   final Set<Function(Duration position)> _positionListeners = {};
   final Set<Function(PlayerStatus status)> _statusListeners = {};
+  bool _rotationUnlocked = false;
+
+  void enableAutoRotationOnce() {
+    if (_rotationUnlocked) return;
+    _rotationUnlocked = true;
+    if (allowRotateScreen) {
+      unawaited(autoScreen());
+    }
+  }
 
   /// 播放事件监听
   void startListeners() {
@@ -1007,6 +1016,9 @@ class PlPlayerController {
       controllerStream.playing.listen((event) {
         WakelockPlus.toggle(enable: event);
         if (event) {
+          if (Utils.isHarmony) {
+            enableAutoRotationOnce();
+          }
           if (_shouldSetPip) {
             if (_isCurrVideoPage) {
               enterPip(isAuto: true);
@@ -1158,6 +1170,63 @@ class PlPlayerController {
         }),
       ],
     };
+    debugPrint('33333');
+
+    // Harmony 手机/平板：监听方向流，自动进入/退出全屏
+    if (Utils.isHarmony && !Utils.isDesktop) {
+      debugPrint('44444');
+      final sub = harmonyOrientationStream().listen((event) {
+        if (!_rotationUnlocked) return;
+        // 原生返回 rotation 数字或 orientation 字符串，先兼容两种
+        final oriVal = event['orientation'];
+        final rotVal = event['rotation'];
+        if (rotVal is num && rotVal.toInt() == 2) {
+          // 禁止倒置竖屏 180 度方向
+          return;
+        }
+        String? orientation;
+        if (oriVal is String) {
+          orientation = oriVal;
+        } else if (oriVal is num) {
+          orientation = oriVal % 2 == 1 ? 'landscape' : 'portrait';
+        } else {
+          return;
+        }
+        
+
+        // 仅在播放或暂停且资源已加载后响应，避免未就绪时误触
+        final playingOrPaused = playerStatus.value == PlayerStatus.playing ||
+            playerStatus.value == PlayerStatus.paused;
+        if (!playingOrPaused || dataStatus.status.value != DataStatus.loaded) {
+          return;
+        }
+        
+
+        final mode = FullScreenMode.values[Pref.fullScreenMode];
+        if (mode == FullScreenMode.none) return;
+
+        final videoIsVertical = isVertical;
+        debugPrint('55555');
+        debugPrint('event=$orientation isFull=${isFullScreen.value} '
+      'videoIsVertical=$videoIsVertical mode=${FullScreenMode.values[Pref.fullScreenMode]} '
+      'horizontalLock=$horizontalScreen');
+
+        if (orientation == 'landscape' &&
+            !videoIsVertical &&
+            !isFullScreen.value) {
+          debugPrint('11111');
+          triggerFullScreen(status: true, isManualFS: false);
+        } else if (orientation == 'portrait' &&
+            isFullScreen.value &&
+            !horizontalScreen &&
+            !isManualFS) {
+          // 只有自动进入的全屏才自动退出，避免手动全屏被瞬间打断
+          debugPrint('22222');
+          triggerFullScreen(status: false, isManualFS: false);
+        }
+      });
+      subscriptions.add(sub);
+    }
   }
 
   /// 移除事件监听
@@ -1252,6 +1321,26 @@ class PlPlayerController {
     await _videoPlayerController?.setRate(playSpeedDefault);
     _playbackSpeed.value = playSpeedDefault;
   }
+
+  // 提供给外部（如页面尺寸变化）调用的方向处理，便于自动全屏/退出
+  void handleDeviceOrientation(Orientation orientation) {
+    if (!Utils.isHarmony) return;
+    // 简化：横屏则尝试全屏，竖屏则尝试退出
+    final mode = FullScreenMode.values[Pref.fullScreenMode];
+    if (mode == FullScreenMode.none) return;
+    final videoIsVertical = isVertical;
+    if (orientation == Orientation.landscape &&
+        !videoIsVertical &&
+        !isFullScreen.value) {
+      triggerFullScreen(status: true, isManualFS: false);
+    } else if (orientation == Orientation.portrait &&
+        isFullScreen.value &&
+        !horizontalScreen) {
+      triggerFullScreen(status: false, isManualFS: false);
+    }
+  }
+
+
 
   /// 播放视频
   Future<void> play({bool repeat = false, bool hideControls = true}) async {
