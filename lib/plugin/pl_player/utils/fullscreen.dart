@@ -80,18 +80,32 @@ Future<void> landscape({bool forceLandscape = false}) async {
 //竖屏
 Future<void> verticalScreenForTwoSeconds({bool forcePortrait = false}) async {
   if (Utils.isHarmony) {
-    // 退出时恢复全向自动，让后续竖屏半屏可自由旋转
-    await _harmonyOrientationChannel.invokeMethod('set', {
-      'orientation': 'auto',
-      'fullscreen': false,
-    });
+    if (forcePortrait) {
+      // 先强制竖屏，稍后再恢复自动
+      await _harmonyOrientationChannel.invokeMethod('set', {
+        'orientation': 'portrait',
+        'fullscreen': false,
+      });
+      Future.delayed(const Duration(milliseconds: 800), () {
+        _harmonyOrientationChannel.invokeMethod('set', {
+          'orientation': 'auto',
+          'fullscreen': false,
+        });
+      });
+    } else {
+      // 直接恢复自动
+      await _harmonyOrientationChannel.invokeMethod('set', {
+        'orientation': 'auto',
+        'fullscreen': false,
+      });
+    }
     return;
   }
   if (forcePortrait) {
     await SystemChrome.setPreferredOrientations(const [
       DeviceOrientation.portraitUp,
     ]);
-    Future.delayed(const Duration(milliseconds: 500), () {
+    Future.delayed(const Duration(milliseconds: 800), () {
       SystemChrome.setPreferredOrientations(const [
         DeviceOrientation.portraitUp,
         DeviceOrientation.portraitDown,
