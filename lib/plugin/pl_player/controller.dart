@@ -1519,7 +1519,7 @@ class PlPlayerController {
 
   void setFullScreen(bool val) {
     isFullScreen.value = val;
-    setHarmonyMiniWindowLandscape(val);
+    // setHarmonyMiniWindowLandscape(val);
     updateSubtitleStyle();
   }
 
