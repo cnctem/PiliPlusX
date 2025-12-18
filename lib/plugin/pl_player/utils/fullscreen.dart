@@ -54,15 +54,20 @@ Future<void> landscape() async {
 //竖屏
 Future<void> verticalScreenForTwoSeconds() async {
   await AutoOrientation.portraitAutoMode(forceSensor: true);
-  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
+  // autoScreen()已包含 await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   await autoScreen();
+  // 修复鸿蒙上溢出到状态栏
+  SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.manual,
+    overlays: SystemUiOverlay.values,
+  );
 }
 
 //全向
 bool allowRotateScreen = Pref.allowRotateScreen;
 
-/// 应该是设置自动旋转时调用，但代码就是设置允许应用方向为横屏和正向竖屏
 Future<void> autoScreen() async {
   if (!allowRotateScreen) return;
 
