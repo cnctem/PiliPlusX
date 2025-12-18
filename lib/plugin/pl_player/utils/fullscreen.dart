@@ -54,9 +54,9 @@ Future<void> exitDesktopFullscreen() async {
 @pragma('vm:notify-debugger-on-exception')
 Future<void> landscape({bool forceLandscape = false}) async {
   if (Utils.isHarmony) {
+    // 始终允许左右横屏（auto_landscape），避免只锁定单一方向
     await _harmonyOrientationChannel.invokeMethod('set', {
-      // 手动全屏锁定横屏；自动全屏保持全向，依赖设备当前朝向
-      'orientation': forceLandscape ? 'landscape' : 'auto',
+      'orientation': 'auto_landscape',
       'fullscreen': true,
     });
     return;
@@ -79,19 +79,11 @@ Future<void> landscape({bool forceLandscape = false}) async {
 //竖屏
 Future<void> verticalScreenForTwoSeconds({bool forcePortrait = false}) async {
   if (Utils.isHarmony) {
+    // 退出时恢复全向自动，让后续竖屏半屏可自由旋转
     await _harmonyOrientationChannel.invokeMethod('set', {
-      'orientation': forcePortrait ? 'portrait' : 'auto',
+      'orientation': 'auto',
       'fullscreen': false,
     });
-    if (forcePortrait) {
-      // 短暂锁竖屏后恢复自动，退出全屏可继续重力感应
-      Future.delayed(const Duration(milliseconds: 500), () {
-        _harmonyOrientationChannel.invokeMethod('set', {
-          'orientation': 'auto',
-          'fullscreen': false,
-        });
-      });
-    }
     return;
   }
   if (forcePortrait) {
