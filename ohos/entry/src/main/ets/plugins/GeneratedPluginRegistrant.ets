@@ -1,4 +1,5 @@
 import { FlutterEngine, Log } from '@ohos/flutter_ohos';
+import FloatingPlugin from 'floating';
 import AudioSessionPlugin from 'audio_session';
 import InAppWebViewFlutterPlugin from 'flutter_inappwebview_ohos';
 import ImagePickerPlugin from 'image_picker_ohos';
@@ -31,6 +32,7 @@ export class GeneratedPluginRegistrant {
 
   static registerWith(flutterEngine: FlutterEngine) {
     try {
+      flutterEngine.getPlugins()?.add(new FloatingPlugin());
       flutterEngine.getPlugins()?.add(new AudioSessionPlugin());
       flutterEngine.getPlugins()?.add(new InAppWebViewFlutterPlugin());
       flutterEngine.getPlugins()?.add(new ImagePickerPlugin());

@@ -207,7 +207,7 @@ List<SettingsModel> get playSettings => [
     setKey: SettingBoxKey.continuePlayInBackground,
     defaultVal: false,
   ),
-  if (Platform.isAndroid) ...[
+  if (Platform.isAndroid || Utils.isHarmony) ...[
     SwitchModel(
       title: '后台画中画',
       subtitle: '进入后台时以小窗形式（PiP）播放',

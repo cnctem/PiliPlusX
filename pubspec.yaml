@@ -167,9 +167,9 @@ dependencies:
   # floating: ^3.0.0
   floating:
     git:
-      url: https://github.com/bggRGjQaUbCoE/floating.git
-      ref: version-3
-  # html解析
+      url: https://github.com/qinshah/floating.git
+      ref: harmony
+    # html解析
   html: ^0.15.4
   # html渲染
   flutter_html: ^3.0.0-beta.2
