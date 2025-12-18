@@ -1001,6 +1001,7 @@ class PlPlayerController {
   final Set<Function(PlayerStatus status)> _statusListeners = {};
   bool _rotationUnlocked = false;
   bool _manualFsLock = false; // 手动全屏后，等待首次横屏再允许自动退出
+  bool _manualLandscapeOnly = false;
 
   void enableAutoRotationOnce() {
     if (_rotationUnlocked) return;
@@ -1191,6 +1192,10 @@ class PlPlayerController {
         } else if (oriVal is num) {
           orientation = oriVal % 2 == 1 ? 'landscape' : 'portrait';
         } else {
+          return;
+        }
+
+        if (_manualLandscapeOnly && orientation == 'portrait') {
           return;
         }
 
@@ -1642,6 +1647,7 @@ class PlPlayerController {
       this.isManualFS = isManualFS;
       if (status) {
         _manualFsLock = isManualFS;
+        _manualLandscapeOnly = isManualFS && !isVertical;
         if (Utils.isMobile) {
           hideStatusBar();
           if (mode == FullScreenMode.none) {
@@ -1665,6 +1671,7 @@ class PlPlayerController {
         }
       } else {
         _manualFsLock = false;
+        _manualLandscapeOnly = false;
         if (Utils.isMobile) {
           showStatusBar();
           if (mode == FullScreenMode.none) {
