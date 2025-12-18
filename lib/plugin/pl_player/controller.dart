@@ -432,17 +432,17 @@ class PlPlayerController {
 
   // 字幕基准字号（与安卓原版一致）
   TextStyle get subTitleStyle => TextStyle(
-        height: 1.5,
-        fontSize:
-            16 * (isFullScreen.value ? subtitleFontScaleFS : subtitleFontScale),
-        letterSpacing: 0.1,
-        wordSpacing: 0.1,
-        color: Colors.white,
-        fontWeight: FontWeight.values[subtitleFontWeight],
-        backgroundColor: subtitleBgOpacity == 0
-            ? null
-            : Colors.black.withValues(alpha: subtitleBgOpacity),
-      );
+    height: 1.5,
+    fontSize:
+        16 * (isFullScreen.value ? subtitleFontScaleFS : subtitleFontScale),
+    letterSpacing: 0.1,
+    wordSpacing: 0.1,
+    color: Colors.white,
+    fontWeight: FontWeight.values[subtitleFontWeight],
+    backgroundColor: subtitleBgOpacity == 0
+        ? null
+        : Colors.black.withValues(alpha: subtitleBgOpacity),
+  );
 
   late final Rx<SubtitleViewConfiguration> subtitleConfig = _getSubConfig.obs;
 
@@ -928,12 +928,13 @@ class PlPlayerController {
       if (dataSource.audioSource.isNullOrEmpty) {
         SmartDialog.showToast('音频源为空');
       } else {
-        await (_videoPlayerController!.platform!).maybeAsNativePlayer.setProperty(
-          'audio-files',
-          Platform.isWindows
-              ? dataSource.audioSource!.replaceAll(';', '\\;')
-              : dataSource.audioSource!.replaceAll(':', '\\:'),
-        );
+        await (_videoPlayerController!.platform!).maybeAsNativePlayer
+            .setProperty(
+              'audio-files',
+              Platform.isWindows
+                  ? dataSource.audioSource!.replaceAll(';', '\\;')
+                  : dataSource.audioSource!.replaceAll(':', '\\:'),
+            );
       }
     }
     await _videoPlayerController!.open(
@@ -1335,7 +1336,7 @@ class PlPlayerController {
     if (this.volume.value != volume) {
       this.volume.value = volume;
       try {
-        // TODO: 鸿蒙 调整系统音量
+        // TODO 鸿蒙待适配 鸿蒙调整系统音量
         if (Utils.isDesktop || Utils.isHarmony) {
           _videoPlayerController!.setVolume(volume * 100);
         } else {

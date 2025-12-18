@@ -363,6 +363,7 @@ class AccountManager extends Interceptor {
       case DioExceptionType.unknown:
         String desc;
         try {
+          // TODO 鸿蒙待适配 Connectivity Checks the connection status of the device.
           // 在 OHOS 上调用 Connectivity 可能因权限未授予而报 201，直接跳过。
           if (Utils.isHarmony) {
             desc = '';

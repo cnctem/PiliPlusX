@@ -724,6 +724,7 @@ List<SettingsModel> get extraSettings => [
     leading: const Icon(MdiIcons.dragVariant),
     setKey: SettingBoxKey.enableDragSubtitle,
     defaultVal: false,
+    // TODO 鸿蒙待适配 适配后删除提示
     onChanged: (_) => SmartDialog.showToast('鸿蒙待适配 不生效'),
   ),
   const SwitchModel(

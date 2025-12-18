@@ -36,12 +36,6 @@ Future<void> exitDesktopFullscreen() async {
 //横屏
 @pragma('vm:notify-debugger-on-exception')
 Future<void> landscape() async {
-  // Harmony 端优先依赖 auto_orientation（已适配 OHOS）
-  if (Utils.isHarmony) {
-    await AutoOrientation.landscapeAutoMode(forceSensor: true);
-    return;
-  }
-
   // 其它端走原生实现
   try {
     await AutoOrientation.landscapeAutoMode(forceSensor: true);
@@ -50,40 +44,28 @@ Future<void> landscape() async {
 
 //竖屏
 Future<void> verticalScreenForTwoSeconds() async {
-  if (Utils.isHarmony) {
-    await AutoOrientation.portraitAutoMode(forceSensor: true);
-    await autoScreen();
-    return;
-  }
-
+  await AutoOrientation.portraitAutoMode(forceSensor: true);
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
   await autoScreen();
 }
 
 //全向
 bool allowRotateScreen = Pref.allowRotateScreen;
+
+/// 应该是设置自动旋转时调用，但代码就是设置允许应用方向为横屏和正向竖屏
 Future<void> autoScreen() async {
   if (!allowRotateScreen) return;
 
-  if (Utils.isHarmony) {
-    await AutoOrientation.fullAutoMode();
-    return;
-  }
-
-  if (Utils.isMobile) {
-    await SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      // DeviceOrientation.portraitDown,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
-  }
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    // DeviceOrientation.portraitDown,
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
 }
 
 Future<void> fullAutoModeForceSensor() {
-  if (Utils.isHarmony) {
-    return AutoOrientation.fullAutoMode();
-  }
   return AutoOrientation.fullAutoMode();
 }
 

@@ -104,8 +104,9 @@ abstract class ImageUtils {
     required int width,
     required int height,
   }) async {
+    // TODO 鸿蒙待适配 下载Live Photo
     if (Utils.isHarmony) {
-      SmartDialog.showToast('当前平台暂不支持 Live Photo 下载');
+      SmartDialog.showToast('鸿蒙平台暂不支持 Live Photo 下载');
       return false;
     }
     try {
