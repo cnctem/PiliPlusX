@@ -27,6 +27,10 @@
     {
       "name": "read_imagevideo_reason",
       "value": "用于读取相册图片"
+    },
+    {
+      "name": "keep_background_running_reason",
+      "value": "用于在后台继续播放音频"
     }
   ]
 }

@@ -63,6 +63,9 @@ import 'package:window_manager/window_manager.dart';
 class PlPlayerController {
   Player? _videoPlayerController;
   VideoController? _videoController;
+  static const MethodChannel _bgChannel = MethodChannel(
+    'com.piliplus/background',
+  );
 
   // 添加一个私有静态变量来保存实例
   static PlPlayerController? _instance;
@@ -105,9 +108,7 @@ class PlPlayerController {
   late final RxDouble _longPressSpeed = Pref.longPressSpeedDefault.obs;
 
   /// 音量控制条
-  final RxDouble volume = RxDouble(
-    Utils.isDesktop ? Pref.desktopVolume : 1.0,
-  );
+  final RxDouble volume = RxDouble(Utils.isDesktop ? Pref.desktopVolume : 1.0);
   final setSystemBrightness = Pref.setSystemBrightness;
 
   /// 亮度控制条
@@ -350,9 +351,10 @@ class PlPlayerController {
   late double danmakuStaticDuration = Pref.danmakuStaticDuration;
   late List<double> speedList = Pref.speedList;
   late bool enableAutoLongPressSpeed = Pref.enableAutoLongPressSpeed;
-  late final showControlDuration = Pref.enableLongShowControl
-      ? const Duration(seconds: 30)
-      : const Duration(seconds: 3);
+  late final showControlDuration =
+      Pref.enableLongShowControl
+          ? const Duration(seconds: 30)
+          : const Duration(seconds: 3);
   late double subtitleFontScale = Pref.subtitleFontScale;
   late double subtitleFontScaleFS = Pref.subtitleFontScaleFS;
   late double danmakuLineHeight = Pref.danmakuLineHeight;
@@ -371,10 +373,11 @@ class PlPlayerController {
   late final double blockLimit = Pref.blockLimit;
   late final blockSettings = Pref.blockSettings;
   late final List<Color> blockColor = Pref.blockColor;
-  late final Set<String> enableList = blockSettings
-      .where((item) => item.second != SkipType.disable)
-      .map((item) => item.first.name)
-      .toSet();
+  late final Set<String> enableList =
+      blockSettings
+          .where((item) => item.second != SkipType.disable)
+          .map((item) => item.first.name)
+          .toSet();
 
   // settings
   late final showFSActionItem = Pref.showFSActionItem;
@@ -420,9 +423,8 @@ class PlPlayerController {
   late final fullScreenGestureReverse = Pref.fullScreenGestureReverse;
 
   late final isRelative = Pref.useRelativeSlide;
-  late final offset = isRelative
-      ? Pref.sliderDuration / 100
-      : Pref.sliderDuration * 1000;
+  late final offset =
+      isRelative ? Pref.sliderDuration / 100 : Pref.sliderDuration * 1000;
 
   num get sliderScale =>
       isRelative ? duration.value.inMilliseconds * offset : offset;
@@ -439,9 +441,10 @@ class PlPlayerController {
     wordSpacing: 0.1,
     color: Colors.white,
     fontWeight: FontWeight.values[subtitleFontWeight],
-    backgroundColor: subtitleBgOpacity == 0
-        ? null
-        : Colors.black.withValues(alpha: subtitleBgOpacity),
+    backgroundColor:
+        subtitleBgOpacity == 0
+            ? null
+            : Colors.black.withValues(alpha: subtitleBgOpacity),
   );
 
   late final Rx<SubtitleViewConfiguration> subtitleConfig = _getSubConfig.obs;
@@ -516,6 +519,13 @@ class PlPlayerController {
   // try to get PlayerStatus
   static PlayerStatus? getPlayerStatusIfExists() {
     return _instance?.playerStatus.value;
+  }
+
+  Future<void> _syncHarmonyBgRunning(bool enable) async {
+    if (!Utils.isHarmony) return;
+    try {
+      await _bgChannel.invokeMethod('enableBackground', {'enable': enable});
+    } catch (_) {}
   }
 
   static Future<void> pauseIfExists({
@@ -663,8 +673,8 @@ class PlPlayerController {
       );
       // 获取视频时长 00:00
       this.duration.value = duration ?? _videoPlayerController!.state.duration;
-      position.value = buffered.value = sliderPosition.value =
-          seekTo ?? Duration.zero;
+      position.value =
+          buffered.value = sliderPosition.value = seekTo ?? Duration.zero;
       updateDurationSecond();
       updatePositionSecond();
       updateSliderPositionSecond();
@@ -785,12 +795,17 @@ class PlPlayerController {
         Player(
           configuration: PlayerConfiguration(
             // 默认缓冲 4M 大小
-            bufferSize: Pref.expandBuffer
-                ? (isLive ? 64 * 1024 * 1024 : 32 * 1024 * 1024)
-                : (isLive ? 16 * 1024 * 1024 : 4 * 1024 * 1024),
+            bufferSize:
+                Pref.expandBuffer
+                    ? (isLive ? 64 * 1024 * 1024 : 32 * 1024 * 1024)
+                    : (isLive ? 16 * 1024 * 1024 : 4 * 1024 * 1024),
             logLevel: kDebugMode ? MPVLogLevel.warn : MPVLogLevel.error,
           ),
         );
+    // 初次创建播放器时，根据后台播放开关同步 Harmony 后台任务状态
+    if (_videoPlayerController == null) {
+      _syncHarmonyBgRunning(continuePlayInBackground.value);
+    }
     final pp = player.platform!.maybeAsNativePlayer;
     if (_videoPlayerController == null) {
       if (Utils.isDesktop) {
@@ -802,9 +817,8 @@ class PlPlayerController {
       await pp.setProperty("af", "scaletempo2=max-speed=8");
       if (Platform.isAndroid) {
         await pp.setProperty("volume-max", "100");
-        String ao = Pref.useOpenSLES
-            ? "opensles,audiotrack"
-            : "audiotrack,opensles";
+        String ao =
+            Pref.useOpenSLES ? "opensles,audiotrack" : "audiotrack,opensles";
         await pp.setProperty("ao", ao);
       }
       // video-sync=display-resample
@@ -829,13 +843,15 @@ class PlPlayerController {
     // 音轨
     late final String audioUri;
     if (isFileSource) {
-      audioUri = onlyPlayAudio.value || mediaType == 1
-          ? ''
-          : path.join(dirPath!, typeTag!, PathUtils.audioNameType2);
+      audioUri =
+          onlyPlayAudio.value || mediaType == 1
+              ? ''
+              : path.join(dirPath!, typeTag!, PathUtils.audioNameType2);
     } else if (dataSource.audioSource?.isNotEmpty == true) {
-      audioUri = Platform.isWindows
-          ? dataSource.audioSource!.replaceAll(';', '\\;')
-          : dataSource.audioSource!.replaceAll(':', '\\:');
+      audioUri =
+          Platform.isWindows
+              ? dataSource.audioSource!.replaceAll(';', '\\;')
+              : dataSource.audioSource!.replaceAll(':', '\\:');
     } else {
       audioUri = '';
     }
@@ -861,14 +877,10 @@ class PlPlayerController {
         audioNormalization = audioNormalization.replaceFirstMapped(
           loudnormRegExp,
           (i) =>
-              'loudnorm=${volume.format(
-                Map.fromEntries(
-                  i.group(1)!.split(':').map((item) {
-                    final parts = item.split('=');
-                    return MapEntry(parts[0].toLowerCase(), num.parse(parts[1]));
-                  }),
-                ),
-              )}',
+              'loudnorm=${volume.format(Map.fromEntries(i.group(1)!.split(':').map((item) {
+                final parts = item.split('=');
+                return MapEntry(parts[0].toLowerCase(), num.parse(parts[1]));
+              })))}',
         );
       } else {
         audioNormalization = audioNormalization.replaceFirst(
@@ -876,9 +888,10 @@ class PlPlayerController {
           AudioNormalization.getParamFromConfig(Pref.fallbackNormalization),
         );
       }
-      filters = audioNormalization.isEmpty
-          ? null
-          : {'lavfi-complex': '"[aid1] $audioNormalization [ao]"'};
+      filters =
+          audioNormalization.isEmpty
+              ? null
+              : {'lavfi-complex': '"[aid1] $audioNormalization [ao]"'};
     } else {
       filters = null;
     }
@@ -1849,6 +1862,7 @@ class PlPlayerController {
     _videoController = null;
     _instance = null;
     videoPlayerServiceHandler?.clear();
+    await _syncHarmonyBgRunning(false);
   }
 
   static void updatePlayCount() {
@@ -1867,6 +1881,11 @@ class PlPlayerController {
         continuePlayInBackground.value,
       );
     }
+    _syncHarmonyBgRunning(continuePlayInBackground.value);
+  }
+
+  Future<void> ensureBgRunningIfNeeded() async {
+    await _syncHarmonyBgRunning(continuePlayInBackground.value);
   }
 
   void setOnlyPlayAudio() {
