@@ -288,7 +288,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         }
       }
       // 播放完展示控制栏
-      if (Platform.isAndroid && !notExitFlag) {
+      if ((Platform.isAndroid || Utils.isHarmony) && !notExitFlag) {
         PiPStatus currentStatus = await Floating().pipStatus;
         if (currentStatus == PiPStatus.disabled) {
           plPlayerController!.onLockControl(false);
