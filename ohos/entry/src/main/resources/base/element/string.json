@@ -19,6 +19,10 @@
     {
       "name": "perm_get_wifi_info_reason",
       "value": "用于读取 Wi‑Fi 连接信息，优化视频播放的网络选择。"
+    },
+    {
+      "name": "write_imagevideo_reason",
+      "value": "用于读取写入图片"
     }
   ]
 }

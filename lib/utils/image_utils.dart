@@ -14,6 +14,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart' as igs;
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:live_photo_maker/live_photo_maker.dart';
 import 'package:saver_gallery/saver_gallery.dart';
@@ -293,7 +294,29 @@ abstract class ImageUtils {
   }) async {
     SaveResult? result;
     fileName += '.$ext';
-    if (Utils.isMobile) {
+    if (Utils.isHarmony) {
+      // pixez 同款：优先 image_gallery_saver，失败再回退 saver_gallery
+      SmartDialog.showLoading(msg: '正在保存');
+      Map<dynamic, dynamic>? res;
+      bool ok = false;
+      try {
+        res = await igs.ImageGallerySaver.saveImage(bytes, name: fileName);
+        ok = res?['isSuccess'] == true;
+      } catch (_) {}
+      if (!ok) {
+        result = await SaverGallery.saveImage(
+          bytes,
+          fileName: fileName,
+          androidRelativePath: _androidRelativePath,
+          skipIfExists: false,
+        );
+        ok = result.isSuccess;
+      } else {
+        result = SaveResult(true, null);
+      }
+      SmartDialog.dismiss();
+      SmartDialog.showToast(ok ? ' 已保存 ' : '保存失败');
+    } else if (Utils.isMobile) {
       SmartDialog.showLoading(msg: '正在保存');
       result = await SaverGallery.saveImage(
         bytes,
@@ -337,7 +360,28 @@ abstract class ImageUtils {
       return;
     }
     SaveResult? result;
-    if (Utils.isMobile) {
+    if (Utils.isHarmony) {
+      final bytes = await file.readAsBytes();
+      Map<dynamic, dynamic>? res;
+      bool ok = false;
+      try {
+        res = await igs.ImageGallerySaver.saveImage(bytes, name: fileName);
+        ok = res?['isSuccess'] == true;
+      } catch (_) {}
+      if (!ok) {
+        final r = await SaverGallery.saveImage(
+          bytes,
+          fileName: fileName,
+          androidRelativePath: _androidRelativePath,
+          skipIfExists: false,
+        );
+        result = SaveResult(r.isSuccess, r.errorMessage);
+        ok = r.isSuccess;
+      } else {
+        result = SaveResult(true, null);
+      }
+      if (del) file.tryDel();
+    } else if (Utils.isMobile) {
       result = await SaverGallery.saveFile(
         filePath: filePath,
         fileName: fileName,

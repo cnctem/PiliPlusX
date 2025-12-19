@@ -11,6 +11,10 @@
     {
       "name": "EntryAbility_label",
       "value": "PiliPlus"
+    },
+    {
+      "name": "write_imagevideo_reason",
+      "value": "用于保存图片/视频到相册。"
     }
   ]
 }

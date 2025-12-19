@@ -53,6 +53,9 @@ dependencies:
   cached_network_image: ^3.4.1
   # extended_image: ^9.0.7
   saver_gallery: ^4.1.0
+  image_gallery_saver:
+    git:
+      url: https://github.com/bgli100/flutter_image_gallery_saver_ohos.git
 
   # QRCode
   # qr_flutter: ^4.1.0

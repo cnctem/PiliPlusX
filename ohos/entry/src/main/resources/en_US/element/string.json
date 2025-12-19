@@ -11,6 +11,10 @@
     {
       "name": "EntryAbility_label",
       "value": "PiliPlus"
+    },
+    {
+      "name": "write_imagevideo_reason",
+      "value": "Allow saving images/videos to gallery."
     }
   ]
 }
