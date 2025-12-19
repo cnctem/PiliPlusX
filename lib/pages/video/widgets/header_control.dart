@@ -2722,6 +2722,11 @@ class HeaderControlState extends State<HeaderControl>
                       padding: WidgetStatePropertyAll(EdgeInsets.zero),
                     ),
                     onPressed: () async {
+                      if (!kDebugMode && Utils.isHarmony) {
+                        // TODO
+                        SmartDialog.showToast('鸿蒙待适配');
+                        return;
+                      }
                       if (Utils.isDesktop) {
                         plPlayerController.toggleDesktopPip();
                         return;

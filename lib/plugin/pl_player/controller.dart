@@ -223,7 +223,7 @@ class PlPlayerController {
 
   late final bool autoPiP = Pref.autoPiP;
   bool get isPipMode =>
-      (Platform.isAndroid && Floating().isPipMode) ||
+      ((Platform.isAndroid || Utils.isHarmony) && Floating().isPipMode) ||
       (Utils.isDesktop && isDesktopPip);
   late bool isDesktopPip = false;
   late Rect _lastWindowBounds;
@@ -1202,21 +1202,23 @@ class PlPlayerController {
         }
 
         // 仅在播放或暂停且资源已加载后响应，避免未就绪时误触
-        final playingOrPaused = playerStatus.value == PlayerStatus.playing ||
+        final playingOrPaused =
+            playerStatus.value == PlayerStatus.playing ||
             playerStatus.value == PlayerStatus.paused;
         if (!playingOrPaused || dataStatus.status.value != DataStatus.loaded) {
           return;
         }
-        
 
         final mode = FullScreenMode.values[Pref.fullScreenMode];
         if (mode == FullScreenMode.none) return;
 
         final videoIsVertical = isVertical;
         debugPrint('55555');
-        debugPrint('event=$orientation isFull=${isFullScreen.value} '
-      'videoIsVertical=$videoIsVertical mode=${FullScreenMode.values[Pref.fullScreenMode]} '
-      'horizontalLock=$horizontalScreen');
+        debugPrint(
+          'event=$orientation isFull=${isFullScreen.value} '
+          'videoIsVertical=$videoIsVertical mode=${FullScreenMode.values[Pref.fullScreenMode]} '
+          'horizontalLock=$horizontalScreen',
+        );
 
         if (orientation == 'landscape' &&
             !videoIsVertical &&
@@ -1346,8 +1348,6 @@ class PlPlayerController {
       triggerFullScreen(status: false, isManualFS: false);
     }
   }
-
-
 
   /// 播放视频
   Future<void> play({bool repeat = false, bool hideControls = true}) async {
