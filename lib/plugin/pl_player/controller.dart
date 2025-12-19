@@ -560,6 +560,12 @@ class PlPlayerController {
       enableHeart = false;
     }
 
+    // 记录初始窗口面积，用于判断是否处于小窗（面积显著缩小时）
+    if (Utils.isHarmony) {
+      final size = ui.window.physicalSize;
+      _baselineArea ??= size.width * size.height;
+    }
+
     if (Platform.isAndroid && autoPiP) {
       Utils.sdkInt.then((sdkInt) {
         if (sdkInt < 31) {
@@ -1344,9 +1350,19 @@ class PlPlayerController {
     _playbackSpeed.value = playSpeedDefault;
   }
 
+  double? _baselineArea;
+  bool get _isMiniWindow {
+    if (_baselineArea == null) return false;
+    final size = ui.window.physicalSize;
+    final area = size.width * size.height;
+    return area < _baselineArea! * 0.8;
+  }
+
   // 提供给外部（如页面尺寸变化）调用的方向处理，便于自动全屏/退出
   void handleDeviceOrientation(Orientation orientation) {
     if (!Utils.isHarmony) return;
+    // 小窗模式下不响应自动全屏/退出
+    if (_isMiniWindow) return;
     // 简化：横屏则尝试全屏，竖屏则尝试退出
     final mode = FullScreenMode.values[Pref.fullScreenMode];
     if (mode == FullScreenMode.none) return;
