@@ -12,6 +12,7 @@
     ],
     "deliveryWithInstall": true,
     "installationFree": false,
+    "backgroundModes": ["audioPlayback"],
     "pages": "$profile:main_pages",
     "abilities": [
       {
