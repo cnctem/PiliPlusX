@@ -150,6 +150,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   StreamSubscription? _controlsListener;
 
   bool _pauseDueToPauseUponEnteringBackgroundMode = false;
+  bool _resumeForBackground = false;
 
   @override
   void initState() {
@@ -286,6 +287,18 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         AppLifecycleState.detached,
       ].contains(state)) {
         plPlayerController.ensureBgRunningIfNeeded();
+        final player = plPlayerController.videoController?.player;
+        if (player != null && player.state.playing) {
+          _resumeForBackground = true;
+          Future.microtask(() {
+            if (_resumeForBackground) {
+              player.play();
+            }
+          });
+        }
+      }
+      if (state == AppLifecycleState.resumed) {
+        _resumeForBackground = false;
       }
     }
   }

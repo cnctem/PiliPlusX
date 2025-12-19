@@ -12,7 +12,6 @@
     ],
     "deliveryWithInstall": true,
     "installationFree": false,
-    "backgroundModes": ["audioPlayback"],
     "pages": "$profile:main_pages",
     "abilities": [
       {
@@ -24,6 +23,7 @@
         "startWindowIcon": "$media:icon_startwindow",
         "startWindowBackground": "$color:start_window_background",
         "exported": true,
+        "backgroundModes": ["audioPlayback"],
         "orientation": "auto_rotation_unspecified",
         "preferMultiWindowOrientation": "landscape_auto",
         "skills": [
