@@ -23,6 +23,10 @@
     {
       "name": "write_imagevideo_reason",
       "value": "用于读取写入图片"
+    },
+    {
+      "name": "read_imagevideo_reason",
+      "value": "用于读取相册图片"
     }
   ]
 }

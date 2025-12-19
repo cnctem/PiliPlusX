@@ -1427,6 +1427,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "9.4.7"
+  permission_handler_ohos:
+    dependency: "direct main"
+    description:
+      name: permission_handler_ohos
+      sha256: "47b6df831738b9634b9a647ae5b961545700c93cb4e98c52c2173e9296d659ee"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.0.8"
   permission_handler_platform_interface:
     dependency: "direct main"
     description:

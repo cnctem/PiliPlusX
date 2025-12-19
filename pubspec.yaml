@@ -74,6 +74,7 @@ dependencies:
   permission_handler_apple: ^9.4.7
   permission_handler_android: ^13.0.1
   permission_handler_platform_interface: ^4.3.0
+  permission_handler_ohos: ^0.0.8
   # 分享
   share_plus: ^10.1.1
   # cookie 管理

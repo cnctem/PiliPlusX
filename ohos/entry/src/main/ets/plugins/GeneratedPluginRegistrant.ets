@@ -17,6 +17,7 @@ import BatteryPlusOhosPlugin from 'battery_plus_ohos';
 import ConnectivityPlusOhosPlugin from 'connectivity_plus_ohos';
 import DeviceInfoPlusPlugin from 'device_info_plus_ohos';
 import PackageInfoPlusPlugin from 'package_info_plus_ohos';
+import PermissionHandlerOhosPlugin from 'permission_handler_ohos';
 import SaverGalleryPlugin from 'saver_gallery';
 import ScreenBrightnessOhosPlugin from 'screen_brightness_ohos';
 import WakelockPlugin from 'wakelock_plus_ohos';
@@ -51,6 +52,7 @@ export class GeneratedPluginRegistrant {
       flutterEngine.getPlugins()?.add(new ConnectivityPlusOhosPlugin());
       flutterEngine.getPlugins()?.add(new DeviceInfoPlusPlugin());
       flutterEngine.getPlugins()?.add(new PackageInfoPlusPlugin());
+      flutterEngine.getPlugins()?.add(new PermissionHandlerOhosPlugin());
       flutterEngine.getPlugins()?.add(new SaverGalleryPlugin());
       flutterEngine.getPlugins()?.add(new ScreenBrightnessOhosPlugin());
       flutterEngine.getPlugins()?.add(new WakelockPlugin());

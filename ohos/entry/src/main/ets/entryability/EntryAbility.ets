@@ -1,7 +1,12 @@
 import { FlutterAbility, FlutterEngine } from '@ohos/flutter_ohos';
+import type Want from '@ohos.app.ability.Want';
+import AbilityConstant from '@ohos.app.ability.AbilityConstant';
 import OrientationPlugin from '../orientation/OrientationPlugin';
 import DeviceInfoBridge from '../plugins/DeviceInfoBridge';
 import { GeneratedPluginRegistrant } from '../plugins/GeneratedPluginRegistrant';
+import abilityAccessCtrl from '@ohos.abilityAccessCtrl';
+import type { Permissions } from '@ohos.abilityAccessCtrl';
+import hilog from '@ohos.hilog';
 
 export default class EntryAbility extends FlutterAbility {
   // private windowManagerPlugin: WindowManagerPlugin = new WindowManagerPlugin()
@@ -11,6 +16,10 @@ export default class EntryAbility extends FlutterAbility {
     flutterEngine.getPlugins()?.add(new OrientationPlugin());
     flutterEngine.getPlugins()?.add(new DeviceInfoBridge());
     // flutterEngine.getPlugins()?.add(this.windowManagerPlugin);
+  }
+
+  onCreate(want: Want, launchParam: AbilityConstant.LaunchParam) {
+    super.onCreate(want, launchParam);
   }
 
   // async onWindowStageCreate(windowStage: window.WindowStage): Promise<void> {
