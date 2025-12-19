@@ -1631,6 +1631,12 @@ class PlPlayerController {
     if (val) {
       // 进入全屏，鸿蒙小窗横屏已单独判断
       // TODO 解决鸿蒙小窗的顶部沉浸问题
+      // Harmony 场景：仅横屏视频才开启小窗横屏能力，竖屏视频保持竖屏
+      if (!isVertical) {
+        setHarmonyMiniWindowLandscape(true);
+      } else {
+        setHarmonyMiniWindowLandscape(false);
+      }
     } else {
       // 退出全屏，应该、大概、肯定要取消鸿蒙小窗横屏
       setHarmonyMiniWindowLandscape(false);

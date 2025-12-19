@@ -204,12 +204,17 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   // 兜底：窗口尺寸变化时根据宽高比推送方向，避免原生事件取不到横屏
   Orientation? _lastMetricsOrientation;
+  double? _baselineArea;
   @override
   void didChangeMetrics() {
     super.didChangeMetrics();
     if (!Utils.isHarmony) return;
     final view = WidgetsBinding.instance.platformDispatcher.views.first;
     final size = view.physicalSize;
+    final area = size.width * size.height;
+    // 记录初始窗口面积作为基准，进入小窗时面积骤减，跳过方向推送以免打断小窗内部的方向逻辑
+    _baselineArea ??= area;
+    if (area < _baselineArea! * 0.8) return;
     final o =
         size.width > size.height ? Orientation.landscape : Orientation.portrait;
     if (_lastMetricsOrientation == o) return;
