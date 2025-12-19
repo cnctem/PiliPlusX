@@ -435,8 +435,9 @@ class PlPlayerController {
   // 字幕基准字号（与安卓原版一致）
   TextStyle get subTitleStyle => TextStyle(
     height: 1.5,
-    fontSize:
-        16 * (isFullScreen.value ? subtitleFontScaleFS : subtitleFontScale),
+    fontSize: 16 *
+        (isFullScreen.value ? subtitleFontScaleFS : subtitleFontScale) *
+        _subtitleMiniFactor,
     letterSpacing: 0.1,
     wordSpacing: 0.1,
     color: Colors.white,
@@ -465,6 +466,20 @@ class PlPlayerController {
 
   void updateSubtitleStyle() {
     subtitleConfig.value = _getSubConfig;
+  }
+
+  /// 根据当前窗口尺寸刷新字幕/弹幕字号（小窗时减半）
+  void refreshTextSizes() {
+    updateSubtitleStyle();
+    final ctr = danmakuController;
+    if (ctr != null) {
+      final isFs = isFullScreen.value;
+      ctr.updateOption(
+        ctr.option.copyWith(
+          fontSize: _danmakuFontSize(isFullScreen: isFs),
+        ),
+      );
+    }
   }
 
   void onUpdatePadding(EdgeInsets padding) {
@@ -1356,6 +1371,12 @@ class PlPlayerController {
     final size = ui.window.physicalSize;
     final area = size.width * size.height;
     return area < _baselineArea! * 0.8;
+  }
+  bool get isMiniWindow => _isMiniWindow;
+  double get _subtitleMiniFactor => _isMiniWindow ? 0.5 : 1.0;
+  double _danmakuFontSize({required bool isFullScreen}) {
+    final baseScale = isFullScreen ? danmakuFontScaleFS : danmakuFontScale;
+    return 15 * baseScale * (_isMiniWindow ? 0.5 : 1.0);
   }
 
   // 提供给外部（如页面尺寸变化）调用的方向处理，便于自动全屏/退出

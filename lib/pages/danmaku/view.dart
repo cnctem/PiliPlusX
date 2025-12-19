@@ -77,9 +77,13 @@ class _PlDanmakuState extends State<PlDanmaku> {
     );
   }
 
-  double get _fontSize => !widget.isFullScreen || widget.isPipMode
-      ? 15 * playerController.danmakuFontScale
-      : 15 * playerController.danmakuFontScaleFS;
+  double get _fontSize {
+    final base = (!widget.isFullScreen || widget.isPipMode)
+        ? playerController.danmakuFontScale
+        : playerController.danmakuFontScaleFS;
+    final miniFactor = playerController.isMiniWindow ? 0.5 : 1.0;
+    return 15 * base * miniFactor;
+  }
 
   // 播放器状态监听
   void playerListener(PlayerStatus? status) {

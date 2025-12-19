@@ -214,6 +214,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     final area = size.width * size.height;
     // 记录初始窗口面积作为基准，进入小窗时面积骤减，跳过方向推送以免打断小窗内部的方向逻辑
     _baselineArea ??= area;
+    plPlayerController?.refreshTextSizes();
     if (area < _baselineArea! * 0.8) return;
     final o =
         size.width > size.height ? Orientation.landscape : Orientation.portrait;
