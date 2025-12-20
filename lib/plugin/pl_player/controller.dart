@@ -433,20 +433,48 @@ class PlPlayerController {
   late PlayRepeat playRepeat = PlayRepeat.values[Pref.playRepeat];
 
   // 字幕基准字号（与安卓原版一致）
-  TextStyle get subTitleStyle => TextStyle(
-    height: 1.5,
-    fontSize: 16 *
-        (isFullScreen.value ? subtitleFontScaleFS : subtitleFontScale) *
-        _subtitleMiniFactor,
-    letterSpacing: 0.1,
-    wordSpacing: 0.1,
-    color: Colors.white,
-    fontWeight: FontWeight.values[subtitleFontWeight],
-    backgroundColor:
-        subtitleBgOpacity == 0
-            ? null
-            : Colors.black.withValues(alpha: subtitleBgOpacity),
-  );
+  // TextStyle get subTitleStyle => TextStyle(
+  //   height: 1.5,
+  //   // 小窗字号不再额外折半，保持与当前场景一致
+  //   fontSize: 16 *
+  //       (isFullScreen.value ? subtitleFontScaleFS : subtitleFontScale),
+  //   letterSpacing: 0.1,
+  //   wordSpacing: 0.1,
+  //   color: Colors.white,
+  //   fontWeight: FontWeight.values[subtitleFontWeight],
+  //   backgroundColor:
+  //       subtitleBgOpacity == 0
+  //           ? null
+  //           : Colors.black.withValues(alpha: subtitleBgOpacity),
+  // );
+
+  TextStyle get subTitleStyle {
+    final bool isMobile = Utils.isMobile;
+    final bool isTablet = Pref.isTablet;
+    final bool isPhone  = isMobile && !isTablet;
+    final bool fs       = isFullScreen.value;
+    final bool mini     = _isMiniWindow;
+
+    final double scale = isPhone
+        ? ((fs && !mini) ? subtitleFontScaleFS : subtitleFontScale)  // 手机：小窗永远普通
+        : (fs ? subtitleFontScaleFS : subtitleFontScale);            // 平板/桌面：全屏永远FS
+
+    return TextStyle(
+      height: 1.5,
+      fontSize: 16 * scale * _subtitleMiniFactor,
+      letterSpacing: 0.1,
+      wordSpacing: 0.1,
+      color: Colors.white,
+      fontWeight: FontWeight.values[subtitleFontWeight],
+      backgroundColor: subtitleBgOpacity == 0
+          ? null
+          : Colors.black.withValues(alpha: subtitleBgOpacity),
+    );
+  }
+
+
+
+
 
   late final Rx<SubtitleViewConfiguration> subtitleConfig = _getSubConfig.obs;
 
@@ -468,7 +496,7 @@ class PlPlayerController {
     subtitleConfig.value = _getSubConfig;
   }
 
-  /// 根据当前窗口尺寸刷新字幕/弹幕字号（小窗时减半）
+  /// 根据当前窗口尺寸刷新字幕/弹幕字号
   void refreshTextSizes() {
     updateSubtitleStyle();
     final ctr = danmakuController;
@@ -1206,11 +1234,11 @@ class PlPlayerController {
         }),
       ],
     };
-    debugPrint('33333');
+
 
     // Harmony 手机/平板：监听方向流，自动进入/退出全屏
     if (Utils.isHarmony && !Utils.isDesktop) {
-      debugPrint('44444');
+
       final sub = harmonyOrientationStream().listen((event) {
         if (!_rotationUnlocked) return;
         // 原生返回 rotation 数字或 orientation 字符串，先兼容两种
@@ -1247,24 +1275,20 @@ class PlPlayerController {
         if (mode == FullScreenMode.none) return;
 
         final videoIsVertical = isVertical;
-        debugPrint('55555');
-        debugPrint(
-          'event=$orientation isFull=${isFullScreen.value} '
-          'videoIsVertical=$videoIsVertical mode=${FullScreenMode.values[Pref.fullScreenMode]} '
-          'horizontalLock=$horizontalScreen',
-        );
+
+
 
         if (orientation == 'landscape' &&
             !videoIsVertical &&
             !isFullScreen.value) {
-          debugPrint('11111');
+
           triggerFullScreen(status: true, isManualFS: false);
         } else if (orientation == 'portrait' &&
             isFullScreen.value &&
             !horizontalScreen &&
             !isManualFS) {
           // 只有自动进入的全屏才自动退出，避免手动全屏被瞬间打断
-          debugPrint('22222');
+
           triggerFullScreen(status: false, isManualFS: false);
         }
       });
@@ -1373,10 +1397,17 @@ class PlPlayerController {
     return area < _baselineArea! * 0.8;
   }
   bool get isMiniWindow => _isMiniWindow;
-  double get _subtitleMiniFactor => _isMiniWindow ? 0.5 : 1.0;
+  double get _subtitleMiniFactor => 1;
   double _danmakuFontSize({required bool isFullScreen}) {
-    final baseScale = isFullScreen ? danmakuFontScaleFS : danmakuFontScale;
-    return 15 * baseScale * (_isMiniWindow ? 0.5 : 1.0);
+    final bool isMobile = Utils.isMobile;
+    final bool isTablet = Pref.isTablet;
+    final bool isPhone  = isMobile && !isTablet;
+    final bool mini     = _isMiniWindow;
+    final baseScale = isPhone
+        ? ((isFullScreen && !mini) ? danmakuFontScaleFS : danmakuFontScale)  // 手机：小窗永远普通
+        : (isFullScreen ? danmakuFontScaleFS : danmakuFontScale);            // 平板/桌面：全屏永远FS
+
+    return 15 * baseScale;
   }
 
   // 提供给外部（如页面尺寸变化）调用的方向处理，便于自动全屏/退出

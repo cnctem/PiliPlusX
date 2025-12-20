@@ -49,6 +49,7 @@ void main() async {
   MediaKit.ensureInitialized();
   if (Utils.isHarmony) {
     await Utils.initHarmonyDeviceType();
+    print('Device= ${await Utils.harmonyDeviceType}');
   }
   tmpDirPath = (await getTemporaryDirectory()).path;
   appSupportDirPath = (await getApplicationSupportDirectory()).path;

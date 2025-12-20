@@ -7,6 +7,11 @@ import BackgroundPlugin from '../plugins/BackgroundPlugin';
 import { GeneratedPluginRegistrant } from '../plugins/GeneratedPluginRegistrant';
 // abilityAccessCtrl/hilog 已在后台插件内部使用，这里无需引入
 
+import { deviceInfo } from '@kit.BasicServicesKit';
+let devicetypeinfo: string = deviceInfo.deviceType;
+console.info('deviceType is '+ devicetypeinfo);
+
+
 export default class EntryAbility extends FlutterAbility {
   // private windowManagerPlugin: WindowManagerPlugin = new WindowManagerPlugin()
   configureFlutterEngine(flutterEngine: FlutterEngine) {

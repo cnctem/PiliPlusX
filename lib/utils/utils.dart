@@ -18,7 +18,7 @@ abstract class Utils {
 
   static const channel = MethodChannel(Constants.appName);
 
-  @pragma("vm:platform-const")
+  // @pragma("vm:platform-const")
   // Harmony 设备类型缓存（通过 MethodChannel 异步获取）
   static String? _harmonyDeviceType;
 
@@ -26,11 +26,15 @@ abstract class Utils {
   static Future<void> initHarmonyDeviceType() async {
     if (!isHarmony || _harmonyDeviceType != null) return;
     try {
-      _harmonyDeviceType ??= await const MethodChannel(
+      var type = await const MethodChannel(
         'com.piliplus/device_info',
-      ).invokeMethod<String>('DeviceType');
-    } catch (_) {
-      // 保持 null，后续调用仍可重试。
+      ).invokeMethod('DeviceType');
+      print('initDeviceType: $type');
+      
+      _harmonyDeviceType = type;
+      print('initDevice=: $_harmonyDeviceType');
+    } catch (e) {
+      print('initDeviceType error: $e');
     }
   }
 
@@ -38,6 +42,7 @@ abstract class Utils {
     await initHarmonyDeviceType();
     return _harmonyDeviceType;
   }
+  static String? get harmonyDeviceTypeCached => _harmonyDeviceType;
 
   // 基础判定：Android / iOS / Harmony 手机/平板
   static Future<bool> get isHarmonyMobile async {
