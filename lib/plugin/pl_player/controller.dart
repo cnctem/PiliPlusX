@@ -1385,14 +1385,27 @@ class PlPlayerController {
 
   double? _baselineArea;
   bool get _isMiniWindow {
-    // 若首次计算，记录当前窗口面积作为基线
+    // 当前窗口面积
     final size = ui.window.physicalSize;
     final area = size.width * size.height;
-    _baselineArea = math.max(_baselineArea ?? 0, area);
+
+    // 使用物理屏幕面积作为基准，避免在小窗首次计算时基准过小
+    try {
+      final view = ui.PlatformDispatcher.instance.views.first;
+      final display = view.display ?? ui.PlatformDispatcher.instance.displays.first;
+      final screenSize = display.size;
+      final screenArea = screenSize.width * screenSize.height;
+      if (screenArea > 0) {
+        _baselineArea = math.max(_baselineArea ?? 0, screenArea);
+      }
+    } catch (_) {
+      _baselineArea = math.max(_baselineArea ?? 0, area);
+    }
 
     // Harmony 平板小窗缩放比例相对较小，放宽判定阈值
     final factor = Utils.isHarmony ? 0.95 : 0.8;
-    return area < (_baselineArea ?? area) * factor;
+    final baseline = _baselineArea ?? area;
+    return area < baseline * factor;
   }
 
   bool get isMiniWindow => _isMiniWindow;
@@ -1402,14 +1415,13 @@ class PlPlayerController {
     final bool isTablet = Pref.isTablet;
     final bool isPhone = isMobile && !isTablet;
     final bool mini = _isMiniWindow;
-    final baseScale = isPhone
+    final double baseScale = isPhone
         ? ((isFullScreen && !mini)
-              ? danmakuFontScaleFS
-              : danmakuFontScale) // 手机：小窗永远普通
+            ? danmakuFontScaleFS
+            : danmakuFontScale) // 手机：小窗永远普通字号
         : (isFullScreen
-              ? danmakuFontScaleFS
-              : danmakuFontScale); // 平板/桌面：全屏永远FS
-
+            ? danmakuFontScaleFS
+            : danmakuFontScale); // 平板/桌面：全屏使用全屏字号
     return 15 * baseScale;
   }
 

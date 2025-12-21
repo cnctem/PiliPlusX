@@ -386,7 +386,11 @@ class _LiveRoomPageState extends State<LiveRoomPage>
       final isFullScreen = this.isFullScreen ||
           plPlayerController.isDesktopPip ||
           plPlayerController.isMiniWindow;
-      return Stack(
+      final mediaSize = MediaQuery.sizeOf(context);
+      final bool miniBySize =
+          maxHeight < mediaSize.height * 0.9 || maxWidth < mediaSize.width * 0.9;
+      final bool mini = plPlayerController.isMiniWindow || miniBySize;
+      Widget stack = Stack(
         clipBehavior: Clip.none,
         children: [
           const SizedBox.expand(child: ColoredBox(color: Colors.black)),
@@ -420,7 +424,8 @@ class _LiveRoomPageState extends State<LiveRoomPage>
           Scaffold(
             resizeToAvoidBottomInset: false,
             backgroundColor: Colors.transparent,
-            appBar: _buildAppBar(isFullScreen),
+            // 小窗模式下移除 AppBar，防止保留系统栏导致黑条
+            appBar: mini ? null : _buildAppBar(isFullScreen),
             body: isPortrait
                 ? Obx(
                     () {
@@ -434,6 +439,17 @@ class _LiveRoomPageState extends State<LiveRoomPage>
           ),
         ],
       );
+      if (mini) {
+        stack = MediaQuery.removeViewPadding(
+          context: context,
+          removeTop: true,
+          removeLeft: true,
+          removeRight: true,
+          removeBottom: true,
+          child: stack,
+        );
+      }
+      return stack;
     });
   }
 

@@ -1406,10 +1406,15 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   @override
   Widget build(BuildContext context) {
+    final mediaSize = MediaQuery.sizeOf(context);
+    final bool miniWindowBySize =
+        maxHeight < mediaSize.height * 0.9 || maxWidth < mediaSize.width * 0.9;
+
     // 在小窗模式下，系统状态栏/安全区会导致上方出现黑条。
     // 此处对 padding 重新赋值：小窗时去掉安全区，非小窗保持原始值。
     final bool miniWindow =
-        videoDetailController.plPlayerController.isMiniWindow;
+        videoDetailController.plPlayerController.isMiniWindow ||
+            miniWindowBySize;
     padding = miniWindow ? EdgeInsets.zero : MediaQuery.viewPaddingOf(context);
 
     Widget child;
