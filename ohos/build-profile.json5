@@ -5,13 +5,13 @@
         "name": "default",
         "type": "HarmonyOS",
         "material": {
-          "certpath": "/Users/qshh/.ohos/config/default_ohos_1llWdKLAUrUnUDVa7Iw4XtVOrvqcENacpnPtwak6xJg=.cer",
+          "certpath": "/Users/qshh/.ohos/config/default_ohos_CZbO9MPL6UNlJA8SWbmNGsNNhGGQQVUCUnqtaQDHCYM=.cer",
           "keyAlias": "debugKey",
-          "keyPassword": "0000001BEA08482448EB411F5E47917501B0C13727210864496BA095B177166632BAD7D6C5047DFD7D9E24",
-          "profile": "/Users/qshh/.ohos/config/default_ohos_1llWdKLAUrUnUDVa7Iw4XtVOrvqcENacpnPtwak6xJg=.p7b",
+          "keyPassword": "0000001BD9AF8A6F704C22A9837990321FBA6B8B4D909D454A69B462505DF029072ECEFC07C137678C9E57",
+          "profile": "/Users/qshh/.ohos/config/default_ohos_CZbO9MPL6UNlJA8SWbmNGsNNhGGQQVUCUnqtaQDHCYM=.p7b",
           "signAlg": "SHA256withECDSA",
-          "storeFile": "/Users/qshh/.ohos/config/default_ohos_1llWdKLAUrUnUDVa7Iw4XtVOrvqcENacpnPtwak6xJg=.p12",
-          "storePassword": "0000001B0159ED001C218AC72C8B856FCE48B81B0BA836A7D1A79B49DCB6098CF4360117604D6423FF41C6"
+          "storeFile": "/Users/qshh/.ohos/config/default_ohos_CZbO9MPL6UNlJA8SWbmNGsNNhGGQQVUCUnqtaQDHCYM=.p12",
+          "storePassword": "0000001B000EAF4AD594CCA84ED9D57943A73DFC73CB61121AC7427415F643818D7E8B8E74DF1755FAA1BB"
         }
       }
     ],

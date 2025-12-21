@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:PiliPlus/adapt/harmony_volume.dart';
 import 'package:PiliPlus/build_config.dart';
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/widgets/custom_toast.dart';
@@ -7,7 +8,6 @@ import 'package:PiliPlus/common/widgets/mouse_back.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/models/common/theme/theme_color_type.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
-import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/router/app_pages.dart';
 import 'package:PiliPlus/services/account_service.dart';
 import 'package:PiliPlus/services/download/download_service.dart';
@@ -47,10 +47,7 @@ WebViewEnvironment? webViewEnvironment;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
-  if (Utils.isHarmony) {
-    await Utils.initHarmonyDeviceType();
-    print('Device= ${await Utils.harmonyDeviceType}');
-  }
+  if (Utils.isHarmony) await Utils.initHarmonyDeviceType();
   tmpDirPath = (await getTemporaryDirectory()).path;
   appSupportDirPath = (await getApplicationSupportDirectory()).path;
   try {
@@ -356,22 +353,22 @@ class MyApp extends StatelessWidget {
               ),
             );
           }
-          return child;
+          return Stack(
+            children: [
+              // 看不见的地方加一个鸿蒙原生音量控件，
+              if (Utils.isHarmony)
+                HarmonyVolumeView(
+                  onCreated: (cntlr) => HarmonyVolumeView.cntlr = cntlr,
+                ),
+              child,
+            ],
+          );
+          // 调试代码用
           // ignore: dead_code
           return Stack(
             children: [
               child,
-              Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    final isLandscape =
-                        MediaQuery.of(context).orientation ==
-                        Orientation.landscape;
-                    setHarmonyMiniWindowLandscape(!isLandscape);
-                  },
-                  child: const Text('测试鸿蒙小窗横竖屏'),
-                ),
-              ),
+              const Center(),
             ],
           );
         },

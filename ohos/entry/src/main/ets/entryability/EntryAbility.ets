@@ -5,6 +5,8 @@ import OrientationPlugin from '../orientation/OrientationPlugin';
 import DeviceInfoBridge from '../plugins/DeviceInfoBridge';
 import BackgroundPlugin from '../plugins/BackgroundPlugin';
 import { GeneratedPluginRegistrant } from '../plugins/GeneratedPluginRegistrant';
+import { VolumeFactory } from './VolumeFactory';
+
 // abilityAccessCtrl/hilog 已在后台插件内部使用，这里无需引入
 
 import { deviceInfo } from '@kit.BasicServicesKit';
@@ -13,14 +15,16 @@ console.info('deviceType is '+ devicetypeinfo);
 
 
 export default class EntryAbility extends FlutterAbility {
-  // private windowManagerPlugin: WindowManagerPlugin = new WindowManagerPlugin()
   configureFlutterEngine(flutterEngine: FlutterEngine) {
     super.configureFlutterEngine(flutterEngine)
+    flutterEngine.getPlatformViewsController()?.getRegistry().registerViewFactory(
+      'AVVolumePanel',
+      new VolumeFactory(flutterEngine.dartExecutor.getBinaryMessenger())
+    )
     GeneratedPluginRegistrant.registerWith(flutterEngine)
     flutterEngine.getPlugins()?.add(new OrientationPlugin());
     flutterEngine.getPlugins()?.add(new DeviceInfoBridge());
     flutterEngine.getPlugins()?.add(new BackgroundPlugin());
-    // flutterEngine.getPlugins()?.add(this.windowManagerPlugin);
   }
 
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam) {

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:math' show max, min;
 import 'dart:ui' as ui;
 
+import 'package:PiliPlus/adapt/harmony_volume.dart';
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -319,9 +320,13 @@ class PlPlayerController {
 
   void disableAutoEnterPip() {
     if (_shouldSetPip) {
-      Utils.channel.invokeMethod('setPipAutoEnterEnabled', {
-        'autoEnable': false,
-      });
+      if (Utils.isHarmony) {
+        Floating().setAutoPip(false);
+      } else {
+        Utils.channel.invokeMethod('setPipAutoEnterEnabled', {
+          'autoEnable': false,
+        });
+      }
     }
   }
 
@@ -351,10 +356,9 @@ class PlPlayerController {
   late double danmakuStaticDuration = Pref.danmakuStaticDuration;
   late List<double> speedList = Pref.speedList;
   late bool enableAutoLongPressSpeed = Pref.enableAutoLongPressSpeed;
-  late final showControlDuration =
-      Pref.enableLongShowControl
-          ? const Duration(seconds: 30)
-          : const Duration(seconds: 3);
+  late final showControlDuration = Pref.enableLongShowControl
+      ? const Duration(seconds: 30)
+      : const Duration(seconds: 3);
   late double subtitleFontScale = Pref.subtitleFontScale;
   late double subtitleFontScaleFS = Pref.subtitleFontScaleFS;
   late double danmakuLineHeight = Pref.danmakuLineHeight;
@@ -373,11 +377,10 @@ class PlPlayerController {
   late final double blockLimit = Pref.blockLimit;
   late final blockSettings = Pref.blockSettings;
   late final List<Color> blockColor = Pref.blockColor;
-  late final Set<String> enableList =
-      blockSettings
-          .where((item) => item.second != SkipType.disable)
-          .map((item) => item.first.name)
-          .toSet();
+  late final Set<String> enableList = blockSettings
+      .where((item) => item.second != SkipType.disable)
+      .map((item) => item.first.name)
+      .toSet();
 
   // settings
   late final showFSActionItem = Pref.showFSActionItem;
@@ -423,8 +426,9 @@ class PlPlayerController {
   late final fullScreenGestureReverse = Pref.fullScreenGestureReverse;
 
   late final isRelative = Pref.useRelativeSlide;
-  late final offset =
-      isRelative ? Pref.sliderDuration / 100 : Pref.sliderDuration * 1000;
+  late final offset = isRelative
+      ? Pref.sliderDuration / 100
+      : Pref.sliderDuration * 1000;
 
   num get sliderScale =>
       isRelative ? duration.value.inMilliseconds * offset : offset;
@@ -451,13 +455,13 @@ class PlPlayerController {
   TextStyle get subTitleStyle {
     final bool isMobile = Utils.isMobile;
     final bool isTablet = Pref.isTablet;
-    final bool isPhone  = isMobile && !isTablet;
-    final bool fs       = isFullScreen.value;
-    final bool mini     = _isMiniWindow;
+    final bool isPhone = isMobile && !isTablet;
+    final bool fs = isFullScreen.value;
+    final bool mini = _isMiniWindow;
 
     final double scale = isPhone
-        ? ((fs && !mini) ? subtitleFontScaleFS : subtitleFontScale)  // 手机：小窗永远普通
-        : (fs ? subtitleFontScaleFS : subtitleFontScale);            // 平板/桌面：全屏永远FS
+        ? ((fs && !mini) ? subtitleFontScaleFS : subtitleFontScale) // 手机：小窗永远普通
+        : (fs ? subtitleFontScaleFS : subtitleFontScale); // 平板/桌面：全屏永远FS
 
     return TextStyle(
       height: 1.5,
@@ -471,10 +475,6 @@ class PlPlayerController {
           : Colors.black.withValues(alpha: subtitleBgOpacity),
     );
   }
-
-
-
-
 
   late final Rx<SubtitleViewConfiguration> subtitleConfig = _getSubConfig.obs;
 
@@ -603,26 +603,27 @@ class PlPlayerController {
       enableHeart = false;
     }
 
-    // 记录初始窗口面积，用于判断是否处于小窗（面积显著缩小时）
-    if (Utils.isHarmony) {
-      final size = ui.window.physicalSize;
-      _baselineArea ??= size.width * size.height;
-    }
-
-    if (Platform.isAndroid && autoPiP) {
-      Utils.sdkInt.then((sdkInt) {
-        if (sdkInt < 31) {
-          Utils.channel.setMethodCallHandler((call) async {
-            if (call.method == 'onUserLeaveHint') {
-              if (playerStatus.playing && _isCurrVideoPage) {
-                enterPip();
+    if (autoPiP) {
+      if (Utils.isHarmony) {
+        _shouldSetPip = true;
+        // 记录初始窗口面积，用于判断是否处于小窗（面积显著缩小时）
+        final size = ui.window.physicalSize;
+        _baselineArea ??= size.width * size.height;
+      } else if (Platform.isAndroid) {
+        Utils.sdkInt.then((sdkInt) {
+          if (sdkInt < 31) {
+            Utils.channel.setMethodCallHandler((call) async {
+              if (call.method == 'onUserLeaveHint') {
+                if (playerStatus.playing && _isCurrVideoPage) {
+                  enterPip();
+                }
               }
-            }
-          });
-        } else {
-          _shouldSetPip = true;
-        }
-      });
+            });
+          } else {
+            _shouldSetPip = true;
+          }
+        });
+      }
     }
   }
 
@@ -722,8 +723,8 @@ class PlPlayerController {
       );
       // 获取视频时长 00:00
       this.duration.value = duration ?? _videoPlayerController!.state.duration;
-      position.value =
-          buffered.value = sliderPosition.value = seekTo ?? Duration.zero;
+      position.value = buffered.value = sliderPosition.value =
+          seekTo ?? Duration.zero;
       updateDurationSecond();
       updatePositionSecond();
       updateSliderPositionSecond();
@@ -844,10 +845,9 @@ class PlPlayerController {
         Player(
           configuration: PlayerConfiguration(
             // 默认缓冲 4M 大小
-            bufferSize:
-                Pref.expandBuffer
-                    ? (isLive ? 64 * 1024 * 1024 : 32 * 1024 * 1024)
-                    : (isLive ? 16 * 1024 * 1024 : 4 * 1024 * 1024),
+            bufferSize: Pref.expandBuffer
+                ? (isLive ? 64 * 1024 * 1024 : 32 * 1024 * 1024)
+                : (isLive ? 16 * 1024 * 1024 : 4 * 1024 * 1024),
             logLevel: kDebugMode ? MPVLogLevel.warn : MPVLogLevel.error,
           ),
         );
@@ -866,8 +866,9 @@ class PlPlayerController {
       await pp.setProperty("af", "scaletempo2=max-speed=8");
       if (Platform.isAndroid) {
         await pp.setProperty("volume-max", "100");
-        String ao =
-            Pref.useOpenSLES ? "opensles,audiotrack" : "audiotrack,opensles";
+        String ao = Pref.useOpenSLES
+            ? "opensles,audiotrack"
+            : "audiotrack,opensles";
         await pp.setProperty("ao", ao);
       }
       // video-sync=display-resample
@@ -892,15 +893,13 @@ class PlPlayerController {
     // 音轨
     late final String audioUri;
     if (isFileSource) {
-      audioUri =
-          onlyPlayAudio.value || mediaType == 1
-              ? ''
-              : path.join(dirPath!, typeTag!, PathUtils.audioNameType2);
+      audioUri = onlyPlayAudio.value || mediaType == 1
+          ? ''
+          : path.join(dirPath!, typeTag!, PathUtils.audioNameType2);
     } else if (dataSource.audioSource?.isNotEmpty == true) {
-      audioUri =
-          Platform.isWindows
-              ? dataSource.audioSource!.replaceAll(';', '\\;')
-              : dataSource.audioSource!.replaceAll(':', '\\:');
+      audioUri = Platform.isWindows
+          ? dataSource.audioSource!.replaceAll(';', '\\;')
+          : dataSource.audioSource!.replaceAll(':', '\\:');
     } else {
       audioUri = '';
     }
@@ -937,10 +936,9 @@ class PlPlayerController {
           AudioNormalization.getParamFromConfig(Pref.fallbackNormalization),
         );
       }
-      filters =
-          audioNormalization.isEmpty
-              ? null
-              : {'lavfi-complex': '"[aid1] $audioNormalization [ao]"'};
+      filters = audioNormalization.isEmpty
+          ? null
+          : {'lavfi-complex': '"[aid1] $audioNormalization [ao]"'};
     } else {
       filters = null;
     }
@@ -1235,10 +1233,8 @@ class PlPlayerController {
       ],
     };
 
-
     // Harmony 手机/平板：监听方向流，自动进入/退出全屏
     if (Utils.isHarmony && !Utils.isDesktop) {
-
       final sub = harmonyOrientationStream().listen((event) {
         if (!_rotationUnlocked) return;
         // 原生返回 rotation 数字或 orientation 字符串，先兼容两种
@@ -1276,12 +1272,9 @@ class PlPlayerController {
 
         final videoIsVertical = isVertical;
 
-
-
         if (orientation == 'landscape' &&
             !videoIsVertical &&
             !isFullScreen.value) {
-
           triggerFullScreen(status: true, isManualFS: false);
         } else if (orientation == 'portrait' &&
             isFullScreen.value &&
@@ -1396,16 +1389,21 @@ class PlPlayerController {
     final area = size.width * size.height;
     return area < _baselineArea! * 0.8;
   }
+
   bool get isMiniWindow => _isMiniWindow;
   double get _subtitleMiniFactor => 1;
   double _danmakuFontSize({required bool isFullScreen}) {
     final bool isMobile = Utils.isMobile;
     final bool isTablet = Pref.isTablet;
-    final bool isPhone  = isMobile && !isTablet;
-    final bool mini     = _isMiniWindow;
+    final bool isPhone = isMobile && !isTablet;
+    final bool mini = _isMiniWindow;
     final baseScale = isPhone
-        ? ((isFullScreen && !mini) ? danmakuFontScaleFS : danmakuFontScale)  // 手机：小窗永远普通
-        : (isFullScreen ? danmakuFontScaleFS : danmakuFontScale);            // 平板/桌面：全屏永远FS
+        ? ((isFullScreen && !mini)
+              ? danmakuFontScaleFS
+              : danmakuFontScale) // 手机：小窗永远普通
+        : (isFullScreen
+              ? danmakuFontScaleFS
+              : danmakuFontScale); // 平板/桌面：全屏永远FS
 
     return 15 * baseScale;
   }
@@ -1513,9 +1511,12 @@ class PlPlayerController {
     if (this.volume.value != volume) {
       this.volume.value = volume;
       try {
-        // TODO 鸿蒙待适配 鸿蒙调整系统音量
-        if (Utils.isDesktop || Utils.isHarmony) {
+        if (Utils.isDesktop) {
+          // 鸿蒙pc也按应用内音量设置
           _videoPlayerController!.setVolume(volume * 100);
+        } else if (Utils.isHarmony) {
+          // 否则，鸿蒙手机和平板，按系统音量设置
+          HarmonyVolumeView.cntlr?.setVolume(volume);
         } else {
           FlutterVolumeController.updateShowSystemUI(false);
           await FlutterVolumeController.setVolume(volume);

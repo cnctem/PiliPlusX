@@ -18,8 +18,6 @@ abstract class Utils {
 
   static const channel = MethodChannel(Constants.appName);
 
-  // @pragma("vm:platform-const")
-  // Harmony 设备类型缓存（通过 MethodChannel 异步获取）
   static String? _harmonyDeviceType;
 
   /// 主动获取并缓存 Harmony 设备类型；在应用启动时调用一次即可。

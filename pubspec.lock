@@ -257,7 +257,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: e13ec72d2406b1ede94bbeec64dd0941a7dd9ac2
+      resolved-ref: "75704a77d287607d00742f7fd6e0fbccf8e89425"
       url: "https://github.com/bggRGjQaUbCoE/canvas_danmaku.git"
     source: git
     version: "0.2.6"
@@ -629,7 +629,7 @@ packages:
     description:
       path: "."
       ref: harmony
-      resolved-ref: fd139f7bc54e97902739960888bab0b5958cda77
+      resolved-ref: "5913ef28c5c02e71bbc142e8c7e563b4d85b02fb"
       url: "https://github.com/qinshah/floating.git"
     source: git
     version: "3.0.0"
@@ -1358,7 +1358,7 @@ packages:
     description:
       path: "packages/path_provider/path_provider"
       ref: HEAD
-      resolved-ref: "408badd41843679a3aa7a94837757f335586d8c0"
+      resolved-ref: "759e65b17c9ddf365594b700b9ab7d13b87adbe9"
       url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
     source: git
     version: "2.1.0"
@@ -1391,7 +1391,7 @@ packages:
     description:
       path: "packages/path_provider/path_provider_ohos"
       ref: HEAD
-      resolved-ref: "408badd41843679a3aa7a94837757f335586d8c0"
+      resolved-ref: "759e65b17c9ddf365594b700b9ab7d13b87adbe9"
       url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
     source: git
     version: "2.2.1"
@@ -1639,10 +1639,10 @@ packages:
     dependency: transitive
     description:
       name: sentry
-      sha256: "10a0bc25f5f21468e3beeae44e561825aaa02cdc6829438e73b9b64658ff88d9"
+      sha256: "9b2fe138df1a104f6e41d8ebf2b1e4fe39d4370d2200eb4eea29913d38b8b33b"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "9.8.0"
+    version: "9.9.1"
   share_plus:
     dependency: "direct main"
     description:
@@ -1911,10 +1911,10 @@ packages:
     dependency: transitive
     description:
       name: uri_parser
-      sha256: "380c6c96c52a8de82c84c627d0a79cfb2e1697c3fe3eda78fbb9b87af0dcee08"
+      sha256: "051c62e5f693de98ca9f130ee707f8916e2266945565926be3ff20659f7853ce"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "3.0.1"
+    version: "3.0.2"
   url_launcher:
     dependency: "direct main"
     description:
@@ -1961,7 +1961,7 @@ packages:
     description:
       path: "packages/url_launcher/url_launcher_ohos"
       ref: HEAD
-      resolved-ref: "408badd41843679a3aa7a94837757f335586d8c0"
+      resolved-ref: "759e65b17c9ddf365594b700b9ab7d13b87adbe9"
       url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
     source: git
     version: "6.0.38"
@@ -2034,7 +2034,7 @@ packages:
     description:
       path: "packages/video_player/video_player"
       ref: "br_video_player-v2.9.2_ohos"
-      resolved-ref: b898226e48eb81c866d1958ee1b840530261a08c
+      resolved-ref: "7d473d8bb420cc312bbc3db17bea07b1ac967809"
       url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
     source: git
     version: "2.9.2"
@@ -2059,7 +2059,7 @@ packages:
     description:
       path: "packages/video_player/video_player_ohos"
       ref: "br_video_player-v2.9.2_ohos"
-      resolved-ref: b898226e48eb81c866d1958ee1b840530261a08c
+      resolved-ref: "7d473d8bb420cc312bbc3db17bea07b1ac967809"
       url: "https://gitcode.com/openharmony-sig/flutter_packages.git"
     source: git
     version: "1.0.0+1"
