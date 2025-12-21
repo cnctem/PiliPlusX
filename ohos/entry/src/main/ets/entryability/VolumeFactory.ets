@@ -81,10 +81,9 @@ export class VolumeView extends PlatformView implements MethodCallHandler {
   }
 
   onMethodCall(call: MethodCall, result: MethodResult): void {
-    let method: string = call.method;
     // let volumeParameterLink: SubscribedAbstractProperty<AVVolumePanelParameter> =
-    AppStorage.link('volumeParameter');
-    switch (method) {
+    // AppStorage.link('volumeParameter');
+    switch (call.method) {
       case 'setVolume':
         let volumeLink: SubscribedAbstractProperty<number> = AppStorage.link('volume');
         const volume: number = call.argument('volume')
