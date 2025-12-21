@@ -184,17 +184,16 @@ class _LiveRoomPageState extends State<LiveRoomPage>
 
   @override
   Widget build(BuildContext context) {
+    // 实时获取窗口尺寸与方向，避免小窗旋转后仍沿用旧的纵横信息
+    final size = MediaQuery.sizeOf(context);
+    maxWidth = size.width;
+    maxHeight = size.height;
+    isPortrait = size.isPortrait;
+
     // Mini-window 场景不需要系统安全区，否则会出现顶部留黑
     padding = plPlayerController.isMiniWindow
         ? EdgeInsets.zero
         : MediaQuery.viewPaddingOf(context);
-    // 小窗尺寸会变化，确保使用实时窗口大小
-    if (plPlayerController.isMiniWindow) {
-      final size = MediaQuery.sizeOf(context);
-      maxWidth = size.width;
-      maxHeight = size.height;
-      isPortrait = size.isPortrait;
-    }
     Widget child;
     if ((Platform.isAndroid || Utils.isHarmony) && Floating().isPipMode) {
       child = videoPlayerPanel(
