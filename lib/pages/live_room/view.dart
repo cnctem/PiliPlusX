@@ -78,7 +78,8 @@ class _LiveRoomPageState extends State<LiveRoomPage>
       this,
       ModalRoute.of(context)! as PageRoute,
     );
-    padding = MediaQuery.viewPaddingOf(context);
+    final bool miniWindow = plPlayerController.isMiniWindow;
+    padding = miniWindow ? EdgeInsets.zero : MediaQuery.viewPaddingOf(context);
     final size = MediaQuery.sizeOf(context);
     maxWidth = size.width;
     maxHeight = size.height;
@@ -183,6 +184,10 @@ class _LiveRoomPageState extends State<LiveRoomPage>
 
   @override
   Widget build(BuildContext context) {
+    // Mini-window 场景不需要系统安全区，否则会出现顶部留黑
+    padding = plPlayerController.isMiniWindow
+        ? EdgeInsets.zero
+        : MediaQuery.viewPaddingOf(context);
     Widget child;
     if ((Platform.isAndroid || Utils.isHarmony) && Floating().isPipMode) {
       child = videoPlayerPanel(
@@ -202,7 +207,16 @@ class _LiveRoomPageState extends State<LiveRoomPage>
         child: child,
       );
     }
-    return child;
+    return plPlayerController.isMiniWindow
+        ? MediaQuery.removeViewPadding(
+            context: context,
+            removeTop: true,
+            removeBottom: true,
+            removeLeft: true,
+            removeRight: true,
+            child: child,
+          )
+        : child;
   }
 
   Widget videoPlayerPanel(
