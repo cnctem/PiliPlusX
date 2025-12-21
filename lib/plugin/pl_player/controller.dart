@@ -603,12 +603,13 @@ class PlPlayerController {
       enableHeart = false;
     }
 
+    // 记录初始窗口面积，用于判断是否处于小窗（面积显著缩小时）
+    final size = ui.window.physicalSize;
+    _baselineArea ??= size.width * size.height;
+
     if (autoPiP) {
       if (Utils.isHarmony) {
         _shouldSetPip = true;
-        // 记录初始窗口面积，用于判断是否处于小窗（面积显著缩小时）
-        final size = ui.window.physicalSize;
-        _baselineArea ??= size.width * size.height;
       } else if (Platform.isAndroid) {
         Utils.sdkInt.then((sdkInt) {
           if (sdkInt < 31) {
