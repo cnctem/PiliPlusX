@@ -1406,6 +1406,12 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   @override
   Widget build(BuildContext context) {
+    // 在小窗模式下，系统状态栏/安全区会导致上方出现黑条。
+    // 此处对 padding 重新赋值：小窗时去掉安全区，非小窗保持原始值。
+    final bool miniWindow =
+        videoDetailController.plPlayerController.isMiniWindow;
+    padding = miniWindow ? EdgeInsets.zero : MediaQuery.viewPaddingOf(context);
+
     Widget child;
     if (videoDetailController.plPlayerController.isPipMode) {
       child = plPlayer(width: maxWidth, height: maxHeight, isPipMode: true);
@@ -1434,6 +1440,19 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         child: child,
       );
     }
+
+    // 小窗场景彻底移除系统安全区，避免顶部残留黑条或内容下移
+    if (miniWindow) {
+      child = MediaQuery.removeViewPadding(
+        context: context,
+        removeTop: true,
+        removeLeft: true,
+        removeRight: true,
+        removeBottom: true,
+        child: child,
+      );
+    }
+
     return videoDetailController.plPlayerController.darkVideoPage
         ? Theme(data: themeData, child: child)
         : child;
