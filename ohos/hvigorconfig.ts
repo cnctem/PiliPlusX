@@ -47,8 +47,8 @@ import { injectNativeModules } from 'flutter-hvigor-plugin'
   const commitHash = gitShortHash()              // 例如 3741fe54f
   const buildTime = gitCommitTime()              // Git 最新提交的时间戳（秒）
 
-  // 上游展示形态示例：1.1.5-3741fe54f+4442
-  const versionName = `${baseVersion}-${commitHash}+${versionCode}`
+  // 形如 1.1.5-3741fe54f（不包含 versionCode，避免界面重复叠加）
+  const versionName = `${baseVersion}-${commitHash}`
 
   const defines = [
     `pili.name=${versionName}`,

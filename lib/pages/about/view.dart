@@ -39,7 +39,8 @@ class AboutPage extends StatefulWidget {
 }
 
 class _AboutPageState extends State<AboutPage> {
-  final currentVersion =
+  /// 显示形如 1.1.5-abcdef01+4515
+  final String currentVersion =
       '${BuildConfig.versionName}+${BuildConfig.versionCode}';
   RxString cacheSize = ''.obs;
 
