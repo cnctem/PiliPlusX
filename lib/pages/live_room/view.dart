@@ -188,6 +188,13 @@ class _LiveRoomPageState extends State<LiveRoomPage>
     padding = plPlayerController.isMiniWindow
         ? EdgeInsets.zero
         : MediaQuery.viewPaddingOf(context);
+    // 小窗尺寸会变化，确保使用实时窗口大小
+    if (plPlayerController.isMiniWindow) {
+      final size = MediaQuery.sizeOf(context);
+      maxWidth = size.width;
+      maxHeight = size.height;
+      isPortrait = size.isPortrait;
+    }
     Widget child;
     if ((Platform.isAndroid || Utils.isHarmony) && Floating().isPipMode) {
       child = videoPlayerPanel(
