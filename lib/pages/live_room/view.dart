@@ -383,7 +383,10 @@ class _LiveRoomPageState extends State<LiveRoomPage>
 
   Widget get childWhenDisabled {
     return Obx(() {
-      final isFullScreen = this.isFullScreen || plPlayerController.isDesktopPip;
+      // Harmony 小窗下也视作全屏，避免保留顶栏/底栏产生黑条
+      final isFullScreen = this.isFullScreen ||
+          plPlayerController.isDesktopPip ||
+          plPlayerController.isMiniWindow;
       return Stack(
         clipBehavior: Clip.none,
         children: [
