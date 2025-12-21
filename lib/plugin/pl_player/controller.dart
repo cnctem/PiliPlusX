@@ -1385,10 +1385,14 @@ class PlPlayerController {
 
   double? _baselineArea;
   bool get _isMiniWindow {
-    if (_baselineArea == null) return false;
+    // 若首次计算，记录当前窗口面积作为基线
     final size = ui.window.physicalSize;
     final area = size.width * size.height;
-    return area < _baselineArea! * 0.8;
+    _baselineArea = math.max(_baselineArea ?? 0, area);
+
+    // Harmony 平板小窗缩放比例相对较小，放宽判定阈值
+    final factor = Utils.isHarmony ? 0.95 : 0.8;
+    return area < (_baselineArea ?? area) * factor;
   }
 
   bool get isMiniWindow => _isMiniWindow;
