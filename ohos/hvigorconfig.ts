@@ -41,12 +41,14 @@ import { injectNativeModules } from 'flutter-hvigor-plugin'
   }
 
   const pubVersion = readPubVersion()
+  // 去掉 pubspec 自带的 +build 元数据，避免重复添加 versionCode
+  const baseVersion = pubVersion.split('+')[0]
   const versionCode = gitRevCount()              // 例如 4442
   const commitHash = gitShortHash()              // 例如 3741fe54f
   const buildTime = gitCommitTime()              // Git 最新提交的时间戳（秒）
 
   // 上游展示形态示例：1.1.5-3741fe54f+4442
-  const versionName = `${pubVersion}-${commitHash}+${versionCode}`
+  const versionName = `${baseVersion}-${commitHash}+${versionCode}`
 
   const defines = [
     `pili.name=${versionName}`,
