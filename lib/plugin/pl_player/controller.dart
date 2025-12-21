@@ -1396,10 +1396,10 @@ class PlPlayerController {
       final screenSize = display.size;
       final screenArea = screenSize.width * screenSize.height;
       if (screenArea > 0) {
-        _baselineArea = math.max(_baselineArea ?? 0, screenArea);
+        _baselineArea = max(_baselineArea ?? 0, screenArea);
       }
     } catch (_) {
-      _baselineArea = math.max(_baselineArea ?? 0, area);
+      _baselineArea = max(_baselineArea ?? 0, area);
     }
 
     // Harmony 平板小窗缩放比例相对较小，放宽判定阈值

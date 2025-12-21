@@ -8,7 +8,7 @@
 
 - [x] 亮度、音量调节(还不支持系统音量)和自动旋转等
 
-其它进度细节可转到看板：[issues 看板](https://github.com/users/qinshah/projects/1)
+其它进度细节可转到看板：[issues 看板](https://github.com/users/bggRGjQaUbCoE/projects/1)
 
 ## 需要更多人参与适配，让鸿蒙版 PiliPlus 更快完善
 
