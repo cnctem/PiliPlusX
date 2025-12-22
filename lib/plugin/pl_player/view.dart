@@ -191,10 +191,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     if (Utils.isMobile) {
       Future.microtask(() async {
         try {
-          if (Utils.isHarmony && HarmonyVolumeView.cntlr != null) {
+          if (Utils.isHarmony) {
             // 在鸿蒙，非pc也把播放器音量设为系统音量
-            plPlayerController.volume.value = await HarmonyVolumeView.cntlr!
-                .getVolume();
+            final volume = await HarmonyVolumeView.cntlr?.getVolume();
+            if (volume != null) plPlayerController.volume.value = volume;
           } else {
             FlutterVolumeController.updateShowSystemUI(true);
             plPlayerController.volume.value =

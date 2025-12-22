@@ -19,7 +19,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 abstract class Update {
   // 检查更新
   static Future<void> checkUpdate([bool isAuto = true]) async {
-    if (kDebugMode) return;
+    // if (kDebugMode) return;
     SmartDialog.dismiss();
     try {
       final res = await Request().get(
@@ -67,7 +67,7 @@ abstract class Update {
                       Text('${data['body']}'),
                       TextButton(
                         onPressed: () => PageUtils.launchURL(
-                          '${Constants.sourceCodeUrl}/commits/main',
+                          '${Constants.sourceCodeUrl}/commits/ohos', // 鸿蒙版ohos分支
                         ),
                         child: Text(
                           "点此查看完整更新(即commit)内容",

@@ -11,6 +11,7 @@ import {
 import common from '@ohos.app.ability.common';
 import { Params } from '@ohos/flutter_ohos/src/main/ets/plugin/platform/PlatformView';
 import { audio, AVVolumePanel, AVVolumePanelParameter } from '@kit.AudioKit';
+import { BusinessError } from '@ohos.base'
 
 // const hide: AVVolumePanelParameter =
 //   {
@@ -85,13 +86,18 @@ export class VolumeView extends PlatformView implements MethodCallHandler {
     // AppStorage.link('volumeParameter');
     switch (call.method) {
       case 'setVolume':
-        let volumeLink: SubscribedAbstractProperty<number> = AppStorage.link('volume');
-        const volume: number = call.argument('volume')
-        // 隐藏音量条
-        // volumeParameterLink.set(hide)
-        // [0 ,1]转系统音量
-        volumeLink.set(this.minVolume + volume * this.volumeRange)
-        result.success(true)
+        try {
+          let volumeLink: SubscribedAbstractProperty<number> = AppStorage.link('volume');
+          const volume: number = call.argument('volume')
+          // 隐藏音量条
+          // volumeParameterLink.set(hide)
+          // [0 ,1]转系统音量
+          volumeLink.set(this.minVolume + volume * this.volumeRange)
+          result.success(null)
+        } catch (e) {
+          const error = e as BusinessError
+          result.error(error.code.toString(), error.message, error.data)
+        }
         break;
       // 恢复显示音量条
       // case 'restorePanel':
