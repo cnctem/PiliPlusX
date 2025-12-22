@@ -2,15 +2,9 @@
 
 这是一个适配鸿蒙的分支，目前处于可用水平，大部分功能正常
 
-## 适配进度
+### 适配进度移步看板：[issues 看板](https://github.com/users/qinshah/projects/1)
 
-- [x] 能正常登录和播放，已使用 media_kit([ErBW_s](https://github.com/ErBWs)大佬做的 media_kit 鸿蒙适配)
-
-- [x] 亮度、音量调节(还不支持系统音量)和自动旋转等
-
-其它进度细节可转到看板：[issues 看板](https://github.com/users/bggRGjQaUbCoE/projects/1)
-
-## 需要更多人参与适配，让鸿蒙版 PiliPlus 更快完善
+### 需要更多人参与适配，让鸿蒙版 PiliPlus 更快完善
 
 ## 感谢
 
