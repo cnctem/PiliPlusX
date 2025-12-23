@@ -1,7 +1,6 @@
 import { FlutterEngine, Log } from '@ohos/flutter_ohos';
 import FloatingPlugin from 'floating';
 import AudioSessionPlugin from 'audio_session';
-import ImageGallerySaverPlugin from 'image_gallery_saver';
 import InAppWebViewFlutterPlugin from 'flutter_inappwebview_ohos';
 import ImagePickerPlugin from 'image_picker_ohos';
 import PathProviderPlugin from 'path_provider_ohos';
@@ -36,7 +35,6 @@ export class GeneratedPluginRegistrant {
     try {
       flutterEngine.getPlugins()?.add(new FloatingPlugin());
       flutterEngine.getPlugins()?.add(new AudioSessionPlugin());
-      flutterEngine.getPlugins()?.add(new ImageGallerySaverPlugin());
       flutterEngine.getPlugins()?.add(new InAppWebViewFlutterPlugin());
       flutterEngine.getPlugins()?.add(new ImagePickerPlugin());
       flutterEngine.getPlugins()?.add(new PathProviderPlugin());

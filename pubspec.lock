@@ -966,15 +966,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "8.0.0"
-  image_gallery_saver:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "80105a3eb5765449fa12ae49ba3c25ca20fdcc61"
-      url: "https://github.com/bgli100/flutter_image_gallery_saver_ohos.git"
-    source: git
-    version: "2.0.3"
   image_picker:
     dependency: "direct main"
     description:

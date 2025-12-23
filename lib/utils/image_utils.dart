@@ -14,7 +14,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart' as igs;
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:live_photo_maker/live_photo_maker.dart';
 import 'package:permission_handler_ohos/permission_handler_ohos.dart'
@@ -173,8 +172,9 @@ abstract class ImageUtils {
   static Future<bool> _requestHarmonyAlbumPerms() async {
     debugPrint('11111');
     const perm = 'ohos.permission.WRITE_IMAGEVIDEO';
-    final status =
-        await ph_ohos.PermissionHandlerOhos.checkPermissionStatus(perm);
+    final status = await ph_ohos.PermissionHandlerOhos.checkPermissionStatus(
+      perm,
+    );
     debugPrint('[ImageUtils] checkPermissionStatus($perm) -> $status');
     if (status == ph_ohos.PermissionStatusOhos.granted) {
       return true;
@@ -332,27 +332,18 @@ abstract class ImageUtils {
     required String fileName,
     String ext = 'png',
   }) async {
-    debugPrint('[ImageUtils] saveByteImg harmony=${Utils.isHarmony} name=$fileName');
+    debugPrint(
+      '[ImageUtils] saveByteImg harmony=${Utils.isHarmony} name=$fileName',
+    );
     SaveResult? result;
     fileName += '.$ext';
-    if (Utils.isHarmony) {
-      if (!await _requestHarmonyAlbumPerms()) {
-        SmartDialog.showToast('请先授予相册权限');
-        return null;
+    if (Utils.isMobile || Utils.isHarmony) {
+      if (Utils.isHarmony) {
+        if (!await _requestHarmonyAlbumPerms()) {
+          SmartDialog.showToast('请先授予相册权限');
+          return null;
+        }
       }
-      SmartDialog.showLoading(msg: '正在保存');
-      try {
-        final res = await igs.ImageGallerySaver.saveImage(bytes, name: fileName);
-        final ok = res?['isSuccess'] == true;
-        debugPrint('[ImageUtils] saveImage result=$res');
-        result = SaveResult(ok, ok ? null : res?['message']?.toString());
-      } catch (e) {
-        debugPrint('[ImageUtils] saveImage error=$e');
-        result = SaveResult(false, e.toString());
-      }
-      SmartDialog.dismiss();
-      SmartDialog.showToast(result.isSuccess ? ' 已保存 ' : '保存失败');
-    } else if (Utils.isMobile) {
       SmartDialog.showLoading(msg: '正在保存');
       result = await SaverGallery.saveImage(
         bytes,
@@ -390,30 +381,22 @@ abstract class ImageUtils {
     bool needToast = false,
     bool del = true,
   }) async {
-    debugPrint('[ImageUtils] saveFileImg harmony=${Utils.isHarmony} path=$filePath');
+    debugPrint(
+      '[ImageUtils] saveFileImg harmony=${Utils.isHarmony} path=$filePath',
+    );
     final file = File(filePath);
     if (!file.existsSync()) {
       SmartDialog.showToast("文件不存在");
       return;
     }
     SaveResult? result;
-    if (Utils.isHarmony) {
-      if (!await _requestHarmonyAlbumPerms()) {
-        SmartDialog.showToast('请先授予相册权限');
-        return;
+    if (Utils.isMobile || Utils.isHarmony) {
+      if (Utils.isHarmony) {
+        if (!await _requestHarmonyAlbumPerms()) {
+          SmartDialog.showToast('请先授予相册权限');
+          return;
+        }
       }
-      final bytes = await file.readAsBytes();
-      try {
-        final res = await igs.ImageGallerySaver.saveImage(bytes, name: fileName);
-        final ok = res?['isSuccess'] == true;
-        debugPrint('[ImageUtils] saveImage(file) result=$res');
-        result = SaveResult(ok, ok ? null : res?['message']?.toString());
-      } catch (e) {
-        debugPrint('[ImageUtils] saveImage(file) error=$e');
-        result = SaveResult(false, e.toString());
-      }
-      if (del) file.tryDel();
-    } else if (Utils.isMobile) {
       result = await SaverGallery.saveFile(
         filePath: filePath,
         fileName: fileName,
