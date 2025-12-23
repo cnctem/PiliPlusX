@@ -1,77 +1,77 @@
-
 {
-  "module": {
-    "name": "entry",
-    "type": "entry",
-    "description": "$string:module_desc",
-    "mainElement": "EntryAbility",
-    "deviceTypes": [
-      "phone",
-      "2in1",
-      "tablet"
-    ],
-    "deliveryWithInstall": true,
-    "installationFree": false,
-    "pages": "$profile:main_pages",
-    "abilities": [
+  module: {
+    name: "entry",
+    type: "entry",
+    description: "$string:module_desc",
+    mainElement: "EntryAbility",
+    deviceTypes: ["phone", "2in1", "tablet"],
+    deliveryWithInstall: true,
+    installationFree: false,
+    pages: "$profile:main_pages",
+    abilities: [
       {
-        "name": "EntryAbility",
-        "srcEntry": "./ets/entryability/EntryAbility.ets",
-        "description": "$string:EntryAbility_desc",
-        "icon": "$media:icon",
-        "label": "$string:EntryAbility_label",
-        "startWindowIcon": "$media:icon_startwindow",
-        "startWindowBackground": "$color:start_window_background",
-        "exported": true,
-        "backgroundModes": ["audioPlayback"],
-        "orientation": "auto_rotation_unspecified",
-        "preferMultiWindowOrientation": "landscape_auto",
-        "skills": [
+        name: "EntryAbility",
+        srcEntry: "./ets/entryability/EntryAbility.ets",
+        description: "$string:EntryAbility_desc",
+        icon: "$media:icon",
+        label: "$string:EntryAbility_label",
+        startWindowIcon: "$media:icon_startwindow",
+        startWindowBackground: "$color:start_window_background",
+        exported: true,
+        backgroundModes: ["audioPlayback"],
+        orientation: "auto_rotation_unspecified",
+        preferMultiWindowOrientation: "landscape_auto",
+        skills: [
           {
-            "entities": [
-              "entity.system.home"
-            ],
-            "actions": [
-              "action.system.home"
-            ]
-          }
-        ]
-      }
+            entities: ["entity.system.home"],
+            actions: ["action.system.home"],
+          },
+        ],
+      },
     ],
-    "requestPermissions": [
-      {"name" :  "ohos.permission.INTERNET"},
+    requestPermissions: [
       {
-        "name": "ohos.permission.GET_NETWORK_INFO",
-        "reason": "$string:perm_get_network_info_reason",
-        "usedScene": {
-          "abilities": ["EntryAbility"],
-          "when": "inuse"
-        }
+        name: "ohos.permission.INTERNET",
       },
       {
-        "name": "ohos.permission.WRITE_IMAGEVIDEO",
-        "reason": "$string:write_imagevideo_reason",
-        "usedScene": {
-          "abilities": ["EntryAbility"],
-          "when": "inuse"
-        }
+        name: "ohos.permission.GET_NETWORK_INFO",
+        reason: "$string:perm_get_network_info_reason",
+        usedScene: {
+          abilities: ["EntryAbility"],
+          when: "inuse",
+        },
       },
       {
-        "name": "ohos.permission.GET_WIFI_INFO",
-        "reason": "$string:perm_get_wifi_info_reason",
-        "usedScene": {
-          "abilities": ["EntryAbility"],
-          "when": "inuse"
-        }
+        name: "ohos.permission.WRITE_IMAGEVIDEO",
+        reason: "$string:write_imagevideo_reason",
+        usedScene: {
+          abilities: ["EntryAbility"],
+          when: "inuse",
+        },
       },
       {
-        "name": "ohos.permission.KEEP_BACKGROUND_RUNNING",
-        "reason": "$string:keep_background_running_reason",
-        "usedScene": {
-          "abilities": ["EntryAbility"],
-          "when": "inuse"
-        }
-      }
-    ]
-  }
+        name: "ohos.permission.GET_WIFI_INFO",
+        reason: "$string:perm_get_wifi_info_reason",
+        usedScene: {
+          abilities: ["EntryAbility"],
+          when: "inuse",
+        },
+      },
+      {
+        name: "ohos.permission.KEEP_BACKGROUND_RUNNING",
+        reason: "$string:keep_background_running_reason",
+        usedScene: {
+          abilities: ["EntryAbility"],
+          when: "inuse",
+        },
+      },
+      {
+        name: "ohos.permission.VIBRATE",
+        usedScene: {
+          abilities: ["EntryAbility"],
+          when: "inuse",
+        },
+      },
+    ],
+  },
 }
