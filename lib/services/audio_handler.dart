@@ -189,6 +189,8 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
         artist: data.anchorInfo?.baseInfo?.uname,
         artUri: Uri.parse(data.roomInfo?.cover ?? ''),
         isLive: true,
+        // 设置直播间时长为0，解决鸿蒙因时长为null而不显示媒体组件
+        duration: Duration.zero,
       );
     } else if (data is Part) {
       mediaItem = MediaItem(
