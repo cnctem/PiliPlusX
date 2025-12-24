@@ -1,0 +1,15 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build_env",
+      "type": "shell",
+      "command": "dart",
+      "args": [".vscode/build_env.dart"],
+      "presentation": {
+        "echo": false,
+        "reveal": "silent"
+      }
+    }
+  ]
+}

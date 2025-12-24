@@ -1,25 +1,38 @@
 {
-    // 使用 IntelliSense 了解相关属性。
-    // 悬停以查看现有属性的描述。
-    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "PiliPlus",
-            "request": "launch",
-            "type": "dart"
-        },
-        {
-            "name": "PiliPlus (profile mode)",
-            "request": "launch",
-            "type": "dart",
-            "flutterMode": "profile"
-        },
-        {
-            "name": "PiliPlus (release mode)",
-            "request": "launch",
-            "type": "dart",
-            "flutterMode": "release"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "noDebug": true,
+      "name": "PiliPlus (run)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "preLaunchTask": "build_env",
+      "args": ["--dart-define-from-file=.vscode/env.json"]
+    },
+    {
+      "name": "PiliPlus (debug)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "preLaunchTask": "build_env",
+      "args": ["--dart-define-from-file=.vscode/env.json"]
+    },
+    {
+      "name": "PiliPlus (profile)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile",
+      "preLaunchTask": "build_env",
+      "args": ["--dart-define-from-file=.vscode/env.json"]
+    },
+    {
+      "name": "PiliPlus (release)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release",
+      "preLaunchTask": "build_env",
+      "args": ["--dart-define-from-file=.vscode/env.json"]
+    }
+  ]
 }

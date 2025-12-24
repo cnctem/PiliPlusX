@@ -68,7 +68,6 @@ class GeetestWebviewDialog extends StatelessWidget {
     return AlertDialog(
       title: const Text('验证码'),
       content: SizedBox(
-        width: 300,
         height: 400,
         child: InAppWebView(
           webViewEnvironment: webViewEnvironment,
@@ -84,7 +83,44 @@ class GeetestWebviewDialog extends StatelessWidget {
           ),
           initialData: InAppWebViewInitialData(
             data:
-                '<!DOCTYPE html><html><head></head><body><script src="$_geetestJsUri"></script><script>function R(n,o){flutter_inappwebview.callHandler(n,o)}</script></body></html>',
+                // 之前的html
+                // '<!DOCTYPE html><html><head></head><body><script src="$_geetestJsUri"></script><script>function R(n,o){flutter_inappwebview.callHandler(n,o)}</script></body></html>',
+                // 铺满InAppWebView防止看不清
+                '''<!DOCTYPE html>
+            <html>
+            <head>
+              <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+              <style>
+                body {
+                  margin: 0;
+                  padding: 10px;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  min-height: 100vh;
+                  background-color: white;
+                }
+                #geetest_holder {
+                  width: 80%;
+                  max-width: 280px;
+                  display: flex;
+                  justify-content: center;
+                }
+                .geetest_panel {
+                  width: 100% !important;
+                }
+              </style>
+            </head>
+            <body>
+              <div id="geetest_holder"></div>
+              <script src="$_geetestJsUri"></script>
+              <script>
+                function R(n,o){
+                  flutter_inappwebview.callHandler(n,o)
+                }
+              </script>
+            </body>
+            </html>''',
           ),
           onWebViewCreated: (ctr) {
             ctr

@@ -20,6 +20,11 @@ abstract class Update {
   // 检查更新
   static Future<void> checkUpdate([bool isAuto = true]) async {
     // if (kDebugMode) return;
+    // 获取到默认值，没有构建时间信息
+    if (BuildConfig.buildTime == 0) {
+      SmartDialog.showToast('未知Build Time，可前往源码仓库检查更新');
+      return;
+    }
     SmartDialog.dismiss();
     try {
       final res = await Request().get(

@@ -203,7 +203,8 @@ void main() async {
     });
   }
 
-  if (Pref.enableLog) {
+  // TODO: 鸿蒙待适配 异常捕获
+  if (Pref.enableLog && !Utils.isHarmony) {
     // 异常捕获 logo记录
     final customParameters = {
       'BuildConfig':

@@ -138,6 +138,7 @@ class LoginPageController extends GetxController
     }
 
     if (Utils.isDesktop || Utils.isHarmony) {
+      // 极验插件不支持桌面和鸿蒙
       Get.dialog<Map<String, dynamic>>(
         GeetestWebviewDialog(geeGt, geeChallenge),
       ).then((res) {
@@ -759,11 +760,11 @@ class LoginPageController extends GetxController
                         (context as Element).markNeedsBuild();
                       },
                       child: WrapRadioOptionsGroup<Account>(
-                      groupValue: selectAccount[e.index],
-                      onChanged: (v) {
-                        selectAccount[e.index] = v!;
-                        (context as Element).markNeedsBuild();
-                      },
+                        groupValue: selectAccount[e.index],
+                        onChanged: (v) {
+                          selectAccount[e.index] = v!;
+                          (context as Element).markNeedsBuild();
+                        },
                         groupTitle: e.title,
                         options: options,
                       ),
