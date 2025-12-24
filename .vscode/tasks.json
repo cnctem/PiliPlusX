@@ -7,7 +7,6 @@
       "command": "dart",
       "args": [".vscode/build_env.dart"],
       "presentation": {
-        "echo": false,
         "reveal": "silent"
       }
     }

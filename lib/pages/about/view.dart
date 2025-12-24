@@ -157,7 +157,7 @@ Commit Hash: ${BuildConfig.commitHash}''',
             ),
             leading: const Icon(Icons.info_outline),
             onTap: () => PageUtils.launchURL(
-              '${Constants.sourceCodeUrl}/commit/${BuildConfig.commitHash}',
+              '${Constants.sourceCodeUrl}/commit/${BuildConfig.commitHash == 'N/A' ? 'HEAD' : BuildConfig.commitHash}',
             ),
             onLongPress: () => Utils.copyText(BuildConfig.commitHash),
             onSecondaryTap: Utils.isMobile
