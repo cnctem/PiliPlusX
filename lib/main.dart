@@ -140,7 +140,10 @@ void main() async {
     if (await WebViewEnvironment.getAvailableVersion() != null) {
       webViewEnvironment = await WebViewEnvironment.create(
         settings: WebViewEnvironmentSettings(
-          userDataFolder: path.join(appSupportDirPath, 'flutter_inappwebview'),
+          userDataFolder: path.join(
+            appSupportDirPath,
+            'flutter_inappwebview',
+          ),
         ),
       );
     }
@@ -181,7 +184,7 @@ void main() async {
         FlutterDisplayMode.setPreferredMode(displayMode ?? DisplayMode.auto);
       });
     }
-  } else if (Utils.isDesktop) {
+  } else if (Utils.isDesktop && !Utils.isHarmony) {
     await windowManager.ensureInitialized();
 
     WindowOptions windowOptions = WindowOptions(

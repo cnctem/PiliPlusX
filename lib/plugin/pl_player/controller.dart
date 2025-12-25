@@ -1392,7 +1392,7 @@ class PlPlayerController {
     // 使用物理屏幕面积作为基准，避免在小窗首次计算时基准过小
     try {
       final view = ui.PlatformDispatcher.instance.views.first;
-      final display = view.display ?? ui.PlatformDispatcher.instance.displays.first;
+      final display = view.display;
       final screenSize = display.size;
       final screenArea = screenSize.width * screenSize.height;
       if (screenArea > 0) {
@@ -1417,11 +1417,11 @@ class PlPlayerController {
     final bool mini = _isMiniWindow;
     final double baseScale = isPhone
         ? ((isFullScreen && !mini)
-            ? danmakuFontScaleFS
-            : danmakuFontScale) // 手机：小窗永远普通字号
+              ? danmakuFontScaleFS
+              : danmakuFontScale) // 手机：小窗永远普通字号
         : (isFullScreen
-            ? danmakuFontScaleFS
-            : danmakuFontScale); // 平板/桌面：全屏使用全屏字号
+              ? danmakuFontScaleFS
+              : danmakuFontScale); // 平板/桌面：全屏使用全屏字号
     return 15 * baseScale;
   }
 

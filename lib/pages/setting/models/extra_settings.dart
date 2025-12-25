@@ -639,16 +639,17 @@ List<SettingsModel> get extraSettings => [
     setKey: SettingBoxKey.enableCommAntifraud,
     defaultVal: false,
   ),
-  const SwitchModel(
-    title: '使用「哔哩发评反诈」检查评论',
-    subtitle: '仅对Android生效',
-    leading: Icon(
-      FontAwesomeIcons.b,
-      size: 22,
+  if (Platform.isAndroid)
+    const SwitchModel(
+      title: '使用「哔哩发评反诈」检查评论',
+      subtitle: '仅对Android生效',
+      leading: Icon(
+        FontAwesomeIcons.b,
+        size: 22,
+      ),
+      setKey: SettingBoxKey.biliSendCommAntifraud,
+      defaultVal: false,
     ),
-    setKey: SettingBoxKey.biliSendCommAntifraud,
-    defaultVal: false,
-  ),
   const SwitchModel(
     title: '发布/转发动态反诈',
     subtitle: '发布/转发动态后检查动态是否可见',
@@ -719,13 +720,11 @@ List<SettingsModel> get extraSettings => [
     setKey: SettingBoxKey.showDynActionBar,
     defaultVal: true,
   ),
-  SwitchModel(
+  const SwitchModel(
     title: '启用拖拽字幕调整底部边距',
-    leading: const Icon(MdiIcons.dragVariant),
+    leading: Icon(MdiIcons.dragVariant),
     setKey: SettingBoxKey.enableDragSubtitle,
     defaultVal: false,
-    // TODO 鸿蒙待适配 适配后删除提示
-    onChanged: (_) => SmartDialog.showToast('鸿蒙待适配 不生效'),
   ),
   const SwitchModel(
     title: '展示追番时间表',
