@@ -1,15 +1,15 @@
-import { MethodChannel, MethodCall, MethodResult, FlutterPlugin, FlutterPluginBinding } from '@ohos/flutter_ohos';
-import { deviceInfo } from '@kit.BasicServicesKit';
+import { FlutterPlugin, FlutterPluginBinding, MethodCall, MethodChannel, MethodResult } from "@ohos/flutter_ohos";
+import deviceInfo from "@ohos.deviceInfo";
 
-export default class DeviceInfoBridge implements FlutterPlugin {
+export default class HarmonyChannel implements FlutterPlugin {
   private channel: MethodChannel | null = null;
 
   getUniqueClassName(): string {
-    return 'DeviceInfoBridge';
+    return 'HarmonyChannel';
   }
 
   onAttachedToEngine(binding: FlutterPluginBinding): void {
-    this.channel = new MethodChannel(binding.getBinaryMessenger(), 'com.piliplus/device_info');
+    this.channel = new MethodChannel(binding.getBinaryMessenger(), 'harmonyChannel');
     this.channel.setMethodCallHandler(this);
   }
 
@@ -19,9 +19,6 @@ export default class DeviceInfoBridge implements FlutterPlugin {
 
   onMethodCall(call: MethodCall, result: MethodResult): void {
     switch (call.method) {
-      case 'DeviceType':
-        result.success(deviceInfo.deviceType);
-        break;
       default:
         result.notImplemented();
         break;

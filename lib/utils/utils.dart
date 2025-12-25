@@ -18,74 +18,23 @@ abstract class Utils {
 
   static const channel = MethodChannel(Constants.appName);
 
-  static String? _harmonyDeviceType;
+  static late final String harmonyDeviceType;
 
-  /// 主动获取并缓存 Harmony 设备类型；在应用启动时调用一次即可。
   static Future<void> initHarmonyDeviceType() async {
-    if (!isHarmony || _harmonyDeviceType != null) return;
-    try {
-      var type = await const MethodChannel(
-        'com.piliplus/device_info',
-      ).invokeMethod('DeviceType');
-      print('initDeviceType: $type');
-      
-      _harmonyDeviceType = type;
-      print('initDevice=: $_harmonyDeviceType');
-    } catch (e) {
-      print('initDeviceType error: $e');
-    }
+    final type = (await DeviceInfoPlugin().ohosInfo).deviceType;
+    if (type == null) throw Exception("Failed to init device type");
+    harmonyDeviceType = type;
   }
 
-  static Future<String?> get harmonyDeviceType async {
-    await initHarmonyDeviceType();
-    return _harmonyDeviceType;
-  }
-  static String? get harmonyDeviceTypeCached => _harmonyDeviceType;
+  static final isMobile =
+      Platform.isAndroid ||
+      Platform.isIOS ||
+      (isHarmony &&
+          (harmonyDeviceType == 'phone' || harmonyDeviceType == 'tablet'));
 
-  // 基础判定：Android / iOS / Harmony 手机/平板
-  static Future<bool> get isHarmonyMobile async {
-    if (!isHarmony) return false;
-    await initHarmonyDeviceType();
-    return _harmonyDeviceType == 'phone' || _harmonyDeviceType == 'tablet';
-  }
+  static final isDesktop = !isMobile;
 
-  static Future<bool> get isHarmonyDesktop async {
-    if (!isHarmony) return false;
-    await initHarmonyDeviceType();
-    return _harmonyDeviceType == '2in1' || _harmonyDeviceType == 'pc';
-  }
-
-  // 统一移动端判定（含 Harmony 手机/平板）
-  static Future<bool> get isMobileAsync async =>
-      Platform.isAndroid || Platform.isIOS || await isHarmonyMobile;
-
-  @pragma("vm:platform-const")
-  static final bool isMobileBase = Platform.isAndroid || Platform.isIOS;
-  static final isMobile = _getIsMobile();
-
-  // 同步移动端判定：Android/iOS 直接返回；Harmony 根据已缓存的设备类型，
-  // 尚未获取到类型时默认按移动端处理，避免 UI 逻辑被阻塞。
-  static bool _getIsMobile() {
-    if (Platform.isAndroid || Platform.isIOS) return true;
-    if (isHarmony) {
-      return _harmonyDeviceType == null ||
-          _harmonyDeviceType == 'phone' ||
-          _harmonyDeviceType == 'tablet';
-    }
-    return false;
-  }
-
-  static final isDesktop = _getIsDesktop();
-  // 桌面判定：Windows / macOS / Linux 以及 Harmony 的 2in1、pc
-  static bool _getIsDesktop() {
-    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) return true;
-    if (isHarmony) {
-      return _harmonyDeviceType == '2in1' || _harmonyDeviceType == 'pc';
-    }
-    return false;
-  }
-
-  static final bool isHarmony = Platform.operatingSystem == "ohos";
+  static final isHarmony = Platform.operatingSystem == "ohos";
 
   static const jsonEncoder = JsonEncoder.withIndent('    ');
 
@@ -123,17 +72,9 @@ abstract class Utils {
   };
 
   static Future<bool> get isWiFi async {
+    // TODO 鸿蒙未适配 判断是否为wifi
+    // 这里做了catch，就先让鸿蒙返回true
     try {
-      // HarmonyOS: 调用 Connectivity 可能触发权限校验；仅在 Harmony 手机/平板上才使用。
-      if (Utils.isHarmony) {
-        if (await Utils.isHarmonyMobile) {
-          final result = await Connectivity().checkConnectivity();
-          return result == ConnectivityResult.wifi;
-        }
-        // 桌面/2in1 直接认为有网，不做校验
-        return true;
-      }
-      if (!Utils.isMobileBase) return false;
       final result = await Connectivity().checkConnectivity();
       return result == ConnectivityResult.wifi;
     } catch (_) {

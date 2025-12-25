@@ -425,19 +425,12 @@ packages:
   device_info_plus:
     dependency: "direct main"
     description:
-      name: device_info_plus
-      sha256: a7fd703482b391a87d60b6061d04dfdeab07826b96f9abd8f5ed98068acc0074
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "10.1.2"
-  device_info_plus_ohos:
-    dependency: "direct main"
-    description:
-      name: device_info_plus_ohos
-      sha256: c162bca365b854fc4e7e5c0a2414cc1595f6cc2500cdf3f3d221ca39b03adcf8
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "0.0.8"
+      path: "packages/device_info_plus/device_info_plus"
+      ref: HEAD
+      resolved-ref: "0eb41c70f961f124a987b8de59c9a26ca919af17"
+      url: "https://gitcode.com/openharmony-sig/flutter_plus_plugins.git"
+    source: git
+    version: "9.1.0"
   device_info_plus_platform_interface:
     dependency: transitive
     description:

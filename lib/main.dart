@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:PiliPlus/adapt/harmony_volume.dart';
 import 'package:PiliPlus/build_config.dart';
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/widgets/custom_toast.dart';
 import 'package:PiliPlus/common/widgets/mouse_back.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_volume.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/models/common/theme/theme_color_type.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
@@ -112,7 +112,7 @@ void main() async {
     }
 
     if (Utils.isHarmony) {
-      final type = await Utils.harmonyDeviceType;
+      final type = Utils.harmonyDeviceType;
       if (type == 'phone') {
         // Harmony 手机：若允许旋转则完全交给系统/传感器处理，否则锁竖屏
         if (Pref.allowRotateScreen) {

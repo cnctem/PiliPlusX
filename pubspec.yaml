@@ -65,7 +65,6 @@ dependencies:
 
   # 设备信息
   device_info_plus: ^10.1.0
-  device_info_plus_ohos: ^0.0.8
   # 权限
   # permission_handler: ^12.0.0+1
   permission_handler_apple: ^9.4.7
@@ -255,6 +254,10 @@ dependencies:
   characters: any
 
 dependency_overrides:
+  device_info_plus:
+    git:
+      url: https://gitcode.com/openharmony-sig/flutter_plus_plugins.git
+      path: packages/device_info_plus/device_info_plus
   media_kit:
     git:
       url: https://github.com/ErBWs/media-kit.git

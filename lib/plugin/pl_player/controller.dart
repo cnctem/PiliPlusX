@@ -4,8 +4,8 @@ import 'dart:io';
 import 'dart:math' show max, min;
 import 'dart:ui' as ui;
 
-import 'package:PiliPlus/adapt/harmony_volume.dart';
 import 'package:PiliPlus/common/constants.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_volume.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/ua_type.dart';
