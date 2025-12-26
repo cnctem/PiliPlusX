@@ -390,32 +390,26 @@ class MyApp extends StatelessWidget {
 // 处理刷新快捷键
 KeyEventResult? _handleRefreshKey(KeyEvent event) {
   if (event is! KeyDownEvent) return null;
-
   // 1. 先匹配字母 R
   if (event.logicalKey != LogicalKeyboardKey.keyR) {
     return null;
   }
-
   // 2. 再判断本平台的"主修饰键"是否按下
   if (!isPrimaryModifierPressed) return null;
-
-  // 3. 防止 Shift/Alt/等其它修饰符干扰（可选）
+  // 3. 防止 Shift/Alt/等其它修饰符干扰
   if (HardwareKeyboard.instance.isShiftPressed ||
       HardwareKeyboard.instance.isAltPressed) {
     return null;
   }
-
   // 4. 真正干活
   _handleRefreshShortcut();
   return KeyEventResult.handled;
 }
-
 // 处理Control+R快捷键刷新
 void _handleRefreshShortcut() {
   // 获取当前路由
   final context = Get.context;
   if (context == null) return;
-
   // 尝试获取当前页面的控制器
   final currentController = _getCurrentPageController();
   if (currentController != null) {
@@ -425,14 +419,12 @@ void _handleRefreshShortcut() {
     }
   }
 }
-
 // 获取当前页面的控制器
 dynamic _getCurrentPageController() {
   try {
     // 获取主页控制器
     final mainController = Get.find<MainController>();
     final currentIndex = mainController.selectedIndex.value;
-
     // 根据当前索引获取对应的控制器
     if (mainController.navigationBars[currentIndex] == NavigationBarType.home) {
       final homeController = Get.find<HomeController>();
