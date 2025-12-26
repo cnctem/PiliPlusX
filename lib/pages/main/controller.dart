@@ -310,16 +310,7 @@ class MainController extends GetxController
               homeController.onRefresh();
             } else if (currentNav == NavigationBarType.dynamics) {
               dynamicController.onRefresh();
-            } else if (currentNav == NavigationBarType.mine) {
-              // 二次点击"我的"
-              if (Pref.defaultShowWatchLater) {
-                // 打开稍后再看
-                Get.toNamed('/later');
-              } else {
-                // 打开账号选择器
-                LoginPageController.switchAccountDialog(Get.context!);
-              }
-            }
+            } 
           },
         );
       } else {
@@ -327,6 +318,15 @@ class MainController extends GetxController
           homeController.toTopOrRefresh();
         } else if (currentNav == NavigationBarType.dynamics) {
           dynamicController.toTopOrRefresh();
+        } else if (currentNav == NavigationBarType.mine) {
+          // 二次点击"我的"
+          if (Pref.defaultShowWatchLater) {
+            // 打开稍后再看
+            Get.toNamed('/later');
+          } else {
+            // 打开账号选择器
+            LoginPageController.switchAccountDialog(Get.context!);
+          }
         }
       }
       _lastSelectTime = now;
