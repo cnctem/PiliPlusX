@@ -11,9 +11,10 @@ import 'package:PiliPlus/models/dynamics/result.dart';
 import 'package:PiliPlus/pages/dynamics/controller.dart';
 import 'package:PiliPlus/pages/save_panel/view.dart';
 import 'package:PiliPlus/utils/accounts.dart';
-import 'package:PiliPlus/utils/context_ext.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/context_ext.dart';
+import 'package:PiliPlus/utils/extension/string_ext.dart';
+import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
@@ -22,7 +23,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart' hide InkWell;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:get/get.dart' hide ContextExtensionss;
+import 'package:get/get.dart';
 
 class AuthorPanel extends StatelessWidget {
   final DynamicItemModel item;
@@ -45,14 +46,15 @@ class AuthorPanel extends StatelessWidget {
   });
 
   Widget _buildAvatar(ModuleAuthorModel moduleAuthor) {
-    String? pendant = moduleAuthor.pendant?.image;
+    final pendant = moduleAuthor.pendant?.image;
+    final hasPendant = pendant != null && pendant.isNotEmpty;
     Widget avatar = PendantAvatar(
       avatar: moduleAuthor.face,
-      size: pendant.isNullOrEmpty ? 40 : 34,
+      size: hasPendant ? 34 : 40,
       officialType: null, // 已被注释
       garbPendantImage: pendant,
     );
-    if (!pendant.isNullOrEmpty) {
+    if (hasPendant) {
       avatar = Padding(padding: const EdgeInsets.all(3), child: avatar);
     }
     return avatar;
@@ -476,7 +478,7 @@ class AuthorPanel extends StatelessWidget {
                           );
                         }
                         return UserHttp.dynamicReport(
-                          mid: moduleAuthor.mid,
+                          mid: moduleAuthor.mid!,
                           dynId: item.idStr,
                           reasonType: reasonType,
                           reasonDesc: reasonType == 0 ? reasonDesc : null,

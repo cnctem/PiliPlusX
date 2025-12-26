@@ -25,7 +25,7 @@ import 'package:PiliPlus/utils/utils.dart';
 import 'package:PiliPlus/utils/wbi_sign.dart';
 import 'package:dio/dio.dart';
 
-class DynamicsHttp {
+abstract final class DynamicsHttp {
   @pragma('vm:notify-debugger-on-exception')
   static Future<LoadingState<DynamicsDataModel>> followDynamic({
     DynamicsTabType type = DynamicsTabType.all,

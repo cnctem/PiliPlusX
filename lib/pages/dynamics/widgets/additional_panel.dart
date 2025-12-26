@@ -435,11 +435,12 @@ Widget addWidget(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        vote.desc!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      if (vote.title case final title?)
+                        Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       Text(
                         '${NumUtils.numFormat(vote.joinNum)}人参与',
                         maxLines: 1,

@@ -17,7 +17,7 @@ import 'package:PiliPlus/pages/video/controller.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';
 import 'package:PiliPlus/pages/video/member/controller.dart';
 import 'package:PiliPlus/utils/accounts.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/num_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
@@ -306,7 +306,7 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
                     context: context,
                     mid: widget.mid,
                     isFollow: memberInfoModel.isFollowed ?? false,
-                    callback: (attribute) {
+                    afterMod: (attribute) {
                       _controller
                         ..userState.value.data.isFollowed = attribute != 0
                         ..userState.refresh();

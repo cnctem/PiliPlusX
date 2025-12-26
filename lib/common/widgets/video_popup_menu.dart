@@ -130,21 +130,13 @@ class VideoPopupMenu extends StatelessWidget {
                                 context: context,
                                 builder: (context) {
                                   return Dialog(
-                                    child: ConstrainedBox(
-                                      constraints: const BoxConstraints(
-                                        minWidth: 280,
-                                        maxWidth: 420,
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 14,
-                                        ),
-                                        child: AiConclusionPanel.buildContent(
-                                          context,
-                                          Theme.of(context),
-                                          res,
-                                          tap: false,
-                                        ),
+                                    child: Padding(
+                                      padding: const .symmetric(vertical: 14),
+                                      child: AiConclusionPanel.buildContent(
+                                        context,
+                                        Theme.of(context),
+                                        res,
+                                        tap: false,
                                       ),
                                     ),
                                   );
@@ -215,8 +207,7 @@ class VideoPopupMenu extends StatelessWidget {
                                 return AlertDialog(
                                   content: SingleChildScrollView(
                                     child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      crossAxisAlignment: .start,
                                       children: [
                                         if (tp.dislikeReasons != null) ...[
                                           const Text('我不想看'),

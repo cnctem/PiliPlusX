@@ -142,7 +142,7 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
               right: kFloatingActionButtonMargin,
               bottom: kFloatingActionButtonMargin + bottom,
               child: SlideTransition(
-                position: _videoReplyController.anim,
+                position: _videoReplyController.animation,
                 child: FloatingActionButton(
                   heroTag: null,
                   onPressed: () {

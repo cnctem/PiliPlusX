@@ -14,8 +14,11 @@ import 'package:PiliPlus/pages/emote/view.dart';
 import 'package:PiliPlus/pages/whisper_detail/controller.dart';
 import 'package:PiliPlus/pages/whisper_detail/widget/chat_item.dart';
 import 'package:PiliPlus/pages/whisper_link_setting/view.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/file_ext.dart';
+import 'package:PiliPlus/utils/extension/iterable_ext.dart';
+import 'package:PiliPlus/utils/extension/widget_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart' hide TextField;
 import 'package:flutter/services.dart';
@@ -53,25 +56,6 @@ class _WhisperDetailPageState
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        leading: Center(
-          child: SizedBox(
-            width: 34,
-            height: 34,
-            child: IconButton(
-              tooltip: '返回',
-              style: IconButton.styleFrom(
-                padding: EdgeInsets.zero,
-                backgroundColor: theme.colorScheme.secondaryContainer,
-              ),
-              onPressed: Get.back,
-              icon: Icon(
-                Icons.arrow_back_outlined,
-                size: 18,
-                color: theme.colorScheme.onSecondaryContainer,
-              ),
-            ),
-          ),
-        ),
         title: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () {
@@ -116,25 +100,23 @@ class _WhisperDetailPageState
         ),
         actions: [
           IconButton(
+            tooltip: '设置',
             onPressed: () => Get.to(
               WhisperLinkSettingPage(
                 talkerUid: _whisperDetailController.talkerId,
               ),
             ),
             icon: Icon(
-              size: 20,
+              size: 22,
               Icons.settings,
               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 5),
         ],
       ),
       body: Padding(
-        padding: EdgeInsets.only(
-          left: padding.left,
-          right: padding.right,
-        ),
+        padding: EdgeInsets.only(left: padding.left, right: padding.right),
         child: Column(
           children: [
             Expanded(
@@ -162,7 +144,7 @@ class _WhisperDetailPageState
               SizedBox(height: padding.bottom),
           ],
         ),
-      ),
+      ).constraintWidth(),
     );
   }
 
@@ -304,7 +286,8 @@ class _WhisperDetailPageState
                     minLines: 1,
                     maxLines: 4,
                     onChanged: onChanged,
-                    textInputAction: TextInputAction.none,
+                    onSubmitted: onSubmitted,
+                    textInputAction: TextInputAction.newline,
                     decoration: InputDecoration(
                       filled: true,
                       hintText: '发个消息聊聊呗~',
@@ -367,7 +350,7 @@ class _WhisperDetailPageState
                                 onClearText: editController.clear,
                               )
                               .whenComplete(() {
-                                if (Utils.isMobile) {
+                                if (PlatformUtils.isMobile) {
                                   File(path).tryDel();
                                 }
                               });
@@ -406,7 +389,7 @@ class _WhisperDetailPageState
 
   @override
   Future<void> onMention([bool fromClick = false]) {
-    return Future.value();
+    return Future.syncValue(null);
   }
 
   @override

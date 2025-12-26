@@ -4,7 +4,7 @@ import 'package:PiliPlus/http/msg.dart';
 import 'package:PiliPlus/models_new/msg/msg_like/data.dart';
 import 'package:PiliPlus/models_new/msg/msg_like/item.dart';
 import 'package:PiliPlus/pages/common/common_data_controller.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 class LikeMeController
@@ -27,7 +27,7 @@ class LikeMeController
   @override
   Future<void> queryData([bool isRefresh = true]) {
     if (!isRefresh && isEnd) {
-      return Future.value();
+      return Future.syncValue(null);
     }
     return super.queryData(isRefresh);
   }

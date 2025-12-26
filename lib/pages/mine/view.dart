@@ -15,7 +15,9 @@ import 'package:PiliPlus/pages/login/controller.dart';
 import 'package:PiliPlus/pages/main/controller.dart';
 import 'package:PiliPlus/pages/mine/controller.dart';
 import 'package:PiliPlus/pages/mine/widgets/item.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/get_ext.dart';
+import 'package:PiliPlus/utils/extension/theme_ext.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart' hide ListTile;
 import 'package:get/get.dart';
@@ -33,7 +35,7 @@ class MinePage extends StatefulWidget {
 class _MediaPageState extends CommonPageState<MinePage, MineController>
     with AutomaticKeepAliveClientMixin {
   @override
-  MineController controller = Get.put(MineController());
+  MineController controller = Get.putOrFind(MineController.new);
   late final MainController _mainController = Get.find<MainController>();
 
   @override
@@ -252,7 +254,7 @@ class _MediaPageState extends CommonPageState<MinePage, MineController>
               Feedback.forLongPress(context);
               controller.onLogin(true);
             },
-            onSecondaryTap: Utils.isMobile
+            onSecondaryTap: PlatformUtils.isMobile
                 ? null
                 : () => controller.onLogin(true),
             child: Row(
@@ -549,7 +551,7 @@ class _MediaPageState extends CommonPageState<MinePage, MineController>
                   return FavFolderItem(
                     heroTag: Utils.generateRandomString(8),
                     item: response.list[index],
-                    callback: () => Future.delayed(
+                    onPop: () => Future.delayed(
                       const Duration(milliseconds: 150),
                       controller.onRefresh,
                     ),

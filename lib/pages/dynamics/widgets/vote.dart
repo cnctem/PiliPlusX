@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:PiliPlus/common/widgets/avatars.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/dialog/report.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
@@ -11,19 +12,20 @@ import 'package:PiliPlus/models/dynamics/vote_model.dart';
 import 'package:PiliPlus/models_new/followee_votes/vote.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
+import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/num_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart' hide ContextExtensionss;
+import 'package:get/get.dart';
 
 class VotePanel extends StatefulWidget {
   final VoteInfo voteInfo;
-  final FutureOr<LoadingState<VoteInfo>> Function(Set<int>, bool) callback;
+  final FutureOr<LoadingState<VoteInfo>> Function(Set<int>, bool) onVote;
 
   const VotePanel({
     super.key,
     required this.voteInfo,
-    required this.callback,
+    required this.onVote,
   });
 
   @override
@@ -112,7 +114,7 @@ class _VotePanelState extends State<VotePanel> {
             () => OutlinedButton(
               onPressed: groupValue.isNotEmpty
                   ? () async {
-                      final res = await widget.callback(
+                      final res = await widget.onVote(
                         groupValue.toSet(),
                         anonymous,
                       );
@@ -149,51 +151,6 @@ class _VotePanelState extends State<VotePanel> {
           Obx(() {
             final list = followeeVote.value;
             if (list != null && list.isNotEmpty) {
-              Widget child;
-              const size = 22.0;
-              const gap = 6.0;
-              const offset = size - gap;
-              if (list.length == 1) {
-                child = NetworkImgLayer(
-                  src: list.first.face,
-                  width: size,
-                  height: size,
-                );
-              } else {
-                final decoration = BoxDecoration(
-                  shape: .circle,
-                  border: Border.all(color: theme.colorScheme.surface),
-                );
-                child = SizedBox(
-                  height: size,
-                  width: offset * min(3, list.length) + gap,
-                  child: Stack(
-                    clipBehavior: .none,
-                    children: list
-                        .take(3)
-                        .indexed
-                        .map(
-                          (e) => Positioned(
-                            top: 0,
-                            left: e.$1 * offset,
-                            bottom: 0,
-                            child: DecoratedBox(
-                              decoration: decoration,
-                              child: Padding(
-                                padding: const .all(.8),
-                                child: NetworkImgLayer(
-                                  src: e.$2.face,
-                                  width: size - .8,
-                                  height: size - .8,
-                                ),
-                              ),
-                            ),
-                          ),
-                        )
-                        .toList(),
-                  ),
-                );
-              }
               return GestureDetector(
                 behavior: .opaque,
                 onTap: () {
@@ -205,10 +162,6 @@ class _VotePanelState extends State<VotePanel> {
                         clipBehavior: .hardEdge,
                         title: const Text('关注的人的投票'),
                         contentPadding: const .only(top: 10, bottom: 12),
-                        constraints: const BoxConstraints(
-                          minWidth: 280,
-                          maxWidth: 420,
-                        ),
                         content: SingleChildScrollView(
                           child: Column(
                             mainAxisSize: .min,
@@ -217,7 +170,7 @@ class _VotePanelState extends State<VotePanel> {
                                   (e) => ListTile(
                                     dense: true,
                                     onTap: () =>
-                                        Get.toNamed('/member?mid=${e.uid}'),
+                                        Get.toNamed('/member?mid=${e.mid}'),
                                     leading: NetworkImgLayer(
                                       src: e.face,
                                       width: 40,
@@ -263,7 +216,10 @@ class _VotePanelState extends State<VotePanel> {
                 child: Row(
                   mainAxisSize: .min,
                   children: [
-                    child,
+                    avatars(
+                      colorScheme: theme.colorScheme,
+                      users: list.take(3),
+                    ),
                     Icon(
                       size: 18,
                       color: theme.colorScheme.outline.withValues(alpha: .7),
@@ -597,7 +553,7 @@ Future showVoteDialog(
             padding: const EdgeInsets.all(24),
             child: VotePanel(
               voteInfo: voteInfo.data,
-              callback: (votes, anonymous) => DynamicsHttp.doVote(
+              onVote: (votes, anonymous) => DynamicsHttp.doVote(
                 voteId: voteId,
                 votes: votes.toList(),
                 anonymous: anonymous,

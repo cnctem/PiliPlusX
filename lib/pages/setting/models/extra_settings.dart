@@ -27,9 +27,11 @@ import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/services/download/download_service.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
@@ -45,7 +47,7 @@ import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 List<SettingsModel> get extraSettings => [
-  if (Utils.isDesktop) ...[
+  if (PlatformUtils.isDesktop) ...[
     SwitchModel(
       title: '退出时最小化',
       leading: const Icon(Icons.exit_to_app),
@@ -425,7 +427,7 @@ List<SettingsModel> get extraSettings => [
     setKey: SettingBoxKey.continuePlayingPart,
     defaultVal: true,
   ),
-  getBanwordModel(
+  getBanWordModel(
     title: '评论关键词过滤',
     key: SettingBoxKey.banWordForReply,
     onChanged: (value) {
@@ -433,7 +435,7 @@ List<SettingsModel> get extraSettings => [
       ReplyGrpc.enableFilter = value.pattern.isNotEmpty;
     },
   ),
-  getBanwordModel(
+  getBanWordModel(
     title: '动态关键词过滤',
     key: SettingBoxKey.banWordForDyn,
     onChanged: (value) {
@@ -647,16 +649,16 @@ List<SettingsModel> get extraSettings => [
     setKey: SettingBoxKey.enableCommAntifraud,
     defaultVal: false,
   ),
-  const SwitchModel(
-    title: '使用「哔哩发评反诈」检查评论',
-    subtitle: '仅对Android生效',
-    leading: Icon(
-      FontAwesomeIcons.b,
-      size: 22,
+  if (Platform.isAndroid)
+    const SwitchModel(
+      title: '使用「哔哩发评反诈」检查评论',
+      leading: Icon(
+        FontAwesomeIcons.b,
+        size: 22,
+      ),
+      setKey: SettingBoxKey.biliSendCommAntifraud,
+      defaultVal: false,
     ),
-    setKey: SettingBoxKey.biliSendCommAntifraud,
-    defaultVal: false,
-  ),
   const SwitchModel(
     title: '发布/转发动态反诈',
     subtitle: '发布/转发动态后检查动态是否可见',
@@ -803,8 +805,10 @@ List<SettingsModel> get extraSettings => [
             return;
           }
           final quickFavId = Pref.quickFavId;
-          Get.dialog(
-            AlertDialog(
+          if (!context.mounted) return;
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
               clipBehavior: Clip.hardEdge,
               title: const Text('选择默认收藏夹'),
               contentPadding: const EdgeInsets.only(top: 5, bottom: 18),
@@ -849,8 +853,9 @@ List<SettingsModel> get extraSettings => [
         if (quickShareId != null && quickShareId != 1004428694) {
           controller.text = quickShareId.toString();
         }
-        final result = await Get.dialog(
-          AlertDialog(
+        final result = await showDialog<bool>(
+          context: Get.context!,
+          builder: (context) => AlertDialog(
             title: const Text('默认分享对象的mid'),
             content: TextField(
               controller: controller,
@@ -862,13 +867,13 @@ List<SettingsModel> get extraSettings => [
             actions: [
               TextButton(
                 onPressed: () {
-                  Get.back(result: false);
+                  Navigator.of(context).pop(false);
                 },
                 child: const Text('取消'),
               ),
               TextButton(
                 onPressed: () {
-                  Get.back(result: true);
+                  Navigator.of(context).pop(true);
                 },
                 child: const Text('确定'),
               ),
@@ -946,7 +951,6 @@ List<SettingsModel> get extraSettings => [
     onTap: (context, setState) async {
       final result = await showDialog<double>(
         context: context,
-
         builder: (context) {
           return SlideDialog(
             title: '连接重试次数',
@@ -972,7 +976,6 @@ List<SettingsModel> get extraSettings => [
     onTap: (context, setState) async {
       final result = await showDialog<double>(
         context: context,
-
         builder: (context) {
           return SlideDialog(
             title: '连接重试间隔',
@@ -1013,7 +1016,6 @@ List<SettingsModel> get extraSettings => [
     onTap: (context, setState) async {
       final result = await showDialog<int>(
         context: context,
-
         builder: (context) {
           return SelectDialog<int>(
             title: '评论展示',
@@ -1038,7 +1040,6 @@ List<SettingsModel> get extraSettings => [
     onTap: (context, setState) async {
       final result = await showDialog<int>(
         context: context,
-
         builder: (context) {
           return SelectDialog<int>(
             title: '动态展示',
@@ -1063,7 +1064,6 @@ List<SettingsModel> get extraSettings => [
     onTap: (context, setState) async {
       final result = await showDialog<MemberTabType>(
         context: context,
-
         builder: (context) {
           return SelectDialog<MemberTabType>(
             title: '用户页默认展示TAB',
@@ -1343,16 +1343,16 @@ List<SettingsModel> get extraSettings => [
               TextButton(
                 onPressed: () async {
                   if (!valueStr.isNotEmpty) {
-                    Get.snackbar('格式错误', '代理链接不能为空');
+                    SmartDialog.showToast('格式错误：代理链接不能为空');
                     return;
                   }
                   if (!valueStr.toLowerCase().startsWith('http')) {
-                    Get.snackbar('格式错误', '代理链接格式错误');
+                    SmartDialog.showToast('格式错误：代理链接格式错误');
                     return;
                   }
 
                   if (valueStr.toLowerCase().endsWith('/')) {
-                    Get.snackbar('格式错误', '末尾不能有/');
+                    SmartDialog.showToast('格式错误：末尾不能有/');
                     return;
                   }
 
@@ -1421,7 +1421,6 @@ Future<void> audioNormalization(
       String param = '';
       await showDialog(
         context: context,
-
         builder: (context) {
           return AlertDialog(
             title: const Text('自定义参数'),

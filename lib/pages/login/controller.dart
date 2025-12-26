@@ -12,7 +12,7 @@ import 'package:PiliPlus/models/login/model.dart';
 import 'package:PiliPlus/pages/login/geetest/geetest_webview_dialog.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/accounts/account.dart';
-import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
@@ -136,9 +136,10 @@ class LoginPageController extends GetxController
       onSuccess();
     }
 
-    if (Utils.isDesktop) {
-      Get.dialog<Map<String, dynamic>>(
-        GeetestWebviewDialog(geeGt, geeChallenge),
+    if (PlatformUtils.isDesktop) {
+      showDialog<Map<String, dynamic>>(
+        context: Get.context!,
+        builder: (context) => GeetestWebviewDialog(geeGt, geeChallenge),
       ).then((res) {
         if (res != null) {
           updateCaptchaData(res);
@@ -341,8 +342,9 @@ class LoginPageController extends GetxController
 
         TextEditingController textFieldController = TextEditingController();
         String captchaKey = '';
-        Get.dialog(
-          AlertDialog(
+        showDialog(
+          context: Get.context!,
+          builder: (context) => AlertDialog(
             titlePadding: const EdgeInsets.only(
               left: 16,
               top: 18,
@@ -738,13 +740,9 @@ class LoginPageController extends GetxController
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('选择账号mid, 为0时使用匿名'),
-        titlePadding: const EdgeInsets.only(left: 22, top: 16, right: 22),
-        contentPadding: const EdgeInsets.symmetric(vertical: 5),
-        actionsPadding: const EdgeInsets.only(
-          left: 16,
-          right: 16,
-          bottom: 10,
-        ),
+        titlePadding: const .only(left: 22, top: 16, right: 22),
+        contentPadding: const .symmetric(vertical: 5),
+        actionsPadding: const .only(left: 16, right: 16, bottom: 10),
         content: SingleChildScrollView(
           child: Builder(
             builder: (context) => RadioGroup(

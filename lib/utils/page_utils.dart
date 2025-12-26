@@ -12,14 +12,17 @@ import 'package:PiliPlus/models/dynamics/result.dart';
 import 'package:PiliPlus/models_new/pgc/pgc_info_model/episode.dart';
 import 'package:PiliPlus/models_new/pgc/pgc_info_model/result.dart';
 import 'package:PiliPlus/pages/common/common_intro_controller.dart';
+import 'package:PiliPlus/pages/common/publish/publish_route.dart';
 import 'package:PiliPlus/pages/contact/view.dart';
 import 'package:PiliPlus/pages/fav_panel/view.dart';
 import 'package:PiliPlus/pages/share/view.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/widgets/menu_row.dart';
 import 'package:PiliPlus/services/shutdown_timer_service.dart';
 import 'package:PiliPlus/utils/app_scheme.dart';
-import 'package:PiliPlus/utils/context_ext.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/context_ext.dart';
+import 'package:PiliPlus/utils/extension/extension.dart';
+import 'package:PiliPlus/utils/extension/iterable_ext.dart';
+import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/global_data.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
@@ -31,10 +34,10 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show FilteringTextInputFormatter;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:get/get.dart' hide ContextExtensionss;
+import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-abstract class PageUtils {
+abstract final class PageUtils {
   static final RouteObserver<PageRoute> routeObserver =
       RouteObserver<PageRoute>();
 
@@ -61,7 +64,6 @@ abstract class PageUtils {
   }) async {
     // if (kDebugMode) debugPrint(content.toString());
 
-    int? selectedIndex;
     List<UserModel> userList = <UserModel>[];
 
     final shareListRes = await ImGrpc.shareList(size: 3);
@@ -76,11 +78,10 @@ abstract class PageUtils {
         ),
       );
     } else if (context.mounted) {
-      UserModel? userModel = await Navigator.of(context).push(
+      final UserModel? userModel = await Navigator.of(context).push(
         GetPageRoute(page: () => const ContactPage()),
       );
       if (userModel != null) {
-        selectedIndex = 0;
         userList.add(userModel);
       }
     }
@@ -91,7 +92,6 @@ abstract class PageUtils {
         builder: (context) => SharePanel(
           content: content,
           userList: userList,
-          selectedIndex: selectedIndex,
         ),
         useSafeArea: true,
         enableDrag: false,
@@ -423,10 +423,7 @@ abstract class PageUtils {
             }
           }
           // redirectUrl from jumpUrl
-          if (await UrlUtils.parseRedirectUrl(
-                archive.jumpUrl.http2https,
-                false,
-              )
+          if (await UrlUtils.parseRedirectUrl(archive.jumpUrl.http2https, false)
               case final redirectUrl?) {
             if (viewPgcFromUri(redirectUrl)) {
               return;
@@ -655,49 +652,50 @@ abstract class PageUtils {
     if (!context.mounted) {
       return;
     }
-    Get.generalDialog(
-      barrierLabel: '',
-      barrierDismissible: true,
-      pageBuilder: (buildContext, animation, secondaryAnimation) {
-        if (Get.context!.isPortrait) {
+    Get.key.currentState!.push(
+      PublishRoute(
+        pageBuilder: (context, animation, secondaryAnimation) {
+          if (context.isPortrait) {
+            return SafeArea(
+              child: FractionallySizedBox(
+                heightFactor: 0.7,
+                widthFactor: 1.0,
+                alignment: Alignment.bottomCenter,
+                child: isFullScreen() && padding != null
+                    ? Padding(
+                        padding: EdgeInsets.only(bottom: padding),
+                        child: child,
+                      )
+                    : child,
+              ),
+            );
+          }
           return SafeArea(
             child: FractionallySizedBox(
-              heightFactor: 0.7,
-              widthFactor: 1.0,
-              alignment: Alignment.bottomCenter,
-              child: isFullScreen() && padding != null
-                  ? Padding(
-                      padding: EdgeInsets.only(bottom: padding),
-                      child: child,
-                    )
-                  : child,
+              widthFactor: 0.5,
+              heightFactor: 1.0,
+              alignment: Alignment.centerRight,
+              child: child,
             ),
           );
-        }
-        return SafeArea(
-          child: FractionallySizedBox(
-            widthFactor: 0.5,
-            heightFactor: 1.0,
-            alignment: Alignment.centerRight,
+        },
+        transitionDuration: const Duration(milliseconds: 350),
+        transitionBuilder: (context, animation, secondaryAnimation, child) {
+          final begin = context.isPortrait
+              ? const Offset(0.0, 1.0)
+              : const Offset(1.0, 0.0);
+          return SlideTransition(
+            position: animation.drive(
+              Tween(
+                begin: begin,
+                end: Offset.zero,
+              ).chain(CurveTween(curve: Curves.easeInOut)),
+            ),
             child: child,
-          ),
-        );
-      },
-      transitionDuration: const Duration(milliseconds: 350),
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        Offset begin = Get.context!.isPortrait
-            ? const Offset(0.0, 1.0)
-            : const Offset(1.0, 0.0);
-        var tween = Tween(
-          begin: begin,
-          end: Offset.zero,
-        ).chain(CurveTween(curve: Curves.easeInOut));
-        return SlideTransition(
-          position: animation.drive(tween),
-          child: child,
-        );
-      },
-      routeSettings: RouteSettings(arguments: Get.arguments),
+          );
+        },
+        settings: RouteSettings(arguments: Get.arguments),
+      ),
     );
   }
 

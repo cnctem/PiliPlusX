@@ -239,7 +239,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: 8d6395cf0f733d9275aa897a39cd22d76ffee928
+      resolved-ref: "8d6395cf0f733d9275aa897a39cd22d76ffee928"
       url: "https://github.com/cnctem/canvas_danmaku.git"
     source: git
     version: "0.2.6"
@@ -340,14 +340,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "4.0.8"
-  crclib:
-    dependency: "direct main"
-    description:
-      name: crclib
-      sha256: "800f2226cd90c900ddcaaccb79449eabe690627ee8c7046737458f1a2509043d"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "3.0.0"
   cross_file:
     dependency: transitive
     description:
@@ -530,10 +522,10 @@ packages:
     description:
       path: "."
       ref: mod
-      resolved-ref: "4c03c3413a915fa82f58d4591bfe3b62709a6edf"
+      resolved-ref: e9f51575d0103880f4d0ad64f314bc57d0b49cf1
       url: "https://github.com/bggRGjQaUbCoE/flutter_file_picker.git"
     source: git
-    version: "10.3.7"
+    version: "10.3.8"
   file_selector_linux:
     dependency: transitive
     description:
@@ -801,7 +793,7 @@ packages:
     description:
       path: "."
       ref: "version_4.7.2"
-      resolved-ref: "579a8978a922e6c57cebd001320f78674e040418"
+      resolved-ref: "8b6dcbfb6217d4033204a15702de59588dd955ab"
       url: "https://github.com/bggRGjQaUbCoE/getx.git"
     source: git
     version: "4.7.2"
@@ -894,13 +886,13 @@ packages:
     source: hosted
     version: "4.1.2"
   image:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: image
-      sha256: "51555e36056541237b15b57afc31a0f53d4f9aefd9bd00873a6dc0090e54e332"
-      url: "https://pub.dev"
+      sha256: "492bd52f6c4fbb6ee41f781ff27765ce5f627910e1e0cbecfa3d9add5562604c"
+      url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "4.6.0"
+    version: "4.7.2"
   image_cropper:
     dependency: "direct main"
     description:
@@ -1536,10 +1528,10 @@ packages:
     dependency: transitive
     description:
       name: sentry
-      sha256: "10a0bc25f5f21468e3beeae44e561825aaa02cdc6829438e73b9b64658ff88d9"
+      sha256: "9b2fe138df1a104f6e41d8ebf2b1e4fe39d4370d2200eb4eea29913d38b8b33b"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "9.8.0"
+    version: "9.9.1"
   share_plus:
     dependency: "direct main"
     description:
@@ -1762,14 +1754,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.5.2"
-  tuple:
-    dependency: transitive
-    description:
-      name: tuple
-      sha256: a97ce2013f240b2f3807bcbaf218765b6f301c3eff91092bcfa23a039e7dd151
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "2.0.2"
   typed_data:
     dependency: transitive
     description:
@@ -1798,10 +1782,10 @@ packages:
     dependency: transitive
     description:
       name: uri_parser
-      sha256: "380c6c96c52a8de82c84c627d0a79cfb2e1697c3fe3eda78fbb9b87af0dcee08"
-      url: "https://pub.dev"
+      sha256: "051c62e5f693de98ca9f130ee707f8916e2266945565926be3ff20659f7853ce"
+      url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "3.0.1"
+    version: "3.0.2"
   url_launcher:
     dependency: "direct main"
     description:
@@ -1943,7 +1927,7 @@ packages:
     description:
       name: watcher
       sha256: f52385d4f73589977c80797e60fe51014f7f2b957b5e9a62c3f6ada439889249
-      url: "https://pub.dev"
+      url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.2.0"
   waterfall_flow:

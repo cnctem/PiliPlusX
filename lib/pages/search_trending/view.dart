@@ -7,14 +7,15 @@ import 'package:PiliPlus/common/widgets/loading_widget/loading_widget.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models_new/search/search_trending/list.dart';
 import 'package:PiliPlus/pages/search_trending/controller.dart';
-import 'package:PiliPlus/utils/context_ext.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/context_ext.dart';
+import 'package:PiliPlus/utils/extension/get_ext.dart';
+import 'package:PiliPlus/utils/extension/size_ext.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide ListTile;
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
-import 'package:get/get.dart' hide ContextExtensionss;
+import 'package:get/get.dart';
 
 class SearchTrendingPage extends StatefulWidget {
   const SearchTrendingPage({super.key});

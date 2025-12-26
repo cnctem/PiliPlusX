@@ -10,7 +10,7 @@ import 'package:PiliPlus/models_new/pgc/pgc_timeline/result.dart';
 import 'package:PiliPlus/pages/common/common_list_controller.dart';
 import 'package:PiliPlus/services/account_service.dart';
 import 'package:PiliPlus/utils/accounts.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/scroll_controller_ext.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -122,7 +122,7 @@ class PgcController
       List<FavPgcItemModel>? list = data.list;
       followCount.value = data.total ?? -1;
 
-      if (list.isNullOrEmpty) {
+      if (list == null || list.isEmpty) {
         followEnd = true;
         if (isRefresh) {
           followState.value = Success(list);
@@ -132,13 +132,13 @@ class PgcController
       }
 
       if (isRefresh) {
-        if (list!.length >= followCount.value) {
+        if (list.length >= followCount.value) {
           followEnd = true;
         }
         followState.value = Success(list);
         followController?.animToTop();
       } else if (followState.value.isSuccess) {
-        final currentList = followState.value.data!..addAll(list!);
+        final currentList = followState.value.data!..addAll(list);
         if (currentList.length >= followCount.value) {
           followEnd = true;
         }

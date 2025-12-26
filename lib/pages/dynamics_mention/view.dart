@@ -11,25 +11,26 @@ import 'package:PiliPlus/models_new/dynamic/dyn_mention/group.dart';
 import 'package:PiliPlus/pages/dynamics_mention/controller.dart';
 import 'package:PiliPlus/pages/dynamics_mention/widgets/item.dart';
 import 'package:PiliPlus/pages/search/controller.dart' show DebounceStreamState;
-import 'package:PiliPlus/utils/context_ext.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/context_ext.dart';
+import 'package:PiliPlus/utils/extension/iterable_ext.dart';
+import 'package:PiliPlus/utils/extension/scroll_controller_ext.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart' hide ContextExtensionss;
+import 'package:get/get.dart';
 
 class DynMentionPanel extends StatefulWidget {
   const DynMentionPanel({
     super.key,
     this.scrollController,
-    this.callback,
+    this.onCachePos,
   });
 
   final ScrollController? scrollController;
-  final ValueChanged<double>? callback;
+  final ValueChanged<double>? onCachePos;
 
   static Future onDynMention(
     BuildContext context, {
     double offset = 0,
-    ValueChanged<double>? callback,
+    ValueChanged<double>? onCachePos,
   }) {
     return showModalBottomSheet(
       context: Get.context!,
@@ -48,7 +49,7 @@ class DynMentionPanel extends StatefulWidget {
         snapSizes: const [0.65],
         builder: (context, scrollController) => DynMentionPanel(
           scrollController: scrollController,
-          callback: callback,
+          onCachePos: onCachePos,
         ),
       ),
     );
@@ -178,7 +179,7 @@ class _DynMentionPanelState
                       _controller.focusNode.unfocus();
                     }
                   } else if (notification is ScrollEndNotification) {
-                    widget.callback?.call(notification.metrics.pixels);
+                    widget.onCachePos?.call(notification.metrics.pixels);
                   }
                   return false;
                 },

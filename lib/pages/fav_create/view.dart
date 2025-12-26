@@ -4,10 +4,11 @@ import 'package:PiliPlus/common/widgets/loading_widget/loading_widget.dart';
 import 'package:PiliPlus/http/fav.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/msg.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/file_ext.dart';
+import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/fav_utils.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
-import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart';
@@ -26,8 +27,8 @@ class CreateFavPage extends StatefulWidget {
 
 class _CreateFavPageState extends State<CreateFavPage> {
   dynamic _mediaId;
-  late final _titleController = TextEditingController();
-  late final _introController = TextEditingController();
+  late final TextEditingController _titleController;
+  late final TextEditingController _introController;
   String? _cover;
   bool _isPublic = true;
   late final _imagePicker = ImagePicker();
@@ -37,6 +38,8 @@ class _CreateFavPageState extends State<CreateFavPage> {
   @override
   void initState() {
     super.initState();
+    _titleController = TextEditingController();
+    _introController = TextEditingController();
     _mediaId = Get.parameters['mediaId'];
     if (_mediaId != null) {
       _getFolderInfo();
@@ -118,7 +121,7 @@ class _CreateFavPageState extends State<CreateFavPage> {
       );
       if (pickedFile != null && mounted) {
         String imgPath = pickedFile.path;
-        if (Utils.isMobile) {
+        if (PlatformUtils.isMobile) {
           final croppedFile = await ImageCropper.platform.cropImage(
             sourcePath: imgPath,
             uiSettings: [
@@ -159,7 +162,7 @@ class _CreateFavPageState extends State<CreateFavPage> {
               SmartDialog.showToast(res['msg']);
             }
           }
-          if (Utils.isMobile) {
+          if (PlatformUtils.isMobile) {
             File(imgPath).tryDel();
           }
         });
@@ -190,9 +193,7 @@ class _CreateFavPageState extends State<CreateFavPage> {
                           builder: (_) {
                             return AlertDialog(
                               clipBehavior: Clip.hardEdge,
-                              contentPadding: const EdgeInsets.symmetric(
-                                vertical: 12,
-                              ),
+                              contentPadding: const .symmetric(vertical: 12),
                               content: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [

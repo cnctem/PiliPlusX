@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'dart:ui' show clampDouble;
 
-import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -24,88 +24,31 @@ class CustomTooltip extends StatefulWidget {
   static final List<CustomTooltipState> _openedTooltips =
       <CustomTooltipState>[];
 
-  static bool dismissAllToolTips() {
-    if (_openedTooltips.isNotEmpty) {
-      final List<CustomTooltipState> openedTooltips = _openedTooltips.toList();
-      for (final CustomTooltipState state in openedTooltips) {
-        assert(state.mounted);
-        state._scheduleDismissTooltip();
-      }
-      return true;
-    }
-    return false;
-  }
-
   @override
   State<CustomTooltip> createState() => CustomTooltipState();
 }
 
 class CustomTooltipState extends State<CustomTooltip>
     with SingleTickerProviderStateMixin {
-  static const Duration _fadeInDuration = Duration(milliseconds: 150);
-  static const Duration _fadeOutDuration = Duration(milliseconds: 75);
-
   final OverlayPortalController _overlayController = OverlayPortalController();
-
-  AnimationController? _backingController;
-  AnimationController get _controller {
-    return _backingController ??= AnimationController(
-      duration: _fadeInDuration,
-      reverseDuration: _fadeOutDuration,
-      vsync: this,
-    )..addStatusListener(_handleStatusChanged);
-  }
-
-  CurvedAnimation? _backingOverlayAnimation;
-  CurvedAnimation get _overlayAnimation {
-    return _backingOverlayAnimation ??= CurvedAnimation(
-      parent: _controller,
-      curve: Curves.fastOutSlowIn,
-    );
-  }
 
   LongPressGestureRecognizer? _longPressRecognizer;
 
-  AnimationStatus _animationStatus = AnimationStatus.dismissed;
-  void _handleStatusChanged(AnimationStatus status) {
-    assert(mounted);
-    switch ((_animationStatus.isDismissed, status.isDismissed)) {
-      case (false, true):
-        CustomTooltip._openedTooltips.remove(this);
-        _overlayController.hide();
-      case (true, false):
-        _overlayController.show();
-        CustomTooltip._openedTooltips.add(this);
-      case (true, true) || (false, false):
-        break;
-    }
-    _animationStatus = status;
-  }
-
   void _scheduleShowTooltip() {
-    _controller.forward();
+    _overlayController.show();
+    CustomTooltip._openedTooltips.add(this);
   }
 
   void _scheduleDismissTooltip() {
-    _controller.reverse();
+    CustomTooltip._openedTooltips.remove(this);
+    _overlayController.hide();
   }
 
   void _handlePointerDown(PointerDownEvent event) {
     assert(mounted);
-    const Set<PointerDeviceKind> triggerModeDeviceKinds = <PointerDeviceKind>{
-      PointerDeviceKind.invertedStylus,
-      PointerDeviceKind.stylus,
-      PointerDeviceKind.touch,
-      PointerDeviceKind.unknown,
-      PointerDeviceKind.trackpad,
-    };
-    _longPressRecognizer ??= LongPressGestureRecognizer(
+    (_longPressRecognizer ??= LongPressGestureRecognizer(
       debugOwner: this,
-      supportedDevices: triggerModeDeviceKinds,
-    );
-    _longPressRecognizer!
-      ..onLongPress = _scheduleShowTooltip
-      ..addPointer(event);
+    )..onLongPress = _scheduleShowTooltip).addPointer(event);
   }
 
   Widget _buildCustomTooltipOverlay(BuildContext context) {
@@ -123,7 +66,6 @@ class CustomTooltipState extends State<CustomTooltip>
       verticalOffset: box.size.height / 2,
       horizontalOffset: box.size.width / 2,
       type: widget.type,
-      animation: _overlayAnimation,
       target: target,
       onDismiss: _scheduleDismissTooltip,
       overlayWidget: widget.overlayWidget,
@@ -141,8 +83,6 @@ class CustomTooltipState extends State<CustomTooltip>
     CustomTooltip._openedTooltips.remove(this);
     _longPressRecognizer?.onLongPressCancel = null;
     _longPressRecognizer?.dispose();
-    _backingController?.dispose();
-    _backingOverlayAnimation?.dispose();
     super.dispose();
   }
 
@@ -150,7 +90,7 @@ class CustomTooltipState extends State<CustomTooltip>
   @override
   Widget build(BuildContext context) {
     Widget result;
-    if (Utils.isMobile) {
+    if (PlatformUtils.isMobile) {
       result = Listener(
         onPointerDown: _handlePointerDown,
         behavior: HitTestBehavior.opaque,
@@ -177,7 +117,6 @@ class _CustomTooltipOverlay extends StatelessWidget {
     required this.verticalOffset,
     required this.horizontalOffset,
     required this.type,
-    required this.animation,
     required this.target,
     required this.onDismiss,
     required this.overlayWidget,
@@ -187,7 +126,6 @@ class _CustomTooltipOverlay extends StatelessWidget {
   final double verticalOffset;
   final double horizontalOffset;
   final TooltipType type;
-  final Animation<double> animation;
   final Offset target;
   final VoidCallback onDismiss;
   final Widget Function() overlayWidget;
@@ -215,7 +153,7 @@ class _CustomTooltipOverlay extends StatelessWidget {
           ),
       ],
     );
-    if (Utils.isMobile) {
+    if (PlatformUtils.isMobile) {
       return GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onDismiss,

@@ -3,10 +3,12 @@ import 'dart:typed_data';
 
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/http/init.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/file_ext.dart';
+import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/global_data.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/utils/permission_handler.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:dio/dio.dart';
@@ -19,7 +21,7 @@ import 'package:live_photo_maker/live_photo_maker.dart';
 import 'package:saver_gallery/saver_gallery.dart';
 import 'package:share_plus/share_plus.dart';
 
-abstract class ImageUtils {
+abstract final class ImageUtils {
   static String get time =>
       DateFormat('yyyy-MM-dd_HH-mm-ss').format(DateTime.now());
   static bool silentDownImg = Pref.silentDownImg;
@@ -127,7 +129,8 @@ abstract class ImageUtils {
     required int height,
   }) async {
     try {
-      if (Utils.isMobile && !await checkPermissionDependOnSdkInt(context)) {
+      if (PlatformUtils.isMobile &&
+          !await checkPermissionDependOnSdkInt(context)) {
         return false;
       }
       if (!silentDownImg) SmartDialog.showLoading(msg: '正在下载');
@@ -186,7 +189,8 @@ abstract class ImageUtils {
     List<String> imgList, [
     CacheManager? manager,
   ]) async {
-    if (Utils.isMobile && !await checkPermissionDependOnSdkInt(context)) {
+    if (PlatformUtils.isMobile &&
+        !await checkPermissionDependOnSdkInt(context)) {
       return false;
     }
     CancelToken? cancelToken;
@@ -229,7 +233,7 @@ abstract class ImageUtils {
         }
       });
       final result = await Future.wait(futures, eagerError: true);
-      if (Utils.isMobile) {
+      if (PlatformUtils.isMobile) {
         final delList = <String>[];
         final saveList = <SaveFileData>[];
         for (var i in result) {
@@ -310,7 +314,7 @@ abstract class ImageUtils {
   }) async {
     SaveResult? result;
     fileName += '.$ext';
-    if (Utils.isMobile) {
+    if (PlatformUtils.isMobile) {
       SmartDialog.showLoading(msg: '正在保存');
       result = await SaverGallery.saveImage(
         bytes,
@@ -348,7 +352,7 @@ abstract class ImageUtils {
   }) async {
     SaveResult? result;
     fileName += '.$ext';
-    if (Utils.isMobile) {
+    if (PlatformUtils.isMobile) {
       SmartDialog.showLoading(msg: '正在保存');
       result = await SaverGallery.saveImage(
         bytes,
@@ -392,7 +396,7 @@ abstract class ImageUtils {
       return;
     }
     SaveResult? result;
-    if (Utils.isMobile) {
+    if (PlatformUtils.isMobile) {
       result = await SaverGallery.saveFile(
         filePath: filePath,
         fileName: fileName,

@@ -28,12 +28,14 @@ import 'package:PiliPlus/pages/video/reply/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/utils/accounts.dart';
-import 'package:PiliPlus/utils/context_ext.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/context_ext.dart';
+import 'package:PiliPlus/utils/extension/iterable_ext.dart';
+import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/global_data.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
@@ -41,7 +43,7 @@ import 'package:expandable/expandable.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:get/get.dart' hide ContextExtensionss;
+import 'package:get/get.dart';
 
 class UgcIntroController extends CommonIntroController with ReloadMixin {
   late ExpandableController expandableCtr;
@@ -62,6 +64,8 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
   late final horizontalMemberPage = Pref.horizontalMemberPage;
 
   AiConclusionResult? aiConclusionResult;
+
+  late final Map<int?, bool> seasonFavState = {};
 
   @override
   void onInit() {
@@ -332,7 +336,7 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
                   PageUtils.launchURL(videoUrl);
                 },
               ),
-              if (Utils.isMobile)
+              if (PlatformUtils.isMobile)
                 ListTile(
                   dense: true,
                   title: const Text(
@@ -448,7 +452,7 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
         mid: mid,
         isFollow: attr != 0,
         followStatus: followStatus,
-        callback: (attribute) {
+        afterMod: (attribute) {
           followStatus['attribute'] = attribute;
           Future.delayed(const Duration(milliseconds: 500), queryFollowStatus);
         },
@@ -515,9 +519,11 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
         // 重新请求评论
         if (videoDetailCtr.showReply) {
           try {
-            Get.find<VideoReplyController>(tag: heroTag)
-              ..aid = aid
-              ..onReload();
+            final replyCtr = Get.find<VideoReplyController>(tag: heroTag)
+              ..aid = aid;
+            if (replyCtr.loadingState.value is! Loading) {
+              replyCtr.onReload();
+            }
           } catch (_) {}
         }
 

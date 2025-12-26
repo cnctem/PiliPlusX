@@ -12,13 +12,11 @@ class LiveDmBlockController extends GetxController
   @override
   void onInit() {
     super.onInit();
+    tabController = TabController(length: 2, vsync: this);
     queryData();
   }
 
-  late final TabController tabController = TabController(
-    length: 2,
-    vsync: this,
-  );
+  late final TabController tabController;
 
   int? oldLevel;
   final RxInt level = 0.obs;

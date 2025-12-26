@@ -9,7 +9,7 @@ import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/pendant_avatar.dart';
 import 'package:PiliPlus/grpc/bilibili/main/community/reply/v1.pb.dart'
     show ReplyInfo, ReplyControl, Content, Url;
-import 'package:PiliPlus/http/init.dart';
+import 'package:PiliPlus/http/reply.dart';
 import 'package:PiliPlus/http/video.dart';
 import 'package:PiliPlus/models/common/badge_type.dart';
 import 'package:PiliPlus/models/common/image_type.dart';
@@ -18,24 +18,25 @@ import 'package:PiliPlus/pages/save_panel/view.dart';
 import 'package:PiliPlus/pages/video/controller.dart';
 import 'package:PiliPlus/pages/video/reply/widgets/zan_grpc.dart';
 import 'package:PiliPlus/utils/accounts.dart';
-import 'package:PiliPlus/utils/context_ext.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/duration_utils.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/context_ext.dart';
+import 'package:PiliPlus/utils/extension/string_ext.dart';
+import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/url_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dio/dio.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:get/get.dart' hide ContextExtensionss;
+import 'package:get/get.dart';
 
 class ReplyItemGrpc extends StatelessWidget {
   const ReplyItemGrpc({
@@ -77,7 +78,7 @@ class ReplyItemGrpc extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
-    final isMobile = Utils.isMobile;
+    final isMobile = PlatformUtils.isMobile;
     void showMore() => showModalBottomSheet(
       context: context,
       useSafeArea: true,
@@ -465,7 +466,7 @@ class ReplyItemGrpc extends StatelessWidget {
                     feedBack();
                     showMore();
                   },
-                  onSecondaryTap: Utils.isMobile ? null : showMore,
+                  onSecondaryTap: PlatformUtils.isMobile ? null : showMore,
                   child: Padding(
                     padding: padding,
                     child: Text.rich(
@@ -680,7 +681,11 @@ class ReplyItemGrpc extends StatelessWidget {
           spanChildren.add(
             WidgetSpan(
               child: NetworkImgLayer(
-                src: emote.hasGifUrl() ? emote.gifUrl : emote.url,
+                src: emote.hasWebpUrl()
+                    ? emote.webpUrl
+                    : emote.hasGifUrl()
+                    ? emote.gifUrl
+                    : emote.url,
                 type: ImageType.emote,
                 width: size,
                 height: size,
@@ -936,28 +941,17 @@ class ReplyItemGrpc extends StatelessWidget {
                   context,
                   ReportOptions.commentReport,
                   (reasonType, reasonDesc, banUid) async {
-                    final res = await Request().post(
-                      '/x/v2/reply/report',
-                      data: {
-                        'add_blacklist': banUid,
-                        'csrf': Accounts.main.csrf,
-                        'gaia_source': 'main_h5',
-                        'oid': item.oid,
-                        'platform': 'android',
-                        'reason': reasonType,
-                        'rpid': item.id,
-                        'scene': 'main',
-                        'type': 1,
-                        if (reasonType == 0) 'content': reasonDesc!,
-                      },
-                      options: Options(
-                        contentType: Headers.formUrlEncodedContentType,
-                      ),
+                    final res = await ReplyHttp.report(
+                      rpid: item.id,
+                      oid: item.oid,
+                      reasonType: reasonType,
+                      reasonDesc: reasonDesc,
+                      banUid: banUid,
                     );
-                    if (res.data['code'] == 0) {
+                    if (res.isSuccess) {
                       onDelete();
                     }
-                    return res.data as Map;
+                    return res;
                   },
                 );
               },
@@ -994,15 +988,8 @@ class ReplyItemGrpc extends StatelessWidget {
                 context: context,
                 builder: (context) {
                   return Dialog(
-                    constraints: const BoxConstraints(
-                      minWidth: 280,
-                      maxWidth: 425,
-                    ),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 16,
-                      ),
+                      padding: const .symmetric(horizontal: 20, vertical: 16),
                       child: SelectableText(
                         message,
                         style: const TextStyle(fontSize: 15, height: 1.7),

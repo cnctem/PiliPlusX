@@ -13,7 +13,8 @@ import 'package:PiliPlus/pages/home/controller.dart';
 import 'package:PiliPlus/pages/login/controller.dart';
 import 'package:PiliPlus/pages/mine/view.dart';
 import 'package:PiliPlus/services/account_service.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/get_ext.dart';
+import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
@@ -31,8 +32,7 @@ class MainController extends GetxController
 
   List<NavigationBarType> navigationBars = <NavigationBarType>[];
 
-  StreamController<bool>? bottomBarStream;
-  late bool hideTabBar = Pref.hideTabBar;
+  RxBool? bottomBar;
   late dynamic controller;
   final RxInt selectedIndex = 0.obs;
 
@@ -42,12 +42,10 @@ class MainController extends GetxController
   late int dynamicPeriod = Pref.dynamicPeriod * 60 * 1000;
   late int _lastCheckDynamicAt = 0;
   late bool hasDyn = false;
-  late final DynamicsController dynamicController = Get.put(
-    DynamicsController(),
-  );
+  late final dynamicController = Get.putOrFind(DynamicsController.new);
 
   late bool hasHome = false;
-  late final HomeController homeController = Get.put(HomeController());
+  late final homeController = Get.putOrFind(HomeController.new);
 
   late DynamicBadgeMode msgBadgeMode = Pref.msgBadgeMode;
   late Set<MsgUnReadType> msgUnReadTypes = Pref.msgUnReadTypeV2;
@@ -85,8 +83,8 @@ class MainController extends GetxController
           )
         : PageController(initialPage: selectedIndex.value);
 
-    if (navigationBars.length > 1 && hideTabBar) {
-      bottomBarStream = StreamController<bool>.broadcast();
+    if (navigationBars.length > 1 && Pref.hideTabBar) {
+      bottomBar = true.obs;
     }
     dynamicBadgeMode = DynamicBadgeMode.values[Pref.dynamicBadgeMode];
 
@@ -331,13 +329,13 @@ class MainController extends GetxController
 
   void setSearchBar() {
     if (hasHome) {
-      homeController.searchBarStream?.add(true);
+      homeController.searchBar?.value = true;
     }
   }
 
   @override
   void onClose() {
-    bottomBarStream?.close();
+    bottomBar?.close();
     controller.dispose();
     super.onClose();
   }

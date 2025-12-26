@@ -26,10 +26,12 @@ import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/utils/accounts.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/iterable_ext.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/global_data.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:PiliPlus/utils/video_utils.dart';
@@ -58,10 +60,7 @@ class AudioController extends GetxController
   final Rx<Duration> position = Duration.zero.obs;
   final Rx<Duration> duration = Duration.zero.obs;
 
-  late final AnimationController animController = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 200),
-  );
+  late final AnimationController animController;
 
   Set<StreamSubscription>? _subscriptions;
 
@@ -125,6 +124,11 @@ class AudioController extends GetxController
       ?..onPlay = onPlay
       ..onPause = onPause
       ..onSeek = onSeek;
+
+    animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
   }
 
   Future<void> onPlay() async {
@@ -507,7 +511,7 @@ class AudioController extends GetxController
                   PageUtils.launchURL(audioUrl);
                 },
               ),
-              if (Utils.isMobile)
+              if (PlatformUtils.isMobile)
                 ListTile(
                   dense: true,
                   title: const Text(

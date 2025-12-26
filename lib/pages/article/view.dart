@@ -15,7 +15,7 @@ import 'package:PiliPlus/pages/article/widgets/opus_content.dart';
 import 'package:PiliPlus/pages/common/dyn/common_dyn_page.dart';
 import 'package:PiliPlus/pages/dynamics_repost/view.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/get_ext.dart';
 import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/num_utils.dart';
@@ -25,7 +25,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:get/get.dart' hide ContextExtensionss;
+import 'package:get/get.dart';
 import 'package:html/parser.dart' as parser;
 
 class ArticlePage extends StatefulWidget {
@@ -597,7 +597,7 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
                                     pic: summary.cover,
                                     title: summary.title,
                                     uname: summary.author?.name,
-                                    callback: () {
+                                    onSuccess: () {
                                       if (forward != null) {
                                         int count = forward.count ?? 0;
                                         forward.count = count + 1;

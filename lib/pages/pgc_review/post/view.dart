@@ -27,11 +27,17 @@ class PgcReviewPostPanel extends StatefulWidget {
 }
 
 class _PgcReviewPostPanelState extends State<PgcReviewPostPanel> {
-  late final _controller = TextEditingController(text: widget.content);
+  late final TextEditingController _controller;
   late final RxInt _score = (widget.score ?? 0).obs;
   late final RxBool _shareFeed = false.obs;
   late final RxBool _enablePost = _isMod.obs;
   late final _isMod = widget.reviewId != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.content);
+  }
 
   @override
   void dispose() {
