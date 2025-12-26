@@ -332,6 +332,12 @@ class MyApp extends StatelessWidget {
                   _onBack();
                   return KeyEventResult.handled;
                 }
+
+                // 处理Alt+H/Opt+H返回主页快捷键
+                final homeResult = _handleHomeShortcut(event);
+                if (homeResult != null) {
+                  return homeResult;
+                }
                 return KeyEventResult.ignored;
               },
               child: MouseBackDetector(
@@ -440,6 +446,40 @@ dynamic _getCurrentPageController() {
   } catch (e) {
     return null;
   }
+}
+
+// 处理Alt+H/Opt+H返回主页快捷键
+KeyEventResult? _handleHomeShortcut(KeyEvent event) {
+  if (event is! KeyDownEvent) return null;
+  // 1. 先匹配字母 H
+  if (event.logicalKey != LogicalKeyboardKey.keyH) {
+    return null;
+  }
+  // 2. 判断Alt键是否按下（Windows/Linux/macOS的Option键）
+  if (!HardwareKeyboard.instance.isAltPressed) {
+    return null;
+  }
+  // 3. 防止其他修饰符干扰
+  if (HardwareKeyboard.instance.isShiftPressed ||
+      HardwareKeyboard.instance.isControlPressed ||
+      HardwareKeyboard.instance.isMetaPressed) {
+    return null;
+  }
+  // 4. 执行返回主页逻辑
+  _handleHomeShortcutAction();
+  return KeyEventResult.handled;
+}
+// 执行返回主页操作
+void _handleHomeShortcutAction() {
+  // 清理播放器资源（如果存在）
+  final plCtr = PlPlayerController.instance;
+  if (plCtr != null) {
+    plCtr
+      ..isCloseAll = true
+      ..dispose();
+  }
+  // 返回主页
+  Get.until((route) => route.isFirst);
 }
 
 class _CustomHttpOverrides extends HttpOverrides {
