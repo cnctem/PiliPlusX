@@ -326,6 +326,12 @@ class MyApp extends StatelessWidget {
                   return refreshResult;
                 }
 
+                // 处理设置快捷键 (主修饰键 + ,)
+                final settingsResult = _handleSettingsKey(event);
+                if (settingsResult != null) {
+                  return settingsResult;
+                }
+
                 // 处理Escape键返回功能
                 if (event.logicalKey == LogicalKeyboardKey.escape &&
                     event is KeyDownEvent) {
@@ -405,6 +411,26 @@ KeyEventResult? _handleRefreshKey(KeyEvent event) {
   _handleRefreshShortcut();
   return KeyEventResult.handled;
 }
+
+// 处理设置快捷键 (主修饰键 + ,)
+KeyEventResult? _handleSettingsKey(KeyEvent event) {
+  if (event is! KeyDownEvent) return null;
+  // 1. 先匹配逗号键
+  if (event.logicalKey != LogicalKeyboardKey.comma) {
+    return null;
+  }
+  // 2. 再判断本平台的"主修饰键"是否按下
+  if (!isPrimaryModifierPressed) return null;
+  // 3. 防止 Shift/Alt/等其它修饰符干扰
+  if (HardwareKeyboard.instance.isShiftPressed ||
+      HardwareKeyboard.instance.isAltPressed) {
+    return null;
+  }
+  // 4. 打开设置页面
+  _handleSettingsShortcut();
+  return KeyEventResult.handled;
+}
+
 // 处理Control+R快捷键刷新
 void _handleRefreshShortcut() {
   // 获取当前路由
@@ -419,6 +445,7 @@ void _handleRefreshShortcut() {
     }
   }
 }
+
 // 获取当前页面的控制器
 dynamic _getCurrentPageController() {
   try {
@@ -461,6 +488,7 @@ KeyEventResult? _handleHomeShortcut(KeyEvent event) {
   _handleHomeShortcutAction();
   return KeyEventResult.handled;
 }
+
 // 执行返回主页操作
 void _handleHomeShortcutAction() {
   // 清理播放器资源（如果存在）
@@ -472,6 +500,12 @@ void _handleHomeShortcutAction() {
   }
   // 返回主页
   Get.until((route) => route.isFirst);
+}
+
+// 处理设置快捷键
+void _handleSettingsShortcut() {
+  // 打开设置页面
+  Get.toNamed('/setting', preventDuplicates: false);
 }
 
 class _CustomHttpOverrides extends HttpOverrides {
