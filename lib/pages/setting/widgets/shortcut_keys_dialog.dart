@@ -51,11 +51,9 @@ class ShortcutKeysDialog extends StatelessWidget {
                       '方向键上/下 - 增加/减少音量',
                       'Shift+1/2 - 设置播放速度为1x或2x',
                     ]),
-                    _buildSection('三连快捷键', [
+                    _buildSection('互动快捷键', [
                       'Q键 - 长按开始三连，松开取消三连',
                       'R键 - 长按开始三连，松开取消三连',
-                    ]),
-                    _buildSection('互动快捷键', [
                       'W键 - 投币（需按住Cmd/Ctrl）',
                       'E键 - 快速收藏',
                       'T/V键 - 稍后再看',
@@ -66,7 +64,9 @@ class ShortcutKeysDialog extends StatelessWidget {
                       '[ 键 - 上一集',
                       '] 键 - 下一集',
                       'Enter键 - 私信发送',
+                      'H键 - 返回主页（需按住Opt/Alt）',
                       'R键 - 刷新页面（需按住Cmd/Ctrl）',
+                      ', 键 - 打开设置（需按住Cmd/Ctrl）',
                     ]),
                   ],
                 ),

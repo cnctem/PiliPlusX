@@ -26,7 +26,7 @@
 ## 空降指挥部
 
 - [特色功能](#功能)
-- [快捷键功能说明](#快捷键功能)
+- [快捷键功能说明](docs/快捷键说明.md)
 - [港澳台代理](#港澳台代理)
 - [致谢](#致谢)
 
@@ -40,10 +40,10 @@
 - [x] Android
 - [x] iOS
 - [x] Pad
-- [x] Windows
 - [x] macOS
+- [x] Windows
 - [ ] Harmony OS ([开发中](https://github.com/cnctem/PiliPlusX/issues/5))
-- [ ] Linux (暂时移除支持，推荐上游[PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus) 或 [bilibili-linux](https://github.com/msojocs/bilibili-linux))
+- [ ] Linux (暂时移除支持, [详情](https://github.com/cnctem/PiliPlusX/issues/7))
 
 ## refactor
 
@@ -229,45 +229,6 @@
 
 <br/>
 
-## 快捷键功能
-
-视频播放器快捷键功能
-
-- 空格键 - 播放/暂停视频
-- F键 - 切换全屏模式（Shift+F 切换应用内全屏）
-- D键 - 切换弹幕显示/隐藏
-- P键 - 桌面端画中画模式
-- M键 - 静音/取消静音
-- S键 - 全屏模式下截图
-- Enter键 - 发送弹幕或跳过片段
-
-播放控制快捷键：
-
-- 方向键左 - 后退（可配置时长）
-- 方向键右 - 前进（可配置时长）
-- 方向键上/下 - 增加/减少音量
-- Shift+1/2 - 设置播放速度为1x或2x
-
-三连快捷键：
-
-- Q键 - 长按开始三连，松开取消三连
-- R键 - 长按开始三连，松开取消三连
-
-互动快捷键：
-
-- W键 - 投币（需按住Cmd/Ctrl）
-- E键 - 快速收藏
-- T/V键 - 稍后再看
-- G键 - 关注/取消关注
-- L键 - 锁定/解锁控制面板
-
-其他：
-
-- \[ 键 - 上一集
-- ] 键 - 下一集
-- Enter键 - 私信发送
-- R键 - 刷新页面（需按住Cmd/Ctrl）
-
 ## 港澳台代理
 
 由于PiliPlus使用了web接口,所以不能直接使用哔哩漫游的公共服务器
@@ -292,6 +253,8 @@
 |------|------|:----:|
 |gucooing|https://blblapi.alsl.xyz||
 
+感谢 [gucooing](https://github.com/gucooing) !
+
 ## PiliPlusX版本说明
 
 - 主线版本：基于上游[`main`分支](https://github.com/bggRGjQaUbCoE/PiliPlus/tree/main)更新最及时，打包 Android、iOS、Windows、macOS 版本
@@ -302,7 +265,7 @@
 
 - 字体问题由`flutter3.38.x`要求显式定义字体，而color OS及个别定制安卓的字体机制采用映射到系统Roboto的方案，导致flutter找不到定义的字体从而产生字体问题，表现为显示为一种错误的衬线字体
 - 主线版本 在关闭设置项“使用系统字体”后将字体指定为使用鸿蒙黑体，基本解决问题
-- 如果你是color OS等字体错误的定制安卓，且希望显示手机自定义主题字体，推荐使用oddo版本，通过使用`flutter3.35.7`彻底解决字体问题。下载最新版本 [v1.0.9.2-oddo](https://github.com/cnctem/PiliPlusX/releases/tag/v1.0.9.2)
+- 如果你是color OS等字体错误的定制安卓，且希望显示手机自定义主题字体，推荐使用oddo版本，通过使用`flutter3.35.7`彻底解决字体问题。下载最新版本 [v1.1.0.0-oddo](https://github.com/cnctem/PiliPlusX/releases/tag/v1.1.0.0)
 
 ## 声明
 
