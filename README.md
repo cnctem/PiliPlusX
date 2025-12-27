@@ -43,7 +43,7 @@
 - [x] macOS
 - [x] Windows
 - [ ] Harmony OS ([开发中](https://github.com/cnctem/PiliPlusX/issues/5))
-- [ ] Linux (暂时移除支持, [详情](https://github.com/cnctem/PiliPlusX/issues/7))
+- [ ] Linux (暂时移除支持, [详情](https://github.com/cnctem/PiliPlusX/issues/7#issuecomment-3650079829))
 
 ## refactor
 
