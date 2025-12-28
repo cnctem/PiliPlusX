@@ -5,6 +5,5 @@
   },
   "editor.codeActionsOnSave": {
     "source.organizeImports": "explicit"
-  },
-  "dart.flutterSdkPath": ".fvm/versions/custom_oh-3.32.4-dev"
+  }
 }

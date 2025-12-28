@@ -61,7 +61,7 @@ import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:easy_debounce/easy_throttle.dart';
-// TODO flutter 3.32.4-ohos-0.0.1使用fl_chart报错
+// TODO 鸿蒙待适配 使用fl_chart报错
 // import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -74,6 +74,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart' hide ContextExtensionss;
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:screen_brightness_platform_interface/constant/plugin_channel.dart';
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -192,7 +193,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       Future.microtask(() async {
         try {
           if (Utils.isHarmony) {
-            // 在鸿蒙，非pc也把播放器音量设为系统音量
+            // 移动端是鸿蒙也把播放器音量设为系统音量
             final volume = await HarmonyVolumeView.cntlr?.getVolume();
             if (volume != null) plPlayerController.volume.value = volume;
           } else {
@@ -240,7 +241,21 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                     .instance
                     .onApplicationScreenBrightnessChanged
                     .listen(listener);
-        } catch (_) {}
+        } catch (e) {
+          print('监听屏幕亮度失败: $e');
+          if (Utils.isHarmony) {
+            print('尝试鸿蒙number类型的亮度监听: $e');
+            _harmonyOnApplicationScreenBrightnessChanged ??=
+                pluginEventChannelApplicationBrightnessChanged
+                    .receiveBroadcastStream()
+                    .cast<num>();
+            _harmonyOnApplicationScreenBrightnessChanged!.listen((num value) {
+              if (mounted) {
+                _brightnessValue.value = value.toDouble();
+              }
+            });
+          }
+        }
       });
     }
 
@@ -268,6 +283,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     _doubleTapGestureRecognizer = DoubleTapGestureRecognizer()
       ..onDoubleTapDown = _onDoubleTapDown;
   }
+
+  Stream<num>? _harmonyOnApplicationScreenBrightnessChanged;
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -322,7 +339,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           value,
         );
       }
-    } catch (_) {}
+    } catch (e) {
+      print('设置屏幕亮度失败：$e');
+    }
     _brightnessIndicator.value = true;
     _brightnessTimer?.cancel();
     _brightnessTimer = Timer(const Duration(milliseconds: 200), () {

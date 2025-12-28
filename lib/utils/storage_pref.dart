@@ -28,8 +28,6 @@ import 'package:PiliPlus/utils/context_ext.dart';
 import 'package:PiliPlus/utils/extension.dart';
 import 'package:PiliPlus/utils/global_data.dart';
 import 'package:PiliPlus/utils/login_utils.dart';
-import 'package:PiliPlus/utils/utils.dart';
-import 'package:flutter/widgets.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/utils.dart';
@@ -554,27 +552,17 @@ abstract class Pref {
   static bool get horizontalScreen =>
       _setting.get(SettingBoxKey.horizontalScreen) ?? isTablet;
 
-//   static bool get isTablet {
-//     
-//   }
   static bool get isTablet {
-    // 1) Harmony：优先使用原生获取并缓存的设备类型
-    if (Utils.isHarmony) {
-      final cached = Utils.harmonyDeviceTypeCached;
-      return cached == 'tablet';
-    }else{
-        bool isTablet;
-        if (Get.context != null) {
-        isTablet = Get.context!.isTablet;
-        } else {
-        final view = WidgetsBinding.instance.platformDispatcher.views.first;
-        final screenSize = view.physicalSize / view.devicePixelRatio;
-        isTablet = screenSize.shortestSide >= 600;
-        }
-        _setting.put(SettingBoxKey.horizontalScreen, isTablet);
-        return isTablet;
+    bool isTablet;
+    if (Get.context != null) {
+      isTablet = Get.context!.isTablet;
+    } else {
+      final view = WidgetsBinding.instance.platformDispatcher.views.first;
+      final screenSize = view.physicalSize / view.devicePixelRatio;
+      isTablet = screenSize.shortestSide >= 600;
     }
-
+    _setting.put(SettingBoxKey.horizontalScreen, isTablet);
+    return isTablet;
   }
 
   static String get banWordForDyn =>

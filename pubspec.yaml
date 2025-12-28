@@ -242,8 +242,8 @@ dependencies:
   fixnum: any
   json_annotation: any
   stream_transform: any
-  screen_brightness_ohos: ^2.1.2
-  screen_brightness_platform_interface: any
+  screen_brightness: ^2.1.7
+  screen_brightness_platform_interface: ^2.1.0
   mime: any
   path: any
   collection: any
@@ -310,10 +310,6 @@ dependency_overrides:
       url: https://gitcode.com/openharmony-sig/flutter_plus_plugins.git
       path: packages/share_plus/share_plus
       ref: br_share_plus-v10.1.1_ohos
-  # screen_brightness: ^2.1.
-  screen_brightness_ios: ^2.1.2
-  screen_brightness_android: ^2.1.3
-  screen_brightness_platform_interface: ^2.1.0
   path: ^1.9.1
   mime: ^2.0.0
   rxdart: ^0.28.0
