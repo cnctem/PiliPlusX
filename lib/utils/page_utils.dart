@@ -66,7 +66,7 @@ abstract final class PageUtils {
 
     List<UserModel> userList = <UserModel>[];
 
-    final shareListRes = await ImGrpc.shareList(size: 3);
+    final shareListRes = await ImGrpc.shareList(size: 5);
     if (shareListRes.isSuccess && shareListRes.data.sessionList.isNotEmpty) {
       userList.addAll(
         shareListRes.data.sessionList.map<UserModel>(
