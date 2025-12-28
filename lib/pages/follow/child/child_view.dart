@@ -106,7 +106,7 @@ class _FollowChildPageState extends State<FollowChildPage>
         itemCount: 12,
         itemBuilder: (context, index) => const MsgFeedTopSkeleton(),
       ),
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? SliverList.builder(
                 itemCount: response.length,
@@ -127,7 +127,7 @@ class _FollowChildPageState extends State<FollowChildPage>
                 },
               )
             : HttpError(onReload: _followController.onReload),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: _followController.onReload,
       ),
@@ -139,7 +139,7 @@ class _FollowChildPageState extends State<FollowChildPage>
     LoadingState<List<FollowItemModel>?> state,
   ) {
     return switch (state) {
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? SliverMainAxisGroup(
                 slivers: [

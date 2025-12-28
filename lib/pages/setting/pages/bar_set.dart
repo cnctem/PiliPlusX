@@ -28,7 +28,7 @@ class _BarSetPageState extends State<BarSetPage> {
         .map((e) => Pair(first: e, second: cache?.contains(e.index) ?? true))
         .toList();
     if (cache != null && cache.isNotEmpty) {
-      final cacheIndex = {for (var (k, v) in cache.indexed) v: k};
+      final cacheIndex = {for (final (k, v) in cache.indexed) v: k};
       list.sort((a, b) {
         final indexA = cacheIndex[a.first.index] ?? cacheIndex.length;
         final indexB = cacheIndex[b.first.index] ?? cacheIndex.length;

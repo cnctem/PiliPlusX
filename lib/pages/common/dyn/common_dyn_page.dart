@@ -157,7 +157,7 @@ abstract class CommonDynPageState<T extends StatefulWidget> extends State<T>
         itemCount: 12,
         itemBuilder: (context, index) => const VideoReplySkeleton(),
       ),
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? SliverList.builder(
                 itemCount: response.length + 1,
@@ -206,7 +206,7 @@ abstract class CommonDynPageState<T extends StatefulWidget> extends State<T>
                 errMsg: '还没有评论',
                 onReload: controller.onReload,
               ),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: controller.onReload,
       ),
@@ -285,10 +285,7 @@ abstract class CommonDynPageState<T extends StatefulWidget> extends State<T>
       builder: (context) => Align(
         alignment: Alignment.topRight,
         child: Container(
-          margin: const EdgeInsets.only(
-            top: 56,
-            right: 16,
-          ),
+          margin: const EdgeInsets.only(top: 56, right: 16),
           width: maxWidth / 4,
           height: 32,
           child: Builder(

@@ -151,7 +151,7 @@ class _WhisperDetailPageState
   Widget _buildBody(LoadingState<List<Msg>?> loadingState) {
     return switch (loadingState) {
       Loading() => loadingWidget,
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? ListView.separated(
                 shrinkWrap: true,
@@ -181,7 +181,7 @@ class _WhisperDetailPageState
                     const SizedBox(height: 12),
               )
             : scrollErrorWidget(onReload: _whisperDetailController.onReload),
-      Error(:var errMsg) => scrollErrorWidget(
+      Error(:final errMsg) => scrollErrorWidget(
         errMsg: errMsg,
         onReload: _whisperDetailController.onReload,
       ),
@@ -278,7 +278,7 @@ class _WhisperDetailPageState
                       }
                     }
                   },
-                   child: RichTextField(
+                  child: RichTextField(
                     key: key,
                     readOnly: readOnly.value,
                     focusNode: focusNode,
@@ -297,7 +297,6 @@ class _WhisperDetailPageState
                         borderRadius: BorderRadius.all(Radius.circular(6)),
                         gapPadding: 0,
                       ),
-                      contentPadding: const EdgeInsets.all(10),
                     ),
                     // inputFormatters: [LengthLimitingTextInputFormatter(500)],
                   ),

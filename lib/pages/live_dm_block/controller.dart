@@ -32,7 +32,7 @@ class LiveDmBlockController extends GetxController
   }
 
   Future<void> queryData() async {
-    var res = await LiveHttp.getLiveInfoByUser(roomId);
+    final res = await LiveHttp.getLiveInfoByUser(roomId);
     if (res.isSuccess) {
       final data = res.data;
       final shieldRules = data?.shieldRules;
@@ -57,7 +57,7 @@ class LiveDmBlockController extends GetxController
     int level, {
     VoidCallback? onError,
   }) async {
-    var res = await LiveHttp.liveSetSilent(type: type.name, level: level);
+    final res = await LiveHttp.liveSetSilent(type: type.name, level: level);
     if (res.isSuccess) {
       switch (type) {
         case LiveDmSilentType.level:
@@ -86,9 +86,9 @@ class LiveDmBlockController extends GetxController
             setSilent(LiveDmSilentType.verify, 1),
           ]
         : [
-            for (var e in LiveDmSilentType.values) setSilent(e, 0),
+            for (final e in LiveDmSilentType.values) setSilent(e, 0),
           ];
-    var res = await Future.wait(futures);
+    final res = await Future.wait(futures);
     if (enable) {
       if (res.any((e) => e)) {
         isEnable.value = true;
@@ -102,14 +102,14 @@ class LiveDmBlockController extends GetxController
 
   Future<void> addShieldKeyword(bool isKeyword, String value) async {
     if (isKeyword) {
-      var res = await LiveHttp.addShieldKeyword(keyword: value);
+      final res = await LiveHttp.addShieldKeyword(keyword: value);
       if (res.isSuccess) {
         keywordList.insert(0, value);
       } else {
         res.toast();
       }
     } else {
-      var res = await LiveHttp.liveShieldUser(
+      final res = await LiveHttp.liveShieldUser(
         uid: value,
         roomid: roomId,
         type: 1,
@@ -125,7 +125,7 @@ class LiveDmBlockController extends GetxController
   Future<void> onRemove(int index, Object item) async {
     assert(item is ShieldUserList || item is String);
     if (item is ShieldUserList) {
-      var res = await LiveHttp.liveShieldUser(
+      final res = await LiveHttp.liveShieldUser(
         uid: item.uid!,
         roomid: roomId,
         type: 0,
@@ -136,7 +136,7 @@ class LiveDmBlockController extends GetxController
         res.toast();
       }
     } else {
-      var res = await LiveHttp.delShieldKeyword(keyword: item as String);
+      final res = await LiveHttp.delShieldKeyword(keyword: item as String);
       if (res.isSuccess) {
         keywordList.removeAt(index);
       } else {

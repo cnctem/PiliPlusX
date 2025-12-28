@@ -39,7 +39,7 @@ class ReplyMeController
 
   Future<void> onRemove(dynamic id, int index) async {
     try {
-      var res = await MsgHttp.delMsgfeed(1, id);
+      final res = await MsgHttp.delMsgfeed(1, id);
       if (res.isSuccess) {
         loadingState
           ..value.data!.removeAt(index)

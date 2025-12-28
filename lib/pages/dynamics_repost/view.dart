@@ -417,7 +417,7 @@ class _RepostPanelState extends CommonRichTextPubPageState<RepostPanel> {
     if (hasRichText && repostContent != null) {
       richContent.addAll(repostContent);
     }
-    var result = await DynamicsHttp.createDynamic(
+    final result = await DynamicsHttp.createDynamic(
       mid: Accounts.main.mid,
       dynIdStr: widget.item?.idStr ?? widget.dynIdStr,
       rid: widget.rid,
@@ -431,7 +431,7 @@ class _RepostPanelState extends CommonRichTextPubPageState<RepostPanel> {
       Get.back();
       SmartDialog.showToast('转发成功');
       widget.onSuccess?.call();
-      var id = result['data']?['dyn_id'];
+      final id = result['data']?['dyn_id'];
       RequestUtils.insertCreatedDyn(id);
       RequestUtils.checkCreatedDyn(
         id: id,

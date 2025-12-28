@@ -8,12 +8,12 @@ sealed class LoadingState<T> {
   bool get isSuccess => this is Success<T>;
 
   T get data => switch (this) {
-    Success(:var response) => response,
+    Success(:final response) => response,
     _ => throw this,
   };
 
   T? get dataOrNull => switch (this) {
-    Success(:var response) => response,
+    Success(:final response) => response,
     _ => null,
   };
 

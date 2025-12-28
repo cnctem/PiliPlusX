@@ -18,7 +18,7 @@ extension IntExt on int? {
 
 extension DoubleExt on double {
   double toPrecision(int fractionDigits) {
-    var mod = pow(10, fractionDigits.toDouble()).toDouble();
+    final mod = pow(10, fractionDigits.toDouble()).toDouble();
     return ((this * mod).round().toDouble() / mod);
   }
 }

@@ -221,7 +221,7 @@ class LiveMessageStream {
         final msgBody = utf8.decode(
           data.sublist(subHeader.headerSize, subHeader.totalSize),
         );
-        for (var f in _eventListeners) {
+        for (final f in _eventListeners) {
           f(jsonDecode(msgBody));
         }
         if (subHeader.totalSize < data.length) {

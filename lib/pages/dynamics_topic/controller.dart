@@ -40,7 +40,7 @@ class DynTopicController
   Future<void> queryTop() async {
     topState.value = await DynamicsHttp.topicTop(topicId: topicId);
     if (topState.value.isSuccess) {
-      var topicItem = topState.value.data!.topicItem!;
+      final topicItem = topState.value.data!.topicItem!;
       topicName = topicItem.name;
       isFav.value = topicItem.isFav;
       isLike.value = topicItem.isLike;
@@ -97,7 +97,7 @@ class DynTopicController
       return;
     }
     bool isFav = this.isFav.value ?? false;
-    var res = isFav
+    final res = isFav
         ? await FavHttp.delFavTopic(topicId)
         : await FavHttp.addFavTopic(topicId);
     if (res.isSuccess) {
@@ -118,7 +118,7 @@ class DynTopicController
       return;
     }
     bool isLike = this.isLike.value ?? false;
-    var res = await FavHttp.likeTopic(topicId, isLike);
+    final res = await FavHttp.likeTopic(topicId, isLike);
     if (res.isSuccess) {
       if (isLike) {
         topState.value.data!.topicItem!.like -= 1;

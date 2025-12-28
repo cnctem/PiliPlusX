@@ -109,6 +109,7 @@ class _DynMentionPanelState
             controller: _controller.controller,
             onChanged: ctr!.add,
             decoration: InputDecoration(
+              visualDensity: .standard,
               border: const OutlineInputBorder(
                 gapPadding: 0,
                 borderSide: BorderSide.none,
@@ -237,7 +238,7 @@ class _DynMentionPanelState
         padding: const EdgeInsets.only(top: 8),
         sliver: linearLoading,
       ),
-      Success<List<MentionGroup>?>(:var response) =>
+      Success<List<MentionGroup>?>(:final response) =>
         response != null && response.isNotEmpty
             ? SliverMainAxisGroup(
                 slivers: response.map((group) {
@@ -277,7 +278,7 @@ class _DynMentionPanelState
                 }).toList(),
               )
             : HttpError(onReload: _controller.onReload),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: _controller.onReload,
       ),

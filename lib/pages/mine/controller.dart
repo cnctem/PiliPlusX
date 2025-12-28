@@ -99,7 +99,7 @@ class MineController extends CommonDataController<FavFolderData, FavFolderData>
   }
 
   Future<void> queryUserInfo() async {
-    var res = await UserHttp.userInfo();
+    final res = await UserHttp.userInfo();
     if (res.isSuccess) {
       UserInfoData data = res.data;
       if (data.isLogin == true) {
@@ -126,7 +126,7 @@ class MineController extends CommonDataController<FavFolderData, FavFolderData>
   }
 
   Future<void> queryUserStatOwner() async {
-    var res = await UserHttp.userStatOwner();
+    final res = await UserHttp.userStatOwner();
     if (res['status']) {
       userStat.value = res['data'];
     }

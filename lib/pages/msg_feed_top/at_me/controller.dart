@@ -39,7 +39,7 @@ class AtMeController extends CommonListController<MsgAtData, MsgAtItem> {
   @pragma('vm:notify-debugger-on-exception')
   Future<void> onRemove(Object id, int index) async {
     try {
-      var res = await MsgHttp.delMsgfeed(2, id);
+      final res = await MsgHttp.delMsgfeed(2, id);
       if (res.isSuccess) {
         loadingState
           ..value.data!.removeAt(index)

@@ -9,7 +9,6 @@ import 'package:PiliPlus/models/common/image_preview_type.dart'
 import 'package:PiliPlus/models/common/image_type.dart';
 import 'package:PiliPlus/models/dynamics/result.dart';
 import 'package:PiliPlus/pages/dynamics/widgets/vote.dart';
-import 'package:PiliPlus/utils/app_scheme.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/gestures.dart';
@@ -51,7 +50,7 @@ TextSpan? richNode(
     if (richTextNodes == null || richTextNodes.isEmpty) {
       return null;
     } else {
-      for (var i in richTextNodes) {
+      for (final i in richTextNodes) {
         switch (i.type) {
           case 'RICH_TEXT_NODE_TYPE_TEXT':
             spanChildren.add(
@@ -111,8 +110,7 @@ TextSpan? richNode(
                   recognizer: i.origText == null
                       ? null
                       : (TapGestureRecognizer()
-                          ..onTap = () =>
-                              PiliScheme.routePushFromUrl(i.origText!)),
+                          ..onTap = () => PageUtils.handleWebview(i.origText!)),
                 ),
               );
             break;
@@ -206,8 +204,7 @@ TextSpan? richNode(
                   recognizer: i.jumpUrl == null
                       ? null
                       : (TapGestureRecognizer()
-                          ..onTap = () =>
-                              PiliScheme.routePushFromUrl(i.jumpUrl!)),
+                          ..onTap = () => PageUtils.handleWebview(i.jumpUrl!)),
                 ),
               );
             break;
@@ -292,7 +289,7 @@ TextSpan? richNode(
 
                       DynamicsHttp.dynPic(i.rid).then((res) {
                         if (res.isSuccess) {
-                          var list = res.data;
+                          final list = res.data;
                           if (Platform.isAndroid) {
                             i.pics = list;
                           } else {
@@ -329,8 +326,7 @@ TextSpan? richNode(
                   recognizer: i.jumpUrl == null
                       ? null
                       : (TapGestureRecognizer()
-                          ..onTap = () =>
-                              PiliScheme.routePushFromUrl(i.jumpUrl!)),
+                          ..onTap = () => PageUtils.handleWebview(i.jumpUrl!)),
                 ),
               );
             break;
@@ -342,8 +338,7 @@ TextSpan? richNode(
                 recognizer: i.jumpUrl == null
                     ? null
                     : (TapGestureRecognizer()
-                        ..onTap = () =>
-                            PiliScheme.routePushFromUrl(i.jumpUrl!)),
+                        ..onTap = () => PageUtils.handleWebview(i.jumpUrl!)),
               ),
             );
             break;

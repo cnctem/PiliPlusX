@@ -310,7 +310,7 @@ class _VideoReplyReplyPanelState extends State<VideoReplyReplyPanel>
         itemBuilder: (_, _) => const VideoReplySkeleton(),
         itemCount: 8,
       ),
-      Success(:var response!) => SuperSliverList.builder(
+      Success(:final response!) => SuperSliverList.builder(
         listController: _controller.listController,
         itemBuilder: (context, index) {
           if (index == response.length) {
@@ -357,7 +357,7 @@ class _VideoReplyReplyPanelState extends State<VideoReplyReplyPanel>
         },
         itemCount: response.length + 1,
       ),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: _controller.onReload,
       ),

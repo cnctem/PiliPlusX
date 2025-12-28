@@ -13,7 +13,7 @@ abstract final class IdUtils {
 
   static const data =
       'FcwAPNKTMug3GV5Lj7EJnHpWsx4tb8haYeviqBz6rkCy12mUSDQX9RdoZf';
-  static final invData = {for (var (i, c) in data.codeUnits.indexed) c: i};
+  static final invData = {for (final (i, c) in data.codeUnits.indexed) c: i};
 
   static final bvRegex = RegExp(r'bv1[0-9a-zA-Z]{9}', caseSensitive: false);
   static final bvRegexExact = RegExp(
@@ -84,7 +84,7 @@ abstract final class IdUtils {
       return '';
     }
 
-    var midByte = ascii.encode(uid.toString());
+    final midByte = ascii.encode(uid.toString());
 
     const key = 'ad1va46a7lza';
     for (int i = 0; i < midByte.length; i++) {

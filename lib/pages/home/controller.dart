@@ -79,7 +79,7 @@ class HomeController extends GetxController
 
   Future<void> querySearchDefault() async {
     try {
-      var res = await Request().get(
+      final res = await Request().get(
         Api.searchDefault,
         queryParameters: await WbiSign.makSign({'web_location': 333.1365}),
       );

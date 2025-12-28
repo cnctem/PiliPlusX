@@ -83,8 +83,9 @@ class PendantAvatar extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
+                      size: 16,
+                      applyTextScaling: true,
                       Icons.equalizer_rounded,
-                      size: MediaQuery.textScalerOf(context).scale(16),
                       color: colorScheme.onSecondaryContainer,
                     ),
                     Text(

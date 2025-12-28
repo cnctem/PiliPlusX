@@ -54,7 +54,7 @@ class WhisperLinkSettingController extends GetxController {
   }
 
   Future<void> getIsPinned() async {
-    var res = await ImGrpc.sessionUpdate(sessionId: sessionId);
+    final res = await ImGrpc.sessionUpdate(sessionId: sessionId);
     if (res.isSuccess) {
       isPinned.value = res.data.session.isPinned;
     }
@@ -75,7 +75,7 @@ class WhisperLinkSettingController extends GetxController {
 
   Future<void> _setPush(bool isPush) async {
     int setting = isPush ? 1 : 0;
-    var res = await MsgHttp.setPushSs(
+    final res = await MsgHttp.setPushSs(
       setting: setting,
       talkerUid: talkerUid,
     );
@@ -89,7 +89,7 @@ class WhisperLinkSettingController extends GetxController {
   }
 
   Future<void> setPin() async {
-    var res = isPinned.value
+    final res = isPinned.value
         ? await ImGrpc.unpinSession(sessionId: sessionId)
         : await ImGrpc.pinSession(sessionId: sessionId);
     if (res.isSuccess) {
@@ -101,7 +101,7 @@ class WhisperLinkSettingController extends GetxController {
 
   Future<void> setMute(bool isMuted) async {
     int setting = isMuted ? 0 : 1;
-    var res = await MsgHttp.setMsgDnd(
+    final res = await MsgHttp.setMsgDnd(
       uid: Accounts.main.mid,
       setting: setting,
       dndUid: talkerUid,
@@ -117,7 +117,7 @@ class WhisperLinkSettingController extends GetxController {
 
   Future<void> setBlock(bool isBlocked) async {
     if (isBlocked) {
-      var res = await VideoHttp.relationMod(
+      final res = await VideoHttp.relationMod(
         mid: talkerUid,
         act: 6,
         reSrc: 11,
@@ -135,7 +135,7 @@ class WhisperLinkSettingController extends GetxController {
         title: '确认拉黑该用户',
         content: '加入黑名单后，将自动解除关注关系和对该用户的合集订阅关系，禁止该用户与我互动或查看我的空间',
         onConfirm: () async {
-          var res = await VideoHttp.relationMod(
+          final res = await VideoHttp.relationMod(
             mid: talkerUid,
             act: 5,
             reSrc: 11,

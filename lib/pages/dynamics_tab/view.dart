@@ -115,7 +115,7 @@ class _DynamicsTabPageState
   Widget _buildBody(LoadingState<List<DynamicItemModel>?> loadingState) {
     return switch (loadingState) {
       Loading() => dynSkeleton,
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? GlobalData().dynamicsWaterfallFlow
                   ? SliverWaterfallFlow(
@@ -156,7 +156,7 @@ class _DynamicsTabPageState
                       itemCount: response.length,
                     )
             : HttpError(onReload: controller.onReload),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: controller.onReload,
       ),

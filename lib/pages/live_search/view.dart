@@ -41,6 +41,7 @@ class _LiveSearchPageState extends State<LiveSearchPage> {
           textAlignVertical: TextAlignVertical.center,
           decoration: InputDecoration(
             hintText: '搜索房间或主播',
+            visualDensity: .standard,
             border: InputBorder.none,
             suffixIcon: IconButton(
               tooltip: '清空',

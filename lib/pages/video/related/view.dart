@@ -32,7 +32,7 @@ class _RelatedVideoPanelState extends State<RelatedVideoPanel> with GridMixin {
   Widget _buildBody(LoadingState<List<HotVideoItemModel>?> loadingState) {
     return switch (loadingState) {
       Loading() => gridSkeleton,
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? SliverGrid.builder(
                 gridDelegate: gridDelegate,
@@ -47,7 +47,7 @@ class _RelatedVideoPanelState extends State<RelatedVideoPanel> with GridMixin {
                 itemCount: response.length,
               )
             : const SliverToBoxAdapter(),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: _relatedController.onReload,
       ),

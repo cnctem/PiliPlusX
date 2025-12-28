@@ -57,7 +57,7 @@ class _FavSortPageState extends State<FavSortPage> {
                 Get.back();
                 return;
               }
-              var res = await FavHttp.sortFav(
+              final res = await FavHttp.sortFav(
                 mediaId: _favDetailController.mediaId,
                 sort: sort.join(','),
               );

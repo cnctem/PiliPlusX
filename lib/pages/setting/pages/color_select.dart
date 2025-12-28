@@ -37,15 +37,6 @@ class Item {
   bool isExpanded;
 }
 
-List<Item> generateItems(int count) {
-  return List<Item>.generate(count, (int index) {
-    return Item(
-      headerValue: 'Panel $index',
-      expandedValue: 'This is item number $index',
-    );
-  });
-}
-
 class _ColorSelectPageState extends State<ColorSelectPage> {
   final ctr = Get.put(ColorSelectController());
   FlexSchemeVariant _dynamicSchemeVariant =

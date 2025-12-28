@@ -91,7 +91,7 @@ abstract final class LoginUtils {
   }
 
   static String generateBuvid() {
-    var md5Str = Digest(
+    final md5Str = Digest(
       List.generate(16, (_) => Utils.random.nextInt(256)),
     ).toString();
     return 'XY${md5Str[2]}${md5Str[12]}${md5Str[22]}$md5Str';

@@ -1,6 +1,6 @@
 import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
 import 'package:PiliPlus/grpc/bilibili/main/community/reply/v1.pb.dart'
-    show MainListReply, ReplyInfo, SubjectControl, Mode, EditorIconState;
+    show MainListReply, ReplyInfo, SubjectControl, Mode;
 import 'package:PiliPlus/grpc/bilibili/pagination.pb.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/reply.dart';
@@ -101,25 +101,24 @@ abstract class ReplyController<R> extends CommonListController<R, ReplyInfo> {
     onReload();
   }
 
-  (bool inputDisable, bool canUploadPic, String? hint) get replyHint {
-    bool inputDisable = false;
-    bool canUploadPic =
-        subjectControl?.uploadPictureIconState !=
-        EditorIconState.EditorIconState_DISABLE;
+  (bool inputDisable, String? hint) get replyHint {
     String? hint;
+    bool inputDisable = false;
     try {
-      if (subjectControl != null && subjectControl!.hasRootText()) {
-        final rootText = subjectControl!.rootText;
-        inputDisable = subjectControl!.inputDisable;
-        if (inputDisable) {
-          SmartDialog.showToast(rootText);
-        }
-        if (rootText.contains('可发') || rootText.contains('可见')) {
-          hint = rootText;
+      if (subjectControl case final subjectControl?) {
+        inputDisable = subjectControl.inputDisable;
+        if (subjectControl.hasRootText()) {
+          final rootText = subjectControl.rootText;
+          if (inputDisable) {
+            SmartDialog.showToast(rootText);
+          }
+          if (rootText.contains('可发') || rootText.contains('可见')) {
+            hint = rootText;
+          }
         }
       }
     } catch (_) {}
-    return (inputDisable, canUploadPic, hint);
+    return (inputDisable, hint);
   }
 
   void onReply(
@@ -128,9 +127,8 @@ abstract class ReplyController<R> extends CommonListController<R, ReplyInfo> {
     ReplyInfo? replyItem,
     int? replyType,
   }) {
-    if (loadingState.value case Error error) {
-      final errMsg = error.errMsg;
-      if (errMsg != null && (error.code == 12061 || error.code == 12002)) {
+    if (loadingState.value case Error(:final errMsg, :final code)) {
+      if (errMsg != null && (code == 12061 || code == 12002)) {
         SmartDialog.showToast(errMsg);
         return;
       }
@@ -138,7 +136,7 @@ abstract class ReplyController<R> extends CommonListController<R, ReplyInfo> {
 
     assert(replyItem != null || (oid != null && replyType != null));
 
-    final (bool inputDisable, bool canUploadPic, String? hint) = replyHint;
+    final (bool inputDisable, String? hint) = replyHint;
     if (inputDisable) {
       return;
     }
@@ -156,7 +154,9 @@ abstract class ReplyController<R> extends CommonListController<R, ReplyInfo> {
                 replyType: replyItem?.type.toInt() ?? replyType!,
                 replyItem: replyItem,
                 items: savedReplies[key],
-                canUploadPic: canUploadPic,
+
+                /// hd api deprecated
+                // canUploadPic: canUploadPic,
                 onSave: (reply) {
                   if (reply.isEmpty) {
                     savedReplies.remove(key);

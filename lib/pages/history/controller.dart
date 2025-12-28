@@ -78,7 +78,7 @@ class HistoryController
 
   // 观看历史暂停状态
   Future<void> historyStatus() async {
-    var res = await UserHttp.historyStatus(account: account);
+    final res = await UserHttp.historyStatus(account: account);
     if (res case Success(:final response)) {
       baseCtr.pauseStatus.value = response;
       GStorage.localCache.put(LocalCacheKey.historyPause, response);

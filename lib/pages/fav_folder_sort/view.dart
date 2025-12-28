@@ -33,7 +33,7 @@ class _FavFolderSortPageState extends State<FavFolderSortPage> {
         actions: [
           TextButton(
             onPressed: () async {
-              var res = await FavHttp.sortFavFolder(
+              final res = await FavHttp.sortFavFolder(
                 sort: sortList.map((item) => item.id).join(','),
               );
               if (res.isSuccess) {

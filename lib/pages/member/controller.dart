@@ -179,7 +179,7 @@ class MemberController extends CommonDataController<SpaceData, SpaceData?>
 
   Future<void> _onBlock() async {
     final isBlocked = relation.value == 128;
-    var res = await VideoHttp.relationMod(
+    final res = await VideoHttp.relationMod(
       mid: mid,
       act: isBlocked ? 6 : 5,
       reSrc: 11,
@@ -239,7 +239,7 @@ class MemberController extends CommonDataController<SpaceData, SpaceData?>
   }
 
   Future<void> vipExpAdd() async {
-    var res = await UserHttp.vipExpAdd();
+    final res = await UserHttp.vipExpAdd();
     if (res.isSuccess) {
       SmartDialog.showToast('领取成功');
     } else {

@@ -25,7 +25,7 @@ class HotKeyword extends StatelessWidget {
       runSpacing: 0.4,
       spacing: 5.0,
       children: [
-        for (var i in hotSearchList)
+        for (final i in hotSearchList)
           SizedBox(
             width: width,
             child: Material(

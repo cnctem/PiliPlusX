@@ -106,7 +106,7 @@ class _WhisperLinkSettingPageState extends State<WhisperLinkSettingPage> {
   ) {
     return switch (loadingState) {
       Loading() => const SizedBox.shrink(),
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? Column(
                 mainAxisSize: MainAxisSize.min,
@@ -159,7 +159,7 @@ class _WhisperLinkSettingPageState extends State<WhisperLinkSettingPage> {
                 ],
               )
             : const SizedBox.shrink(),
-      Error(:var errMsg) => _errWidget(errMsg, _controller.getUserInfo),
+      Error(:final errMsg) => _errWidget(errMsg, _controller.getUserInfo),
     };
   }
 
@@ -171,7 +171,7 @@ class _WhisperLinkSettingPageState extends State<WhisperLinkSettingPage> {
   ) {
     return switch (loadingState) {
       Loading() => const SizedBox.shrink(),
-      Success(:var response) => Builder(
+      Success(:final response) => Builder(
         builder: (context) {
           late final subTitleS = TextStyle(
             fontSize: 13,
@@ -223,14 +223,14 @@ class _WhisperLinkSettingPageState extends State<WhisperLinkSettingPage> {
           );
         },
       ),
-      Error(:var errMsg) => _errWidget(errMsg, _controller.getSessionSs),
+      Error(:final errMsg) => _errWidget(errMsg, _controller.getSessionSs),
     };
   }
 
   Widget _buildMuteItem(LoadingState<List<UidSetting>?> loadingState) {
     return switch (loadingState) {
       Loading() => const SizedBox.shrink(),
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? ListTile(
                 dense: true,
@@ -247,7 +247,7 @@ class _WhisperLinkSettingPageState extends State<WhisperLinkSettingPage> {
                 ),
               )
             : const SizedBox.shrink(),
-      Error(:var errMsg) => _errWidget(errMsg, _controller.getMsgDnd),
+      Error(:final errMsg) => _errWidget(errMsg, _controller.getMsgDnd),
     };
   }
 

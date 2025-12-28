@@ -88,7 +88,7 @@ class _PgcReviewChildPageState extends State<PgcReviewChildPage>
         itemBuilder: (_, _) => const VideoReplySkeleton(),
         itemCount: 8,
       ),
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? SliverList.separated(
                 itemBuilder: (context, index) {
@@ -101,7 +101,7 @@ class _PgcReviewChildPageState extends State<PgcReviewChildPage>
                 separatorBuilder: (context, index) => divider,
               )
             : HttpError(onReload: _controller.onReload),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: _controller.onReload,
       ),

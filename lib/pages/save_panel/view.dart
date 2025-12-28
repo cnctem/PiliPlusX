@@ -90,7 +90,7 @@ class _SavePanelState extends State<SavePanel> {
   @override
   void initState() {
     super.initState();
-    if (_item case ReplyInfo reply) {
+    if (_item case final ReplyInfo reply) {
       itemType = '评论';
       final currentRoute = Get.currentRoute;
       late final hasRoot = reply.hasRoot();
@@ -219,7 +219,7 @@ class _SavePanelState extends State<SavePanel> {
       }
 
       if (kDebugMode) debugPrint(uri);
-    } else if (_item case DynamicItemModel i) {
+    } else if (_item case final DynamicItemModel i) {
       uri = parseDyn(i);
 
       if (kDebugMode) debugPrint(uri);
@@ -299,7 +299,7 @@ class _SavePanelState extends State<SavePanel> {
       RenderRepaintBoundary boundary =
           boundaryKey.currentContext!.findRenderObject()
               as RenderRepaintBoundary;
-      var image = await boundary.toImage(pixelRatio: 3);
+      final image = await boundary.toImage(pixelRatio: 3);
       ByteData? byteData = await image.toByteData(format: ImageByteFormat.png);
       Uint8List pngBytes = byteData!.buffer.asUint8List();
       String picName =
@@ -375,7 +375,7 @@ class _SavePanelState extends State<SavePanel> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (_item case ReplyInfo reply)
+                          if (_item case final ReplyInfo reply)
                             IgnorePointer(
                               child: ReplyItemGrpc(
                                 replyItem: reply,
@@ -384,7 +384,7 @@ class _SavePanelState extends State<SavePanel> {
                                 upMid: widget.upMid,
                               ),
                             )
-                          else if (_item case DynamicItemModel dyn)
+                          else if (_item case final DynamicItemModel dyn)
                             IgnorePointer(
                               child: DynamicPanel(
                                 item: dyn,

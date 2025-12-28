@@ -85,7 +85,7 @@ class _LiveSearchChildPageState extends State<LiveSearchChildPage>
   Widget _buildBody(LoadingState<List?> loadingState) {
     return switch (loadingState) {
       Loading() => _buildLoading,
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? Builder(
                 builder: (context) {
@@ -118,7 +118,7 @@ class _LiveSearchChildPageState extends State<LiveSearchChildPage>
                 },
               )
             : HttpError(onReload: _controller.onReload),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: _controller.onReload,
       ),

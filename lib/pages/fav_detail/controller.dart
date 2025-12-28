@@ -32,7 +32,7 @@ mixin BaseFavController
   void onViewFav(FavDetailItemModel item, int? index);
 
   Future<void> onCancelFav(int index, int id, int type) async {
-    var result = await FavHttp.favVideo(
+    final result = await FavHttp.favVideo(
       resources: '$id:$type',
       delIds: mediaId.toString(),
     );
@@ -55,7 +55,7 @@ mixin BaseFavController
       title: '提示',
       onConfirm: () async {
         final removeList = allChecked.toSet();
-        var result = await FavHttp.favVideo(
+        final result = await FavHttp.favVideo(
           resources: removeList
               .map((item) => '${item.id}:${item.type}')
               .join(','),
@@ -176,7 +176,7 @@ class FavDetailController
       SmartDialog.showToast('账号未登录');
       return;
     }
-    var res = isFav
+    final res = isFav
         ? await FavHttp.unfavFavFolder(mediaId)
         : await FavHttp.favFavFolder(mediaId);
 
@@ -189,7 +189,7 @@ class FavDetailController
   }
 
   Future<void> cleanFav() async {
-    var res = await FavHttp.cleanFav(mediaId: mediaId);
+    final res = await FavHttp.cleanFav(mediaId: mediaId);
     if (res.isSuccess) {
       SmartDialog.showToast('清除成功');
       Future.delayed(const Duration(milliseconds: 200), onReload);

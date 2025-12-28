@@ -73,6 +73,7 @@ class _SearchPageState extends State<SearchPage> {
           textInputAction: TextInputAction.search,
           onChanged: _searchController.onChange,
           decoration: InputDecoration(
+            visualDensity: .standard,
             hintText: _searchController.hintText ?? '搜索',
             border: InputBorder.none,
           ),
@@ -415,7 +416,7 @@ class _SearchPageState extends State<SearchPage> {
     bool isTrending,
   ) {
     return switch (loadingState) {
-      Success(:var response) =>
+      Success(:final response) =>
         response.list?.isNotEmpty == true
             ? LayoutBuilder(
                 builder: (context, constraints) => HotKeyword(
@@ -425,7 +426,7 @@ class _SearchPageState extends State<SearchPage> {
                 ),
               )
             : const SizedBox.shrink(),
-      Error(:var errMsg) => errorWidget(
+      Error(:final errMsg) => errorWidget(
         errMsg: errMsg,
         onReload: isTrending
             ? _searchController.queryTrendingList

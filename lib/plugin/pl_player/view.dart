@@ -539,7 +539,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             final List<SectionItem> sections = videoDetail.ugcSeason!.sections!;
             for (int i = 0; i < sections.length; i++) {
               final List<EpisodeItem> episodesList = sections[i].episodes!;
-              for (var item in episodesList) {
+              for (final item in episodesList) {
                 if (item.cid == currentCid) {
                   index = i;
                   episodes = episodesList;

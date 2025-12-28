@@ -70,7 +70,7 @@ class _LoginPageState extends State<LoginPage> {
                 RenderRepaintBoundary boundary =
                     globalKey.currentContext!.findRenderObject()!
                         as RenderRepaintBoundary;
-                var image = await boundary.toImage(pixelRatio: 3);
+                final image = await boundary.toImage(pixelRatio: 3);
                 ByteData? byteData = await image.toByteData(
                   format: ImageByteFormat.png,
                 );
@@ -106,7 +106,7 @@ class _LoginPageState extends State<LoginPage> {
                   semanticsLabel: '二维码加载中',
                 ),
               ),
-              Success(:var response) => Container(
+              Success(:final response) => Container(
                 width: 200,
                 height: 200,
                 color: Colors.white,
@@ -120,7 +120,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-              Error(:var errMsg) => errorWidget(
+              Error(:final errMsg) => errorWidget(
                 errMsg: errMsg,
                 onReload: _loginPageCtr.refreshQRCode,
               ),

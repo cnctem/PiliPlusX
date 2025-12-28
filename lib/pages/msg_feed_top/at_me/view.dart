@@ -84,7 +84,7 @@ class _AtMePageState extends State<AtMePage> {
         itemCount: 12,
         itemBuilder: (context, index) => const MsgFeedTopSkeleton(),
       ),
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? SliverList.separated(
                 itemCount: response.length,
@@ -175,7 +175,7 @@ class _AtMePageState extends State<AtMePage> {
                 separatorBuilder: (context, index) => divider,
               )
             : HttpError(onReload: _atMeController.onReload),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: _atMeController.onReload,
       ),

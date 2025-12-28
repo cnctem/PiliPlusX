@@ -57,7 +57,7 @@ class _MusicRecommendPageState extends State<MusicRecommendPage>
   Widget _buildBody(LoadingState<List<BgmRecommend>?> loadingState) {
     return switch (loadingState) {
       Loading() => gridSkeleton,
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? SliverGrid.builder(
                 gridDelegate: gridDelegate,
@@ -66,7 +66,7 @@ class _MusicRecommendPageState extends State<MusicRecommendPage>
                 itemCount: response.length,
               )
             : HttpError(onReload: _controller.onReload),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: _controller.onReload,
       ),

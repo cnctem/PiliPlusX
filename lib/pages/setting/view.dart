@@ -218,7 +218,9 @@ class _SettingPageState extends State<SettingPage> {
         return MultiSelectDialog<LoginAccount>(
           title: '选择要登出的账号uid',
           initValues: const Iterable.empty(),
-          values: {for (var i in Accounts.account.values) i: i.mid.toString()},
+          values: {
+            for (final i in Accounts.account.values) i: i.mid.toString(),
+          },
         );
       },
     );
@@ -290,20 +292,25 @@ class _SettingPageState extends State<SettingPage> {
         onTap: () => Get.toNamed('/settingsSearch'),
         borderRadius: const BorderRadius.all(Radius.circular(50)),
         child: Ink(
-          padding: const EdgeInsets.symmetric(vertical: 6),
+          padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.all(Radius.circular(50)),
             color: theme.colorScheme.onInverseSurface,
           ),
-          child: Center(
+          child: const Center(
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  size: MediaQuery.textScalerOf(context).scale(18),
+                  size: 18,
+                  applyTextScaling: true,
                   Icons.search,
                 ),
-                const Text(' 搜索'),
+                Text(
+                  ' 搜索',
+                  style: TextStyle(height: 1),
+                  strutStyle: StrutStyle(height: 1, leading: 0),
+                ),
               ],
             ),
           ),

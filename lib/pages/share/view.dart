@@ -230,6 +230,7 @@ class _SharePanelState extends State<SharePanel> {
                   textInputAction: TextInputAction.newline,
                   decoration: InputDecoration(
                     hintText: '说说你的想法吧...',
+                    visualDensity: .standard,
                     hintStyle: const TextStyle(fontSize: 14),
                     border: const OutlineInputBorder(
                       borderSide: BorderSide.none,
@@ -237,9 +238,9 @@ class _SharePanelState extends State<SharePanel> {
                     ),
                     filled: true,
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
+                    contentPadding: const .symmetric(
+                      horizontal: 12,
+                      vertical: 6,
                     ),
                     fillColor: theme.colorScheme.onInverseSurface,
                   ),

@@ -178,7 +178,7 @@ Widget addWidget(
                               : btn.disable == 1
                               ? null
                               : () async {
-                                  var res = await DynamicsHttp.dynReserve(
+                                  final res = await DynamicsHttp.dynReserve(
                                     reserveId: reserve.rid,
                                     curBtnStatus: btn.status,
                                     dynamicIdStr: idStr,
@@ -556,6 +556,56 @@ Widget addWidget(
 
       case 'ADDITIONAL_TYPE_MATCH':
         final content = additional.match!;
+        Widget teamItem(TTeam team, Alignment alignment, EdgeInsets padding) {
+          return Expanded(
+            child: Align(
+              alignment: alignment,
+              child: Padding(
+                padding: padding,
+                child: Column(
+                  spacing: 5,
+                  mainAxisSize: .min,
+                  children: [
+                    NetworkImgLayer(
+                      radius: 0,
+                      width: 30,
+                      height: 30,
+                      src: team.pic,
+                    ),
+                    Text(
+                      maxLines: 1,
+                      overflow: .ellipsis,
+                      team.name!,
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+        Widget? title;
+        if (content.matchInfo?.title?.isNotEmpty == true) {
+          title = Text(
+            content.matchInfo!.title!,
+            style: const TextStyle(fontSize: 13),
+          );
+        }
+        if (content.matchInfo?.subTitle?.isNotEmpty == true) {
+          title = Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ?title,
+              Text(
+                content.matchInfo!.subTitle!,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: theme.colorScheme.outline,
+                ),
+              ),
+            ],
+          );
+        }
         child = InkWell(
           borderRadius: borderRadius,
           onTap: content.jumpUrl == null
@@ -565,43 +615,13 @@ Widget addWidget(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Row(
               children: [
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (content.matchInfo?.title?.isNotEmpty == true)
-                      Text(
-                        content.matchInfo!.title!,
-                        style: const TextStyle(fontSize: 13),
-                      ),
-                    if (content.matchInfo?.subTitle?.isNotEmpty == true)
-                      Text(
-                        content.matchInfo!.subTitle!,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: theme.colorScheme.outline,
-                        ),
-                      ),
-                  ],
-                ),
-                const Spacer(),
-                if (content.matchInfo?.leftTeam != null) ...[
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      NetworkImgLayer(
-                        width: 30,
-                        height: 30,
-                        src: content.matchInfo!.leftTeam!.pic,
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        content.matchInfo!.leftTeam!.name!,
-                        style: const TextStyle(fontSize: 13),
-                      ),
-                    ],
+                ?title,
+                if (content.matchInfo?.leftTeam != null)
+                  teamItem(
+                    content.matchInfo!.leftTeam!,
+                    Alignment.centerRight,
+                    const .only(right: 16),
                   ),
-                  const SizedBox(width: 16),
-                ],
                 Column(
                   children: [
                     if (content.matchInfo?.centerTop?.isNotEmpty == true)
@@ -626,25 +646,12 @@ Widget addWidget(
                       ),
                   ],
                 ),
-                if (content.matchInfo?.rightTeam != null) ...[
-                  const SizedBox(width: 16),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      NetworkImgLayer(
-                        width: 30,
-                        height: 30,
-                        src: content.matchInfo!.rightTeam!.pic,
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        content.matchInfo!.rightTeam!.name!,
-                        style: const TextStyle(fontSize: 13),
-                      ),
-                    ],
+                if (content.matchInfo?.rightTeam != null)
+                  teamItem(
+                    content.matchInfo!.rightTeam!,
+                    Alignment.centerLeft,
+                    const .only(left: 16),
                   ),
-                ],
-                const Spacer(),
                 if (content.button case final button?)
                   FilledButton.tonal(
                     onPressed: () =>

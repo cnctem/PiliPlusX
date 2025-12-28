@@ -130,7 +130,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     return switch (loadingState) {
       Loading() => loadingWidget,
-      Success(:var response) => ListView(
+      Success(:final response) => ListView(
         padding: EdgeInsets.only(
           bottom: MediaQuery.viewPaddingOf(context).bottom + 25,
         ),
@@ -242,7 +242,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           divider1,
         ],
       ),
-      Error(:var errMsg) => scrollErrorWidget(
+      Error(:final errMsg) => scrollErrorWidget(
         errMsg: errMsg,
         onReload: _getInfo,
       ),

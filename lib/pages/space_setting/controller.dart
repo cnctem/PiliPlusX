@@ -31,11 +31,11 @@ class SpaceSettingController
     if ((hasMod ?? false) && loadingState.value.isSuccess) {
       Privacy? data = loadingState.value.data;
       if (data != null) {
-        var res = await UserHttp.spaceSettingMod(
+        final res = await UserHttp.spaceSettingMod(
           {
-            for (var e in data.list1) e.key: e.value,
-            for (var e in data.list2) e.key: e.value,
-            for (var e in data.list3) e.key: e.value,
+            for (final e in data.list1) e.key: e.value,
+            for (final e in data.list2) e.key: e.value,
+            for (final e in data.list3) e.key: e.value,
           },
         );
         if (!res.isSuccess) {

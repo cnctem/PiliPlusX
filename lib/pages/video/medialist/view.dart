@@ -139,7 +139,7 @@ class _MediaListPanelState extends State<MediaListPanel>
                         widget.mediaList.length < widget.count!)) {
                   widget.loadMoreMedia();
                 }
-                var item = widget.mediaList[index];
+                final item = widget.mediaList[index];
                 final isCurr = item.bvid == widget.bvid;
                 return _buildItem(theme, index, item, isCurr, showDelBtn);
               },

@@ -13,34 +13,28 @@ class CustomTooltip extends StatefulWidget {
     this.type = TooltipType.top,
     required this.overlayWidget,
     required this.child,
-    this.indicator,
+    required this.indicator,
   });
 
   final TooltipType type;
   final Widget child;
-  final Widget Function() overlayWidget;
-  final Widget Function()? indicator;
-
-  static final List<CustomTooltipState> _openedTooltips =
-      <CustomTooltipState>[];
+  final ValueGetter<Widget> overlayWidget;
+  final ValueGetter<Widget> indicator;
 
   @override
-  State<CustomTooltip> createState() => CustomTooltipState();
+  State<CustomTooltip> createState() => _CustomTooltipState();
 }
 
-class CustomTooltipState extends State<CustomTooltip>
-    with SingleTickerProviderStateMixin {
+class _CustomTooltipState extends State<CustomTooltip> {
   final OverlayPortalController _overlayController = OverlayPortalController();
 
   LongPressGestureRecognizer? _longPressRecognizer;
 
   void _scheduleShowTooltip() {
     _overlayController.show();
-    CustomTooltip._openedTooltips.add(this);
   }
 
   void _scheduleDismissTooltip() {
-    CustomTooltip._openedTooltips.remove(this);
     _overlayController.hide();
   }
 
@@ -80,7 +74,6 @@ class CustomTooltipState extends State<CustomTooltip>
   @protected
   @override
   void dispose() {
-    CustomTooltip._openedTooltips.remove(this);
     _longPressRecognizer?.onLongPressCancel = null;
     _longPressRecognizer?.dispose();
     super.dispose();
@@ -112,6 +105,8 @@ class CustomTooltipState extends State<CustomTooltip>
   }
 }
 
+enum _ChildType { overlay, indicator }
+
 class _CustomTooltipOverlay extends StatelessWidget {
   const _CustomTooltipOverlay({
     required this.verticalOffset,
@@ -120,7 +115,7 @@ class _CustomTooltipOverlay extends StatelessWidget {
     required this.target,
     required this.onDismiss,
     required this.overlayWidget,
-    this.indicator,
+    required this.indicator,
   });
 
   final double verticalOffset;
@@ -128,8 +123,8 @@ class _CustomTooltipOverlay extends StatelessWidget {
   final TooltipType type;
   final Offset target;
   final VoidCallback onDismiss;
-  final Widget Function() overlayWidget;
-  final Widget Function()? indicator;
+  final ValueGetter<Widget> overlayWidget;
+  final ValueGetter<Widget> indicator;
 
   @override
   Widget build(BuildContext context) {
@@ -138,19 +133,18 @@ class _CustomTooltipOverlay extends StatelessWidget {
         type: type,
         target: target,
         verticalOffset: verticalOffset,
-        horizontslOffset: horizontalOffset,
+        horizontalOffset: horizontalOffset,
         preferBelow: false,
       ),
       children: [
         LayoutId(
-          id: 'overlay',
+          id: _ChildType.overlay,
           child: overlayWidget(),
         ),
-        if (indicator != null)
-          LayoutId(
-            id: 'indicator',
-            child: indicator!(),
-          ),
+        LayoutId(
+          id: _ChildType.indicator,
+          child: indicator(),
+        ),
       ],
     );
     if (PlatformUtils.isMobile) {
@@ -169,7 +163,7 @@ class _CustomMultiTooltipPositionDelegate extends MultiChildLayoutDelegate {
     required this.type,
     required this.target,
     required this.verticalOffset,
-    required this.horizontslOffset,
+    required this.horizontalOffset,
     required this.preferBelow,
   });
 
@@ -179,7 +173,7 @@ class _CustomMultiTooltipPositionDelegate extends MultiChildLayoutDelegate {
 
   final double verticalOffset;
 
-  final double horizontslOffset;
+  final double horizontalOffset;
 
   final bool preferBelow;
 
@@ -188,13 +182,16 @@ class _CustomMultiTooltipPositionDelegate extends MultiChildLayoutDelegate {
     switch (type) {
       case TooltipType.top:
         Size? indicatorSize;
-        if (hasChild('indicator')) {
-          indicatorSize = layoutChild('indicator', BoxConstraints.loose(size));
+        if (hasChild(_ChildType.indicator)) {
+          indicatorSize = layoutChild(
+            _ChildType.indicator,
+            BoxConstraints.loose(size),
+          );
         }
 
-        if (hasChild('overlay')) {
+        if (hasChild(_ChildType.overlay)) {
           final overlaySize = layoutChild(
-            'overlay',
+            _ChildType.overlay,
             BoxConstraints.loose(size),
           );
           Offset offset = positionDependentBox(
@@ -203,30 +200,33 @@ class _CustomMultiTooltipPositionDelegate extends MultiChildLayoutDelegate {
             childSize: overlaySize,
             target: target,
             verticalOffset: verticalOffset,
-            horizontslOffset: horizontslOffset,
+            horizontalOffset: horizontalOffset,
             preferBelow: preferBelow,
           );
           if (indicatorSize != null) {
             offset = Offset(offset.dx, offset.dy - indicatorSize.height + 1);
             positionChild(
-              'indicator',
+              _ChildType.indicator,
               Offset(
                 target.dx - indicatorSize.width / 2,
                 offset.dy + overlaySize.height - 1,
               ),
             );
           }
-          positionChild('overlay', offset);
+          positionChild(_ChildType.overlay, offset);
         }
       case TooltipType.right:
         Size? indicatorSize;
-        if (hasChild('indicator')) {
-          indicatorSize = layoutChild('indicator', BoxConstraints.loose(size));
+        if (hasChild(_ChildType.indicator)) {
+          indicatorSize = layoutChild(
+            _ChildType.indicator,
+            BoxConstraints.loose(size),
+          );
         }
 
-        if (hasChild('overlay')) {
+        if (hasChild(_ChildType.overlay)) {
           final overlaySize = layoutChild(
-            'overlay',
+            _ChildType.overlay,
             BoxConstraints.loose(size),
           );
           Offset offset = positionDependentBox(
@@ -235,20 +235,20 @@ class _CustomMultiTooltipPositionDelegate extends MultiChildLayoutDelegate {
             childSize: overlaySize,
             target: target,
             verticalOffset: verticalOffset,
-            horizontslOffset: horizontslOffset,
+            horizontalOffset: horizontalOffset,
             preferBelow: preferBelow,
           );
           if (indicatorSize != null) {
             offset = Offset(offset.dx + indicatorSize.height - 1, offset.dy);
             positionChild(
-              'indicator',
+              _ChildType.indicator,
               Offset(
                 offset.dx - indicatorSize.width + 1,
                 target.dy - indicatorSize.height / 2,
               ),
             );
           }
-          positionChild('overlay', offset);
+          positionChild(_ChildType.overlay, offset);
         }
     }
   }
@@ -302,7 +302,7 @@ Offset positionDependentBox({
   required Offset target,
   required bool preferBelow,
   double verticalOffset = 0.0,
-  double horizontslOffset = 0.0,
+  double horizontalOffset = 0.0,
   double margin = 10.0,
 }) {
   switch (type) {
@@ -335,7 +335,7 @@ Offset positionDependentBox({
     case TooltipType.right:
       final double dy = math.max(margin, target.dy - childSize.height / 2);
       final double dx = math.min(
-        target.dx + horizontslOffset,
+        target.dx + horizontalOffset,
         size.width - childSize.width - margin,
       );
       return Offset(dx, dy);

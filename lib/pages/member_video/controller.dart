@@ -152,8 +152,8 @@ class MemberVideoCtr
       final params = Uri.parse(episodicButton.uri!).queryParameters;
       String? oid = params['oid'];
       if (oid != null) {
-        var bvid = IdUtils.av2bv(int.parse(oid));
-        var cid = await SearchHttp.ab2c(aid: oid, bvid: bvid);
+        final bvid = IdUtils.av2bv(int.parse(oid));
+        final cid = await SearchHttp.ab2c(aid: oid, bvid: bvid);
         if (cid != null) {
           PageUtils.toVideoPage(
             aid: int.parse(oid),

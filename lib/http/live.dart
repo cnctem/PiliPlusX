@@ -37,7 +37,7 @@ abstract final class LiveHttp {
     Object? emoticonOptions,
   }) async {
     String csrf = Accounts.main.csrf;
-    var res = await Request().post(
+    final res = await Request().post(
       Api.sendLiveMsg,
       data: FormData.fromMap({
         'bubble': 0,
@@ -76,7 +76,7 @@ abstract final class LiveHttp {
     Object? qn,
     bool onlyAudio = false,
   }) async {
-    var res = await Request().get(
+    final res = await Request().get(
       Api.liveRoomInfo,
       queryParameters: await WbiSign.makSign({
         'room_id': roomId,
@@ -102,7 +102,7 @@ abstract final class LiveHttp {
   static Future<LoadingState<RoomInfoH5Data>> liveRoomInfoH5({
     required Object roomId,
   }) async {
-    var res = await Request().get(
+    final res = await Request().get(
       Api.liveRoomInfoH5,
       queryParameters: {
         'room_id': roomId,
@@ -116,7 +116,7 @@ abstract final class LiveHttp {
   }
 
   static Future liveRoomDanmaPrefetch({required Object roomId}) async {
-    var res = await Request().get(
+    final res = await Request().get(
       Api.liveRoomDmPrefetch,
       queryParameters: {'roomid': roomId},
       options: Options(
@@ -136,7 +136,7 @@ abstract final class LiveHttp {
   static Future<LoadingState<LiveDmInfoData>> liveRoomGetDanmakuToken({
     required Object roomId,
   }) async {
-    var res = await Request().get(
+    final res = await Request().get(
       Api.liveRoomDmToken,
       queryParameters: await WbiSign.makSign({
         'id': roomId,
@@ -153,7 +153,7 @@ abstract final class LiveHttp {
   static Future<LoadingState<List<LiveEmoteDatum>?>> getLiveEmoticons({
     required int roomId,
   }) async {
-    var res = await Request().get(
+    final res = await Request().get(
       Api.getLiveEmoticons,
       queryParameters: {
         'platform': 'pc',
@@ -195,7 +195,7 @@ abstract final class LiveHttp {
       'statistics': Constants.statisticsApp,
     };
     AppSign.appSign(params);
-    var res = await Request().get(
+    final res = await Request().get(
       Api.liveFeedIndex,
       queryParameters: params,
       options: Options(
@@ -224,7 +224,7 @@ abstract final class LiveHttp {
   }
 
   static Future<LoadingState<LiveFollowData>> liveFollow(int page) async {
-    var res = await Request().get(
+    final res = await Request().get(
       Api.liveFollow,
       queryParameters: {
         'page': page,
@@ -275,7 +275,7 @@ abstract final class LiveHttp {
       'statistics': Constants.statisticsApp,
     };
     AppSign.appSign(params);
-    var res = await Request().get(
+    final res = await Request().get(
       Api.liveSecondList,
       queryParameters: params,
       options: Options(
@@ -319,7 +319,7 @@ abstract final class LiveHttp {
       'statistics': Constants.statisticsApp,
     };
     AppSign.appSign(params);
-    var res = await Request().get(
+    final res = await Request().get(
       Api.liveAreaList,
       queryParameters: params,
     );
@@ -350,7 +350,7 @@ abstract final class LiveHttp {
       'statistics': Constants.statisticsApp,
     };
     AppSign.appSign(params);
-    var res = await Request().get(
+    final res = await Request().get(
       Api.getLiveFavTag,
       queryParameters: params,
     );
@@ -386,7 +386,7 @@ abstract final class LiveHttp {
       'statistics': Constants.statisticsApp,
     };
     AppSign.appSign(data);
-    var res = await Request().post(
+    final res = await Request().post(
       Api.setLiveFavTag,
       data: data,
       options: Options(contentType: Headers.formUrlEncodedContentType),
@@ -420,7 +420,7 @@ abstract final class LiveHttp {
       'statistics': Constants.statisticsApp,
     };
     AppSign.appSign(params);
-    var res = await Request().get(
+    final res = await Request().get(
       Api.liveRoomAreaList,
       queryParameters: params,
     );
@@ -457,7 +457,7 @@ abstract final class LiveHttp {
       'type': type.name,
     };
     AppSign.appSign(params);
-    var res = await Request().get(
+    final res = await Request().get(
       Api.liveSearch,
       queryParameters: params,
     );
@@ -471,7 +471,7 @@ abstract final class LiveHttp {
   static Future<LoadingState<ShieldInfo?>> getLiveInfoByUser(
     Object roomId,
   ) async {
-    var res = await Request().get(
+    final res = await Request().get(
       Api.getLiveInfoByUser,
       queryParameters: await WbiSign.makSign({
         'room_id': roomId,
@@ -492,7 +492,7 @@ abstract final class LiveHttp {
     required int level,
   }) async {
     final csrf = Accounts.main.csrf;
-    var res = await Request().post(
+    final res = await Request().post(
       Api.liveSetSilent,
       data: {
         'type': type,
@@ -513,7 +513,7 @@ abstract final class LiveHttp {
     required String keyword,
   }) async {
     final csrf = Accounts.main.csrf;
-    var res = await Request().post(
+    final res = await Request().post(
       Api.addShieldKeyword,
       data: {
         'keyword': keyword,
@@ -533,7 +533,7 @@ abstract final class LiveHttp {
     required String keyword,
   }) async {
     final csrf = Accounts.main.csrf;
-    var res = await Request().post(
+    final res = await Request().post(
       Api.delShieldKeyword,
       data: {
         'keyword': keyword,
@@ -555,7 +555,7 @@ abstract final class LiveHttp {
     required int type,
   }) async {
     final csrf = Accounts.main.csrf;
-    var res = await Request().post(
+    final res = await Request().post(
       Api.liveShieldUser,
       data: {
         'uid': uid,
@@ -579,7 +579,7 @@ abstract final class LiveHttp {
     required Object uid,
     Object? anchorId,
   }) async {
-    var res = await Request().post(
+    final res = await Request().post(
       Api.liveLikeReport,
       data: await WbiSign.makSign({
         'click_time': clickTime,
@@ -602,7 +602,7 @@ abstract final class LiveHttp {
   static Future<LoadingState<SuperChatData>> superChatMsg(
     Object roomId,
   ) async {
-    var res = await Request().get(
+    final res = await Request().get(
       Api.superChatMsg,
       queryParameters: {
         'room_id': roomId,

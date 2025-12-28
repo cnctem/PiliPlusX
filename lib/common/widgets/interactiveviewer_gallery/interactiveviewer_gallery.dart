@@ -123,7 +123,7 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
       ..removeListener(listener)
       ..dispose();
     _transformationController.dispose();
-    for (var item in widget.sources) {
+    for (final item in widget.sources) {
       if (item.sourceType == SourceType.networkImage) {
         CachedNetworkImageProvider(_getActualUrl(item.url)).evict();
       }
@@ -197,7 +197,7 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
   void _onPageChanged(int page) {
     _player?.pause();
     currentIndex.value = page;
-    var item = widget.sources[page];
+    final item = widget.sources[page];
     if (item.sourceType == SourceType.livePhoto) {
       _onPlay(item.liveUrl!);
     }

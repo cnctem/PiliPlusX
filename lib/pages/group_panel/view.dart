@@ -69,7 +69,7 @@ class _GroupPanelState extends State<GroupPanel> {
   Widget get _buildBody {
     return switch (loadingState) {
       Loading() => loadingWidget,
-      Success(:var response) => ListView.builder(
+      Success(:final response) => ListView.builder(
         controller: widget.scrollController,
         itemCount: response.length,
         itemBuilder: (context, index) {
@@ -113,7 +113,7 @@ class _GroupPanelState extends State<GroupPanel> {
           );
         },
       ),
-      Error(:var errMsg) => scrollErrorWidget(
+      Error(:final errMsg) => scrollErrorWidget(
         controller: widget.scrollController,
         errMsg: errMsg,
         onReload: _query,

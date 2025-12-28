@@ -146,7 +146,7 @@ abstract final class ReplyUtils {
     // root reply
     if (root == 0) {
       // no cookie check
-      var res = await ReplyHttp.replyList(
+      final res = await ReplyHttp.replyList(
         isLogin: false,
         oid: oid,
         nextOffset: '',

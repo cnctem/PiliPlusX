@@ -39,7 +39,7 @@ class FavTopicController
       FavHttp.favTopic(page: page);
 
   Future<void> onRemove(int index, int id) async {
-    var res = await FavHttp.delFavTopic(id);
+    final res = await FavHttp.delFavTopic(id);
     if (res.isSuccess) {
       loadingState
         ..value.data!.removeAt(index)

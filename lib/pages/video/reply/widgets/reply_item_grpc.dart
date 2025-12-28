@@ -800,7 +800,7 @@ class ReplyItemGrpc extends StatelessWidget {
           .where((url) => !matchedUrls.contains(url))
           .toList();
       if (unmatchedItems.isNotEmpty) {
-        for (var patternStr in unmatchedItems) {
+        for (final patternStr in unmatchedItems) {
           addUrl(patternStr, content.urls[patternStr]!);
         }
       }
@@ -916,7 +916,7 @@ class ReplyItemGrpc extends StatelessWidget {
                   return;
                 }
                 SmartDialog.showLoading(msg: '删除中...');
-                var result = await VideoHttp.replyDel(
+                final result = await VideoHttp.replyDel(
                   type: item.type.toInt(),
                   oid: item.oid.toInt(),
                   rpid: item.id.toInt(),

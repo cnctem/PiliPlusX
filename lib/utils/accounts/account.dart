@@ -186,7 +186,7 @@ extension BiliCookie on Cookie {
 extension BiliCookieJar on DefaultCookieJar {
   Map<String, String> toJson() {
     final cookies = domainCookies['bilibili.com']?['/'] ?? const {};
-    return {for (var i in cookies.values) i.cookie.name: i.cookie.value};
+    return {for (final i in cookies.values) i.cookie.name: i.cookie.value};
   }
 
   List<Cookie> toList() =>
@@ -207,7 +207,7 @@ extension BiliCookieJar on DefaultCookieJar {
       DefaultCookieJar(ignoreExpires: true)
         ..domainCookies['bilibili.com'] = {
           '/': {
-            for (var i in json.entries)
+            for (final i in json.entries)
               i.key: SerializableCookie(
                 Cookie(i.key, i.value)..setBiliDomain(),
               ),
@@ -218,7 +218,7 @@ extension BiliCookieJar on DefaultCookieJar {
       DefaultCookieJar(ignoreExpires: true)
         ..domainCookies['bilibili.com'] = {
           '/': {
-            for (var i in cookies)
+            for (final i in cookies)
               i['name']!: SerializableCookie(
                 Cookie(i['name']!, i['value']!)..setBiliDomain(),
               ),

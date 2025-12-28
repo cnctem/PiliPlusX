@@ -82,7 +82,7 @@ class _LikeMePageState extends State<LikeMePage> {
         itemCount: 12,
         itemBuilder: (context, index) => const MsgFeedTopSkeleton(),
       ),
-      Success(:var response) => Builder(
+      Success(:final response) => Builder(
         builder: (context) {
           Pair<List<MsgLikeItem>, List<MsgLikeItem>> pair = response;
           List<MsgLikeItem> latest = pair.first;
@@ -134,7 +134,7 @@ class _LikeMePageState extends State<LikeMePage> {
           return HttpError(onReload: _likeMeController.onReload);
         },
       ),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: _likeMeController.onReload,
       ),

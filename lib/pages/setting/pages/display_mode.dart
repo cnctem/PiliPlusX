@@ -45,7 +45,7 @@ class _SetDisplayModeState extends State<SetDisplayMode> {
       if (kDebugMode) debugPrint(e.toString());
     }
 
-    var value = setting.get(SettingBoxKey.displayMode);
+    final value = setting.get(SettingBoxKey.displayMode);
     if (value != null) {
       preferred = modes.firstWhereOrNull((e) => e.toString() == value);
     }

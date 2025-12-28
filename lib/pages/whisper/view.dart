@@ -120,7 +120,7 @@ class _WhisperPageState extends State<WhisperPage> {
         itemCount: 12,
         itemBuilder: (context, index) => const WhisperItemSkeleton(),
       ),
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? SliverList.separated(
                 itemCount: response.length,
@@ -142,7 +142,7 @@ class _WhisperPageState extends State<WhisperPage> {
                 separatorBuilder: (context, index) => divider,
               )
             : HttpError(onReload: _controller.onReload),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: _controller.onReload,
       ),

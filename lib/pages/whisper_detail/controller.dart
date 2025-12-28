@@ -56,7 +56,7 @@ class WhisperDetailController extends CommonListController<RspSessionMsg, Msg> {
 
   // 消息标记已读
   Future<void> ackSessionMsg(int msgSeqno) async {
-    var res = await MsgHttp.ackSessionMsg(
+    final res = await MsgHttp.ackSessionMsg(
       talkerId: talkerId,
       ackSeqno: msgSeqno,
     );

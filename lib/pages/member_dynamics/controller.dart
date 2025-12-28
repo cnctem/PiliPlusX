@@ -49,7 +49,7 @@ class MemberDynamicsController
       );
 
   Future<void> onRemove(dynamic dynamicId) async {
-    var res = await MsgHttp.removeDynamic(dynIdStr: dynamicId);
+    final res = await MsgHttp.removeDynamic(dynIdStr: dynamicId);
     if (res.isSuccess) {
       loadingState
         ..value.data!.removeWhere((item) => item.idStr == dynamicId)
@@ -61,7 +61,7 @@ class MemberDynamicsController
   }
 
   Future<void> onSetTop(bool isTop, Object dynamicId) async {
-    var res = await (isTop
+    final res = await (isTop
         ? DynamicsHttp.rmTop(dynamicId: dynamicId)
         : DynamicsHttp.setTop(dynamicId: dynamicId));
     if (res.isSuccess) {

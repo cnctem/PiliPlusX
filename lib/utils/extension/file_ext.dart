@@ -11,7 +11,7 @@ extension FileSystemEntityExt on FileSystemEntity {
 extension DirectoryExt on Directory {
   Future<bool> lengthGte(int length) async {
     int count = 0;
-    await for (var _ in list()) {
+    await for (final _ in list()) {
       if (++count == length) return true;
     }
     return false;

@@ -78,7 +78,7 @@ class _MemberShopState extends State<MemberShop>
             childCount: 10,
           ),
         );
-      case Success(:var response):
+      case Success(:final response):
         if (response == null || response.isEmpty) {
           return HttpError(onReload: _controller.onReload);
         }
@@ -128,7 +128,7 @@ class _MemberShopState extends State<MemberShop>
           );
         }
         return sliver;
-      case Error(:var errMsg):
+      case Error(:final errMsg):
         return HttpError(
           errMsg: errMsg,
           onReload: _controller.onReload,

@@ -502,6 +502,7 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
           late final primary = theme.colorScheme.primary;
           late final outline = theme.colorScheme.outline;
           late final btnStyle = TextButton.styleFrom(
+            tapTargetSize: .padded,
             padding: const EdgeInsets.symmetric(horizontal: 15),
             foregroundColor: outline,
           );

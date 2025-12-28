@@ -71,7 +71,7 @@ class _FavTopicPageState extends State<FavTopicPage>
           ),
         ),
       ),
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? SliverGrid.builder(
                 gridDelegate: gridDelegate,
@@ -127,7 +127,7 @@ class _FavTopicPageState extends State<FavTopicPage>
                 itemCount: response.length,
               )
             : HttpError(onReload: _controller.onReload),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: _controller.onReload,
       ),

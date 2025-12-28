@@ -24,7 +24,7 @@ abstract final class ReplyHttp {
     required int page,
     int sort = 1,
   }) async {
-    var res = !isLogin
+    final res = !isLogin
         ? await Request().get(
             '${Api.replyList}/main',
             queryParameters: {
@@ -62,7 +62,7 @@ abstract final class ReplyHttp {
     required int type,
     bool isCheck = false,
   }) async {
-    var res = await Request().get(
+    final res = await Request().get(
       Api.replyReplyList,
       queryParameters: {
         'oid': oid,
@@ -92,7 +92,7 @@ abstract final class ReplyHttp {
     required int oid,
     required int rpid,
   }) async {
-    var res = await Request().post(
+    final res = await Request().post(
       Api.hateReply,
       data: {
         'type': type,
@@ -117,7 +117,7 @@ abstract final class ReplyHttp {
     required int rpid,
     required int action,
   }) async {
-    var res = await Request().post(
+    final res = await Request().post(
       Api.likeReply,
       data: {
         'type': type,
@@ -138,7 +138,7 @@ abstract final class ReplyHttp {
   static Future<LoadingState<List<Package>?>> getEmoteList({
     String? business,
   }) async {
-    var res = await Request().get(
+    final res = await Request().get(
       Api.myEmote,
       queryParameters: {
         'business': business ?? 'reply',
@@ -158,7 +158,7 @@ abstract final class ReplyHttp {
     required Object rpid,
     required bool isUpTop,
   }) async {
-    var res = await Request().post(
+    final res = await Request().post(
       Api.replyTop,
       data: {
         'oid': oid,

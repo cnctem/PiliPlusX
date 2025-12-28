@@ -181,7 +181,7 @@ class _LivePageState extends CommonPageState<LivePage, LiveController>
         itemBuilder: (context, index) => const VideoCardVSkeleton(),
         itemCount: 10,
       ),
-      Success(:var response) => SliverMainAxisGroup(
+      Success(:final response) => SliverMainAxisGroup(
         slivers: [
           if (controller.newTags case final newTags?)
             if (newTags.isNotEmpty)
@@ -247,7 +247,7 @@ class _LivePageState extends CommonPageState<LivePage, LiveController>
               : HttpError(onReload: controller.onReload),
         ],
       ),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: controller.onReload,
       ),

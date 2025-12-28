@@ -158,7 +158,7 @@ class _DynTopicPageState extends State<DynTopicPage> with DynMixin {
   ) {
     return switch (topState) {
       Loading() => const SliverAppBar(),
-      Success(:var response) when (topState.dataOrNull != null) =>
+      Success(:final response) when (topState.dataOrNull != null) =>
         DynamicSliverAppBarMedium(
           pinned: true,
           afterCalc: (value) =>
@@ -347,7 +347,7 @@ class _DynTopicPageState extends State<DynTopicPage> with DynMixin {
   Widget _buildBody(LoadingState<List<TopicCardItem>?> loadingState) {
     return switch (loadingState) {
       Loading() => dynSkeleton,
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? GlobalData().dynamicsWaterfallFlow
                   ? SliverWaterfallFlow(
@@ -389,7 +389,7 @@ class _DynTopicPageState extends State<DynTopicPage> with DynMixin {
                       itemCount: response.length,
                     )
             : HttpError(onReload: _controller.onReload),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: _controller.onReload,
       ),

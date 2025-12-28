@@ -109,7 +109,7 @@ class MainController extends GetxController
 
   Future<int> _msgUnread() async {
     if (msgUnReadTypes.contains(MsgUnReadType.pm)) {
-      var res = await MsgHttp.msgUnread();
+      final res = await MsgHttp.msgUnread();
       if (res case Success(:final response)) {
         return response.followUnread +
             response.unfollowUnread +
@@ -124,12 +124,12 @@ class MainController extends GetxController
 
   Future<int> _msgFeedUnread() async {
     int count = 0;
-    var remainTypes = Set<MsgUnReadType>.from(msgUnReadTypes)
+    final remainTypes = Set<MsgUnReadType>.from(msgUnReadTypes)
       ..remove(MsgUnReadType.pm);
     if (remainTypes.isNotEmpty) {
-      var res = await MsgHttp.msgFeedUnread();
+      final res = await MsgHttp.msgFeedUnread();
       if (res case Success(:final response)) {
-        for (var item in remainTypes) {
+        for (final item in remainTypes) {
           switch (item) {
             case MsgUnReadType.pm:
               break;
@@ -161,7 +161,7 @@ class MainController extends GetxController
       return;
     }
 
-    var res = await Future.wait([_msgUnread(), _msgFeedUnread()]);
+    final res = await Future.wait([_msgUnread(), _msgFeedUnread()]);
 
     final count = res.sum;
 

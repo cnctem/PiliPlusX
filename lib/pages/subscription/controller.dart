@@ -44,7 +44,7 @@ class SubController extends CommonListController<SubData, SubItemModel> {
           ),
           TextButton(
             onPressed: () async {
-              var res = await FavHttp.cancelSub(
+              final res = await FavHttp.cancelSub(
                 id: subFolderItem.id!,
                 type: subFolderItem.type!,
               );

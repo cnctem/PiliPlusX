@@ -63,7 +63,7 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
   @override
   void dispose() {
     if (PlatformUtils.isMobile) {
-      for (var i in pathList) {
+      for (final i in pathList) {
         File(i).tryDel();
       }
     }
@@ -230,7 +230,7 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
   List<Map<String, dynamic>>? getRichContent() {
     if (editController.items.isEmpty) return null;
     final list = <Map<String, dynamic>>[];
-    for (var e in editController.items) {
+    for (final e in editController.items) {
       switch (e.type) {
         case RichTextType.text || RichTextType.composing || RichTextType.common:
           list.add({
@@ -279,7 +279,7 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
       if (res is MentionItem) {
         _onInsertUser(res, fromClick);
       } else if (res is Set<MentionItem>) {
-        for (var e in res) {
+        for (final e in res) {
           e.checked = false;
           _onInsertUser(e, fromClick);
         }
@@ -313,7 +313,7 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
 
     enablePublish.value = true;
 
-    var oldValue = editController.value;
+    final oldValue = editController.value;
     final selection = oldValue.selection;
 
     if (selection.isValid) {

@@ -40,7 +40,7 @@ class _LogPageState<T> extends State<LogPage<T>> {
   Widget _buildBody(LoadingState<List<T>?> loadingState) {
     return switch (loadingState) {
       Loading() => linearLoading,
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? Builder(
                 builder: (context) {
@@ -86,7 +86,7 @@ class _LogPageState<T> extends State<LogPage<T>> {
                 },
               )
             : HttpError(onReload: _controller.onReload),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: _controller.onReload,
       ),
@@ -115,7 +115,7 @@ class _LogPageState<T> extends State<LogPage<T>> {
     Widget content = Row(
       children: [
         divider,
-        for (var (i, j) in _controller.getFlexAndText(item)) ...[
+        for (final (i, j) in _controller.getFlexAndText(item)) ...[
           text(i, j),
           divider,
         ],

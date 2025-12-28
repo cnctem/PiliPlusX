@@ -80,7 +80,7 @@ class DownloadPageController extends GetxController
       onConfirm: () async {
         SmartDialog.showLoading();
         final watchProgress = GStorage.watchProgress;
-        for (var page in allChecked) {
+        for (final page in allChecked) {
           await watchProgress.deleteAll(
             page.entries.map((e) => e.cid.toString()),
           );

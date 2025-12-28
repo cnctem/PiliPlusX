@@ -78,7 +78,7 @@ class _LiveAreaPageState extends State<LiveAreaPage> {
   ) {
     return switch (loadingState) {
       Loading() => const SizedBox.shrink(),
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? DefaultTabController(
                 length: response.length,
@@ -158,7 +158,7 @@ class _LiveAreaPageState extends State<LiveAreaPage> {
                 ),
               )
             : scrollErrorWidget(onReload: _controller.onReload),
-      Error(:var errMsg) => scrollErrorWidget(
+      Error(:final errMsg) => scrollErrorWidget(
         errMsg: errMsg,
         onReload: _controller.onReload,
       ),

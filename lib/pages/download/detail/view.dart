@@ -206,7 +206,7 @@ class _DownloadDetailPageState extends State<DownloadDetailPage>
         if (isDeleteAll) {
           await _closeSub();
         }
-        for (var entry in allChecked) {
+        for (final entry in allChecked) {
           await watchProgress.deleteAll(
             allChecked.map((e) => e.cid.toString()),
           );

@@ -60,7 +60,7 @@ class PgcReviewController
   );
 
   Future<void> onLike(PgcReviewItemModel item, bool isLike, reviewId) async {
-    var res = await PgcHttp.pgcReviewLike(
+    final res = await PgcHttp.pgcReviewLike(
       mediaId: mediaId,
       reviewId: reviewId,
     );
@@ -83,7 +83,7 @@ class PgcReviewController
     bool isDislike,
     reviewId,
   ) async {
-    var res = await PgcHttp.pgcReviewDislike(
+    final res = await PgcHttp.pgcReviewDislike(
       mediaId: mediaId,
       reviewId: reviewId,
     );
@@ -102,7 +102,7 @@ class PgcReviewController
   }
 
   Future<void> onDel(int index, int reviewId) async {
-    var res = await PgcHttp.pgcReviewDel(
+    final res = await PgcHttp.pgcReviewDel(
       mediaId: mediaId,
       reviewId: reviewId,
     );

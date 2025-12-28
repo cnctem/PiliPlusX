@@ -217,7 +217,7 @@ class _HistoryPageState extends State<HistoryPage>
   Widget _buildBody(LoadingState<List<HistoryItemModel>?> loadingState) {
     return switch (loadingState) {
       Loading() => gridSkeleton,
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? SliverGrid.builder(
                 gridDelegate: gridDelegate,
@@ -236,7 +236,7 @@ class _HistoryPageState extends State<HistoryPage>
                 itemCount: response.length,
               )
             : HttpError(onReload: _historyController.onReload),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: _historyController.onReload,
       ),

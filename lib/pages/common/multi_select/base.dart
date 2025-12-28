@@ -32,7 +32,7 @@ mixin BaseMultiSelectMixin<T extends MultiSelectData>
 
   @override
   void handleSelect({bool checked = false, bool disableSelect = true}) {
-    for (var item in list) {
+    for (final item in list) {
       item.checked = checked;
     }
     state.refresh();
@@ -94,7 +94,7 @@ mixin CommonMultiSelectMixin<T extends MultiSelectData>
     if (loadingState.value.isSuccess) {
       final list = loadingState.value.data;
       if (list != null && list.isNotEmpty) {
-        for (var item in list) {
+        for (final item in list) {
           item.checked = checked;
         }
         loadingState.refresh();

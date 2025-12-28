@@ -222,7 +222,7 @@ class _PgcReviewPostPanelState extends State<PgcReviewPostPanel> {
 
   Future<void> _onPost() async {
     if (_isMod) {
-      var res = await PgcHttp.pgcReviewMod(
+      final res = await PgcHttp.pgcReviewMod(
         mediaId: widget.mediaId,
         score: _score.value * 2,
         content: _controller.text,
@@ -240,7 +240,7 @@ class _PgcReviewPostPanelState extends State<PgcReviewPostPanel> {
       SmartDialog.showToast('账号未登录');
       return;
     }
-    var res = await PgcHttp.pgcReviewPost(
+    final res = await PgcHttp.pgcReviewPost(
       mediaId: widget.mediaId,
       score: _score.value * 2,
       content: _controller.text,

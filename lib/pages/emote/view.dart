@@ -51,7 +51,7 @@ class _EmotePanelState extends State<EmotePanel>
     );
     return switch (loadingState) {
       Loading() => loadingWidget,
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? Column(
                 children: [
@@ -218,7 +218,7 @@ class _EmotePanelState extends State<EmotePanel>
                 ],
               )
             : _errorWidget(),
-      Error(:var errMsg) => _errorWidget(errMsg),
+      Error(:final errMsg) => _errorWidget(errMsg),
     };
   }
 

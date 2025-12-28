@@ -10,7 +10,7 @@ abstract final class FollowHttp {
     int ps = 20,
     String orderType = '', // ''=>最近关注，'attention'=>最常访问
   }) async {
-    var res = await Request().get(
+    final res = await Request().get(
       Api.followings,
       queryParameters: {
         'vmid': vmid,

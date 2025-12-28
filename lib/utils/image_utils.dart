@@ -236,7 +236,7 @@ abstract final class ImageUtils {
       if (PlatformUtils.isMobile) {
         final delList = <String>[];
         final saveList = <SaveFileData>[];
-        for (var i in result) {
+        for (final i in result) {
           if (i.del) delList.add(i.filePath);
           if (i.statusCode == 200) {
             saveList.add(
@@ -249,11 +249,11 @@ abstract final class ImageUtils {
           }
         }
         await SaverGallery.saveFiles(saveList, skipIfExists: false);
-        for (var i in delList) {
+        for (final i in delList) {
           File(i).tryDel();
         }
       } else {
-        for (var res in result) {
+        for (final res in result) {
           if (res.statusCode == 200) {
             await saveFileImg(
               filePath: res.filePath,

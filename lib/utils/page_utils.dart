@@ -808,7 +808,7 @@ abstract final class PageUtils {
   }) async {
     try {
       SmartDialog.showLoading(msg: '资源获取中');
-      var result = await SearchHttp.pgcInfo(seasonId: seasonId, epId: epId);
+      final result = await SearchHttp.pgcInfo(seasonId: seasonId, epId: epId);
       SmartDialog.dismiss();
       if (result.isSuccess) {
         PgcInfoModel data = result.data;
@@ -845,10 +845,10 @@ abstract final class PageUtils {
           if (episode == null) {
             final sections = data.section;
             if (sections != null && sections.isNotEmpty) {
-              for (var section in sections) {
+              for (final section in sections) {
                 final episodes = section.episodes;
                 if (episodes != null && episodes.isNotEmpty) {
-                  for (var episode in episodes) {
+                  for (final episode in episodes) {
                     if (episode.epId.toString() == epId) {
                       // view as ugc
                       viewSection(episode);
@@ -906,7 +906,7 @@ abstract final class PageUtils {
   }) async {
     try {
       SmartDialog.showLoading(msg: '资源获取中');
-      var res = await SearchHttp.pugvInfo(seasonId: seasonId, epId: epId);
+      final res = await SearchHttp.pugvInfo(seasonId: seasonId, epId: epId);
       SmartDialog.dismiss();
       if (res.isSuccess) {
         PgcInfoModel data = res.data;

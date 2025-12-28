@@ -186,7 +186,7 @@ class _NoteListPageState extends State<NoteListPage>
         itemBuilder: (_, _) => const VideoReplySkeleton(),
         itemCount: 8,
       ),
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? SliverList.separated(
                 itemBuilder: (context, index) {
@@ -199,7 +199,7 @@ class _NoteListPageState extends State<NoteListPage>
                 separatorBuilder: (context, index) => divider,
               )
             : HttpError(onReload: _controller.onReload),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: _controller.onReload,
       ),

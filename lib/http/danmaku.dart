@@ -29,7 +29,7 @@ abstract final class DanmakuHttp {
     // assert(aid != null || bvid != null);
     // assert(csrf != null || access_key != null);
     // 构建参数对象
-    var data = <String, Object>{
+    final data = <String, Object>{
       'type': type,
       'oid': oid,
       'msg': msg,

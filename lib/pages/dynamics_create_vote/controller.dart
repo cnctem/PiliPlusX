@@ -55,7 +55,7 @@ class CreateVoteController extends GetxController {
   }
 
   Future<void> queryData() async {
-    var res = await DynamicsHttp.voteInfo(voteId);
+    final res = await DynamicsHttp.voteInfo(voteId);
     if (res.isSuccess) {
       key = Utils.generateRandomString(6);
       final VoteInfo data = res.data;
@@ -95,7 +95,7 @@ class CreateVoteController extends GetxController {
       votePublisher: Accounts.main.mid,
       voteId: voteId,
     );
-    var res = await (voteId == null
+    final res = await (voteId == null
         ? DynamicsHttp.createVote(voteInfo)
         : DynamicsHttp.updateVote(voteInfo));
     if (res.isSuccess) {
@@ -107,7 +107,7 @@ class CreateVoteController extends GetxController {
   }
 
   Future<void> onUpload(int index, String path) async {
-    var res = await MsgHttp.uploadBfs(
+    final res = await MsgHttp.uploadBfs(
       path: path,
       category: 'daily',
       biz: 'vote',

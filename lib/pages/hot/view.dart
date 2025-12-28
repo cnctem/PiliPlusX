@@ -142,7 +142,7 @@ class _HotPageState extends CommonPageState<HotPage, HotController>
   Widget _buildBody(LoadingState<List<HotVideoItemModel>?> loadingState) {
     return switch (loadingState) {
       Loading() => gridSkeleton,
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? SliverGrid.builder(
                 gridDelegate: gridDelegate,
@@ -160,7 +160,7 @@ class _HotPageState extends CommonPageState<HotPage, HotController>
                 itemCount: response.length,
               )
             : HttpError(onReload: controller.onReload),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: controller.onReload,
       ),

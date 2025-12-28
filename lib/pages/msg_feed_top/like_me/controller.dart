@@ -65,7 +65,7 @@ class LikeMeController
 
   Future<void> onRemove(dynamic id, int index, bool isLatest) async {
     try {
-      var res = await MsgHttp.delMsgfeed(0, id);
+      final res = await MsgHttp.delMsgfeed(0, id);
       if (res.isSuccess) {
         Pair<List<MsgLikeItem>, List<MsgLikeItem>> pair =
             loadingState.value.data;
@@ -84,7 +84,7 @@ class LikeMeController
 
   Future<void> onSetNotice(MsgLikeItem item, bool isNotice) async {
     int noticeState = isNotice ? 1 : 0;
-    var res = await MsgHttp.msgSetNotice(
+    final res = await MsgHttp.msgSetNotice(
       id: item.id!,
       noticeState: noticeState,
     );

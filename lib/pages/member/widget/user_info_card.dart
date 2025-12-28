@@ -195,14 +195,14 @@ class UserInfoCard extends StatelessWidget {
                 ),
               ),
             ),
-          if (card.nameplate?.imageSmall?.isNotEmpty == true)
-            CachedNetworkImage(
-              imageUrl: ImageUtils.thumbnailUrl(card.nameplate!.imageSmall!),
-              height: 20,
-              placeholder: (context, url) {
-                return const SizedBox.shrink();
-              },
-            ),
+          // if (card.nameplate?.imageSmall?.isNotEmpty == true)
+          //   CachedNetworkImage(
+          //     imageUrl: ImageUtils.thumbnailUrl(card.nameplate!.imageSmall!),
+          //     height: 20,
+          //     placeholder: (context, url) {
+          //       return const SizedBox.shrink();
+          //     },
+          //   ),
         ],
       ),
     ),
@@ -389,8 +389,8 @@ class UserInfoCard extends StatelessWidget {
                   width: 1.0,
                   color: colorScheme.outline.withValues(alpha: 0.3),
                 ),
+                tapTargetSize: .padded,
                 padding: EdgeInsets.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 visualDensity: VisualDensity.compact,
               ),
             ),
@@ -401,6 +401,7 @@ class UserInfoCard extends StatelessWidget {
                 backgroundColor: relation != 0
                     ? colorScheme.onInverseSurface
                     : null,
+                tapTargetSize: .padded,
                 visualDensity: const VisualDensity(vertical: -1.8),
               ),
               child: Text.rich(

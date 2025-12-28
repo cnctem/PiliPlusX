@@ -52,7 +52,7 @@ class FavPgcController
 
   // 取消追番
   Future<void> pgcDel(int index, seasonId) async {
-    var result = await VideoHttp.pgcDel(seasonId: seasonId);
+    final result = await VideoHttp.pgcDel(seasonId: seasonId);
     if (result case Success(:final response)) {
       loadingState
         ..value.data!.removeAt(index)
@@ -97,7 +97,7 @@ class FavPgcController
   }
 
   Future<void> onUpdate(int index, int followStatus, int? seasonId) async {
-    var result = await VideoHttp.pgcUpdate(
+    final result = await VideoHttp.pgcUpdate(
       seasonId: seasonId.toString(),
       status: followStatus,
     );

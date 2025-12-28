@@ -278,16 +278,18 @@ class OpusContent extends StatelessWidget {
                               surfaceLuminance: getSurfaceLuminance,
                             );
                           }
-                          if (item.rich case final rich?) {
-                            final hasUrl = rich.jumpUrl?.isNotEmpty == true;
+                          if (item.rich case Rich(
+                            :final text,
+                            :final jumpUrl,
+                          )) {
+                            final hasUrl =
+                                jumpUrl != null && jumpUrl.isNotEmpty;
                             return TextSpan(
-                              text: '${hasUrl ? '\u{1F517}' : ''}${rich.text}',
+                              text: '${hasUrl ? '\u{1F517}' : ''}$text',
                               recognizer: hasUrl
                                   ? (TapGestureRecognizer()
                                       ..onTap = () =>
-                                          PiliScheme.routePushFromUrl(
-                                            rich.jumpUrl!,
-                                          ))
+                                          PiliScheme.routePushFromUrl(jumpUrl))
                                   : null,
                               style: hasUrl
                                   ? TextStyle(color: colorScheme.primary)

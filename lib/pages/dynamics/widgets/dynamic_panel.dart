@@ -5,6 +5,7 @@ import 'package:PiliPlus/models/dynamics/result.dart';
 import 'package:PiliPlus/pages/dynamics/widgets/action_panel.dart';
 import 'package:PiliPlus/pages/dynamics/widgets/author_panel.dart';
 import 'package:PiliPlus/pages/dynamics/widgets/dyn_content.dart';
+import 'package:PiliPlus/pages/dynamics/widgets/interaction.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:flutter/material.dart' hide InkWell;
@@ -88,6 +89,14 @@ class DynamicPanel extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             if (!isDetail) ...[
+              if (item.modules.moduleInteraction case ModuleInteraction(
+                :final items,
+              ))
+                if (items != null && items.isNotEmpty)
+                  dynInteraction(
+                    theme: theme,
+                    items: items,
+                  ),
               ActionPanel(item: item),
               if (item.modules.moduleFold case final moduleFold?) ...[
                 Divider(

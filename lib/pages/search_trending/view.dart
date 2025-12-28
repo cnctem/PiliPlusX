@@ -153,7 +153,7 @@ class _SearchTrendingPageState extends State<SearchTrendingPage> {
     );
     return switch (loadingState) {
       Loading() => linearLoading,
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? SliverList.separated(
                 itemCount: response.length,
@@ -219,7 +219,7 @@ class _SearchTrendingPageState extends State<SearchTrendingPage> {
                 separatorBuilder: (context, index) => divider,
               )
             : HttpError(onReload: _controller.onReload),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: _controller.onReload,
       ),

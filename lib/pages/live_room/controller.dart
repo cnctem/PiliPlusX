@@ -191,7 +191,7 @@ class LiveRoomController extends GetxController {
     currentQn ??= await Utils.isWiFi
         ? Pref.liveQuality
         : Pref.liveQualityCellular;
-    var res = await LiveHttp.liveRoomInfo(
+    final res = await LiveHttp.liveRoomInfo(
       roomId: roomId,
       qn: currentQn,
       onlyAudio: plPlayerController.onlyPlayAudio.value,
@@ -234,7 +234,7 @@ class LiveRoomController extends GetxController {
   }
 
   Future<void> queryLiveInfoH5() async {
-    var res = await LiveHttp.liveRoomInfoH5(roomId: roomId);
+    final res = await LiveHttp.liveRoomInfoH5(roomId: roomId);
     if (res.isSuccess) {
       final data = res.data;
       roomInfoH5.value = data;
@@ -506,7 +506,7 @@ class LiveRoomController extends GetxController {
       likeClickTime.value = 0;
       return;
     }
-    var res = await LiveHttp.liveLikeReport(
+    final res = await LiveHttp.liveLikeReport(
       clickTime: likeClickTime.value,
       roomId: roomId,
       uid: mid,

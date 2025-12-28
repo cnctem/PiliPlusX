@@ -719,7 +719,9 @@ class _LiveRoomPageState extends State<LiveRoomPage>
           ? PageView(
               key: pageKey,
               controller: _liveRoomController.pageController,
-              physics: const CustomTabBarViewClampingScrollPhysics(),
+              physics: const CustomTabBarViewScrollPhysics(
+                parent: ClampingScrollPhysics(),
+              ),
               onPageChanged: (value) =>
                   _liveRoomController.pageIndex.value = value,
               children: [

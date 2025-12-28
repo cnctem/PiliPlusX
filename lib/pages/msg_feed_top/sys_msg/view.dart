@@ -70,7 +70,7 @@ class _SysMsgPageState extends State<SysMsgPage> {
           itemBuilder: (context, index) => const MsgFeedSysMsgSkeleton(),
         ),
       ),
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? SliverList.separated(
                 itemCount: response.length,
@@ -125,7 +125,7 @@ class _SysMsgPageState extends State<SysMsgPage> {
                 separatorBuilder: (context, index) => divider,
               )
             : HttpError(onReload: _sysMsgController.onReload),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: _sysMsgController.onReload,
       ),

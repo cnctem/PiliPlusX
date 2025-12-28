@@ -27,7 +27,7 @@ class HistorySearchController
   final account = Accounts.history;
 
   Future<void> onDelHistory(int index, kid, String business) async {
-    var res = await UserHttp.delHistory(
+    final res = await UserHttp.delHistory(
       '${business}_$kid',
       account: account,
     );
@@ -50,7 +50,7 @@ class HistorySearchController
       onConfirm: () async {
         SmartDialog.showLoading(msg: '请求中');
         final removeList = allChecked.toSet();
-        var response = await UserHttp.delHistory(
+        final response = await UserHttp.delHistory(
           removeList
               .map((item) => '${item.history.business!}_${item.kid!}')
               .join(','),

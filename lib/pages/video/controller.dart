@@ -353,7 +353,7 @@ class VideoDetailController extends GetxController
     if (!isReverse && count != null && mediaList.length >= count) {
       return;
     }
-    var res = await UserHttp.getMediaList(
+    final res = await UserHttp.getMediaList(
       type: args['mediaType'] ?? sourceType.mediaType,
       bizId: args['mediaId'] ?? -1,
       ps: 20,
@@ -384,7 +384,7 @@ class VideoDetailController extends GetxController
       if (response.mediaList.isNotEmpty) {
         if (isReverse) {
           mediaList.value = response.mediaList;
-          for (var item in mediaList) {
+          for (final item in mediaList) {
             if (item.cid != null) {
               try {
                 Get.find<UgcIntroController>(
@@ -432,7 +432,7 @@ class VideoDetailController extends GetxController
                 (sourceType == SourceType.fav && args['isOwner'] == true)
             ? (item, index) async {
                 if (sourceType == SourceType.watchLater) {
-                  var res = await UserHttp.toViewDel(
+                  final res = await UserHttp.toViewDel(
                     aids: item.aid.toString(),
                   );
                   if (res['status']) {
@@ -440,7 +440,7 @@ class VideoDetailController extends GetxController
                   }
                   SmartDialog.showToast(res['msg']);
                 } else {
-                  var res = await FavHttp.favVideo(
+                  final res = await FavHttp.favVideo(
                     resources: '${item.aid}:${item.type}',
                     delIds: '${args['mediaId']}',
                   );
@@ -1066,7 +1066,7 @@ class VideoDetailController extends GetxController
     ).codes;
 
     VideoItem? video;
-    for (var i in videoList) {
+    for (final i in videoList) {
       final codec = i.codecs!;
       if (currentDecodeFormats.any(codec.startsWith)) {
         video = i;
@@ -1233,7 +1233,7 @@ class VideoDetailController extends GetxController
             : Pref.defaultAudioQaCellular;
     }
 
-    var result = await VideoHttp.videoUrl(
+    final result = await VideoHttp.videoUrl(
       cid: cid.value,
       bvid: bvid,
       epid: epId,
@@ -1479,7 +1479,7 @@ class VideoDetailController extends GetxController
     if (subtitle != null) {
       await setSub(subtitle);
     } else {
-      var result = await VideoHttp.vttSubtitles(
+      final result = await VideoHttp.vttSubtitles(
         subtitles[index - 1].subtitleUrl!,
       );
       if (result != null) {
@@ -1497,7 +1497,7 @@ class VideoDetailController extends GetxController
   Future<void> getSteinEdgeInfo([int? edgeId]) async {
     steinEdgeInfo = null;
     try {
-      var res = await Request().get(
+      final res = await Request().get(
         '/x/stein/edgeinfo_v2',
         queryParameters: {
           'bvid': bvid,
@@ -1525,7 +1525,7 @@ class VideoDetailController extends GetxController
     if (plPlayerController.showViewPoints) {
       viewPointList.clear();
     }
-    var res = await VideoHttp.playInfo(
+    final res = await VideoHttp.playInfo(
       bvid: bvid,
       cid: cid.value,
       seasonId: seasonId,
@@ -1725,7 +1725,7 @@ class VideoDetailController extends GetxController
   Future<void> _getDmTrend() async {
     dmTrend.value = LoadingState<List<double>>.loading();
     try {
-      var res = await Request().get(
+      final res = await Request().get(
         'https://bvc.bilivideo.com/pbp/data',
         queryParameters: {
           'bvid': bvid,
@@ -1793,7 +1793,7 @@ class VideoDetailController extends GetxController
   bool onSkipSegment() {
     try {
       if (plPlayerController.enableBlock) {
-        if (listData.lastOrNull case SegmentModel item) {
+        if (listData.lastOrNull case final SegmentModel item) {
           onSkip(item, isSeek: false);
           onRemoveItem(listData.indexOf(item), item);
           return true;

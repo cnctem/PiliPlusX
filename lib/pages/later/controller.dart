@@ -142,7 +142,7 @@ class LaterController extends MultiSelectController<LaterData, LaterItemModel>
       title: '确认',
       content: content,
       onConfirm: () async {
-        var res = await UserHttp.toViewClear(cleanType);
+        final res = await UserHttp.toViewClear(cleanType);
         if (res.isSuccess) {
           onReload();
           final restTypes = List<LaterViewType>.from(LaterViewType.values)

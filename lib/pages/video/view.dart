@@ -2110,7 +2110,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
           ..cid.refresh();
       } else {
         // switch to first episode
-        var episode = ugcIntroController
+        final episode = ugcIntroController
             .videoDetail
             .value
             .ugcSeason!
@@ -2136,7 +2136,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         videoDetailController.cid.refresh();
       } else {
         // switch to first episode
-        var episode = videoDetail.pages!.first;
+        final episode = videoDetail.pages!.first;
         if (episode.cid != videoDetailController.cid.value) {
           ugcIntroController.onChangeEpisode(episode);
         } else {

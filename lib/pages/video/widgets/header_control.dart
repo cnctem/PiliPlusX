@@ -43,7 +43,6 @@ import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
-import 'package:PiliPlus/utils/request_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
@@ -1101,33 +1100,36 @@ class HeaderControlState extends State<HeaderControl>
                               plPlayerController.superResolutionType.value,
                           child: Padding(
                             padding: const EdgeInsets.all(4),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  widget
-                                      .controller
-                                      .superResolutionType
-                                      .value
-                                      .title,
-                                  strutStyle: const StrutStyle(
-                                    leading: 0,
-                                    height: 1,
+                            child: Text.rich(
+                              style: TextStyle(
+                                height: 1,
+                                fontSize: 14,
+                                color: theme.colorScheme.secondary,
+                              ),
+                              strutStyle: const StrutStyle(
+                                leading: 0,
+                                height: 1,
+                                fontSize: 14,
+                              ),
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: widget
+                                        .controller
+                                        .superResolutionType
+                                        .value
+                                        .title,
                                   ),
-                                  style: TextStyle(
-                                    height: 1,
-                                    fontSize: 14,
-                                    color: theme.colorScheme.secondary,
+                                  WidgetSpan(
+                                    alignment: .middle,
+                                    child: Icon(
+                                      MdiIcons.unfoldMoreHorizontal,
+                                      size: 14,
+                                      color: theme.colorScheme.secondary,
+                                    ),
                                   ),
-                                ),
-                                Icon(
-                                  MdiIcons.unfoldMoreHorizontal,
-                                  size: MediaQuery.textScalerOf(
-                                    context,
-                                  ).scale(14),
-                                  color: theme.colorScheme.secondary,
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                           onSelected: (value) {
@@ -2890,7 +2892,7 @@ class HeaderControlState extends State<HeaderControl>
                     ),
                   ),
                 ),
-                if (introController case UgcIntroController ugc)
+                if (introController case final UgcIntroController ugc)
                   SizedBox(
                     width: 42,
                     height: 34,

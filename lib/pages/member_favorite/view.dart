@@ -88,7 +88,7 @@ class _MemberFavoriteState extends State<MemberFavorite>
                 ],
               )
             : HttpError(onReload: _controller.onReload),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: _controller.onReload,
       ),

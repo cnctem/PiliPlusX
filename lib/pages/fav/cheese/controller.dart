@@ -27,7 +27,7 @@ class FavCheeseController
       FavHttp.favPugv(mid: mid, page: page);
 
   Future<void> onRemove(int index, int sid) async {
-    var res = await FavHttp.delFavPugv(sid);
+    final res = await FavHttp.delFavPugv(sid);
     if (res.isSuccess) {
       loadingState
         ..value.data!.removeAt(index)

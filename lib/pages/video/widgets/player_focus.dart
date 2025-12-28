@@ -254,7 +254,7 @@ class PlayerFocus extends StatelessWidget {
             return true;
 
           case LogicalKeyboardKey.keyG:
-            if (introController case UgcIntroController ugcCtr) {
+            if (introController case final UgcIntroController ugcCtr) {
               ugcCtr.actionRelationMod(Get.context!);
             }
             return true;

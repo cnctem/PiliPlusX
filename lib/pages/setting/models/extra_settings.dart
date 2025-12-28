@@ -144,24 +144,26 @@ List<SettingsModel> get extraSettings => [
           initialValue: pgcSkipType,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  pgcSkipType.title,
-                  style: TextStyle(fontSize: 14, height: 1, color: color),
-                  strutStyle: const StrutStyle(
-                    leading: 0,
-                    height: 1,
-                    fontSize: 14,
+            child: Text.rich(
+              style: TextStyle(fontSize: 14, height: 1, color: color),
+              strutStyle: const StrutStyle(
+                leading: 0,
+                height: 1,
+                fontSize: 14,
+              ),
+              TextSpan(
+                children: [
+                  TextSpan(text: pgcSkipType.title),
+                  WidgetSpan(
+                    alignment: .middle,
+                    child: Icon(
+                      MdiIcons.unfoldMoreHorizontal,
+                      size: 14,
+                      color: color,
+                    ),
                   ),
-                ),
-                Icon(
-                  MdiIcons.unfoldMoreHorizontal,
-                  size: MediaQuery.textScalerOf(context).scale(14),
-                  color: color,
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           onSelected: (value) async {

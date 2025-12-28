@@ -60,7 +60,7 @@ List<SettingsModel> get privacySettings => [
 Widget _getAccountDetail(BuildContext context) {
   final slivers = <Widget>[];
   final theme = TextTheme.of(context);
-  for (var i in AccountType.values) {
+  for (final i in AccountType.values) {
     final url = ApiType.apiTypeSet[i];
     if (url == null) continue;
 

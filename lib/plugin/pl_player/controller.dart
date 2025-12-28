@@ -1036,7 +1036,7 @@ class PlPlayerController {
         );
 
         /// 触发回调事件
-        for (var element in _statusListeners) {
+        for (final element in _statusListeners) {
           element(event ? PlayerStatus.playing : PlayerStatus.paused);
         }
         if (videoPlayerController!.state.position.inSeconds != 0) {
@@ -1048,7 +1048,7 @@ class PlPlayerController {
           playerStatus.value = PlayerStatus.completed;
 
           /// 触发回调事件
-          for (var element in _statusListeners) {
+          for (final element in _statusListeners) {
             element(PlayerStatus.completed);
           }
         } else {
@@ -1065,7 +1065,7 @@ class PlPlayerController {
         }
 
         /// 触发回调事件
-        for (var element in _positionListeners) {
+        for (final element in _positionListeners) {
           element(event);
         }
         makeHeartBeat(event.inSeconds);
@@ -1395,7 +1395,7 @@ class PlPlayerController {
         _dataListenerForVideoFit = dataStatus.status.listen((status) {
           if (status == DataStatus.loaded) {
             _stopListenerForVideoFit();
-            var attr = VideoFitType.values[fitValue];
+            final attr = VideoFitType.values[fitValue];
             if (attr == VideoFitType.none || attr == VideoFitType.scaleDown) {
               videoFit.value = attr;
             }
@@ -1802,14 +1802,13 @@ class PlPlayerController {
       getVideoShot();
       return;
     }
-    if (videoShot case Success<VideoShotData> success) {
-      final data = success.response;
+    if (videoShot case Success(:final response)) {
       if (!showPreview.value) {
         showPreview.value = true;
       }
       previewIndex.value = max(
         0,
-        (data.index.where((item) => item <= seconds).length - 2),
+        (response.index.where((item) => item <= seconds).length - 2),
       );
     }
   }
@@ -1818,7 +1817,7 @@ class PlPlayerController {
     showPreview.value = false;
     previewIndex.value = null;
     videoShot = null;
-    for (var i in previewCache.values) {
+    for (final i in previewCache.values) {
       i?.dispose();
     }
     previewCache.clear();
@@ -1826,7 +1825,7 @@ class PlPlayerController {
 
   Future<void> getVideoShot() async {
     try {
-      var res = await Request().get(
+      final res = await Request().get(
         '/x/player/videoshot',
         queryParameters: {
           // 'aid': IdUtils.bv2av(_bvid),

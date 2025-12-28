@@ -52,7 +52,7 @@ class DynamicsTabController
       );
 
   Future<void> onRemove(int index, dynamic dynamicId) async {
-    var res = await MsgHttp.removeDynamic(dynIdStr: dynamicId);
+    final res = await MsgHttp.removeDynamic(dynIdStr: dynamicId);
     if (res.isSuccess) {
       loadingState
         ..value.data!.removeAt(index)

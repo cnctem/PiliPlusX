@@ -36,27 +36,30 @@ class PopupMenuText<T> extends StatelessWidget {
             }
           },
           itemBuilder: itemBuilder,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                getSelectTitle(select),
-                style: TextStyle(
-                  height: 1,
-                  fontSize: 14,
-                  color: secondary,
+          child: Text.rich(
+            style: TextStyle(
+              height: 1,
+              fontSize: 14,
+              color: secondary,
+            ),
+            strutStyle: const StrutStyle(
+              height: 1,
+              leading: 0,
+              fontSize: 14,
+            ),
+            TextSpan(
+              children: [
+                TextSpan(text: getSelectTitle(select)),
+                WidgetSpan(
+                  alignment: .middle,
+                  child: Icon(
+                    size: 14,
+                    MdiIcons.unfoldMoreHorizontal,
+                    color: secondary,
+                  ),
                 ),
-                strutStyle: const StrutStyle(
-                  height: 1,
-                  leading: 0,
-                ),
-              ),
-              Icon(
-                MdiIcons.unfoldMoreHorizontal,
-                size: MediaQuery.textScalerOf(context).scale(14),
-                color: secondary,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],

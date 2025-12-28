@@ -68,7 +68,7 @@ class _DownloadPageState extends State<DownloadPage> {
                   final allChecked = _controller.allChecked.toSet();
                   _controller.handleSelect();
                   final list = <BiliDownloadEntryInfo>[];
-                  for (var page in allChecked) {
+                  for (final page in allChecked) {
                     list.addAll(page.entries);
                   }
                   final res = await Future.wait(

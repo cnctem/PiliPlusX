@@ -17,7 +17,7 @@ class LiveIndexData {
       // my_idol_v1
       // area_entrance_v3
       // small_card_v1
-      for (var json in json['card_list']) {
+      for (final json in json['card_list']) {
         switch (json['card_type']) {
           case 'my_idol_v1':
             followItem = LiveCardList.fromJson(json);

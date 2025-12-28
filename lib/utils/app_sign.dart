@@ -28,7 +28,7 @@ abstract final class AppSign {
     List<MapEntry<String, dynamic /*String?|Iterable<String>*/>>
     queryParameters,
   ) {
-    var result = StringBuffer();
+    final result = StringBuffer();
     var separator = '';
 
     void writeParameter(String key, String? value) {
@@ -43,8 +43,8 @@ abstract final class AppSign {
       }
     }
 
-    for (var i in queryParameters) {
-      if (i.value case Iterable<String> values) {
+    for (final i in queryParameters) {
+      if (i.value case final Iterable<String> values) {
         for (final String value in values) {
           writeParameter(i.key, value);
         }

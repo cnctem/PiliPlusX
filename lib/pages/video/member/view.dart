@@ -80,7 +80,7 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
   Widget _buildUserPage(ThemeData theme, LoadingState userState) {
     return switch (userState) {
       Loading() => loadingWidget,
-      Success(:var response) => Column(
+      Success(:final response) => Column(
         children: [
           _buildUserInfo(theme, response),
           _buildHeader(theme),
@@ -108,7 +108,7 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
           ),
         ],
       ),
-      Error(:var errMsg) => scrollErrorWidget(
+      Error(:final errMsg) => scrollErrorWidget(
         controller: _controller.scrollController,
         errMsg: errMsg,
         onReload: () {
@@ -172,7 +172,7 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
         itemBuilder: (_, _) => const VideoCardHSkeleton(),
         itemExtent: 100,
       ),
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? SliverFixedExtentList.builder(
                 itemBuilder: (context, index) {
@@ -202,7 +202,7 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
                 itemExtent: 100,
               )
             : HttpError(onReload: _controller.onReload),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: _controller.onReload,
       ),

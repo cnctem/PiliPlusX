@@ -87,7 +87,7 @@ class _ReplyPageState extends CommonRichTextPubPageState<LiveSendDmPanel> {
 
   List<Widget> buildInputView(ThemeData theme) {
     return [
-      Container(
+      Padding(
         padding: const EdgeInsets.only(
           top: 12,
           right: 15,

@@ -57,7 +57,7 @@ class DynamicsDataModel {
       items = <DynamicItemModel>[];
       late final filterBan =
           type != DynamicsTabType.up && tempBannedList?.isNotEmpty == true;
-      for (var e in list) {
+      for (final e in list) {
         DynamicItemModel item = DynamicItemModel.fromJson(e);
         if (antiGoodsDyn &&
             (item.orig?.modules.moduleDynamic?.additional?.type ==
@@ -167,6 +167,7 @@ class ItemModulesModel {
   List<ArticleContentModel>? moduleContent;
   ModuleBlocked? moduleBlocked;
   ModuleFold? moduleFold;
+  ModuleInteraction? moduleInteraction;
 
   ItemModulesModel.fromJson(Map<String, dynamic> json) {
     moduleAuthor = json['module_author'] != null
@@ -183,6 +184,9 @@ class ItemModulesModel {
         : null;
     moduleFold = json['module_fold'] != null
         ? ModuleFold.fromJson(json['module_fold'])
+        : null;
+    moduleInteraction = json['module_interaction'] != null
+        ? ModuleInteraction.fromJson(json['module_interaction'])
         : null;
   }
 
@@ -231,6 +235,28 @@ class ItemModulesModel {
           break;
       }
     }
+  }
+}
+
+class ModuleInteraction {
+  List<ModuleInteractionItem>? items;
+
+  ModuleInteraction.fromJson(Map<String, dynamic> json) {
+    items = (json['items'] as List?)
+        ?.map((e) => ModuleInteractionItem.fromJson(e))
+        .toList();
+  }
+}
+
+class ModuleInteractionItem {
+  int? type;
+  DynamicDescModel? desc;
+
+  ModuleInteractionItem.fromJson(Map<String, dynamic> json) {
+    type = json['type'];
+    desc = json["desc"] == null
+        ? null
+        : DynamicDescModel.fromJson(json["desc"]);
   }
 }
 

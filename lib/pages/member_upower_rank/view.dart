@@ -173,7 +173,7 @@ class _UpowerRankPageState extends State<UpowerRankPage>
     late final width = MediaQuery.textScalerOf(context).scale(32);
     return switch (loadingState) {
       Loading() => linearLoading,
-      Success<List<UpowerRankInfo>?>(:var response) =>
+      Success<List<UpowerRankInfo>?>(:final response) =>
         response != null && response.isNotEmpty
             ? SliverList.builder(
                 itemCount: response.length,
@@ -242,7 +242,7 @@ class _UpowerRankPageState extends State<UpowerRankPage>
                 },
               )
             : HttpError(onReload: _controller.onReload),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: _controller.onReload,
       ),
