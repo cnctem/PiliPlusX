@@ -1204,13 +1204,13 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       if (item == null) {
         _suspendedDm?.suspend = false;
         _dmOffset.value = null;
-      } else if (item != _suspendedDm) {
+      } else if (item.$2 != _suspendedDm) {
         _suspendedDm?.suspend = false;
-        if (item.content.extra == null) {
+        if (item.$2.content.extra == null) {
           _dmOffset.value = null;
           return;
         }
-        _suspendedDm = item..suspend = true;
+        _suspendedDm = item.$2..suspend = true;
       }
     }
   }
@@ -2328,8 +2328,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     final overlayWidth = _actionItemWidth * (seekOffset == null ? 3 : 4);
 
     final dy = item.content.type == DanmakuItemType.bottom
-        ? maxHeight - item.yPosition - item.height
-        : item.yPosition;
+        ? maxHeight - offset.dy - item.height
+        : offset.dy;
     final top = dy + item.height + _triangleHeight + 2;
 
     final realLeft = dx + overlayWidth / 2;

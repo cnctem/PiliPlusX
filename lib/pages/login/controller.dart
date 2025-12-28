@@ -782,7 +782,7 @@ class LoginPageController extends GetxController
                   ),
                   TextButton(
                     onPressed: () {
-                      for (var (i, v) in selectAccount.indexed) {
+                      for (final (i, v) in selectAccount.indexed) {
                         if (selectAccount[0] != Accounts.accountMode[i]) {
                           Accounts.set(AccountType.values[i], selectAccount[0]);
                         }

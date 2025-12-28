@@ -194,7 +194,7 @@ SettingsModel getVideoFilterSelectModel({
               : '当前$title:「$value${suffix ?? ""}」'
         : null,
     onTap: (context, setState) async {
-      var result = await showDialog<int>(
+      final result = await showDialog<int>(
         context: context,
         builder: (context) {
           return SelectDialog<int>(
@@ -240,7 +240,8 @@ SettingsModel getVideoFilterSelectModel({
                   TextButton(
                     onPressed: () {
                       Get.back();
-                      result = int.tryParse(valueStr) ?? 0;
+                      final customResult = int.tryParse(valueStr) ?? 0;
+                      Navigator.of(context).pop(customResult);
                     },
                     child: const Text('确定'),
                   ),
@@ -274,7 +275,7 @@ SettingsModel getSaveImgPathModel({
     leading: const Icon(Icons.folder),
     getSubtitle: () => value,
     onTap: (context, setState) async {
-      var result = await showDialog<String>(
+      final result = await showDialog<String>(
         context: context,
         builder: (context) {
           return SelectDialog<String>(
@@ -291,8 +292,8 @@ SettingsModel getSaveImgPathModel({
         value = result!;
         setState();
         GStorage.setting.put(key1, result);
-        result = 'Pictures/$suffix/screenshot';
-        GStorage.setting.put(key2, result);
+        final screenshotResult = 'Pictures/$suffix/screenshot';
+        GStorage.setting.put(key2, screenshotResult);
         return;
       }
       if (result == 'Pictures/${Constants.appName}') {
