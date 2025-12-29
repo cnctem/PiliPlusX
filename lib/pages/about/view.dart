@@ -152,6 +152,18 @@ class _AboutPageState extends State<AboutPage> {
             ),
           ),
           ListTile(
+            onLongPress: () => Utils.copyText(currentVersion),
+            onSecondaryTap: PlatformUtils.isMobile
+                ? null
+                : () => Utils.copyText(currentVersion),
+            title: const Text('对应上游版本'),
+            leading: const Icon(Icons.commit_outlined),
+            trailing: Text(
+              versionName,
+              style: subTitleStyle,
+            ),
+          ),         
+          ListTile(
             title: Text(
               '''
 Build Time: ${DateFormatUtils.format(BuildConfig.buildTime, format: DateFormatUtils.longFormatDs)}
@@ -173,16 +185,16 @@ Commit Hash: ${BuildConfig.commitHash}''',
             color: theme.colorScheme.outlineVariant,
           ),
           ListTile(
-            onTap: () => PageUtils.launchURL(Constants.upstreamCodeUrl),
-            leading: const Icon(Icons.code),
-            title: const Text('Upstream Code'),
-            subtitle: Text(Constants.upstreamCodeUrl, style: subTitleStyle),
-          ),
-          ListTile(
             onTap: () => PageUtils.launchURL(Constants.sourceCodeUrl),
             leading: const Icon(Icons.code),
             title: const Text('Source Code'),
             subtitle: Text(Constants.sourceCodeUrl, style: subTitleStyle),
+          ),
+          ListTile(
+            onTap: () => PageUtils.launchURL(Constants.upstreamCodeUrl),
+            leading: const Icon(Icons.code),
+            title: const Text('Upstream Code'),
+            subtitle: Text(Constants.upstreamCodeUrl, style: subTitleStyle),
           ),
           if (Platform.isAndroid)
             ListTile(

@@ -27,7 +27,7 @@ android {
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        versionName = System.getenv("pili.tag") ?: flutter.versionName
     }
 
     packagingOptions.jniLibs.useLegacyPackaging = true
