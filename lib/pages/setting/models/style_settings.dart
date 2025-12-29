@@ -164,15 +164,18 @@ List<SettingsModel> get styleSettings => [
     onTap: (context, setState) async {
       final result = await Get.toNamed('/fontSizeSetting');
       if (result != null) {
-        Get.put(ColorSelectController()).currentTextScale.value = result;
+        Get.putOrFind(ColorSelectController.new).currentTextScale.value =
+            result;
       }
     },
     title: '字体大小',
     leading: const Icon(Icons.format_size_outlined),
     getSubtitle: () =>
-        Get.put(ColorSelectController()).currentTextScale.value == 1.0
+        Get.putOrFind(ColorSelectController.new).currentTextScale.value == 1.0
         ? '默认'
-        : Get.put(ColorSelectController()).currentTextScale.value.toString(),
+        : Get.putOrFind(
+            ColorSelectController.new,
+          ).currentTextScale.value.toString(),
   ),
   NormalModel(
     title: '页面过渡动画',
@@ -749,23 +752,6 @@ List<SettingsModel> get styleSettings => [
         },
       );
     },
-  ),
-  NormalModel(
-    onTap: (context, setState) async {
-      final result = await Get.toNamed('/fontSizeSetting');
-      if (result != null) {
-        Get.putOrFind(ColorSelectController.new).currentTextScale.value =
-            result;
-      }
-    },
-    title: '字体大小',
-    leading: const Icon(Icons.format_size_outlined),
-    getSubtitle: () =>
-        Get.putOrFind(ColorSelectController.new).currentTextScale.value == 1.0
-        ? '默认'
-        : Get.putOrFind(
-            ColorSelectController.new,
-          ).currentTextScale.value.toString(),
   ),
   NormalModel(
     onTap: (context, setState) => Get.toNamed(
