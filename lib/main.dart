@@ -97,9 +97,9 @@ void main() async {
 
   CacheManager.autoClearCache();
 
-  Future<void> initOrientation() async {
-    if (Platform.isAndroid || Platform.isIOS) {
-      await SystemChrome.setPreferredOrientations(
+  if (Utils.isMobile) {
+    await Future.wait([
+      SystemChrome.setPreferredOrientations(
         [
           DeviceOrientation.portraitUp,
           if (Pref.horizontalScreen) ...[
@@ -107,34 +107,13 @@ void main() async {
             DeviceOrientation.landscapeRight,
           ],
         ],
-      );
-      return;
-    }
-
-    if (Utils.isHarmony) {
-      final type = Utils.harmonyDeviceType;
-      if (type == 'phone') {
-        // Harmony 手机：若允许旋转则完全交给系统/传感器处理，否则锁竖屏
-        if (Pref.allowRotateScreen) {
-          await SystemChrome.setPreferredOrientations([]);
-        } else {
-          await SystemChrome.setPreferredOrientations(
-            [
-              DeviceOrientation.portraitUp,
-            ],
-          );
-        }
-        return;
-      }
-      // 平板 / 2in1 / pc 保持系统自动旋转，不做限制
-      await SystemChrome.setPreferredOrientations([]);
-    }
+      ),
+    ]);
   }
 
-  await Future.wait([
-    initOrientation(),
-    setupServiceLocator(),
-  ]);
+  if (Utils.isMobile || Utils.isHarmony) {
+    await setupServiceLocator();
+  }
 
   if (Platform.isWindows) {
     if (await WebViewEnvironment.getAvailableVersion() != null) {

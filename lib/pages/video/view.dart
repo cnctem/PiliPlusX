@@ -2038,6 +2038,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     heroTag: heroTag,
   );
 
+  // TODO 鸿蒙待适配 ai总结模板无法拖拽关闭
   // ai总结
   void showAiBottomSheet() {
     videoDetailController.childKey.currentState?.showBottomSheet(

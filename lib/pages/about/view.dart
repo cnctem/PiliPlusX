@@ -115,7 +115,7 @@ class _AboutPageState extends State<AboutPage> {
           ),
           ListTile(
             title: Text(
-              '${Constants.appName}(鸿蒙版)',
+              '${Constants.appName}${Utils.isHarmony ? '(鸿蒙版)' : ''}',
               textAlign: TextAlign.center,
               style: theme.textTheme.titleMedium!.copyWith(height: 2),
             ),

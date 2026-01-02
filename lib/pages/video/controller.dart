@@ -1314,7 +1314,7 @@ class VideoDetailController extends GetxController
         autoPlay.value = false;
         videoState.value = const Error('视频资源不存在');
         if (plPlayerController.isFullScreen.value) {
-          plPlayerController.setFullScreen(false);
+          plPlayerController.toggleFullScreen(false);
         }
         isQuerying = false;
         return;
@@ -1409,7 +1409,7 @@ class VideoDetailController extends GetxController
       autoPlay.value = false;
       videoState.value = result..toast();
       if (plPlayerController.isFullScreen.value) {
-        plPlayerController.setFullScreen(false);
+        plPlayerController.toggleFullScreen(false);
       }
     }
     isQuerying = false;

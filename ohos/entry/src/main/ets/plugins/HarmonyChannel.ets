@@ -1,8 +1,8 @@
 import { FlutterPlugin, FlutterPluginBinding, MethodCall, MethodChannel, MethodResult } from "@ohos/flutter_ohos";
-import deviceInfo from "@ohos.deviceInfo";
+import window from "@ohos.window";
 
 export default class HarmonyChannel implements FlutterPlugin {
-  private channel: MethodChannel | null = null;
+  private channel: MethodChannel | null = null
 
   getUniqueClassName(): string {
     return 'HarmonyChannel';
@@ -17,11 +17,26 @@ export default class HarmonyChannel implements FlutterPlugin {
     this.channel?.setMethodCallHandler(null);
   }
 
-  onMethodCall(call: MethodCall, result: MethodResult): void {
+  async onMethodCall(call: MethodCall, result: MethodResult): Promise<void> {
     switch (call.method) {
+      case 'setMiniWindowLandscape': {
+        const landscape: boolean = call.argument('landscape') ?? false;
+        await this.setMiniWindowLandscape(landscape);
+        result.success(true);
+        break;
+      }
       default:
         result.notImplemented();
         break;
+    }
+  }
+
+  private async setMiniWindowLandscape(landscape: boolean) {
+    const lastWindow = await window.getLastWindow(getContext());
+    if (landscape) {
+      lastWindow.enableLandscapeMultiWindow()
+    } else {
+      lastWindow.disableLandscapeMultiWindow()
     }
   }
 }
