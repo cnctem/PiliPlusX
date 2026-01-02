@@ -148,11 +148,29 @@ class _BottomControlState extends State<BottomControl> with HeaderMixin {
                     )
                     .toList();
               },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Text(
-                  plPlayerController.videoFit.value.desc,
-                  style: const TextStyle(color: Colors.white, fontSize: 13),
+              child: GestureDetector(
+                onLongPress: () {
+                  final currentFit = plPlayerController.videoFit.value;
+                  if (currentFit == VideoFitType.contain) {
+                    plPlayerController.toggleVideoFit(VideoFitType.cover);
+                  } else {
+                    plPlayerController.toggleVideoFit(VideoFitType.contain);
+                  }
+                },
+                onSecondaryTap: () {
+                  final currentFit = plPlayerController.videoFit.value;
+                  if (currentFit == VideoFitType.contain) {
+                    plPlayerController.toggleVideoFit(VideoFitType.cover);
+                  } else {
+                    plPlayerController.toggleVideoFit(VideoFitType.contain);
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Text(
+                    plPlayerController.videoFit.value.desc,
+                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                  ),
                 ),
               ),
             ),

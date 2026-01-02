@@ -589,11 +589,29 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 )
                 .toList();
           },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              plPlayerController.videoFit.value.desc,
-              style: const TextStyle(color: Colors.white, fontSize: 13),
+          child: GestureDetector(
+            onLongPress: () {
+              final currentFit = plPlayerController.videoFit.value;
+              if (currentFit == VideoFitType.contain) {
+                plPlayerController.toggleVideoFit(VideoFitType.cover);
+              } else {
+                plPlayerController.toggleVideoFit(VideoFitType.contain);
+              }
+            },
+            onSecondaryTap: () {
+              final currentFit = plPlayerController.videoFit.value;
+              if (currentFit == VideoFitType.contain) {
+                plPlayerController.toggleVideoFit(VideoFitType.cover);
+              } else {
+                plPlayerController.toggleVideoFit(VideoFitType.contain);
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                plPlayerController.videoFit.value.desc,
+                style: const TextStyle(color: Colors.white, fontSize: 13),
+              ),
             ),
           ),
         ),
@@ -743,6 +761,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           },
           child: GestureDetector(
             onLongPress: () {
+              final double currentSpeed = plPlayerController.playbackSpeed;
+              plPlayerController.setPlaybackSpeed(currentSpeed == 1.0 ? 2.0 : 1.0);
+            },
+            onSecondaryTap: () {
               final double currentSpeed = plPlayerController.playbackSpeed;
               plPlayerController.setPlaybackSpeed(currentSpeed == 1.0 ? 2.0 : 1.0);
             },
