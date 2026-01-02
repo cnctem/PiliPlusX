@@ -16,7 +16,13 @@
 
 因为这个分支只做移植适配工作，不考虑增加上游没有的功能或更改特性
 
-### 需要更多人参与适配，让鸿蒙版 PiliPlus 更快完善
+## 如何运行此项目到鸿蒙
+
+- 目前需要3.35.7版本的鸿蒙flutter
+
+- 其余步骤可参考[鸿蒙flutter仓库的教程](https://gitcode.com/openharmony-tpc/flutter_flutter/tree/oh-3.35.7-dev#flutter-sdk-%E4%BB%93%E5%BA%93)
+
+### 欢迎所有人参与适配，让PiliPlus在鸿蒙更快完善
 
 ## 感谢
 
