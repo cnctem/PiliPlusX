@@ -1,4 +1,3 @@
-import 'package:PiliPlus/harmony_adapt/radio_group.dart';
 import 'package:flutter/material.dart';
 
 class RadioWidget<T> extends StatefulWidget {
@@ -8,18 +7,6 @@ class RadioWidget<T> extends StatefulWidget {
   final EdgeInsetsGeometry? padding;
   final MainAxisSize mainAxisSize;
 
-  /// The selected value under this radio group.
-  ///
-  /// [RawRadio] under this radio group where its [RawRadio.value] equals to this
-  /// value will be selected.
-  final T? groupValue;
-
-  /// Called when selection has changed.
-  ///
-  /// The value can be null when unselect the [RawRadio] with
-  /// [RawRadio.toggleable] set to true.
-  final ValueChanged<T?> onChanged;
-
   const RadioWidget({
     super.key,
     required this.value,
@@ -27,8 +14,6 @@ class RadioWidget<T> extends StatefulWidget {
     this.tristate = false,
     this.padding,
     this.mainAxisSize = MainAxisSize.min,
-    this.groupValue,
-    required this.onChanged,
   });
 
   @override
@@ -85,10 +70,8 @@ class RadioWidgetState<T> extends State<RadioWidget<T>> with RadioClient<T> {
           descendantsAreTraversable: false,
           child: Radio<T>(
             value: radioValue,
-            // groupRegistry: _radioRegistry,
+            groupRegistry: _radioRegistry,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            groupValue: widget.groupValue,
-            onChanged: widget.onChanged,
           ),
         ),
         Text(widget.title),
@@ -109,25 +92,11 @@ class WrapRadioOptionsGroup<T> extends StatelessWidget {
   final Map<T, String> options;
   final EdgeInsetsGeometry? itemPadding;
 
-  /// The selected value under this radio group.
-  ///
-  /// [RawRadio] under this radio group where its [RawRadio.value] equals to this
-  /// value will be selected.
-  final T? groupValue;
-
-  /// Called when selection has changed.
-  ///
-  /// The value can be null when unselect the [RawRadio] with
-  /// [RawRadio.toggleable] set to true.
-  final ValueChanged<T?> onChanged;
-
   const WrapRadioOptionsGroup({
     super.key,
     required this.groupTitle,
     required this.options,
     this.itemPadding,
-    this.groupValue,
-    required this.onChanged,
   });
 
   @override
@@ -148,8 +117,6 @@ class WrapRadioOptionsGroup<T> extends StatelessWidget {
           child: Wrap(
             children: options.entries.map((entry) {
               return RadioWidget<T>(
-                groupValue: groupValue,
-                onChanged: onChanged,
                 value: entry.key,
                 title: entry.value,
                 padding: itemPadding ?? const EdgeInsets.only(right: 10),

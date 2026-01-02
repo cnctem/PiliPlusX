@@ -1,5 +1,4 @@
 import 'package:PiliPlus/common/widgets/radio_widget.dart';
-import 'package:PiliPlus/harmony_adapt/radio_group.dart';
 import 'package:PiliPlus/utils/extension.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -20,8 +19,7 @@ Future<void> autoWrapReportDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
-        // //  TODO 直接注释掉的代码 3.32.4-ohos-0.0.1不支持
-        // constraints: const BoxConstraints(minWidth: 280, maxWidth: 420),
+        constraints: const BoxConstraints(minWidth: 280, maxWidth: 420),
         title: const Text('举报'),
         titlePadding: const EdgeInsets.only(left: 22, top: 16, right: 22),
         contentPadding: const EdgeInsets.symmetric(vertical: 5),
@@ -60,11 +58,6 @@ Future<void> autoWrapReportDialog(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: options.entries.map((entry) {
                               return WrapRadioOptionsGroup<int>(
-                                onChanged: (value) {
-                                  reasonType = value;
-                                  (context as Element).markNeedsBuild();
-                                },
-                                groupValue: reasonType,
                                 groupTitle: entry.key,
                                 options: entry.value,
                               );

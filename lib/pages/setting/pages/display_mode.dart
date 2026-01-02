@@ -1,4 +1,3 @@
-import 'package:PiliPlus/harmony_adapt/radio_group.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
@@ -97,17 +96,6 @@ class _SetDisplayModeState extends State<SetDisplayMode> {
                     title: mode == DisplayMode.auto
                         ? const Text('自动')
                         : Text('$mode${mode == active ? '  [系统]' : ''}'),
-                    groupValue: preferred,
-                    onChanged: (DisplayMode? newMode) {
-                      FlutterDisplayMode.setPreferredMode(
-                        newMode!,
-                      ).whenComplete(
-                        () => Future.delayed(
-                          const Duration(milliseconds: 100),
-                          fetchAll,
-                        ),
-                      );
-                    },
                   );
                 },
               ),

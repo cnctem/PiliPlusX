@@ -1,25 +1,24 @@
 import { FlutterEngine, Log } from '@ohos/flutter_ohos';
-import FloatingPlugin from 'floating';
-import AudioSessionPlugin from 'audio_session';
-import InAppWebViewFlutterPlugin from 'flutter_inappwebview_ohos';
-import ImagePickerPlugin from 'image_picker_ohos';
-import PathProviderPlugin from 'path_provider_ohos';
-import UrlLauncherPlugin from 'url_launcher_ohos';
-import VideoPlayerPlugin from 'video_player_ohos';
-import DeviceInfoPlusOhosPlugin from 'device_info_plus';
-import SharePlusOhosPlugin from 'share_plus';
-import AudioServicePlugin from 'audio_service';
-import AutoOrientationPlugin from 'auto_orientation';
-import MediaKitLibsOhosPlugin from 'media_kit_libs_ohos';
-import MediaKitVideoPlugin from 'media_kit_video';
-import AppLinksOhosPlugin from 'app_links_ohos';
-import BatteryPlusOhosPlugin from 'battery_plus_ohos';
-import ConnectivityPlusOhosPlugin from 'connectivity_plus_ohos';
-import PackageInfoPlusPlugin from 'package_info_plus_ohos';
-import PermissionHandlerOhosPlugin from 'permission_handler_ohos';
-import SaverGalleryPlugin from 'saver_gallery';
-import ScreenBrightnessOhosPlugin from 'screen_brightness_ohos';
 import WakelockPlugin from 'wakelock_plus_ohos';
+import UrlLauncherPlugin from 'url_launcher_ohos';
+import SharePlusOhosPlugin from 'share_plus';
+import PathProviderPlugin from 'path_provider_ohos';
+import ScreenBrightnessOhosPlugin from 'screen_brightness_ohos';
+import SaverGalleryPlugin from 'saver_gallery';
+import PermissionHandlerOhosPlugin from 'permission_handler_ohos';
+import PackageInfoPlusPlugin from 'package_info_plus_ohos';
+import MediaKitVideoPlugin from 'media_kit_video';
+import MediaKitLibsOhosPlugin from 'media_kit_libs_ohos';
+import ImagePickerPlugin from 'image_picker_ohos';
+import InAppWebViewFlutterPlugin from 'flutter_inappwebview_ohos';
+import FloatingPlugin from 'floating';
+import DeviceInfoPlusOhosPlugin from 'device_info_plus';
+import ConnectivityPlusOhosPlugin from 'connectivity_plus_ohos';
+import BatteryPlusOhosPlugin from 'battery_plus_ohos';
+import AutoOrientationPlugin from 'auto_orientation';
+import AudioSessionPlugin from 'audio_session';
+import AudioServicePlugin from 'audio_service';
+import AppLinksOhosPlugin from 'app_links_ohos';
 
 /**
  * Generated file. Do not edit.
@@ -33,27 +32,26 @@ export class GeneratedPluginRegistrant {
 
   static registerWith(flutterEngine: FlutterEngine) {
     try {
-      flutterEngine.getPlugins()?.add(new FloatingPlugin());
-      flutterEngine.getPlugins()?.add(new AudioSessionPlugin());
-      flutterEngine.getPlugins()?.add(new InAppWebViewFlutterPlugin());
-      flutterEngine.getPlugins()?.add(new ImagePickerPlugin());
-      flutterEngine.getPlugins()?.add(new PathProviderPlugin());
-      flutterEngine.getPlugins()?.add(new UrlLauncherPlugin());
-      flutterEngine.getPlugins()?.add(new VideoPlayerPlugin());
-      flutterEngine.getPlugins()?.add(new DeviceInfoPlusOhosPlugin());
-      flutterEngine.getPlugins()?.add(new SharePlusOhosPlugin());
-      flutterEngine.getPlugins()?.add(new AudioServicePlugin());
-      flutterEngine.getPlugins()?.add(new AutoOrientationPlugin());
-      flutterEngine.getPlugins()?.add(new MediaKitLibsOhosPlugin());
-      flutterEngine.getPlugins()?.add(new MediaKitVideoPlugin());
-      flutterEngine.getPlugins()?.add(new AppLinksOhosPlugin());
-      flutterEngine.getPlugins()?.add(new BatteryPlusOhosPlugin());
-      flutterEngine.getPlugins()?.add(new ConnectivityPlusOhosPlugin());
-      flutterEngine.getPlugins()?.add(new PackageInfoPlusPlugin());
-      flutterEngine.getPlugins()?.add(new PermissionHandlerOhosPlugin());
-      flutterEngine.getPlugins()?.add(new SaverGalleryPlugin());
-      flutterEngine.getPlugins()?.add(new ScreenBrightnessOhosPlugin());
       flutterEngine.getPlugins()?.add(new WakelockPlugin());
+      flutterEngine.getPlugins()?.add(new UrlLauncherPlugin());
+      flutterEngine.getPlugins()?.add(new SharePlusOhosPlugin());
+      flutterEngine.getPlugins()?.add(new PathProviderPlugin());
+      flutterEngine.getPlugins()?.add(new ScreenBrightnessOhosPlugin());
+      flutterEngine.getPlugins()?.add(new SaverGalleryPlugin());
+      flutterEngine.getPlugins()?.add(new PermissionHandlerOhosPlugin());
+      flutterEngine.getPlugins()?.add(new PackageInfoPlusPlugin());
+      flutterEngine.getPlugins()?.add(new MediaKitVideoPlugin());
+      flutterEngine.getPlugins()?.add(new MediaKitLibsOhosPlugin());
+      flutterEngine.getPlugins()?.add(new ImagePickerPlugin());
+      flutterEngine.getPlugins()?.add(new InAppWebViewFlutterPlugin());
+      flutterEngine.getPlugins()?.add(new FloatingPlugin());
+      flutterEngine.getPlugins()?.add(new DeviceInfoPlusOhosPlugin());
+      flutterEngine.getPlugins()?.add(new ConnectivityPlusOhosPlugin());
+      flutterEngine.getPlugins()?.add(new BatteryPlusOhosPlugin());
+      flutterEngine.getPlugins()?.add(new AutoOrientationPlugin());
+      flutterEngine.getPlugins()?.add(new AudioSessionPlugin());
+      flutterEngine.getPlugins()?.add(new AudioServicePlugin());
+      flutterEngine.getPlugins()?.add(new AppLinksOhosPlugin());
     } catch (e) {
       Log.e(
         TAG,

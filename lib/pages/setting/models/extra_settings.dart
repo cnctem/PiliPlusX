@@ -7,7 +7,6 @@ import 'package:PiliPlus/common/widgets/image/custom_grid_view.dart'
     show CustomGridView, ImageModel;
 import 'package:PiliPlus/common/widgets/pendant_avatar.dart';
 import 'package:PiliPlus/grpc/reply.dart';
-import 'package:PiliPlus/harmony_adapt/radio_group.dart';
 import 'package:PiliPlus/http/fav.dart';
 import 'package:PiliPlus/models/common/audio_normalization.dart';
 import 'package:PiliPlus/models/common/dynamic/dynamics_type.dart';
@@ -816,12 +815,6 @@ List<SettingsModel> get extraSettings => [
                         dense: true,
                         title: Text(item.title),
                         value: item.id,
-                        groupValue: quickFavId,
-                        onChanged: (value) {
-                          Get.back();
-                          GStorage.setting.put(SettingBoxKey.quickFavId, value);
-                          SmartDialog.showToast('设置成功');
-                        },
                       );
                     }).toList(),
                   ),

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:PiliPlus/harmony_adapt/radio_group.dart';
 import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/http/ua_type.dart';
 import 'package:PiliPlus/http/video.dart';
@@ -35,10 +34,9 @@ class SelectDialog<T> extends StatelessWidget {
     return AlertDialog(
       clipBehavior: Clip.hardEdge,
       title: Text(title),
-      // //  TODO 直接注释掉的代码 3.32.4-ohos-0.0.1不支持
-      // constraints: subtitleBuilder != null
-      //     ? const BoxConstraints(maxWidth: 320, minWidth: 320)
-      //     : null,
+      constraints: subtitleBuilder != null
+          ? const BoxConstraints(maxWidth: 320, minWidth: 320)
+          : null,
       contentPadding: const EdgeInsets.symmetric(vertical: 12),
       content: Material(
         type: MaterialType.transparency,
@@ -61,8 +59,6 @@ class SelectDialog<T> extends StatelessWidget {
                       style: titleMedium,
                     ),
                     subtitle: subtitleBuilder?.call(context, index),
-                    groupValue: value,
-                    onChanged: (v) => Navigator.of(context).pop(v ?? value),
                   );
                 },
               ),
