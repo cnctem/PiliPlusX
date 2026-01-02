@@ -741,12 +741,18 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 )
                 .toList();
           },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              "${plPlayerController.playbackSpeed}X",
-              style: const TextStyle(color: Colors.white, fontSize: 13),
-              semanticsLabel: "${plPlayerController.playbackSpeed}倍速",
+          child: GestureDetector(
+            onLongPress: () {
+              final double currentSpeed = plPlayerController.playbackSpeed;
+              plPlayerController.setPlaybackSpeed(currentSpeed == 1.0 ? 2.0 : 1.0);
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                "${plPlayerController.playbackSpeed}X",
+                style: const TextStyle(color: Colors.white, fontSize: 13),
+                semanticsLabel: "${plPlayerController.playbackSpeed}倍速",
+              ),
             ),
           ),
         ),
