@@ -78,8 +78,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
       this,
       ModalRoute.of(context)! as PageRoute,
     );
-    final bool miniWindow = plPlayerController.isMiniWindow;
-    padding = miniWindow ? EdgeInsets.zero : MediaQuery.viewPaddingOf(context);
+    padding = MediaQuery.viewPaddingOf(context);
     final size = MediaQuery.sizeOf(context);
     maxWidth = size.width;
     maxHeight = size.height;
@@ -184,16 +183,6 @@ class _LiveRoomPageState extends State<LiveRoomPage>
 
   @override
   Widget build(BuildContext context) {
-    // 实时获取窗口尺寸与方向，避免小窗旋转后仍沿用旧的纵横信息
-    final size = MediaQuery.sizeOf(context);
-    maxWidth = size.width;
-    maxHeight = size.height;
-    isPortrait = size.isPortrait;
-
-    // Mini-window 场景不需要系统安全区，否则会出现顶部留黑
-    padding = plPlayerController.isMiniWindow
-        ? EdgeInsets.zero
-        : MediaQuery.viewPaddingOf(context);
     Widget child;
     if ((Platform.isAndroid || Utils.isHarmony) && Floating().isPipMode) {
       child = videoPlayerPanel(
@@ -213,16 +202,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
         child: child,
       );
     }
-    return plPlayerController.isMiniWindow
-        ? MediaQuery.removeViewPadding(
-            context: context,
-            removeTop: true,
-            removeBottom: true,
-            removeLeft: true,
-            removeRight: true,
-            child: child,
-          )
-        : child;
+    return child;
   }
 
   Widget videoPlayerPanel(
@@ -382,15 +362,8 @@ class _LiveRoomPageState extends State<LiveRoomPage>
 
   Widget get childWhenDisabled {
     return Obx(() {
-      // Harmony 小窗下也视作全屏，避免保留顶栏/底栏产生黑条
-      final isFullScreen = this.isFullScreen ||
-          plPlayerController.isDesktopPip ||
-          plPlayerController.isMiniWindow;
-      final mediaSize = MediaQuery.sizeOf(context);
-      final bool miniBySize =
-          maxHeight < mediaSize.height * 0.9 || maxWidth < mediaSize.width * 0.9;
-      final bool mini = plPlayerController.isMiniWindow || miniBySize;
-      Widget stack = Stack(
+      final isFullScreen = this.isFullScreen || plPlayerController.isDesktopPip;
+      return Stack(
         clipBehavior: Clip.none,
         children: [
           const SizedBox.expand(child: ColoredBox(color: Colors.black)),
@@ -424,8 +397,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
           Scaffold(
             resizeToAvoidBottomInset: false,
             backgroundColor: Colors.transparent,
-            // 小窗模式下移除 AppBar，防止保留系统栏导致黑条
-            appBar: mini ? null : _buildAppBar(isFullScreen),
+            appBar: _buildAppBar(isFullScreen),
             body: isPortrait
                 ? Obx(
                     () {
@@ -439,17 +411,6 @@ class _LiveRoomPageState extends State<LiveRoomPage>
           ),
         ],
       );
-      if (mini) {
-        stack = MediaQuery.removeViewPadding(
-          context: context,
-          removeTop: true,
-          removeLeft: true,
-          removeRight: true,
-          removeBottom: true,
-          child: stack,
-        );
-      }
-      return stack;
     });
   }
 

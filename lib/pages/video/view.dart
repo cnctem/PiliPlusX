@@ -152,6 +152,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     }
 
     videoSourceInit();
+    autoScreen();
 
     WidgetsBinding.instance.addObserver(this);
   }
@@ -200,27 +201,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       introController.cancelTimer();
       ctr.showDanmaku = false;
     }
-  }
-
-  // 兜底：窗口尺寸变化时根据宽高比推送方向，避免原生事件取不到横屏
-  Orientation? _lastMetricsOrientation;
-  double? _baselineArea;
-  @override
-  void didChangeMetrics() {
-    super.didChangeMetrics();
-    if (!Utils.isHarmony) return;
-    final view = WidgetsBinding.instance.platformDispatcher.views.first;
-    final size = view.physicalSize;
-    final area = size.width * size.height;
-    // 记录初始窗口面积作为基准，进入小窗时面积骤减，跳过方向推送以免打断小窗内部的方向逻辑
-    _baselineArea ??= area;
-    plPlayerController?.refreshTextSizes();
-    if (area < _baselineArea! * 0.8) return;
-    final o =
-        size.width > size.height ? Orientation.landscape : Orientation.portrait;
-    if (_lastMetricsOrientation == o) return;
-    _lastMetricsOrientation = o;
-    plPlayerController?.handleDeviceOrientation(o);
   }
 
   void playCallBack() {
@@ -1406,17 +1386,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   @override
   Widget build(BuildContext context) {
-    final mediaSize = MediaQuery.sizeOf(context);
-    final bool miniWindowBySize =
-        maxHeight < mediaSize.height * 0.9 || maxWidth < mediaSize.width * 0.9;
-
-    // 在小窗模式下，系统状态栏/安全区会导致上方出现黑条。
-    // 此处对 padding 重新赋值：小窗时去掉安全区，非小窗保持原始值。
-    final bool miniWindow =
-        videoDetailController.plPlayerController.isMiniWindow ||
-            miniWindowBySize;
-    padding = miniWindow ? EdgeInsets.zero : MediaQuery.viewPaddingOf(context);
-
     Widget child;
     if (videoDetailController.plPlayerController.isPipMode) {
       child = plPlayer(width: maxWidth, height: maxHeight, isPipMode: true);
@@ -1445,19 +1414,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         child: child,
       );
     }
-
-    // 小窗场景彻底移除系统安全区，避免顶部残留黑条或内容下移
-    if (miniWindow) {
-      child = MediaQuery.removeViewPadding(
-        context: context,
-        removeTop: true,
-        removeLeft: true,
-        removeRight: true,
-        removeBottom: true,
-        child: child,
-      );
-    }
-
     return videoDetailController.plPlayerController.darkVideoPage
         ? Theme(data: themeData, child: child)
         : child;

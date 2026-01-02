@@ -5,6 +5,7 @@ import 'dart:math' show max, min;
 import 'dart:ui' as ui;
 
 import 'package:PiliPlus/common/constants.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_volume.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -64,9 +65,6 @@ import 'package:window_manager/window_manager.dart';
 class PlPlayerController {
   Player? _videoPlayerController;
   VideoController? _videoController;
-  static const MethodChannel _bgChannel = MethodChannel(
-    'com.piliplus/background',
-  );
 
   // 添加一个私有静态变量来保存实例
   static PlPlayerController? _instance;
@@ -109,7 +107,9 @@ class PlPlayerController {
   late final RxDouble _longPressSpeed = Pref.longPressSpeedDefault.obs;
 
   /// 音量控制条
-  final RxDouble volume = RxDouble(Utils.isDesktop ? Pref.desktopVolume : 1.0);
+  final RxDouble volume = RxDouble(
+    Utils.isDesktop ? Pref.desktopVolume : 1.0,
+  );
   final setSystemBrightness = Pref.setSystemBrightness;
 
   /// 亮度控制条
@@ -436,45 +436,18 @@ class PlPlayerController {
   // 播放顺序相关
   late PlayRepeat playRepeat = PlayRepeat.values[Pref.playRepeat];
 
-  // 字幕基准字号（与安卓原版一致）
-  // TextStyle get subTitleStyle => TextStyle(
-  //   height: 1.5,
-  //   // 小窗字号不再额外折半，保持与当前场景一致
-  //   fontSize: 16 *
-  //       (isFullScreen.value ? subtitleFontScaleFS : subtitleFontScale),
-  //   letterSpacing: 0.1,
-  //   wordSpacing: 0.1,
-  //   color: Colors.white,
-  //   fontWeight: FontWeight.values[subtitleFontWeight],
-  //   backgroundColor:
-  //       subtitleBgOpacity == 0
-  //           ? null
-  //           : Colors.black.withValues(alpha: subtitleBgOpacity),
-  // );
-
-  TextStyle get subTitleStyle {
-    final bool isMobile = Utils.isMobile;
-    final bool isTablet = Pref.isTablet;
-    final bool isPhone = isMobile && !isTablet;
-    final bool fs = isFullScreen.value;
-    final bool mini = _isMiniWindow;
-
-    final double scale = isPhone
-        ? ((fs && !mini) ? subtitleFontScaleFS : subtitleFontScale) // 手机：小窗永远普通
-        : (fs ? subtitleFontScaleFS : subtitleFontScale); // 平板/桌面：全屏永远FS
-
-    return TextStyle(
-      height: 1.5,
-      fontSize: 16 * scale * _subtitleMiniFactor,
-      letterSpacing: 0.1,
-      wordSpacing: 0.1,
-      color: Colors.white,
-      fontWeight: FontWeight.values[subtitleFontWeight],
-      backgroundColor: subtitleBgOpacity == 0
-          ? null
-          : Colors.black.withValues(alpha: subtitleBgOpacity),
-    );
-  }
+  TextStyle get subTitleStyle => TextStyle(
+    height: 1.5,
+    fontSize:
+        16 * (isFullScreen.value ? subtitleFontScaleFS : subtitleFontScale),
+    letterSpacing: 0.1,
+    wordSpacing: 0.1,
+    color: Colors.white,
+    fontWeight: FontWeight.values[subtitleFontWeight],
+    backgroundColor: subtitleBgOpacity == 0
+        ? null
+        : Colors.black.withValues(alpha: subtitleBgOpacity),
+  );
 
   late final Rx<SubtitleViewConfiguration> subtitleConfig = _getSubConfig.obs;
 
@@ -482,32 +455,30 @@ class PlPlayerController {
     final subTitleStyle = this.subTitleStyle;
     return SubtitleViewConfiguration(
       style: subTitleStyle,
+      // TODO 鸿蒙待适配 strokeStyle media_kit
+      // strokeStyle: subtitleBgOpacity == 0
+      //     ? subTitleStyle.copyWith(
+      //         color: null,
+      //         background: null,
+      //         backgroundColor: null,
+      //         foreground: Paint()
+      //           ..color = Colors.black
+      //           ..style = PaintingStyle.stroke
+      //           ..strokeWidth = subtitleStrokeWidth,
+      //       )
+      //     : null,
       padding: EdgeInsets.only(
         left: subtitlePaddingH.toDouble(),
         right: subtitlePaddingH.toDouble(),
         bottom: subtitlePaddingB.toDouble(),
       ),
       // 固定文本缩放，防止在大屏上被自动缩小
-      textScaler: const TextScaler.linear(1),
+      textScaler: TextScaler.noScaling,
     );
   }
 
   void updateSubtitleStyle() {
     subtitleConfig.value = _getSubConfig;
-  }
-
-  /// 根据当前窗口尺寸刷新字幕/弹幕字号
-  void refreshTextSizes() {
-    updateSubtitleStyle();
-    final ctr = danmakuController;
-    if (ctr != null) {
-      final isFs = isFullScreen.value;
-      ctr.updateOption(
-        ctr.option.copyWith(
-          fontSize: _danmakuFontSize(isFullScreen: isFs),
-        ),
-      );
-    }
   }
 
   void onUpdatePadding(EdgeInsets padding) {
@@ -564,13 +535,6 @@ class PlPlayerController {
     return _instance?.playerStatus.value;
   }
 
-  Future<void> _syncHarmonyBgRunning(bool enable) async {
-    if (!Utils.isHarmony) return;
-    try {
-      await _bgChannel.invokeMethod('enableBackground', {'enable': enable});
-    } catch (_) {}
-  }
-
   static Future<void> pauseIfExists({
     bool notify = true,
     bool isInterrupt = false,
@@ -603,14 +567,8 @@ class PlPlayerController {
       enableHeart = false;
     }
 
-    // 记录初始窗口面积，用于判断是否处于小窗（面积显著缩小时）
-    final size = ui.window.physicalSize;
-    _baselineArea ??= size.width * size.height;
-
     if (autoPiP) {
-      if (Utils.isHarmony) {
-        _shouldSetPip = true;
-      } else if (Platform.isAndroid) {
+      if (Platform.isAndroid) {
         Utils.sdkInt.then((sdkInt) {
           if (sdkInt < 31) {
             Utils.channel.setMethodCallHandler((call) async {
@@ -624,6 +582,8 @@ class PlPlayerController {
             _shouldSetPip = true;
           }
         });
+      } else if (Utils.isHarmony) {
+        _shouldSetPip = true;
       }
     }
   }
@@ -852,10 +812,6 @@ class PlPlayerController {
             logLevel: kDebugMode ? MPVLogLevel.warn : MPVLogLevel.error,
           ),
         );
-    // 初次创建播放器时，根据后台播放开关同步 Harmony 后台任务状态
-    if (_videoPlayerController == null) {
-      _syncHarmonyBgRunning(continuePlayInBackground.value);
-    }
     final pp = player.platform!.maybeAsNativePlayer;
     if (_videoPlayerController == null) {
       if (Utils.isDesktop) {
@@ -926,10 +882,14 @@ class PlPlayerController {
         audioNormalization = audioNormalization.replaceFirstMapped(
           loudnormRegExp,
           (i) =>
-              'loudnorm=${volume.format(Map.fromEntries(i.group(1)!.split(':').map((item) {
-                final parts = item.split('=');
-                return MapEntry(parts[0].toLowerCase(), num.parse(parts[1]));
-              })))}',
+              'loudnorm=${volume.format(
+                Map.fromEntries(
+                  i.group(1)!.split(':').map((item) {
+                    final parts = item.split('=');
+                    return MapEntry(parts[0].toLowerCase(), num.parse(parts[1]));
+                  }),
+                ),
+              )}',
         );
       } else {
         audioNormalization = audioNormalization.replaceFirst(
@@ -1060,17 +1020,6 @@ class PlPlayerController {
   Set<StreamSubscription> subscriptions = {};
   final Set<Function(Duration position)> _positionListeners = {};
   final Set<Function(PlayerStatus status)> _statusListeners = {};
-  bool _rotationUnlocked = false;
-  bool _manualFsLock = false; // 手动全屏后，等待首次横屏再允许自动退出
-  bool _manualLandscapeOnly = false;
-
-  void enableAutoRotationOnce() {
-    if (_rotationUnlocked) return;
-    _rotationUnlocked = true;
-    if (allowRotateScreen) {
-      unawaited(autoScreen());
-    }
-  }
 
   /// 播放事件监听
   void startListeners() {
@@ -1079,9 +1028,6 @@ class PlPlayerController {
       controllerStream.playing.listen((event) {
         WakelockPlus.toggle(enable: event);
         if (event) {
-          if (Utils.isHarmony) {
-            enableAutoRotationOnce();
-          }
           if (_shouldSetPip) {
             if (_isCurrVideoPage) {
               enterPip(isAuto: true);
@@ -1233,61 +1179,6 @@ class PlPlayerController {
         }),
       ],
     };
-
-    // Harmony 手机/平板：监听方向流，自动进入/退出全屏
-    if (Utils.isHarmony && !Utils.isDesktop) {
-      final sub = harmonyOrientationStream().listen((event) {
-        if (!_rotationUnlocked) return;
-        // 原生返回 rotation 数字或 orientation 字符串，先兼容两种
-        final oriVal = event['orientation'];
-        final rotVal = event['rotation'];
-        String? orientation;
-        if (oriVal is String) {
-          orientation = oriVal;
-        } else if (oriVal is num) {
-          orientation = oriVal % 2 == 1 ? 'landscape' : 'portrait';
-        } else {
-          return;
-        }
-        // 手动横屏全屏时，忽略竖屏方向，保持左右横向；自动全屏不受限
-        if (_manualLandscapeOnly) {
-          if (orientation == 'portrait') return;
-          // 仅限左右横屏：忽略非 90/270（即 rot=2 倒竖）也屏蔽
-          if (rotVal is num && rotVal.toInt() == 2) return;
-        }
-
-        if (_manualLandscapeOnly && orientation == 'portrait') {
-          return;
-        }
-
-        // 仅在播放或暂停且资源已加载后响应，避免未就绪时误触
-        final playingOrPaused =
-            playerStatus.value == PlayerStatus.playing ||
-            playerStatus.value == PlayerStatus.paused;
-        if (!playingOrPaused || dataStatus.status.value != DataStatus.loaded) {
-          return;
-        }
-
-        final mode = FullScreenMode.values[Pref.fullScreenMode];
-        if (mode == FullScreenMode.none) return;
-
-        final videoIsVertical = isVertical;
-
-        if (orientation == 'landscape' &&
-            !videoIsVertical &&
-            !isFullScreen.value) {
-          triggerFullScreen(status: true, isManualFS: false);
-        } else if (orientation == 'portrait' &&
-            isFullScreen.value &&
-            !horizontalScreen &&
-            !isManualFS) {
-          // 只有自动进入的全屏才自动退出，避免手动全屏被瞬间打断
-
-          triggerFullScreen(status: false, isManualFS: false);
-        }
-      });
-      subscriptions.add(sub);
-    }
   }
 
   /// 移除事件监听
@@ -1383,68 +1274,6 @@ class PlPlayerController {
     _playbackSpeed.value = playSpeedDefault;
   }
 
-  double? _baselineArea;
-  bool get _isMiniWindow {
-    // 当前窗口面积
-    final size = ui.window.physicalSize;
-    final area = size.width * size.height;
-
-    // 使用物理屏幕面积作为基准，避免在小窗首次计算时基准过小
-    try {
-      final view = ui.PlatformDispatcher.instance.views.first;
-      final display = view.display;
-      final screenSize = display.size;
-      final screenArea = screenSize.width * screenSize.height;
-      if (screenArea > 0) {
-        _baselineArea = max(_baselineArea ?? 0, screenArea);
-      }
-    } catch (_) {
-      _baselineArea = max(_baselineArea ?? 0, area);
-    }
-
-    // Harmony 平板小窗缩放比例相对较小，放宽判定阈值
-    final factor = Utils.isHarmony ? 0.95 : 0.8;
-    final baseline = _baselineArea ?? area;
-    return area < baseline * factor;
-  }
-
-  bool get isMiniWindow => _isMiniWindow;
-  double get _subtitleMiniFactor => 1;
-  double _danmakuFontSize({required bool isFullScreen}) {
-    final bool isMobile = Utils.isMobile;
-    final bool isTablet = Pref.isTablet;
-    final bool isPhone = isMobile && !isTablet;
-    final bool mini = _isMiniWindow;
-    final double baseScale = isPhone
-        ? ((isFullScreen && !mini)
-              ? danmakuFontScaleFS
-              : danmakuFontScale) // 手机：小窗永远普通字号
-        : (isFullScreen
-              ? danmakuFontScaleFS
-              : danmakuFontScale); // 平板/桌面：全屏使用全屏字号
-    return 15 * baseScale;
-  }
-
-  // 提供给外部（如页面尺寸变化）调用的方向处理，便于自动全屏/退出
-  void handleDeviceOrientation(Orientation orientation) {
-    if (!Utils.isHarmony) return;
-    // 小窗模式下不响应自动全屏/退出
-    if (_isMiniWindow) return;
-    // 简化：横屏则尝试全屏，竖屏则尝试退出
-    final mode = FullScreenMode.values[Pref.fullScreenMode];
-    if (mode == FullScreenMode.none) return;
-    final videoIsVertical = isVertical;
-    if (orientation == Orientation.landscape &&
-        !videoIsVertical &&
-        !isFullScreen.value) {
-      triggerFullScreen(status: true, isManualFS: false);
-    } else if (orientation == Orientation.portrait &&
-        isFullScreen.value &&
-        !horizontalScreen) {
-      triggerFullScreen(status: false, isManualFS: false);
-    }
-  }
-
   /// 播放视频
   Future<void> play({bool repeat = false, bool hideControls = true}) async {
     if (_playerCount == 0) return;
@@ -1532,7 +1361,7 @@ class PlPlayerController {
           // 鸿蒙pc也按应用内音量设置
           _videoPlayerController!.setVolume(volume * 100);
         } else if (Utils.isHarmony) {
-          // 否则，鸿蒙手机和平板，按系统音量设置
+          // 否则如果是鸿蒙手机和平板，按系统音量设置
           HarmonyVolumeView.cntlr?.setVolume(volume);
         } else {
           FlutterVolumeController.updateShowSystemUI(false);
@@ -1712,22 +1541,19 @@ class PlPlayerController {
     controls = !val;
   }
 
-  void setFullScreen(bool val) {
+  void toggleFullScreen(bool val) {
     isFullScreen.value = val;
-    if (val) {
-      // 进入全屏，鸿蒙小窗横屏已单独判断
-      // TODO 解决鸿蒙小窗的顶部沉浸问题
-      // Harmony 场景：仅横屏视频才开启小窗横屏能力，竖屏视频保持竖屏
-      if (!isVertical) {
-        setHarmonyMiniWindowLandscape(true);
-      } else {
-        setHarmonyMiniWindowLandscape(false);
-      }
-    } else {
-      // 退出全屏，应该、大概、肯定要取消鸿蒙小窗横屏
-      setHarmonyMiniWindowLandscape(false);
-    }
     updateSubtitleStyle();
+    if (!Utils.isHarmony) return;
+    // 鸿蒙小窗适配方向
+    // TODO 解决鸿蒙小窗的顶部沉浸问题
+    if (val && isVertical) {
+      // 进入全屏且横屏，设置小窗横屏
+      HarmonyChannel.setMiniWindowLandscape(true);
+    } else {
+      // 否则鸿蒙小窗横屏
+      HarmonyChannel.setMiniWindowLandscape(false);
+    }
   }
 
   late bool isManualFS = true;
@@ -1752,9 +1578,8 @@ class PlPlayerController {
     try {
       mode ??= this.mode;
       this.isManualFS = isManualFS;
+
       if (status) {
-        _manualFsLock = isManualFS;
-        _manualLandscapeOnly = isManualFS && !isVertical;
         if (Utils.isMobile) {
           hideStatusBar();
           if (mode == FullScreenMode.none) {
@@ -1769,23 +1594,21 @@ class PlPlayerController {
               (mode == FullScreenMode.auto && isVertical) ||
               (mode == FullScreenMode.ratio &&
                   (isVertical || size.height / size.width < kScreenRatio)))) {
-            await verticalScreenForTwoSeconds(forcePortrait: false);
+            await verticalScreenForTwoSeconds();
           } else {
-            await landscape(forceLandscape: isManualFS);
+            await landscape();
           }
         } else {
           await enterDesktopFullscreen(inAppFullScreen: inAppFullScreen);
         }
       } else {
-        _manualFsLock = false;
-        _manualLandscapeOnly = false;
         if (Utils.isMobile) {
           showStatusBar();
           if (mode == FullScreenMode.none) {
             return;
           }
           if (!horizontalScreen) {
-            await verticalScreenForTwoSeconds(forcePortrait: true);
+            await verticalScreenForTwoSeconds();
           } else {
             await autoScreen();
           }
@@ -1794,7 +1617,7 @@ class PlPlayerController {
         }
       }
     } finally {
-      setFullScreen(status);
+      toggleFullScreen(status);
       fsProcessing = false;
     }
   }
@@ -1954,7 +1777,6 @@ class PlPlayerController {
     _videoController = null;
     _instance = null;
     videoPlayerServiceHandler?.clear();
-    await _syncHarmonyBgRunning(false);
   }
 
   static void updatePlayCount() {
@@ -1973,11 +1795,6 @@ class PlPlayerController {
         continuePlayInBackground.value,
       );
     }
-    _syncHarmonyBgRunning(continuePlayInBackground.value);
-  }
-
-  Future<void> ensureBgRunningIfNeeded() async {
-    await _syncHarmonyBgRunning(continuePlayInBackground.value);
   }
 
   void setOnlyPlayAudio() {

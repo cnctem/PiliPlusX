@@ -6,8 +6,6 @@ import 'package:PiliPlus/pages/danmaku/danmaku_model.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/utils/danmaku_utils.dart';
-import 'package:PiliPlus/utils/storage_pref.dart';
-import 'package:PiliPlus/utils/utils.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -79,28 +77,9 @@ class _PlDanmakuState extends State<PlDanmaku> {
     );
   }
 
-  double get _fontSize {
-    // PIP 下始终用普通字号
-    if (widget.isPipMode) {
-      return 15 * playerController.danmakuFontScale;
-    }
-
-    final bool isMobile = Utils.isMobile;
-    final bool isTablet = Pref.isTablet;
-    final bool isPhone = isMobile && !isTablet;
-    final bool mini = playerController.isMiniWindow;
-    final bool fs = widget.isFullScreen;
-
-    final double base = isPhone
-        ? ((fs && !mini)
-            ? playerController.danmakuFontScaleFS
-            : playerController.danmakuFontScale) // 手机：小窗永远普通字号
-        : (fs
-            ? playerController.danmakuFontScaleFS
-            : playerController.danmakuFontScale); // 平板/桌面：全屏使用全屏字号
-
-    return 15 * base;
-  }
+  double get _fontSize => !widget.isFullScreen || widget.isPipMode
+      ? 15 * playerController.danmakuFontScale
+      : 15 * playerController.danmakuFontScaleFS;
 
   // 播放器状态监听
   void playerListener(PlayerStatus? status) {

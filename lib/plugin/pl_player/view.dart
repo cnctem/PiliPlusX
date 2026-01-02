@@ -286,44 +286,43 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
   Stream<num>? _harmonyOnApplicationScreenBrightnessChanged;
 
+  StreamSubscription<bool>? harmonyBackPlayingSub;
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (!plPlayerController.continuePlayInBackground.value) {
-      late final player = plPlayerController.videoController?.player;
+    final player = plPlayerController.videoController?.player;
+    if (player == null) return;
+    final continuePlay = plPlayerController.continuePlayInBackground.value;
+    if (continuePlay) {}
+    if (!continuePlay) {
       if (const [
         AppLifecycleState.paused,
         AppLifecycleState.detached,
       ].contains(state)) {
-        if (player != null && player.state.playing) {
+        if (player.state.playing) {
           _pauseDueToPauseUponEnteringBackgroundMode = true;
           player.pause();
         }
       } else {
         if (_pauseDueToPauseUponEnteringBackgroundMode) {
           _pauseDueToPauseUponEnteringBackgroundMode = false;
-          player?.play();
+          player.play();
         }
       }
     } else {
-      // Harmony 需要在退到后台前确保申请后台长时任务，避免被系统打断
-      if (const [
-        AppLifecycleState.inactive,
-        AppLifecycleState.paused,
-        AppLifecycleState.detached,
-      ].contains(state)) {
-        plPlayerController.ensureBgRunningIfNeeded();
-        final player = plPlayerController.videoController?.player;
-        if (player != null && player.state.playing) {
-          _resumeForBackground = true;
-          Future.microtask(() {
-            if (_resumeForBackground) {
-              player.play();
-            }
-          });
-        }
-      }
-      if (state == AppLifecycleState.resumed) {
-        _resumeForBackground = false;
+      // 需要后台播放，防止鸿蒙切到后台被暂停
+      if (Utils.isHarmony) {
+        harmonyBackPlayingSub?.cancel();
+        harmonyBackPlayingSub = player.stream.playing.listen((playing) {
+          if (!playing) {
+            player.play();
+            harmonyBackPlayingSub?.cancel();
+          }
+        });
+        // 3秒后检查并释放
+        Future.delayed(const Duration(seconds: 3)).then((_) {
+          harmonyBackPlayingSub?.cancel();
+        });
       }
     }
   }
