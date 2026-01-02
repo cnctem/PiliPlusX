@@ -114,7 +114,7 @@ class _AboutPageState extends State<AboutPage> {
                 width: 150,
                 height: 150,
                 cacheWidth: 150.cacheSize(context),
-                'assets/images/logo/logo_X.png',\
+                'assets/images/logo/logo_X.png',
               ),
             ),
           ),
