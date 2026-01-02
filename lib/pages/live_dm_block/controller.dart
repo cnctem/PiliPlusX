@@ -1,6 +1,6 @@
 import 'package:PiliPlus/http/live.dart';
 import 'package:PiliPlus/http/loading_state.dart';
-import 'package:PiliPlus/models/common/live_dm_silent_type.dart';
+import 'package:PiliPlus/models/common/live/live_dm_silent_type.dart';
 import 'package:PiliPlus/models_new/live/live_dm_block/shield_user_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -33,19 +33,18 @@ class LiveDmBlockController extends GetxController
 
   Future<void> queryData() async {
     final res = await LiveHttp.getLiveInfoByUser(roomId);
-    if (res.isSuccess) {
-      final data = res.data;
-      final shieldRules = data?.shieldRules;
+    if (res case Success(:final response)) {
+      final shieldRules = response?.shieldRules;
       level.value = shieldRules?.level ?? 0;
       rank.value = shieldRules?.rank ?? 0;
       verify.value = shieldRules?.verify ?? 0;
       updateValue();
 
-      if (data?.keywordList != null) {
-        keywordList.addAll(data!.keywordList!);
+      if (response?.keywordList case final keywordList?) {
+        keywordList.addAll(keywordList);
       }
-      if (data?.shieldUserList != null) {
-        shieldUserList.addAll(data!.shieldUserList!);
+      if (response?.shieldUserList case final shieldUserList?) {
+        shieldUserList.addAll(shieldUserList);
       }
     } else {
       res.toast();

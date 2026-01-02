@@ -42,10 +42,12 @@ class PgcRankItem extends StatelessWidget {
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     return NetworkImgLayer(
-                      radius: 6,
                       width: constraints.maxWidth,
                       height: constraints.maxHeight,
                       src: item.cover,
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(6),
+                      ),
                     );
                   },
                 ),

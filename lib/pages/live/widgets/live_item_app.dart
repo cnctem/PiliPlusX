@@ -42,7 +42,7 @@ class LiveCardVApp extends StatelessWidget {
                         src: item.cover!,
                         width: maxWidth,
                         height: maxHeight,
-                        radius: 0,
+                        type: .emote,
                       ),
                       Positioned(
                         left: 0,

@@ -41,7 +41,7 @@ class LiveItem extends StatelessWidget {
                         src: liveItem.cover,
                         width: maxWidth,
                         height: maxHeight,
-                        radius: 0,
+                        type: .emote,
                       ),
                       Positioned(
                         left: 0,

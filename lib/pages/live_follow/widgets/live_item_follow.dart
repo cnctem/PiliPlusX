@@ -42,7 +42,7 @@ class LiveCardVFollow extends StatelessWidget {
                         src: liveItem.roomCover!,
                         width: maxWidth,
                         height: maxHeight,
-                        radius: 0,
+                        type: .emote,
                       ),
                       Positioned(
                         left: 0,

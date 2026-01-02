@@ -321,7 +321,9 @@ class _CreateVotePageState extends State<CreateVotePage> {
               src: imgUrl,
               width: 40,
               height: 40,
-              radius: 6,
+              borderRadius: const BorderRadius.all(
+                Radius.circular(6),
+              ),
             ),
           ),
         if (showDel)

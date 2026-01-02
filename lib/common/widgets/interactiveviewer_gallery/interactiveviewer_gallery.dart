@@ -340,6 +340,7 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
                 fadeInDuration: Duration.zero,
                 fadeOutDuration: Duration.zero,
                 imageUrl: ImageUtils.thumbnailUrl(item.url, widget.quality),
+                placeholder: (_, _) => const SizedBox.expand(),
               );
             },
           ),

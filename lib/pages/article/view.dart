@@ -175,7 +175,7 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
             // if (kDebugMode) debugPrint('moduleBlocked');
             final moduleBlocked = controller.opusData!.modules.moduleBlocked!;
             content = SliverToBoxAdapter(
-              child: moduleBlockedItem(theme, moduleBlocked, maxWidth),
+              child: moduleBlockedItem(context, theme, moduleBlocked, maxWidth),
             );
           } else if (controller.articleData?.content != null) {
             if (controller.articleData?.type == 3) {
@@ -292,6 +292,8 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
                                             fadeOutDuration: const Duration(
                                               milliseconds: 120,
                                             ),
+                                            placeholder: (_, _) =>
+                                                const SizedBox.shrink(),
                                           ),
                                         ),
                                         if (pic.isLongPic == true)

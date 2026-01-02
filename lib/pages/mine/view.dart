@@ -16,6 +16,7 @@ import 'package:PiliPlus/pages/main/controller.dart';
 import 'package:PiliPlus/pages/mine/controller.dart';
 import 'package:PiliPlus/pages/mine/widgets/item.dart';
 import 'package:PiliPlus/utils/extension/get_ext.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
@@ -267,7 +268,6 @@ class _MediaPageState extends CommonPageState<MinePage, MineController>
                         children: [
                           NetworkImgLayer(
                             src: userInfo.face,
-                            semanticsLabel: '头像',
                             type: ImageType.avatar,
                             width: 55,
                             height: 55,
@@ -279,6 +279,7 @@ class _MediaPageState extends CommonPageState<MinePage, MineController>
                               child: Image.asset(
                                 'assets/images/big-vip.png',
                                 height: 19,
+                                cacheHeight: 19.cacheSize(context),
                                 semanticLabel: "大会员",
                               ),
                             ),
@@ -288,6 +289,7 @@ class _MediaPageState extends CommonPageState<MinePage, MineController>
                         child: Image.asset(
                           width: 55,
                           height: 55,
+                          cacheHeight: 55.cacheSize(context),
                           'assets/images/noface.jpeg',
                           semanticLabel: "默认头像",
                         ),
@@ -314,12 +316,12 @@ class _MediaPageState extends CommonPageState<MinePage, MineController>
                             ),
                           ),
                           Image.asset(
-                            'assets/images/lv/lv${levelInfo == null
-                                ? 0
-                                : userInfo.isSeniorMember == 1
-                                ? '6_s'
-                                : levelInfo.currentLevel}.png',
+                            Utils.levelName(
+                              levelInfo?.currentLevel ?? 0,
+                              isSeniorMember: userInfo.isSeniorMember == 1,
+                            ),
                             height: 10,
+                            cacheHeight: 10.cacheSize(context),
                           ),
                         ],
                       ),

@@ -18,6 +18,7 @@ import 'package:PiliPlus/pages/video/introduction/ugc/widgets/page.dart';
 import 'package:PiliPlus/services/download/download_service.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/duration_utils.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
@@ -433,6 +434,7 @@ class _DownloadPanelState extends State<DownloadPanel> {
                           'assets/images/live.png',
                           color: primary,
                           height: 12,
+                          cacheHeight: 12.cacheSize(context),
                           semanticLabel: '正在播放：',
                         ),
                       Expanded(

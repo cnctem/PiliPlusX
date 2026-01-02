@@ -299,7 +299,12 @@ class _PayCoinsPageState extends State<PayCoinsPage>
           child: SizedBox(
             width: 110,
             height: 155,
-            child: Image.asset(payImg),
+            child: Image.asset(
+              payImg,
+              width: 110,
+              height: 155,
+              cacheWidth: 110.cacheSize(context),
+            ),
           ),
         ),
       ),
@@ -392,6 +397,7 @@ class _PayCoinsPageState extends State<PayCoinsPage>
                                 index == 0
                                     ? 'assets/images/paycoins/ic_left_disable.png'
                                     : 'assets/images/paycoins/ic_left.png',
+                                cacheWidth: 16.cacheSize(context),
                               ),
                             ),
                           );
@@ -416,6 +422,7 @@ class _PayCoinsPageState extends State<PayCoinsPage>
                               index == 1
                                   ? 'assets/images/paycoins/ic_right_disable.png'
                                   : 'assets/images/paycoins/ic_right.png',
+                              cacheWidth: 16.cacheSize(context),
                             ),
                           ),
                         );
@@ -490,6 +497,9 @@ class _PayCoinsPageState extends State<PayCoinsPage>
                         height: 30,
                         child: Image.asset(
                           'assets/images/paycoins/ic_panel_close.png',
+                          width: 30,
+                          height: 30,
+                          cacheWidth: 30.cacheSize(context),
                         ),
                       ),
                     ),

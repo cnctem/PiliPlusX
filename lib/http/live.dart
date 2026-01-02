@@ -5,9 +5,11 @@ import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/login.dart';
 import 'package:PiliPlus/http/ua_type.dart';
 import 'package:PiliPlus/models/common/account_type.dart';
-import 'package:PiliPlus/models/common/live_search_type.dart';
+import 'package:PiliPlus/models/common/live/live_contribution_rank_type.dart';
+import 'package:PiliPlus/models/common/live/live_search_type.dart';
 import 'package:PiliPlus/models_new/live/live_area_list/area_item.dart';
 import 'package:PiliPlus/models_new/live/live_area_list/area_list.dart';
+import 'package:PiliPlus/models_new/live/live_contribution_rank/data.dart';
 import 'package:PiliPlus/models_new/live/live_dm_block/data.dart';
 import 'package:PiliPlus/models_new/live/live_dm_block/shield_info.dart';
 import 'package:PiliPlus/models_new/live/live_dm_block/shield_user_list.dart';
@@ -654,6 +656,36 @@ abstract final class LiveHttp {
     );
     if (res.data['code'] == 0) {
       return const Success(null);
+    } else {
+      return Error(res.data['message']);
+    }
+  }
+
+  static Future<LoadingState<LiveContributionRankData>> liveContributionRank({
+    required Object ruid,
+    required Object roomId,
+    required int page,
+    required LiveContributionRankType type,
+  }) async {
+    final res = await Request().get(
+      Api.liveContributionRank,
+      queryParameters: await WbiSign.makSign({
+        'ruid': ruid,
+        'room_id': roomId,
+        'page': page,
+        'page_size': 100,
+        'type': type.name,
+        'switch': type.sw1tch,
+        'platform': 'web',
+        'web_location': 444.8,
+      }),
+    );
+    if (res.data['code'] == 0) {
+      try {
+        return Success(LiveContributionRankData.fromJson(res.data['data']));
+      } catch (e, s) {
+        return Error('$e\n\n$s');
+      }
     } else {
       return Error(res.data['message']);
     }

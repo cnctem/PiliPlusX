@@ -1,4 +1,5 @@
 import 'package:PiliPlus/models_new/search/search_trending/list.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -55,8 +56,10 @@ class HotKeyword extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.only(left: 4),
                             child: CachedNetworkImage(
-                              imageUrl: ImageUtils.thumbnailUrl(i.icon!),
                               height: 15,
+                              memCacheHeight: 15.cacheSize(context),
+                              imageUrl: ImageUtils.thumbnailUrl(i.icon!),
+                              placeholder: (_, _) => const SizedBox.shrink(),
                             ),
                           )
                         else if (i.showLiveIcon == true)
@@ -66,6 +69,7 @@ class HotKeyword extends StatelessWidget {
                               'assets/images/live/live.gif',
                               width: 48,
                               height: 15,
+                              cacheHeight: 15.cacheSize(context),
                             ),
                           )
                         else if (i.recommendReason?.isNotEmpty == true)

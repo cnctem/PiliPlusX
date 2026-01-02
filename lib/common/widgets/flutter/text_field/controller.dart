@@ -787,7 +787,7 @@ class RichTextEditingController extends TextEditingController {
                     width: 22, // emote.width,
                     height: 22, // emote.height,
                     type: ImageType.emote,
-                    boxFit: BoxFit.contain,
+                    fit: BoxFit.contain,
                   ),
                 ),
               );

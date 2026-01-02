@@ -17,6 +17,7 @@ import 'package:PiliPlus/pages/video/controller.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';
 import 'package:PiliPlus/pages/video/member/controller.dart';
 import 'package:PiliPlus/utils/accounts.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/num_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
@@ -245,8 +246,12 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
           ),
           const SizedBox(width: 8),
           Image.asset(
-            'assets/images/lv/lv${memberInfoModel.isSeniorMember == 1 ? '6_s' : memberInfoModel.level}.png',
+            Utils.levelName(
+              memberInfoModel.level!,
+              isSeniorMember: memberInfoModel.isSeniorMember == 1,
+            ),
             height: 11,
+            cacheHeight: 11.cacheSize(context),
           ),
         ],
       ),

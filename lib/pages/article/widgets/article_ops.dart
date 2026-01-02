@@ -14,7 +14,7 @@ class ArticleOpus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if ((_ops == null || _ops.isEmpty)) {
+    if (_ops == null || _ops.isEmpty) {
       return const SliverToBoxAdapter();
     }
 
@@ -23,47 +23,47 @@ class ArticleOpus extends StatelessWidget {
       itemBuilder: (context, index) {
         try {
           final item = _ops[index];
-          if (item.insert is String) {
-            return SelectableText(item.insert);
+          switch (item.insert) {
+            case String e:
+              return SelectableText(e);
+            case Insert(:final card):
+              if (card != null) {
+                if (card.url?.isNotEmpty == true) {
+                  return GestureDetector(
+                    onTap: () {
+                      switch (item.attributes?.clazz) {
+                        case 'article-card card':
+                          if (card.id != null) {
+                            Get.toNamed(
+                              '/articlePage',
+                              parameters: {
+                                'id': card.id!.substring(2),
+                                'type': 'read',
+                              },
+                            );
+                          }
+                        case 'video-card card':
+                          if (card.id != null) {
+                            PiliScheme.videoPush(null, card.id);
+                          }
+                        case 'vote-card card':
+                          if (card.id != null) {
+                            showVoteDialog(context, int.parse(card.id!));
+                          }
+                      }
+                    },
+                    child: ClipRRect(
+                      borderRadius: StyleString.mdRadius,
+                      child: CachedNetworkImage(
+                        imageUrl: ImageUtils.thumbnailUrl(card.url, 60),
+                        placeholder: (_, _) => const SizedBox.shrink(),
+                      ),
+                    ),
+                  );
+                }
+              }
           }
-
-          if (item.insert is Insert) {
-            InsertCard card = item.insert.card;
-            if (card.url?.isNotEmpty == true) {
-              return GestureDetector(
-                onTap: () {
-                  switch (item.attributes?.clazz) {
-                    case 'article-card card':
-                      if (card.id != null) {
-                        Get.toNamed(
-                          '/articlePage',
-                          parameters: {
-                            'id': card.id!.substring(2),
-                            'type': 'read',
-                          },
-                        );
-                      }
-                    case 'video-card card':
-                      if (card.id != null) {
-                        PiliScheme.videoPush(null, card.id);
-                      }
-                    case 'vote-card card':
-                      if (card.id != null) {
-                        showVoteDialog(context, int.parse(card.id!));
-                      }
-                  }
-                },
-                child: ClipRRect(
-                  borderRadius: StyleString.mdRadius,
-                  child: CachedNetworkImage(
-                    imageUrl: ImageUtils.thumbnailUrl(card.url, 60),
-                  ),
-                ),
-              );
-            }
-          }
-
-          return Text('${item.attributes}');
+          return Text(item.attributes.toString());
         } catch (e) {
           return Text(e.toString());
         }

@@ -1,4 +1,4 @@
-import 'package:PiliPlus/models/common/live_search_type.dart';
+import 'package:PiliPlus/models/common/live/live_search_type.dart';
 import 'package:PiliPlus/pages/live_search/child/controller.dart';
 import 'package:PiliPlus/utils/extension/scroll_controller_ext.dart';
 import 'package:PiliPlus/utils/id_utils.dart';

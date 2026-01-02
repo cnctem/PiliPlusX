@@ -48,6 +48,7 @@ import 'package:PiliPlus/plugin/pl_player/view.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/services/shutdown_timer_service.dart';
 import 'package:PiliPlus/utils/accounts.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/scroll_controller_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
@@ -1277,6 +1278,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                 'assets/images/play.png',
                 width: 60,
                 height: 60,
+                cacheHeight: 60.cacheSize(context),
               ),
             ),
           ),
@@ -1590,12 +1592,11 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                   onTap: handlePlay,
                   child: Obx(
                     () => NetworkImgLayer(
-                      radius: 0,
+                      type: .emote,
                       quality: 60,
                       src: videoDetailController.cover.value,
                       width: width,
                       height: height,
-                      boxFit: BoxFit.cover,
                       forceUseCacheWidth: true,
                       getPlaceHolder: () => Center(
                         child: Image.asset('assets/images/loading.png'),

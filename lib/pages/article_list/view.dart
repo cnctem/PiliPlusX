@@ -117,7 +117,9 @@ class _ArticleListPageState extends State<ArticleListPage> with GridMixin {
                   width: 91,
                   height: 120,
                   src: item.imageUrl,
-                  radius: 6,
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(6),
+                  ),
                 ),
                 const SizedBox(width: 10),
               ],

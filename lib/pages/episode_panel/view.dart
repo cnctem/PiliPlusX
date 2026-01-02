@@ -25,6 +25,7 @@ import 'package:PiliPlus/pages/video/introduction/ugc/widgets/page.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/duration_utils.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/scroll_controller_ext.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
@@ -520,6 +521,7 @@ class _EpisodePanelState extends State<EpisodePanel>
                       'assets/images/live.png',
                       color: primary,
                       height: 12,
+                      cacheHeight: 12.cacheSize(context),
                       semanticLabel: "正在播放：",
                     ),
                   Expanded(
@@ -593,17 +595,17 @@ class _EpisodePanelState extends State<EpisodePanel>
             ? const Icon(Icons.notifications_off_outlined)
             : const Icon(Icons.notifications_active_outlined),
         onPressed: () async {
-          final result = await FavHttp.seasonFav(
+          final res = await FavHttp.seasonFav(
             isFav: response,
             seasonId: widget.seasonId,
           );
-          if (result.isSuccess) {
+          if (res.isSuccess) {
             SmartDialog.showToast('${response ? '取消' : ''}订阅成功');
             _favState!.value = Success(!response);
             widget.ugcIntroController?.seasonFavState[widget.seasonId] =
                 !response;
           } else {
-            result.toast();
+            res.toast();
           }
         },
       ),

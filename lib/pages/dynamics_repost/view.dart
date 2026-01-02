@@ -169,10 +169,12 @@ class _RepostPanelState extends CommonRichTextPubPageState<RepostPanel> {
         children: [
           if (_pic != null) ...[
             NetworkImgLayer(
-              radius: 6,
               width: 40,
               height: 40,
               src: _pic,
+              borderRadius: const BorderRadius.all(
+                Radius.circular(6),
+              ),
             ),
             const SizedBox(width: 10),
           ],

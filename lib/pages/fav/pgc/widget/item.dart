@@ -69,10 +69,12 @@ class FavPgcItem extends StatelessWidget {
                               clipBehavior: Clip.none,
                               children: [
                                 NetworkImgLayer(
-                                  radius: 4,
                                   src: item.cover,
                                   width: boxConstraints.maxWidth,
                                   height: boxConstraints.maxHeight,
+                                  borderRadius: const BorderRadius.all(
+                                    Radius.circular(4),
+                                  ),
                                 ),
                                 PBadge(
                                   right: 4,

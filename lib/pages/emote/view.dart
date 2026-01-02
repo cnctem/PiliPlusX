@@ -98,7 +98,7 @@ class _EmotePanelState extends State<EmotePanel>
                                         width: size,
                                         height: size,
                                         type: ImageType.emote,
-                                        boxFit: BoxFit.contain,
+                                        fit: BoxFit.contain,
                                       ),
                               );
                               if (!isTextEmote) {
@@ -124,7 +124,7 @@ class _EmotePanelState extends State<EmotePanel>
                                           width: 65,
                                           height: 65,
                                           type: ImageType.emote,
-                                          boxFit: BoxFit.contain,
+                                          fit: BoxFit.contain,
                                         ),
                                         Text(
                                           item.meta?.alias ??

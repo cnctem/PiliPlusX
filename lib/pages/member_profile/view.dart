@@ -1,6 +1,7 @@
 import 'dart:io' show File;
 
 import 'package:PiliPlus/common/constants.dart';
+import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/loading_widget.dart';
 import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/http/init.dart';
@@ -16,13 +17,11 @@ import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/extension/file_ext.dart';
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
-import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart';
@@ -141,12 +140,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
             title: '头像',
             widget: Padding(
               padding: const EdgeInsets.symmetric(vertical: 5),
-              child: ClipOval(
-                child: CachedNetworkImage(
-                  width: 55,
-                  height: 55,
-                  imageUrl: ImageUtils.thumbnailUrl(response.face),
-                ),
+              child: NetworkImgLayer(
+                width: 55,
+                height: 55,
+                type: .avatar,
+                src: response.face,
               ),
             ),
             onTap: () => EasyThrottle.throttle(

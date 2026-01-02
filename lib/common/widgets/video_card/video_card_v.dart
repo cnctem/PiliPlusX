@@ -98,7 +98,7 @@ class VideoCardV extends StatelessWidget {
                             src: videoItem.cover,
                             width: maxWidth,
                             height: maxHeight,
-                            radius: 0,
+                            type: .emote,
                           ),
                           if (videoItem.duration > 0)
                             PBadge(

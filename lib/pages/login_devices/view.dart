@@ -28,6 +28,7 @@ class LoginDevicesPageState extends State<LoginDevicesPage> {
       body: refreshIndicator(
         onRefresh: _controller.onRefresh,
         child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             ViewSliverSafeArea(
               sliver: Obx(

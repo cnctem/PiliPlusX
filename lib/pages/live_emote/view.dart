@@ -125,7 +125,7 @@ class _LiveEmotePanelState extends State<LiveEmotePanel>
                                             width: 65,
                                             height: 65,
                                             type: ImageType.emote,
-                                            boxFit: BoxFit.contain,
+                                            fit: BoxFit.contain,
                                           ),
                                           Text(
                                             e.emoji == null
@@ -146,7 +146,7 @@ class _LiveEmotePanelState extends State<LiveEmotePanel>
                                     child: Padding(
                                       padding: const EdgeInsets.all(6),
                                       child: NetworkImgLayer(
-                                        boxFit: BoxFit.contain,
+                                        fit: BoxFit.contain,
                                         src: e.url,
                                         width: width,
                                         height: height,

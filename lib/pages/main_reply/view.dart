@@ -76,6 +76,7 @@ class _MainReplyPageState extends State<MainReplyPage> {
               right: padding.right,
             ),
             child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 buildReplyHeader(colorScheme),
                 Obx(

@@ -239,11 +239,17 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
             "biz_id": "",
           });
         case RichTextType.at:
-          list.add({
-            "raw_text": '@${e.rawText}',
-            "type": 2,
-            "biz_id": e.id,
-          });
+          list
+            ..add({
+              "raw_text": '@${e.rawText}',
+              "type": 2,
+              "biz_id": e.id,
+            })
+            ..add({
+              "raw_text": ' ',
+              "type": 1,
+              "biz_id": "",
+            });
         case RichTextType.emoji:
           list.add({
             "raw_text": e.rawText,

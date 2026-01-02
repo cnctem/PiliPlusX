@@ -757,12 +757,13 @@ class ChatItem extends StatelessWidget {
 
   Widget msgTypePictureCard_13(dynamic content) {
     final url = content['jump_url'];
-    return ClipRRect(
-      borderRadius: StyleString.mdRadius,
-      child: GestureDetector(
-        onTap: url == null ? null : () => PiliScheme.routePushFromUrl(url),
+    return GestureDetector(
+      onTap: url == null ? null : () => PiliScheme.routePushFromUrl(url),
+      child: ClipRRect(
+        borderRadius: StyleString.mdRadius,
         child: CachedNetworkImage(
           imageUrl: ImageUtils.thumbnailUrl(content['pic_url']),
+          placeholder: (_, _) => const SizedBox.shrink(),
         ),
       ),
     ).constraintWidth(constraints: const BoxConstraints(maxWidth: 400.0));

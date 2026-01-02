@@ -978,4 +978,7 @@ abstract final class Api {
 
   static const String followeeVotes =
       '${HttpString.tUrl}/vote_svr/v1/vote_svr/followee_votes';
+
+  static const String liveContributionRank =
+      '${HttpString.liveBaseUrl}/xlive/general-interface/v1/rank/queryContributionRank';
 }

@@ -16,6 +16,7 @@ import 'package:PiliPlus/pages/whisper_detail/widget/chat_item.dart';
 import 'package:PiliPlus/pages/whisper_link_setting/view.dart';
 import 'package:PiliPlus/utils/extension/file_ext.dart';
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/widget_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
@@ -92,6 +93,7 @@ class _WhisperDetailPageState
                 Image.asset(
                   'assets/images/live/live.gif',
                   height: 16,
+                  cacheHeight: 16.cacheSize(context),
                   filterQuality: FilterQuality.low,
                 ),
               ],

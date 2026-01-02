@@ -24,6 +24,7 @@ import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/duration_utils.dart';
 import 'package:PiliPlus/utils/extension/get_ext.dart';
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
@@ -1029,6 +1030,7 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
           'assets/images/ai.png',
           height: 18,
           width: 18,
+          cacheHeight: 18.cacheSize(context),
         ),
       ),
     ),

@@ -166,8 +166,10 @@ class _AtMePageState extends State<AtMePage> {
                         ? NetworkImgLayer(
                             width: 45,
                             height: 45,
-                            radius: 8,
                             src: item.item?.image,
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(8),
+                            ),
                           )
                         : null,
                   );

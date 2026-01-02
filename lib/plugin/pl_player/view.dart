@@ -47,6 +47,7 @@ import 'package:PiliPlus/plugin/pl_player/widgets/forward_seek.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/mpv_convert_webp.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/play_pause_btn.dart';
 import 'package:PiliPlus/utils/duration_utils.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
@@ -1228,17 +1229,21 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     final ctr = plPlayerController.danmakuController;
     if (ctr != null) {
       final pos = details.localPosition;
-      final item = ctr.findSingleDanmaku(pos);
-      if (item == null) {
+      final res = ctr.findSingleDanmaku(pos);
+      if (res != null) {
+        final (dy, item) = res;
+        if (item != _suspendedDm) {
+          _suspendedDm?.suspend = false;
+          if (item.content.extra == null) {
+            _dmOffset.value = null;
+            return;
+          }
+          _suspendedDm = item..suspend = true;
+          this.dy = dy;
+        }
+      } else {
         _suspendedDm?.suspend = false;
         _dmOffset.value = null;
-      } else if (item.$2 != _suspendedDm) {
-        _suspendedDm?.suspend = false;
-        if (item.$2.content.extra == null) {
-          _dmOffset.value = null;
-          return;
-        }
-        _suspendedDm = item.$2..suspend = true;
       }
     }
   }
@@ -1980,6 +1985,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                       Image.asset(
                         'assets/images/loading.webp',
                         height: 25,
+                        cacheHeight: 25.cacheSize(context),
                         semanticLabel: "加载中",
                         color: Colors.white,
                       ),
@@ -2297,6 +2303,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   static const _actionItemHeight = 35.0 - _triangleHeight;
 
   DanmakuItem<DanmakuExtra>? _suspendedDm;
+  late double dy = 0;
   late final Rxn<Offset> _dmOffset = Rxn<Offset>();
 
   void _removeDmAction() {
@@ -2355,9 +2362,6 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
     final overlayWidth = _actionItemWidth * (seekOffset == null ? 3 : 4);
 
-    final dy = item.content.type == DanmakuItemType.bottom
-        ? maxHeight - offset.dy - item.height
-        : offset.dy;
     final top = dy + item.height + _triangleHeight + 2;
 
     final realLeft = dx + overlayWidth / 2;

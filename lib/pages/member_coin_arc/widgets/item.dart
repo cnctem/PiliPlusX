@@ -70,7 +70,7 @@ class MemberCoinLikeItem extends StatelessWidget {
                         src: item.cover,
                         width: maxWidth,
                         height: maxHeight,
-                        radius: 0,
+                        type: .emote,
                       ),
                       if (item.isCooperation == true)
                         const PBadge(

@@ -35,7 +35,7 @@ class MemberShopItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             NetworkImgLayer(
-              radius: 0,
+              type: .emote,
               src: item.cover?.url,
               width: maxWidth,
               height: maxWidth,

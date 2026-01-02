@@ -6,6 +6,7 @@ import 'package:PiliPlus/models/dynamics/up.dart';
 import 'package:PiliPlus/pages/dynamics/controller.dart';
 import 'package:PiliPlus/pages/live_follow/view.dart';
 import 'package:PiliPlus/utils/accounts.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
@@ -150,41 +151,64 @@ class _UpPanelState extends State<UpPanel> {
 
     Widget avatar;
     if (isAll) {
-      avatar = const CircleAvatar(
-        backgroundColor: Color(0xFF5CB67B),
-        backgroundImage: AssetImage('assets/images/logo/logo.png'),
+      avatar = DecoratedBox(
+        decoration: BoxDecoration(
+          shape: .circle,
+          border: Border.all(
+            width: 5,
+            color: const Color(0xFF5CB67B),
+          ),
+        ),
+        child: Image.asset(
+          width: 38,
+          height: 38,
+          cacheWidth: 38.cacheSize(context),
+          'assets/images/logo/logo.png',
+        ),
       );
     } else {
-      avatar = Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: NetworkImgLayer(
-              width: 38,
-              height: 38,
-              src: data.face,
-              type: ImageType.avatar,
-            ),
-          ),
-          Positioned(
-            top: isLive && !isTop ? -5 : 0,
-            right: isLive ? -6 : 4,
-            child: Badge(
-              smallSize: 8,
-              label: isLive ? const Text(' Live ') : null,
-              textColor: theme.colorScheme.onSecondaryContainer,
-              alignment: AlignmentDirectional.topStart,
-              isLabelVisible: isLive || (data.hasUpdate ?? false),
-              backgroundColor: isLive
-                  ? theme.colorScheme.secondaryContainer.withValues(
-                      alpha: 0.75,
-                    )
-                  : theme.colorScheme.primary,
-            ),
-          ),
-        ],
+      avatar = Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: NetworkImgLayer(
+          width: 38,
+          height: 38,
+          src: data.face,
+          type: ImageType.avatar,
+        ),
       );
+      if (isLive) {
+        avatar = Stack(
+          clipBehavior: .none,
+          children: [
+            avatar,
+            Positioned(
+              top: isLive && !isTop ? -5 : 0,
+              right: -6,
+              child: Badge(
+                label: const Text(' Live '),
+                textColor: theme.colorScheme.onSecondaryContainer,
+                backgroundColor: theme.colorScheme.secondaryContainer
+                    .withValues(alpha: 0.75),
+              ),
+            ),
+          ],
+        );
+      } else if (data.hasUpdate ?? false) {
+        avatar = Stack(
+          clipBehavior: .none,
+          children: [
+            avatar,
+            Positioned(
+              top: 0,
+              right: 4,
+              child: Badge(
+                smallSize: 8,
+                backgroundColor: theme.colorScheme.primary,
+              ),
+            ),
+          ],
+        );
+      }
     }
 
     return SizedBox(

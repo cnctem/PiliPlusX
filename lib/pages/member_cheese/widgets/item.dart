@@ -91,10 +91,12 @@ class MemberCheeseItem extends StatelessWidget {
                 child: LayoutBuilder(
                   builder: (context, boxConstraints) {
                     Widget child = NetworkImgLayer(
-                      radius: 4,
                       src: item.cover,
                       width: boxConstraints.maxWidth,
                       height: boxConstraints.maxHeight,
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(4),
+                      ),
                     );
                     if (item.marks?.isNotEmpty == true) {
                       return Stack(

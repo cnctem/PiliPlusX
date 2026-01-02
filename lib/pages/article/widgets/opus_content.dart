@@ -11,6 +11,7 @@ import 'package:PiliPlus/models/dynamics/article_content_model.dart'
 import 'package:PiliPlus/models/dynamics/result.dart';
 import 'package:PiliPlus/pages/dynamics/widgets/vote.dart';
 import 'package:PiliPlus/utils/app_scheme.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
@@ -216,25 +217,26 @@ class OpusContent extends StatelessWidget {
                 final pic = element.pic!.pics!.first;
                 final width = pic.width == null
                     ? null
-                    : math.min(maxWidth.toDouble(), pic.width!);
+                    : math.min(maxWidth, pic.width!);
                 final height = width == null || pic.height == null
                     ? null
                     : width * pic.height! / pic.width!;
-                return Hero(
-                  tag: pic.url!,
-                  child: GestureDetector(
-                    onTap: () => PageUtils.imageView(
-                      imgList: [SourceModel(url: pic.url!)],
-                      quality: 60,
-                    ),
-                    child: Center(
+                return GestureDetector(
+                  onTap: () => PageUtils.imageView(
+                    imgList: [SourceModel(url: pic.url!)],
+                    quality: 60,
+                  ),
+                  child: Center(
+                    child: Hero(
+                      tag: pic.url!,
                       child: CachedNetworkImage(
                         width: width,
                         height: height,
+                        memCacheWidth: width?.cacheSize(context),
                         imageUrl: ImageUtils.thumbnailUrl(pic.url!, 60),
                         fadeInDuration: const Duration(milliseconds: 120),
                         fadeOutDuration: const Duration(milliseconds: 120),
-                        placeholder: (context, url) =>
+                        placeholder: (_, _) =>
                             Image.asset('assets/images/loading.png'),
                       ),
                     ),
@@ -255,11 +257,14 @@ class OpusContent extends StatelessWidget {
                 );
               }
             case 3 when (element.line != null):
+              final height = element.line!.pic!.height?.toDouble();
               return CachedNetworkImage(
                 width: maxWidth,
                 fit: BoxFit.contain,
-                height: element.line!.pic!.height?.toDouble(),
+                height: height,
+                memCacheHeight: height?.cacheSize(context),
                 imageUrl: ImageUtils.thumbnailUrl(element.line!.pic!.url!),
+                placeholder: (_, _) => const SizedBox.shrink(),
               );
             case 5 when (element.list != null):
               return SelectableText.rich(
@@ -352,10 +357,12 @@ class OpusContent extends StatelessWidget {
                         spacing: 10,
                         children: [
                           NetworkImgLayer(
-                            radius: 6,
                             width: 104,
                             height: 65,
                             src: element.linkCard!.card!.ugc!.cover,
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(6),
+                            ),
                           ),
                           Expanded(
                             child: Column(
@@ -391,10 +398,12 @@ class OpusContent extends StatelessWidget {
                         spacing: 10,
                         children: [
                           NetworkImgLayer(
-                            radius: 6,
                             width: 104,
                             height: 65,
                             src: element.linkCard!.card!.common!.cover,
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(6),
+                            ),
                           ),
                           Expanded(
                             child: Column(
@@ -428,10 +437,12 @@ class OpusContent extends StatelessWidget {
                         spacing: 10,
                         children: [
                           NetworkImgLayer(
-                            radius: 6,
                             width: 104,
                             height: 65,
                             src: element.linkCard!.card!.live!.cover,
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(6),
+                            ),
                           ),
                           Expanded(
                             child: Column(
@@ -465,10 +476,12 @@ class OpusContent extends StatelessWidget {
                         spacing: 10,
                         children: [
                           NetworkImgLayer(
-                            radius: 6,
                             width: 104,
                             height: 65,
                             src: element.linkCard!.card!.opus!.cover,
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(6),
+                            ),
                           ),
                           Expanded(
                             child: Column(
@@ -526,10 +539,12 @@ class OpusContent extends StatelessWidget {
                         spacing: 10,
                         children: [
                           NetworkImgLayer(
-                            radius: 6,
                             width: 104,
                             height: 65,
                             src: element.linkCard!.card!.music!.cover,
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(6),
+                            ),
                           ),
                           Expanded(
                             child: Column(
@@ -564,10 +579,12 @@ class OpusContent extends StatelessWidget {
                               spacing: 10,
                               children: [
                                 NetworkImgLayer(
-                                  radius: 6,
                                   width: 104,
                                   height: 65,
                                   src: e.cover,
+                                  borderRadius: const BorderRadius.all(
+                                    Radius.circular(6),
+                                  ),
                                 ),
                                 Expanded(
                                   child: Column(
@@ -688,6 +705,7 @@ class OpusContent extends StatelessWidget {
 }
 
 Widget moduleBlockedItem(
+  BuildContext context,
   ThemeData theme,
   ModuleBlocked moduleBlocked,
   double maxWidth,
@@ -714,14 +732,17 @@ Widget moduleBlockedItem(
   Widget icon(double width) {
     return CachedNetworkImage(
       width: width,
+      memCacheWidth: width.cacheSize(context),
       fit: BoxFit.contain,
       imageUrl: ImageUtils.thumbnailUrl(
         isDarkMode ? moduleBlocked.icon!.imgDark : moduleBlocked.icon!.imgDay,
       ),
+      placeholder: (_, _) => const SizedBox.shrink(),
     );
   }
 
-  Widget btn({
+  Widget btn(
+    BuildContext context, {
     OutlinedBorder? shape,
     VisualDensity? visualDensity,
     EdgeInsetsGeometry? padding,
@@ -749,7 +770,9 @@ Widget moduleBlockedItem(
             CachedNetworkImage(
               height: 16,
               color: Colors.white,
-              imageUrl: moduleBlocked.button!.icon!.http2https,
+              memCacheHeight: 16.cacheSize(context),
+              placeholder: (_, _) => const SizedBox.shrink(),
+              imageUrl: ImageUtils.safeThumbnailUrl(moduleBlocked.button!.icon),
             ),
           Text(moduleBlocked.button!.text ?? ''),
         ],
@@ -781,6 +804,7 @@ Widget moduleBlockedItem(
             if (moduleBlocked.button != null) ...[
               const SizedBox(height: 8),
               btn(
+                context,
                 visualDensity: const VisualDensity(vertical: -2.5),
               ),
             ],
@@ -817,6 +841,7 @@ Widget moduleBlockedItem(
         ),
         if (moduleBlocked.button != null)
           btn(
+            context,
             visualDensity: const VisualDensity(vertical: -3, horizontal: -4),
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(6)),
