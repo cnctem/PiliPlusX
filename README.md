@@ -30,7 +30,7 @@
 - [港澳台代理](#港澳台代理)
 - [致谢](#致谢)
 
-- PiliPlusX 独家功能详见 [TODO List](docs/TODO.md) 完成项
+- PiliPlusX 独家功能详见 [TODO List](https://github.com/cnctem/PiliPlusX/blob/dev/docs/TODO.md) 完成项
 - [下载最新版本](https://github.com/cnctem/PiliPlusX/releases/latest)
 - [安卓字体修复版本说明](#PiliPlusX字体修复说明)
 - 请提出你的宝贵建议！[Issues](https://github.com/cnctem/PiliPlusX/issues)
