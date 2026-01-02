@@ -9,4 +9,9 @@ abstract class HarmonyChannel {
     });
     return result ?? false;
   }
+
+  static Future<bool> setAutoRotation() async {
+    final result = await _channel.invokeMethod<bool>('setAutoRotation');
+    return result ?? false;
+  }
 }

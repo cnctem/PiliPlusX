@@ -37,8 +37,8 @@ Future<void> exitDesktopFullscreen() async {
 @pragma('vm:notify-debugger-on-exception')
 Future<void> landscape() async {
   try {
-  // 鸿蒙将小窗设为横屏
-  if (Utils.isHarmony) HarmonyChannel.setMiniWindowLandscape(true);
+    // 鸿蒙将小窗设为横屏
+    if (Utils.isHarmony) HarmonyChannel.setMiniWindowLandscape(true);
     await AutoOrientation.landscapeAutoMode(forceSensor: true);
   } catch (e) {
     print('横屏时出错：$e');
@@ -65,8 +65,9 @@ Future<void> autoScreen() async {
 }
 
 Future<void> fullAutoModeForceSensor() {
-  // TODO 重构 强制按重力旋转
-  // return AutoOrientation.fullAutoMode(forceSensor: true);
+  print('自动旋转屏幕模式');
+  // 鸿蒙通过通道设置强制传感器方向
+  if (Utils.isHarmony) return HarmonyChannel.setAutoRotation();
   return AutoOrientation.fullAutoMode();
 }
 

@@ -3,6 +3,7 @@ import window from "@ohos.window";
 
 export default class HarmonyChannel implements FlutterPlugin {
   private channel: MethodChannel | null = null
+  private lastWindow: window.Window | null = null
 
   getUniqueClassName(): string {
     return 'HarmonyChannel';
@@ -25,18 +26,28 @@ export default class HarmonyChannel implements FlutterPlugin {
         result.success(true);
         break;
       }
+      case 'setAutoRotation': {
+        await this.setAutoRotation();
+        result.success(true);
+        break;
+      }
       default:
         result.notImplemented();
         break;
     }
   }
 
+  async setAutoRotation() {
+    this.lastWindow ??= await window.getLastWindow(getContext())
+    this.lastWindow.setPreferredOrientation(window.Orientation.AUTO_ROTATION)
+  }
+
   private async setMiniWindowLandscape(landscape: boolean) {
-    const lastWindow = await window.getLastWindow(getContext());
+    this.lastWindow ??= await window.getLastWindow(getContext())
     if (landscape) {
-      lastWindow.enableLandscapeMultiWindow()
+      this.lastWindow.enableLandscapeMultiWindow()
     } else {
-      lastWindow.disableLandscapeMultiWindow()
+      this.lastWindow.disableLandscapeMultiWindow()
     }
   }
 }
