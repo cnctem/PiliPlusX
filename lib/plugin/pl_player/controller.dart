@@ -1547,11 +1547,11 @@ class PlPlayerController {
     if (!Utils.isHarmony) return;
     // 鸿蒙小窗适配方向
     // TODO 解决鸿蒙小窗的顶部沉浸问题
-    if (val && isVertical) {
+    if (val && !isVertical) {
       // 进入全屏且横屏，设置小窗横屏
       HarmonyChannel.setMiniWindowLandscape(true);
     } else {
-      // 否则鸿蒙小窗横屏
+      // 否则取消鸿蒙小窗横屏
       HarmonyChannel.setMiniWindowLandscape(false);
     }
   }
