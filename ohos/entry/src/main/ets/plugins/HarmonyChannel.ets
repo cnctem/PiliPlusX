@@ -26,20 +26,10 @@ export default class HarmonyChannel implements FlutterPlugin {
         result.success(true);
         break;
       }
-      case 'setAutoRotation': {
-        await this.setAutoRotation();
-        result.success(true);
-        break;
-      }
       default:
         result.notImplemented();
         break;
     }
-  }
-
-  async setAutoRotation() {
-    this.lastWindow ??= await window.getLastWindow(getContext())
-    this.lastWindow.setPreferredOrientation(window.Orientation.AUTO_ROTATION)
   }
 
   private async setMiniWindowLandscape(landscape: boolean) {

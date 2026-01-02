@@ -61,14 +61,19 @@ Future<void> autoScreen() async {
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
+    // 实测鸿蒙上全向旋转功能需调用此方法才能和安卓效果一致
+    // 背后的鸿蒙代码参考文档
+    // 自动旋转方向类型 AUTO_ROTATION_UNSPECIFIED
+    // 跟随传感器自动旋转，受控制中心的旋转开关控制，且可旋转方向受系统判定
+    // （如在某种设备，可以旋转到竖屏、横屏、反向横屏三个方向，无法旋转到反向竖屏）。
+    if (Utils.isHarmony) await AutoOrientation.setScreenOrientationUser();
   }
 }
 
 Future<void> fullAutoModeForceSensor() {
-  print('自动旋转屏幕模式');
-  // 鸿蒙通过通道设置强制传感器方向
-  if (Utils.isHarmony) return HarmonyChannel.setAutoRotation();
+  // 鸿蒙的AutoOrientation插件没有上游版本的forceSensor参数
   return AutoOrientation.fullAutoMode();
+  // return AutoOrientation.fullAutoMode(forceSensor: true);
 }
 
 bool _showStatusBar = true;

@@ -4,7 +4,6 @@ import 'package:PiliPlus/build_config.dart';
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/widgets/custom_toast.dart';
 import 'package:PiliPlus/common/widgets/mouse_back.dart';
-import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_volume.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/models/common/theme/theme_color_type.dart';
@@ -346,12 +345,12 @@ class MyApp extends StatelessWidget {
                 ),
               child,
               // 调试代码用
-              const Center(
-                child: ElevatedButton(
-                  onPressed: HarmonyChannel.setAutoRotation,
-                  child: Text('测试'),
-                ),
-              ),
+              // Center(
+              //   child: ElevatedButton(
+              //     onPressed: () {},
+              //     child: const Text('测试'),
+              //   ),
+              // ),
             ],
           );
         },
