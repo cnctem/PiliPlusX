@@ -2,7 +2,19 @@
 
 这是一个适配鸿蒙的分支，目前处于可用水平，大部分功能正常
 
-### 适配进度移步看板：[issues 看板](https://github.com/users/qinshah/projects/1)
+### 目前主要的问题
+
+- 硬件解码未适配
+
+- 可能的滑动失效(实测nova12p视频页音量、亮度和播放器Hub等都用不了)
+
+### 其它适配细节：[issues 看板](https://github.com/users/qinshah/projects/1)
+
+## 需要提issue？
+
+先确认有无已存在的类似issue，再确认是不是鸿蒙版特有的移植问题
+
+因为这个分支只做移植适配工作，不考虑增加上游没有的功能或更改特性
 
 ### 需要更多人参与适配，让鸿蒙版 PiliPlus 更快完善
 
