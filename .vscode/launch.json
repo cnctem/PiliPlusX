@@ -6,17 +6,19 @@
       "name": "PiliPlus (run)",
       "request": "launch",
       "type": "dart",
-      "program": "lib/main.dart",
       "preLaunchTask": "build_env",
-      "args": ["--dart-define-from-file=.vscode/env.json"]
+      "args": [
+        "--dart-define-from-file=.vscode/env.json"
+      ]
     },
     {
       "name": "PiliPlus (debug)",
       "request": "launch",
       "type": "dart",
-      "program": "lib/main.dart",
       "preLaunchTask": "build_env",
-      "args": ["--dart-define-from-file=.vscode/env.json"]
+      "args": [
+        "--dart-define-from-file=.vscode/env.json"
+      ]
     },
     {
       "name": "PiliPlus (profile)",
@@ -24,7 +26,9 @@
       "type": "dart",
       "flutterMode": "profile",
       "preLaunchTask": "build_env",
-      "args": ["--dart-define-from-file=.vscode/env.json"]
+      "args": [
+        "--dart-define-from-file=.vscode/env.json"
+      ]
     },
     {
       "name": "PiliPlus (release)",
@@ -32,7 +36,9 @@
       "type": "dart",
       "flutterMode": "release",
       "preLaunchTask": "build_env",
-      "args": ["--dart-define-from-file=.vscode/env.json"]
-    }
+      "args": [
+        "--dart-define-from-file=.vscode/env.json"
+      ]
+    },
   ]
 }
