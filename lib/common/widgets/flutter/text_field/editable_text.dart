@@ -5217,8 +5217,7 @@ class EditableTextState extends State<EditableText>
       allowedMimeTypes: widget.contentInsertionConfiguration == null
           ? const <String>[]
           : widget.contentInsertionConfiguration!.allowedMimeTypes,
-      // //  TODO 直接注释掉的代码 3.32.4-ohos-0.0.1不支持
-      // hintLocales: widget.hintLocales,
+      hintLocales: widget.hintLocales,
     );
   }
 

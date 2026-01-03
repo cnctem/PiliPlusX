@@ -39,8 +39,7 @@ class AboutPage extends StatefulWidget {
 }
 
 class _AboutPageState extends State<AboutPage> {
-  /// 显示形如 1.1.5-abcdef01+4515
-  final String currentVersion =
+  final currentVersion =
       '${BuildConfig.versionName}+${BuildConfig.versionCode}';
   RxString cacheSize = ''.obs;
 
@@ -449,11 +448,10 @@ Future<void> showImportExportDialog<T>(
               builder: (context) {
                 return AlertDialog(
                   title: Text('输入$title'),
-                  // //  TODO 直接注释掉的代码 3.32.4-ohos-0.0.1不支持
-                  // constraints: const BoxConstraints(
-                  //   minWidth: 420,
-                  //   maxWidth: 420,
-                  // ),
+                  constraints: const BoxConstraints(
+                    minWidth: 420,
+                    maxWidth: 420,
+                  ),
                   content: TextFormField(
                     key: key,
                     minLines: 4,

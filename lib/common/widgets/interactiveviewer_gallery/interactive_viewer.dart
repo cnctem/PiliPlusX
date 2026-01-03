@@ -580,8 +580,7 @@ class _InteractiveViewerState extends State<InteractiveViewer>
     }
 
     final Matrix4 nextMatrix = matrix.clone()
-        // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
-      ..translate(alignedTranslation.dx, alignedTranslation.dy, 0);
+      ..translateByDouble(alignedTranslation.dx, alignedTranslation.dy, 0, 1);
 
     // Transform the viewport to determine where its four corners will be after
     // the child has been transformed.
@@ -696,8 +695,7 @@ class _InteractiveViewerState extends State<InteractiveViewer>
     );
     final double clampedScale = clampedTotalScale / currentScale;
     return matrix.clone()
-        // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
-      ..scale(clampedScale, clampedScale, clampedScale);
+      ..scaleByDouble(clampedScale, clampedScale, clampedScale, 1);
   }
 
   // Return a new matrix representing the given matrix after applying the given
@@ -708,11 +706,9 @@ class _InteractiveViewerState extends State<InteractiveViewer>
     }
     final Offset focalPointScene = _transformer.toScene(focalPoint);
     return matrix.clone()
-        // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
-      ..translate(focalPointScene.dx, focalPointScene.dy, 0)
+      ..translateByDouble(focalPointScene.dx, focalPointScene.dy, 0, 1)
       ..rotateZ(-rotation)
-        // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
-      ..translate(-focalPointScene.dx, -focalPointScene.dy, 0);
+      ..translateByDouble(-focalPointScene.dx, -focalPointScene.dy, 0, 1);
   }
 
   // Returns true iff the given _GestureType is enabled.
@@ -1302,11 +1298,9 @@ Quad _transformViewport(Matrix4 matrix, Rect viewport) {
 // the given amount.
 Quad _getAxisAlignedBoundingBoxWithRotation(Rect rect, double rotation) {
   final Matrix4 rotationMatrix = Matrix4.identity()
-        // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
-    ..translate(rect.size.width / 2, rect.size.height / 2, 0)
+    ..translateByDouble(rect.size.width / 2, rect.size.height / 2, 0, 1)
     ..rotateZ(rotation)
-        // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
-    ..translate(-rect.size.width / 2, -rect.size.height / 2, 0);
+    ..translateByDouble(-rect.size.width / 2, -rect.size.height / 2, 0, 1);
   final Quad boundariesRotated = Quad.points(
     rotationMatrix.transform3(Vector3(rect.left, rect.top, 0.0)),
     rotationMatrix.transform3(Vector3(rect.right, rect.top, 0.0)),

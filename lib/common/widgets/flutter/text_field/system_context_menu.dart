@@ -166,9 +166,8 @@ class SystemContextMenu extends StatefulWidget {
         const IOSSystemContextMenuItemLookUp(),
       if (editableTextState.searchWebEnabled)
         const IOSSystemContextMenuItemSearchWeb(),
-        // //  TODO 直接注释掉的代码 3.32.4-ohos-0.0.1不支持
-      // if (editableTextState.liveTextInputEnabled)
-      //   const IOSSystemContextMenuItemLiveText(),
+      if (editableTextState.liveTextInputEnabled)
+        const IOSSystemContextMenuItemLiveText(),
     ];
   }
 

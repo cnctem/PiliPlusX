@@ -111,8 +111,7 @@ abstract class ThemeUtils {
         ),
       ),
       cupertinoOverrideTheme: CupertinoThemeData(
-        // //  TODO 直接注释掉的代码 3.32.4-ohos-0.0.1不支持
-        // selectionHandleColor: colorScheme.primary,
+        selectionHandleColor: colorScheme.primary,
       ),
       switchTheme: const SwitchThemeData(
         thumbIcon: WidgetStateProperty<Icon?>.fromMap(

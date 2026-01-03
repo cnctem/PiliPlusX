@@ -68,6 +68,7 @@ class GeetestWebviewDialog extends StatelessWidget {
     return AlertDialog(
       title: const Text('验证码'),
       content: SizedBox(
+        width: 300,
         height: 400,
         child: InAppWebView(
           webViewEnvironment: webViewEnvironment,

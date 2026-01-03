@@ -1942,8 +1942,7 @@ class VideoDetailController extends GetxController
     showDialog(
       context: Get.context!,
       builder: (context) => AlertDialog(
-                    // //  TODO 直接注释掉的代码 3.32.4-ohos-0.0.1不支持
-        // constraints: const BoxConstraints(maxWidth: 425, minWidth: 425),
+        constraints: const BoxConstraints(maxWidth: 425, minWidth: 425),
         title: const Text('播放地址'),
         content: Column(
           spacing: 20,

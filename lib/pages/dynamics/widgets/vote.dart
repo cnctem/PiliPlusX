@@ -436,11 +436,10 @@ Future showVoteDialog(
       showDialog(
         context: context,
         builder: (context) => Dialog(
-        // //  TODO 直接注释掉的代码 3.32.4-ohos-0.0.1不支持
-          // constraints: const BoxConstraints(
-          //   minWidth: 280,
-          //   maxWidth: 625,
-          // ),
+          constraints: const BoxConstraints(
+            minWidth: 280,
+            maxWidth: 625,
+          ),
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: VotePanel(

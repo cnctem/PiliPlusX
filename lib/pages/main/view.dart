@@ -37,22 +37,9 @@ class _MainAppState extends State<MainApp>
   final MainController _mainController = Get.put(MainController());
   late final _setting = GStorage.setting;
 
-  // final _harmonyWindowManagerChannel = const MethodChannel(
-  //   'com.piliplus/window_manager',
-  // );
-
   @override
   void initState() {
     super.initState();
-    // _harmonyWindowManagerChannel.setMethodCallHandler((call) async {
-    //   switch (call.method) {
-    //     case 'flutterCallBack':
-    //       print('当前屏幕方向为: ');
-    //       print(MediaQuery.of(context).orientation);
-    //     default:
-    //       throw MissingPluginException();
-    //   }
-    // });
     WidgetsBinding.instance.addObserver(this);
     if (Utils.isDesktop) {
       windowManager
