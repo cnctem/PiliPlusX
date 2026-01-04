@@ -1182,16 +1182,16 @@ List<SettingsModel> get extraSettings => [
               TextButton(
                 onPressed: () async {
                   if (!valueStr.isNotEmpty) {
-                    Get.snackbar('格式错误', '代理链接不能为空');
+                    SmartDialog.showToast('代理链接不能为空');
                     return;
                   }
                   if (!valueStr.toLowerCase().startsWith('http')) {
-                    Get.snackbar('格式错误', '代理链接格式错误');
+                    SmartDialog.showToast('代理链接格式错误');
                     return;
                   }
 
                   if (valueStr.toLowerCase().endsWith('/')) {
-                    Get.snackbar('格式错误', '末尾不能有/');
+                    SmartDialog.showToast('末尾不能有/');
                     return;
                   }
 
