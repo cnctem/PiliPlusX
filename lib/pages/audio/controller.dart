@@ -6,7 +6,6 @@ import 'package:PiliPlus/grpc/bilibili/app/listener/v1.pb.dart'
     show
         DetailItem,
         PlayURLResp,
-        PlaylistResp,
         PlaylistSource,
         PlayInfo,
         ThumbUpReq_ThumbType,
@@ -14,6 +13,7 @@ import 'package:PiliPlus/grpc/bilibili/app/listener/v1.pb.dart'
         DashItem,
         ResponseUrl;
 import 'package:PiliPlus/http/constants.dart';
+import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/ua_type.dart';
 import 'package:PiliPlus/pages/common/common_intro_controller.dart'
     show FavMixin;
@@ -26,10 +26,12 @@ import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/utils/accounts.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/iterable_ext.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/global_data.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:PiliPlus/utils/video_utils.dart';
@@ -58,10 +60,7 @@ class AudioController extends GetxController
   final Rx<Duration> position = Duration.zero.obs;
   final Rx<Duration> duration = Duration.zero.obs;
 
-  late final AnimationController animController = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 200),
-  );
+  late final AnimationController animController;
 
   Set<StreamSubscription>? _subscriptions;
 
@@ -125,6 +124,11 @@ class AudioController extends GetxController
       ?..onPlay = onPlay
       ..onPause = onPause
       ..onSeek = onSeek;
+
+    animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
   }
 
   Future<void> onPlay() async {
@@ -170,28 +174,27 @@ class AudioController extends GetxController
       extraId: extraId,
       order: order,
     );
-    if (res.isSuccess) {
-      final PlaylistResp data = res.data;
+    if (res case Success(:final response)) {
       if (isInit) {
-        late final paginationReply = data.paginationReply;
-        _prev = data.reachStart ? null : paginationReply.prev;
-        _next = data.reachEnd ? null : paginationReply.next;
-        final index = data.list.indexWhere((e) => e.item.oid == oid);
+        late final paginationReply = response.paginationReply;
+        _prev = response.reachStart ? null : paginationReply.prev;
+        _next = response.reachEnd ? null : paginationReply.next;
+        final index = response.list.indexWhere((e) => e.item.oid == oid);
         if (index != -1) {
           this.index = index;
-          _updateCurrItem(data.list[index]);
-          playlist = data.list;
+          _updateCurrItem(response.list[index]);
+          playlist = response.list;
         }
       } else if (isLoadPrev) {
-        _prev = data.reachStart ? null : data.paginationReply.prev;
-        if (data.list.isNotEmpty) {
-          index += data.list.length;
-          playlist?.insertAll(0, data.list);
+        _prev = response.reachStart ? null : response.paginationReply.prev;
+        if (response.list.isNotEmpty) {
+          index += response.list.length;
+          playlist?.insertAll(0, response.list);
         }
       } else if (isLoadNext) {
-        _next = data.reachEnd ? null : data.paginationReply.next;
-        if (data.list.isNotEmpty) {
-          playlist?.addAll(data.list);
+        _next = response.reachEnd ? null : response.paginationReply.next;
+        if (response.list.isNotEmpty) {
+          playlist?.addAll(response.list);
         }
       }
     } else {
@@ -205,8 +208,8 @@ class AudioController extends GetxController
       oid: oid,
       subId: subId,
     );
-    if (res.isSuccess) {
-      _onPlay(res.data);
+    if (res case Success(:final response)) {
+      _onPlay(response);
       return true;
     } else {
       res.toast();
@@ -339,7 +342,7 @@ class AudioController extends GetxController
           ? ThumbUpReq_ThumbType.LIKE
           : ThumbUpReq_ThumbType.CANCEL_LIKE,
     );
-    if (res.isSuccess) {
+    if (res case Success(:final response)) {
       hasLike.value = newVal;
       try {
         audioItem.value!.stat
@@ -347,7 +350,7 @@ class AudioController extends GetxController
           ..like += newVal ? 1 : -1;
         audioItem.refresh();
       } catch (_) {}
-      SmartDialog.showToast(res.data.message);
+      SmartDialog.showToast(response.message);
     } else {
       res.toast();
     }
@@ -364,10 +367,9 @@ class AudioController extends GetxController
       subId: subId,
       itemType: itemType,
     );
-    if (res.isSuccess) {
-      final data = res.data;
+    if (res case Success(:final response)) {
       hasLike.value = true;
-      if (data.coinOk && !hasCoin) {
+      if (response.coinOk && !hasCoin) {
         coinNum.value = 2;
         GlobalData().afterCoin(2);
         try {
@@ -507,7 +509,7 @@ class AudioController extends GetxController
                   PageUtils.launchURL(audioUrl);
                 },
               ),
-              if (Utils.isMobile)
+              if (PlatformUtils.isMobile)
                 ListTile(
                   dense: true,
                   title: const Text(
@@ -516,10 +518,13 @@ class AudioController extends GetxController
                   ),
                   onTap: () {
                     Get.back();
-                    if (audioItem.value case final audioItem?) {
+                    if (audioItem.value case DetailItem(
+                      :final arc,
+                      :final owner,
+                    )) {
                       Utils.shareText(
-                        '${audioItem.arc.title} '
-                        'UP主: ${audioItem.owner.name}'
+                        '${arc.title} '
+                        'UP主: ${owner.name}'
                         ' - $audioUrl',
                       );
                     }
@@ -533,7 +538,10 @@ class AudioController extends GetxController
                 ),
                 onTap: () {
                   Get.back();
-                  if (audioItem.value case final audioItem?) {
+                  if (audioItem.value case DetailItem(
+                    :final arc,
+                    :final owner,
+                  )) {
                     showModalBottomSheet(
                       context: context,
                       isScrollControlled: true,
@@ -541,9 +549,9 @@ class AudioController extends GetxController
                       builder: (context) => RepostPanel(
                         rid: oid.toInt(),
                         dynType: isVideo ? 8 : 256,
-                        pic: audioItem.arc.cover,
-                        title: audioItem.arc.title,
-                        uname: audioItem.owner.name,
+                        pic: arc.cover,
+                        title: arc.title,
+                        uname: owner.name,
                       ),
                     );
                   }
@@ -558,18 +566,21 @@ class AudioController extends GetxController
                   ),
                   onTap: () {
                     Get.back();
-                    if (audioItem.value case final audioItem?) {
+                    if (audioItem.value case DetailItem(
+                      :final arc,
+                      :final owner,
+                    )) {
                       try {
                         PageUtils.pmShare(
                           context,
                           content: {
                             "id": oid.toString(),
-                            "title": audioItem.arc.title,
-                            "headline": audioItem.arc.title,
+                            "title": arc.title,
+                            "headline": arc.title,
                             "source": 5,
-                            "thumb": audioItem.arc.cover,
-                            "author": audioItem.owner.name,
-                            "author_id": audioItem.owner.mid.toString(),
+                            "thumb": arc.cover,
+                            "author": owner.name,
+                            "author_id": owner.mid.toString(),
                           },
                         );
                       } catch (e) {
@@ -608,8 +619,7 @@ class AudioController extends GetxController
 
   bool playNext({bool nextPart = false}) {
     if (nextPart) {
-      if (audioItem.value case final audioItem?) {
-        final parts = audioItem.parts;
+      if (audioItem.value case DetailItem(:final parts)) {
         if (parts.length > 1) {
           final subId = this.subId.firstOrNull;
           final nextIndex = parts.indexWhere((e) => e.subId == subId) + 1;

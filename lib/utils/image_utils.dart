@@ -3,10 +3,12 @@ import 'dart:typed_data';
 
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/http/init.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/file_ext.dart';
+import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/global_data.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/utils/permission_handler.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:dio/dio.dart';
@@ -19,7 +21,7 @@ import 'package:live_photo_maker/live_photo_maker.dart';
 import 'package:saver_gallery/saver_gallery.dart';
 import 'package:share_plus/share_plus.dart';
 
-abstract class ImageUtils {
+abstract final class ImageUtils {
   static String get time =>
       DateFormat('yyyy-MM-dd_HH-mm-ss').format(DateTime.now());
   static bool silentDownImg = Pref.silentDownImg;
@@ -109,7 +111,8 @@ abstract class ImageUtils {
     required int height,
   }) async {
     try {
-      if (Utils.isMobile && !await checkPermissionDependOnSdkInt(context)) {
+      if (PlatformUtils.isMobile &&
+          !await checkPermissionDependOnSdkInt(context)) {
         return false;
       }
       if (!silentDownImg) SmartDialog.showLoading(msg: '正在下载');
@@ -168,7 +171,8 @@ abstract class ImageUtils {
     List<String> imgList, [
     CacheManager? manager,
   ]) async {
-    if (Utils.isMobile && !await checkPermissionDependOnSdkInt(context)) {
+    if (PlatformUtils.isMobile &&
+        !await checkPermissionDependOnSdkInt(context)) {
       return false;
     }
     CancelToken? cancelToken;
@@ -211,10 +215,10 @@ abstract class ImageUtils {
         }
       });
       final result = await Future.wait(futures, eagerError: true);
-      if (Utils.isMobile) {
+      if (PlatformUtils.isMobile) {
         final delList = <String>[];
         final saveList = <SaveFileData>[];
-        for (var i in result) {
+        for (final i in result) {
           if (i.del) delList.add(i.filePath);
           if (i.statusCode == 200) {
             saveList.add(
@@ -227,11 +231,11 @@ abstract class ImageUtils {
           }
         }
         await SaverGallery.saveFiles(saveList, skipIfExists: false);
-        for (var i in delList) {
+        for (final i in delList) {
           File(i).tryDel();
         }
       } else {
-        for (var res in result) {
+        for (final res in result) {
           if (res.statusCode == 200) {
             await saveFileImg(
               filePath: res.filePath,
@@ -258,6 +262,17 @@ abstract class ImageUtils {
     } finally {
       if (!silentDownImg) SmartDialog.dismiss(status: SmartStatus.loading);
     }
+  }
+
+  static final _suffixRegex = RegExp(
+    r'\.(jpg|jpeg|png|webp|gif|avif)$',
+    caseSensitive: false,
+  );
+  static String safeThumbnailUrl(String? src) {
+    if (src != null && _suffixRegex.hasMatch(src)) {
+      return thumbnailUrl(src);
+    }
+    return src.http2https;
   }
 
   static final _thumbRegex = RegExp(
@@ -290,21 +305,21 @@ abstract class ImageUtils {
     required String fileName,
     String ext = 'png',
   }) async {
-    SaveResult? result;
+    SaveResult? res;
     fileName += '.$ext';
-    if (Utils.isMobile) {
+    if (PlatformUtils.isMobile) {
       SmartDialog.showLoading(msg: '正在保存');
-      result = await SaverGallery.saveImage(
+      res = await SaverGallery.saveImage(
         bytes,
         fileName: fileName,
         androidRelativePath: _androidRelativePath,
         skipIfExists: false,
       );
       SmartDialog.dismiss();
-      if (result.isSuccess) {
+      if (res.isSuccess) {
         SmartDialog.showToast(' 已保存 ');
       } else {
-        SmartDialog.showToast('保存失败，${result.errorMessage}');
+        SmartDialog.showToast('保存失败，${res.errorMessage}');
       }
     } else {
       SmartDialog.dismiss();
@@ -318,9 +333,9 @@ abstract class ImageUtils {
       }
       await File(savePath).writeAsBytes(bytes);
       SmartDialog.showToast(' 已保存 ');
-      result = SaveResult(true, null);
+      res = SaveResult(true, null);
     }
-    return result;
+    return res;
   }
 
   static Future<void> saveFileImg({
@@ -335,9 +350,9 @@ abstract class ImageUtils {
       SmartDialog.showToast("文件不存在");
       return;
     }
-    SaveResult? result;
-    if (Utils.isMobile) {
-      result = await SaverGallery.saveFile(
+    SaveResult? res;
+    if (PlatformUtils.isMobile) {
+      res = await SaverGallery.saveFile(
         filePath: filePath,
         fileName: fileName,
         androidRelativePath: _androidRelativePath,
@@ -355,13 +370,13 @@ abstract class ImageUtils {
       }
       await file.copy(savePath);
       if (del) file.tryDel();
-      result = SaveResult(true, null);
+      res = SaveResult(true, null);
     }
     if (needToast) {
-      if (result.isSuccess) {
+      if (res.isSuccess) {
         SmartDialog.showToast(' 已保存 ');
       } else {
-        SmartDialog.showToast('保存失败，${result.errorMessage}');
+        SmartDialog.showToast('保存失败，${res.errorMessage}');
       }
     }
   }

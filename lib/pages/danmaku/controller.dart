@@ -3,7 +3,9 @@ import 'dart:io' show File;
 
 import 'package:PiliPlus/grpc/bilibili/community/service/dm/v1.pb.dart';
 import 'package:PiliPlus/grpc/dm.dart';
+import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
+import 'package:PiliPlus/plugin/pl_player/utils/danmaku_options.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
@@ -46,17 +48,16 @@ class PlDanmakuController {
       return;
     }
     _requestedSeg.add(segmentIndex);
-    final result = await DmGrpc.dmSegMobile(
+    final res = await DmGrpc.dmSegMobile(
       cid: _cid,
       segmentIndex: segmentIndex + 1,
     );
 
-    if (result.isSuccess) {
-      final data = result.data;
-      if (data.state == 1) {
+    if (res case Success(:final response)) {
+      if (response.state == 1) {
         _plPlayerController.dmState.add(_cid);
       }
-      handleDanmaku(data.elems);
+      handleDanmaku(response.elems);
     } else {
       _requestedSeg.remove(segmentIndex);
     }
@@ -67,7 +68,7 @@ class PlDanmakuController {
     final uniques = HashMap<String, DanmakuElem>();
 
     final shouldFilter = _plPlayerController.filters.count != 0;
-    final danmakuWeight = _plPlayerController.danmakuWeight;
+    final danmakuWeight = DanmakuOptions.danmakuWeight;
     for (final element in elems) {
       if (_isLogin) {
         element.isSelf = element.midHash == _plPlayerController.midHash;

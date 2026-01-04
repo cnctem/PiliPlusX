@@ -9,7 +9,7 @@ import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/msg.dart';
 import 'package:PiliPlus/pages/common/common_list_controller.dart';
 import 'package:PiliPlus/utils/accounts.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/scroll_controller_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/material.dart';
@@ -56,12 +56,12 @@ class WhisperDetailController extends CommonListController<RspSessionMsg, Msg> {
 
   // 消息标记已读
   Future<void> ackSessionMsg(int msgSeqno) async {
-    var res = await MsgHttp.ackSessionMsg(
+    final res = await MsgHttp.ackSessionMsg(
       talkerId: talkerId,
       ackSeqno: msgSeqno,
     );
-    if (!res['status']) {
-      SmartDialog.showToast(res['msg']);
+    if (!res.isSuccess) {
+      res.toast();
     }
   }
 
@@ -82,7 +82,7 @@ class WhisperDetailController extends CommonListController<RspSessionMsg, Msg> {
       SmartDialog.showToast('请先登录');
       return;
     }
-    var result = await ImGrpc.sendMsg(
+    final res = await ImGrpc.sendMsg(
       senderUid: account.mid,
       receiverId: mid!,
       content: msgType == 5
@@ -91,7 +91,7 @@ class WhisperDetailController extends CommonListController<RspSessionMsg, Msg> {
       msgType: MsgType.values[msgType ?? (picMsg != null ? 2 : 1)],
     );
     SmartDialog.dismiss();
-    if (result.isSuccess) {
+    if (res.isSuccess) {
       if (msgType == 5) {
         loadingState
           ..value.data![index!].msgStatus = 1
@@ -103,7 +103,7 @@ class WhisperDetailController extends CommonListController<RspSessionMsg, Msg> {
         SmartDialog.showToast('发送成功');
       }
     } else {
-      result.toast();
+      res.toast();
     }
     _isSending = false;
   }

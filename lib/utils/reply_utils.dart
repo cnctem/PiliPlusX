@@ -6,10 +6,9 @@ import 'package:PiliPlus/grpc/bilibili/main/community/reply/v1.pb.dart'
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/reply.dart';
 import 'package:PiliPlus/models/common/reply/reply_sort_type.dart';
-import 'package:PiliPlus/models_new/reply/data.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/accounts/account.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
@@ -17,7 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
-class ReplyUtils {
+abstract final class ReplyUtils {
   static void onCheckReply({
     required ReplyInfo replyInfo,
     required bool biliSendCommAntifraud,
@@ -99,9 +98,10 @@ class ReplyUtils {
       await Future.delayed(const Duration(seconds: 8));
     }
     void showReplyCheckResult(String message, {bool isBan = false}) {
-      Get.dialog(
+      showDialog(
+        context: Get.context!,
         barrierDismissible: isManual,
-        AlertDialog(
+        builder: (context) => AlertDialog(
           title: const Text('评论检查结果'),
           content: SelectableText(message),
           actions: [
@@ -123,7 +123,7 @@ class ReplyUtils {
                     '/webview',
                     parameters: {
                       'url':
-                          'https://www.bilibili.com/h5/comment/appeal?native.theme=2&night=${Get.isDarkMode ? 1 : 0}',
+                          'https://www.bilibili.com/h5/comment/appeal?${Utils.themeUrl(Get.isDarkMode)}',
                     },
                   );
                 },
@@ -145,7 +145,7 @@ class ReplyUtils {
     // root reply
     if (root == 0) {
       // no cookie check
-      var res = await ReplyHttp.replyList(
+      final res = await ReplyHttp.replyList(
         isLogin: false,
         oid: oid,
         nextOffset: '',
@@ -154,13 +154,12 @@ class ReplyUtils {
         page: 1,
       );
 
-      if (res is Error) {
-        SmartDialog.showToast('获取评论主列表时发生错误：${res.errMsg}');
+      if (res case Error(:final errMsg)) {
+        SmartDialog.showToast('获取评论主列表时发生错误：$errMsg');
         return;
-      } else if (res.isSuccess) {
-        ReplyData replies = res.data;
-        int index =
-            replies.replies?.indexWhere((item) => item.rpid == id) ?? -1;
+      } else if (res case Success(:final response)) {
+        final index =
+            response.replies?.indexWhere((item) => item.rpid == id) ?? -1;
         if (index != -1) {
           // found
           showReplyCheckResult('无账号状态下找到了你的评论，评论正常！\n\n你的评论：$message');

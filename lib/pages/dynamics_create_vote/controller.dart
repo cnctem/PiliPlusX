@@ -1,11 +1,10 @@
 import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
 import 'package:PiliPlus/http/dynamics.dart';
+import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/msg.dart';
 import 'package:PiliPlus/models/dynamics/vote_model.dart';
-import 'package:PiliPlus/models_new/upload_bfs/data.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/utils.dart';
-import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
 class CreateVoteController extends GetxController {
@@ -57,16 +56,17 @@ class CreateVoteController extends GetxController {
   }
 
   Future<void> queryData() async {
-    var res = await DynamicsHttp.voteInfo(voteId);
-    if (res.isSuccess) {
+    final res = await DynamicsHttp.voteInfo(voteId);
+    if (res case Success(:final response)) {
       key = Utils.generateRandomString(6);
-      final VoteInfo data = res.data;
-      title.value = data.title!;
-      desc.value = data.desc ?? '';
-      type.value = data.options.first.imgUrl?.isNotEmpty == true ? 1 : 0;
-      options.value = data.options;
-      choiceCnt.value = data.choiceCnt!;
-      endtime.value = DateTime.fromMillisecondsSinceEpoch(data.endTime! * 1000);
+      title.value = response.title!;
+      desc.value = response.desc ?? '';
+      type.value = response.options.first.imgUrl?.isNotEmpty == true ? 1 : 0;
+      options.value = response.options;
+      choiceCnt.value = response.choiceCnt!;
+      endtime.value = DateTime.fromMillisecondsSinceEpoch(
+        response.endTime! * 1000,
+      );
       canCreate.value = true;
     } else {
       showConfirmDialog(
@@ -97,11 +97,11 @@ class CreateVoteController extends GetxController {
       votePublisher: Accounts.main.mid,
       voteId: voteId,
     );
-    var res = voteId == null
-        ? await DynamicsHttp.createVote(voteInfo)
-        : await DynamicsHttp.updateVote(voteInfo);
-    if (res.isSuccess) {
-      voteInfo.voteId = res.data;
+    final res = await (voteId == null
+        ? DynamicsHttp.createVote(voteInfo)
+        : DynamicsHttp.updateVote(voteInfo));
+    if (res case Success(:final response)) {
+      voteInfo.voteId = response;
       Get.back(result: voteInfo);
     } else {
       res.toast();
@@ -109,19 +109,18 @@ class CreateVoteController extends GetxController {
   }
 
   Future<void> onUpload(int index, String path) async {
-    var res = await MsgHttp.uploadBfs(
+    final res = await MsgHttp.uploadBfs(
       path: path,
       category: 'daily',
       biz: 'vote',
     );
-    if (res['status']) {
-      UploadBfsResData data = res['data'];
+    if (res case Success(:final response)) {
       options
-        ..[index].imgUrl = data.imageUrl
+        ..[index].imgUrl = response.imageUrl
         ..refresh();
       updateCanCreate();
     } else {
-      SmartDialog.showToast(res['msg']);
+      res.toast();
     }
   }
 }

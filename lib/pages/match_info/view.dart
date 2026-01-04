@@ -11,7 +11,8 @@ import 'package:PiliPlus/pages/common/dyn/common_dyn_page.dart';
 import 'package:PiliPlus/pages/match_info/controller.dart';
 import 'package:PiliPlus/pages/video/reply_reply/view.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/get_ext.dart';
+import 'package:PiliPlus/utils/extension/widget_ext.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart';
@@ -57,7 +58,7 @@ class _MatchInfoPageState extends CommonDynPageState<MatchInfoPage> {
             ],
           ),
         ),
-      ),
+      ).constraintWidth(),
       floatingActionButton: SlideTransition(
         position: fabAnim,
         child: replyButton,
@@ -66,9 +67,8 @@ class _MatchInfoPageState extends CommonDynPageState<MatchInfoPage> {
   }
 
   Widget _buildInfo(ThemeData theme, LoadingState<MatchContest?> infoState) {
-    if (infoState.isSuccess) {
-      MatchContest? data = infoState.dataOrNull;
-      if (data != null) {
+    if (infoState case Success(:final response)) {
+      if (response != null) {
         try {
           Widget teamInfo(MatchTeam team) {
             return Column(
@@ -95,7 +95,7 @@ class _MatchInfoPageState extends CommonDynPageState<MatchInfoPage> {
                 children: [
                   Center(
                     child: Text(
-                      '${data.season?.title ?? ''}  ${data.gameStage ?? ''}',
+                      '${response.season?.title ?? ''}  ${response.gameStage ?? ''}',
                     ),
                   ),
                   Row(
@@ -103,35 +103,36 @@ class _MatchInfoPageState extends CommonDynPageState<MatchInfoPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (data.homeId != 0)
+                      if (response.homeId != 0)
                         Expanded(
                           child: Align(
                             alignment: const Alignment(0.8, 1),
-                            child: teamInfo(data.homeTeam!),
+                            child: teamInfo(response.homeTeam!),
                           ),
                         ),
                       Column(
                         spacing: 10,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          if (data.homeId != 0)
+                          if (response.homeId != 0)
                             Text(
-                              data.contestStatus == 1
+                              response.contestStatus == 1
                                   ? 'VS'
-                                  : '${data.homeScore} : ${data.awayScore}',
+                                  : '${response.homeScore} : ${response.awayScore}',
                               style: const TextStyle(
                                 fontSize: 25,
                                 fontWeight: FontWeight.bold,
                               ),
                             )
-                          else if (data.season?.logo != null)
+                          else if (response.season?.logo != null)
                             NetworkImgLayer(
                               width: 50,
                               height: 50,
-                              src: 'https://i1.hdslb.com${data.season!.logo}',
+                              src:
+                                  'https://i1.hdslb.com${response.season!.logo}',
                               type: ImageType.emote,
                             ),
-                          if (data.contestStatus == 2)
+                          if (response.contestStatus == 2)
                             FilledButton.tonal(
                               style: FilledButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
@@ -146,20 +147,20 @@ class _MatchInfoPageState extends CommonDynPageState<MatchInfoPage> {
                                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
                               onPressed: () =>
-                                  PageUtils.toLiveRoom(data.liveRoom),
+                                  PageUtils.toLiveRoom(response.liveRoom),
                               child: const Text('看直播'),
                             )
-                          else if (data.contestStatus == 3)
+                          else if (response.contestStatus == 3)
                             Text(
-                              '${DateFormatUtils.dateFormat(data.stime)}${data.contestStatus == 3 ? ' 已结束' : ''}',
+                              '${DateFormatUtils.dateFormat(response.stime)}${response.contestStatus == 3 ? ' 已结束' : ''}',
                               style: TextStyle(
                                 color: theme.colorScheme.outline,
                               ),
                             )
-                          else if (data.contestStatus == 1)
+                          else if (response.contestStatus == 1)
                             Text(
                               DateFormatUtils.format(
-                                data.stime,
+                                response.stime,
                                 format: DateFormat('yy-MM-dd HH:mm'),
                               ),
                               style: TextStyle(
@@ -168,11 +169,11 @@ class _MatchInfoPageState extends CommonDynPageState<MatchInfoPage> {
                             ),
                         ],
                       ),
-                      if (data.awayId != 0)
+                      if (response.awayId != 0)
                         Expanded(
                           child: Align(
                             alignment: const Alignment(-0.8, -1),
-                            child: teamInfo(data.awayTeam!),
+                            child: teamInfo(response.awayTeam!),
                           ),
                         ),
                     ],
@@ -220,7 +221,7 @@ class _MatchInfoPageState extends CommonDynPageState<MatchInfoPage> {
               replyType: controller.replyType,
               firstFloor: replyItem,
             ),
-          ),
+          ).constraintWidth(),
         ),
       );
     });

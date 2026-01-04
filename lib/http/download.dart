@@ -1,3 +1,4 @@
+import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/video.dart';
 import 'package:PiliPlus/models/common/account_type.dart';
 import 'package:PiliPlus/models/common/video/audio_quality.dart';
@@ -8,10 +9,9 @@ import 'package:PiliPlus/models/video/play/url.dart';
 import 'package:PiliPlus/models_new/download/bili_download_entry_info.dart';
 import 'package:PiliPlus/models_new/download/bili_download_media_file_info.dart';
 import 'package:PiliPlus/utils/accounts.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/video_utils.dart';
-import 'package:get/get_utils/get_utils.dart';
 
 abstract final class DownloadHttp {
   static const String referer = "https://www.bilibili.com/";
@@ -38,18 +38,17 @@ abstract final class DownloadHttp {
         _ => VideoType.ugc,
       },
     );
-    if (res.isSuccess) {
-      final PlayUrlModel data = res.data;
-      final Dash? dash = data.dash;
+    if (res case Success(:final response)) {
+      final Dash? dash = response.dash;
       if (dash != null) {
         final List<VideoItem> videoList = dash.video!;
         final curHighestVideoQa = videoList.first.quality.code;
         final preferVideoQa = entry.preferedVideoQuality;
         int targetVideoQa = curHighestVideoQa;
-        if (data.acceptQuality?.isNotEmpty == true &&
+        if (response.acceptQuality?.isNotEmpty == true &&
             preferVideoQa <= curHighestVideoQa) {
           // 如果预设的画质低于当前最高
-          targetVideoQa = data.acceptQuality!.findClosestTarget(
+          targetVideoQa = response.acceptQuality!.findClosestTarget(
             (e) => e <= preferVideoQa,
             (a, b) => a > b ? a : b,
           );
@@ -61,7 +60,7 @@ abstract final class DownloadHttp {
             .toList();
 
         /// 优先顺序 设置中指定解码格式 -> 当前可选的首个解码格式
-        final List<FormatItem> supportFormats = data.supportFormats!;
+        final List<FormatItem> supportFormats = response.supportFormats!;
         // 根据画质选编码格式
         final FormatItem targetSupportFormats = supportFormats.firstWhere(
           (e) => e.quality == targetVideoQa,
@@ -171,7 +170,7 @@ abstract final class DownloadHttp {
           userAgent: userAgent,
         );
       } else {
-        final first = data.durl!.first;
+        final first = response.durl!.first;
         final List<Type1Segment> segmentList = [
           Type1Segment(
             backupUrls: [],
@@ -183,9 +182,8 @@ abstract final class DownloadHttp {
             url: VideoUtils.getCdnUrl(first.playUrls),
           ),
         ];
-        final FormatItem? formatItem = data.supportFormats?.firstWhereOrNull(
-          (e) => e.quality == data.quality,
-        );
+        final FormatItem? formatItem = response.supportFormats
+            ?.firstWhereOrNull((e) => e.quality == response.quality);
         final String description =
             formatItem?.newDesc ?? VideoQuality.clear480.desc;
         final int targetVideoQa =
@@ -224,7 +222,7 @@ abstract final class DownloadHttp {
           marlinToken: '',
           videoCodecId: 0,
           videoProject: true,
-          format: data.format!,
+          format: response.format!,
           playerError: 0,
           needVip: false,
           needLogin: false,
