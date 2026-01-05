@@ -41,10 +41,10 @@ class LiveDmBlockController extends GetxController
       updateValue();
 
       if (response?.keywordList case final keywordList?) {
-        keywordList.addAll(keywordList);
+        this.keywordList.addAll(keywordList);
       }
       if (response?.shieldUserList case final shieldUserList?) {
-        shieldUserList.addAll(shieldUserList);
+        this.shieldUserList.addAll(shieldUserList);
       }
     } else {
       res.toast();

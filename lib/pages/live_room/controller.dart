@@ -8,6 +8,7 @@ import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/video.dart';
 import 'package:PiliPlus/models/common/super_chat_type.dart';
 import 'package:PiliPlus/models/common/video/live_quality.dart';
+import 'package:PiliPlus/models/model_owner.dart';
 import 'package:PiliPlus/models_new/live/live_danmaku/danmaku_msg.dart';
 import 'package:PiliPlus/models_new/live/live_danmaku/live_emote.dart';
 import 'package:PiliPlus/models_new/live/live_dm_info/data.dart';
@@ -391,6 +392,7 @@ class LiveRoomController extends GetxController {
       ..removeListener(listener)
       ..dispose();
     pageController?.dispose();
+    danmakuController = null;
     super.onClose();
   }
 
@@ -441,6 +443,22 @@ class LiveRoomController extends GetxController {
           if (first[13] case Map<String, dynamic> map) {
             uemote = BaseEmote.fromJson(map);
           }
+          final checkInfo = info[9];
+          final liveExtra = LiveDanmaku(
+            id: extra['id_str'],
+            mid: uid,
+            dmType: extra['dm_type'],
+            ts: checkInfo['ts'],
+            ct: checkInfo['ct'],
+          );
+          Owner? reply;
+          final replyMid = extra['reply_mid'];
+          if (replyMid != null && replyMid != 0) {
+            reply = Owner(
+              mid: replyMid,
+              name: extra['reply_uname'],
+            );
+          }
           messages.add(
             DanmakuMsg(
               name: name,
@@ -450,11 +468,12 @@ class LiveRoomController extends GetxController {
                 (k, v) => MapEntry(k, BaseEmote.fromJson(v)),
               ),
               uemote: uemote,
+              extra: liveExtra,
+              reply: reply,
             ),
           );
 
           if (plPlayerController.showDanmaku) {
-            final checkInfo = info[9];
             danmakuController?.addDanmaku(
               DanmakuContentItem(
                 msg,
@@ -464,13 +483,7 @@ class LiveRoomController extends GetxController {
                 type: DmUtils.getPosition(extra['mode']),
                 // extra['send_from_me'] is invalid
                 selfSend: isLogin && uid == mid,
-                extra: LiveDanmaku(
-                  id: extra['id_str'],
-                  mid: uid,
-                  dmType: extra['dm_type'],
-                  ts: checkInfo['ts'],
-                  ct: checkInfo['ct'],
-                ),
+                extra: liveExtra,
               ),
             );
             if (!disableAutoScroll.value) {
