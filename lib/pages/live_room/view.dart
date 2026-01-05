@@ -26,6 +26,8 @@ import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/danmaku_options.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/plugin/pl_player/view.dart';
+import 'package:PiliPlus/services/live_pip_overlay_service.dart';
+import 'package:PiliPlus/services/pip_overlay_service.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/size_ext.dart';
@@ -64,6 +66,8 @@ class _LiveRoomPageState extends State<LiveRoomPage>
   late final GlobalKey chatKey = GlobalKey();
   late final GlobalKey scKey = GlobalKey();
   late final GlobalKey playerKey = GlobalKey();
+
+  bool _isEnteringPipMode = false;
 
   @override
   void initState() {
@@ -156,9 +160,11 @@ class _LiveRoomPageState extends State<LiveRoomPage>
       ScreenBrightnessPlatform.instance.resetApplicationScreenBrightness();
     }
     PlPlayerController.setPlayCallBack(null);
-    plPlayerController
-      ..removeStatusLister(playerListener)
-      ..dispose();
+    if (!_isEnteringPipMode) {
+      plPlayerController
+        ..removeStatusLister(playerListener)
+        ..dispose();
+    }
     PageUtils.routeObserver.unsubscribe(this);
     for (final e in LiveContributionRankType.values) {
       Get.delete<ContributionRankController>(
@@ -363,6 +369,37 @@ class _LiveRoomPageState extends State<LiveRoomPage>
     return PopScope(
       canPop: !isFullScreen,
       onPopInvokedWithResult: (bool didPop, Object? result) {
+        if (didPop) {
+          plPlayerController.disableAutoEnterPipIfNeeded();
+          
+          final bool isReturningToVideo = VideoStackManager.isReturningToVideo();
+
+          if (Pref.enableInAppPip &&
+              plPlayerController.playerStatus.playing == true &&
+              !LivePipOverlayService.isInPipMode &&
+              !isReturningToVideo) {
+            _isEnteringPipMode = true;
+
+            final overlayContext = Get.overlayContext;
+            if (overlayContext != null) {
+              LivePipOverlayService.startLivePip(
+                context: overlayContext,
+                heroTag: heroTag,
+                roomId: _liveRoomController.roomId,
+                plPlayerController: plPlayerController,
+                onClose: () {
+                  _isEnteringPipMode = false;
+                  plPlayerController?.pause();
+                  plPlayerController?.dispose();
+                },
+                onReturn: () {
+                  _isEnteringPipMode = false;
+                },
+              );
+            }
+          }
+        }
+        
         if (plPlayerController.controlsLock.value) {
           plPlayerController.onLockControl(false);
           return;

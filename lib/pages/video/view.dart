@@ -45,6 +45,7 @@ import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/plugin/pl_player/view.dart';
+import 'package:PiliPlus/services/pip_overlay_service.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/services/shutdown_timer_service.dart';
 import 'package:PiliPlus/utils/accounts.dart';
@@ -57,6 +58,7 @@ import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:auto_orientation/auto_orientation.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
 import 'package:floating/floating.dart';
@@ -93,6 +95,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   late final UgcIntroController ugcIntroController;
   late final PgcIntroController pgcIntroController;
   late final LocalIntroController localIntroController;
+
+  bool _isEnteringPipMode = false;
 
   bool get autoExitFullscreen =>
       videoDetailController.plPlayerController.autoExitFullscreen;
@@ -355,7 +359,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       videoPlayerServiceHandler?.onVideoDetailDispose(heroTag);
       if (plPlayerController != null) {
         videoDetailController.makeHeartBeat();
-        plPlayerController!.dispose();
+        if (!_isEnteringPipMode) {
+          plPlayerController!.dispose();
+        }
       } else {
         PlPlayerController.updatePlayCount();
       }
@@ -2183,6 +2189,64 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   void _onPopInvokedWithResult(bool didPop, result) {
     if (didPop) {
       videoDetailController.plPlayerController.disableAutoEnterPipIfNeeded();
+      
+      final bool isReturningToVideo = VideoStackManager.isReturningToVideo();
+
+      if (Pref.enableInAppPip &&
+          plPlayerController?.playerStatus.playing == true &&
+          !PipOverlayService.isInPipMode &&
+          !isReturningToVideo) {
+        _isEnteringPipMode = true;
+
+        final overlayContext = Get.overlayContext;
+        if (overlayContext != null) {
+          PipOverlayService.startPip(
+            context: overlayContext,
+            videoPlayerBuilder: (isPipMode) {
+              return plPlayer(
+                width: 200,
+                height: 112,
+                isPipMode: isPipMode,
+              );
+            },
+            onClose: () {
+              _isEnteringPipMode = false;
+              plPlayerController?.pause();
+              plPlayerController?.dispose();
+            },
+            onTapToReturn: () {
+              final currentPosition = plPlayerController?.position.value;
+              final savedBvid = videoDetailController.bvid;
+              final savedAid = videoDetailController.aid;
+              final savedCid = videoDetailController.cid.value;
+              final savedVideoType = videoDetailController.videoType;
+              final savedCover = videoDetailController.cover.value;
+              final savedHeroTag = heroTag;
+              final savedEpId = videoDetailController.epId;
+              final savedSeasonId = videoDetailController.seasonId;
+              final savedPgcType = videoDetailController.pgcType;
+
+              _isEnteringPipMode = false;
+
+              Get.toNamed(
+                '/video',
+                arguments: {
+                  'heroTag': savedHeroTag,
+                  'bvid': savedBvid,
+                  'aid': savedAid,
+                  'cid': savedCid,
+                  'videoType': savedVideoType,
+                  'cover': savedCover,
+                  'epId': savedEpId,
+                  'seasonId': savedSeasonId,
+                  'pgcType': savedPgcType,
+                  'initialPosition': currentPosition,
+                },
+              );
+            },
+          );
+        }
+      }
     }
     if (plPlayerController?.controlsLock.value == true) {
       plPlayerController?.onLockControl(false);
@@ -2194,6 +2258,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     }
     if (!videoDetailController.horizontalScreen && !isPortrait) {
       verticalScreenForTwoSeconds();
+      return;
+    }
+    if (PipOverlayService.isInPipMode) {
+      PipOverlayService.stopPip();
       return;
     }
   }
