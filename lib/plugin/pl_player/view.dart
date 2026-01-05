@@ -595,16 +595,20 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
               final currentFit = plPlayerController.videoFit.value;
               if (currentFit == VideoFitType.contain) {
                 plPlayerController.toggleVideoFit(VideoFitType.cover);
+                SmartDialog.showToast(VideoFitType.cover.desc);
               } else {
                 plPlayerController.toggleVideoFit(VideoFitType.contain);
+                SmartDialog.showToast(VideoFitType.contain.desc);
               }
             },
             onSecondaryTap: () {
               final currentFit = plPlayerController.videoFit.value;
               if (currentFit == VideoFitType.contain) {
                 plPlayerController.toggleVideoFit(VideoFitType.cover);
+                SmartDialog.showToast(VideoFitType.cover.desc);
               } else {
                 plPlayerController.toggleVideoFit(VideoFitType.contain);
+                SmartDialog.showToast(VideoFitType.contain.desc);
               }
             },
             child: Padding(
@@ -763,11 +767,15 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           child: GestureDetector(
             onLongPress: () {
               final double currentSpeed = plPlayerController.playbackSpeed;
-              plPlayerController.setPlaybackSpeed(currentSpeed == 1.0 ? 2.0 : 1.0);
+              final newSpeed = currentSpeed == 1.0 ? 2.0 : 1.0;
+              plPlayerController.setPlaybackSpeed(newSpeed);
+              SmartDialog.showToast("${newSpeed}X");
             },
             onSecondaryTap: () {
               final double currentSpeed = plPlayerController.playbackSpeed;
-              plPlayerController.setPlaybackSpeed(currentSpeed == 1.0 ? 2.0 : 1.0);
+              final newSpeed = currentSpeed == 1.0 ? 2.0 : 1.0;
+              plPlayerController.setPlaybackSpeed(newSpeed);
+              SmartDialog.showToast("${newSpeed}X");
             },
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),

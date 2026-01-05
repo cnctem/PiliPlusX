@@ -152,16 +152,20 @@ class _BottomControlState extends State<BottomControl> with HeaderMixin {
                   final currentFit = plPlayerController.videoFit.value;
                   if (currentFit == VideoFitType.contain) {
                     plPlayerController.toggleVideoFit(VideoFitType.cover);
+                    SmartDialog.showToast(VideoFitType.cover.desc);
                   } else {
                     plPlayerController.toggleVideoFit(VideoFitType.contain);
+                    SmartDialog.showToast(VideoFitType.contain.desc);
                   }
                 },
                 onSecondaryTap: () {
                   final currentFit = plPlayerController.videoFit.value;
                   if (currentFit == VideoFitType.contain) {
                     plPlayerController.toggleVideoFit(VideoFitType.cover);
+                    SmartDialog.showToast(VideoFitType.cover.desc);
                   } else {
                     plPlayerController.toggleVideoFit(VideoFitType.contain);
+                    SmartDialog.showToast(VideoFitType.contain.desc);
                   }
                 },
                 child: Padding(
