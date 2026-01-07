@@ -43,7 +43,12 @@ abstract class Update {
       final data = res.data[0];
       final int latest =
           DateTime.parse(data['created_at']).millisecondsSinceEpoch ~/ 1000;
-      if (BuildConfig.buildTime >= latest) {
+      final latestTag = data['tag_name'];
+      final latestHash = (await Request().get(
+        'https://api.github.com/repos/qinshah/PiliPlus/git/refs/tags/$latestTag',
+      )).data['object']['sha'];
+      if (BuildConfig.buildTime >= latest ||
+          BuildConfig.commitHash == latestHash) {
         if (!isAuto) {
           SmartDialog.showToast('已是最新版本');
         }
