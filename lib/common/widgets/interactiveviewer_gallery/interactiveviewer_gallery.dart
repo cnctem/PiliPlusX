@@ -273,8 +273,8 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
                   onDoubleTap,
                 ),
                 onLongPress: !isFileImg ? () => onLongPress(item) : null,
-                onSecondaryTap: !isFileImg && !PlatformUtils.isMobile
-                    ? () => onLongPress(item)
+                onSecondaryTapUp: PlatformUtils.isDesktop && !isFileImg
+                    ? (e) => _showDesktopMenu(e.globalPosition, item)
                     : null,
                 child: widget.itemBuilder != null
                     ? widget.itemBuilder!(
@@ -479,15 +479,51 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
                     );
                   },
                   dense: true,
-                  title: const Text(
-                    '保存 Live Photo',
-                    style: TextStyle(fontSize: 14),
+                  title: Text(
+                    '保存${Platform.isIOS ? ' Live Photo' : '视频'}',
+                    style: const TextStyle(fontSize: 14),
                   ),
                 ),
             ],
           ),
         );
       },
+    );
+  }
+
+  void _showDesktopMenu(Offset offset, SourceModel item) {
+    showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(offset.dx, offset.dy, offset.dx, 0),
+      items: [
+        PopupMenuItem(
+          height: 42,
+          onTap: () => Utils.copyText(item.url),
+          child: const Text('复制链接', style: TextStyle(fontSize: 14)),
+        ),
+        PopupMenuItem(
+          height: 42,
+          onTap: () => ImageUtils.downloadImg(context, [item.url]),
+          child: const Text('保存图片', style: TextStyle(fontSize: 14)),
+        ),
+        PopupMenuItem(
+          height: 42,
+          onTap: () => PageUtils.launchURL(item.url),
+          child: const Text('网页打开', style: TextStyle(fontSize: 14)),
+        ),
+        if (item.sourceType == SourceType.livePhoto)
+          PopupMenuItem(
+            height: 42,
+            onTap: () => ImageUtils.downloadLivePhoto(
+              context: context,
+              url: item.url,
+              liveUrl: item.liveUrl!,
+              width: item.width!,
+              height: item.height!,
+            ),
+            child: const Text('保存视频', style: TextStyle(fontSize: 14)),
+          ),
+      ],
     );
   }
 }
