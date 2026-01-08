@@ -268,6 +268,12 @@ class MineController extends CommonDataController<FavFolderData, FavFolderData>
     Get.changeThemeMode(newVal.toThemeMode);
   }
 
+  void onChangeThemeToSystem() {
+    themeType.value = ThemeType.system;
+    GStorage.setting.put(SettingBoxKey.themeMode, ThemeType.system.index);
+    Get.changeThemeMode(ThemeMode.system);
+  }
+
   void push(String name) {
     late final mid = userInfo.value.mid;
     if (isLogin && mid != null) {

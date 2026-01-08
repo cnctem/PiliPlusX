@@ -195,15 +195,19 @@ class _MediaPageState extends CommonPageState<MinePage, MineController>
         ),
         Obx(
           () {
-            return IconButton(
-              iconSize: 22,
-              padding: const EdgeInsets.all(8),
-              style: const ButtonStyle(
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            return GestureDetector(
+              onLongPress: controller.onChangeThemeToSystem,
+              onSecondaryTap: controller.onChangeThemeToSystem,
+              child: IconButton(
+                iconSize: 22,
+                padding: const EdgeInsets.all(8),
+                style: const ButtonStyle(
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                tooltip: '切换至${controller.nextThemeType.desc}主题',
+                onPressed: controller.onChangeTheme,
+                icon: controller.themeType.value.icon,
               ),
-              tooltip: '切换至${controller.nextThemeType.desc}主题',
-              onPressed: controller.onChangeTheme,
-              icon: controller.themeType.value.icon,
             );
           },
         ),
