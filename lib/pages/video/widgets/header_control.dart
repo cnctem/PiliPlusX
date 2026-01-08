@@ -1019,6 +1019,28 @@ class HeaderControlState extends State<HeaderControl>
                         Get.back();
                         final int quality = item.quality!;
                         final newQa = VideoQuality.fromCode(quality);
+
+                        if (newQa == VideoQuality.hdrVivid ||
+                            newQa == VideoQuality.dolbyVision ||
+                            newQa == VideoQuality.hdr) {
+                          SmartDialog.show(
+                            builder: (context) {
+                              final ThemeData theme = Theme.of(context);
+                              return AlertDialog(
+                                title: const Text('提示'),
+                                content: const Text(
+                                    '当前版本media_kit暂不支持HDR和杜比视界，将作SDR解析'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: SmartDialog.dismiss,
+                                    child: const Text('确定'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        }
+
                         videoDetailCtr
                           ..plPlayerController.cacheVideoQa = newQa.code
                           ..currentVideoQa.value = newQa
