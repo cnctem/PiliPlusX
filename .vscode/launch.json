@@ -12,15 +12,6 @@
       ]
     },
     {
-      "name": "PiliPlus (debug)",
-      "request": "launch",
-      "type": "dart",
-      "preLaunchTask": "build_env",
-      "args": [
-        "--dart-define-from-file=.vscode/env.json"
-      ]
-    },
-    {
       "name": "PiliPlus (profile)",
       "request": "launch",
       "type": "dart",

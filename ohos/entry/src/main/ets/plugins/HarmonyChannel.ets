@@ -32,6 +32,10 @@ export default class HarmonyChannel implements FlutterPlugin {
     }
   }
 
+  public onFloatingWindowChange(isFloatingWindow: boolean) {
+    this.channel?.invokeMethod('onFloatingWindowChange', { 'isFloatingWindow': isFloatingWindow })
+  }
+
   private async setMiniWindowLandscape(landscape: boolean) {
     this.lastWindow ??= await window.getLastWindow(getContext())
     if (landscape) {
