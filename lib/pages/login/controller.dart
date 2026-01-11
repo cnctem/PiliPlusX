@@ -752,7 +752,7 @@ class LoginPageController extends GetxController
                 selectAccount[0] = v!;
                 (context as Element).markNeedsBuild();
               },
-              child: WrapRadioOptionsGroup<Account>.vertical(
+              child: WrapRadioOptionsGroup<Account>(
                 groupTitle: '账号切换',
                 options: options,
               ),
