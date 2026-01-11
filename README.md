@@ -1,16 +1,14 @@
 <div align="center">
-    <img width="200" height="200" src="assets/images/logo/logo.png">
+    <img width="200" height="200" src="assets/images/logo/logo_X.png">
 </div>
 
 
 
 <div align="center">
-    <h1>PiliPlus</h1>
+    <h1>PiliPlusX</h1>
 <div align="center">
     
-![GitHub repo size](https://img.shields.io/github/repo-size/bggRGjQaUbCoE/PiliPlus) 
-![GitHub Repo stars](https://img.shields.io/github/stars/bggRGjQaUbCoE/PiliPlus) 
-![GitHub all releases](https://img.shields.io/github/downloads/bggRGjQaUbCoE/PiliPlus/total) 
+
 </div>
     <p>使用Flutter开发的BiliBili第三方客户端</p>
     
@@ -25,15 +23,27 @@
 
 <br/>
 
+## 空降指挥部
+
+- [特色功能](#功能)
+- [快捷键功能说明](docs/快捷键说明.md)
+- [港澳台代理](#港澳台代理)
+- [致谢](#致谢)
+
+- PiliPlusX 独家功能详见 [TODO List](https://github.com/cnctem/PiliPlusX/blob/dev/docs/TODO.md) 完成项
+- [下载最新版本](https://github.com/cnctem/PiliPlusX/releases/latest)
+- [安卓字体修复版本说明](#PiliPlusX字体修复说明)
+- 请提出你的宝贵建议！[Issues](https://github.com/cnctem/PiliPlusX/issues)
+
 ## 适配平台
 
 - [x] Android
 - [x] iOS
 - [x] Pad
+- [x] macOS
 - [x] Windows
-- [x] Linux
-
-[![Packaging status](https://repology.org/badge/vertical-allrepos/piliplus.svg)](https://repology.org/project/piliplus/versions)
+- [ ] Harmony OS ([开发中](https://github.com/cnctem/PiliPlusX/issues/5))
+- [ ] Linux (暂时移除支持, [详情](https://github.com/cnctem/PiliPlusX/issues/7#issuecomment-3650079829))
 
 ## refactor
 
@@ -130,11 +140,14 @@
 - [x] 视频播放
 - [x] 视频staff
 - [x] 防止bottomsheet遮挡全屏视频
+- [x] 回车绑定发送
+- [x] 选择鸿蒙黑体/系统字体
 - [x] 其他
 
 ## fix
 
 - [x] 番剧分集点赞/投币/收藏
+- [x] 字体回调（Flutter 3.38 导致）
 - [x] bugs
 
 <br/>
@@ -240,37 +253,39 @@
 |------|------|:----:|
 |gucooing|https://blblapi.alsl.xyz||
 
+感谢 [gucooing](https://github.com/gucooing) !
+
+## PiliPlusX版本说明
+
+- 主线版本：基于上游[`main`分支](https://github.com/bggRGjQaUbCoE/PiliPlus/tree/main)更新最及时，打包 Android、iOS、Windows、macOS 版本
+- oddo版本：基于上游[`flutter_3.35.7`分支](https://github.com/bggRGjQaUbCoE/PiliPlus/tree/flutter_3.35.7)，面向color OS等字体错误的定制安卓，仅打包 Android 版本
+- ohos版本：敬请期待
+
+## PiliPlusX字体修复说明
+
+- 字体问题由`flutter3.38.x`要求显式定义字体，而color OS及个别定制安卓的字体机制采用映射到系统Roboto的方案，导致flutter找不到定义的字体从而产生字体问题，表现为显示为一种错误的衬线字体
+- 主线版本 在关闭设置项“使用系统字体”后将字体指定为使用鸿蒙黑体，基本解决问题
+- 如果你是color OS等字体错误的定制安卓，且希望显示手机自定义主题字体，推荐使用oddo版本，通过使用`flutter3.35.7`彻底解决字体问题。下载最新版本 [v1.1.0.0-oddo](https://github.com/cnctem/PiliPlusX/releases/tag/v1.1.0.0)
+
 ## 声明
 
-此项目（PiliPlus）是个人为了兴趣而开发, 仅用于学习和测试，请于下载后24小时内删除。
+此项目（PiliPlusX）是个人学习 Flutter 而开发，仅用于交流学习 Flutter 技术，请于下载后24小时内删除，严禁在互联网上传播软件安装包！
+
+上游项目声明
+>此项目（PiliPlus）是个人为了兴趣而开发，仅用于学习和测试，请于下载后24小时内删除。
 所用API皆从官方网站收集, 不提供任何破解内容。
-在此致敬原作者：[guozhigq/pilipala](https://github.com/guozhigq/pilipala)
-在此致敬上游作者：[orz12/PiliPalaX](https://github.com/orz12/PiliPalaX)
-本仓库做了更激进的修改，感谢原作者的开源精神。
 
-感谢使用
-
-
-<br/>
+**感谢使用**
 
 ## 致谢
+
+- 在此致敬原作者：[guozhigq/pilipala](https://github.com/guozhigq/pilipala)
+- 在此致敬上游作者：[orz12/PiliPalaX](https://github.com/orz12/PiliPalaX)
+- 在此致敬上游作者：[bggRGjQaUbCoE/PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus)
+- 在此致敬上游作者：[gucooing/PiliPlus](https://github.com/gucooing/PiliPlus)
 
 - [bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect)
 - [flutter_meedu_videoplayer](https://github.com/zezo357/flutter_meedu_videoplayer)
 - [media-kit](https://github.com/media-kit/media-kit)
 - [dio](https://pub.dev/packages/dio)
 - 等等
-
-<br/>
-<br/>
-<br/>
-
-## Star History
-
-<a href="https://www.star-history.com/#bggRGjQaUbCoE/PiliPlus&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=bggRGjQaUbCoE/PiliPlus&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=bggRGjQaUbCoE/PiliPlus&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=bggRGjQaUbCoE/PiliPlus&type=Date" />
- </picture>
-</a>

@@ -590,11 +590,33 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 )
                 .toList();
           },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              plPlayerController.videoFit.value.desc,
-              style: const TextStyle(color: Colors.white, fontSize: 13),
+          child: GestureDetector(
+            onLongPress: () {
+              final currentFit = plPlayerController.videoFit.value;
+              if (currentFit == VideoFitType.contain) {
+                plPlayerController.toggleVideoFit(VideoFitType.cover);
+                SmartDialog.showToast(VideoFitType.cover.desc);
+              } else {
+                plPlayerController.toggleVideoFit(VideoFitType.contain);
+                SmartDialog.showToast(VideoFitType.contain.desc);
+              }
+            },
+            onSecondaryTap: () {
+              final currentFit = plPlayerController.videoFit.value;
+              if (currentFit == VideoFitType.contain) {
+                plPlayerController.toggleVideoFit(VideoFitType.cover);
+                SmartDialog.showToast(VideoFitType.cover.desc);
+              } else {
+                plPlayerController.toggleVideoFit(VideoFitType.contain);
+                SmartDialog.showToast(VideoFitType.contain.desc);
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                plPlayerController.videoFit.value.desc,
+                style: const TextStyle(color: Colors.white, fontSize: 13),
+              ),
             ),
           ),
         ),
@@ -742,12 +764,26 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 )
                 .toList();
           },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              "${plPlayerController.playbackSpeed}X",
-              style: const TextStyle(color: Colors.white, fontSize: 13),
-              semanticsLabel: "${plPlayerController.playbackSpeed}倍速",
+          child: GestureDetector(
+            onLongPress: () {
+              final double currentSpeed = plPlayerController.playbackSpeed;
+              final newSpeed = currentSpeed == 1.0 ? 2.0 : 1.0;
+              plPlayerController.setPlaybackSpeed(newSpeed);
+              SmartDialog.showToast("${newSpeed}X");
+            },
+            onSecondaryTap: () {
+              final double currentSpeed = plPlayerController.playbackSpeed;
+              final newSpeed = currentSpeed == 1.0 ? 2.0 : 1.0;
+              plPlayerController.setPlaybackSpeed(newSpeed);
+              SmartDialog.showToast("${newSpeed}X");
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                "${plPlayerController.playbackSpeed}X",
+                style: const TextStyle(color: Colors.white, fontSize: 13),
+                semanticsLabel: "${plPlayerController.playbackSpeed}倍速",
+              ),
             ),
           ),
         ),
@@ -798,6 +834,28 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                       }
                       final int quality = item.quality!;
                       final newQa = VideoQuality.fromCode(quality);
+
+                      if (newQa == VideoQuality.hdrVivid ||
+                          newQa == VideoQuality.dolbyVision ||
+                          newQa == VideoQuality.hdr) {
+                        SmartDialog.show(
+                          builder: (context) {
+                            final ThemeData theme = Theme.of(context);
+                            return AlertDialog(
+                              title: const Text('提示'),
+                              content: const Text(
+                                  '当前版本media_kit暂不支持HDR和杜比视界，将作SDR解析'),
+                              actions: [
+                                TextButton(
+                                  onPressed: SmartDialog.dismiss,
+                                  child: const Text('确定'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
+
                       videoDetailController
                         ..plPlayerController.cacheVideoQa = newQa.code
                         ..currentVideoQa.value = newQa
@@ -2015,7 +2073,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                               ),
                               child: BackwardSeekIndicator(
                                 duration:
-                                    plPlayerController.fastForBackwardDuration,
+                                    plPlayerController.fastForBackwardDuration_,
                                 onSubmitted: (Duration value) {
                                   plPlayerController
                                     ..mountSeekBackwardButton.value = false

@@ -147,7 +147,7 @@ dependencies:
   #     ref: master
   canvas_danmaku:
     git:
-      url: https://github.com/bggRGjQaUbCoE/canvas_danmaku.git
+      url: https://github.com/cnctem/canvas_danmaku.git
       ref: main
   # 状态栏图标控制
   # status_bar_control: ^3.2.1
@@ -355,12 +355,10 @@ flutter:
     - family: custom_icon
       fonts:
         - asset: assets/fonts/custom_icon.ttf
-  #   - family: Jura-Bold
-  #     fonts:
-  #       - asset: assets/fonts/Jura-Bold.ttf
-  # - family: HarmonyOS
-  #   fonts:
-  #     - asset: assets/fonts/HarmonyOS_Sans_SC_Regular.ttf
+    - family: HarmonyOS_Sans
+      fonts:
+        - asset: assets/fonts/HarmonyOS_SansSC_Regular.ttf
 
+  # 字幕和弹幕将直接调取HarmonyOS_Sans
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

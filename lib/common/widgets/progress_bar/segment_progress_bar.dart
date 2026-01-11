@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:PiliPlus/utils/storage_pref.dart' as Pref;
 
 class Segment {
   final double start;
@@ -51,6 +53,9 @@ class SegmentProgressBar extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..style = PaintingStyle.fill;
+    final fontFamily = !Pref.Pref.useSystemFont && Platform.isAndroid
+        ? 'HarmonyOS_Sans'
+        : null;
 
     for (int i = 0; i < segmentColors.length; i++) {
       final item = segmentColors[i];
@@ -81,6 +86,7 @@ class SegmentProgressBar extends CustomPainter {
               style: TextStyle(
                 color: Colors.white,
                 fontSize: fontSize,
+                fontFamily: fontFamily,
                 height: 1,
               ),
             ),

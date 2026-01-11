@@ -446,6 +446,15 @@ List<SettingsModel> get extraSettings => [
       DynamicsDataModel.enableFilter = value.pattern.isNotEmpty;
     },
   ),
+  if (Platform.isAndroid) ...[
+    getSaveImgPathModel(
+      context: Get.context!,
+      title: '图片&截图 保存路径',
+      key1: SettingBoxKey.saveImgPath,
+      key2: SettingBoxKey.saveScreenshotPath,
+      suffix: 'bili',
+    ),
+  ],
   const SwitchModel(
     title: '使用外部浏览器打开链接',
     leading: Icon(Icons.open_in_browser),
@@ -461,10 +470,10 @@ List<SettingsModel> get extraSettings => [
         context: context,
         builder: (context) {
           return SlideDialog(
-            title: '刷新滑动距离',
-            min: 0.1,
+            title: '刷新滑动距离(默认0.25)',
+            min: 0,
             max: 0.5,
-            divisions: 8,
+            divisions: 10,
             precise: 2,
             value: Pref.refreshDragPercentage,
             suffix: 'x',
@@ -833,7 +842,72 @@ List<SettingsModel> get extraSettings => [
         }
       }
     },
+  ),
+  SwitchModel(
+    title: '快速分享给指定用户',
+    subtitle: '长按分享触发，点击指定用户',
+    leading: const Icon(FontAwesomeIcons.shareFromSquare),
+    setKey: SettingBoxKey.enableQuickShare,
     defaultVal: false,
+    onChanged: (value) async {
+      if (value && Accounts.main.isLogin) {
+        final TextEditingController controller = TextEditingController();
+        final quickShareId = Pref.quickShareId;
+        if (quickShareId != null && quickShareId != 1004428694) {
+          controller.text = quickShareId.toString();
+        }
+        final result = await showDialog<bool>(
+          context: Get.context!,
+          builder: (context) => AlertDialog(
+            title: const Text('默认分享对象的mid'),
+            content: TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                hintText: '空白默认为开发者mid',
+              ),
+              keyboardType: TextInputType.number,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
+                child: const Text('确定'),
+              ),
+            ],
+          ),
+        );
+
+        if (result == true) {
+          final inputText = controller.text.trim();
+          if (inputText.isEmpty) {
+            // 如果为空，使用默认值
+            await GStorage.setting.put(SettingBoxKey.quickShareId, 1004428694);
+            SmartDialog.showToast('设置成功');
+          } else {
+            final mid = int.tryParse(inputText);
+            if (mid != null) {
+              // 如果是有效的整数，保存
+              await GStorage.setting.put(SettingBoxKey.quickShareId, mid);
+              SmartDialog.showToast('设置成功');
+            } else {
+              // 如果不是有效的整数，显示错误并关闭选项
+              SmartDialog.showToast('请输入正确mid');
+              await GStorage.setting.put(SettingBoxKey.enableQuickShare, false);
+            }
+          }
+        } else {
+          // 用户点击取消，关闭选项
+          await GStorage.setting.put(SettingBoxKey.enableQuickShare, false);
+        }
+      }
+    },
   ),
   SwitchModel(
     title: '评论区搜索关键词',
@@ -923,6 +997,19 @@ List<SettingsModel> get extraSettings => [
         SmartDialog.showToast('重启生效');
       }
     },
+  ),
+  const SwitchModel(
+    title: '长按展示视频卡片替换为加入稍后再看',
+    leading: const Icon(Icons.watch_later_outlined),
+    setKey: SettingBoxKey.defaultAddWatchLater,
+    defaultVal: false,
+  ),
+  const SwitchModel(
+    title: '在"我的"页点击主菜单"我的"打开稍后再看',
+    subtitle: '关闭选项 默认打开账号选择器',
+    leading: const Icon(Icons.watch_later_outlined),
+    setKey: SettingBoxKey.defaultShowWatchLater,
+    defaultVal: false,
   ),
   NormalModel(
     title: '评论展示',

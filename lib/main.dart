@@ -5,7 +5,12 @@ import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/widgets/custom_toast.dart';
 import 'package:PiliPlus/common/widgets/mouse_back.dart';
 import 'package:PiliPlus/http/init.dart';
+import 'package:PiliPlus/models/common/nav_bar_config.dart';
 import 'package:PiliPlus/models/common/theme/theme_color_type.dart';
+import 'package:PiliPlus/pages/common/common_controller.dart';
+import 'package:PiliPlus/pages/dynamics/controller.dart';
+import 'package:PiliPlus/pages/home/controller.dart';
+import 'package:PiliPlus/pages/main/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/router/app_pages.dart';
 import 'package:PiliPlus/services/account_service.dart';
@@ -20,6 +25,7 @@ import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/json_file_handler.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
+import 'package:PiliPlus/utils/platform_shortcuts.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
@@ -27,6 +33,7 @@ import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/theme_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/utils/window_control.dart';
 import 'package:catcher_2/catcher_2.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
@@ -170,6 +177,11 @@ void main() async {
       if (Pref.isWindowMaximized) await windowManager.maximize();
       await windowManager.show();
       await windowManager.focus();
+
+      // Restore window from minimized state on Windows
+      if (Platform.isWindows) {
+        await WindowControl.restoreWindow();
+      }
     });
   }
 
@@ -305,10 +317,29 @@ class MyApp extends StatelessWidget {
             return Focus(
               canRequestFocus: false,
               onKeyEvent: (_, event) {
+                // 处理刷新快捷键
+                final refreshResult = _handleRefreshKey(event);
+                if (refreshResult != null) {
+                  return refreshResult;
+                }
+
+                // 处理设置快捷键 (主修饰键 + ,)
+                final settingsResult = _handleSettingsKey(event);
+                if (settingsResult != null) {
+                  return settingsResult;
+                }
+
+                // 处理Escape键返回功能
                 if (event.logicalKey == LogicalKeyboardKey.escape &&
                     event is KeyDownEvent) {
                   _onBack();
                   return KeyEventResult.handled;
+                }
+
+                // 处理Alt+H/Opt+H返回主页快捷键
+                final homeResult = _handleHomeShortcut(event);
+                if (homeResult != null) {
+                  return homeResult;
                 }
                 return KeyEventResult.ignored;
               },
@@ -383,6 +414,121 @@ class MyApp extends StatelessWidget {
     GStorage.setting.put(SettingBoxKey.dynamicColor, false);
     return false;
   }
+}
+
+// 处理刷新快捷键
+KeyEventResult? _handleRefreshKey(KeyEvent event) {
+  if (event is! KeyDownEvent) return null;
+  // 1. 先匹配字母 R
+  if (event.logicalKey != LogicalKeyboardKey.keyR) {
+    return null;
+  }
+  // 2. 再判断本平台的"主修饰键"是否按下
+  if (!isPrimaryModifierPressed) return null;
+  // 3. 防止 Shift/Alt/等其它修饰符干扰
+  if (HardwareKeyboard.instance.isShiftPressed ||
+      HardwareKeyboard.instance.isAltPressed) {
+    return null;
+  }
+  // 4. 真正干活
+  _handleRefreshShortcut();
+  return KeyEventResult.handled;
+}
+
+// 处理设置快捷键 (主修饰键 + ,)
+KeyEventResult? _handleSettingsKey(KeyEvent event) {
+  if (event is! KeyDownEvent) return null;
+  // 1. 先匹配逗号键
+  if (event.logicalKey != LogicalKeyboardKey.comma) {
+    return null;
+  }
+  // 2. 再判断本平台的"主修饰键"是否按下
+  if (!isPrimaryModifierPressed) return null;
+  // 3. 防止 Shift/Alt/等其它修饰符干扰
+  if (HardwareKeyboard.instance.isShiftPressed ||
+      HardwareKeyboard.instance.isAltPressed) {
+    return null;
+  }
+  // 4. 打开设置页面
+  _handleSettingsShortcut();
+  return KeyEventResult.handled;
+}
+
+// 处理Control+R快捷键刷新
+void _handleRefreshShortcut() {
+  // 获取当前路由
+  final context = Get.context;
+  if (context == null) return;
+  // 尝试获取当前页面的控制器
+  final currentController = _getCurrentPageController();
+  if (currentController != null) {
+    // 如果当前控制器有onRefresh方法，则调用它
+    if (currentController is ScrollOrRefreshMixin) {
+      currentController.onRefresh();
+    }
+  }
+}
+
+// 获取当前页面的控制器
+dynamic _getCurrentPageController() {
+  try {
+    // 获取主页控制器
+    final mainController = Get.find<MainController>();
+    final currentIndex = mainController.selectedIndex.value;
+    // 根据当前索引获取对应的控制器
+    if (mainController.navigationBars[currentIndex] == NavigationBarType.home) {
+      final homeController = Get.find<HomeController>();
+      return homeController.controller;
+    } else if (mainController.navigationBars[currentIndex] ==
+        NavigationBarType.dynamics) {
+      return Get.find<DynamicsController>();
+    }
+
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
+
+// 处理Alt+H/Opt+H返回主页快捷键
+KeyEventResult? _handleHomeShortcut(KeyEvent event) {
+  if (event is! KeyDownEvent) return null;
+  // 1. 先匹配字母 H
+  if (event.logicalKey != LogicalKeyboardKey.keyH) {
+    return null;
+  }
+  // 2. 判断Alt键是否按下（Windows/Linux/macOS的Option键）
+  if (!HardwareKeyboard.instance.isAltPressed) {
+    return null;
+  }
+  // 3. 防止其他修饰符干扰
+  if (HardwareKeyboard.instance.isShiftPressed ||
+      HardwareKeyboard.instance.isControlPressed ||
+      HardwareKeyboard.instance.isMetaPressed) {
+    return null;
+  }
+  // 4. 执行返回主页逻辑
+  _handleHomeShortcutAction();
+  return KeyEventResult.handled;
+}
+
+// 执行返回主页操作
+void _handleHomeShortcutAction() {
+  // 清理播放器资源（如果存在）
+  final plCtr = PlPlayerController.instance;
+  if (plCtr != null) {
+    plCtr
+      ..isCloseAll = true
+      ..dispose();
+  }
+  // 返回主页
+  Get.until((route) => route.isFirst);
+}
+
+// 处理设置快捷键
+void _handleSettingsShortcut() {
+  // 打开设置页面
+  Get.toNamed('/setting', preventDuplicates: false);
 }
 
 class _CustomHttpOverrides extends HttpOverrides {

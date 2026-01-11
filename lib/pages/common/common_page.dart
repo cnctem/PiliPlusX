@@ -17,7 +17,7 @@ abstract class CommonPageState<
   // late double _downScrollCount = 0.0; // 向下滚动计数器
   late double _upScrollCount = 0.0; // 向上滚动计数器
   double? _lastScrollPosition; // 记录上次滚动位置
-  final _enableScrollThreshold = Pref.enableScrollThreshold;
+  final _enableScrollThreshold = true;    // Pref.enableScrollThreshold;
   late final double _scrollThreshold = Pref.scrollThreshold; // 滚动阈值
   late final scrollController = controller.scrollController;
 

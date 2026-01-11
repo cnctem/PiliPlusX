@@ -180,6 +180,7 @@ SettingsModel getVideoFilterSelectModel({
   int defaultValue = 0,
   bool isFilter = true,
   ValueChanged<int>? onChanged,
+  BuildContext? context,
 }) {
   assert(!isFilter || onChanged != null);
   int value = GStorage.setting.get(key, defaultValue: defaultValue);
@@ -193,7 +194,7 @@ SettingsModel getVideoFilterSelectModel({
               : '当前$title:「$value${suffix ?? ""}」'
         : null,
     onTap: (context, setState) async {
-      var result = await showDialog<int>(
+      final result = await showDialog<int>(
         context: context,
         builder: (context) {
           return SelectDialog<int>(
@@ -239,7 +240,8 @@ SettingsModel getVideoFilterSelectModel({
                   TextButton(
                     onPressed: () {
                       Get.back();
-                      result = int.tryParse(valueStr) ?? 0;
+                      final customResult = int.tryParse(valueStr) ?? 0;
+                      Navigator.of(context).pop(customResult);
                     },
                     child: const Text('确定'),
                   ),
@@ -254,6 +256,52 @@ SettingsModel getVideoFilterSelectModel({
           onChanged?.call(result!);
           GStorage.setting.put(key, result);
         }
+      }
+    },
+  );
+}
+
+SettingsModel getSaveImgPathModel({
+  required BuildContext context,
+  required String title,
+  required String key1,
+  required String key2,
+  required String suffix, // 路径前缀
+  String defaultValue = 'Pictures/${Constants.appName}',
+}) {
+  String value = GStorage.setting.get(key1, defaultValue: defaultValue);
+  return NormalModel(
+    title: title,
+    leading: const Icon(Icons.folder),
+    getSubtitle: () => value,
+    onTap: (context, setState) async {
+      final result = await showDialog<String>(
+        context: context,
+        builder: (context) {
+          return SelectDialog<String>(
+            title: '选择$title',
+            value: value,
+            values: [
+              ('Pictures/${Constants.appName}', '默认路径'),
+              ('Pictures/$suffix', '官方版本路径'),
+            ],
+          );
+        },
+      );
+      if (result == 'Pictures/$suffix') {
+        value = result!;
+        setState();
+        GStorage.setting.put(key1, result);
+        final screenshotResult = 'Pictures/$suffix/screenshot';
+        GStorage.setting.put(key2, screenshotResult);
+        return;
+      }
+      if (result == 'Pictures/${Constants.appName}') {
+        value = result!;
+        setState();
+        GStorage.setting.put(key1, result);
+        GStorage.setting.put(key2, result);
+        return;
       }
     },
   );
