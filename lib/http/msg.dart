@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:PiliPlus/http/api.dart';
 import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/http/init.dart';
@@ -16,7 +18,7 @@ import 'package:PiliPlus/models_new/upload_bfs/data.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/wbi_sign.dart';
 import 'package:dio/dio.dart';
-import 'package:uuid/uuid.dart';
+import 'package:uuid/v4.dart';
 
 abstract final class MsgHttp {
   static Future<LoadingState<MsgReplyData>> msgFeedReplyMe({
@@ -424,7 +426,7 @@ abstract final class MsgHttp {
   }
 
   static String getDevId() {
-    return const Uuid().v4();
+    return const UuidV4().generate();
   }
 
   static Future<LoadingState<Null>> msgSetNotice({
@@ -605,6 +607,35 @@ abstract final class MsgHttp {
     );
     if (res.data['code'] == 0) {
       return Success(MsgFeedUnreadData.fromJson(res.data['data']));
+    } else {
+      return Error(res.data['message']);
+    }
+  }
+
+  static Future<LoadingState<Null>> imMsgReport({
+    required Object accusedUid,
+    required int reasonType,
+    required String reasonDesc,
+    required Map comment,
+    required Map extra,
+  }) async {
+    final res = await Request().post(
+      Api.imMsgReport,
+      data: {
+        'biz_code': 4,
+        'accused_uid': accusedUid,
+        'object_id': accusedUid,
+        'reason_type': reasonType,
+        'reason_desc': reasonDesc,
+        'module': 604,
+        'comment': jsonEncode(comment),
+        'extra': jsonEncode(extra),
+        'csrf': Accounts.main.csrf,
+      },
+      options: Options(contentType: Headers.formUrlEncodedContentType),
+    );
+    if (res.data['code'] == 0) {
+      return const Success(null);
     } else {
       return Error(res.data['message']);
     }

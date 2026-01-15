@@ -25,10 +25,10 @@ abstract final class ValidateHttp {
   }
 
   static Future gaiaVgateValidate({
-    required challenge,
-    required seccode,
-    required token,
-    required validate,
+    required dynamic challenge,
+    required dynamic seccode,
+    required dynamic token,
+    required dynamic validate,
   }) async {
     final res = await Request().post(
       Api.gaiaVgateValidate,

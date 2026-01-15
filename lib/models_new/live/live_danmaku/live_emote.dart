@@ -11,6 +11,13 @@ class BaseEmote {
     width = (json['width'] as num).toDouble();
     height = (json['height'] as num?)?.toDouble();
   }
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'url': url,
+    'emoticon_unique': emoticonUnique,
+    'width': width,
+    'height': height,
+  };
 }
 
 // class Emote extends BaseEmote {
