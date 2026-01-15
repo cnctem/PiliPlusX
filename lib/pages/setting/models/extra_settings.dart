@@ -761,13 +761,15 @@ List<SettingsModel> get extraSettings => [
     defaultVal: false,
     onChanged: (value) => ImageUtils.silentDownImg = value,
   ),
-  SwitchModel(
-    title: '长按/右键显示图片菜单',
-    leading: const Icon(Icons.menu),
-    setKey: SettingBoxKey.enableImgMenu,
-    defaultVal: false,
-    onChanged: (value) => CustomGridView.enableImgMenu = value,
-  ),
+  if (!Platform.isAndroid) ...[
+    SwitchModel(
+      title: '长按/右键显示图片菜单',
+      leading: const Icon(Icons.menu),
+      setKey: SettingBoxKey.enableImgMenu,
+      defaultVal: false,
+      onChanged: (value) => CustomGridView.enableImgMenu = value,
+    ),
+  ],
   SwitchModel(
     setKey: SettingBoxKey.feedBackEnable,
     onChanged: (value) {

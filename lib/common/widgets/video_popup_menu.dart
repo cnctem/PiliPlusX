@@ -68,19 +68,19 @@ class VideoPopupMenu extends StatelessWidget {
                         ),
                         () => Utils.copyText(videoItem.bvid!),
                       ),
-                      _VideoCustomAction(
-                        '保存封面图',
-                        const Icon(MdiIcons.image, size: 16),
-                        () async {
-                          bool saveStatus = await ImageUtils.downloadImg(
-                            context,
-                            [videoItem.cover!],
-                          );
-                          if (saveStatus) {
-                            SmartDialog.dismiss();
-                          }
-                        },
-                      ),
+                      if (Pref.enableImgMenu)
+                        _VideoCustomAction(
+                          '保存封面图',
+                          const Icon(MdiIcons.image, size: 16),
+                          () async {
+                            bool saveStatus = await ImageUtils.downloadImg(
+                              [videoItem.cover!],
+                            );
+                            if (saveStatus) {
+                              SmartDialog.dismiss();
+                            }
+                          },
+                        ),
                       _VideoCustomAction(
                         '稍后再看',
                         const Icon(MdiIcons.clockTimeEightOutline, size: 16),

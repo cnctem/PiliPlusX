@@ -153,7 +153,7 @@ abstract final class SettingBoxKey {
       followOrderType = 'followOrderType',
       // Img
       saveImgPath = 'saveImgPath',
-      saveScreenshotPath = 'saveScreenshotPath';
+      saveScreenshotPath = 'saveScreenshotPath',
       enableImgMenu = 'enableImgMenu',
       showDynDispute = 'showDynDispute';
 

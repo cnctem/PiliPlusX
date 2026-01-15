@@ -3,6 +3,8 @@ import 'package:PiliPlus/pages/setting/widgets/normal_item.dart';
 import 'package:PiliPlus/pages/setting/widgets/select_dialog.dart';
 import 'package:PiliPlus/pages/setting/widgets/switch_item.dart';
 import 'package:PiliPlus/utils/storage.dart';
+import 'package:PiliPlus/common/widgets/image/custom_grid_view.dart';
+import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show FilteringTextInputFormatter;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -294,6 +296,8 @@ SettingsModel getSaveImgPathModel({
         GStorage.setting.put(key1, result);
         final screenshotResult = 'Pictures/$suffix/screenshot';
         GStorage.setting.put(key2, screenshotResult);
+        GStorage.setting.put(SettingBoxKey.enableImgMenu, false);
+        CustomGridView.enableImgMenu = false;
         return;
       }
       if (result == 'Pictures/${Constants.appName}') {
@@ -301,6 +305,8 @@ SettingsModel getSaveImgPathModel({
         setState();
         GStorage.setting.put(key1, result);
         GStorage.setting.put(key2, result);
+        GStorage.setting.put(SettingBoxKey.enableImgMenu, true);
+        CustomGridView.enableImgMenu = true;
         return;
       }
     },
