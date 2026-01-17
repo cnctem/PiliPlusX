@@ -221,6 +221,7 @@ abstract final class SettingBoxKey {
       useSideBar = 'useSideBar',
       enableMYBar = 'enableMYBar',
       useSystemFont = 'useSystemFont',
+      customFontPath = 'customFontPath',
       hideSearchBar = 'hideSearchBar',
       hideTabBar = 'hideTabBar',
       scrollThreshold = 'scrollThreshold',

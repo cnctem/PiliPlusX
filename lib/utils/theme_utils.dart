@@ -20,7 +20,10 @@ abstract final class ThemeUtils {
         : FontWeight.values[appFontWeight];
 
     // 根据设置决定使用系统字体还是 HarmonyOS_Sans
-    final fontFamilyFallback = Pref.useSystemFont ? null : ['HarmonyOS_Sans'];
+    final customFont = Pref.customFontPath != null ? 'CustomFont' : null;
+    final fontFamilyFallback = customFont != null
+        ? [customFont]
+        : (Pref.useSystemFont ? null : ['HarmonyOS_Sans']);
     late final textStyle = TextStyle(fontWeight: fontWeight);
     ThemeData themeData = ThemeData(
       colorScheme: colorScheme,

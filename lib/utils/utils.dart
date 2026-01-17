@@ -5,6 +5,7 @@ import 'dart:math' show Random;
 
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:catcher_2/catcher_2.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -35,6 +36,21 @@ abstract final class Utils {
 
   static String themeUrl(bool isDark) =>
       'native.theme=${isDark ? 2 : 1}&night=${isDark ? 1 : 0}';
+
+  static Future<void> loadCustomFont() async {
+    final path = Pref.customFontPath;
+    if (path == null) return;
+    try {
+      final file = File(path);
+      if (!file.existsSync()) return;
+      final bytes = await file.readAsBytes();
+      final fontLoader = FontLoader('CustomFont');
+      fontLoader.addFont(Future.value(ByteData.view(bytes.buffer)));
+      await fontLoader.load();
+    } catch (e) {
+      // ignore
+    }
+  }
 
   static Future<void> saveBytes2File({
     required String name,

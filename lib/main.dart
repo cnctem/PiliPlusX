@@ -65,6 +65,8 @@ void main() async {
     if (kDebugMode) debugPrint('GStorage init error: $e');
     exit(0);
   }
+  await Utils.loadCustomFont();
+  ScaledWidgetsFlutterBinding.instance.setScaleFactor(Pref.uiScale);
 
   if (PlatformUtils.isDesktop) {
     final customDownPath = Pref.downloadPath;

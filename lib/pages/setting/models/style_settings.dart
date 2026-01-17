@@ -2,6 +2,9 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:PiliPlus/common/widgets/color_palette.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:PiliPlus/utils/utils.dart';
 import 'package:PiliPlus/common/widgets/custom_toast.dart';
 import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
@@ -118,16 +121,71 @@ List<SettingsModel> get styleSettings => [
     defaultVal: false,
     needReboot: true,
   ),
-  if (!Platform.isMacOS) ...[
-    const SwitchModel(
-      title: '使用系统字体',
-      subtitle: '关闭后将使用内置HarmonyOS Sans字体',
-      leading: Icon(Icons.font_download_outlined),
-      setKey: SettingBoxKey.useSystemFont,
-      defaultVal: false,
-      needReboot: true,
-    ),
-  ],
+  NormalModel(
+    title: '自定义字体',
+    getSubtitle: () {
+      final path = Pref.customFontPath;
+      if (path != null) {
+        return '当前: ${path.split(Platform.pathSeparator).last}';
+      }
+      return '点击导入字体文件 (.ttf/.otf)';
+    },
+    leading: const Icon(Icons.font_download_outlined),
+    onTap: (context, setState) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return SimpleDialog(
+            title: const Text('自定义字体'),
+            children: [
+              SimpleDialogOption(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  try {
+                    final result = await FilePicker.platform.pickFiles(
+                      type: FileType.custom,
+                      allowedExtensions: ['ttf', 'otf'],
+                    );
+                    if (result != null && result.files.single.path != null) {
+                      final path = result.files.single.path!;
+                      final appDir = await getApplicationSupportDirectory();
+                      final fileName = result.files.single.name;
+                      final savedPath = '${appDir.path}/fonts/$fileName';
+                      final savedFile = File(savedPath);
+                      if (!savedFile.parent.existsSync()) {
+                        savedFile.parent.createSync(recursive: true);
+                      }
+                      await File(path).copy(savedPath);
+                      Pref.customFontPath = savedPath;
+                      await Utils.loadCustomFont();
+                      SmartDialog.showToast('字体已导入，需重启生效');
+                      setState();
+                    }
+                  } catch (e) {
+                    SmartDialog.showToast('导入失败: $e');
+                  }
+                },
+                child: const Text('导入字体文件'),
+              ),
+              if (Pref.customFontPath != null)
+                SimpleDialogOption(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Pref.customFontPath = null;
+                    SmartDialog.showToast('已清除自定义字体，需重启生效');
+                    setState();
+                  },
+                  child: const Text(
+                    '清除自定义字体',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+            ],
+          );
+        },
+      );
+    },
+  ),
   SwitchModel(
     title: 'App字体字重',
     subtitle: '点击设置字重，iOS使用此选项需要开启“使用系统字体”',

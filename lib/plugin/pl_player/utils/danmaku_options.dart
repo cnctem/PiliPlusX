@@ -30,9 +30,11 @@ abstract final class DanmakuOptions {
     double speed = 1.0,
   }) {
     return DanmakuOption(
-      fontFamily: !Pref.useSystemFont && Platform.isAndroid
-          ? 'HarmonyOS_Sans'
-          : null,
+      fontFamily: Pref.customFontPath != null
+          ? 'CustomFont'
+          : (!Pref.useSystemFont && Platform.isAndroid
+              ? 'HarmonyOS_Sans'
+              : null),
       fontSize: 15 * (notFullscreen ? danmakuFontScale : danmakuFontScaleFS),
       fontWeight: danmakuFontWeight,
       area: danmakuShowArea,

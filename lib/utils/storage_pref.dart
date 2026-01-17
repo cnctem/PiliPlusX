@@ -528,6 +528,12 @@ abstract final class Pref {
     defaultValue: false,
   );
 
+  static String? get customFontPath =>
+      _setting.get(SettingBoxKey.customFontPath);
+
+  static set customFontPath(String? path) =>
+      _setting.put(SettingBoxKey.customFontPath, path);
+
   static int get appFontWeight =>
       _setting.get(SettingBoxKey.appFontWeight, defaultValue: -1);
 

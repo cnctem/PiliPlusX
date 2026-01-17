@@ -53,9 +53,8 @@ class SegmentProgressBar extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..style = PaintingStyle.fill;
-    final fontFamily = !Pref.Pref.useSystemFont && Platform.isAndroid
-        ? 'HarmonyOS_Sans'
-        : null;
+    final fontFamily =
+        Pref.Pref.customFontPath != null ? 'CustomFont' : null;
 
     for (int i = 0; i < segmentColors.length; i++) {
       final item = segmentColors[i];
