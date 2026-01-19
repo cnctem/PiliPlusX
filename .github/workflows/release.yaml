@@ -1,17 +1,9 @@
-name: build
+name: release
 
 on:
-  pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - ready_for_review
-    paths-ignore:
-      - 'static/**'
-      - '**.md'
-      - '.gitignore'
-      - '.github/ISSUE_TEMPLATE/**'
+  push:
+    tags:
+      - "*"
   workflow_dispatch:
     inputs:
       logLevel:
@@ -23,6 +15,11 @@ on:
           - info
           - warning
           - debug
+      draft:
+        description: 'Whether creates a draft release'
+        required: true
+        type: boolean
+        default: false
 
 jobs:
   flutter_build_ohos:
@@ -32,6 +29,12 @@ jobs:
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
+      - name: Extract tag name
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+        shell: bash
+      - name: Echo build progress
+        run: echo "PiliPlus_ohos_${{ env.tag }}_unsigned.hap build progress"
+        shell: bash
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -68,10 +71,11 @@ jobs:
         shell: bash
         continue-on-error: true
       - name: Package ohos build output
-        run: cp ./ohos/entry/build/default/outputs/default/entry-default-unsigned.hap PiliPlus_ohos_canary.hap
+        run: cp ./ohos/entry/build/default/outputs/default/entry-default-unsigned.hap PiliPlus_ohos_${{ env.tag }}_unsigned.hap
         shell: bash
-      - name: Upload ohos outputs
-        uses: actions/upload-artifact@v4
+      - name: Create release
+        uses: softprops/action-gh-release@v2
         with:
-          name: ohos_outputs
-          path: PiliPlus_ohos_*.hap
+          name: ${{ env.tag }}-ohos
+          draft: ${{ inputs.draft }}
+          files: PiliPlus_ohos_*.hap
