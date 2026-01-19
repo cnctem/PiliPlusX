@@ -61,6 +61,8 @@ jobs:
       - name: Get Flutter dependencies
         run: flutter pub get
         shell: bash
+        env:
+          GIT_LFS_SKIP_SMUDGE: 1
       - name: Rename package
         run: |
           sed -i "s/name: PiliPlus/name: piliplus/g" pubspec.yaml
