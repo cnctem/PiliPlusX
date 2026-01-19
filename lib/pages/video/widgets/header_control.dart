@@ -1439,11 +1439,10 @@ class HeaderControlState extends State<HeaderControl>
         return AlertDialog(
           title: const Text('播放信息'),
           contentPadding: const EdgeInsets.only(top: 16),
-          // //  TODO 直接注释掉的代码 3.32.4-ohos-0.0.1不支持
-          // constraints: const BoxConstraints(
-          //   minWidth: 280,
-          //   maxWidth: 425,
-          // ),
+          constraints: const BoxConstraints(
+            minWidth: 280,
+            maxWidth: 425,
+          ),
           content: Material(
             type: MaterialType.transparency,
             child: ListTileTheme(

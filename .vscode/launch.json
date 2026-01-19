@@ -12,16 +12,6 @@
       ]
     },
     {
-      "name": "PiliPlus (profile)",
-      "request": "launch",
-      "type": "dart",
-      "flutterMode": "profile",
-      "preLaunchTask": "build_env",
-      "args": [
-        "--dart-define-from-file=.vscode/env.json"
-      ]
-    },
-    {
       "name": "PiliPlus (release)",
       "request": "launch",
       "type": "dart",

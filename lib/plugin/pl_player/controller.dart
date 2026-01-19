@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_status_bar.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_volume.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -472,7 +473,6 @@ class PlPlayerController {
         right: subtitlePaddingH.toDouble(),
         bottom: subtitlePaddingB.toDouble(),
       ),
-      // 固定文本缩放，防止在大屏上被自动缩小
       textScaler: TextScaler.noScaling,
     );
   }
@@ -1546,12 +1546,16 @@ class PlPlayerController {
     updateSubtitleStyle();
     if (!Utils.isHarmony) return;
     // 鸿蒙小窗适配方向
-    // TODO 解决鸿蒙小窗的顶部沉浸问题
-    if (val && !isVertical) {
-      // 进入全屏且横屏，设置小窗横屏
-      HarmonyChannel.setMiniWindowLandscape(true);
+
+    // 鸿蒙退出全屏后取消状态栏避让
+    if (val) {
+      // 进入全屏，或许需要避让状态栏
+      HarmonyStatusBar.i.mayBeAvoidStatusBar(true);
+      // 横向还需设置小窗横屏
+      if (!isVertical) HarmonyChannel.setMiniWindowLandscape(true);
     } else {
-      // 否则取消鸿蒙小窗横屏
+      // 退出全屏不需要避让状态栏和鸿蒙小窗横屏
+      HarmonyStatusBar.i.mayBeAvoidStatusBar(false);
       HarmonyChannel.setMiniWindowLandscape(false);
     }
   }

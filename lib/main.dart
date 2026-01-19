@@ -4,6 +4,7 @@ import 'package:PiliPlus/build_config.dart';
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/widgets/custom_toast.dart';
 import 'package:PiliPlus/common/widgets/mouse_back.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_status_bar.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_volume.dart';
 import 'package:PiliPlus/harmony_adapt/scalable_binding.dart';
 import 'package:PiliPlus/http/init.dart';
@@ -325,6 +326,13 @@ class MyApp extends StatelessWidget {
             ),
             child: child!,
           );
+
+          if (Utils.isHarmony) {
+            // 设置鸿蒙的状态栏高度
+            HarmonyStatusBar.i.onHeightCHange(mediaData.padding.top);
+            // 包裹状态栏避让组件
+            child = HarmonyStatusBar.i.avoidWidget(child: child);
+          }
           if (Utils.isDesktop) {
             return Focus(
               canRequestFocus: false,
@@ -351,41 +359,16 @@ class MyApp extends StatelessWidget {
                   onCreated: (cntlr) => HarmonyVolumeView.cntlr = cntlr,
                 ),
               child,
-              // 调试代码用
-              // SizedBox(
-              //   width: 100,
-              //   height: 30,
-              //   child: MaterialApp(
-              //     debugShowCheckedModeBanner: false,
-              //     home: Material(
-              //       child: SliderTheme(
-              //         data: const SliderThemeData(
-              //           showValueIndicator: ShowValueIndicator.onDrag,
-              //         ),
-              //         child: ValueListenableBuilder(
-              //           valueListenable: _s,
-              //           builder: (context, value, child) {
-              //             return Slider(
-              //               divisions: 5,
-              //               value: value,
-              //               min: 0.5,
-              //               max: 1,
-              //               label:
-              //                   ScalableWidgetsFlutterBinding.ensureInitialized()
-              //                       .scale
-              //                       .toStringAsFixed(2),
-              //               onChanged: (newV) {
-              //                 ScalableWidgetsFlutterBinding.ensureInitialized()
-              //                     .setScale(newV);
-              //                 _s.value = newV;
-              //               },
-              //             );
-              //           },
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              // ),
+              // 调试代码用，ai生成git提交信息请忽略这部分改动
+              if (kDebugMode)
+                ElevatedButton(
+                  onPressed: () {
+                    SystemChrome.setEnabledSystemUIMode(
+                      SystemUiMode.immersiveSticky,
+                    );
+                  },
+                  child: const Text('测试'),
+                ),
             ],
           );
         },
