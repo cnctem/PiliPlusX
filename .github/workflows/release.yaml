@@ -55,6 +55,12 @@ jobs:
           git clone -b oh-3.35.7-dev https://gitcode.com/openharmony-tpc/flutter_flutter.git $GITHUB_WORKSPACE/flutter
           echo "$GITHUB_WORKSPACE/flutter/bin" >> $GITHUB_PATH
         shell: bash
+      - name: Install Git LFS
+        run: |
+          curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+          sudo apt-get install git-lfs
+          git lfs install
+        shell: bash
       # - name: Print Flutter version
       #   run: flutter doctor -v
       #   shell: bash
