@@ -15,11 +15,6 @@ on:
           - info
           - warning
           - debug
-      draft:
-        description: 'Whether creates a draft release'
-        required: true
-        type: boolean
-        default: false
 
 jobs:
   flutter_build_ohos:
@@ -63,6 +58,9 @@ jobs:
         shell: bash
         env:
           GIT_LFS_SKIP_SMUDGE: 1
+      - name: Set and Extract version
+        shell: pwsh
+        run: lib/scripts/build.ps1
       - name: Rename package
         run: |
           sed -i "s/name: PiliPlus/name: piliplus/g" pubspec.yaml
@@ -79,5 +77,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           name: ${{ env.tag }}-ohos
-          draft: ${{ inputs.draft }}
+          draft: true
           files: PiliPlus_ohos_*.hap

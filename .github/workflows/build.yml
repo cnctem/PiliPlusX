@@ -26,7 +26,7 @@ on:
 
 jobs:
   flutter_build_ohos:
-    name: Release for ohos
+    name: Build for ohos
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
@@ -60,6 +60,9 @@ jobs:
         shell: bash
         env:
           GIT_LFS_SKIP_SMUDGE: 1
+      - name: Set and Extract version
+        shell: pwsh
+        run: lib/scripts/build.ps1
       - name: Rename package
         run: |
           sed -i "s/name: PiliPlus/name: piliplus/g" pubspec.yaml
