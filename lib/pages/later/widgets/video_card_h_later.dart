@@ -136,8 +136,11 @@ class VideoCardHLater extends StatelessWidget {
                             left: 0,
                             bottom: 0,
                             right: 0,
-                            child: videoProgressIndicator(
-                              progress == -1
+                            child: VideoProgressIndicator(
+                              color: theme.colorScheme.primary,
+                              backgroundColor:
+                                  theme.colorScheme.secondaryContainer,
+                              progress: progress == -1
                                   ? 1
                                   : progress / videoItem.duration!,
                             ),

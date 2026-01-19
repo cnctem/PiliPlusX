@@ -4,10 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 class DisabledIcon<T extends Widget> extends SingleChildRenderObjectWidget {
-  final Color? color;
-  final double lineLengthScale;
-  final StrokeCap strokeCap;
-
   const DisabledIcon({
     super.key,
     required T child,
@@ -18,27 +14,70 @@ class DisabledIcon<T extends Widget> extends SingleChildRenderObjectWidget {
        strokeCap = strokeCap ?? StrokeCap.butt,
        super(child: child);
 
+  final Color? color;
+  final StrokeCap strokeCap;
+  final double lineLengthScale;
+
+  T enable() => child as T;
+
   @override
   RenderObject createRenderObject(BuildContext context) {
     return RenderMaskedIcon(
-      color ??
+      color:
+          color ??
           (child is Icon
               ? (child as Icon).color ?? IconTheme.of(context).color!
               : IconTheme.of(context).color!),
-      lineLengthScale,
-      strokeCap,
+      strokeCap: strokeCap,
+      lineLengthScale: lineLengthScale,
     );
   }
 
-  T enable() => child as T;
+  @override
+  void updateRenderObject(BuildContext context, RenderMaskedIcon renderObject) {
+    renderObject
+      ..color =
+          color ??
+          (child is Icon
+              ? (child as Icon).color ?? IconTheme.of(context).color!
+              : IconTheme.of(context).color!)
+      ..strokeCap = strokeCap
+      ..lineLengthScale = lineLengthScale;
+  }
 }
 
 class RenderMaskedIcon extends RenderProxyBox {
-  final Color color;
-  final double lineLengthScale;
-  final StrokeCap strokeCap;
+  RenderMaskedIcon({
+    required Color color,
+    required StrokeCap strokeCap,
+    required double lineLengthScale,
+  }) : _color = color,
+       _strokeCap = strokeCap,
+       _lineLengthScale = lineLengthScale;
 
-  RenderMaskedIcon(this.color, this.lineLengthScale, this.strokeCap);
+  Color _color;
+  Color get color => _color;
+  set color(Color value) {
+    if (_color == value) return;
+    _color = value;
+    markNeedsPaint();
+  }
+
+  StrokeCap _strokeCap;
+  StrokeCap get strokeCap => _strokeCap;
+  set strokeCap(StrokeCap value) {
+    if (_strokeCap == value) return;
+    _strokeCap = value;
+    markNeedsPaint();
+  }
+
+  double _lineLengthScale;
+  double get lineLengthScale => _lineLengthScale;
+  set lineLengthScale(double value) {
+    if (_lineLengthScale == value) return;
+    _lineLengthScale = value;
+    markNeedsPaint();
+  }
 
   @override
   void paint(PaintingContext context, Offset offset) {
@@ -77,7 +116,7 @@ class RenderMaskedIcon extends RenderProxyBox {
       ..clipPath(path, doAntiAlias: false);
     super.paint(context, offset);
 
-    context.canvas.restore();
+    canvas.restore();
 
     final linePaint = Paint()
       ..color = color
@@ -94,6 +133,9 @@ class RenderMaskedIcon extends RenderProxyBox {
       linePaint,
     );
   }
+
+  @override
+  bool get isRepaintBoundary => true;
 }
 
 extension DisabledIconExt on Icon {

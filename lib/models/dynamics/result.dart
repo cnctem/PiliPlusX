@@ -159,6 +159,8 @@ class ItemModulesModel {
   // 动态
   ModuleDynamicModel? moduleDynamic;
   // ModuleInterModel? moduleInter;
+  ModuleInteraction? moduleInteraction;
+  ModuleDispute? moduleDispute;
 
   // 专栏
   ModuleTop? moduleTop;
@@ -167,7 +169,9 @@ class ItemModulesModel {
   List<ArticleContentModel>? moduleContent;
   ModuleBlocked? moduleBlocked;
   ModuleFold? moduleFold;
-  ModuleInteraction? moduleInteraction;
+
+  static bool showDynDispute = Pref.showDynDispute;
+  static bool showDynInteraction = Pref.showDynInteraction;
 
   ItemModulesModel.fromJson(Map<String, dynamic> json) {
     moduleAuthor = json['module_author'] != null
@@ -185,9 +189,16 @@ class ItemModulesModel {
     moduleFold = json['module_fold'] != null
         ? ModuleFold.fromJson(json['module_fold'])
         : null;
-    moduleInteraction = json['module_interaction'] != null
-        ? ModuleInteraction.fromJson(json['module_interaction'])
-        : null;
+    if (showDynInteraction) {
+      moduleInteraction = json['module_interaction'] != null
+          ? ModuleInteraction.fromJson(json['module_interaction'])
+          : null;
+    }
+    if (showDynDispute) {
+      moduleDispute = json['module_dispute'] != null
+          ? ModuleDispute.fromJson(json['module_dispute'])
+          : null;
+    }
   }
 
   ItemModulesModel.fromOpusJson(List json) {
@@ -235,6 +246,18 @@ class ItemModulesModel {
           break;
       }
     }
+  }
+}
+
+class ModuleDispute {
+  String? title;
+  String? desc;
+  String? jumpUrl;
+
+  ModuleDispute.fromJson(Map<String, dynamic> json) {
+    title = json['title'];
+    desc = json['desc'];
+    jumpUrl = json['jump_url'];
   }
 }
 
@@ -387,6 +410,8 @@ class ModuleAuthorModel extends Avatar {
   int? pubTs;
   String? type;
   Decorate? decorate;
+  bool? isTop;
+  String? badgeText;
 
   ModuleAuthorModel.fromJson(Map<String, dynamic> json) : super.fromJson(json) {
     if (json['official'] != null) {
@@ -403,6 +428,8 @@ class ModuleAuthorModel extends Avatar {
     } else {
       pendant = null;
     }
+    isTop = json['is_top'];
+    badgeText = _parseString(json['icon_badge']?['text']);
   }
 }
 
@@ -1163,12 +1190,23 @@ class DynamicNoneModel {
   }
 }
 
-class OpusPicModel {
+sealed class PicModel {}
+
+class FilePicModel extends PicModel {
+  String path;
+
+  FilePicModel({
+    required this.path,
+  });
+}
+
+class OpusPicModel extends PicModel {
   OpusPicModel({
     this.width,
     this.height,
     this.src,
     this.url,
+    this.size,
   });
 
   int? width;
@@ -1176,6 +1214,7 @@ class OpusPicModel {
   String? src;
   String? url;
   String? liveUrl;
+  num? size;
 
   OpusPicModel.fromJson(Map<String, dynamic> json) {
     width = Utils.safeToInt(json['width']);
@@ -1183,7 +1222,15 @@ class OpusPicModel {
     src = json['src'];
     url = json['url'];
     liveUrl = json['live_url'];
+    size = json['size'];
   }
+
+  Map<String, dynamic> toJson() => {
+    'img_width': width,
+    'img_height': height,
+    'img_size': size,
+    'img_src': url,
+  };
 }
 
 class DynamicLiveModel {
@@ -1246,7 +1293,7 @@ class ModuleTag {
   String? text;
 
   ModuleTag.fromJson(Map<String, dynamic> json) {
-    text = json['text'];
+    text = _parseString(json['text']);
   }
 }
 

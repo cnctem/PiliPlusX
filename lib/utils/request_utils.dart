@@ -24,6 +24,7 @@ import 'package:PiliPlus/pages/later/controller.dart';
 import 'package:PiliPlus/pages/login/geetest/geetest_webview_dialog.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/extension/context_ext.dart';
+import 'package:PiliPlus/utils/extension/size_ext.dart';
 import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
@@ -121,11 +122,11 @@ abstract final class RequestUtils {
       }
     } else {
       if (followStatus?['tag'] == null) {
-        Map<String, dynamic> result = await UserHttp.hasFollow(mid);
-        if (result['status']) {
-          followStatus = result['data'];
+        final res = await UserHttp.hasFollow(mid);
+        if (res case Success(:final response)) {
+          followStatus = response;
         } else {
-          SmartDialog.showToast(result['msg']);
+          res.toast();
           return;
         }
       }
@@ -174,13 +175,18 @@ abstract final class RequestUtils {
                           maxWidth: min(640, context.mediaQueryShortestSide),
                         ),
                         builder: (BuildContext context) {
+                          final maxChildSize =
+                              PlatformUtils.isMobile &&
+                                  !context.mediaQuerySize.isPortrait
+                              ? 1.0
+                              : 0.7;
                           return DraggableScrollableSheet(
                             minChildSize: 0,
                             maxChildSize: 1,
-                            initialChildSize: 0.7,
                             snap: true,
                             expand: false,
-                            snapSizes: const [0.7],
+                            snapSizes: [maxChildSize],
+                            initialChildSize: maxChildSize,
                             builder:
                                 (
                                   BuildContext context,
@@ -489,12 +495,12 @@ abstract final class RequestUtils {
     }
 
     final res = await ValidateHttp.gaiaVgateRegister(vVoucher);
-    if (!res['status']) {
-      SmartDialog.showToast("${res['msg']}");
+    if (!res.isSuccess) {
+      res.toast();
       return;
     }
 
-    final resData = res['data'];
+    final resData = res.data;
     if (resData == null) {
       SmartDialog.showToast("null data");
       return;
@@ -502,10 +508,10 @@ abstract final class RequestUtils {
 
     CaptchaDataModel captchaData = CaptchaDataModel();
 
-    final geetest = resData?['geetest'];
+    final geetest = resData['geetest'];
     String? gt = geetest?['gt'];
     String? challenge = geetest?['challenge'];
-    captchaData.token = resData?['token'];
+    captchaData.token = resData['token'];
 
     bool isGeeArgumentValid() {
       return gt?.isNotEmpty == true &&
@@ -525,9 +531,9 @@ abstract final class RequestUtils {
         token: captchaData.token,
         validate: captchaData.validate,
       );
-      if (res['status']) {
-        if (res['data']?['is_valid'] == 1) {
-          final griskId = res['data']?['grisk_id'];
+      if (res case Success(:final response)) {
+        if (response?['is_valid'] == 1) {
+          final griskId = response?['grisk_id'];
           if (griskId != null) {
             onSuccess(griskId);
           }
@@ -535,7 +541,7 @@ abstract final class RequestUtils {
           SmartDialog.showToast('invalid');
         }
       } else {
-        SmartDialog.showToast(res['msg']);
+        res.toast();
       }
     }
 

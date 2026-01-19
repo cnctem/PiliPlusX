@@ -435,10 +435,9 @@ class VideoDetailController extends GetxController
                   final res = await UserHttp.toViewDel(
                     aids: item.aid.toString(),
                   );
-                  if (res['status']) {
+                  if (res.isSuccess) {
                     mediaList.removeAt(index);
                   }
-                  SmartDialog.showToast(res['msg']);
                 } else {
                   final res = await FavHttp.favVideo(
                     resources: '${item.aid}:${item.type}',
@@ -839,7 +838,11 @@ class VideoDetailController extends GetxController
           segmentList.map((e) {
             double start = (e.segment.first / duration).clamp(0.0, 1.0);
             double end = (e.segment.second / duration).clamp(0.0, 1.0);
-            return Segment(start, end, _getColor(e.segmentType));
+            return Segment(
+              start: start,
+              end: end,
+              color: _getColor(e.segmentType),
+            );
           }),
         );
 
@@ -855,6 +858,7 @@ class VideoDetailController extends GetxController
   }
 
   void initSkip() {
+    if (isClosed) return;
     if (segmentList.isNotEmpty) {
       positionSubscription?.cancel();
       positionSubscription = plPlayerController
@@ -1174,6 +1178,8 @@ class VideoDetailController extends GetxController
       mediaType: isFileSource ? entry.mediaType : null,
     );
 
+    if (isClosed) return;
+
     if (!isFileSource) {
       if (plPlayerController.enableBlock) {
         initSkip();
@@ -1451,7 +1457,7 @@ class VideoDetailController extends GetxController
   late final Map<int, String> vttSubtitles = {};
   late final RxInt vttSubtitlesIndex = (-1).obs;
   late final RxBool showVP = true.obs;
-  late final RxList<Segment> viewPointList = <Segment>[].obs;
+  late final RxList<ViewPointSegment> viewPointList = <ViewPointSegment>[].obs;
 
   // 设定字幕轨道
   Future<void> setSubtitle(int index) async {
@@ -1482,7 +1488,7 @@ class VideoDetailController extends GetxController
       final result = await VideoHttp.vttSubtitles(
         subtitles[index - 1].subtitleUrl!,
       );
-      if (result != null) {
+      if (!isClosed && result != null) {
         vttSubtitles[index - 1] = result;
         await setSub(result);
       }
@@ -1573,14 +1579,13 @@ class VideoDetailController extends GetxController
               0.0,
               1.0,
             );
-            return Segment(
-              start,
-              start,
-              Colors.black.withValues(alpha: 0.5),
-              item.content,
-              item.imgUrl,
-              item.from,
-              item.to,
+            return ViewPointSegment(
+              start: start,
+              end: start,
+              title: item.content,
+              url: item.imgUrl,
+              from: item.from,
+              to: item.to,
             );
           }).toList();
         } catch (_) {}
@@ -1589,8 +1594,7 @@ class VideoDetailController extends GetxController
       if (response.subtitle?.subtitles?.isNotEmpty == true) {
         subtitles.value = response.subtitle!.subtitles!;
 
-        final idx = switch (SubtitlePrefType.values[Pref
-            .subtitlePreferenceV2]) {
+        final idx = switch (Pref.subtitlePreferenceV2) {
           SubtitlePrefType.off => 0,
           SubtitlePrefType.on => 1,
           SubtitlePrefType.withoutAi =>
@@ -1883,34 +1887,39 @@ class VideoDetailController extends GetxController
       final index = episodes.indexWhere(
         (e) => e.cid == (seasonCid ?? cid.value),
       );
-      final size = context.mediaQuerySize;
-      final maxChildSize = PlatformUtils.isMobile && !size.isPortrait
-          ? 1.0
-          : 0.7;
+
       showModalBottomSheet(
         context: context,
         useSafeArea: true,
         isScrollControlled: true,
-        constraints: BoxConstraints(maxWidth: min(640, size.shortestSide)),
-        builder: (context) => DraggableScrollableSheet(
-          snap: true,
-          expand: false,
-          minChildSize: 0,
-          snapSizes: [maxChildSize],
-          maxChildSize: maxChildSize,
-          initialChildSize: maxChildSize,
-          builder: (context, scrollController) => DownloadPanel(
-            index: index,
-            videoDetail: videoDetail,
-            pgcItem: pgcItem,
-            episodes: episodes!,
-            scrollController: scrollController,
-            videoDetailController: this,
-            heroTag: heroTag,
-            ugcIntroController: ugcIntroController,
-            cidSet: cidSet,
-          ),
+        constraints: BoxConstraints(
+          maxWidth: min(640, context.mediaQueryShortestSide),
         ),
+        builder: (context) {
+          final maxChildSize =
+              PlatformUtils.isMobile && !context.mediaQuerySize.isPortrait
+              ? 1.0
+              : 0.7;
+          return DraggableScrollableSheet(
+            snap: true,
+            expand: false,
+            minChildSize: 0,
+            snapSizes: [maxChildSize],
+            maxChildSize: maxChildSize,
+            initialChildSize: maxChildSize,
+            builder: (context, scrollController) => DownloadPanel(
+              index: index,
+              videoDetail: videoDetail,
+              pgcItem: pgcItem,
+              episodes: episodes!,
+              scrollController: scrollController,
+              videoDetailController: this,
+              heroTag: heroTag,
+              ugcIntroController: ugcIntroController,
+              cidSet: cidSet,
+            ),
+          );
+        },
       );
     }
   }

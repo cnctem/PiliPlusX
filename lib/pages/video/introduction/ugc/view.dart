@@ -800,6 +800,9 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
     int? ownerMid,
     Staff item,
   ) {
+    void onTap() => Get.toNamed(
+      '/member?mid=${item.mid}&from_view_aid=${videoDetailCtr.aid}',
+    );
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
@@ -808,11 +811,13 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
             introController.horizontalMemberPage) {
           widget.onShowMemberPage(ownerMid);
         } else {
-          Get.toNamed(
-            '/member?mid=${item.mid}&from_view_aid=${videoDetailCtr.aid}',
-          );
+          onTap();
         }
       },
+      onSecondaryTap:
+          PlatformUtils.isDesktop && introController.horizontalMemberPage
+          ? onTap
+          : null,
       child: Row(
         children: [
           Stack(
@@ -920,6 +925,12 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
   ) => GestureDetector(
     onTap: onPushMember,
     behavior: HitTestBehavior.opaque,
+    onSecondaryTap:
+        PlatformUtils.isDesktop && introController.horizontalMemberPage
+        ? () => Get.toNamed(
+            '/member?mid=${introController.userStat.value.card?.mid}&from_view_aid=${videoDetailCtr.aid}',
+          )
+        : null,
     child: Obx(
       () {
         final userStat = introController.userStat.value;

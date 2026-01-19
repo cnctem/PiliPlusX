@@ -181,7 +181,7 @@ class ProgressBar extends LeafRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RenderProgressBar(
+    return RenderProgressBar(
       progress: progress,
       total: total,
       buffered: buffered ?? Duration.zero,
@@ -203,8 +203,11 @@ class ProgressBar extends LeafRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderObject renderObject) {
-    (renderObject as _RenderProgressBar)
+  void updateRenderObject(
+    BuildContext context,
+    RenderProgressBar renderObject,
+  ) {
+    renderObject
       ..total = total
       ..progress = progress
       ..buffered = buffered ?? Duration.zero
@@ -327,8 +330,8 @@ class _EagerHorizontalDragGestureRecognizer
   String get debugDescription => '_EagerHorizontalDragGestureRecognizer';
 }
 
-class _RenderProgressBar extends RenderBox {
-  _RenderProgressBar({
+class RenderProgressBar extends RenderBox {
+  RenderProgressBar({
     required Duration progress,
     required Duration total,
     required Duration buffered,
@@ -362,12 +365,15 @@ class _RenderProgressBar extends RenderBox {
        _thumbGlowColor = thumbGlowColor,
        _thumbGlowRadius = thumbGlowRadius,
        _paintThumbGlow = thumbGlowRadius > thumbRadius,
-       _thumbCanPaintOutsideBar = thumbCanPaintOutsideBar {
-    _drag = _EagerHorizontalDragGestureRecognizer()
-      ..onStart = _onDragStart
-      ..onUpdate = _onDragUpdate
-      ..onEnd = _onDragEnd
-      ..onCancel = _finishDrag;
+       _thumbCanPaintOutsideBar = thumbCanPaintOutsideBar,
+       _hitTestSelf = onDragStart != null {
+    if (onDragStart != null) {
+      _drag = _EagerHorizontalDragGestureRecognizer()
+        ..onStart = _onDragStart
+        ..onUpdate = _onDragUpdate
+        ..onEnd = _onDragEnd
+        ..onCancel = _finishDrag;
+    }
     if (!_userIsDraggingThumb) {
       _progress = progress;
       _thumbValue = _proportionOfTotal(_progress);
@@ -377,6 +383,7 @@ class _RenderProgressBar extends RenderBox {
   @override
   void dispose() {
     _drag?.dispose();
+    _drag = null;
     super.dispose();
   }
 
@@ -656,8 +663,9 @@ class _RenderProgressBar extends RenderBox {
   @override
   double computeMaxIntrinsicHeight(double width) => _heightWhenNoLabels();
 
+  final bool _hitTestSelf;
   @override
-  bool hitTestSelf(Offset position) => true;
+  bool hitTestSelf(Offset position) => _hitTestSelf;
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' show max;
 
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/grpc/dyn.dart';
@@ -86,7 +85,7 @@ class MainController extends GetxController
     if (navigationBars.length > 1 && Pref.hideTabBar) {
       bottomBar = true.obs;
     }
-    dynamicBadgeMode = DynamicBadgeMode.values[Pref.dynamicBadgeMode];
+    dynamicBadgeMode = Pref.dynamicBadgeMode;
 
     hasDyn = navigationBars.contains(NavigationBarType.dynamics);
     if (dynamicBadgeMode != DynamicBadgeMode.hidden) {
@@ -212,7 +211,6 @@ class MainController extends GetxController
   void setNavBarConfig() {
     List<int>? navBarSort =
         (GStorage.setting.get(SettingBoxKey.navBarSort) as List?)?.fromCast();
-    int defaultHomePage = Pref.defaultHomePage;
     late final List<NavigationBarType> navigationBars;
     if (navBarSort == null || navBarSort.isEmpty) {
       navigationBars = NavigationBarType.values;
@@ -222,10 +220,7 @@ class MainController extends GetxController
           .toList();
     }
     this.navigationBars = navigationBars;
-    selectedIndex.value = max(
-      0,
-      navigationBars.indexWhere((e) => e.index == defaultHomePage),
-    );
+    selectedIndex.value = Pref.defaultHomePageIndex;
   }
 
   void checkDefaultSearch([bool shouldCheck = false]) {

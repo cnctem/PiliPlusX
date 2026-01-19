@@ -3,7 +3,7 @@ import 'dart:ui' show clampDouble;
 
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 enum TooltipType { top, right }
 
@@ -261,19 +261,83 @@ class _CustomMultiTooltipPositionDelegate extends MultiChildLayoutDelegate {
   }
 }
 
-class TrianglePainter extends CustomPainter {
-  TrianglePainter(this.color, {this.type = TooltipType.top});
-  final TooltipType type;
+class Triangle extends LeafRenderObjectWidget {
+  const Triangle({
+    super.key,
+    required this.color,
+    required this.size,
+    this.type = .top,
+  });
+
   final Color color;
+  final Size size;
+  final TooltipType type;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  RenderObject createRenderObject(BuildContext context) {
+    return RenderTriangle(
+      color: color,
+      size: size,
+      type: type,
+    );
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    RenderTriangle renderObject,
+  ) {
+    renderObject
+      ..color = color
+      ..preferredSize = size;
+  }
+}
+
+class RenderTriangle extends RenderBox {
+  RenderTriangle({
+    required Color color,
+    required Size size,
+    required TooltipType type,
+  }) : _color = color,
+       _preferredSize = size,
+       _type = type;
+
+  Color _color;
+  Color get color => _color;
+  set color(Color value) {
+    if (_color == value) return;
+    _color = value;
+    markNeedsPaint();
+  }
+
+  Size _preferredSize;
+  set preferredSize(Size value) {
+    if (_preferredSize == value) return;
+    _preferredSize = value;
+    markNeedsLayout();
+  }
+
+  final TooltipType _type;
+
+  @override
+  void performLayout() {
+    size = computeDryLayout(constraints);
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.constrain(_preferredSize);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final size = this.size;
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.fill;
 
     Path path;
-    switch (type) {
+    switch (_type) {
       case TooltipType.top:
         path = Path()
           ..moveTo(0, 0)
@@ -288,11 +352,11 @@ class TrianglePainter extends CustomPainter {
           ..close();
     }
 
-    canvas.drawPath(path, paint);
+    context.canvas.drawPath(path, paint);
   }
 
   @override
-  bool shouldRepaint(TrianglePainter oldDelegate) => color != oldDelegate.color;
+  bool get isRepaintBoundary => true;
 }
 
 Offset positionDependentBox({

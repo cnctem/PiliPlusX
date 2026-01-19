@@ -247,7 +247,7 @@ class _CdnSelectDialogState extends State<CdnSelectDialog> {
                 valueListenable: item,
                 builder: (context, value, _) {
                   return Text(
-                    item.value ?? '---',
+                    value ?? '---',
                     style: const TextStyle(fontSize: 13),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

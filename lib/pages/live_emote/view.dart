@@ -75,6 +75,7 @@ class _LiveEmotePanelState extends State<LiveEmotePanel>
                           final width = widthFac * 38;
                           final height = heightFac * 38;
                           return GridView.builder(
+                            physics: const ClampingScrollPhysics(),
                             padding: const EdgeInsets.only(
                               left: 12,
                               right: 12,
@@ -104,9 +105,9 @@ class _LiveEmotePanelState extends State<LiveEmotePanel>
                                     }
                                   },
                                   child: CustomTooltip(
-                                    indicator: () => CustomPaint(
+                                    indicator: () => Triangle(
+                                      color: color,
                                       size: const Size(14, 8),
-                                      painter: TrianglePainter(color),
                                     ),
                                     overlayWidget: () => Container(
                                       padding: const EdgeInsets.all(8),
