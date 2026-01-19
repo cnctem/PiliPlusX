@@ -15,11 +15,6 @@ on:
           - info
           - warning
           - debug
-      draft:
-        description: 'Whether creates a draft release'
-        required: true
-        type: boolean
-        default: false
 
 jobs:
   flutter_build_ohos:
@@ -63,6 +58,15 @@ jobs:
         shell: bash
         env:
           GIT_LFS_SKIP_SMUDGE: 1
+      - name: Generate build environment
+        run: |
+          mkdir -p .vscode
+          versionName="${{ env.tag }}"
+          versionCode=$(git rev-list --count HEAD)
+          commitHash=$(git rev-parse HEAD)
+          currentTime=$(date +%s)
+          echo '{"此环境变量由脚本自动生成":"请勿编辑","pili.name":"'"$versionName"'","pili.time":'"$currentTime"',"pili.hash":"'"$commitHash"'","pili.code":'"$versionCode"'}' > .vscode/env.json
+        shell: bash
       - name: Rename package
         run: |
           sed -i "s/name: PiliPlus/name: piliplus/g" pubspec.yaml
@@ -79,5 +83,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           name: ${{ env.tag }}-ohos
-          draft: ${{ inputs.draft }}
+          draft: true
           files: PiliPlus_ohos_*.hap
