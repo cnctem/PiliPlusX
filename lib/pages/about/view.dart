@@ -11,12 +11,11 @@ import 'package:PiliPlus/services/logger.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/accounts/account.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
+import 'package:PiliPlus/utils/context_ext.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
-import 'package:PiliPlus/utils/extension/context_ext.dart';
-import 'package:PiliPlus/utils/extension/num_ext.dart';
+import 'package:PiliPlus/utils/extension.dart';
 import 'package:PiliPlus/utils/login_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
-import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/update.dart';
 import 'package:PiliPlus/utils/utils.dart';
@@ -73,7 +72,7 @@ class _AboutPageState extends State<AboutPage> {
     context: context,
     builder: (context) {
       return AlertDialog(
-        constraints: StyleString.dialogFixedConstraints,
+        constraints: const BoxConstraints(maxWidth: 450),
         content: TextField(
           autofocus: true,
           onSubmitted: (value) {
@@ -113,7 +112,7 @@ class _AboutPageState extends State<AboutPage> {
                 _showDialog();
               }
             },
-            onSecondaryTap: PlatformUtils.isDesktop ? _showDialog : null,
+            onSecondaryTap: Utils.isDesktop ? _showDialog : null,
             child: ExcludeSemantics(
               child: Image.asset(
                 width: 150,
@@ -148,7 +147,7 @@ class _AboutPageState extends State<AboutPage> {
           ListTile(
             onTap: () => Update.checkUpdate(false),
             onLongPress: () => Utils.copyText(versionTag),
-            onSecondaryTap: PlatformUtils.isMobile
+            onSecondaryTap: Utils.isMobile
                 ? null
                 : () => Utils.copyText(versionTag),
             title: const Text('当前版本'),
@@ -160,7 +159,7 @@ class _AboutPageState extends State<AboutPage> {
           ),
           ListTile(
             onLongPress: () => Utils.copyText(versionName),
-            onSecondaryTap: PlatformUtils.isMobile
+            onSecondaryTap: Utils.isMobile
                 ? null
                 : () => Utils.copyText(versionName),
             title: const Text('对应上游版本'),
@@ -182,7 +181,7 @@ Commit Hash: ${BuildConfig.commitHash}''',
               '${Constants.sourceCodeUrl}/commit/${BuildConfig.commitHash}',
             ),
             onLongPress: () => Utils.copyText(BuildConfig.commitHash),
-            onSecondaryTap: PlatformUtils.isMobile
+            onSecondaryTap: Utils.isMobile
                 ? null
                 : () => Utils.copyText(BuildConfig.commitHash),
           ),
@@ -228,7 +227,7 @@ Commit Hash: ${BuildConfig.commitHash}''',
           ListTile(
             onTap: () => Get.toNamed('/logs'),
             onLongPress: LoggerUtils.clearLogs,
-            onSecondaryTap: PlatformUtils.isMobile
+            onSecondaryTap: Utils.isMobile
                 ? null
                 : LoggerUtils.clearLogs,
             leading: const Icon(Icons.bug_report_outlined),
@@ -372,7 +371,7 @@ Future<void> showImportExportDialog<T>(
               Get.back();
               final res = utf8.encode(toJson());
               final name =
-                  'piliplus_${label}_${context.isTablet ? 'pad' : 'phone'}_'
+                  'piliplus_${label}_${ContextExtensions(context).isTablet ? 'pad' : 'phone'}_'
                   '${DateFormat('yyyyMMddHHmmss').format(DateTime.now())}.json';
               Utils.saveBytes2File(
                 name: name,
@@ -422,7 +421,7 @@ Future<void> showImportExportDialog<T>(
             showDialog(
               context: context,
               builder: (context) {
-                final isDark = context.isDarkMode;
+                final isDark = ContextExtensions(context).isDarkMode;
                 if (isDark != isDarkMode) {
                   isDarkMode = isDark;
                   renderer = TextSpanRenderer(
@@ -479,7 +478,7 @@ Future<void> showImportExportDialog<T>(
               builder: (context) {
                 return AlertDialog(
                   title: Text('输入$title'),
-                  constraints: StyleString.dialogFixedConstraints,
+                  constraints: const BoxConstraints(maxWidth: 450),
                   content: TextFormField(
                     key: key,
                     minLines: 4,
