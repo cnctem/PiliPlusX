@@ -334,7 +334,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     );
 
     if (!Get.previousRoute.startsWith('/video')) {
-      if (Platform.isAndroid && !videoDetailController.setSystemBrightness) {
+      if ((Platform.isAndroid || Utils.isHarmony) && !videoDetailController.setSystemBrightness) {
         ScreenBrightnessPlatform.instance.resetApplicationScreenBrightness();
       }
       PlPlayerController.setPlayCallBack(null);
@@ -380,7 +380,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
     WidgetsBinding.instance.removeObserver(this);
 
-    if (Platform.isAndroid && !videoDetailController.setSystemBrightness) {
+    if ((Platform.isAndroid || Utils.isHarmony) && !videoDetailController.setSystemBrightness) {
       ScreenBrightnessPlatform.instance.resetApplicationScreenBrightness();
     }
 
@@ -428,7 +428,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     introController.startTimer();
 
     if (mounted &&
-        Platform.isAndroid &&
+        (Platform.isAndroid || Utils.isHarmony) &&
         !videoDetailController.setSystemBrightness) {
       if (videoDetailController.brightness != null) {
         plPlayerController?.brightness.value =
