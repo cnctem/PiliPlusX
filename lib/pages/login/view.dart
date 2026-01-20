@@ -6,6 +6,7 @@ import 'package:PiliPlus/common/widgets/loading_widget/loading_widget.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/pages/login/controller.dart';
+import 'package:PiliPlus/utils/context_ext.dart';
 import 'package:PiliPlus/utils/extension.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
@@ -15,7 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:get/get.dart' hide ContextExtensionss;
+import 'package:get/get.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -31,6 +32,12 @@ class _LoginPageState extends State<LoginPage> {
   // 二维码生成时间
   bool showPassword = false;
   GlobalKey globalKey = GlobalKey();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loginPageCtr.didChangeDependencies(context);
+  }
 
   Widget loginByQRCode(ThemeData theme) {
     return Column(
@@ -62,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
                 RenderRepaintBoundary boundary =
                     globalKey.currentContext!.findRenderObject()!
                         as RenderRepaintBoundary;
-                var image = await boundary.toImage(pixelRatio: 3);
+                final image = await boundary.toImage(pixelRatio: 3);
                 ByteData? byteData = await image.toByteData(
                   format: ImageByteFormat.png,
                 );
@@ -98,7 +105,7 @@ class _LoginPageState extends State<LoginPage> {
                   semanticsLabel: '二维码加载中',
                 ),
               ),
-              Success(:var response) => Container(
+              Success(:final response) => Container(
                 width: 200,
                 height: 200,
                 color: Colors.white,
@@ -112,7 +119,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-              Error(:var errMsg) => errorWidget(
+              Error(:final errMsg) => errorWidget(
                 errMsg: errMsg,
                 onReload: _loginPageCtr.refreshQRCode,
               ),
@@ -606,12 +613,9 @@ class _LoginPageState extends State<LoginPage> {
   Widget tabViewOuter(Widget child) {
     return SingleChildScrollView(
       padding: padding,
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 600),
-          child: child,
-        ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 450),
+        child: child,
       ),
     );
   }

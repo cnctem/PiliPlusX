@@ -214,8 +214,8 @@ class SSearchController extends GetxController
   @override
   Future<void> onValueChanged(String value) async {
     var res = await SearchHttp.searchSuggest(term: value);
-    if (res['status']) {
-      SearchSuggestModel data = res['data'];
+    if (res.isSuccess) {
+      SearchSuggestModel data = res.data;
       if (data.tag?.isNotEmpty == true) {
         searchSuggestList.value = data.tag!;
       }

@@ -13,6 +13,7 @@ import 'package:PiliPlus/utils/accounts/account.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
 import 'package:PiliPlus/utils/context_ext.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
+import 'package:PiliPlus/utils/extension.dart';
 import 'package:PiliPlus/utils/login_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
@@ -21,7 +22,7 @@ import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart' hide ListTile;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:get/get.dart' hide ContextExtensionss;
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:re_highlight/languages/json.dart';
@@ -43,6 +44,8 @@ class _AboutPageState extends State<AboutPage> {
       '${BuildConfig.versionName}+${BuildConfig.versionCode}';
   final versionTag = 
       '${BuildConfig.versionTag}+${BuildConfig.versionCode}';
+  final versionName =
+      '${BuildConfig.versionName}';
   RxString cacheSize = ''.obs;
 
   late int _pressCount = 0;
@@ -64,6 +67,24 @@ class _AboutPageState extends State<AboutPage> {
       await CacheManager.loadApplicationCache(),
     );
   }
+
+  void _showDialog() => showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        constraints: const BoxConstraints(maxWidth: 450),
+        content: TextField(
+          autofocus: true,
+          onSubmitted: (value) {
+            Get.back();
+            if (value.isNotEmpty) {
+              PageUtils.handleWebview(value, inApp: true);
+            }
+          },
+        ),
+      );
+    },
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -88,29 +109,16 @@ class _AboutPageState extends State<AboutPage> {
               _pressCount++;
               if (_pressCount == 5) {
                 _pressCount = 0;
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      content: TextField(
-                        autofocus: true,
-                        onSubmitted: (value) {
-                          Get.back();
-                          if (value.isNotEmpty) {
-                            PageUtils.handleWebview(value, inApp: true);
-                          }
-                        },
-                      ),
-                    );
-                  },
-                );
+                _showDialog();
               }
             },
+            onSecondaryTap: Utils.isDesktop ? _showDialog : null,
             child: ExcludeSemantics(
               child: Image.asset(
                 width: 150,
                 height: 150,
-                'assets/images/logo/logo.png',
+                cacheWidth: 150.cacheSize(context),
+                'assets/images/logo/logo_X.png',
               ),
             ),
           ),
@@ -150,6 +158,18 @@ class _AboutPageState extends State<AboutPage> {
             ),
           ),
           ListTile(
+            onLongPress: () => Utils.copyText(versionName),
+            onSecondaryTap: Utils.isMobile
+                ? null
+                : () => Utils.copyText(versionName),
+            title: const Text('对应上游版本'),
+            leading: const Icon(Icons.commit_outlined),
+            trailing: Text(
+              versionName,
+              style: subTitleStyle,
+            ),
+          ),         
+          ListTile(
             title: Text(
               '''
 Build Time: ${DateFormatUtils.format(BuildConfig.buildTime, format: DateFormatUtils.longFormatDs)}
@@ -176,6 +196,12 @@ Commit Hash: ${BuildConfig.commitHash}''',
             title: const Text('Source Code'),
             subtitle: Text(Constants.sourceCodeUrl, style: subTitleStyle),
           ),
+          ListTile(
+            onTap: () => PageUtils.launchURL(Constants.upstreamCodeUrl),
+            leading: const Icon(Icons.code),
+            title: const Text('Upstream Code'),
+            subtitle: Text(Constants.upstreamCodeUrl, style: subTitleStyle),
+          ),
           if (Platform.isAndroid)
             ListTile(
               onTap: () => Utils.channel.invokeMethod('linkVerifySettings'),
@@ -201,7 +227,9 @@ Commit Hash: ${BuildConfig.commitHash}''',
           ListTile(
             onTap: () => Get.toNamed('/logs'),
             onLongPress: LoggerUtils.clearLogs,
-            onSecondaryTap: Utils.isMobile ? null : LoggerUtils.clearLogs,
+            onSecondaryTap: Utils.isMobile
+                ? null
+                : LoggerUtils.clearLogs,
             leading: const Icon(Icons.bug_report_outlined),
             title: const Text('错误日志'),
             subtitle: Text('长按清除日志', style: subTitleStyle),
@@ -325,7 +353,7 @@ Future<void> showImportExportDialog<T>(
   BuildContext context, {
   required String title,
   String? label,
-  required String Function() toJson,
+  required ValueGetter<String> toJson,
   required FutureOr<bool> Function(T json) fromJson,
 }) => showDialog(
   context: context,
@@ -343,7 +371,7 @@ Future<void> showImportExportDialog<T>(
               Get.back();
               final res = utf8.encode(toJson());
               final name =
-                  'piliplus_${label}_${context.isTablet ? 'pad' : 'phone'}_'
+                  'piliplus_${label}_${ContextExtensions(context).isTablet ? 'pad' : 'phone'}_'
                   '${DateFormat('yyyyMMddHHmmss').format(DateTime.now())}.json';
               Utils.saveBytes2File(
                 name: name,
@@ -393,7 +421,7 @@ Future<void> showImportExportDialog<T>(
             showDialog(
               context: context,
               builder: (context) {
-                final isDark = context.isDarkMode;
+                final isDark = ContextExtensions(context).isDarkMode;
                 if (isDark != isDarkMode) {
                   isDarkMode = isDark;
                   renderer = TextSpanRenderer(
@@ -450,10 +478,7 @@ Future<void> showImportExportDialog<T>(
               builder: (context) {
                 return AlertDialog(
                   title: Text('输入$title'),
-                  constraints: const BoxConstraints(
-                    minWidth: 420,
-                    maxWidth: 420,
-                  ),
+                  constraints: const BoxConstraints(maxWidth: 450),
                   content: TextFormField(
                     key: key,
                     minLines: 4,

@@ -617,11 +617,33 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 )
                 .toList();
           },
+          child: GestureDetector(
+            onLongPress: () {
+              final currentFit = plPlayerController.videoFit.value;
+              if (currentFit == VideoFitType.contain) {
+                plPlayerController.toggleVideoFit(VideoFitType.cover);
+                SmartDialog.showToast(VideoFitType.cover.desc);
+              } else {
+                plPlayerController.toggleVideoFit(VideoFitType.contain);
+                SmartDialog.showToast(VideoFitType.contain.desc);
+              }
+            },
+            onSecondaryTap: () {
+              final currentFit = plPlayerController.videoFit.value;
+              if (currentFit == VideoFitType.contain) {
+                plPlayerController.toggleVideoFit(VideoFitType.cover);
+                SmartDialog.showToast(VideoFitType.cover.desc);
+              } else {
+                plPlayerController.toggleVideoFit(VideoFitType.contain);
+                SmartDialog.showToast(VideoFitType.contain.desc);
+              }
+          },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Text(
               plPlayerController.videoFit.value.desc,
               style: const TextStyle(color: Colors.white, fontSize: 13),
+              ),
             ),
           ),
         ),
@@ -751,12 +773,26 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 )
                 .toList();
           },
+          child: GestureDetector(
+            onLongPress: () {
+              final double currentSpeed = plPlayerController.playbackSpeed;
+              final newSpeed = currentSpeed == 1.0 ? 2.0 : 1.0;
+              plPlayerController.setPlaybackSpeed(newSpeed);
+              SmartDialog.showToast("${newSpeed}X");
+            },
+            onSecondaryTap: () {
+              final double currentSpeed = plPlayerController.playbackSpeed;
+              final newSpeed = currentSpeed == 1.0 ? 2.0 : 1.0;
+              plPlayerController.setPlaybackSpeed(newSpeed);
+              SmartDialog.showToast("${newSpeed}X");
+          },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Text(
               "${plPlayerController.playbackSpeed}X",
               style: const TextStyle(color: Colors.white, fontSize: 13),
               semanticsLabel: "${plPlayerController.playbackSpeed}倍速",
+              ),
             ),
           ),
         ),
@@ -1996,7 +2032,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                                   Opacity(opacity: value, child: child),
                               child: BackwardSeekIndicator(
                                 duration:
-                                    plPlayerController.fastForBackwardDuration,
+                                    plPlayerController.fastForBackwardDuration_,
                                 onSubmitted: (Duration value) {
                                   plPlayerController
                                     ..mountSeekBackwardButton.value = false

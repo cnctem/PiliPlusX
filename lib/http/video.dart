@@ -35,6 +35,8 @@ import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/wbi_sign.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show compute;
+import 'package:flutter/material.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 /// view层根据 status 判断渲染逻辑
 class VideoHttp {
@@ -257,7 +259,10 @@ class VideoHttp {
           tryLook: tryLook,
           videoType: VideoType.pgc,
         );
+      } else if (bvid != null && IdUtils.bvRegexExact.hasMatch(bvid)) {
+        return Error('视频可能换源，请进入up主页查看');
       }
+      return Error(res.data['message']);
       return Error(_parseVideoErr(res.data['code'], res.data['message']));
     } catch (e, s) {
       return Error('$e\n\n$s');

@@ -30,6 +30,7 @@ try {
 
     $buildTime = [int]([DateTimeOffset]::Now.ToUnixTimeSeconds())
 
+    # 获取标签信息
     $tag = $env:GITHUB_REF_NAME
     if ($null -eq $tag) {
         $tag = $env:GITHUB_EVENT_INPUTS_TAG
