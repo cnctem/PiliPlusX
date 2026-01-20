@@ -15,10 +15,13 @@
  * along with PiliPlus.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:io' show Platform;
+
 import 'package:flutter/foundation.dart' show listEquals, kDebugMode;
 import 'package:flutter/gestures.dart' show TapGestureRecognizer;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show BoxHitTestEntry;
+import 'package:PiliPlus/utils/storage_pref.dart';
 
 sealed class BaseSegment {
   final double start;
@@ -116,7 +119,7 @@ class RenderProgressBar extends BaseRenderProgressBar<Segment> {
     final size = this.size;
     final canvas = context.canvas;
     final paint = Paint()..style = PaintingStyle.fill;
-    final fontFamily = !Pref.Pref.useSystemFont && Platform.isAndroid
+    final fontFamily = !Pref.useSystemFont && Platform.isAndroid
         ? 'HarmonyOS_Sans'
         : null;
 

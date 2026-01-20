@@ -73,7 +73,6 @@ class VideoPopupMenu extends StatelessWidget {
                         const Icon(MdiIcons.image, size: 16),
                         () async {
                           bool saveStatus = await ImageUtils.downloadImg(
-                            context,
                             [videoItem.cover!],
                           );
                           if (saveStatus) {
