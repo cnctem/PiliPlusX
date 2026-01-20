@@ -257,6 +257,32 @@ class VideoHttp {
           tryLook: tryLook,
           videoType: VideoType.pgc,
         );
+      } else if (bvid != null && IdUtils.bvRegexExact.hasMatch(bvid)) {
+        // 若bvid符合有效格式, 弹窗
+        SmartDialog.show(
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('提示'),
+              content: const Text('视频可能换源，是否跳转到新地址？'),
+              actions: [
+                TextButton(
+                  onPressed: () => SmartDialog.dismiss(),
+                  child: Text(
+                    '取消',
+                    style: TextStyle(color: Theme.of(context).colorScheme.outline),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    SmartDialog.dismiss();
+                    PiliScheme.videoPush(null, bvid, showDialog: false);
+                  },
+                  child: const Text('确定'),
+                ),
+              ],
+            );
+          },
+        );
       }
       return Error(_parseVideoErr(res.data['code'], res.data['message']));
     } catch (e, s) {

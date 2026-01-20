@@ -34,7 +34,9 @@ jobs:
         run: |
           flutter build ios --release --no-codesign --dart-define-from-file=pili_release.json
           ln -sf ./build/ios/iphoneos Payload
-          zip -r9 PiliPlusX_ios_${{ inputs.tag }}.ipa Payload/runner.app
+          # make AltSign happy...
+          find Payload/Runner.app/Frameworks -type d -name "*.framework" -exec codesign --force --sign - --preserve-metadata=identifier,entitlements {} \;
+          zip -r9 PiliPlusX_ios_${{env.version}}.ipa Payload/runner.app
 
       - name: Release
         if: ${{ inputs.tag != '' && !contains(inputs.tag, 'test') }}
