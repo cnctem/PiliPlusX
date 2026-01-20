@@ -11,6 +11,7 @@ bool get isPrimaryModifierPressed {
     case TargetPlatform.android:
     case TargetPlatform.iOS:                  // iPadOS 外接键盘也走这里
     case TargetPlatform.fuchsia:
+    case TargetPlatform.ohos:                 // HarmonyOS
       return HardwareKeyboard.instance.isControlPressed; // 其余用 Ctrl
   }
 }
