@@ -2,14 +2,13 @@
 
 这是一个适配鸿蒙的分支，目前处于可用水平，大部分功能正常
 
-> [!CAUTION]
-> 最近半年我要去做设计，没什么时间了，[nimmi114514](https://github.com/nimmi114514)最近也很忙，可能会更新很慢了。如果你有空愿意适配可以联系我们
+上游 [qinshah/PiliPlus](https://github.com/qinshah/PiliPlus)
 
 ### 目前主要的问题
 
 - 硬件解码未适配
 
-- 可能的滑动失效(实测nova12p视频页音量、亮度和播放器Hub等都用不了)
+- 手势竞争（取决于设置项中打开的手势，具体冲突组合暂未测出，欢迎Issue）
 
 ### 其它适配细节：[issues 看板](https://github.com/users/qinshah/projects/1)
 
@@ -34,6 +33,8 @@
 - media_kit 适配者[ErBW_s](https://github.com/ErBWs)
 
 - ...所有依赖内容的构建者/贡献者
+
+- [致谢](#致谢)
 
 # 以下是原上游项目 readme
 
