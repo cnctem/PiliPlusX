@@ -39,10 +39,10 @@
 
 - [x] Android
 - [x] iOS
-- [x] Pad
+- [x] [HarmonyOS](https://github.com/cnctem/PiliPlusX/tree/ohos#当前分支ohos说明)
+- [x] Pad & Fold
 - [x] macOS
 - [x] Windows
-- [ ] Harmony OS ([开发中](https://github.com/cnctem/PiliPlusX/issues/5))
 - [ ] Linux (暂时移除支持, [详情](https://github.com/cnctem/PiliPlusX/issues/7#issuecomment-3650079829))
 
 ## refactor
@@ -290,3 +290,6 @@
 - [media-kit](https://github.com/media-kit/media-kit)
 - [dio](https://pub.dev/packages/dio)
 - 等等
+
+- 致谢鸿蒙版上游 [qinshah/PiliPlus](https://github.com/qinshah/PiliPlus)
+- 鸿蒙适配[致谢](https://github.com/cnctem/PiliPlusX/tree/ohos?tab=readme-ov-file#感谢)
