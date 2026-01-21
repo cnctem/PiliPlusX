@@ -327,7 +327,7 @@ class MyApp extends StatelessWidget {
             child: child!,
           );
 
-          if (Utils.isHarmony) {
+          if (Utils.isHarmony && !Pref.horizontalScreen) {
             // 设置鸿蒙的状态栏高度
             HarmonyStatusBar.i.onHeightCHange(mediaData.padding.top);
             // 包裹状态栏避让组件
