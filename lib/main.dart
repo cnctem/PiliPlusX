@@ -13,6 +13,7 @@ import 'package:PiliPlus/pages/dynamics/controller.dart';
 import 'package:PiliPlus/pages/home/controller.dart';
 import 'package:PiliPlus/pages/main/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
+import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/router/app_pages.dart';
 import 'package:PiliPlus/services/account_service.dart';
 import 'package:PiliPlus/services/download/download_service.dart';
@@ -145,6 +146,9 @@ void main() async {
         systemNavigationBarContrastEnforced: false,
       ),
     );
+    if (PlatformUtils.isMobile && Pref.hideStatusBar) {
+      await hideStatusBar();
+    }
     if (Platform.isAndroid) {
       FlutterDisplayMode.supported.then((mode) {
         final String? storageDisplay = GStorage.setting.get(
