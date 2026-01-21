@@ -1446,7 +1446,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         _videoWidget,
 
         if (widget.danmuWidget case final danmaku?)
-          Positioned.fill(top: 4, child: danmaku),
+          Positioned.fill(top: 0, child: danmaku),
 
         if (!isLive)
           Positioned.fill(
