@@ -76,11 +76,11 @@
 
 - [x] Android
 - [x] iOS
-- [x] Pad
-- [x] Windows
+- [x] [HarmonyOS](https://github.com/cnctem/PiliPlusX/tree/ohos#当前分支ohos说明)
+- [x] Pad & Fold
 - [x] macOS
-- [ ] Harmony OS ([开发中](https://github.com/cnctem/PiliPlusX/issues/5))
-- [ ] Linux (暂时移除支持，推荐上游[PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus) 或 [bilibili-linux](https://github.com/msojocs/bilibili-linux))
+- [x] Windows
+- [ ] Linux (暂时移除支持, [详情](https://github.com/cnctem/PiliPlusX/issues/7#issuecomment-3650079829))
 
 ## refactor
 
@@ -364,3 +364,6 @@
 - [flutter_ohos](https://gitcode.com/openharmony-tpc/flutter_flutter)
 - [dio](https://pub.dev/packages/dio)
 - 等等
+
+- 致谢鸿蒙版上游 [qinshah/PiliPlus](https://github.com/qinshah/PiliPlus)
+- 鸿蒙适配[致谢](https://github.com/cnctem/PiliPlusX/tree/ohos?tab=readme-ov-file#感谢)
