@@ -18,9 +18,13 @@ class _HarmonyVolumeViewState extends State<HarmonyVolumeView> {
     return OhosView(
       viewType: 'AVVolumePanel',
       onPlatformViewCreated: (id) {
-        widget.onCreated(
-          HarmonyVolumeCntlr(MethodChannel('AVVolumePanel_$id')),
-        );
+        final cntlr = HarmonyVolumeCntlr(MethodChannel('AVVolumePanel_$id'));
+        widget.onCreated(cntlr);
+        cntlr.getVolume().then((volume) {
+          if (volume != null) {
+            cntlr.setVolume(volume);
+          }
+        });
       },
     );
   }

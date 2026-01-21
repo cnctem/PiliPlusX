@@ -16,8 +16,8 @@ import { BusinessError } from '@ohos.base'
 const hide: AVVolumePanelParameter =
   {
     position: {
-      x: -1,
-      y: -1
+      x: -10000,
+      y: -10000
     }
   }
 const volumeGroupId = audio.DEFAULT_VOLUME_GROUP_ID
@@ -50,6 +50,9 @@ struct VolumeComponent {
       volumeLevel: this.volume,
       volumeParameter: this.volumeParameter
     })
+      .width(0)
+      .height(0)
+      .opacity(0)
   }
 }
 
@@ -79,6 +82,10 @@ export class VolumeView extends PlatformView implements MethodCallHandler {
     this.volumeManager = audio.getAudioManager().getVolumeManager()
     this.minVolume = this.volumeManager.getMinVolumeByStream(volumeGroupId)
     this.volumeRange = this.volumeManager.getMaxVolumeByStream(volumeGroupId) - this.minVolume
+    
+    let volumeParameterLink: SubscribedAbstractProperty<AVVolumePanelParameter> =
+    AppStorage.link('volumeParameter');
+    volumeParameterLink.set(hide)
   }
 
   onMethodCall(call: MethodCall, result: MethodResult): void {

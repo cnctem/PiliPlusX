@@ -11,7 +11,7 @@ const EVENT_BACK_PRESS = 'EVENT_BACK_PRESS'
 struct Index {
   private context = getContext(this) as common.UIAbilityContext
   @LocalStorageLink('viewId') viewId: string = "";
-  @State volume: number = 0;
+  @StorageLink('volume') volume: number = 0;
 
   build() {
     Column() {
@@ -20,8 +20,8 @@ struct Index {
         volumeLevel: this.volume,
         volumeParameter: {
           position: {
-            x: -100,
-            y: -200
+            x: -10000,
+            y: -10000
           }
         }
       })

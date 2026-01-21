@@ -5,6 +5,15 @@ import { GeneratedPluginRegistrant } from '../plugins/GeneratedPluginRegistrant'
 import { VolumeFactory } from './VolumeFactory';
 import HarmonyChannel from '../plugins/HarmonyChannel';
 import window from '@ohos.window';
+import { AVVolumePanelParameter } from '@kit.AudioKit';
+
+const hide: AVVolumePanelParameter =
+  {
+    position: {
+      x: -10000,
+      y: -10000
+    }
+  }
 
 export default class EntryAbility extends FlutterAbility {
   harmonyChannel: HarmonyChannel = new HarmonyChannel()
@@ -18,6 +27,8 @@ export default class EntryAbility extends FlutterAbility {
     )
     GeneratedPluginRegistrant.registerWith(flutterEngine)
     flutterEngine.getPlugins()?.add(this.harmonyChannel);
+    
+    AppStorage.setOrCreate('volumeParameter', hide)
   }
 
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam) {
