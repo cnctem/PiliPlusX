@@ -580,6 +580,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                   clipBehavior: Clip.none,
                   children: [
                     AppBar(
+                      primary: false,
                       backgroundColor: Colors.black,
                       toolbarHeight: 0,
                       systemOverlayStyle: Platform.isAndroid
@@ -594,6 +595,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                     ),
                     if (shouldShow)
                       AppBar(
+                        primary: false,
                         backgroundColor: themeData.colorScheme.surface
                             .withValues(alpha: scrollRatio),
                         toolbarHeight: 0,
@@ -890,7 +892,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       final isFullScreen = this.isFullScreen;
       return Scaffold(
         resizeToAvoidBottomInset: false,
-        appBar: AppBar(backgroundColor: Colors.black, toolbarHeight: 0),
+        appBar: AppBar(
+          primary: false,
+          backgroundColor: Colors.black,
+          toolbarHeight: 0),
         body: Padding(
           padding: !isFullScreen
               ? padding.copyWith(top: 0, bottom: 0)
@@ -1116,7 +1121,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     final isFullScreen = this.isFullScreen;
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      appBar: AppBar(backgroundColor: Colors.black, toolbarHeight: 0),
+      appBar: AppBar(
+          primary: false,
+          backgroundColor: Colors.black,
+          toolbarHeight: 0),
       body: Padding(
         padding: !isFullScreen
             ? padding.copyWith(top: 0, bottom: 0)
