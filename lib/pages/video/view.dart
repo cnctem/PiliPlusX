@@ -471,7 +471,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       ModalRoute.of(context)! as PageRoute,
     );
 
-    padding = MediaQuery.viewPaddingOf(context);
+    padding = MediaQuery.viewPaddingOf(context).copyWith(top: 0);
 
     final size = MediaQuery.sizeOf(context);
     maxWidth = size.width;
