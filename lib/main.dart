@@ -353,13 +353,15 @@ class MyApp extends StatelessWidget {
           return Stack(
             alignment: Alignment.center,
             children: [
-              // 看不见的地方加一个鸿蒙原生音量控件，
-              if (Utils.isHarmony)
-                HarmonyVolumeView(
-                  onCreated: (cntlr) => HarmonyVolumeView.cntlr = cntlr,
-                ),
               child,
-              // 调试代码用，ai生成git提交信息请忽略这部分改动
+              if (Utils.isHarmony)
+                Positioned(
+                  left: -1000,
+                  top: -1000,
+                  child: HarmonyVolumeView(
+                    onCreated: (cntlr) => HarmonyVolumeView.cntlr = cntlr,
+                  ),
+                ),
               if (kDebugMode)
                 ElevatedButton(
                   onPressed: () {

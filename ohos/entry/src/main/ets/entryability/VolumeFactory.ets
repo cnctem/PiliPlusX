@@ -13,18 +13,18 @@ import { Params } from '@ohos/flutter_ohos/src/main/ets/plugin/platform/Platform
 import { audio, AVVolumePanel, AVVolumePanelParameter } from '@kit.AudioKit';
 import { BusinessError } from '@ohos.base'
 
-// const hide: AVVolumePanelParameter =
-//   {
-//     position: {
-//       x: -1,
-//       y: -1
-//     }
-//   }
+const hide: AVVolumePanelParameter =
+  {
+    position: {
+      x: -1,
+      y: -1
+    }
+  }
 const volumeGroupId = audio.DEFAULT_VOLUME_GROUP_ID
 
 AppStorage.setOrCreate('volume', 0)
 
-// AppStorage.setOrCreate('volumeParameter', hide)
+AppStorage.setOrCreate('volumeParameter', hide)
 
 export class VolumeFactory extends PlatformViewFactory {
   private binaryMessenger: BinaryMessenger
@@ -43,12 +43,12 @@ export class VolumeFactory extends PlatformViewFactory {
 struct VolumeComponent {
   @StorageLink('volume') volume: number = 0
 
-  // @StorageLink('volumeParameter') volumeParameter?: AVVolumePanelParameter = hide
+  @StorageLink('volumeParameter') volumeParameter?: AVVolumePanelParameter = hide
 
   build() {
     AVVolumePanel({
       volumeLevel: this.volume,
-      // volumeParameter: this.volumeParameter
+      volumeParameter: this.volumeParameter
     })
   }
 }
@@ -82,16 +82,14 @@ export class VolumeView extends PlatformView implements MethodCallHandler {
   }
 
   onMethodCall(call: MethodCall, result: MethodResult): void {
-    // let volumeParameterLink: SubscribedAbstractProperty<AVVolumePanelParameter> =
-    // AppStorage.link('volumeParameter');
+    let volumeParameterLink: SubscribedAbstractProperty<AVVolumePanelParameter> =
+    AppStorage.link('volumeParameter');
     switch (call.method) {
       case 'setVolume':
         try {
           let volumeLink: SubscribedAbstractProperty<number> = AppStorage.link('volume');
           const volume: number = call.argument('volume')
-          // 隐藏音量条
-          // volumeParameterLink.set(hide)
-          // [0 ,1]转系统音量
+          volumeParameterLink.set(hide)
           volumeLink.set(this.minVolume + volume * this.volumeRange)
           result.success(null)
         } catch (e) {
@@ -99,14 +97,12 @@ export class VolumeView extends PlatformView implements MethodCallHandler {
           result.error(error.code.toString(), error.message, error.data)
         }
         break;
-      // 恢复显示音量条
-      // case 'restorePanel':
-      //   volumeParameterLink.set(undefined)
-      //   result.success(true)
-      //   break;
+      case 'restorePanel':
+        volumeParameterLink.set(undefined)
+        result.success(true)
+        break;
       case 'getVolume':
         const systemVolume = this.volumeManager.getVolumeByStream(volumeGroupId)
-        // 系统音量转[0, 1]
         result.success((systemVolume - this.minVolume) / this.volumeRange)
         break;
       default:
