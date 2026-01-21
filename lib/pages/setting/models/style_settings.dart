@@ -113,7 +113,15 @@ List<SettingsModel> get styleSettings => [
     defaultVal: false,
     needReboot: true,
   ),
-  if (Platform.isLinux) ...[
+  const SwitchModel(
+    title: '隐藏状态栏',
+    subtitle: '开启后将隐藏状态栏并移除安全边距，可能导致异形屏遮挡顶部组件',
+    leading: Icon(Icons.fullscreen_outlined),
+    setKey: SettingBoxKey.hideStatusBar,
+    defaultVal: false,
+    needReboot: true,
+  ),
+  if (Platform.isMacOS) ...[
     const SwitchModel(
       title: '使用系统字体',
       subtitle: '关闭后将使用内置HarmonyOS Sans字体',
