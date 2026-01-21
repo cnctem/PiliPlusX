@@ -56,6 +56,7 @@ import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:collection/collection.dart';
@@ -1446,7 +1447,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         _videoWidget,
 
         if (widget.danmuWidget case final danmaku?)
-          Positioned.fill(top: 4, child: danmaku),
+          Positioned.fill(top: Pref.hideStatusBar ? 0 : 4, child: danmaku),
 
         if (!isLive)
           Positioned.fill(

@@ -57,6 +57,7 @@ import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:auto_orientation/auto_orientation.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
 import 'package:floating/floating.dart';
@@ -363,7 +364,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     }
     PageUtils.routeObserver.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
-    if (PlatformUtils.isMobile) {
+    if (PlatformUtils.isMobile && !Pref.hideStatusBar) {
       showStatusBar();
     }
     super.dispose();
@@ -471,7 +472,11 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       ModalRoute.of(context)! as PageRoute,
     );
 
-    padding = MediaQuery.viewPaddingOf(context);
+    if (!Pref.hideStatusBar) {
+      padding = MediaQuery.viewPaddingOf(context);
+    } else {
+      padding = MediaQuery.viewPaddingOf(context).copyWith(top: 0);
+    }
 
     final size = MediaQuery.sizeOf(context);
     maxWidth = size.width;
@@ -534,7 +539,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       ..addListener(animListener);
     if (PlatformUtils.isMobile && mounted && isShowing && !isFullScreen) {
       if (isPortrait) {
-        if (!videoDetailController.imageview) {
+        if (!videoDetailController.imageview && !Pref.hideStatusBar) {
           showStatusBar();
         }
       } else if (!videoDetailController.horizontalScreen) {

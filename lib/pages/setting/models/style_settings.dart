@@ -119,6 +119,14 @@ List<SettingsModel> get styleSettings => [
     defaultVal: false,
     needReboot: true,
   ),
+  const SwitchModel(
+    title: '隐藏状态栏',
+    subtitle: '开启后将隐藏状态栏，建议全屏方向设为【不改变当前方向】',
+    leading: Icon(Icons.fullscreen_outlined),
+    setKey: SettingBoxKey.hideStatusBar,
+    defaultVal: false,
+    needReboot: true,
+  ),
   if (!Platform.isMacOS) ...[
     const SwitchModel(
       title: '使用系统字体',
