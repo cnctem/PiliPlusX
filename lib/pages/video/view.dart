@@ -535,7 +535,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     if (PlatformUtils.isMobile && mounted && isShowing && !isFullScreen) {
       if (isPortrait) {
         if (!videoDetailController.imageview) {
-          showStatusBar();
+          hideStatusBar();
         }
       } else if (!videoDetailController.horizontalScreen) {
         hideStatusBar();
