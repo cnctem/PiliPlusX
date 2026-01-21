@@ -892,6 +892,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     () {
       final isFullScreen = this.isFullScreen;
       return Scaffold(
+        primary: false,
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           primary: false,
@@ -929,6 +930,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             width: introWidth,
             height: maxHeight - padding.top,
             child: Scaffold(
+              primary: false,
               key: videoDetailController.childKey,
               resizeToAvoidBottomInset: false,
               backgroundColor: Colors.transparent,
@@ -998,6 +1000,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               width: introWidth,
               height: introHeight,
               child: Scaffold(
+                primary: false,
                 key: videoDetailController.childKey,
                 resizeToAvoidBottomInset: false,
                 backgroundColor: Colors.transparent,
@@ -1072,6 +1075,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             width: maxWidth - width - padding.horizontal,
             height: maxHeight - padding.top,
             child: Scaffold(
+              primary: false,
               key: videoDetailController.childKey,
               resizeToAvoidBottomInset: false,
               backgroundColor: Colors.transparent,
@@ -1167,6 +1171,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               width: maxWidth - padding.horizontal,
               height: bottomHeight,
               child: Scaffold(
+                primary: false,
                 key: videoDetailController.childKey,
                 resizeToAvoidBottomInset: false,
                 backgroundColor: Colors.transparent,
