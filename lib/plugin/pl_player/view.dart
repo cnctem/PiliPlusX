@@ -13,6 +13,7 @@ import 'package:PiliPlus/common/widgets/progress_bar/audio_video_progress_bar.da
 import 'package:PiliPlus/common/widgets/progress_bar/segment_progress_bar.dart';
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_volume.dart';
+import 'package:PiliPlus/harmony_adapt/status_bar.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/models/common/sponsor_block/action_type.dart';
 import 'package:PiliPlus/models/common/sponsor_block/post_segment_model.dart';
@@ -902,7 +903,25 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 constraints: BoxConstraints(minWidth: constraints.maxWidth),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
-                  children: userSpecifyItemRight.map(progressWidget).toList(),
+                  children: [
+                   if(isFullScreen) SizedBox(
+                      width: 42,
+                      height: 34,
+                      child: IconButton(
+                        tooltip: '切换状态栏隐藏',
+                        style: const ButtonStyle(
+                          padding: WidgetStatePropertyAll(EdgeInsets.zero),
+                        ),
+                        onPressed: StatusBar.i.toggleHide,
+                        icon: const Icon(
+                          Icons.ad_units,
+                          size: 19,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    ...userSpecifyItemRight.map(progressWidget),
+                  ],
                 ),
               ),
             ),
