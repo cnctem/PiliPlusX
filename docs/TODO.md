@@ -11,8 +11,8 @@
 - [x] 阈值 默认打开，无按钮
 - [x] 双击快进快退默认关闭
 - [x] 默认自动开始播放
+- [x] 全局状态栏隐藏，移除安全边距 -Issue12
 - [ ] 首页“充电视频”筛除
-- [ ] 选择移除播放详情页的安全边距（状态栏）
 
 ### 快捷键
 
@@ -36,7 +36,6 @@
 - [ ] 动态评论区正确跳转和动态详情页的评论按钮 -c001
 - [ ] 安卓播控中心退出播放页后有概率仍在
 - [ ] 换源视频重新定向加一个ping验证
-- [ ] 对应上游版本正确tag
 
 ### 稍后再看相关
 
@@ -64,14 +63,12 @@
 - [ ] 桌面端多实例（多窗口） -ywt
 - [ ] 增加消息通知功能，基于“消息”-点击跳转对应界面，并提高消息刷新频率
 - [ ] 直播间竖屏界面下面的弹幕调用弹幕复制组件 -hcz
-- [ ] 应用内小窗口，实现参考 [pilipro](https://github.com/naaammme/pilipro) （设置项）-[Issue9](https://github.com/cnctem/PiliPlusX/issues/9)
 - [ ] 请求超时后台自动重新选择最快的 CDN -c001
 - [ ] 明显处开关打开CDN 弹窗（设置项）-c001
 - [ ] 缓存的视频可手动分类 -c001
 - [ ] 更换app icon和主题色，优化素材引用导致的内存占用
-- [ ] 自定义字体(导入.ttf/.otf) -c001
+- [ ] 自定义字体(导入.ttf/.otf) 或者类似[Slive](https://github.com/SlotSun/dart_simple_live)的下载字体机制
 - [ ] 这个旋转其他视频平台的逻辑大概是点了之后会有一秒左右的不检测方向（设置项：支持在非临时全屏状态下旋转退出全屏）全屏1s后进入临时全屏状态 -c001
-- [ ] 自动全屏不转变方向（设置项）
 
 ### 暂时搁置或暂时无法实现的功能请求
 
@@ -81,5 +78,6 @@
 - [ ] 当播放视频时候界面处于长按倍速状态，上下滑动即可动态倍速（设置项）-ywt
 - [ ] 鼠标右键事件 -[Issue3](https://github.com/cnctem/PiliPlusX/issues/3)
 - [ ] 看一下api仓库，搜索 图文 接口 -ywt
+- [ ] 应用内小窗口，实现参考 [pilipro](https://github.com/naaammme/pilipro) （设置项）-[Issue9](https://github.com/cnctem/PiliPlusX/issues/9)
 
 **欢迎在 [Issues](https://github.com/cnctem/PiliPlusX/issues) 提交建议和问题反馈**
