@@ -157,9 +157,6 @@ void main() async {
         systemNavigationBarContrastEnforced: false,
       ),
     );
-    if (Pref.hideStatusBar) {
-      await hideStatusBar();
-    }
     if (Platform.isAndroid) {
       late List<DisplayMode> modes;
       FlutterDisplayMode.supported.then((value) {
@@ -343,12 +340,18 @@ class MyApp extends StatelessWidget {
             child: child!,
           );
 
-          if (Utils.isHarmony) {
+          if (Utils.isHarmony && !Pref.horizontalScreen) {
             // 设置鸿蒙的状态栏高度
             HarmonyStatusBar.i.onHeightCHange(mediaData.padding.top);
             // 包裹状态栏避让组件
             child = HarmonyStatusBar.i.avoidWidget(child: child);
           }
+
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (Utils.isMobile && Pref.hideStatusBar) {
+              hideStatusBar();
+            }
+          });
           if (Utils.isDesktop) {
             return Focus(
               canRequestFocus: false,
