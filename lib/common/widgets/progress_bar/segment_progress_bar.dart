@@ -119,9 +119,6 @@ class RenderProgressBar extends BaseRenderProgressBar<Segment> {
     final size = this.size;
     final canvas = context.canvas;
     final paint = Paint()..style = PaintingStyle.fill;
-    final fontFamily = !Pref.useSystemFont && Platform.isAndroid
-        ? 'HarmonyOS_Sans'
-        : null;
 
     for (final segment in segments) {
       paint.color = segment.color;
@@ -201,6 +198,9 @@ class RenderViewPointProgressBar
     final size = this.size;
     final canvas = context.canvas;
     final paint = Paint()..style = PaintingStyle.fill;
+    final fontFamily = !Pref.useSystemFont && Platform.isAndroid
+        ? 'HarmonyOS_Sans'
+        : null;
 
     canvas.drawRect(
       Rect.fromLTWH(0, 0, size.width, barHeight),
@@ -225,6 +225,7 @@ class RenderViewPointProgressBar
             style: TextStyle(
               color: Colors.white,
               fontSize: fontSize,
+              fontFamily: fontFamily,
               height: 1,
             ),
           ),
