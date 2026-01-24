@@ -1,4 +1,3 @@
-import 'package:PiliPlus/harmony_adapt/harmony_status_bar.dart';
 import 'package:PiliPlus/harmony_adapt/scalable_binding.dart';
 import 'package:flutter/services.dart';
 
@@ -16,9 +15,9 @@ abstract class HarmonyChannel {
       case 'onFloatingWindowChange':
         _onFloatingWindowChange(call.arguments['isFloatingWindow']);
         break;
-      case 'onRotationChange':
-        HarmonyStatusBar.i.onRotationChange(call.arguments['rotation']);
-        break;
+      // case 'onRotationChange':
+      //   StatusBar.i.onRotationChange(call.arguments['rotation']);
+      //   break;
       default:
         break;
     }

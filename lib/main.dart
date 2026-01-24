@@ -4,9 +4,9 @@ import 'package:PiliPlus/build_config.dart';
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/widgets/custom_toast.dart';
 import 'package:PiliPlus/common/widgets/mouse_back.dart';
-import 'package:PiliPlus/harmony_adapt/harmony_status_bar.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_volume.dart';
 import 'package:PiliPlus/harmony_adapt/scalable_binding.dart';
+import 'package:PiliPlus/harmony_adapt/status_bar.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/models/common/nav_bar_config.dart';
 import 'package:PiliPlus/models/common/theme/theme_color_type.dart';
@@ -339,14 +339,6 @@ class MyApp extends StatelessWidget {
             ),
             child: child!,
           );
-
-          if (Utils.isHarmony && !Pref.horizontalScreen) {
-            // 设置鸿蒙的状态栏高度
-            HarmonyStatusBar.i.onHeightCHange(mediaData.padding.top);
-            // 包裹状态栏避让组件
-            child = HarmonyStatusBar.i.avoidWidget(child: child);
-          }
-
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (Utils.isMobile && Pref.hideStatusBar) {
               hideStatusBar();
@@ -388,11 +380,7 @@ class MyApp extends StatelessWidget {
               // 调试代码用，ai生成git提交信息请忽略这部分改动
               if (kDebugMode)
                 ElevatedButton(
-                  onPressed: () {
-                    SystemChrome.setEnabledSystemUIMode(
-                      SystemUiMode.immersiveSticky,
-                    );
-                  },
+                  onPressed: StatusBar.i.toggleHide,
                   child: const Text('测试'),
                 ),
             ],

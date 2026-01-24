@@ -6,7 +6,6 @@ import 'dart:ui' as ui;
 
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
-import 'package:PiliPlus/harmony_adapt/harmony_status_bar.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_volume.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -1547,15 +1546,11 @@ class PlPlayerController {
     if (!Utils.isHarmony) return;
     // 鸿蒙小窗适配方向
 
-    // 鸿蒙退出全屏后取消状态栏避让
     if (val) {
-      // 进入全屏，或许需要避让状态栏
-      HarmonyStatusBar.i.mayBeAvoidStatusBar(true);
-      // 横向还需设置小窗横屏
+      // 横向全屏需设置小窗横屏
       if (!isVertical) HarmonyChannel.setMiniWindowLandscape(true);
     } else {
-      // 退出全屏不需要避让状态栏和鸿蒙小窗横屏
-      HarmonyStatusBar.i.mayBeAvoidStatusBar(false);
+      // 退出全屏取消鸿蒙小窗横屏
       HarmonyChannel.setMiniWindowLandscape(false);
     }
   }

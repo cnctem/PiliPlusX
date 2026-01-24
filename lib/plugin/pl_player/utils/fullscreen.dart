@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
+import 'package:PiliPlus/harmony_adapt/status_bar.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:auto_orientation/auto_orientation.dart';
@@ -82,6 +83,7 @@ Future<void> hideStatusBar() async {
     return;
   }
   _showStatusBar = false;
+  StatusBar.i.hidden = true;
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 }
 
@@ -91,6 +93,7 @@ Future<void> showStatusBar() async {
     return;
   }
   _showStatusBar = true;
+  StatusBar.i.hidden = false;
   SystemUiMode mode;
   if (Platform.isAndroid && (await Utils.sdkInt < 29)) {
     mode = SystemUiMode.manual;
