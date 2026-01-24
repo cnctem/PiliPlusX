@@ -60,16 +60,11 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
   late final RichTextEditingController editController;
 
   @override
-  void initState() {
-    super.initState();
+  void initPubState() {
     editController = RichTextEditingController(
       items: widget.items,
       onMention: onMention,
     );
-  }
-
-  @override
-  void initPubState() {
     if (editController.rawText.trim().isNotEmpty) {
       enablePublish.value = true;
     }
