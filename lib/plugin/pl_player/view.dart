@@ -568,31 +568,26 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
       /// 画面比例
       BottomControlType.fit => Obx(
-        () {
-          final fit = plPlayerController.videoFit.value;
-          return PopupMenuButton<VideoFitType>(
-            tooltip: '画面比例',
-            requestFocus: false,
-            initialValue: fit,
-            color: Colors.black.withValues(alpha: 0.8),
-            itemBuilder: (context) {
-              return VideoFitType.values
-                  .map(
-                    (boxFit) => PopupMenuItem<VideoFitType>(
-                      height: 35,
-                      padding: const EdgeInsets.only(left: 30),
-                      value: boxFit,
-                      onTap: () => plPlayerController.toggleVideoFit(boxFit),
-                      child: Text(
-                        boxFit.desc,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                        ),
-                      ),
+        () => PopupMenuButton<VideoFitType>(
+          tooltip: '画面比例',
+          requestFocus: false,
+          initialValue: plPlayerController.videoFit.value,
+          color: Colors.black.withValues(alpha: 0.8),
+          itemBuilder: (context) {
+            return VideoFitType.values
+                .map(
+                  (boxFit) => PopupMenuItem<VideoFitType>(
+                    height: 35,
+                    padding: const EdgeInsets.only(left: 30),
+                    value: boxFit,
+                    onTap: () => plPlayerController.toggleVideoFit(boxFit),
+                    child: Text(
+                      boxFit.desc,
+                      style: const TextStyle(color: Colors.white, fontSize: 13),
                     ),
-                  )
-                  .toList();
+                  ),
+                )
+                .toList();
           },
           child: GestureDetector(
             onLongPress: () {
@@ -618,12 +613,12 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
-                fit.desc,
+                plPlayerController.videoFit.value.desc,
                 style: const TextStyle(color: Colors.white, fontSize: 13),
               ),
             ),
-          );
-        },
+          ),
+        ),
       ),
 
       BottomControlType.aiTranslate => Obx(
@@ -779,18 +774,18 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
               final newSpeed = currentSpeed == 1.0 ? 2.0 : 1.0;
               plPlayerController.setPlaybackSpeed(newSpeed);
               SmartDialog.showToast("${newSpeed}x播放");
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Text(
-                "${plPlayerController.playbackSpeed}X",
-                style: const TextStyle(color: Colors.white, fontSize: 13),
-                semanticsLabel: "${plPlayerController.playbackSpeed}倍速",
-              ),
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Text(
+              "${plPlayerController.playbackSpeed}X",
+              style: const TextStyle(color: Colors.white, fontSize: 13),
+              semanticsLabel: "${plPlayerController.playbackSpeed}倍速",
             ),
           ),
         ),
       ),
+    ),
 
       BottomControlType.qa => Obx(
         () {
@@ -843,7 +838,6 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                           newQa == VideoQuality.hdr) {
                         SmartDialog.show(
                           builder: (context) {
-                            final ThemeData theme = Theme.of(context);
                             return const AlertDialog(
                               title: Text('提示'),
                               content: Text(

@@ -40,6 +40,7 @@ import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:path/path.dart' as path;
@@ -296,73 +297,7 @@ class MyApp extends StatelessWidget {
         toastBuilder: (msg) => CustomToast(msg: msg),
         loadingBuilder: (msg) => LoadingWidget(msg: msg),
         builder: _builder,
-        /*  TODO: 需在 _builder 中恢复部分快捷键功能
-        builder: (context, child) {
-          final uiScale = Pref.uiScale;
-          final mediaQuery = MediaQuery.of(context);
-          final textScaler = TextScaler.linear(Pref.defaultTextScale);
           if (uiScale != 1.0) {
-            child = MediaQuery(
-              data: mediaQuery.copyWith(
-                textScaler: textScaler,
-                size: mediaQuery.size / uiScale,
-                padding: mediaQuery.padding / uiScale,
-                viewInsets: mediaQuery.viewInsets / uiScale,
-                viewPadding: mediaQuery.viewPadding / uiScale,
-                devicePixelRatio: mediaQuery.devicePixelRatio * uiScale,
-              ),
-              child: child!,
-            );
-          } else {
-            child = MediaQuery(
-              data: mediaQuery.copyWith(textScaler: textScaler),
-              child: child!,
-            );
-          }
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (PlatformUtils.isMobile && Pref.hideStatusBar) {
-              hideStatusBar();
-            }
-          });
-          if (PlatformUtils.isDesktop) {
-            return Focus(
-              canRequestFocus: false,
-              onKeyEvent: (_, event) {
-                // 处理刷新快捷键
-                final refreshResult = _handleRefreshKey(event);
-                if (refreshResult != null) {
-                  return refreshResult;
-                }
-
-                // 处理设置快捷键 (主修饰键 + ,)
-                final settingsResult = _handleSettingsKey(event);
-                if (settingsResult != null) {
-                  return settingsResult;
-                }
-
-                // 处理Escape键返回功能
-                if (event.logicalKey == LogicalKeyboardKey.escape &&
-                    event is KeyDownEvent) {
-                  _onBack();
-                  return KeyEventResult.handled;
-                }
-
-                // 处理Alt+H/Opt+H返回主页快捷键
-                final homeResult = _handleHomeShortcut(event);
-                if (homeResult != null) {
-                  return homeResult;
-                }
-                return KeyEventResult.ignored;
-              },
-              child: MouseBackDetector(
-                onTapDown: _onBack,
-                child: child,
-              ),
-            );
-          }
-          return child;
-        },
-*/
       ),
       navigatorObservers: [
         PageUtils.routeObserver,
@@ -396,13 +331,49 @@ class MyApp extends StatelessWidget {
         child: child!,
       );
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (PlatformUtils.isMobile && Pref.hideStatusBar) {
+        hideStatusBar();
+      }
+    });
     if (PlatformUtils.isDesktop) {
-      return BackDetector(
-        onBack: _onBack,
-        child: child,
+      return Focus(
+        canRequestFocus: false,
+        onKeyEvent: (_, event) {
+          // 处理退出快捷键 (Cmd+Q)
+          if (Platform.isMacOS) {
+            final quitResult = ShortcutHandler.handleQuitKey(event);
+            if (quitResult != null) {
+              return quitResult;
+            }
+          }
+
+          // 处理刷新快捷键
+          final refreshResult = ShortcutHandler.handleRefreshKey(event);
+          if (refreshResult != null) {
+            return refreshResult;
+          }
+
+          // 处理设置快捷键 (主修饰键 + ,)
+          final settingsResult = ShortcutHandler.handleSettingsKey(event);
+          if (settingsResult != null) {
+            return settingsResult;
+          }
+
+          // 处理Alt+H/Opt+H返回主页快捷键
+          final homeResult = ShortcutHandler.handleHomeShortcut(event);
+          if (homeResult != null) {
+            return homeResult;
+          }
+          return KeyEventResult.ignored;
+        },
+        child: BackDetector(
+          onBack: _onBack,
+          child: child!,
+        ),
       );
     }
-    return child;
+    return child!;
   }
 
   /// from [DynamicColorBuilderState.initPlatformState]
@@ -451,120 +422,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// 处理刷新快捷键
-KeyEventResult? _handleRefreshKey(KeyEvent event) {
-  if (event is! KeyDownEvent) return null;
-  // 1. 先匹配字母 R
-  if (event.logicalKey != LogicalKeyboardKey.keyR) {
-    return null;
-  }
-  // 2. 再判断本平台的"主修饰键"是否按下
-  if (!isPrimaryModifierPressed) return null;
-  // 3. 防止 Shift/Alt/等其它修饰符干扰
-  if (HardwareKeyboard.instance.isShiftPressed ||
-      HardwareKeyboard.instance.isAltPressed) {
-    return null;
-  }
-  // 4. 真正干活
-  _handleRefreshShortcut();
-  return KeyEventResult.handled;
-}
 
-// 处理设置快捷键 (主修饰键 + ,)
-KeyEventResult? _handleSettingsKey(KeyEvent event) {
-  if (event is! KeyDownEvent) return null;
-  // 1. 先匹配逗号键
-  if (event.logicalKey != LogicalKeyboardKey.comma) {
-    return null;
-  }
-  // 2. 再判断本平台的"主修饰键"是否按下
-  if (!isPrimaryModifierPressed) return null;
-  // 3. 防止 Shift/Alt/等其它修饰符干扰
-  if (HardwareKeyboard.instance.isShiftPressed ||
-      HardwareKeyboard.instance.isAltPressed) {
-    return null;
-  }
-  // 4. 打开设置页面
-  _handleSettingsShortcut();
-  return KeyEventResult.handled;
-}
-
-// 处理Control+R快捷键刷新
-void _handleRefreshShortcut() {
-  // 获取当前路由
-  final context = Get.context;
-  if (context == null) return;
-  // 尝试获取当前页面的控制器
-  final currentController = _getCurrentPageController();
-  if (currentController != null) {
-    // 如果当前控制器有onRefresh方法，则调用它
-    if (currentController is ScrollOrRefreshMixin) {
-      currentController.onRefresh();
-    }
-  }
-}
-
-// 获取当前页面的控制器
-dynamic _getCurrentPageController() {
-  try {
-    // 获取主页控制器
-    final mainController = Get.find<MainController>();
-    final currentIndex = mainController.selectedIndex.value;
-    // 根据当前索引获取对应的控制器
-    if (mainController.navigationBars[currentIndex] == NavigationBarType.home) {
-      final homeController = Get.find<HomeController>();
-      return homeController.controller;
-    } else if (mainController.navigationBars[currentIndex] ==
-        NavigationBarType.dynamics) {
-      return Get.find<DynamicsController>();
-    }
-
-    return null;
-  } catch (e) {
-    return null;
-  }
-}
-
-// 处理Alt+H/Opt+H返回主页快捷键
-KeyEventResult? _handleHomeShortcut(KeyEvent event) {
-  if (event is! KeyDownEvent) return null;
-  // 1. 先匹配字母 H
-  if (event.logicalKey != LogicalKeyboardKey.keyH) {
-    return null;
-  }
-  // 2. 判断Alt键是否按下（Windows/Linux/macOS的Option键）
-  if (!HardwareKeyboard.instance.isAltPressed) {
-    return null;
-  }
-  // 3. 防止其他修饰符干扰
-  if (HardwareKeyboard.instance.isShiftPressed ||
-      HardwareKeyboard.instance.isControlPressed ||
-      HardwareKeyboard.instance.isMetaPressed) {
-    return null;
-  }
-  // 4. 执行返回主页逻辑
-  _handleHomeShortcutAction();
-  return KeyEventResult.handled;
-}
-
-// 执行返回主页操作
-void _handleHomeShortcutAction() {
-  // 清理播放器资源（如果存在）
-  final plCtr = PlPlayerController.instance;
-  if (plCtr != null) {
-    plCtr
-      ..isCloseAll = true
-      ..dispose();
-  }
-  // 返回主页
-  Get.until((route) => route.isFirst);
-}
-
-// 处理设置快捷键
-void _handleSettingsShortcut() {
-  // 打开设置页面
-  Get.toNamed('/setting', preventDuplicates: false);
-}
 
 class _CustomHttpOverrides extends HttpOverrides {
   @override
