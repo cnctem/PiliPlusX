@@ -941,10 +941,12 @@ class VideoDetailController extends GetxController
     return Align(
       alignment: Alignment.centerLeft,
       child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(-1, 0),
-          end: Offset.zero,
-        ).animate(animation),
+        position: animation.drive(
+          Tween<Offset>(
+            begin: const Offset(-1.0, 0.0),
+            end: Offset.zero,
+          ),
+        ),
         child: Padding(
           padding: const EdgeInsets.only(top: 5),
           child: GestureDetector(
@@ -1454,7 +1456,7 @@ class VideoDetailController extends GetxController
   }
 
   RxList<Subtitle> subtitles = RxList<Subtitle>();
-  late final Map<int, String> vttSubtitles = {};
+  final Map<int, ({bool isData, String id})> vttSubtitles = {};
   late final RxInt vttSubtitlesIndex = (-1).obs;
   late final RxBool showVP = true.obs;
   late final RxList<ViewPointSegment> viewPointList = <ViewPointSegment>[].obs;
@@ -1469,19 +1471,21 @@ class VideoDetailController extends GetxController
       return;
     }
 
-    Future<void> setSub(String subtitle) async {
+    Future<void> setSub(({bool isData, String id}) subtitle) async {
       final sub = subtitles[index - 1];
       await plPlayerController.videoPlayerController?.setSubtitleTrack(
-        SubtitleTrack.data(
-          subtitle,
-          title: sub.lanDoc,
-          language: sub.lan,
+        SubtitleTrack(
+          subtitle.id,
+          sub.lanDoc,
+          sub.lan,
+          uri: !subtitle.isData,
+          data: subtitle.isData,
         ),
       );
       vttSubtitlesIndex.value = index;
     }
 
-    String? subtitle = vttSubtitles[index - 1];
+    ({bool isData, String id})? subtitle = vttSubtitles[index - 1];
     if (subtitle != null) {
       await setSub(subtitle);
     } else {
@@ -1489,8 +1493,9 @@ class VideoDetailController extends GetxController
         subtitles[index - 1].subtitleUrl!,
       );
       if (!isClosed && result != null) {
-        vttSubtitles[index - 1] = result;
-        await setSub(result);
+        final subtitle = (isData: true, id: result);
+        vttSubtitles[index - 1] = subtitle;
+        await setSub(subtitle);
       }
     }
   }
@@ -1663,6 +1668,8 @@ class VideoDetailController extends GetxController
       ?..removeListener(scrollListener)
       ..dispose();
     animController?.dispose();
+    subtitles.clear();
+    vttSubtitles.clear();
     super.onClose();
   }
 

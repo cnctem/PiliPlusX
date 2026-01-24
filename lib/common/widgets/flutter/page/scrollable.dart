@@ -1683,7 +1683,7 @@ class _ScrollableSelectionContainerDelegate
   bool _globalPositionInScrollable(Offset globalPosition) {
     final RenderBox box = state.context.findRenderObject()! as RenderBox;
     final Offset localPosition = box.globalToLocal(globalPosition);
-    final Rect rect = Rect.fromLTWH(0, 0, box.size.width, box.size.height);
+    final Rect rect = Rect.fromLTRB(0, 0, box.size.width, box.size.height);
     return rect.contains(localPosition);
   }
 

@@ -7,21 +7,21 @@ class Arc extends LeafRenderObjectWidget {
     super.key,
     required this.size,
     required this.color,
-    required this.sweepAngle,
+    required this.progress,
     this.strokeWidth = 2,
   });
 
   final double size;
   final Color color;
-  final double sweepAngle;
+  final double progress;
   final double strokeWidth;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
     return RenderArc(
-      size: size,
+      preferredSize: size,
       color: color,
-      sweepAngle: sweepAngle,
+      progress: progress,
       strokeWidth: strokeWidth,
     );
   }
@@ -32,21 +32,22 @@ class Arc extends LeafRenderObjectWidget {
     RenderArc renderObject,
   ) {
     renderObject
+      ..preferredSize = size
       ..color = color
-      ..sweepAngle = sweepAngle
+      ..progress = progress
       ..strokeWidth = strokeWidth;
   }
 }
 
 class RenderArc extends RenderBox {
   RenderArc({
-    required double size,
+    required double preferredSize,
     required Color color,
-    required double sweepAngle,
+    required double progress,
     required double strokeWidth,
-  }) : _preferredSize = Size.square(size),
+  }) : _preferredSize = preferredSize,
        _color = color,
-       _sweepAngle = sweepAngle,
+       _progress = progress,
        _strokeWidth = strokeWidth;
 
   Color _color;
@@ -57,11 +58,11 @@ class RenderArc extends RenderBox {
     markNeedsPaint();
   }
 
-  double _sweepAngle;
-  double get sweepAngle => _sweepAngle;
-  set sweepAngle(double value) {
-    if (_sweepAngle == value) return;
-    _sweepAngle = value;
+  double _progress;
+  double get progress => _progress;
+  set progress(double value) {
+    if (_progress == value) return;
+    _progress = value;
     markNeedsPaint();
   }
 
@@ -73,8 +74,9 @@ class RenderArc extends RenderBox {
     markNeedsPaint();
   }
 
-  Size _preferredSize;
-  set preferredSize(Size value) {
+  double _preferredSize;
+  double get preferredSize => _preferredSize;
+  set preferredSize(double value) {
     if (_preferredSize == value) return;
     _preferredSize = value;
     markNeedsLayout();
@@ -82,17 +84,12 @@ class RenderArc extends RenderBox {
 
   @override
   void performLayout() {
-    size = computeDryLayout(constraints);
-  }
-
-  @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    return constraints.constrain(_preferredSize);
+    size = constraints.constrainDimensions(_preferredSize, _preferredSize);
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (sweepAngle == 0) {
+    if (progress == 0) {
       return;
     }
 
@@ -101,15 +98,14 @@ class RenderArc extends RenderBox {
       ..strokeWidth = strokeWidth
       ..style = PaintingStyle.stroke;
 
-    final size = this.size;
+    final radius = size.width / 2;
     final rect = Rect.fromCircle(
-      center: Offset(size.width / 2, size.height / 2),
-      radius: size.width / 2,
+      center: Offset(radius, radius),
+      radius: radius,
     );
 
     const startAngle = -pi / 2;
-
-    context.canvas.drawArc(rect, startAngle, sweepAngle, false, paint);
+    context.canvas.drawArc(rect, startAngle, progress * 2 * pi, false, paint);
   }
 
   @override

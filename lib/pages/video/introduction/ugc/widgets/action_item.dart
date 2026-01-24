@@ -56,7 +56,7 @@ class ActionItem extends StatelessWidget {
             builder: (context, child) => Arc(
               size: 28,
               color: primary,
-              sweepAngle: animation!.value,
+              progress: -animation!.value,
             ),
           ),
           child,

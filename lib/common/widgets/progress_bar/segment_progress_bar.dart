@@ -128,10 +128,10 @@ class RenderProgressBar extends BaseRenderProgressBar<Segment> {
       if (segmentEnd > segmentStart ||
           (segmentEnd == segmentStart && segmentStart > 0)) {
         canvas.drawRect(
-          Rect.fromLTWH(
+          Rect.fromLTRB(
             segmentStart,
             0,
-            segmentEnd == segmentStart ? 2 : segmentEnd - segmentStart,
+            segmentEnd == segmentStart ? segmentStart + 2 : segmentEnd,
             size.height,
           ),
           paint,
@@ -186,12 +186,12 @@ class RenderViewPointProgressBar
     }
   }
 
-  static const double barHeight = 15.0;
-
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    return constraints.constrain(Size(constraints.maxWidth, barHeight));
+  void performLayout() {
+    size = constraints.constrainDimensions(constraints.maxWidth, _barHeight);
   }
+
+  static const double _barHeight = 15.0;
 
   @override
   void paint(PaintingContext context, Offset offset) {
@@ -203,7 +203,7 @@ class RenderViewPointProgressBar
         : null;
 
     canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.width, barHeight),
+      Rect.fromLTRB(0, 0, size.width, _barHeight),
       paint..color = Colors.grey[600]!.withValues(alpha: 0.45),
     );
 
@@ -248,11 +248,11 @@ class RenderViewPointProgressBar
         }
 
         canvas.drawRect(
-          Rect.fromLTWH(
+          Rect.fromLTRB(
             segmentStart,
             0,
-            segmentEnd == segmentStart ? 2 : segmentEnd - segmentStart,
-            barHeight + height,
+            segmentEnd == segmentStart ? segmentStart + 2 : segmentEnd,
+            _barHeight + height,
           ),
           paint,
         );
@@ -262,7 +262,7 @@ class RenderViewPointProgressBar
             : (segmentStart - prevStart - textPainter.width) / 2 +
                   prevStart +
                   1;
-        final textY = (barHeight - textPainter.height) / 2;
+        final textY = (_barHeight - textPainter.height) / 2;
         textPainter.paint(canvas, Offset(textX, textY));
       }
     }
@@ -341,7 +341,6 @@ class BaseRenderProgressBar<T extends BaseSegment> extends RenderBox {
   BaseRenderProgressBar({
     required double height,
     required List<T> segments,
-    ValueSetter<int>? onSeek,
   }) : _height = height,
        _segments = segments;
 
@@ -363,12 +362,7 @@ class BaseRenderProgressBar<T extends BaseSegment> extends RenderBox {
 
   @override
   void performLayout() {
-    size = computeDryLayout(constraints);
-  }
-
-  @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    return constraints.constrain(Size(constraints.maxWidth, height));
+    size = constraints.constrainDimensions(constraints.maxWidth, height);
   }
 
   @override

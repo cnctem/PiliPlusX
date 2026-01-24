@@ -214,8 +214,9 @@ class VideoCardHMemberVideo extends StatelessWidget {
           Positioned(
             bottom: 0,
             right: 12,
+            width: 29,
+            height: 29,
             child: VideoPopupMenu(
-              size: 29,
               iconSize: 17,
               videoItem: videoItem,
             ),

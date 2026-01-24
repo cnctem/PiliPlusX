@@ -324,13 +324,17 @@ class _DownloadPanelState extends State<DownloadPanel> {
     required ugc.BaseEpisodeItem episode,
   }) {
     late String title;
-    String? cover;
     num? duration;
     int? pubdate;
     int? view;
     int? danmaku;
     bool? isCharging;
     int? cid;
+
+    String? cover;
+    int? width;
+    int? height;
+    bool cacheWidth = false;
 
     switch (episode) {
       case Part part:
@@ -339,15 +343,27 @@ class _DownloadPanelState extends State<DownloadPanel> {
         title = part.part ?? widget.videoDetail!.title!;
         duration = part.duration;
         pubdate = part.ctime;
+        if (part.dimension case final dimension?) {
+          width = dimension.width;
+          height = dimension.height;
+        }
         break;
       case ugc.EpisodeItem item:
         cid = item.cid;
         title = item.title!;
-        cover = item.arc?.pic;
-        duration = item.arc?.duration;
-        pubdate = item.arc?.pubdate;
-        view = item.arc?.stat?.view;
-        danmaku = item.arc?.stat?.danmaku;
+        if (item.arc case final arc?) {
+          cover = arc.pic;
+          duration = arc.duration;
+          pubdate = arc.pubdate;
+          if (arc.stat case final stat?) {
+            view = stat.view;
+            danmaku = stat.danmaku;
+          }
+          if (arc.dimension case final dimension?) {
+            width = dimension.width;
+            height = dimension.height;
+          }
+        }
         if (item.attribute == 8) {
           isCharging = true;
         }
@@ -363,7 +379,14 @@ class _DownloadPanelState extends State<DownloadPanel> {
           duration = item.duration == null ? null : item.duration! ~/ 1000;
         }
         pubdate = item.pubTime;
+        if (item.dimension case final dimension?) {
+          width = dimension.width;
+          height = dimension.height;
+        }
         break;
+    }
+    if (width != null && height != null) {
+      cacheWidth = width <= height;
     }
     late final primary = theme.colorScheme.primary;
 
@@ -401,6 +424,7 @@ class _DownloadPanelState extends State<DownloadPanel> {
                               src: cover,
                               width: 140.8,
                               height: 88,
+                              cacheWidth: cacheWidth,
                             ),
                             if (duration != null && duration > 0)
                               PBadge(

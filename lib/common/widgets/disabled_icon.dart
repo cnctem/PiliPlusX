@@ -7,14 +7,18 @@ class DisabledIcon<T extends Widget> extends SingleChildRenderObjectWidget {
   const DisabledIcon({
     super.key,
     required T child,
+    this.disable = false,
     this.color,
+    this.iconSize,
     double? lineLengthScale,
     StrokeCap? strokeCap,
   }) : lineLengthScale = lineLengthScale ?? 0.9,
        strokeCap = strokeCap ?? StrokeCap.butt,
        super(child: child);
 
+  final bool disable;
   final Color? color;
+  final double? iconSize;
   final StrokeCap strokeCap;
   final double lineLengthScale;
 
@@ -22,12 +26,18 @@ class DisabledIcon<T extends Widget> extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
+    late final iconTheme = IconTheme.of(context);
     return RenderMaskedIcon(
+      disable: disable,
+      iconSize:
+          iconSize ??
+          (child is Icon ? (child as Icon?)?.size : null) ??
+          iconTheme.size ??
+          24.0,
       color:
           color ??
-          (child is Icon
-              ? (child as Icon).color ?? IconTheme.of(context).color!
-              : IconTheme.of(context).color!),
+          (child is Icon ? (child as Icon?)?.color : null) ??
+          iconTheme.color!,
       strokeCap: strokeCap,
       lineLengthScale: lineLengthScale,
     );
@@ -35,12 +45,18 @@ class DisabledIcon<T extends Widget> extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderMaskedIcon renderObject) {
+    late final iconTheme = IconTheme.of(context);
     renderObject
+      ..disable = disable
+      ..iconSize =
+          iconSize ??
+          (child is Icon ? (child as Icon?)?.size : null) ??
+          iconTheme.size ??
+          24.0
       ..color =
           color ??
-          (child is Icon
-              ? (child as Icon).color ?? IconTheme.of(context).color!
-              : IconTheme.of(context).color!)
+          (child is Icon ? (child as Icon?)?.color : null) ??
+          iconTheme.color!
       ..strokeCap = strokeCap
       ..lineLengthScale = lineLengthScale;
   }
@@ -48,12 +64,32 @@ class DisabledIcon<T extends Widget> extends SingleChildRenderObjectWidget {
 
 class RenderMaskedIcon extends RenderProxyBox {
   RenderMaskedIcon({
+    required bool disable,
+    required double iconSize,
     required Color color,
     required StrokeCap strokeCap,
     required double lineLengthScale,
-  }) : _color = color,
+  }) : _disable = disable,
+       _iconSize = iconSize,
+       _color = color,
        _strokeCap = strokeCap,
        _lineLengthScale = lineLengthScale;
+
+  bool _disable;
+  bool get disable => _disable;
+  set disable(bool value) {
+    if (_disable == value) return;
+    _disable = value;
+    markNeedsPaint();
+  }
+
+  double _iconSize;
+  double get iconSize => _iconSize;
+  set iconSize(double value) {
+    if (_iconSize == value) return;
+    _iconSize = value;
+    markNeedsPaint();
+  }
 
   Color _color;
   Color get color => _color;
@@ -81,22 +117,29 @@ class RenderMaskedIcon extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final strokeWidth = size.width / 12;
+    if (!disable) {
+      return super.paint(context, offset);
+    }
 
     final canvas = context.canvas;
+
+    Size size = this.size;
+    final exceedWidth = size.width > _iconSize;
+    final exceedHeight = size.height > _iconSize;
+    if (exceedWidth || exceedHeight) {
+      final dx = exceedWidth ? (size.width - _iconSize) / 2.0 : 0.0;
+      final dy = exceedHeight ? (size.height - _iconSize) / 2.0 : 0.0;
+      size = Size.square(_iconSize);
+      offset = Offset(dx, dy);
+    } else if (size.width < _iconSize && size.height < _iconSize) {
+      size = Size.square(_iconSize);
+    }
+
+    final strokeWidth = size.width / 12;
+
     var rect = offset & size;
 
     final sqrt2Width = strokeWidth * sqrt2; // rotate pi / 4
-
-    // final path = Path.combine(
-    //   PathOperation.difference,
-    //   Path()..addRect(rect),
-    //   Path()..moveTo(rect.left, rect.top)
-    //   ..relativeLineTo(sqrt2Width, 0)
-    //   ..lineTo(rect.right, rect.bottom - sqrt2Width)
-    //   ..lineTo(rect.right, rect.bottom)
-    //   ..close(),
-    // );
 
     final path = Path.combine(
       PathOperation.union,
@@ -114,7 +157,7 @@ class RenderMaskedIcon extends RenderProxyBox {
     canvas
       ..save()
       ..clipPath(path, doAntiAlias: false);
-    super.paint(context, offset);
+    super.paint(context, .zero);
 
     canvas.restore();
 
@@ -136,9 +179,4 @@ class RenderMaskedIcon extends RenderProxyBox {
 
   @override
   bool get isRepaintBoundary => true;
-}
-
-extension DisabledIconExt on Icon {
-  DisabledIcon<Icon> disable([double? lineLengthScale]) =>
-      DisabledIcon(lineLengthScale: lineLengthScale, child: this);
 }

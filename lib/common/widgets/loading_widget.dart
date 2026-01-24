@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:PiliPlus/common/widgets/custom_arc.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -35,7 +33,7 @@ class LoadingWidget extends StatelessWidget {
               size: 40,
               color: onSurfaceVariant,
               strokeWidth: 3,
-              sweepAngle: progress.value * 2 * pi,
+              progress: progress.value,
             ),
           ),
           //msg

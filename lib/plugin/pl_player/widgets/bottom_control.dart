@@ -56,36 +56,6 @@ class BottomControl extends StatelessWidget {
     final thumbGlowColor = primary.withAlpha(80);
     final bufferedBarColor = primary.withValues(alpha: 0.4);
 
-    Widget progressBar() {
-      final child = Obx(() {
-        final int value = controller.sliderPositionSeconds.value;
-        final int max = controller.durationSeconds.value.inSeconds;
-        return ProgressBar(
-          progress: Duration(seconds: value),
-          buffered: Duration(seconds: controller.bufferedSeconds.value),
-          total: Duration(seconds: max),
-          progressBarColor: primary,
-          baseBarColor: const Color(0x33FFFFFF),
-          bufferedBarColor: bufferedBarColor,
-          thumbColor: primary,
-          thumbGlowColor: thumbGlowColor,
-          barHeight: 3.5,
-          thumbRadius: 7,
-          thumbGlowRadius: 25,
-          onDragStart: onDragStart,
-          onDragUpdate: (e) => onDragUpdate(e, max),
-          onSeek: (e) => onSeek(e, max),
-        );
-      });
-      if (PlatformUtils.isDesktop) {
-        return MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child: child,
-        );
-      }
-      return child;
-    }
-
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 0, 10, 12),
       child: Column(
@@ -100,7 +70,29 @@ class BottomControl extends StatelessWidget {
                   clipBehavior: Clip.none,
                   alignment: Alignment.bottomCenter,
                   children: [
-                    progressBar(),
+                    Obx(() {
+                      final int value = controller.sliderPositionSeconds.value;
+                      final int max =
+                          controller.durationSeconds.value.inSeconds;
+                      return ProgressBar(
+                        progress: Duration(seconds: value),
+                        buffered: Duration(
+                          seconds: controller.bufferedSeconds.value,
+                        ),
+                        total: Duration(seconds: max),
+                        progressBarColor: primary,
+                        baseBarColor: const Color(0x33FFFFFF),
+                        bufferedBarColor: bufferedBarColor,
+                        thumbColor: primary,
+                        thumbGlowColor: thumbGlowColor,
+                        barHeight: 3.5,
+                        thumbRadius: 7,
+                        thumbGlowRadius: 25,
+                        onDragStart: onDragStart,
+                        onDragUpdate: (e) => onDragUpdate(e, max),
+                        onSeek: (e) => onSeek(e, max),
+                      );
+                    }),
                     if (controller.enableBlock &&
                         videoDetailController.segmentProgressList.isNotEmpty)
                       Positioned(

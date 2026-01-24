@@ -99,7 +99,7 @@ abstract final class Utils {
   static Future<Rect?> get sharePositionOrigin async {
     if (await isIpad) {
       final size = Get.size;
-      return Rect.fromLTWH(0, 0, size.width, size.height / 2);
+      return Rect.fromLTRB(0, 0, size.width, size.height / 2);
     }
     return null;
   }

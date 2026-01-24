@@ -102,7 +102,7 @@ class EdgeDraggingAutoScroller {
     final Matrix4 transform = scrollRenderBox.getTransformTo(null);
     final Rect globalRect = MatrixUtils.transformRect(
       transform,
-      Rect.fromLTWH(
+      Rect.fromLTRB(
         0,
         0,
         scrollRenderBox.size.width,

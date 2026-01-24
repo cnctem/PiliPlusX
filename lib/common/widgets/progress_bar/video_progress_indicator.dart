@@ -96,7 +96,7 @@ class RenderProgressBar extends RenderBox {
   }
 
   double _radius;
-  double get borderRadius => _radius;
+  double get radius => _radius;
   set radius(double value) {
     if (_radius == value) return;
     _radius = value;
@@ -113,14 +113,7 @@ class RenderProgressBar extends RenderBox {
 
   @override
   void performLayout() {
-    size = computeDryLayout(constraints);
-  }
-
-  @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    return constraints.constrain(
-      Size(constraints.maxWidth, _radius),
-    );
+    size = constraints.constrainDimensions(constraints.maxWidth, _radius);
   }
 
   @override
@@ -130,11 +123,11 @@ class RenderProgressBar extends RenderBox {
     final paint = Paint()..style = .fill;
 
     canvas.clipRect(
-      .fromLTWH(0, size.height - height, size.width, height),
+      .fromLTRB(0, size.height - height, size.width, size.height),
     );
 
     final radius = Radius.circular(_radius);
-    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
+    final rect = Rect.fromLTRB(0, 0, size.width, size.height);
     final rrect = RRect.fromRectAndCorners(
       rect,
       bottomLeft: radius,
@@ -147,8 +140,8 @@ class RenderProgressBar extends RenderBox {
       canvas.drawRRect(rrect, paint..color = _color);
     } else {
       final w = size.width * progress;
-      final left = Rect.fromLTWH(0, 0, w, size.height);
-      final right = Rect.fromLTWH(w, 0, size.width - w, size.height);
+      final left = Rect.fromLTRB(0, 0, w, size.height);
+      final right = Rect.fromLTRB(w, 0, size.width, size.height);
       canvas
         ..clipRRect(rrect)
         ..drawRect(left, paint..color = _color)
