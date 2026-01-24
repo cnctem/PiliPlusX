@@ -39,11 +39,11 @@
 
 - [x] Android
 - [x] iOS
-- [x] [HarmonyOS](https://github.com/cnctem/PiliPlusX/tree/ohos#当前分支ohos说明)
+- [x] HarmonyOS,[分支说明](https://github.com/cnctem/PiliPlusX/tree/ohos#当前分支ohos说明)
 - [x] Pad & Fold
 - [x] macOS
 - [x] Windows
-- [ ] Linux (暂时移除支持, [详情](https://github.com/cnctem/PiliPlusX/issues/7#issuecomment-3650079829))
+- [x] Linux (需自行编译体验, [详情](https://github.com/cnctem/PiliPlusX/issues/7#issuecomment-3650079829))
 
 ## refactor
 
@@ -260,7 +260,7 @@
 
 - 主线版本：基于上游[`main`分支](https://github.com/bggRGjQaUbCoE/PiliPlus/tree/main)更新最及时，打包 Android、iOS、Windows、macOS 版本
 - oddo版本：基于上游[`flutter_3.35.7`分支](https://github.com/bggRGjQaUbCoE/PiliPlus/tree/flutter_3.35.7)，面向color OS等字体错误的定制安卓，仅打包 Android 版本
-- ohos版本：敬请期待
+- ohos版本：基于上游[qinshah/PiliPlus](https://github.com/qinshah/PiliPlus)
 
 ## PiliPlusX字体修复说明
 
