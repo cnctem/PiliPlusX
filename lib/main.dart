@@ -297,7 +297,6 @@ class MyApp extends StatelessWidget {
         toastBuilder: (msg) => CustomToast(msg: msg),
         loadingBuilder: (msg) => LoadingWidget(msg: msg),
         builder: _builder,
-          if (uiScale != 1.0) {
       ),
       navigatorObservers: [
         PageUtils.routeObserver,
