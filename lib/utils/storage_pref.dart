@@ -187,6 +187,12 @@ abstract final class Pref {
         defaultValue: UpPanelPosition.leftFixed.index,
       )];
 
+  static bool get showHomeRefreshFab =>
+      _setting.get(SettingBoxKey.showHomeRefreshFab, defaultValue: false);
+
+  static bool get showDynamicsRefreshFab =>
+      _setting.get(SettingBoxKey.showDynamicsRefreshFab, defaultValue: false);
+
   static FullScreenMode get fullScreenMode =>
       FullScreenMode.values[_setting.get(
         SettingBoxKey.fullScreenMode,

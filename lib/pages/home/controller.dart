@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class HomeController extends GetxController
-    with GetSingleTickerProviderStateMixin, ScrollOrRefreshMixin {
+    with GetTickerProviderStateMixin, ScrollOrRefreshMixin {
   late List<HomeTabType> tabs;
   late TabController tabController;
 
@@ -32,6 +32,25 @@ class HomeController extends GetxController
   ScrollController get scrollController => controller.scrollController;
 
   AccountService accountService = Get.find<AccountService>();
+
+  bool _isFabVisible = true;
+  AnimationController? _fabAnimationCtr;
+  Animation<Offset>? _fabAnimation;
+
+  Animation<Offset> get fabAnimation {
+    if (_fabAnimation != null) return _fabAnimation!;
+    _fabAnimationCtr = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    )..forward();
+    _fabAnimation = _fabAnimationCtr!.drive(
+      Tween<Offset>(
+        begin: const Offset(0.0, 2.0),
+        end: Offset.zero,
+      ).chain(CurveTween(curve: Curves.easeInOut)),
+    );
+    return _fabAnimation!;
+  }
 
   @override
   void onInit() {
@@ -74,7 +93,22 @@ class HomeController extends GetxController
   @override
   void dispose() {
     tabController.dispose();
+    _fabAnimationCtr?.dispose();
     super.dispose();
+  }
+
+  void showFab() {
+    if (!_isFabVisible) {
+      _isFabVisible = true;
+      _fabAnimationCtr?.forward();
+    }
+  }
+
+  void hideFab() {
+    if (_isFabVisible) {
+      _isFabVisible = false;
+      _fabAnimationCtr?.reverse();
+    }
   }
 
   Future<void> querySearchDefault() async {

@@ -154,6 +154,8 @@ abstract final class SettingBoxKey {
       saveImgPath = 'saveImgPath',
       saveScreenshotPath = 'saveScreenshotPath',
       enableImgMenu = 'enableImgMenu',
+      showHomeRefreshFab = 'showHomeRefreshFab',
+      showDynamicsRefreshFab = 'showDynamicsRefreshFab',
       showDynDispute = 'showDynDispute';
 
   static const String minimizeOnExit = 'minimizeOnExit',

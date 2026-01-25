@@ -20,7 +20,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
 class DynamicsController extends GetxController
-    with GetSingleTickerProviderStateMixin, ScrollOrRefreshMixin, AccountMixin {
+    with GetTickerProviderStateMixin, ScrollOrRefreshMixin, AccountMixin {
   @override
   final ScrollController scrollController = ScrollController();
   late final TabController tabController;
@@ -42,6 +42,25 @@ class DynamicsController extends GetxController
 
   @override
   final AccountService accountService = Get.find<AccountService>();
+
+  bool _isFabVisible = true;
+  AnimationController? _fabAnimationCtr;
+  Animation<Offset>? _fabAnimation;
+
+  Animation<Offset> get fabAnimation {
+    if (_fabAnimation != null) return _fabAnimation!;
+    _fabAnimationCtr = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    )..forward();
+    _fabAnimation = _fabAnimationCtr!.drive(
+      Tween<Offset>(
+        begin: const Offset(0.0, 2.0),
+        end: Offset.zero,
+      ).chain(CurveTween(curve: Curves.easeInOut)),
+    );
+    return _fabAnimation!;
+  }
 
   DynamicsTabController? get controller {
     try {
@@ -196,6 +215,20 @@ class DynamicsController extends GetxController
   Future<void> onRefresh() {
     _refreshFollowUp();
     return controller!.onRefresh();
+  }
+
+  void showFab() {
+    if (!_isFabVisible) {
+      _isFabVisible = true;
+      _fabAnimationCtr?.forward();
+    }
+  }
+
+  void hideFab() {
+    if (_isFabVisible) {
+      _isFabVisible = false;
+      _fabAnimationCtr?.reverse();
+    }
   }
 
   Future<void> _refreshFollowUp() async {

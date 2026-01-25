@@ -119,6 +119,18 @@ List<SettingsModel> get styleSettings => [
     defaultVal: false,
     needReboot: true,
   ),
+  const SwitchModel(
+    title: '首页显示一键刷新',
+    leading: Icon(Icons.refresh_rounded),
+    setKey: SettingBoxKey.showHomeRefreshFab,
+    defaultVal: false,
+  ),
+  const SwitchModel(
+    title: '动态页显示一键刷新',
+    leading: Icon(Icons.refresh_rounded),
+    setKey: SettingBoxKey.showDynamicsRefreshFab,
+    defaultVal: false,
+  ),
   if (PlatformUtils.isMobile) ...[
     const SwitchModel(
       title: '隐藏状态栏',
