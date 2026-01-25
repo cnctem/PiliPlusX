@@ -334,7 +334,7 @@ class _PayCoinsPageState extends State<PayCoinsPage>
                       child: SizedBox(
                         height: 100,
                         child: PageView(
-                          key: const PageStorageKey('PageView'),
+                          key: const PageStorageKey(_PayCoinsPageState),
                           physics: const CustomTabBarViewScrollPhysics(
                             parent: ClampingScrollPhysics(),
                           ),

@@ -48,7 +48,7 @@ class _HomePageState extends State<HomePage>
         children: [
           Column(
             children: [
-              if (!_homeController.useSideBar &&
+              if (!_mainController.useSideBar &&
                   MediaQuery.sizeOf(context).isPortrait)
                 customAppBar(theme),
               if (_homeController.tabs.length > 1)
@@ -82,7 +82,7 @@ class _HomePageState extends State<HomePage>
               else
                 const SizedBox(height: 6),
               Expanded(
-                child: tabBarView(
+                child: TabBarView(
                   controller: _homeController.tabController,
                   children: _homeController.tabs.map((e) => e.page).toList(),
                 ),
@@ -123,7 +123,7 @@ class _HomePageState extends State<HomePage>
         userAvatar(theme: theme, mainController: _mainController),
       ],
     );
-    if (_homeController.searchBar case final searchBar?) {
+    if (_homeController.showSearchBar case final searchBar?) {
       return Obx(() {
         final showSearchBar = searchBar.value;
         return AnimatedOpacity(

@@ -5,7 +5,9 @@ import 'dart:ui';
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/widgets/button/icon_button.dart';
 import 'package:PiliPlus/common/widgets/custom_icon.dart';
+import 'package:PiliPlus/common/widgets/flutter/page/page_view.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
+import 'package:PiliPlus/common/widgets/gesture/horizontal_drag_gesture_recognizer.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/keep_alive_wrapper.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart';
@@ -42,7 +44,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:floating/floating.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide PageView;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
@@ -722,7 +724,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
     return Padding(
       padding: EdgeInsets.only(bottom: 12, top: isPortrait ? 12 : 0),
       child: _liveRoomController.showSuperChat
-          ? PageView(
+          ? PageView<CustomHorizontalDragGestureRecognizer>(
               key: pageKey,
               controller: _liveRoomController.pageController,
               physics: const CustomTabBarViewScrollPhysics(
@@ -730,6 +732,8 @@ class _LiveRoomPageState extends State<LiveRoomPage>
               ),
               onPageChanged: (value) =>
                   _liveRoomController.pageIndex.value = value,
+              horizontalDragGestureRecognizer:
+                  CustomHorizontalDragGestureRecognizer(),
               children: [
                 KeepAliveWrapper(builder: (context) => chat()),
                 SuperChatPanel(
@@ -1051,6 +1055,7 @@ class _LiveDanmakuState extends State<LiveDanmaku> {
 
   @override
   Widget build(BuildContext context) {
+    final option = DanmakuOptions.get(notFullscreen: widget.notFullscreen);
     return Obx(
       () => AnimatedOpacity(
         opacity: plPlayerController.enableShowDanmaku.value
@@ -1062,7 +1067,7 @@ class _LiveDanmakuState extends State<LiveDanmaku> {
             widget.liveRoomController.danmakuController =
                 plPlayerController.danmakuController = e;
           },
-          option: DanmakuOptions.get(notFullscreen: widget.notFullscreen),
+          option: option,
           size: widget.size,
         ),
       ),

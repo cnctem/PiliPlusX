@@ -121,7 +121,7 @@ class CustomGridView extends StatelessWidget {
     );
   }
 
-  static BorderRadius borderRadius(
+  static BorderRadius _borderRadius(
     int col,
     int length,
     int index, {
@@ -255,7 +255,7 @@ class CustomGridView extends StatelessWidget {
           height: imageHeight,
           children: List.generate(length, (index) {
             final item = picArr[index];
-            final radius = borderRadius(column, length, index);
+            final borderRadius = _borderRadius(column, length, index);
             return LayoutId(
               id: index,
               child: GestureDetector(
@@ -274,17 +274,14 @@ class CustomGridView extends StatelessWidget {
                     clipBehavior: Clip.none,
                     alignment: Alignment.center,
                     children: [
-                      ClipRRect(
-                        borderRadius: radius,
-                        child: NetworkImgLayer(
-                          type: .emote,
-                          src: item.url,
-                          width: imageWidth,
-                          height: imageHeight,
-                          alignment: item.isLongPic ? .topCenter : .center,
-                          cacheWidth: item.width <= item.height,
-                          getPlaceHolder: () => placeHolder,
-                        ),
+                      NetworkImgLayer(
+                        src: item.url,
+                        width: imageWidth,
+                        height: imageHeight,
+                        borderRadius: borderRadius,
+                        alignment: item.isLongPic ? .topCenter : .center,
+                        cacheWidth: item.width <= item.height,
+                        getPlaceHolder: () => placeHolder,
                       ),
                       if (item.isLivePhoto)
                         const PBadge(

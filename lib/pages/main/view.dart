@@ -64,6 +64,9 @@ class _MainAppState extends PopScopeState<MainApp>
       this,
       ModalRoute.of(context) as PageRoute,
     );
+    if (!_mainController.useSideBar) {
+      _mainController.useBottomNav = MediaQuery.sizeOf(context).isPortrait;
+    }
   }
 
   @override
@@ -72,7 +75,7 @@ class _MainAppState extends PopScopeState<MainApp>
     _mainController
       ..checkUnreadDynamic()
       ..checkDefaultSearch(true)
-      ..checkUnread(useBottomNav);
+      ..checkUnread(_mainController.useBottomNav);
     super.didPopNext();
   }
 
@@ -88,7 +91,7 @@ class _MainAppState extends PopScopeState<MainApp>
       _mainController
         ..checkUnreadDynamic()
         ..checkDefaultSearch(true)
-        ..checkUnread(useBottomNav);
+        ..checkUnread(_mainController.useBottomNav);
     }
   }
 
@@ -239,57 +242,6 @@ class _MainAppState extends PopScopeState<MainApp>
     }
   }
 
-  late bool useBottomNav;
-
-  Widget? get _bottomNav {
-    return useBottomNav
-        ? _mainController.navigationBars.length > 1
-              ? _mainController.enableMYBar
-                    ? Obx(
-                        () => NavigationBar(
-                          maintainBottomViewPadding: true,
-                          onDestinationSelected: _mainController.setIndex,
-                          selectedIndex: _mainController.selectedIndex.value,
-                          destinations: _mainController.navigationBars
-                              .map(
-                                (e) => NavigationDestination(
-                                  label: e.label,
-                                  icon: _buildIcon(type: e),
-                                  selectedIcon: _buildIcon(
-                                    type: e,
-                                    selected: true,
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      )
-                    : Obx(
-                        () => BottomNavigationBar(
-                          currentIndex: _mainController.selectedIndex.value,
-                          onTap: _mainController.setIndex,
-                          iconSize: 16,
-                          selectedFontSize: 12,
-                          unselectedFontSize: 12,
-                          type: .fixed,
-                          items: _mainController.navigationBars
-                              .map(
-                                (e) => BottomNavigationBarItem(
-                                  label: e.label,
-                                  icon: _buildIcon(type: e),
-                                  activeIcon: _buildIcon(
-                                    type: e,
-                                    selected: true,
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      )
-              : null
-        : null;
-  }
-
   @override
   void onPopInvokedWithResult(bool didPop, Object? result) {
     if (_mainController.directExitOnBack) {
@@ -298,7 +250,7 @@ class _MainAppState extends PopScopeState<MainApp>
       if (_mainController.selectedIndex.value != 0) {
         _mainController
           ..setIndex(0)
-          ..bottomBar?.value = true
+          ..showBottomBar?.value = true
           ..setSearchBar();
       } else {
         _onBack();
@@ -306,140 +258,47 @@ class _MainAppState extends PopScopeState<MainApp>
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final padding = MediaQuery.viewPaddingOf(context);
-    useBottomNav =
-        !_mainController.useSideBar && MediaQuery.sizeOf(context).isPortrait;
-    final bottomNav = _bottomNav;
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
-        systemNavigationBarColor: Colors.transparent,
-        systemNavigationBarIconBrightness: theme.brightness.reverse,
-      ),
-      child: Scaffold(
-        extendBody: true,
-        resizeToAvoidBottomInset: false,
-        appBar: AppBar(toolbarHeight: 0),
-        body: Padding(
-          padding: EdgeInsets.only(
-            left: useBottomNav ? padding.left : 0.0,
-            right: padding.right,
-          ),
-          child: Row(
-            mainAxisAlignment: .center,
-            children: [
-              if (!useBottomNav) ...[
-                _mainController.navigationBars.length > 1
-                    ? context.isTablet && _mainController.optTabletNav
-                          ? Column(
-                              children: [
-                                const SizedBox(height: 25),
-                                userAndSearchVertical(theme),
-                                const Spacer(flex: 2),
-                                Expanded(
-                                  flex: 5,
-                                  child: SizedBox(
-                                    width: 130,
-                                    child: Obx(
-                                      () => NavigationDrawer(
-                                        backgroundColor: Colors.transparent,
-                                        tilePadding: const .symmetric(
-                                          vertical: 5,
-                                          horizontal: 12,
-                                        ),
-                                        indicatorShape:
-                                            const RoundedRectangleBorder(
-                                              borderRadius: .all(
-                                                .circular(16),
-                                              ),
-                                            ),
-                                        onDestinationSelected:
-                                            _mainController.setIndex,
-                                        selectedIndex:
-                                            _mainController.selectedIndex.value,
-                                        children: _mainController.navigationBars
-                                            .map(
-                                              (e) =>
-                                                  NavigationDrawerDestination(
-                                                    label: Text(e.label),
-                                                    icon: _buildIcon(type: e),
-                                                    selectedIcon: _buildIcon(
-                                                      type: e,
-                                                      selected: true,
-                                                    ),
-                                                  ),
-                                            )
-                                            .toList(),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Obx(
-                              () => NavigationRail(
-                                groupAlignment: 0.5,
-                                selectedIndex:
-                                    _mainController.selectedIndex.value,
-                                onDestinationSelected: _mainController.setIndex,
-                                labelType: .selected,
-                                leading: userAndSearchVertical(theme),
-                                destinations: _mainController.navigationBars
-                                    .map(
-                                      (e) => NavigationRailDestination(
-                                        label: Text(e.label),
-                                        icon: _buildIcon(type: e),
-                                        selectedIcon: _buildIcon(
-                                          type: e,
-                                          selected: true,
-                                        ),
-                                      ),
-                                    )
-                                    .toList(),
-                              ),
-                            )
-                    : Container(
-                        width: 80,
-                        padding: const .only(top: 10),
-                        child: userAndSearchVertical(theme),
-                      ),
-                VerticalDivider(
-                  width: 1,
-                  endIndent: padding.bottom,
-                  color: theme.colorScheme.outline.withValues(alpha: 0.06),
-                ),
-              ],
-              Expanded(
-                child: _mainController.mainTabBarView
-                    ? CustomTabBarView(
-                        scrollDirection: useBottomNav ? .horizontal : .vertical,
-                        physics: const NeverScrollableScrollPhysics(),
-                        controller: _mainController.controller,
-                        children: _mainController.navigationBars
-                            .map((i) => i.page)
-                            .toList(),
-                      )
-                    : PageView(
-                        physics: const NeverScrollableScrollPhysics(),
-                        controller: _mainController.controller,
-                        children: _mainController.navigationBars
-                            .map((i) => i.page)
-                            .toList(),
-                      ),
-              ),
-            ],
-          ),
-        ),
-        bottomNavigationBar: _buildBottom(bottomNav),
-      ),
-    );
-  }
-
-  Widget? _buildBottom(Widget? bottomNav) {
+  Widget? get _bottomNav {
+    Widget? bottomNav = _mainController.navigationBars.length > 1
+        ? _mainController.enableMYBar
+              ? Obx(
+                  () => NavigationBar(
+                    maintainBottomViewPadding: true,
+                    onDestinationSelected: _mainController.setIndex,
+                    selectedIndex: _mainController.selectedIndex.value,
+                    destinations: _mainController.navigationBars
+                        .map(
+                          (e) => NavigationDestination(
+                            label: e.label,
+                            icon: _buildIcon(type: e),
+                            selectedIcon: _buildIcon(type: e, selected: true),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                )
+              : Obx(
+                  () => BottomNavigationBar(
+                    currentIndex: _mainController.selectedIndex.value,
+                    onTap: _mainController.setIndex,
+                    iconSize: 16,
+                    selectedFontSize: 12,
+                    unselectedFontSize: 12,
+                    type: .fixed,
+                    items: _mainController.navigationBars
+                        .map(
+                          (e) => BottomNavigationBarItem(
+                            label: e.label,
+                            icon: _buildIcon(type: e),
+                            activeIcon: _buildIcon(type: e, selected: true),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                )
+        : null;
     if (bottomNav != null) {
-      if (_mainController.bottomBar case final bottomBar?) {
+      if (_mainController.showBottomBar case final bottomBar?) {
         return Obx(
           () => AnimatedSlide(
             curve: Curves.easeInOutCubicEmphasized,
@@ -451,6 +310,139 @@ class _MainAppState extends PopScopeState<MainApp>
       }
     }
     return bottomNav;
+  }
+
+  Widget _sideBar(ThemeData theme) {
+    return _mainController.navigationBars.length > 1
+        ? context.isTablet && _mainController.optTabletNav
+              ? Column(
+                  children: [
+                    const SizedBox(height: 25),
+                    userAndSearchVertical(theme),
+                    const Spacer(flex: 2),
+                    Expanded(
+                      flex: 5,
+                      child: SizedBox(
+                        width: 130,
+                        child: Obx(
+                          () => NavigationDrawer(
+                            backgroundColor: Colors.transparent,
+                            tilePadding: const .symmetric(
+                              vertical: 5,
+                              horizontal: 12,
+                            ),
+                            indicatorShape: const RoundedRectangleBorder(
+                              borderRadius: .all(.circular(16)),
+                            ),
+                            onDestinationSelected: _mainController.setIndex,
+                            selectedIndex: _mainController.selectedIndex.value,
+                            children: _mainController.navigationBars
+                                .map(
+                                  (e) => NavigationDrawerDestination(
+                                    label: Text(e.label),
+                                    icon: _buildIcon(type: e),
+                                    selectedIcon: _buildIcon(
+                                      type: e,
+                                      selected: true,
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : Obx(
+                  () => NavigationRail(
+                    groupAlignment: 0.5,
+                    selectedIndex: _mainController.selectedIndex.value,
+                    onDestinationSelected: _mainController.setIndex,
+                    labelType: .selected,
+                    leading: userAndSearchVertical(theme),
+                    destinations: _mainController.navigationBars
+                        .map(
+                          (e) => NavigationRailDestination(
+                            label: Text(e.label),
+                            icon: _buildIcon(type: e),
+                            selectedIcon: _buildIcon(type: e, selected: true),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                )
+        : Container(
+            width: 80,
+            padding: const .only(top: 10),
+            child: userAndSearchVertical(theme),
+          );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final padding = MediaQuery.viewPaddingOf(context);
+
+    Widget child;
+    if (_mainController.mainTabBarView) {
+      child = CustomTabBarView(
+        scrollDirection: _mainController.useBottomNav ? .horizontal : .vertical,
+        physics: const NeverScrollableScrollPhysics(),
+        controller: _mainController.controller,
+        children: _mainController.navigationBars.map((i) => i.page).toList(),
+      );
+    } else {
+      child = PageView(
+        physics: const NeverScrollableScrollPhysics(),
+        controller: _mainController.controller,
+        children: _mainController.navigationBars.map((i) => i.page).toList(),
+      );
+    }
+
+    Widget? bottomNav;
+    if (_mainController.useBottomNav) {
+      bottomNav = _bottomNav;
+      child = Row(children: [Expanded(child: child)]);
+    } else {
+      child = Row(
+        children: [
+          _sideBar(theme),
+          VerticalDivider(
+            width: 1,
+            endIndent: padding.bottom,
+            color: theme.colorScheme.outline.withValues(alpha: 0.06),
+          ),
+          Expanded(child: child),
+        ],
+      );
+    }
+
+    child = Scaffold(
+      extendBody: true,
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(toolbarHeight: 0),
+      body: Padding(
+        padding: EdgeInsets.only(
+          left: _mainController.useBottomNav ? padding.left : 0.0,
+          right: padding.right,
+        ),
+        child: child,
+      ),
+      bottomNavigationBar: bottomNav,
+    );
+
+    if (PlatformUtils.isMobile) {
+      child = AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle(
+          systemNavigationBarColor: Colors.transparent,
+          systemNavigationBarIconBrightness: theme.brightness.reverse,
+        ),
+        child: child,
+      );
+    }
+
+    return child;
   }
 
   Widget _buildIcon({required NavigationBarType type, bool selected = false}) {

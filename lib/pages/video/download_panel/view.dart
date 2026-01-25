@@ -332,9 +332,7 @@ class _DownloadPanelState extends State<DownloadPanel> {
     int? cid;
 
     String? cover;
-    int? width;
-    int? height;
-    bool cacheWidth = false;
+    bool? cacheWidth;
 
     switch (episode) {
       case Part part:
@@ -343,10 +341,7 @@ class _DownloadPanelState extends State<DownloadPanel> {
         title = part.part ?? widget.videoDetail!.title!;
         duration = part.duration;
         pubdate = part.ctime;
-        if (part.dimension case final dimension?) {
-          width = dimension.width;
-          height = dimension.height;
-        }
+        cacheWidth = part.dimension?.cacheWidth;
         break;
       case ugc.EpisodeItem item:
         cid = item.cid;
@@ -359,10 +354,7 @@ class _DownloadPanelState extends State<DownloadPanel> {
             view = stat.view;
             danmaku = stat.danmaku;
           }
-          if (arc.dimension case final dimension?) {
-            width = dimension.width;
-            height = dimension.height;
-          }
+          cacheWidth = arc.dimension?.cacheWidth;
         }
         if (item.attribute == 8) {
           isCharging = true;
@@ -379,14 +371,8 @@ class _DownloadPanelState extends State<DownloadPanel> {
           duration = item.duration == null ? null : item.duration! ~/ 1000;
         }
         pubdate = item.pubTime;
-        if (item.dimension case final dimension?) {
-          width = dimension.width;
-          height = dimension.height;
-        }
+        cacheWidth = item.dimension?.cacheWidth;
         break;
-    }
-    if (width != null && height != null) {
-      cacheWidth = width <= height;
     }
     late final primary = theme.colorScheme.primary;
 

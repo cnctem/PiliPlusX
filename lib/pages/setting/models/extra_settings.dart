@@ -3,6 +3,8 @@ import 'dart:math' show pi, max;
 
 import 'package:PiliPlus/common/widgets/custom_icon.dart';
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
+import 'package:PiliPlus/common/widgets/gesture/horizontal_drag_gesture_recognizer.dart'
+    show touchSlopH;
 import 'package:PiliPlus/common/widgets/image/custom_grid_view.dart'
     show CustomGridView, ImageModel;
 import 'package:PiliPlus/common/widgets/pendant_avatar.dart';
@@ -187,11 +189,9 @@ List<SettingsModel> get extraSettings => [
     leading: const Icon(Icons.notifications_none),
     setKey: SettingBoxKey.checkDynamic,
     defaultVal: true,
-    onChanged: (value) {
-      Get.find<MainController>().checkDynamic = value;
-    },
+    onChanged: (value) => Get.find<MainController>().checkDynamic = value,
     onTap: (context) {
-      int dynamicPeriod = Pref.dynamicPeriod;
+      String dynamicPeriod = Pref.dynamicPeriod.toString();
       showDialog(
         context: context,
         builder: (context) {
@@ -199,11 +199,9 @@ List<SettingsModel> get extraSettings => [
             title: const Text('检查周期'),
             content: TextFormField(
               autofocus: true,
-              initialValue: dynamicPeriod.toString(),
+              initialValue: dynamicPeriod,
               keyboardType: TextInputType.number,
-              onChanged: (value) {
-                dynamicPeriod = int.tryParse(value) ?? 5;
-              },
+              onChanged: (value) => dynamicPeriod = value,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               decoration: const InputDecoration(suffixText: 'min'),
             ),
@@ -219,13 +217,14 @@ List<SettingsModel> get extraSettings => [
               ),
               TextButton(
                 onPressed: () {
-                  Get.back();
-                  GStorage.setting.put(
-                    SettingBoxKey.dynamicPeriod,
-                    dynamicPeriod,
-                  );
-                  Get.find<MainController>().dynamicPeriod =
-                      dynamicPeriod * 60 * 1000;
+                  try {
+                    final val = int.parse(dynamicPeriod);
+                    Get.back();
+                    GStorage.setting.put(SettingBoxKey.dynamicPeriod, val);
+                    Get.find<MainController>().dynamicPeriod = val * 60 * 1000;
+                  } catch (e) {
+                    SmartDialog.showToast(e.toString());
+                  }
                 },
                 child: const Text('确定'),
               ),
@@ -274,17 +273,17 @@ List<SettingsModel> get extraSettings => [
     setKey: SettingBoxKey.expandIntroPanelH,
     defaultVal: false,
   ),
-  const SwitchModel(
+  SwitchModel(
     title: '横屏分P/合集列表显示在Tab栏',
-    leading: Icon(Icons.format_list_numbered_rtl_sharp),
+    leading: const Icon(Icons.format_list_numbered_rtl_sharp),
     setKey: SettingBoxKey.horizontalSeasonPanel,
-    defaultVal: false,
+    defaultVal: PlatformUtils.isDesktop,
   ),
-  const SwitchModel(
+  SwitchModel(
     title: '横屏播放页在侧栏打开UP主页',
-    leading: Icon(Icons.account_circle_outlined),
+    leading: const Icon(Icons.account_circle_outlined),
     setKey: SettingBoxKey.horizontalMemberPage,
-    defaultVal: false,
+    defaultVal: PlatformUtils.isDesktop,
   ),
   SwitchModel(
     title: '横屏在侧栏打开图片预览',
@@ -312,9 +311,7 @@ List<SettingsModel> get extraSettings => [
               autofocus: true,
               initialValue: replyLengthLimit,
               keyboardType: TextInputType.number,
-              onChanged: (value) {
-                replyLengthLimit = value;
-              },
+              onChanged: (value) => replyLengthLimit = value,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               decoration: const InputDecoration(suffixText: '行'),
             ),
@@ -365,12 +362,8 @@ List<SettingsModel> get extraSettings => [
             content: TextFormField(
               autofocus: true,
               initialValue: danmakuLineHeight,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              onChanged: (value) {
-                danmakuLineHeight = value;
-              },
+              keyboardType: const .numberWithOptions(decimal: true),
+              onChanged: (value) => danmakuLineHeight = value,
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'[\d\.]+')),
               ],
@@ -468,6 +461,56 @@ List<SettingsModel> get extraSettings => [
     leading: Icon(Icons.open_in_browser),
     setKey: SettingBoxKey.openInBrowser,
     defaultVal: false,
+  ),
+  NormalModel(
+    title: '横向滑动阈值',
+    getSubtitle: () => '当前:「${Pref.touchSlopH}」',
+    onTap: (context, setState) {
+      String initialValue = Pref.touchSlopH.toString();
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('横向滑动阈值'),
+            content: TextFormField(
+              autofocus: true,
+              initialValue: initialValue,
+              keyboardType: const .numberWithOptions(decimal: true),
+              onChanged: (value) => initialValue = value,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[\d\.]+')),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: Get.back,
+                child: Text(
+                  '取消',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () async {
+                  try {
+                    final val = double.parse(initialValue);
+                    Get.back();
+                    touchSlopH = val;
+                    await GStorage.setting.put(SettingBoxKey.touchSlopH, val);
+                    setState();
+                  } catch (e) {
+                    SmartDialog.showToast(e.toString());
+                  }
+                },
+                child: const Text('确定'),
+              ),
+            ],
+          );
+        },
+      );
+    },
+    leading: const Icon(Icons.pan_tool_alt_outlined),
   ),
   NormalModel(
     title: '刷新滑动距离',
@@ -696,9 +739,7 @@ List<SettingsModel> get extraSettings => [
     ),
     setKey: SettingBoxKey.antiGoodsDyn,
     defaultVal: false,
-    onChanged: (value) {
-      DynamicsDataModel.antiGoodsDyn = value;
-    },
+    onChanged: (value) => DynamicsDataModel.antiGoodsDyn = value,
   ),
   SwitchModel(
     title: '屏蔽带货评论',
@@ -712,9 +753,7 @@ List<SettingsModel> get extraSettings => [
     ),
     setKey: SettingBoxKey.antiGoodsReply,
     defaultVal: false,
-    onChanged: (value) {
-      ReplyGrpc.antiGoodsReply = value;
-    },
+    onChanged: (value) => ReplyGrpc.antiGoodsReply = value,
   ),
   SwitchModel(
     title: '侧滑关闭二级页面',
@@ -724,9 +763,7 @@ List<SettingsModel> get extraSettings => [
     ),
     setKey: SettingBoxKey.slideDismissReplyPage,
     defaultVal: Platform.isIOS,
-    onChanged: (value) {
-      CommonSlideMixin.slideDismissReplyPage = value;
-    },
+    onChanged: (value) => CommonSlideMixin.slideDismissReplyPage = value,
   ),
   const SwitchModel(
     title: '启用双指缩小视频',
@@ -930,9 +967,7 @@ List<SettingsModel> get extraSettings => [
     leading: const Icon(Icons.search_outlined),
     setKey: SettingBoxKey.enableWordRe,
     defaultVal: false,
-    onChanged: (value) {
-      ReplyItemGrpc.enableWordRe = value;
-    },
+    onChanged: (value) => ReplyItemGrpc.enableWordRe = value,
   ),
   const SwitchModel(
     title: '启用AI总结',

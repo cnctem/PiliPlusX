@@ -156,7 +156,8 @@ abstract final class SettingBoxKey {
       enableImgMenu = 'enableImgMenu',
       showHomeRefreshFab = 'showHomeRefreshFab',
       showDynamicsRefreshFab = 'showDynamicsRefreshFab',
-      showDynDispute = 'showDynDispute';
+      showDynDispute = 'showDynDispute',
+      touchSlopH = 'touchSlopH';
 
   static const String minimizeOnExit = 'minimizeOnExit',
       windowSize = 'windowSize',
@@ -228,8 +229,8 @@ abstract final class SettingBoxKey {
       enableMYBar = 'enableMYBar',
       hideStatusBar = 'hideStatusBar',
       useSystemFont = 'useSystemFont',
-      hideSearchBar = 'hideSearchBar',
-      hideTabBar = 'hideTabBar',
+      hideTopBar = 'hideSearchBar',
+      hideBottomBar = 'hideTabBar',
       scrollThreshold = 'scrollThreshold',
       tabBarSort = 'tabBarSort',
       dynamicBadgeMode = 'dynamicBadgeMode',
