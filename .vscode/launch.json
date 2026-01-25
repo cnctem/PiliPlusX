@@ -2,8 +2,8 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "run",
       "noDebug": true,
-      "name": "PiliPlus (run)",
       "request": "launch",
       "type": "dart",
       "preLaunchTask": "build_env",
@@ -12,7 +12,8 @@
       ]
     },
     {
-      "name": "PiliPlus (release)",
+      "name": "run release",
+      "noDebug": true,
       "request": "launch",
       "type": "dart",
       "flutterMode": "release",
