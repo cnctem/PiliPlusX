@@ -1361,7 +1361,7 @@ class PlPlayerController {
           _videoPlayerController!.setVolume(volume * 100);
         } else if (Utils.isHarmony) {
           // 否则如果是鸿蒙手机和平板，按系统音量设置
-          HarmonyVolumeView.cntlr?.setVolume(volume);
+          HarmonyVolumeView.cntlr.setVolume(volume);
         } else {
           FlutterVolumeController.updateShowSystemUI(false);
           await FlutterVolumeController.setVolume(volume);

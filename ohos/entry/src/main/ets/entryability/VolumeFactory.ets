@@ -13,18 +13,11 @@ import { Params } from '@ohos/flutter_ohos/src/main/ets/plugin/platform/Platform
 import { audio, AVVolumePanel, AVVolumePanelParameter } from '@kit.AudioKit';
 import { BusinessError } from '@ohos.base'
 
-// const hide: AVVolumePanelParameter =
-//   {
-//     position: {
-//       x: -1,
-//       y: -1
-//     }
-//   }
 const volumeGroupId = audio.DEFAULT_VOLUME_GROUP_ID
 
 AppStorage.setOrCreate('volume', 0)
 
-// AppStorage.setOrCreate('volumeParameter', hide)
+AppStorage.setOrCreate('visible', true)
 
 export class VolumeFactory extends PlatformViewFactory {
   private binaryMessenger: BinaryMessenger
@@ -42,13 +35,18 @@ export class VolumeFactory extends PlatformViewFactory {
 @Component
 struct VolumeComponent {
   @StorageLink('volume') volume: number = 0
-
-  // @StorageLink('volumeParameter') volumeParameter?: AVVolumePanelParameter = hide
+  @StorageLink('visible') visible: boolean = true
 
   build() {
     AVVolumePanel({
       volumeLevel: this.volume,
-      // volumeParameter: this.volumeParameter
+      volumeParameter: this.visible ? undefined :
+        {
+          position: {
+            x: -1,
+            y: -1
+          }
+        }
     })
   }
 }
@@ -58,8 +56,12 @@ function VolumeComponentBuilder(params: Params) {
   VolumeComponent()
 }
 
+const TAG = '音量面板：'
+
 @Observed
 export class VolumeView extends PlatformView implements MethodCallHandler {
+  volumeLink: SubscribedAbstractProperty<number> = AppStorage.link('volume')
+  visibleLink: SubscribedAbstractProperty<boolean> = AppStorage.link('visible');
   methodChannel: MethodChannel;
   /**
    系统最小音量
@@ -73,41 +75,59 @@ export class VolumeView extends PlatformView implements MethodCallHandler {
 
   constructor(viewId: number, binaryMessenger: BinaryMessenger) {
     super();
+    console.warn(TAG + '创建，请注意有没有重复创建');
     this.methodChannel =
       new MethodChannel(binaryMessenger, `AVVolumePanel_${viewId}`);
     this.methodChannel.setMethodCallHandler(this);
     this.volumeManager = audio.getAudioManager().getVolumeManager()
     this.minVolume = this.volumeManager.getMinVolumeByStream(volumeGroupId)
     this.volumeRange = this.volumeManager.getMaxVolumeByStream(volumeGroupId) - this.minVolume
+    this.volumeManager.on('streamVolumeChange', audio.StreamUsage.STREAM_USAGE_MUSIC,
+      (streamVolumeEvent) => this.onVolumeChange(streamVolumeEvent.volume));
+  }
+
+  systemVolumeToPercent(systemVolume: number): number {
+    return (systemVolume - this.minVolume) / this.volumeRange;
+  }
+
+  onVolumeChange(systemVolume: number): void {
+    let percentVolume = this.systemVolumeToPercent(systemVolume);
+    console.log(TAG, '音量变化' + percentVolume);
+    this.methodChannel.invokeMethod(
+      'onVolumeChange', { 'volume': percentVolume }
+    )
   }
 
   onMethodCall(call: MethodCall, result: MethodResult): void {
-    // let volumeParameterLink: SubscribedAbstractProperty<AVVolumePanelParameter> =
-    // AppStorage.link('volumeParameter');
     switch (call.method) {
       case 'setVolume':
         try {
-          let volumeLink: SubscribedAbstractProperty<number> = AppStorage.link('volume');
           const volume: number = call.argument('volume')
-          // 隐藏音量条
-          // volumeParameterLink.set(hide)
           // [0 ,1]转系统音量
-          volumeLink.set(this.minVolume + volume * this.volumeRange)
+          this.volumeLink.set(this.minVolume + volume * this.volumeRange)
+          // console.log(TAG, '调整音量' + volume);
           result.success(null)
         } catch (e) {
-          const error = e as BusinessError
-          result.error(error.code.toString(), error.message, error.data)
+          let err = e as BusinessError;
+          result.error(err.code.toString(), err.message, err.data)
         }
         break;
-      // 恢复显示音量条
-      // case 'restorePanel':
-      //   volumeParameterLink.set(undefined)
-      //   result.success(true)
-      //   break;
+      case 'setPanelVisible':
+        let visible: boolean = call.argument('visible');
+        try {
+
+          this.visibleLink.set(visible)
+          console.log(TAG, '是否可见' + visible);
+        } catch (e) {
+          console.error(TAG, '设置可见失败' + e);
+        }
+        result.success(true)
+        break;
       case 'getVolume':
         const systemVolume = this.volumeManager.getVolumeByStream(volumeGroupId)
+        console.log(TAG, '系统音量' + systemVolume);
         // 系统音量转[0, 1]
-        result.success((systemVolume - this.minVolume) / this.volumeRange)
+        result.success(this.systemVolumeToPercent(systemVolume))
         break;
       default:
         result.notImplemented()

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:PiliPlus/harmony_adapt/harmony_volume.dart';
 import 'package:PiliPlus/pages/common/common_intro_controller.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
@@ -75,6 +76,8 @@ class PlayerFocus extends StatelessWidget {
           );
       }
     } else if (event is KeyUpEvent) {
+      // 鸿蒙抬起按钮后恢复显示音量条
+      if (Utils.isHarmony) HarmonyVolumeView.cntlr.setPanleVisible(true);
       if (plPlayerController.longPressTimer?.tick == 0 && hasPlayer) {
         _setVolume(isIncrease: isIncrease);
       }

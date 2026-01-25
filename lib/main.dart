@@ -6,7 +6,6 @@ import 'package:PiliPlus/common/widgets/custom_toast.dart';
 import 'package:PiliPlus/common/widgets/mouse_back.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_volume.dart';
 import 'package:PiliPlus/harmony_adapt/scalable_binding.dart';
-import 'package:PiliPlus/harmony_adapt/status_bar.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/models/common/theme/theme_color_type.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
@@ -347,17 +346,14 @@ class MyApp extends StatelessWidget {
             alignment: Alignment.center,
             children: [
               // 看不见的地方加一个鸿蒙原生音量控件，
-              if (Utils.isHarmony)
-                HarmonyVolumeView(
-                  onCreated: (cntlr) => HarmonyVolumeView.cntlr = cntlr,
-                ),
+              if (Utils.isHarmony) const HarmonyVolumeView(),
               child,
               // 调试代码用，ai生成git提交信息请忽略这部分改动
-              if (kDebugMode)
-                ElevatedButton(
-                  onPressed: StatusBar.i.toggleHide,
-                  child: const Text('测试'),
-                ),
+              // if (kDebugMode)
+              //   ElevatedButton(
+              //     onPressed: StatusBar.i.toggleHide,
+              //     child: const Text('测试'),
+              //   ),
             ],
           );
         },

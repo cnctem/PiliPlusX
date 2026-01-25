@@ -195,15 +195,15 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         try {
           if (Utils.isHarmony) {
             // 移动端是鸿蒙也把播放器音量设为系统音量
-            final volume = await HarmonyVolumeView.cntlr?.getVolume();
+            final volume = await HarmonyVolumeView.cntlr.getVolume();
+            print('获取鸿蒙音量：$volume');
             if (volume != null) plPlayerController.volume.value = volume;
           } else {
             FlutterVolumeController.updateShowSystemUI(true);
             plPlayerController.volume.value =
                 (await FlutterVolumeController.getVolume())!;
           }
-          // TODO 鸿蒙待适配，监听系统音量变化
-          FlutterVolumeController.addListener((double value) {
+          void listener(double value) {
             if (mounted &&
                 !plPlayerController.volumeInterceptEventStream.value) {
               plPlayerController.volume.value = value;
@@ -218,8 +218,16 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   });
               }
             }
-          });
-        } catch (_) {}
+          }
+
+          if (Utils.isHarmony) {
+            HarmonyVolumeView.cntlr.addListener(listener);
+          } else {
+            FlutterVolumeController.addListener(listener);
+          }
+        } catch (e) {
+          print('音量初始化处理失败: $e');
+        }
       });
 
       Future.microtask(() async {
@@ -1129,6 +1137,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   }
 
   void _onInteractionEnd(ScaleEndDetails details) {
+    // 鸿蒙滑动结束之后，恢复显示音量条
+    if (Utils.isHarmony) HarmonyVolumeView.cntlr.setPanleVisible(true);
     if (plPlayerController.showSeekPreview) {
       plPlayerController.showPreview.value = false;
     }
@@ -1346,6 +1356,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   }
 
   void _onPointerPanZoomEnd(PointerPanZoomEndEvent event) {
+    // 鸿蒙滑动结束之后，恢复显示音量条
+    if (Utils.isHarmony) HarmonyVolumeView.cntlr.setPanleVisible(true);
     _gestureType = null;
   }
 
