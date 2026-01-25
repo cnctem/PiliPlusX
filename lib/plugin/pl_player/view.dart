@@ -2145,6 +2145,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                     fit: videoFit.boxFit,
                     alignment: widget.alignment,
                     child: Video(
+                      width: maxWidth,
+                      height: maxHeight,
                       controls: NoVideoControls, // 关闭 media_kit 内置按钮
                       // 关闭 media_kit 内置 SubtitleView，避免与外层叠加重复
                       subtitleViewConfiguration:
