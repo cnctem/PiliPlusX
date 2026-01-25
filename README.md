@@ -1,14 +1,8 @@
 # 当前分支(ohos)说明
 
-这是一个适配鸿蒙的分支，目前处于可用水平，大部分功能正常
+这是一个适配鸿蒙的分支，目前处于可用水平，大部分功能正常，目前主要问题是没有硬件解码
 
 上游 [qinshah/PiliPlus](https://github.com/qinshah/PiliPlus)
-
-### 目前主要的问题
-
-- 硬件解码未适配
-
-- 手势竞争（取决于设置项中打开的手势，具体冲突组合暂未测出，欢迎Issue）
 
 ### 其它适配细节：[issues 看板](https://github.com/users/qinshah/projects/1)
 
@@ -16,23 +10,25 @@
 
 先确认有无已存在的类似issue，再确认是不是鸿蒙版特有的移植问题
 
-因为这个分支只做移植适配工作，不考虑增加上游没有的功能或更改特性
+因为这个分支只做移植适配工作，一般情况下不增加新功能或更改特性
 
 ## 如何运行此项目到鸿蒙
 
-- 目前需要3.35.7版本的鸿蒙flutter
+- 需要鸿蒙flutter3.35.7
 
-- 其余步骤可参考[鸿蒙flutter仓库的教程](https://gitcode.com/openharmony-tpc/flutter_flutter/tree/oh-3.35.7-dev#flutter-sdk-%E4%BB%93%E5%BA%93)
+- 其余可参考[鸿蒙flutter仓库的教程](https://gitcode.com/openharmony-tpc/flutter_flutter/tree/oh-3.35.7-dev#flutter-sdk-%E4%BB%93%E5%BA%93)
 
-### 欢迎所有人参与适配，让PiliPlus在鸿蒙更快完善
+### 欢迎你参与适配，让鸿蒙PiliPlus更完善
 
 ## 感谢
 
-- 原上游项目
+- 上游项目
 
 - media_kit 适配者[ErBW_s](https://github.com/ErBWs)
 
-- ...所有依赖内容的构建者/贡献者
+- 所有开发者和贡献者
+
+- ......
 
 - [致谢](#致谢)
 
@@ -208,7 +204,6 @@
   - [x] 我的收藏
   - [x] 站内私信
 - [x] 动态相关
-
   - [x] 全部、投稿、番剧分类查看
   - [x] 动态评论查看
   - [x] 动态评论回复功能
@@ -236,7 +231,6 @@
   - [x] 投稿、番剧、直播间、用户搜索
   - [x] 视频搜索排序、按时长筛选
 - [x] 视频详情页相关
-
   - [x] 视频选集(分 p)切换
   - [x] 点赞、投币、收藏/取消收藏
   - [x] 相关视频查看
