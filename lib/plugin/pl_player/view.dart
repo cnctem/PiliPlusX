@@ -50,6 +50,7 @@ import 'package:PiliPlus/plugin/pl_player/widgets/common_btn.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/forward_seek.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/mpv_convert_webp.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/play_pause_btn.dart';
+import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/duration_utils.dart';
 import 'package:PiliPlus/utils/extension.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
@@ -628,6 +629,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           },
           child: GestureDetector(
             onLongPress: () {
+              feedBack();
               final currentFit = plPlayerController.videoFit.value;
               if (currentFit == VideoFitType.contain) {
                 plPlayerController.toggleVideoFit(VideoFitType.cover);
@@ -784,16 +786,17 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           },
           child: GestureDetector(
             onLongPress: () {
+              feedBack();
               final double currentSpeed = plPlayerController.playbackSpeed;
               final newSpeed = currentSpeed == 1.0 ? 2.0 : 1.0;
               plPlayerController.setPlaybackSpeed(newSpeed);
-              SmartDialog.showToast("${newSpeed}X");
+              SmartDialog.showToast("${newSpeed}x播放");
             },
             onSecondaryTap: () {
               final double currentSpeed = plPlayerController.playbackSpeed;
               final newSpeed = currentSpeed == 1.0 ? 2.0 : 1.0;
               plPlayerController.setPlaybackSpeed(newSpeed);
-              SmartDialog.showToast("${newSpeed}X");
+              SmartDialog.showToast("${newSpeed}x播放");
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),

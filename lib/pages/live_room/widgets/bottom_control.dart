@@ -6,6 +6,7 @@ import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/video_fit_type.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/common_btn.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/play_pause_btn.dart';
+import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:flutter/material.dart';
@@ -150,6 +151,7 @@ class _BottomControlState extends State<BottomControl> with HeaderMixin {
               },
               child: GestureDetector(
                 onLongPress: () {
+                  feedBack();
                   final currentFit = plPlayerController.videoFit.value;
                   if (currentFit == VideoFitType.contain) {
                     plPlayerController.toggleVideoFit(VideoFitType.cover);
