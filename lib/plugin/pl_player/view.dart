@@ -2155,6 +2155,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                           ),
                       controller: plPlayerController.videoController!,
                       fill: widget.fill,
+                      fit: videoFit.boxFit,
                       aspectRatio: videoFit.aspectRatio,
                     ),
                   ),
