@@ -121,12 +121,14 @@ List<SettingsModel> get styleSettings => [
   ),
   const SwitchModel(
     title: '首页显示一键刷新',
+    subtitle: '桌面端友好；移动端不建议开启，可点击主菜单栏当前项刷新',
     leading: Icon(Icons.refresh_rounded),
     setKey: SettingBoxKey.showHomeRefreshFab,
     defaultVal: false,
   ),
   const SwitchModel(
     title: '动态页显示一键刷新',
+    subtitle: '桌面端友好；移动端不建议开启，可点击主菜单栏当前项刷新',
     leading: Icon(Icons.refresh_rounded),
     setKey: SettingBoxKey.showDynamicsRefreshFab,
     defaultVal: false,
@@ -134,7 +136,7 @@ List<SettingsModel> get styleSettings => [
   if (PlatformUtils.isMobile) ...[
     const SwitchModel(
       title: '隐藏状态栏',
-      subtitle: '开启后将隐藏状态栏并移除安全边距，可能导致异形屏遮挡顶部组件',
+      subtitle: '开启后将隐藏状态栏并移除安全边距，实测平板友好，非平板设备谨慎开启',
       leading: Icon(Icons.fullscreen_outlined),
       setKey: SettingBoxKey.hideStatusBar,
       defaultVal: false,
