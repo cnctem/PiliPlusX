@@ -34,6 +34,14 @@
         name: "ohos.permission.INTERNET",
       },
       {
+        name: "ohos.permission.READ_PASTEBOARD",
+        reason: "$string:no_matter",
+        usedScene: {
+          abilities: ["EntryAbility"],
+          when: "inuse",
+        }
+      },
+      {
         name: "ohos.permission.GET_NETWORK_INFO",
         reason: "$string:perm_get_network_info_reason",
         usedScene: {
