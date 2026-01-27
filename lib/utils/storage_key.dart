@@ -132,6 +132,8 @@ abstract final class SettingBoxKey {
       fastForBackwardDuration = 'fastForBackwardDuration',
       fastForBackwardDuration_ = 'fastForBackwardDuration_',
       recordSearchHistory = 'recordSearchHistory',
+      clipboardSearchIncognito = 'clipboardSearchIncognito',
+      showClipboardSearch = 'showClipboardSearch',
       showPgcTimeline = 'showPgcTimeline',
       pageTransition = 'pageTransition',
       optTabletNav = 'optTabletNav',

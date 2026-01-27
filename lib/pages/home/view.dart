@@ -188,7 +188,7 @@ class _HomePageState extends State<HomePage>
                     ),
                   ),
                 ),
-                if (!_homeController.enableSearchWord) ...[
+                if (Pref.showClipboardSearch) ...[
                   const SizedBox(width: 6),
                   Padding(
                     padding: const EdgeInsets.only(right: 10),
@@ -203,7 +203,8 @@ class _HomePageState extends State<HomePage>
                           return;
                         }
                         final text = data!.text!;
-                        if (Pref.recordSearchHistory) {
+                        if (Pref.recordSearchHistory &&
+                            !Pref.clipboardSearchIncognito) {
                           final List<String> historyList = List<String>.from(
                             GStorage.historyWord.get('cacheList') ?? [],
                           );
