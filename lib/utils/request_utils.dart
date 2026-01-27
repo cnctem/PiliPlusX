@@ -317,6 +317,31 @@ abstract final class RequestUtils {
             clearCookie: true,
           );
           final isSuccess = res.isSuccess;
+          final actions = [
+            if (!isSuccess)
+              TextButton(
+                onPressed: () {
+                  Get.back();
+                  Utils.copyText('https://www.bilibili.com/opus/$id');
+                  Get.toNamed(
+                    '/webview',
+                    parameters: {
+                      'url':
+                          'https://www.bilibili.com/h5/comment/appeal?${Utils.themeUrl(Get.isDarkMode)}',
+                    },
+                  );
+                },
+                child: const Text('申诉'),
+              ),
+            if (!isManual)
+              TextButton(
+                onPressed: Get.back,
+                child: Text(
+                  '关闭',
+                  style: TextStyle(color: Get.theme.colorScheme.outline),
+                ),
+              ),
+          ];
           showDialog(
             context: Get.context!,
             barrierDismissible: isManual,
@@ -325,31 +350,7 @@ abstract final class RequestUtils {
               content: SelectableText(
                 '${isSuccess ? '无账号状态下找到了你的动态，动态正常！' : '你的动态被shadow ban（仅自己可见）！'}${dynText != null ? ' \n\n动态内容: $dynText' : ''}',
               ),
-              actions: [
-                if (!isSuccess)
-                  TextButton(
-                    onPressed: () {
-                      Get.back();
-                      Utils.copyText('https://www.bilibili.com/opus/$id');
-                      Get.toNamed(
-                        '/webview',
-                        parameters: {
-                          'url':
-                              'https://www.bilibili.com/h5/comment/appeal?${Utils.themeUrl(Get.isDarkMode)}',
-                        },
-                      );
-                    },
-                    child: const Text('申诉'),
-                  ),
-                if (!isManual)
-                  TextButton(
-                    onPressed: Get.back,
-                    child: Text(
-                      '关闭',
-                      style: TextStyle(color: Get.theme.colorScheme.outline),
-                    ),
-                  ),
-              ],
+              actions: actions.isEmpty ? null : actions,
             ),
           );
         }

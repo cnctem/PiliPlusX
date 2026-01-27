@@ -40,12 +40,12 @@ mixin CommonSlideMixin<T extends CommonSlidePage> on State<T>, TickerProvider {
                 final isRTL = dx >= _maxWidth - offset;
                 if (isLTR || isRTL) {
                   _isRTL = isRTL;
-                  _downDx = dx;
                   return true;
                 }
                 return false;
               },
             )
+            ..onStart = _onDragStart
             ..onUpdate = _onDragUpdate
             ..onEnd = _onDragEnd
             ..onCancel = _onDragEnd;
@@ -99,6 +99,10 @@ mixin CommonSlideMixin<T extends CommonSlidePage> on State<T>, TickerProvider {
       _animController.reverse();
     }
     _downDx = null;
+  }
+
+  void _onDragStart(DragStartDetails details) {
+    _downDx = details.localPosition.dx;
   }
 
   void _onDragUpdate(DragUpdateDetails details) {

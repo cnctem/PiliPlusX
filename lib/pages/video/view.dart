@@ -1345,13 +1345,13 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     required double height,
     bool isPipMode = false,
   }) => PopScope(
+    key: videoDetailController.videoPlayerKey,
     canPop:
         !isFullScreen &&
         !videoDetailController.plPlayerController.isDesktopPip &&
         (videoDetailController.horizontalScreen || isPortrait),
     onPopInvokedWithResult: _onPopInvokedWithResult,
     child: Obx(
-      key: videoDetailController.videoPlayerKey,
       () =>
           videoDetailController.videoState.value is! Success ||
               !videoDetailController.autoPlay.value ||
