@@ -1698,6 +1698,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   isTop: false,
                   controller: animationController,
                   isFullScreen: isFullScreen,
+                  bottom: false,
                   child:
                       widget.bottomControl ??
                       BottomControl(

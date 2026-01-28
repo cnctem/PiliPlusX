@@ -6,12 +6,14 @@ class ViewSafeArea extends StatelessWidget {
     this.top = false,
     this.left = true,
     this.right = true,
+    this.bottom = true,
     required this.child,
   });
 
   final bool top;
   final bool left;
   final bool right;
+  final bool bottom;
   final Widget child;
 
   @override
@@ -22,6 +24,7 @@ class ViewSafeArea extends StatelessWidget {
         top: top ? padding.top : 0.0,
         left: left ? padding.left : 0.0,
         right: right ? padding.right : 0.0,
+        bottom: bottom ? padding.bottom : 0.0,
       ),
       child: child,
     );
