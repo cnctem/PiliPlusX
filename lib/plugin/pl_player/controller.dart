@@ -1601,10 +1601,11 @@ class PlPlayerController {
           await enterDesktopFullscreen(inAppFullScreen: inAppFullScreen);
         }
       } else {
-        if (!Pref.hideStatusBar) {
-          showStatusBar();
-          if (mode == FullScreenMode.none) {
-            return;
+        if (Utils.isMobile) {
+          if (!Pref.hideStatusBar) {
+            showStatusBar();
+          } else {
+            hideStatusBarKeepNav();
           }
           if (!horizontalScreen) {
             await verticalScreenForTwoSeconds();
