@@ -332,7 +332,7 @@ class MyApp extends StatelessWidget {
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (PlatformUtils.isMobile && Pref.hideStatusBar) {
-        hideStatusBar();
+        hideStatusBarKeepNav();
       }
     });
     if (PlatformUtils.isDesktop) {

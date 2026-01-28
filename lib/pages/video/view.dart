@@ -63,7 +63,7 @@ import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
 import 'package:floating/floating.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show SystemUiOverlayStyle;
+import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -535,8 +535,12 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       ..addListener(animListener);
     if (PlatformUtils.isMobile && mounted && isShowing && !isFullScreen) {
       if (isPortrait) {
-        if (!videoDetailController.imageview && !Pref.hideStatusBar) {
-          showStatusBar();
+        if (!videoDetailController.imageview) {
+          if (!Pref.hideStatusBar) {
+            showStatusBar();
+          } else {
+            hideStatusBarKeepNav();
+          }
         }
       } else if (!videoDetailController.horizontalScreen) {
         hideStatusBar();

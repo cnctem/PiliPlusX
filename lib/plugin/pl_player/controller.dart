@@ -1566,6 +1566,8 @@ class PlPlayerController {
         if (PlatformUtils.isMobile) {
           if (!Pref.hideStatusBar) {
             showStatusBar();
+          } else {
+            hideStatusBarKeepNav();
           }
           if (!horizontalScreen) {
             await verticalScreenForTwoSeconds();
