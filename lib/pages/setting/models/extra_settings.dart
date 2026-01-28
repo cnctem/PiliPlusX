@@ -790,6 +790,20 @@ List<SettingsModel> get extraSettings => [
       } catch (_) {}
     },
   ),
+  const SwitchModel(
+    title: '显示剪贴板搜索',
+    subtitle: '首页搜索框旁显示剪贴板粘贴按钮',
+    leading: Icon(Icons.paste),
+    setKey: SettingBoxKey.showClipboardSearch,
+    defaultVal: true,
+  ),
+  const SwitchModel(
+    title: '剪贴板无痕搜索',
+    subtitle: '剪贴板搜索时不记录搜索历史',
+    leading: Icon(Icons.visibility_off_outlined),
+    setKey: SettingBoxKey.clipboardSearchIncognito,
+    defaultVal: false,
+  ),
   SwitchModel(
     title: '快速收藏',
     subtitle: '点击设置默认收藏夹\n点按收藏至默认，长按选择文件夹',

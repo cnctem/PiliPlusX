@@ -115,7 +115,7 @@ List<SettingsModel> get styleSettings => [
   ),
   const SwitchModel(
     title: '隐藏状态栏',
-    subtitle: '开启后将隐藏状态栏并移除安全边距，可能导致异形屏遮挡顶部组件',
+    subtitle: '开启后将隐藏状态栏并移除安全边距，实测平板友好，非平板设备谨慎开启',
     leading: Icon(Icons.fullscreen_outlined),
     setKey: SettingBoxKey.hideStatusBar,
     defaultVal: false,

@@ -44,8 +44,6 @@ class _AboutPageState extends State<AboutPage> {
       '${BuildConfig.versionName}+${BuildConfig.versionCode}';
   final versionTag = 
       '${BuildConfig.versionTag}+${BuildConfig.versionCode}';
-  final versionName =
-      '${BuildConfig.versionName}';
   RxString cacheSize = ''.obs;
 
   late int _pressCount = 0;
@@ -156,19 +154,7 @@ class _AboutPageState extends State<AboutPage> {
               versionTag,
               style: subTitleStyle,
             ),
-          ),
-          ListTile(
-            onLongPress: () => Utils.copyText(versionName),
-            onSecondaryTap: Utils.isMobile
-                ? null
-                : () => Utils.copyText(versionName),
-            title: const Text('对应上游版本'),
-            leading: const Icon(Icons.commit_outlined),
-            trailing: Text(
-              versionName,
-              style: subTitleStyle,
-            ),
-          ),         
+          ),      
           ListTile(
             title: Text(
               '''

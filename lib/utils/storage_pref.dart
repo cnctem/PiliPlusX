@@ -535,6 +535,12 @@ abstract class Pref {
   static bool get recordSearchHistory =>
       _setting.get(SettingBoxKey.recordSearchHistory, defaultValue: true);
 
+  static bool get clipboardSearchIncognito =>
+      _setting.get(SettingBoxKey.clipboardSearchIncognito, defaultValue: false);
+
+  static bool get showClipboardSearch =>
+      _setting.get(SettingBoxKey.showClipboardSearch, defaultValue: true);
+
   static String get webdavUri =>
       _setting.get(SettingBoxKey.webdavUri, defaultValue: '');
 

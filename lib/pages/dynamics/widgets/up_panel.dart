@@ -152,7 +152,7 @@ class _UpPanelState extends State<UpPanel> {
     if (isAll) {
       avatar = const CircleAvatar(
         backgroundColor: Color(0xFF5CB67B),
-        backgroundImage: AssetImage('assets/images/logo/logo.png'),
+        backgroundImage: AssetImage('assets/images/logo/logo_X.png'),
       );
     } else {
       avatar = Stack(
