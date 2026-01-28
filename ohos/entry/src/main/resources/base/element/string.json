@@ -31,6 +31,10 @@
     {
       "name": "keep_background_running_reason",
       "value": "用于在后台继续播放音频"
+    },
+    {
+      "name": "no_matter",
+      "value": "no matter"
     }
   ]
 }

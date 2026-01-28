@@ -15,6 +15,10 @@
     {
       "name": "write_imagevideo_reason",
       "value": "用于保存图片/视频到相册。"
+    },
+    {
+      "name": "no_matter",
+      "value": "这种权限给就完了你别管"
     }
   ]
 }
