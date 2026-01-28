@@ -143,7 +143,8 @@ class PgcIntroController extends CommonIntroController {
     showDialog(
       context: context,
       builder: (_) {
-        String videoUrl = '${HttpString.baseUrl}/bangumi/play/ep$epId';
+        String videoUrl =
+            '${HttpString.baseUrl}/bangumi/play/ep$epId${videoDetailCtr.playedTimePos}';
         return AlertDialog(
           clipBehavior: Clip.hardEdge,
           contentPadding: const EdgeInsets.symmetric(vertical: 12),

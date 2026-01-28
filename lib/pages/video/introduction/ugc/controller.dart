@@ -302,7 +302,8 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
       context: context,
       builder: (_) {
         final videoDetail = this.videoDetail.value;
-        String videoUrl = '${HttpString.baseUrl}/video/$bvid';
+        String videoUrl =
+            '${HttpString.baseUrl}/video/$bvid${videoDetailCtr.playedTimePos}';
         return AlertDialog(
           clipBehavior: Clip.hardEdge,
           contentPadding: const EdgeInsets.symmetric(vertical: 12),

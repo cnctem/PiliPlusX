@@ -132,6 +132,10 @@ class VideoDetailController extends GetxController
   String? audioUrl;
   Duration? defaultST;
   Duration? playedTime;
+  String get playedTimePos {
+    final pos = playedTime?.inMilliseconds;
+    return pos == null || pos == 0 ? '' : '?t=${pos / 1000}';
+  }
 
   // 亮度
   double? brightness;
