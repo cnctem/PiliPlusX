@@ -394,7 +394,7 @@ class PlPlayerController {
   );
 
   late final horizontalSeasonPanel = Pref.horizontalSeasonPanel;
-  late final preInitPlayer = Utils.isHarmony ? true : Pref.preInitPlayer;
+  late final preInitPlayer = Pref.preInitPlayer;
   late final showRelatedVideo = Pref.showRelatedVideo;
   late final showVideoReply = Pref.showVideoReply;
   late final showBangumiReply = Pref.showBangumiReply;

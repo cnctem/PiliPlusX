@@ -431,7 +431,7 @@ abstract class Pref {
   }
 
   static bool get preInitPlayer =>
-      _setting.get(SettingBoxKey.preInitPlayer, defaultValue: false);
+      _setting.get(SettingBoxKey.preInitPlayer, defaultValue: Utils.isHarmony);
 
   static bool get mainTabBarView =>
       _setting.get(SettingBoxKey.mainTabBarView, defaultValue: false);
