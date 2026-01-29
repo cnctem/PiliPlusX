@@ -25,21 +25,21 @@
 
 ## 空降指挥部
 
-- [特色功能](#功能)
+- PiliPlus [特色功能](#功能)
+- PiliPlusX 独家功能见 [TODO List](https://github.com/cnctem/PiliPlusX/blob/dev/docs/TODO.md) 完成项
+- [下载最新版本](https://github.com/cnctem/PiliPlusX/releases/latest)
 - [快捷键功能说明](docs/快捷键说明.md)
+- [安卓字体修复说明](#PiliPlusX字体修复说明)
+- [鸿蒙版详情](https://github.com/cnctem/PiliPlusX/tree/ohos#当前分支ohos说明)
 - [港澳台代理](#港澳台代理)
 - [致谢](#致谢)
-
-- PiliPlusX 独家功能详见 [TODO List](https://github.com/cnctem/PiliPlusX/blob/dev/docs/TODO.md) 完成项
-- [下载最新版本](https://github.com/cnctem/PiliPlusX/releases/latest)
-- [安卓字体修复版本说明](#PiliPlusX字体修复说明)
-- 请提出你的宝贵建议！[Issues](https://github.com/cnctem/PiliPlusX/issues)
+- [请提出你的宝贵建议!](https://github.com/cnctem/PiliPlusX/issues)
 
 ## 适配平台
 
 - [x] Android
 - [x] iOS
-- [x] HarmonyOS,[分支说明](https://github.com/cnctem/PiliPlusX/tree/ohos#当前分支ohos说明)
+- [x] HarmonyOS [(分支说明)](https://github.com/cnctem/PiliPlusX/tree/ohos#当前分支ohos说明)
 - [x] Pad & Fold
 - [x] macOS
 - [x] Windows
@@ -266,7 +266,9 @@
 
 - 字体问题由`flutter3.38.x`要求显式定义字体，而color OS及个别定制安卓的字体机制采用映射到系统Roboto的方案，导致flutter找不到定义的字体从而产生字体问题，表现为显示为一种错误的衬线字体
 - 主线版本 在关闭设置项“使用系统字体”后将字体指定为使用鸿蒙黑体，基本解决问题
-- 如果你是color OS等字体错误的定制安卓，且希望显示手机自定义主题字体，推荐使用oddo版本，通过使用`flutter3.35.7`彻底解决字体问题。下载最新版本 [v1.1.0.0-oddo](https://github.com/cnctem/PiliPlusX/releases/tag/v1.1.0.0)
+- 如果你是ColorOS等字体错误的定制安卓，且希望显示手机自定义主题字体，推荐使用oddo版本，通过使用`flutter3.35.7`彻底解决字体问题。下载最新oddo版 [v1.1.1.6-oddo](https://github.com/cnctem/PiliPlusX/releases/tag/v1.1.1.6)
+- 由于ColorOS在逐步推送修复完Flutter字体回退问题的OTA更新，oddo分支将不再维护，主线版本内嵌字体也将在后续版本改为支持用户导入字体
+
 
 ## 声明
 
