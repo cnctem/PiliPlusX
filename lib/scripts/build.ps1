@@ -30,11 +30,20 @@ try {
 
     $buildTime = [int]([DateTimeOffset]::Now.ToUnixTimeSeconds())
 
+    $versionTag = $env:GITHUB_EVENT_INPUTS_TAG
+    if ($null -eq $versionTag) {
+        $versionTag = $env:GITHUB_REF_NAME
+    }
+    if ($null -eq $versionTag -or $versionTag -eq '') {
+        $versionTag = 'N/A'
+    }
+
     $data = @{
         'pili.name' = $versionName
         'pili.code' = $versionCode
         'pili.hash' = $commitHash
         'pili.time' = $buildTime
+        'pili.tag' = $versionTag
     }
 
     $data | ConvertTo-Json -Compress | Out-File 'pili_release.json' -Encoding UTF8
