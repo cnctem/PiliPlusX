@@ -673,8 +673,10 @@ abstract final class Pref {
   static double get defaultTextScale =>
       _setting.get(SettingBoxKey.defaultTextScale, defaultValue: 1.0);
 
-  static double get uiScale =>
-      _setting.get(SettingBoxKey.uiScale, defaultValue: 1.0);
+  static double get uiScale {
+    final double scale = _setting.get(SettingBoxKey.uiScale, defaultValue: 1.0);
+    return scale.clamp(0.5, 3.0);
+  }
 
   static bool get dynamicsWaterfallFlow =>
       _setting.get(SettingBoxKey.dynamicsWaterfallFlow, defaultValue: true);
@@ -923,7 +925,14 @@ abstract final class Pref {
   static Size get windowSize {
     final List<double>? size = (_setting.get(SettingBoxKey.windowSize) as List?)
         ?.fromCast<double>();
-    return size == null ? const Size(1180.0, 720.0) : Size(size[0], size[1]);
+    if (size != null && size.length >= 2) {
+      final width = size[0];
+      final height = size[1];
+      if (width >= 300 && height >= 300) {
+        return Size(width, height);
+      }
+    }
+    return const Size(1180.0, 720.0);
   }
 
   static List<double>? get windowPosition =>
