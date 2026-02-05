@@ -7,7 +7,12 @@ import 'package:PiliPlus/pages/mine/controller.dart';
 import 'package:PiliPlus/utils/extension/get_ext.dart';
 import 'package:PiliPlus/utils/extension/size_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
+import 'package:PiliPlus/utils/storage.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
@@ -30,48 +35,82 @@ class _HomePageState extends State<HomePage>
   Widget build(BuildContext context) {
     super.build(context);
     final theme = Theme.of(context);
-    return Column(
-      children: [
-        if (!_mainController.useSideBar &&
-            MediaQuery.sizeOf(context).isPortrait)
-          customAppBar(theme),
-        if (_homeController.tabs.length > 1)
-          Material(
-            color: theme.colorScheme.surface,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: SizedBox(
-                height: 42,
-                width: double.infinity,
-                child: TabBar(
+    final bottom = MediaQuery.viewPaddingOf(context).bottom;
+    return NotificationListener<UserScrollNotification>(
+      onNotification: (notification) {
+        if (!Pref.showHomeRefreshFab) return false;
+        final direction = notification.direction;
+        if (direction == ScrollDirection.forward) {
+          _homeController.showFab();
+        } else if (direction == ScrollDirection.reverse) {
+          _homeController.hideFab();
+        }
+        return false;
+      },
+      child: Stack(
+        children: [
+          Column(
+            children: [
+              if (!_mainController.useSideBar &&
+                  MediaQuery.sizeOf(context).isPortrait)
+                customAppBar(theme),
+              if (_homeController.tabs.length > 1)
+                Material(
+                  color: theme.colorScheme.surface,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: SizedBox(
+                      height: 42,
+                      width: double.infinity,
+                      child: TabBar(
+                        controller: _homeController.tabController,
+                        tabs: _homeController.tabs
+                            .map((e) => Tab(text: e.label))
+                            .toList(),
+                        isScrollable: true,
+                        dividerColor: Colors.transparent,
+                        dividerHeight: 0,
+                        splashBorderRadius: StyleString.mdRadius,
+                        tabAlignment: TabAlignment.center,
+                        onTap: (_) {
+                          feedBack();
+                          if (!_homeController.tabController.indexIsChanging) {
+                            _homeController.animateToTop();
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                )
+              else
+                const SizedBox(height: 6),
+              Expanded(
+                child: TabBarView(
                   controller: _homeController.tabController,
-                  tabs: _homeController.tabs
-                      .map((e) => Tab(text: e.label))
-                      .toList(),
-                  isScrollable: true,
-                  dividerColor: Colors.transparent,
-                  dividerHeight: 0,
-                  splashBorderRadius: StyleString.mdRadius,
-                  tabAlignment: TabAlignment.center,
-                  onTap: (_) {
+                  children: _homeController.tabs.map((e) => e.page).toList(),
+                ),
+              ),
+            ],
+          ),
+          if (Pref.showHomeRefreshFab)
+            Positioned(
+              right: kFloatingActionButtonMargin,
+              bottom: kFloatingActionButtonMargin + bottom,
+              child: SlideTransition(
+                position: _homeController.fabAnimation,
+                child: FloatingActionButton(
+                  heroTag: null,
+                  onPressed: () {
                     feedBack();
-                    if (!_homeController.tabController.indexIsChanging) {
-                      _homeController.animateToTop();
-                    }
+                    _homeController.onRefresh();
                   },
+                  tooltip: '刷新',
+                  child: const Icon(Icons.refresh),
                 ),
               ),
             ),
-          )
-        else
-          const SizedBox(height: 6),
-        Expanded(
-          child: tabBarView(
-            controller: _homeController.tabController,
-            children: _homeController.tabs.map((e) => e.page).toList(),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -149,7 +188,48 @@ class _HomePageState extends State<HomePage>
                     ),
                   ),
                 ),
-                const SizedBox(width: 5),
+                if (Pref.showClipboardSearch) ...[
+                  const SizedBox(width: 6),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: InkWell(
+                      borderRadius: borderRadius,
+                      onTap: () async {
+                        ClipboardData? data = await Clipboard.getData(
+                          Clipboard.kTextPlain,
+                        );
+                        if (data?.text?.isNotEmpty != true) {
+                          SmartDialog.showToast('剪贴板无数据');
+                          return;
+                        }
+                        final text = data!.text!;
+                        if (Pref.recordSearchHistory &&
+                            !Pref.clipboardSearchIncognito) {
+                          final List<String> historyList = List<String>.from(
+                            GStorage.historyWord.get('cacheList') ?? [],
+                          );
+                          historyList
+                            ..remove(text)
+                            ..insert(0, text);
+                          GStorage.historyWord.put('cacheList', historyList);
+                        }
+                        Get.toNamed(
+                          '/searchResult',
+                          parameters: {'keyword': text},
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: Icon(
+                          Icons.paste,
+                          size: 20,
+                          color: theme.colorScheme.onSecondaryContainer,
+                        ),
+                      ),
+                    ),
+                  ),
+                ] else
+                  const SizedBox(width: 5),
               ],
             ),
           ),

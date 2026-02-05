@@ -15,10 +15,11 @@ import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
 class DynamicsController extends GetxController
-    with GetSingleTickerProviderStateMixin, ScrollOrRefreshMixin, AccountMixin {
+    with GetTickerProviderStateMixin, ScrollOrRefreshMixin, AccountMixin {
   @override
   final ScrollController scrollController = ScrollController();
   late final TabController tabController;
@@ -40,6 +41,25 @@ class DynamicsController extends GetxController
 
   @override
   final AccountService accountService = Get.find<AccountService>();
+
+  bool _isFabVisible = true;
+  AnimationController? _fabAnimationCtr;
+  Animation<Offset>? _fabAnimation;
+
+  Animation<Offset> get fabAnimation {
+    if (_fabAnimation != null) return _fabAnimation!;
+    _fabAnimationCtr = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    )..forward();
+    _fabAnimation = _fabAnimationCtr!.drive(
+      Tween<Offset>(
+        begin: const Offset(0.0, 2.0),
+        end: Offset.zero,
+      ).chain(CurveTween(curve: Curves.easeInOut)),
+    );
+    return _fabAnimation!;
+  }
 
   DynamicsTabController? get controller {
     try {
@@ -195,12 +215,28 @@ class DynamicsController extends GetxController
     return controller!.onRefresh();
   }
 
-  void _refreshFollowUp() {
+  void showFab() {
+    if (!_isFabVisible) {
+      _isFabVisible = true;
+      _fabAnimationCtr?.forward();
+    }
+  }
+
+  void hideFab() {
+    if (_isFabVisible) {
+      _isFabVisible = false;
+      _fabAnimationCtr?.reverse();
+    }
+  }
+
+  Future<void> _refreshFollowUp() async {
     if (_showAllUp) {
       _upPage = 1;
       _cacheUpList = null;
     }
-    queryFollowUp();
+    await queryFollowUp();
+    await controller?.onRefresh();
+    SmartDialog.showToast('动态已刷新');
   }
 
   @override
@@ -221,7 +257,9 @@ class DynamicsController extends GetxController
         EasyThrottle.throttle(
           'topOrRefresh',
           const Duration(milliseconds: 500),
-          onRefresh,
+          () async {
+            await onRefresh();
+          },
         );
       } else {
         animateToTop();

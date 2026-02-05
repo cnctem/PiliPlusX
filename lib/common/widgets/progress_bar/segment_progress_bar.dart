@@ -16,6 +16,7 @@
  */
 
 import 'dart:ui' as ui;
+import 'dart:io' show Platform;
 
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:collection/collection.dart';
@@ -23,6 +24,7 @@ import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/gestures.dart' show TapGestureRecognizer;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show BoxHitTestEntry;
+import 'package:PiliPlus/utils/storage_pref.dart';
 
 @immutable
 sealed class BaseSegment {
@@ -224,6 +226,9 @@ class RenderViewPointProgressBar
     final size = this.size;
     final canvas = context.canvas;
     final paint = Paint()..style = PaintingStyle.fill;
+    final fontFamily = !Pref.useSystemFont && Platform.isAndroid
+        ? 'HarmonyOS_Sans'
+        : null;
 
     assert(segments.isSortedBy((i) => i.end));
 

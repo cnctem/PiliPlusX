@@ -38,6 +38,46 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
+/// 获取页面过渡动画的中文名称
+String _getTransitionLabel(Transition transition) {
+  switch (transition) {
+    case Transition.fade:
+      return 'fade (渐变动效)';
+    case Transition.fadeIn:
+      return 'fadeIn (褪色;渐变特效)';
+    case Transition.rightToLeft:
+      return 'rightToLeft (从右到左)';
+    case Transition.leftToRight:
+      return 'leftToRight (从左到右)';
+    case Transition.upToDown:
+      return 'upToDown (从上到下)';
+    case Transition.downToUp:
+      return 'downToUp (从下到上)';
+    case Transition.rightToLeftWithFade:
+      return 'rightToLeftWithFade (从右到左并渐隐)';
+    case Transition.leftToRightWithFade:
+      return 'leftToRightWithFade (从左到右并渐隐)';
+    case Transition.zoom:
+      return 'zoom (缩放)';
+    case Transition.topLevel:
+      return 'topLevel (顶级；最高级别)';
+    case Transition.noTransition:
+      return 'noTransition (无过渡)';
+    case Transition.cupertino:
+      return 'cupertino (库比蒂诺)';
+    case Transition.cupertinoDialog:
+      return 'cupertinoDialog (库比蒂诺对话框)';
+    case Transition.size:
+      return 'size (尺寸)';
+    case Transition.circularReveal:
+      return 'circularReveal (图形揭示)';
+    case Transition.native:
+      return 'native (原生样式)';
+    default:
+      return transition.name;
+  }
+}
+
 List<SettingsModel> get styleSettings => [
   if (PlatformUtils.isDesktop) ...[
     const SwitchModel(
@@ -77,9 +117,43 @@ List<SettingsModel> get styleSettings => [
     defaultVal: false,
     needReboot: true,
   ),
+  const SwitchModel(
+    title: '首页显示一键刷新',
+    subtitle: '桌面端友好；移动端不建议开启，可点击主菜单栏当前项刷新',
+    leading: Icon(Icons.refresh_rounded),
+    setKey: SettingBoxKey.showHomeRefreshFab,
+    defaultVal: false,
+  ),
+  const SwitchModel(
+    title: '动态页显示一键刷新',
+    subtitle: '桌面端友好；移动端不建议开启，可点击主菜单栏当前项刷新',
+    leading: Icon(Icons.refresh_rounded),
+    setKey: SettingBoxKey.showDynamicsRefreshFab,
+    defaultVal: false,
+  ),
+  if (PlatformUtils.isMobile) ...[
+    const SwitchModel(
+      title: '隐藏状态栏',
+      subtitle: '开启后将隐藏状态栏并移除安全边距，实测平板友好，非平板设备谨慎开启',
+      leading: Icon(Icons.fullscreen_outlined),
+      setKey: SettingBoxKey.hideStatusBar,
+      defaultVal: false,
+      needReboot: true,
+    ),
+  ],
+  if (!Platform.isMacOS) ...[
+    const SwitchModel(
+      title: '使用系统字体',
+      subtitle: '关闭后将使用内置HarmonyOS Sans字体',
+      leading: Icon(Icons.font_download_outlined),
+      setKey: SettingBoxKey.useSystemFont,
+      defaultVal: false,
+      needReboot: true,
+    ),
+  ],
   SwitchModel(
     title: 'App字体字重',
-    subtitle: '点击设置',
+    subtitle: '点击设置字重，iOS使用此选项需要开启“使用系统字体”',
     setKey: SettingBoxKey.appFontWeight,
     defaultVal: false,
     leading: const Icon(Icons.text_fields),
@@ -95,8 +169,26 @@ List<SettingsModel> get styleSettings => [
   NormalModel(
     title: '页面过渡动画',
     leading: const Icon(Icons.animation),
-    getSubtitle: () => '当前：${Pref.pageTransition.name}',
-    onTap: _showTransitionDialog,
+    getSubtitle: () => '当前：${_getTransitionLabel(Pref.pageTransition)}',
+    onTap: (context, setState) async {
+      final result = await showDialog<Transition>(
+        context: context,
+        builder: (context) {
+          return SelectDialog<Transition>(
+            title: '页面过渡动画',
+            value: Pref.pageTransition,
+            values: Transition.values
+                .map((e) => (e, _getTransitionLabel(e)))
+                .toList(),
+          );
+        },
+      );
+      if (result != null) {
+        await GStorage.setting.put(SettingBoxKey.pageTransition, result.index);
+        SmartDialog.showToast('重启生效');
+        setState();
+      }
+    },
   ),
   const SwitchModel(
     title: '优化平板导航栏',
@@ -198,9 +290,9 @@ List<SettingsModel> get styleSettings => [
     title: '顶/底栏滚动阈值',
     subtitle: '滚动多少像素后收起/展开顶底栏，默认50像素',
     leading: Icon(Icons.swipe_vertical),
-    defaultVal: false,
+    defaultVal: true,
     setKey: SettingBoxKey.enableScrollThreshold,
-    needReboot: true,
+    needReboot: false,
     onTap: _showScrollDialog,
   ),
   NormalModel(

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:PiliPlus/utils/extension/box_ext.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
@@ -28,6 +30,9 @@ abstract final class DanmakuOptions {
     double speed = 1.0,
   }) {
     return DanmakuOption(
+      fontFamily: !Pref.useSystemFont && Platform.isAndroid
+          ? 'HarmonyOS_Sans'
+          : null,
       fontSize: 15 * (notFullscreen ? danmakuFontScale : danmakuFontScaleFS),
       fontWeight: danmakuFontWeight,
       area: danmakuShowArea,

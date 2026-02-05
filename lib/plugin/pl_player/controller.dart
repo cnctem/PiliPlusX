@@ -240,8 +240,9 @@ class PlPlayerController {
     isDesktopPip = false;
     return Future.wait([
       windowManager.setTitleBarStyle(
-          Pref.showWindowTitleBar ? TitleBarStyle.normal : TitleBarStyle.hidden),
-      windowManager.setMinimumSize(const Size(400, 700)),
+        Pref.showWindowTitleBar ? TitleBarStyle.normal : TitleBarStyle.hidden,
+      ),
+      windowManager.setMinimumSize(const Size(140, 140)),
       windowManager.setBounds(_lastWindowBounds),
       setAlwaysOnTop(false),
       windowManager.setAspectRatio(0),
@@ -254,8 +255,6 @@ class PlPlayerController {
     isDesktopPip = true;
 
     _lastWindowBounds = await windowManager.getBounds();
-
-    windowManager.setTitleBarStyle(TitleBarStyle.hidden);
 
     late final Size size;
     final state = videoController!.player.state;
@@ -378,6 +377,9 @@ class PlPlayerController {
   late final fastForBackwardDuration = Duration(
     seconds: Pref.fastForBackwardDuration,
   );
+  late final fastForBackwardDuration_ = Duration(
+    seconds: Pref.fastForBackwardDuration_,
+  );
 
   late final horizontalSeasonPanel = Pref.horizontalSeasonPanel;
   late final preInitPlayer = Pref.preInitPlayer;
@@ -422,6 +424,9 @@ class PlPlayerController {
   late PlayRepeat playRepeat = Pref.playRepeat;
 
   TextStyle get subTitleStyle => TextStyle(
+    fontFamily: !Pref.useSystemFont && Platform.isAndroid
+        ? 'HarmonyOS_Sans'
+        : null,
     height: 1.5,
     fontSize:
         16 * (isFullScreen.value ? subtitleFontScaleFS : subtitleFontScale),
@@ -1570,9 +1575,10 @@ class PlPlayerController {
         }
       } else {
         if (PlatformUtils.isMobile) {
-          showStatusBar();
-          if (mode == FullScreenMode.none) {
-            return;
+          if (!Pref.hideStatusBar) {
+            showStatusBar();
+          } else {
+            hideStatusBarKeepNav();
           }
           if (!horizontalScreen) {
             await verticalScreenForTwoSeconds();
@@ -1847,7 +1853,7 @@ class PlPlayerController {
           builder: (context) => GestureDetector(
             onTap: () {
               Get.back();
-              ImageUtils.saveByteImg(
+              ImageUtils.saveScreenShot(
                 bytes: value,
                 fileName: 'screenshot_${ImageUtils.time}',
               );

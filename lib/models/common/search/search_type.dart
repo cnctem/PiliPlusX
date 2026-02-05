@@ -5,6 +5,7 @@ enum SearchType {
   video('视频'),
   // 番剧：media_bangumi,
   media_bangumi('番剧'),
+  media_hk_bangumi('港澳台番剧'),
   // 影视：media_ft
   media_ft('影视'),
   // 直播间及主播：live

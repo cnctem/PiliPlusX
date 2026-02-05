@@ -18,28 +18,62 @@ abstract final class ThemeUtils {
     final fontWeight = appFontWeight == -1
         ? null
         : FontWeight.values[appFontWeight];
+
+    // 根据设置决定使用系统字体还是 HarmonyOS_Sans
+    final fontFamilyFallback = Pref.useSystemFont ? null : ['HarmonyOS_Sans'];
     late final textStyle = TextStyle(fontWeight: fontWeight);
     ThemeData themeData = ThemeData(
       colorScheme: colorScheme,
       useMaterial3: true,
       textTheme: fontWeight == null
-          ? null
+          ? TextTheme(
+              bodyLarge: TextStyle(fontFamilyFallback: fontFamilyFallback),
+              bodyMedium: TextStyle(fontFamilyFallback: fontFamilyFallback),
+              bodySmall: TextStyle(fontFamilyFallback: fontFamilyFallback),
+              displayLarge: TextStyle(fontFamilyFallback: fontFamilyFallback),
+              displayMedium: TextStyle(fontFamilyFallback: fontFamilyFallback),
+              displaySmall: TextStyle(fontFamilyFallback: fontFamilyFallback),
+              headlineLarge: TextStyle(fontFamilyFallback: fontFamilyFallback),
+              headlineMedium: TextStyle(fontFamilyFallback: fontFamilyFallback),
+              headlineSmall: TextStyle(fontFamilyFallback: fontFamilyFallback),
+              titleLarge: TextStyle(fontFamilyFallback: fontFamilyFallback),
+              titleMedium: TextStyle(fontFamilyFallback: fontFamilyFallback),
+              titleSmall: TextStyle(fontFamilyFallback: fontFamilyFallback),
+              labelLarge: TextStyle(fontFamilyFallback: fontFamilyFallback),
+              labelMedium: TextStyle(fontFamilyFallback: fontFamilyFallback),
+              labelSmall: TextStyle(fontFamilyFallback: fontFamilyFallback),
+            )
           : TextTheme(
-              displayLarge: textStyle,
-              displayMedium: textStyle,
-              displaySmall: textStyle,
-              headlineLarge: textStyle,
-              headlineMedium: textStyle,
-              headlineSmall: textStyle,
-              titleLarge: textStyle,
-              titleMedium: textStyle,
-              titleSmall: textStyle,
-              bodyLarge: textStyle,
-              bodyMedium: textStyle,
-              bodySmall: textStyle,
-              labelLarge: textStyle,
-              labelMedium: textStyle,
-              labelSmall: textStyle,
+              displayLarge:
+                  textStyle.copyWith(fontFamilyFallback: fontFamilyFallback),
+              displayMedium:
+                  textStyle.copyWith(fontFamilyFallback: fontFamilyFallback),
+              displaySmall:
+                  textStyle.copyWith(fontFamilyFallback: fontFamilyFallback),
+              headlineLarge:
+                  textStyle.copyWith(fontFamilyFallback: fontFamilyFallback),
+              headlineMedium:
+                  textStyle.copyWith(fontFamilyFallback: fontFamilyFallback),
+              headlineSmall:
+                  textStyle.copyWith(fontFamilyFallback: fontFamilyFallback),
+              titleLarge:
+                  textStyle.copyWith(fontFamilyFallback: fontFamilyFallback),
+              titleMedium:
+                  textStyle.copyWith(fontFamilyFallback: fontFamilyFallback),
+              titleSmall:
+                  textStyle.copyWith(fontFamilyFallback: fontFamilyFallback),
+              bodyLarge:
+                  textStyle.copyWith(fontFamilyFallback: fontFamilyFallback),
+              bodyMedium:
+                  textStyle.copyWith(fontFamilyFallback: fontFamilyFallback),
+              bodySmall:
+                  textStyle.copyWith(fontFamilyFallback: fontFamilyFallback),
+              labelLarge:
+                  textStyle.copyWith(fontFamilyFallback: fontFamilyFallback),
+              labelMedium:
+                  textStyle.copyWith(fontFamilyFallback: fontFamilyFallback),
+              labelSmall:
+                  textStyle.copyWith(fontFamilyFallback: fontFamilyFallback),
             ),
       tabBarTheme: fontWeight == null
           ? null
@@ -75,8 +109,8 @@ abstract final class ThemeUtils {
         surfaceTintColor: isDynamic
             ? colorScheme.onSurfaceVariant
             : isDark
-            ? colorScheme.onSurfaceVariant
-            : null,
+                ? colorScheme.onSurfaceVariant
+                : null,
         shadowColor: Colors.transparent,
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
@@ -144,8 +178,44 @@ abstract final class ThemeUtils {
   static ThemeData darkenTheme(ThemeData themeData) {
     final colorScheme = themeData.colorScheme;
     final color = colorScheme.surfaceContainerHighest.darken(0.7);
+
+    // 获取字体回退设置
+    final fontFamilyFallback = Pref.useSystemFont ? null : ['HarmonyOS_Sans'];
+
     return themeData.copyWith(
       scaffoldBackgroundColor: Colors.black,
+      textTheme: themeData.textTheme.copyWith(
+        bodyLarge: themeData.textTheme.bodyLarge
+            ?.copyWith(fontFamilyFallback: fontFamilyFallback),
+        bodyMedium: themeData.textTheme.bodyMedium
+            ?.copyWith(fontFamilyFallback: fontFamilyFallback),
+        bodySmall: themeData.textTheme.bodySmall
+            ?.copyWith(fontFamilyFallback: fontFamilyFallback),
+        displayLarge: themeData.textTheme.displayLarge
+            ?.copyWith(fontFamilyFallback: fontFamilyFallback),
+        displayMedium: themeData.textTheme.displayMedium
+            ?.copyWith(fontFamilyFallback: fontFamilyFallback),
+        displaySmall: themeData.textTheme.displaySmall
+            ?.copyWith(fontFamilyFallback: fontFamilyFallback),
+        headlineLarge: themeData.textTheme.headlineLarge
+            ?.copyWith(fontFamilyFallback: fontFamilyFallback),
+        headlineMedium: themeData.textTheme.headlineMedium
+            ?.copyWith(fontFamilyFallback: fontFamilyFallback),
+        headlineSmall: themeData.textTheme.headlineSmall
+            ?.copyWith(fontFamilyFallback: fontFamilyFallback),
+        titleLarge: themeData.textTheme.titleLarge
+            ?.copyWith(fontFamilyFallback: fontFamilyFallback),
+        titleMedium: themeData.textTheme.titleMedium
+            ?.copyWith(fontFamilyFallback: fontFamilyFallback),
+        titleSmall: themeData.textTheme.titleSmall
+            ?.copyWith(fontFamilyFallback: fontFamilyFallback),
+        labelLarge: themeData.textTheme.labelLarge
+            ?.copyWith(fontFamilyFallback: fontFamilyFallback),
+        labelMedium: themeData.textTheme.labelMedium
+            ?.copyWith(fontFamilyFallback: fontFamilyFallback),
+        labelSmall: themeData.textTheme.labelSmall
+            ?.copyWith(fontFamilyFallback: fontFamilyFallback),
+      ),
       appBarTheme: themeData.appBarTheme.copyWith(
         backgroundColor: Colors.black,
       ),

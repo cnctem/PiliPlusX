@@ -6,6 +6,7 @@ import 'package:PiliPlus/models/common/video/subtitle_pref_type.dart';
 import 'package:PiliPlus/pages/main/controller.dart';
 import 'package:PiliPlus/pages/setting/models/model.dart';
 import 'package:PiliPlus/pages/setting/widgets/select_dialog.dart';
+import 'package:PiliPlus/pages/setting/widgets/shortcut_keys_dialog.dart';
 import 'package:PiliPlus/plugin/pl_player/models/bottom_progress_behavior.dart';
 import 'package:PiliPlus/plugin/pl_player/models/fullscreen_mode.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart'
@@ -47,7 +48,7 @@ List<SettingsModel> get playSettings => [
     subtitle: '进入详情页自动播放',
     leading: Icon(Icons.motion_photos_auto_outlined),
     setKey: SettingBoxKey.autoPlayEnable,
-    defaultVal: false,
+    defaultVal: true,
   ),
   const SwitchModel(
     title: '全屏显示锁定按钮',
@@ -68,13 +69,6 @@ List<SettingsModel> get playSettings => [
     defaultVal: PlatformUtils.isMobile,
   ),
   const SwitchModel(
-    title: '双击快退/快进',
-    subtitle: '左侧双击快退/右侧双击快进，关闭则双击均为暂停/播放',
-    leading: Icon(Icons.touch_app_outlined),
-    setKey: SettingBoxKey.enableQuickDouble,
-    defaultVal: true,
-  ),
-  const SwitchModel(
     title: '左右侧滑动调节亮度/音量',
     leading: Icon(MdiIcons.tuneVerticalVariant),
     setKey: SettingBoxKey.enableSlideVolumeBrightness,
@@ -93,10 +87,27 @@ List<SettingsModel> get playSettings => [
     setKey: SettingBoxKey.enableSlideFS,
     defaultVal: true,
   ),
+  const SwitchModel(
+    title: '双击快退/快进',
+    subtitle: '左侧双击快退/右侧双击快进，关闭则双击均为暂停/播放',
+    leading: Icon(Icons.touch_app_outlined),
+    setKey: SettingBoxKey.enableQuickDouble,
+    defaultVal: false,
+  ),
   getVideoFilterSelectModel(
-    title: '双击快进/快退时长',
+    context: Get.context!,
+    title: '右方向键/双击快进时长',
     suffix: 's',
     key: SettingBoxKey.fastForBackwardDuration,
+    values: [5, 10, 15],
+    defaultValue: 10,
+    isFilter: false,
+  ),
+  getVideoFilterSelectModel(
+    context: Get.context!,
+    title: '左方向键/双击快退时长',
+    suffix: 's',
+    key: SettingBoxKey.fastForBackwardDuration_,
     values: [5, 10, 15],
     defaultValue: 10,
     isFilter: false,
@@ -134,11 +145,20 @@ List<SettingsModel> get playSettings => [
         } catch (_) {}
       },
     ),
-  const SwitchModel(
+  SwitchModel(
     title: '启用键盘控制',
-    leading: Icon(Icons.keyboard_alt_outlined),
+    subtitle: '点击查看快捷键',
+    leading: const Icon(Icons.keyboard_alt_outlined),
     setKey: SettingBoxKey.keyboardControl,
     defaultVal: true,
+    onTap: (context) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return const ShortcutKeysDialog();
+        },
+      );
+    },
   ),
   NormalModel(
     title: 'SuperChat (醒目留言) 显示类型',
