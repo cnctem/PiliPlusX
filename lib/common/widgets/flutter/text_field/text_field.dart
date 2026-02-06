@@ -1313,8 +1313,7 @@ class RichTextFieldState extends State<RichTextField>
               enabled: _isEnabled,
               hintMaxLines:
                   widget.decoration?.hintMaxLines ??
-                  // //  TODO 直接注释掉的代码 3.32.4-ohos-0.0.1不支持
-                  // themeData.inputDecorationTheme.hintMaxLines ??
+                  themeData.inputDecorationTheme.hintMaxLines ??
                   widget.maxLines,
             );
 
@@ -1744,7 +1743,21 @@ class RichTextFieldState extends State<RichTextField>
         handleDidLoseAccessibilityFocus = () {
           _effectiveFocusNode.unfocus();
         };
-      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        forcePressEnabled = false;
+        textSelectionControls ??= materialTextSelectionHandleControls;
+        paintCursorAboveText = false;
+        cursorOpacityAnimates ??= false;
+        cursorColor = _hasError
+            ? _errorColor
+            : widget.cursorColor ??
+                  selectionStyle.cursorColor ??
+                  theme.colorScheme.primary;
+        selectionColor =
+            selectionStyle.selectionColor ??
+            theme.colorScheme.primary.withValues(alpha: 0.40);
 
       case TargetPlatform.linux:
         forcePressEnabled = false;

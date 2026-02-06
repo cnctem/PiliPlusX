@@ -62,6 +62,7 @@ import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:easy_debounce/easy_throttle.dart';
+import 'package:fl_chart/fl_chart.dart';
 // TODO 鸿蒙待适配 使用fl_chart报错
 // import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/foundation.dart';
@@ -195,7 +196,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           if (Utils.isHarmony) {
             // 移动端是鸿蒙也把播放器音量设为系统音量
             final volume = await HarmonyVolumeView.cntlr.getVolume();
-            print('获取鸿蒙音量：$volume');
+            debugPrint('获取鸿蒙音量：$volume');
             if (volume != null) plPlayerController.volume.value = volume;
           } else {
             FlutterVolumeController.updateShowSystemUI(true);
@@ -225,7 +226,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             FlutterVolumeController.addListener(listener);
           }
         } catch (e) {
-          print('音量初始化处理失败: $e');
+          debugPrint('音量初始化处理失败: $e');
         }
       });
 
@@ -250,9 +251,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                     .onApplicationScreenBrightnessChanged
                     .listen(listener);
         } catch (e) {
-          print('监听屏幕亮度失败: $e');
+          debugPrint('监听屏幕亮度失败: $e');
           if (Utils.isHarmony) {
-            print('尝试鸿蒙number类型的亮度监听: $e');
+            debugPrint('尝试鸿蒙number类型的亮度监听: $e');
             _harmonyOnApplicationScreenBrightnessChanged ??=
                 pluginEventChannelApplicationBrightnessChanged
                     .receiveBroadcastStream()
@@ -347,7 +348,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         );
       }
     } catch (e) {
-      print('设置屏幕亮度失败：$e');
+      debugPrint('设置屏幕亮度失败：$e');
     }
     _brightnessIndicator.value = true;
     _brightnessTimer?.cancel();
@@ -968,7 +969,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     }
     plPlayerController.initialFocalPoint = localFocalPoint;
     // if (kDebugMode) {
-    //   debugPrint("_initialFocalPoint$_initialFocalPoint");
+    //   debugdebugPrint("_initialFocalPoint$_initialFocalPoint");
     // }
     _gestureType = null;
   }
@@ -1113,13 +1114,13 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         if (isFullScreen ^ plPlayerController.fullScreenGestureReverse) {
           fullScreenTrigger(plPlayerController.fullScreenGestureReverse);
         }
-        // if (kDebugMode) debugPrint('center_down:$cumulativeDy');
+        // if (kDebugMode) debugdebugPrint('center_down:$cumulativeDy');
       } else if (cumulativeDy < -threshold) {
         _gestureType = GestureType.center_up;
         if (!isFullScreen ^ plPlayerController.fullScreenGestureReverse) {
           fullScreenTrigger(!plPlayerController.fullScreenGestureReverse);
         }
-        // if (kDebugMode) debugPrint('center_up:$cumulativeDy');
+        // if (kDebugMode) debugdebugPrint('center_up:$cumulativeDy');
       }
     } else if (_gestureType == GestureType.right) {
       // 右边区域
@@ -2543,38 +2544,37 @@ Widget buildDmChart(
             ? 20.25 + offset
             : 4.25 + offset,
       ),
-      // TODO flutter 3.32.4-ohos-0.0.1使用fl_chart报错
-      // child: LineChart(
-      //   LineChartData(
-      //     titlesData: const FlTitlesData(show: false),
-      //     lineTouchData: const LineTouchData(enabled: false),
-      //     gridData: const FlGridData(show: false),
-      //     borderData: FlBorderData(show: false),
-      //     minX: 0,
-      //     maxX: (dmTrend.length - 1).toDouble(),
-      //     minY: 0,
-      //     maxY: dmTrend.max,
-      //     lineBarsData: [
-      //       LineChartBarData(
-      //         spots: List.generate(
-      //           dmTrend.length,
-      //           (index) => FlSpot(
-      //             index.toDouble(),
-      //             dmTrend[index],
-      //           ),
-      //         ),
-      //         isCurved: true,
-      //         barWidth: 1,
-      //         color: color,
-      //         dotData: const FlDotData(show: false),
-      //         belowBarData: BarAreaData(
-      //           show: true,
-      //           color: color.withValues(alpha: 0.4),
-      //         ),
-      //       ),
-      //     ],
-      //   ),
-      // ),
+      child: LineChart(
+        LineChartData(
+          titlesData: const FlTitlesData(show: false),
+          lineTouchData: const LineTouchData(enabled: false),
+          gridData: const FlGridData(show: false),
+          borderData: FlBorderData(show: false),
+          minX: 0,
+          maxX: (dmTrend.length - 1).toDouble(),
+          minY: 0,
+          maxY: dmTrend.reduce((a, b) => a > b ? a : b).toDouble(),
+          lineBarsData: [
+            LineChartBarData(
+              spots: List.generate(
+                dmTrend.length,
+                (index) => FlSpot(
+                  index.toDouble(),
+                  dmTrend[index],
+                ),
+              ),
+              isCurved: true,
+              barWidth: 1,
+              color: color,
+              dotData: const FlDotData(show: false),
+              belowBarData: BarAreaData(
+                show: true,
+                color: color.withValues(alpha: 0.4),
+              ),
+            ),
+          ],
+        ),
+      ),
     ),
   );
 }
@@ -2858,7 +2858,7 @@ Widget buildViewPointWidget(
               ..danmakuController?.clear()
               ..videoPlayerController?.seek(Duration(seconds: item.from!));
           }
-          // if (kDebugMode) debugPrint('${item.title},,${item.from}');
+          // if (kDebugMode) debugdebugPrint('${item.title},,${item.from}');
         } catch (e) {
           if (kDebugMode) debugPrint('$e');
         }

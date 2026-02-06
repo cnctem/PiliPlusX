@@ -393,6 +393,7 @@ class LiveRoomController extends GetxController {
           ..init();
   }
 
+  @pragma('vm:notify-debugger-on-exception')
   void _danmakuListener(dynamic obj) {
     try {
       // logger.i(' 原始弹幕消息 ======> ${jsonEncode(obj)}');

@@ -238,7 +238,7 @@ dependencies:
       url: https://github.com/bggRGjQaUbCoE/super_sliver_list.git
       ref: mod
   dlna_dart: ^0.1.0
-  battery_plus: 5.0.3
+  battery_plus: ^7.0.0
   battery_plus_ohos: ^0.0.3
 
   vector_math: any

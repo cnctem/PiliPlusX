@@ -9,8 +9,8 @@ import 'dart:math' as math;
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
-import 'package:PiliPlus/common/widgets/flutter/text_field/cupertino/cupertino_adaptive_text_selection_toolbar.dart';
-import 'package:PiliPlus/common/widgets/flutter/text_field/cupertino/cupertino_spell_check_suggestions_toolbar.dart';
+import 'package:PiliPlus/common/widgets/flutter/text_field/cupertino/adaptive_text_selection_toolbar.dart';
+import 'package:PiliPlus/common/widgets/flutter/text_field/cupertino/spell_check_suggestions_toolbar.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/editable_text.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/spell_check.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/system_context_menu.dart';
