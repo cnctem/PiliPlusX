@@ -32,7 +32,6 @@ enum CDNService {
 
   const CDNService(this.desc, [this.host]);
 }
-
 // from https://rec.danmuji.org/dev/cdn-info/
 // {
 //     'cn-ahwh-ct-': {'01': 16},

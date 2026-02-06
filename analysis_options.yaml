@@ -12,8 +12,8 @@ include: package:flutter_lints/flutter.yaml
 analyzer:
   exclude:
     - lib/grpc/bilibili/**
-    # - lib/grpc/google/**
-    # - lib/common/widgets/flutter/**
+    - lib/grpc/google/**
+    - lib/common/widgets/flutter/**
 
 formatter:
   trailing_commas: preserve

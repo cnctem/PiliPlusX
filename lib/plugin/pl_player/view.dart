@@ -153,7 +153,6 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   StreamSubscription? _controlsListener;
 
   bool _pauseDueToPauseUponEnteringBackgroundMode = false;
-  bool _resumeForBackground = false;
 
   @override
   void initState() {

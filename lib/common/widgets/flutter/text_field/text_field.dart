@@ -18,7 +18,7 @@ import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/cupertino/spell_check_suggestions_toolbar.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/cupertino/text_field.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/editable_text.dart';
-import 'package:PiliPlus/common/widgets/flutter/text_field/spell_check.dart';
+import 'package:PiliPlus/common/widgets/flutter/text_field/spell_check.dart' hide buildTextSpanWithSpellCheckSuggestions;
 import 'package:PiliPlus/common/widgets/flutter/text_field/spell_check_suggestions_toolbar.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/system_context_menu.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/text_selection.dart';
