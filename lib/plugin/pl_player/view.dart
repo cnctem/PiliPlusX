@@ -45,7 +45,6 @@ import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/plugin/pl_player/models/video_fit_type.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/app_bar_ani.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/backward_seek.dart';
-import 'package:PiliPlus/plugin/pl_player/widgets/bottom_control.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/common_btn.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/forward_seek.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/mpv_convert_webp.dart';
@@ -462,33 +461,43 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       ),
 
       /// 高能进度条
-      BottomControlType.dmChart => Obx(() {
-        final list = videoDetailController.dmTrend.value?.dataOrNull;
-        if (list != null && list.isNotEmpty) {
-          return ComBtn(
-            width: widgetWidth,
-            height: 30,
-            tooltip: '高能进度条',
-            icon: videoDetailController.showDmTrendChart.value
-                ? const Icon(
-                    Icons.show_chart,
-                    size: 22,
-                    color: Colors.white,
-                  )
-                : const Stack(
-                    clipBehavior: Clip.none,
-                    alignment: Alignment.center,
-                    children: [
-                      Icon(Icons.show_chart, size: 22, color: Colors.white),
-                      Icon(Icons.hide_source, size: 22, color: Colors.white),
-                    ],
-                  ),
-            onTap: () => videoDetailController.showDmTrendChart.value =
-                !videoDetailController.showDmTrendChart.value,
-          );
-        }
-        return const SizedBox.shrink();
-      }),
+      BottomControlType.dmChart => Obx(
+        () {
+          final list = videoDetailController.dmTrend.value?.dataOrNull;
+          if (list != null && list.isNotEmpty) {
+            return ComBtn(
+              width: widgetWidth,
+              height: 30,
+              tooltip: '高能进度条',
+              icon: videoDetailController.showDmTrendChart.value
+                  ? const Icon(
+                      Icons.show_chart,
+                      size: 22,
+                      color: Colors.white,
+                    )
+                  : const Stack(
+                      clipBehavior: Clip.none,
+                      alignment: Alignment.center,
+                      children: [
+                        Icon(
+                          Icons.show_chart,
+                          size: 22,
+                          color: Colors.white,
+                        ),
+                        Icon(
+                          Icons.hide_source,
+                          size: 22,
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
+              onTap: () => videoDetailController.showDmTrendChart.value =
+                  !videoDetailController.showDmTrendChart.value,
+            );
+          }
+          return const SizedBox.shrink();
+        },
+      ),
 
       /// 超分辨率
       BottomControlType.superResolution => Obx(
@@ -771,86 +780,91 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         ),
       ),
 
-      BottomControlType.qa => Obx(() {
-        final VideoQuality? currentVideoQa =
-            videoDetailController.currentVideoQa.value;
-        if (currentVideoQa == null) {
-          return const SizedBox.shrink();
-        }
-        final PlayUrlModel videoInfo = videoDetailController.data;
-        if (videoInfo.dash == null) {
-          return const SizedBox.shrink();
-        }
-        final List<FormatItem> videoFormat = videoInfo.supportFormats!;
-        final int totalQaSam = videoFormat.length;
-        int usefulQaSam = 0;
-        final List<VideoItem> video = videoInfo.dash!.video!;
-        final Set<int> idSet = {};
-        for (final VideoItem item in video) {
-          final int id = item.id!;
-          if (!idSet.contains(id)) {
-            idSet.add(id);
-            usefulQaSam++;
+      BottomControlType.qa => Obx(
+        () {
+          final VideoQuality? currentVideoQa =
+              videoDetailController.currentVideoQa.value;
+          if (currentVideoQa == null) {
+            return const SizedBox.shrink();
           }
-        }
-        return PopupMenuButton<int>(
-          tooltip: '画质',
-          requestFocus: false,
-          initialValue: currentVideoQa.code,
-          color: Colors.black.withValues(alpha: 0.8),
-          itemBuilder: (context) {
-            return List.generate(totalQaSam, (index) {
-              final item = videoFormat[index];
-              final enabled = index >= totalQaSam - usefulQaSam;
-              return PopupMenuItem<int>(
-                enabled: enabled,
-                height: 35,
-                padding: const EdgeInsets.only(left: 15, right: 10),
-                value: item.quality,
-                onTap: () async {
-                  if (currentVideoQa.code == item.quality) {
-                    return;
-                  }
-                  final int quality = item.quality!;
-                  final newQa = VideoQuality.fromCode(quality);
-                  videoDetailController
-                    ..plPlayerController.cacheVideoQa = newQa.code
-                    ..currentVideoQa.value = newQa
-                    ..updatePlayer();
+          final PlayUrlModel videoInfo = videoDetailController.data;
+          if (videoInfo.dash == null) {
+            return const SizedBox.shrink();
+          }
+          final List<FormatItem> videoFormat = videoInfo.supportFormats!;
+          final int totalQaSam = videoFormat.length;
+          int usefulQaSam = 0;
+          final List<VideoItem> video = videoInfo.dash!.video!;
+          final Set<int> idSet = {};
+          for (final VideoItem item in video) {
+            final int id = item.id!;
+            if (!idSet.contains(id)) {
+              idSet.add(id);
+              usefulQaSam++;
+            }
+          }
+          return PopupMenuButton<int>(
+            tooltip: '画质',
+            requestFocus: false,
+            initialValue: currentVideoQa.code,
+            color: Colors.black.withValues(alpha: 0.8),
+            itemBuilder: (context) {
+              return List.generate(
+                totalQaSam,
+                (index) {
+                  final item = videoFormat[index];
+                  final enabled = index >= totalQaSam - usefulQaSam;
+                  return PopupMenuItem<int>(
+                    enabled: enabled,
+                    height: 35,
+                    padding: const EdgeInsets.only(left: 15, right: 10),
+                    value: item.quality,
+                    onTap: () async {
+                      if (currentVideoQa.code == item.quality) {
+                        return;
+                      }
+                      final int quality = item.quality!;
+                      final newQa = VideoQuality.fromCode(quality);
+                      videoDetailController
+                        ..plPlayerController.cacheVideoQa = newQa.code
+                        ..currentVideoQa.value = newQa
+                        ..updatePlayer();
 
-                  SmartDialog.showToast("画质已变为：${newQa.desc}");
+                      SmartDialog.showToast("画质已变为：${newQa.desc}");
 
-                  // update
-                  if (!plPlayerController.tempPlayerConf) {
-                    GStorage.setting.put(
-                      await Utils.isWiFi
-                          ? SettingBoxKey.defaultVideoQa
-                          : SettingBoxKey.defaultVideoQaCellular,
-                      quality,
-                    );
-                  }
+                      // update
+                      if (!plPlayerController.tempPlayerConf) {
+                        GStorage.setting.put(
+                          await Utils.isWiFi
+                              ? SettingBoxKey.defaultVideoQa
+                              : SettingBoxKey.defaultVideoQaCellular,
+                          quality,
+                        );
+                      }
+                    },
+                    child: Text(
+                      item.newDesc ?? '',
+                      style: enabled
+                          ? const TextStyle(color: Colors.white, fontSize: 13)
+                          : const TextStyle(
+                              color: Color(0x62FFFFFF),
+                              fontSize: 13,
+                            ),
+                    ),
+                  );
                 },
-                child: Text(
-                  item.newDesc ?? '',
-                  style: enabled
-                      ? const TextStyle(color: Colors.white, fontSize: 13)
-                      : const TextStyle(
-                          color: Color(0x62FFFFFF),
-                          fontSize: 13,
-                        ),
-                ),
               );
-            });
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              currentVideoQa.shortDesc,
-              style: const TextStyle(color: Colors.white, fontSize: 13),
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                currentVideoQa.shortDesc,
+                style: const TextStyle(color: Colors.white, fontSize: 13),
+              ),
             ),
-          ),
-        );
-      }),
+          );
+        },
+      ),
 
       /// 全屏
       BottomControlType.fullscreen => ComBtn(
@@ -1675,23 +1689,58 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                             )
                           : widget.headerControl,
                     ),
-                    AppBarAni(
-                      isTop: false,
-                      controller: animationController,
-                      isFullScreen: isFullScreen,
-                      child:
-                          widget.bottomControl ??
-                          BottomControl(
-                            maxWidth: maxWidth,
-                            isFullScreen: isFullScreen,
-                            controller: plPlayerController,
-                            videoDetailController: videoDetailController,
-                            buildBottomControl: () => buildBottomControl(
-                              videoDetailController,
-                              maxWidth > maxHeight,
+                    if (plPlayerController.enableBlock &&
+                        videoDetailController.segmentProgressList.isNotEmpty)
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0.75,
+                        child: IgnorePointer(
+                          child: RepaintBoundary.wrap(
+                            CustomPaint(
+                              size: const Size(double.infinity, 3.5),
+                              painter: SegmentProgressBar(
+                                segmentColors:
+                                    videoDetailController.segmentProgressList,
+                              ),
                             ),
+                            1,
                           ),
-                    ),
+                        ),
+                      ),
+                    if (plPlayerController.showViewPoints &&
+                        videoDetailController.viewPointList.isNotEmpty &&
+                        videoDetailController.showVP.value) ...[
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0.75,
+                        child: IgnorePointer(
+                          child: RepaintBoundary.wrap(
+                            CustomPaint(
+                              size: const Size(double.infinity, 3.5),
+                              painter: SegmentProgressBar(
+                                segmentColors:
+                                    videoDetailController.viewPointList,
+                              ),
+                            ),
+                            2,
+                          ),
+                        ),
+                      ),
+                      if (Utils.isMobile)
+                        buildViewPointWidget(
+                          videoDetailController,
+                          plPlayerController,
+                          4.25,
+                          maxWidth,
+                        ),
+                    ],
+                    if (plPlayerController.showDmChart &&
+                        videoDetailController.showDmTrendChart.value)
+                      if (videoDetailController.dmTrend.value?.dataOrNull
+                          case final list?)
+                        buildDmChart(primary, list, videoDetailController),
                   ],
                 ),
               ),
@@ -2553,7 +2602,7 @@ Widget buildDmChart(
           minX: 0,
           maxX: (dmTrend.length - 1).toDouble(),
           minY: 0,
-          maxY: dmTrend.reduce((a, b) => a > b ? a : b).toDouble(),
+          maxY: dmTrend.max,
           lineBarsData: [
             LineChartBarData(
               spots: List.generate(

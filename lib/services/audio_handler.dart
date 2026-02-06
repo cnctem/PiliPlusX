@@ -11,25 +11,20 @@ import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:get/get_utils/get_utils.dart';
 
-Future<VideoPlayerServiceHandler> initAudioService() async {
-  try {
-    return await AudioService.init(
-      builder: VideoPlayerServiceHandler.new,
-      config: const AudioServiceConfig(
-        androidNotificationChannelId: 'com.example.piliplus.audio',
-        androidNotificationChannelName: 'Audio Service ${Constants.appName}',
-        androidNotificationOngoing: true,
-        androidStopForegroundOnPause: true,
-        fastForwardInterval: Duration(seconds: 10),
-        rewindInterval: Duration(seconds: 10),
-        androidNotificationChannelDescription: 'Media notification channel',
-        androidNotificationIcon: 'drawable/ic_notification_icon',
-      ),
-    );
-  } catch (_) {
-    // 若初始化失败（缺少平台实现等），降级为本地空实现
-    return VideoPlayerServiceHandler.local();
-  }
+Future<VideoPlayerServiceHandler> initAudioService() {
+  return AudioService.init(
+    builder: VideoPlayerServiceHandler.new,
+    config: const AudioServiceConfig(
+      androidNotificationChannelId: 'com.example.piliplus.audio',
+      androidNotificationChannelName: 'Audio Service ${Constants.appName}',
+      androidNotificationOngoing: true,
+      androidStopForegroundOnPause: true,
+      fastForwardInterval: Duration(seconds: 10),
+      rewindInterval: Duration(seconds: 10),
+      androidNotificationChannelDescription: 'Media notification channel',
+      androidNotificationIcon: 'drawable/ic_notification_icon',
+    ),
+  );
 }
 
 class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {

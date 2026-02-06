@@ -240,6 +240,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
               onSendDanmaku: _liveRoomController.onSendDanmaku,
               onPlayAudio: _liveRoomController.queryLiveUrl,
               isPortrait: isPortrait,
+              liveController: _liveRoomController,
             ),
             bottomControl: BottomControl(
               plPlayerController: plPlayerController,

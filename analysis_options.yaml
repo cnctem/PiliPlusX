@@ -12,7 +12,7 @@ include: package:flutter_lints/flutter.yaml
 analyzer:
   exclude:
     - lib/grpc/bilibili/**
-    - lib/grpc/google/**
+    # - lib/grpc/google/**
     # - lib/common/widgets/flutter/**
 
 formatter:
