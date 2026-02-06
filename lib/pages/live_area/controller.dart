@@ -43,15 +43,15 @@ class LiveAreaController
   }
 
   Future<void> setFavTag() async {
-    if (favState.value.isSuccess) {
+    if (favState.value case Success(:final response)) {
       final res = await LiveHttp.setLiveFavTag(
-        ids: favState.value.data.map((e) => e.id).join(','),
+        ids: response.map((e) => e.id).join(','),
       );
-      if (res['status']) {
+      if (res.isSuccess) {
         isEditing.value = !isEditing.value;
         SmartDialog.showToast('设置成功');
       } else {
-        SmartDialog.showToast(res['msg']);
+        res.toast();
       }
     } else {
       isEditing.value = !isEditing.value;

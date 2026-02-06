@@ -1,15 +1,16 @@
-import 'package:PiliPlus/common/constants.dart';
+﻿import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/http/search.dart';
 import 'package:PiliPlus/models/common/badge_type.dart';
+import 'package:PiliPlus/models/common/image_type.dart';
 import 'package:PiliPlus/models_new/space/space_archive/item.dart';
 import 'package:PiliPlus/utils/app_scheme.dart';
 import 'package:PiliPlus/utils/duration_utils.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
-import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:flutter/material.dart';
 
 // 视频卡片 - 垂直布局
@@ -74,7 +75,7 @@ class VideoCardVMemberHome extends StatelessWidget {
       child: InkWell(
         onTap: onPushDetail,
         onLongPress: onLongPress,
-        onSecondaryTap: Utils.isMobile ? null : onLongPress,
+        onSecondaryTap: PlatformUtils.isMobile ? null : onLongPress,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -91,7 +92,7 @@ class VideoCardVMemberHome extends StatelessWidget {
                         src: videoItem.cover,
                         width: maxWidth,
                         height: maxHeight,
-                        radius: 0,
+                        type: ImageType.emote,
                       ),
                       if (videoItem.duration > 0)
                         PBadge(

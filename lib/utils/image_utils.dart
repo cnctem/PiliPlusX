@@ -3,10 +3,12 @@ import 'dart:typed_data';
 
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/http/init.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/file_ext.dart';
+import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/global_data.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/utils/permission_handler.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:dio/dio.dart';
@@ -21,7 +23,7 @@ import 'package:permission_handler_ohos/permission_handler_ohos.dart'
 import 'package:saver_gallery/saver_gallery.dart';
 import 'package:share_plus/share_plus.dart';
 
-abstract class ImageUtils {
+abstract final class ImageUtils {
   static String get time =>
       DateFormat('yyyy-MM-dd_HH-mm-ss').format(DateTime.now());
   static bool silentDownImg = Pref.silentDownImg;
@@ -89,7 +91,7 @@ abstract class ImageUtils {
     BuildContext context,
   ) async {
     // 鸿蒙权限在保存时单独申请，这里直接放行
-    if (Utils.isHarmony) return true;
+    if (PlatformUtils.isHarmony) return true;
     if (Platform.isAndroid) {
       if (await Utils.sdkInt <= 32) {
         if (!context.mounted) return false;
@@ -109,12 +111,13 @@ abstract class ImageUtils {
     required int height,
   }) async {
     // TODO 鸿蒙待适配 下载Live Photo
-    if (Utils.isHarmony) {
+    if (PlatformUtils.isHarmony) {
       SmartDialog.showToast('鸿蒙平台暂不支持 Live Photo 下载');
       return false;
     }
     try {
-      if (Utils.isMobile && !await checkPermissionDependOnSdkInt(context)) {
+      if (PlatformUtils.isMobile &&
+          !await checkPermissionDependOnSdkInt(context)) {
         return false;
       }
       if (!silentDownImg) SmartDialog.showLoading(msg: '正在下载');
@@ -197,7 +200,8 @@ abstract class ImageUtils {
     List<String> imgList, [
     CacheManager? manager,
   ]) async {
-    if (Utils.isMobile && !await checkPermissionDependOnSdkInt(context)) {
+    if (PlatformUtils.isMobile &&
+        !await checkPermissionDependOnSdkInt(context)) {
       return false;
     }
     CancelToken? cancelToken;
@@ -240,7 +244,7 @@ abstract class ImageUtils {
         }
       });
       final result = await Future.wait(futures, eagerError: true);
-      if (Utils.isHarmony) {
+      if (PlatformUtils.isHarmony) {
         // 鸿蒙：逐个保存并复用统一的保存逻辑（含权限检测）
         for (var res in result) {
           if (res.statusCode == 200) {
@@ -253,10 +257,10 @@ abstract class ImageUtils {
             File(res.filePath).tryDel();
           }
         }
-      } else if (Utils.isMobile) {
+      } else if (PlatformUtils.isMobile) {
         final delList = <String>[];
         final saveList = <SaveFileData>[];
-        for (var i in result) {
+        for (final i in result) {
           if (i.del) delList.add(i.filePath);
           if (i.statusCode == 200) {
             saveList.add(
@@ -269,11 +273,11 @@ abstract class ImageUtils {
           }
         }
         await SaverGallery.saveFiles(saveList, skipIfExists: false);
-        for (var i in delList) {
+        for (final i in delList) {
           File(i).tryDel();
         }
       } else {
-        for (var res in result) {
+        for (final res in result) {
           if (res.statusCode == 200) {
             await saveFileImg(
               filePath: res.filePath,
@@ -300,6 +304,17 @@ abstract class ImageUtils {
     } finally {
       if (!silentDownImg) SmartDialog.dismiss(status: SmartStatus.loading);
     }
+  }
+
+  static final _suffixRegex = RegExp(
+    r'\.(jpg|jpeg|png|webp|gif|avif)$',
+    caseSensitive: false,
+  );
+  static String safeThumbnailUrl(String? src) {
+    if (src != null && _suffixRegex.hasMatch(src)) {
+      return thumbnailUrl(src);
+    }
+    return src.http2https;
   }
 
   static final _thumbRegex = RegExp(
@@ -333,29 +348,29 @@ abstract class ImageUtils {
     String ext = 'png',
   }) async {
     debugPrint(
-      '[ImageUtils] saveByteImg harmony=${Utils.isHarmony} name=$fileName',
+      '[ImageUtils] saveByteImg harmony=${PlatformUtils.isHarmony} name=$fileName',
     );
-    SaveResult? result;
+    SaveResult? res;
     fileName += '.$ext';
-    if (Utils.isMobile || Utils.isHarmony) {
-      if (Utils.isHarmony) {
+    if (PlatformUtils.isMobile || PlatformUtils.isHarmony) {
+      if (PlatformUtils.isHarmony) {
         if (!await _requestHarmonyAlbumPerms()) {
           SmartDialog.showToast('请先授予相册权限');
           return null;
         }
       }
       SmartDialog.showLoading(msg: '正在保存');
-      result = await SaverGallery.saveImage(
+      res = await SaverGallery.saveImage(
         bytes,
         fileName: fileName,
         androidRelativePath: _androidRelativePath,
         skipIfExists: false,
       );
       SmartDialog.dismiss();
-      if (result.isSuccess) {
+      if (res.isSuccess) {
         SmartDialog.showToast(' 已保存 ');
       } else {
-        SmartDialog.showToast('保存失败，${result.errorMessage}');
+        SmartDialog.showToast('保存失败，${res.errorMessage}');
       }
     } else {
       SmartDialog.dismiss();
@@ -369,9 +384,9 @@ abstract class ImageUtils {
       }
       await File(savePath).writeAsBytes(bytes);
       SmartDialog.showToast(' 已保存 ');
-      result = SaveResult(true, null);
+      res = SaveResult(true, null);
     }
-    return result;
+    return res;
   }
 
   static Future<void> saveFileImg({
@@ -382,22 +397,22 @@ abstract class ImageUtils {
     bool del = true,
   }) async {
     debugPrint(
-      '[ImageUtils] saveFileImg harmony=${Utils.isHarmony} path=$filePath',
+      '[ImageUtils] saveFileImg harmony=${PlatformUtils.isHarmony} path=$filePath',
     );
     final file = File(filePath);
     if (!file.existsSync()) {
       SmartDialog.showToast("文件不存在");
       return;
     }
-    SaveResult? result;
-    if (Utils.isMobile || Utils.isHarmony) {
-      if (Utils.isHarmony) {
+    SaveResult? res;
+    if (PlatformUtils.isMobile || PlatformUtils.isHarmony) {
+      if (PlatformUtils.isHarmony) {
         if (!await _requestHarmonyAlbumPerms()) {
           SmartDialog.showToast('请先授予相册权限');
           return;
         }
       }
-      result = await SaverGallery.saveFile(
+      res = await SaverGallery.saveFile(
         filePath: filePath,
         fileName: fileName,
         androidRelativePath: _androidRelativePath,
@@ -415,13 +430,13 @@ abstract class ImageUtils {
       }
       await file.copy(savePath);
       if (del) file.tryDel();
-      result = SaveResult(true, null);
+      res = SaveResult(true, null);
     }
     if (needToast) {
-      if (result.isSuccess) {
+      if (res.isSuccess) {
         SmartDialog.showToast(' 已保存 ');
       } else {
-        SmartDialog.showToast('保存失败，${result.errorMessage}');
+        SmartDialog.showToast('保存失败，${res.errorMessage}');
       }
     }
   }

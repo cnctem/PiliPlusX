@@ -1,5 +1,6 @@
 import 'package:PiliPlus/common/widgets/radio_widget.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/http/loading_state.dart';
+import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -8,26 +9,22 @@ import 'package:get/get.dart';
 Future<void> autoWrapReportDialog(
   BuildContext context,
   Map<String, Map<int, String>> options,
-  Future<Map> Function(int reasonType, String? reasonDesc, bool banUid)
-  onSuccess,
-) {
+  Future<LoadingState> Function(int reasonType, String? reasonDesc, bool banUid)
+  onSuccess, {
+  bool ban = true,
+}) {
   int? reasonType;
   String? reasonDesc;
   bool banUid = false;
-  late final key = GlobalKey<FormState>();
+  late final key = GlobalKey<FormFieldState<String>>();
   return showDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
-        constraints: const BoxConstraints(minWidth: 280, maxWidth: 420),
         title: const Text('举报'),
-        titlePadding: const EdgeInsets.only(left: 22, top: 16, right: 22),
-        contentPadding: const EdgeInsets.symmetric(vertical: 5),
-        actionsPadding: const EdgeInsets.only(
-          left: 16,
-          right: 16,
-          bottom: 10,
-        ),
+        titlePadding: const EdgeInsetsGeometry.only(left: 22, top: 16, right: 22),
+        contentPadding: const EdgeInsetsGeometry.symmetric(vertical: 5),
+        actionsPadding: const EdgeInsetsGeometry.only(left: 16, right: 16, bottom: 10),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,11 +38,7 @@ Future<void> autoWrapReportDialog(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Padding(
-                          padding: EdgeInsets.only(
-                            left: 22,
-                            right: 22,
-                            bottom: 5,
-                          ),
+                          padding: EdgeInsetsGeometry.only(left: 22, right: 22, bottom: 5),
                           child: Text('请选择举报的理由：'),
                         ),
                         RadioGroup(
@@ -66,27 +59,23 @@ Future<void> autoWrapReportDialog(
                         ),
                         if (reasonType == 0)
                           Padding(
-                            padding: const EdgeInsets.only(
-                              left: 22,
-                              top: 5,
-                              right: 22,
-                            ),
-                            child: Form(
+                            padding: const EdgeInsetsGeometry.only(left: 22, top: 5, right: 22),
+                            child: TextFormField(
                               key: key,
-                              child: TextFormField(
-                                autofocus: true,
-                                minLines: 2,
-                                maxLines: 4,
-                                initialValue: reasonDesc,
-                                decoration: const InputDecoration(
-                                  labelText: '为帮助审核人员更快处理，请补充问题类型和出现位置等详细信息',
-                                  border: OutlineInputBorder(),
-                                  contentPadding: EdgeInsets.all(10),
-                                ),
-                                onChanged: (value) => reasonDesc = value,
-                                validator: (value) =>
-                                    value.isNullOrEmpty ? '理由不能为空' : null,
+                              autofocus: true,
+                              minLines: 2,
+                              maxLines: 4,
+                              initialValue: reasonDesc,
+                              decoration: const InputDecoration(
+                                labelText: '为帮助审核人员更快处理，请补充问题类型和出现位置等详细信息',
+                                border: OutlineInputBorder(),
+                                contentPadding: EdgeInsetsGeometry.all(10),
+                                labelStyle: TextStyle(fontSize: 14),
+                                floatingLabelStyle: TextStyle(fontSize: 14),
                               ),
+                              onChanged: (value) => reasonDesc = value,
+                              validator: (value) =>
+                                  value.isNullOrEmpty ? '理由不能为空' : null,
                             ),
                           ),
                       ],
@@ -95,13 +84,14 @@ Future<void> autoWrapReportDialog(
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 14, top: 6),
-              child: CheckBoxText(
-                text: '拉黑该用户',
-                onChanged: (value) => banUid = value,
+            if (ban)
+              Padding(
+                padding: const EdgeInsets.only(left: 14, top: 6),
+                child: CheckBoxText(
+                  text: '拉黑该用户',
+                  onChanged: (value) => banUid = value,
+                ),
               ),
-            ),
           ],
         ),
         actions: [
@@ -109,7 +99,7 @@ Future<void> autoWrapReportDialog(
             onPressed: Get.back,
             child: Text(
               '取消',
-              style: TextStyle(color: Theme.of(context).colorScheme.outline),
+              style: TextStyle(color: ColorScheme.of(context).outline),
             ),
           ),
           TextButton(
@@ -120,13 +110,13 @@ Future<void> autoWrapReportDialog(
               }
               SmartDialog.showLoading();
               try {
-                final data = await onSuccess(reasonType!, reasonDesc, banUid);
+                final res = await onSuccess(reasonType!, reasonDesc, banUid);
                 SmartDialog.dismiss();
-                if (data['code'] == 0) {
+                if (res.isSuccess) {
                   Get.back();
                   SmartDialog.showToast('举报成功');
                 } else {
-                  SmartDialog.showToast(data['message'].toString());
+                  res.toast();
                 }
               } catch (e, s) {
                 SmartDialog.dismiss();
@@ -169,7 +159,7 @@ class _CheckBoxTextState extends State<CheckBoxText> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final colorScheme = ColorScheme.of(context);
     return InkWell(
       onTap: () {
         setState(() {
@@ -202,7 +192,7 @@ class _CheckBoxTextState extends State<CheckBoxText> {
   }
 }
 
-class ReportOptions {
+abstract final class ReportOptions {
   // from https://s1.hdslb.com/bfs/seed/jinkela/comment-h5/static/js/605.chunks.js
   static Map<String, Map<int, String>> get commentReport => const {
     '违反法律法规': {9: '违法违规', 2: '色情', 10: '低俗', 12: '赌博诈骗', 23: '违法信息外链'},
@@ -262,6 +252,18 @@ class ReportOptions {
       5: '政治敏感',
       6: '青少年不良信息',
       7: '其他', // avoid show form
+    },
+  };
+
+  static Map<String, Map<int, String>> get imMsgReport => const {
+    '': {
+      1: '色情低俗',
+      2: '政治敏感',
+      3: '违法有害',
+      4: '广告骚扰',
+      5: '人身攻击',
+      6: '诈骗',
+      0: '其他问题',
     },
   };
 }

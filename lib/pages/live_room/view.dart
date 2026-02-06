@@ -1,16 +1,19 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
 import 'package:PiliPlus/common/widgets/button/icon_button.dart';
 import 'package:PiliPlus/common/widgets/custom_icon.dart';
+import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/keep_alive_wrapper.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart';
 import 'package:PiliPlus/models/common/image_type.dart';
+import 'package:PiliPlus/models/common/live/live_contribution_rank_type.dart';
 import 'package:PiliPlus/models_new/live/live_room_info_h5/data.dart';
 import 'package:PiliPlus/models_new/live/live_superchat/item.dart';
 import 'package:PiliPlus/pages/danmaku/danmaku_model.dart';
+import 'package:PiliPlus/pages/live_room/contribution_rank/controller.dart';
 import 'package:PiliPlus/pages/live_room/controller.dart';
 import 'package:PiliPlus/pages/live_room/superchat/superchat_card.dart';
 import 'package:PiliPlus/pages/live_room/superchat/superchat_panel.dart';
@@ -20,11 +23,16 @@ import 'package:PiliPlus/pages/live_room/widgets/header_control.dart';
 import 'package:PiliPlus/pages/video/widgets/player_focus.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
+import 'package:PiliPlus/plugin/pl_player/utils/danmaku_options.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/plugin/pl_player/view.dart';
 import 'package:PiliPlus/services/service_locator.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
+import 'package:PiliPlus/utils/extension/size_ext.dart';
+import 'package:PiliPlus/utils/extension/theme_ext.dart';
+import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/utils.dart';
@@ -34,7 +42,7 @@ import 'package:floating/floating.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:get/get.dart' hide ContextExtensionss;
+import 'package:get/get.dart';
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
 
 class LiveRoomPage extends StatefulWidget {
@@ -143,7 +151,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
   void dispose() {
     videoPlayerServiceHandler?.onVideoDetailDispose(heroTag);
     WidgetsBinding.instance.removeObserver(this);
-    if ((Platform.isAndroid || Utils.isHarmony) && !plPlayerController.setSystemBrightness) {
+    if ((Platform.isAndroid || PlatformUtils.isHarmony) && !plPlayerController.setSystemBrightness) {
       ScreenBrightnessPlatform.instance.resetApplicationScreenBrightness();
     }
     PlPlayerController.setPlayCallBack(null);
@@ -151,6 +159,11 @@ class _LiveRoomPageState extends State<LiveRoomPage>
       ..removeStatusLister(playerListener)
       ..dispose();
     PageUtils.routeObserver.unsubscribe(this);
+    for (final e in LiveContributionRankType.values) {
+      Get.delete<ContributionRankController>(
+        tag: '${_liveRoomController.roomId}${e.name}',
+      );
+    }
     super.dispose();
   }
 
@@ -184,7 +197,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
   @override
   Widget build(BuildContext context) {
     Widget child;
-    if ((Platform.isAndroid || Utils.isHarmony) && Floating().isPipMode) {
+    if ((Platform.isAndroid || PlatformUtils.isHarmony) && Floating().isPipMode) {
       child = videoPlayerPanel(
         isFullScreen,
         width: maxWidth,
@@ -253,7 +266,8 @@ class _LiveRoomPageState extends State<LiveRoomPage>
                     liveRoomController: _liveRoomController,
                     plPlayerController: plPlayerController,
                     isFullScreen: isFullScreen,
-                    isPipMode: isPipMode,
+                    isPipMode: plPlayerController.isDesktopPip || isPipMode,
+                    size: Size(width, height),
                   ),
           );
         }
@@ -272,17 +286,10 @@ class _LiveRoomPageState extends State<LiveRoomPage>
               right: 0,
               child: TextButton(
                 onPressed: () {
-                  _liveRoomController.fsSC.value = SuperChatItem.fromJson({
-                    "id": Utils.random.nextInt(2147483647),
-                    "price": 66,
-                    "end_time":
-                        DateTime.now().millisecondsSinceEpoch ~/ 1000 + 5,
-                    "message": Utils.generateRandomString(55),
-                    "user_info": {
-                      "face": "",
-                      "uname": Utils.generateRandomString(8),
-                    },
-                  });
+                  final item = SuperChatItem.random;
+                  _liveRoomController
+                    ..fsSC.value = item
+                    ..addDm(item);
                 },
                 child: const Text('add superchat'),
               ),
@@ -318,6 +325,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
                         child: SuperChatCard(
                           item: item,
                           onRemove: () => _liveRoomController.fsSC.value = null,
+                          onReport: () => _liveRoomController.reportSC(item),
                         ),
                       ),
                       Positioned(
@@ -381,12 +389,17 @@ class _LiveRoomPageState extends State<LiveRoomPage>
                     fit: BoxFit.cover,
                     width: maxWidth,
                     height: maxHeight,
-                    imageUrl: appBackground.http2https,
+                    memCacheWidth: maxWidth.cacheSize(context),
+                    imageUrl: ImageUtils.safeThumbnailUrl(appBackground),
+                    placeholder: (_, _) => const SizedBox.shrink(),
                   );
                 } else {
                   child = Image.asset(
                     'assets/images/live/default_bg.webp',
                     fit: BoxFit.cover,
+                    width: maxWidth,
+                    height: maxHeight,
+                    cacheWidth: maxWidth.cacheSize(context),
                   );
                 }
                 return Positioned.fill(
@@ -517,13 +530,14 @@ class _LiveRoomPageState extends State<LiveRoomPage>
                         type: ImageType.avatar,
                         src: roomInfoH5.anchorInfo!.baseInfo!.face,
                       ),
-                      Expanded(
+                      Flexible(
                         child: Column(
                           spacing: 1,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
                               spacing: 10,
+                              mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Flexible(
@@ -540,6 +554,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
                             ),
                             Row(
                               spacing: 10,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 _liveRoomController.watchedWidget,
                                 _liveRoomController.timeWidget,
@@ -580,7 +595,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
                   ],
                 ),
               ),
-              if (Utils.isMobile)
+              if (PlatformUtils.isMobile)
                 PopupMenuItem(
                   onTap: () => Utils.shareText(liveUrl),
                   child: Row(
@@ -659,7 +674,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
         clampDouble(maxHeight / maxWidth * 1.08, 0.56, 0.7) * maxWidth;
     final rightWidth = min(400.0, maxWidth - videoWidth - padding.horizontal);
     videoWidth = maxWidth - rightWidth - padding.horizontal;
-    final videoHeight = maxHeight - padding.top;
+    final videoHeight = maxHeight - padding.top - kToolbarHeight;
     final width = isFullScreen ? maxWidth : videoWidth;
     final height = isFullScreen ? maxHeight - padding.top : videoHeight;
     return Padding(
@@ -706,6 +721,16 @@ class _LiveRoomPageState extends State<LiveRoomPage>
       isPP: isPP,
       roomId: _liveRoomController.roomId,
       liveRoomController: _liveRoomController,
+      onAtUser: (item) => _liveRoomController
+        ..savedDanmaku = [
+          RichTextItem.fromStart(
+            '@${item.name} ',
+            rawText: item.uid.toString(),
+            type: RichTextType.at,
+            id: item.extra.id.toString(),
+          ),
+        ]
+        ..onSendDanmaku(),
     );
     return Padding(
       padding: EdgeInsets.only(bottom: 12, top: isPortrait ? 12 : 0),
@@ -713,7 +738,9 @@ class _LiveRoomPageState extends State<LiveRoomPage>
           ? PageView(
               key: pageKey,
               controller: _liveRoomController.pageController,
-              physics: const CustomTabBarViewClampingScrollPhysics(),
+              physics: const CustomTabBarViewScrollPhysics(
+                parent: ClampingScrollPhysics(),
+              ),
               onPageChanged: (value) =>
                   _liveRoomController.pageIndex.value = value,
               children: [
@@ -956,6 +983,7 @@ class LiveDanmaku extends StatefulWidget {
   final PlPlayerController plPlayerController;
   final bool isPipMode;
   final bool isFullScreen;
+  final Size size;
 
   const LiveDanmaku({
     super.key,
@@ -963,10 +991,13 @@ class LiveDanmaku extends StatefulWidget {
     required this.plPlayerController,
     this.isPipMode = false,
     required this.isFullScreen,
+    required this.size,
   });
 
   @override
   State<LiveDanmaku> createState() => _LiveDanmakuState();
+
+  bool get notFullscreen => !isFullScreen || isPipMode;
 }
 
 class _LiveDanmakuState extends State<LiveDanmaku> {
@@ -975,60 +1006,31 @@ class _LiveDanmakuState extends State<LiveDanmaku> {
   @override
   void didUpdateWidget(LiveDanmaku oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.isPipMode != widget.isPipMode ||
-        oldWidget.isFullScreen != widget.isFullScreen) {
-      _updateFontSize();
+    if (oldWidget.notFullscreen != widget.notFullscreen &&
+        !DanmakuOptions.sameFontScale) {
+      plPlayerController.danmakuController?.updateOption(
+        DanmakuOptions.get(notFullscreen: widget.notFullscreen),
+      );
     }
   }
-
-  void _updateFontSize() {
-    plPlayerController.danmakuController?.updateOption(
-      plPlayerController.danmakuController!.option.copyWith(
-        fontSize: _fontSize,
-      ),
-    );
-  }
-
-  double get _fontSize =>
-      plPlayerController.isDesktopPip ||
-          !widget.isFullScreen ||
-          widget.isPipMode
-      ? 15 * plPlayerController.danmakuFontScale
-      : 15 * plPlayerController.danmakuFontScaleFS;
 
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () {
-        return AnimatedOpacity(
-          opacity: plPlayerController.enableShowDanmaku.value
-              ? plPlayerController.danmakuOpacity.value
-              : 0,
-          duration: const Duration(milliseconds: 100),
-          child: DanmakuScreen<DanmakuExtra>(
-            createdController: (e) {
-              widget.liveRoomController.danmakuController =
-                  plPlayerController.danmakuController = e;
-            },
-            option: DanmakuOption(
-              fontSize: _fontSize,
-              fontWeight: plPlayerController.danmakuFontWeight,
-              area: plPlayerController.showArea,
-              hideTop: plPlayerController.blockTypes.contains(5),
-              hideScroll: plPlayerController.blockTypes.contains(2),
-              hideBottom: plPlayerController.blockTypes.contains(4),
-              duration:
-                  plPlayerController.danmakuDuration /
-                  plPlayerController.playbackSpeed,
-              staticDuration:
-                  plPlayerController.danmakuStaticDuration /
-                  plPlayerController.playbackSpeed,
-              strokeWidth: plPlayerController.danmakuStrokeWidth,
-              lineHeight: plPlayerController.danmakuLineHeight,
-            ),
-          ),
-        );
-      },
+      () => AnimatedOpacity(
+        opacity: plPlayerController.enableShowDanmaku.value
+            ? plPlayerController.danmakuOpacity.value
+            : 0,
+        duration: const Duration(milliseconds: 100),
+        child: DanmakuScreen<DanmakuExtra>(
+          createdController: (e) {
+            widget.liveRoomController.danmakuController =
+                plPlayerController.danmakuController = e;
+          },
+          option: DanmakuOptions.get(notFullscreen: widget.notFullscreen),
+          size: widget.size,
+        ),
+      ),
     );
   }
 }

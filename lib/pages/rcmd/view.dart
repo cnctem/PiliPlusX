@@ -7,8 +7,8 @@ import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/pages/common/common_page.dart';
 import 'package:PiliPlus/pages/rcmd/controller.dart';
 import 'package:PiliPlus/utils/grid.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
-import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -32,7 +32,7 @@ class _RcmdPageState extends CommonPageState<RcmdPage, RcmdController>
     super.build(context);
     return onBuild(
       Container(
-        clipBehavior: Utils.isHarmony ? Clip.none : Clip.hardEdge,
+        clipBehavior: PlatformUtils.isHarmony ? Clip.none : Clip.hardEdge,
         margin: const EdgeInsets.symmetric(horizontal: StyleString.safeSpace),
         decoration: const BoxDecoration(borderRadius: StyleString.mdRadius),
         child: refreshIndicator(
@@ -66,7 +66,7 @@ class _RcmdPageState extends CommonPageState<RcmdPage, RcmdController>
   Widget _buildBody(LoadingState<List<dynamic>?> loadingState) {
     return switch (loadingState) {
       Loading() => _buildSkeleton,
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? SliverGrid.builder(
                 gridDelegate: gridDelegate,
@@ -131,7 +131,7 @@ class _RcmdPageState extends CommonPageState<RcmdPage, RcmdController>
                     : response.length,
               )
             : HttpError(onReload: controller.onReload),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: controller.onReload,
       ),

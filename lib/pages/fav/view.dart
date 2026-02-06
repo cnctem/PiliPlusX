@@ -2,13 +2,12 @@ import 'package:PiliPlus/common/widgets/scroll_physics.dart';
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models/common/fav_type.dart';
-import 'package:PiliPlus/models_new/fav/fav_folder/list.dart';
 import 'package:PiliPlus/pages/fav/article/controller.dart';
 import 'package:PiliPlus/pages/fav/cheese/controller.dart';
 import 'package:PiliPlus/pages/fav/topic/controller.dart';
 import 'package:PiliPlus/pages/fav/video/controller.dart';
 import 'package:PiliPlus/pages/fav_folder_sort/view.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/scroll_controller_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
@@ -63,10 +62,8 @@ class _FavPageState extends State<FavPage> with SingleTickerProviderStateMixin {
                     onPressed: () => Get.toNamed('/createFav')?.then(
                       (data) {
                         if (data != null) {
-                          List<FavFolderInfo>? list =
-                              _favController.loadingState.value.isSuccess
-                              ? _favController.loadingState.value.data
-                              : null;
+                          final list =
+                              _favController.loadingState.value.dataOrNull;
                           if (list != null && list.isNotEmpty) {
                             list.insert(1, data);
                             _favController.loadingState.refresh();
@@ -104,10 +101,11 @@ class _FavPageState extends State<FavPage> with SingleTickerProviderStateMixin {
             () => _showVideoFavMenu.value
                 ? IconButton(
                     onPressed: () {
-                      if (_favController.loadingState.value.isSuccess) {
+                      if (_favController.loadingState.value case Success(
+                        :final response,
+                      )) {
                         try {
-                          final item =
-                              _favController.loadingState.value.data!.first;
+                          final item = response!.first;
                           Get.toNamed(
                             '/favSearch',
                             arguments: {

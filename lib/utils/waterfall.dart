@@ -14,7 +14,7 @@ mixin DynMixin {
       SliverWaterfallFlowDelegateWithMaxCrossAxisExtent(
         maxCrossAxisExtent: Grid.smallCardWidth * 2,
         crossAxisSpacing: 4,
-        callback: (value) => maxWidth = value,
+        afterCalc: (value) => maxWidth = value,
       );
 
   Widget buildPage(Widget child) {
@@ -27,12 +27,9 @@ mixin DynMixin {
         final cardWidth = Grid.smallCardWidth * 2;
         final flag = cardWidth < maxWidth;
         this.maxWidth = flag ? cardWidth : maxWidth;
-        if (!flag) {
-          return child;
-        }
         return SliverPadding(
           padding: EdgeInsets.symmetric(
-            horizontal: (maxWidth - cardWidth) / 2,
+            horizontal: flag ? (maxWidth - cardWidth) / 2 : 0,
           ),
           sliver: child,
         );
@@ -79,7 +76,7 @@ class SliverWaterfallFlowDelegateWithMaxCrossAxisExtent
     super.collectGarbage,
     super.viewportBuilder,
     super.closeToTrailing,
-    this.callback,
+    this.afterCalc,
   }) : assert(maxCrossAxisExtent >= 0);
 
   /// The maximum extent of tiles in the cross axis.
@@ -98,7 +95,7 @@ class SliverWaterfallFlowDelegateWithMaxCrossAxisExtent
   int? crossAxisCount;
   double? crossAxisExtent;
 
-  final ValueChanged<double>? callback;
+  final ValueChanged<double>? afterCalc;
 
   @override
   int getCrossAxisCount(SliverConstraints constraints) {
@@ -109,7 +106,7 @@ class SliverWaterfallFlowDelegateWithMaxCrossAxisExtent
     this.crossAxisExtent = crossAxisExtent;
     crossAxisCount = (crossAxisExtent / (maxCrossAxisExtent + crossAxisSpacing))
         .ceil();
-    callback?.call(
+    afterCalc?.call(
       (crossAxisExtent - ((crossAxisCount! - 1) * crossAxisSpacing)) /
           crossAxisCount!,
     );

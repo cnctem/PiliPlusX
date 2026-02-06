@@ -747,7 +747,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
                             }
 
                           case _IndicatorType.noSpinner:
-                            return Container();
+                            return const SizedBox.shrink();
                         }
                       },
                     ),

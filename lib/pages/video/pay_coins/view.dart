@@ -2,14 +2,17 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:math' show max;
 
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/common/widgets/scroll_physics.dart';
+import 'package:PiliPlus/pages/common/publish/publish_route.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
+import 'package:PiliPlus/utils/extension/size_ext.dart';
+import 'package:PiliPlus/utils/extension/widget_ext.dart';
 import 'package:PiliPlus/utils/global_data.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart' hide ContextExtensionss;
-import 'package:get/get_navigation/src/dialog/dialog_route.dart';
+import 'package:get/get.dart';
 
 class PayCoinsPage extends StatefulWidget {
   const PayCoinsPage({
@@ -31,8 +34,8 @@ class PayCoinsPage extends StatefulWidget {
     int copyright = 1,
     bool hasCoin = false,
   }) {
-    Navigator.of(Get.context!).push(
-      GetDialogRoute(
+    Get.key.currentState!.push(
+      PublishRoute(
         pageBuilder: (buildContext, animation, secondaryAnimation) {
           return PayCoinsPage(
             onPayCoin: onPayCoin,
@@ -193,7 +196,7 @@ class _PayCoinsPageState extends State<PayCoinsPage>
       ),
     );
 
-    _scale();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scale());
   }
 
   @override
@@ -227,12 +230,9 @@ class _PayCoinsPageState extends State<PayCoinsPage>
     final isPortrait = size.isPortrait;
     return isPortrait
         ? _buildBody(isPortrait)
-        : Center(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: math.min(525, size.width * 0.6),
-              ),
-              child: _buildBody(isPortrait),
+        : _buildBody(isPortrait).constraintWidth(
+            constraints: BoxConstraints(
+              maxWidth: math.min(525, size.width * 0.6),
             ),
           );
   }
@@ -300,7 +300,12 @@ class _PayCoinsPageState extends State<PayCoinsPage>
           child: SizedBox(
             width: 110,
             height: 155,
-            child: Image.asset(payImg),
+            child: Image.asset(
+              payImg,
+              width: 110,
+              height: 155,
+              cacheWidth: 110.cacheSize(context),
+            ),
           ),
         ),
       ),
@@ -339,7 +344,9 @@ class _PayCoinsPageState extends State<PayCoinsPage>
                         height: 100,
                         child: PageView(
                           key: const PageStorageKey('PageView'),
-                          physics: const ClampingScrollPhysics(),
+                          physics: const CustomTabBarViewScrollPhysics(
+                            parent: ClampingScrollPhysics(),
+                          ),
                           controller: _controller,
                           onPageChanged: (index) {
                             _scale();
@@ -393,6 +400,7 @@ class _PayCoinsPageState extends State<PayCoinsPage>
                                 index == 0
                                     ? 'assets/images/paycoins/ic_left_disable.png'
                                     : 'assets/images/paycoins/ic_left.png',
+                                cacheWidth: 16.cacheSize(context),
                               ),
                             ),
                           );
@@ -417,6 +425,7 @@ class _PayCoinsPageState extends State<PayCoinsPage>
                               index == 1
                                   ? 'assets/images/paycoins/ic_right_disable.png'
                                   : 'assets/images/paycoins/ic_right.png',
+                              cacheWidth: 16.cacheSize(context),
                             ),
                           ),
                         );
@@ -445,7 +454,7 @@ class _PayCoinsPageState extends State<PayCoinsPage>
                 const SizedBox(height: 10),
                 Center(
                   child: Text(
-                    '${_coins != null ? '硬币余额：${max(0.0, _coins.toDouble().toPrecision(1))}' : ''}${widget.hasCoin ? '${_coins != null ? '，' : ''}已投1枚硬币' : ''}',
+                    '${_coins != null ? '硬币余额：${max(0.0, DoubleExt(_coins.toDouble()).toPrecision(1))}' : ''}${widget.hasCoin ? '${_coins != null ? '，' : ''}已投1枚硬币' : ''}',
                     style: const TextStyle(color: Colors.white, fontSize: 13),
                   ),
                 ),
@@ -491,6 +500,9 @@ class _PayCoinsPageState extends State<PayCoinsPage>
                         height: 30,
                         child: Image.asset(
                           'assets/images/paycoins/ic_panel_close.png',
+                          width: 30,
+                          height: 30,
+                          cacheWidth: 30.cacheSize(context),
                         ),
                       ),
                     ),

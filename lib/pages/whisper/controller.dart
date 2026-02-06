@@ -58,9 +58,9 @@ class WhisperController extends CommonWhisperController<SessionMainReply> {
   }
 
   Future<void> queryMsgFeedUnread() async {
-    var res = await ImGrpc.getTotalUnread(unreadType: 2);
-    if (res.isSuccess) {
-      final data = MsgFeedUnread.fromJson(res.data.msgFeedUnread.unread);
+    final res = await ImGrpc.getTotalUnread(unreadType: 2);
+    if (res case Success(:final response)) {
+      final data = MsgFeedUnread.fromJson(response.msgFeedUnread.unread);
       final unreadCounts = [data.reply, data.at, data.like, data.sysMsg];
       if (!listEquals(this.unreadCounts, unreadCounts)) {
         this.unreadCounts.value = unreadCounts;

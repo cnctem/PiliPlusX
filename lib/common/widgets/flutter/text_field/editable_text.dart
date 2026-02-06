@@ -25,7 +25,7 @@ import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/editable.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/spell_check.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/text_selection.dart';
-import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart'
@@ -1720,7 +1720,7 @@ class EditableText extends StatefulWidget {
       TargetPlatform.linux => true,
       TargetPlatform.macOS => true,
       TargetPlatform.windows => true,
-      _ => Utils.isDesktop,
+      _ => PlatformUtils.isDesktop,
     };
   }
 
@@ -3432,6 +3432,19 @@ class EditableTextState extends State<EditableText>
         // action; The newline is already inserted. Otherwise, finalize
         // editing.
         if (!_isMultiline) {
+          _finalizeEditing(action, shouldUnfocus: true);
+        } else if (HardwareKeyboard.instance.isControlPressed) {
+          final ctr = widget.controller;
+          final offset = ctr.selection.end;
+          // delete newline
+          ctr.syncRichText(
+            TextEditingDeltaDeletion(
+              composing: TextRange.empty,
+              selection: TextSelection.collapsed(offset: offset - 1),
+              deletedRange: TextRange(start: offset - 1, end: offset),
+              oldText: ctr.text,
+            ),
+          );
           _finalizeEditing(action, shouldUnfocus: true);
         }
       case TextInputAction.done:

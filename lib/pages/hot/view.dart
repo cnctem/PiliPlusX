@@ -1,17 +1,17 @@
-import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
+﻿import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
+import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/video_card/video_card_h.dart';
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models/common/home_tab_type.dart';
+import 'package:PiliPlus/models/common/image_type.dart';
 import 'package:PiliPlus/models/model_hot_video_item.dart';
 import 'package:PiliPlus/pages/common/common_page.dart';
 import 'package:PiliPlus/pages/home/controller.dart';
 import 'package:PiliPlus/pages/hot/controller.dart';
 import 'package:PiliPlus/pages/rank/view.dart';
 import 'package:PiliPlus/utils/grid.dart';
-import 'package:PiliPlus/utils/image_utils.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -41,10 +41,11 @@ class _HotPageState extends CommonPageState<HotPage, HotController>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CachedNetworkImage(
+          NetworkImgLayer(
             width: 35,
             height: 35,
-            imageUrl: ImageUtils.thumbnailUrl(iconUrl),
+            type: ImageType.emote,
+            src: iconUrl,
           ),
           const SizedBox(height: 4),
           Text(
@@ -142,7 +143,7 @@ class _HotPageState extends CommonPageState<HotPage, HotController>
   Widget _buildBody(LoadingState<List<HotVideoItemModel>?> loadingState) {
     return switch (loadingState) {
       Loading() => gridSkeleton,
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? SliverGrid.builder(
                 gridDelegate: gridDelegate,
@@ -160,7 +161,7 @@ class _HotPageState extends CommonPageState<HotPage, HotController>
                 itemCount: response.length,
               )
             : HttpError(onReload: controller.onReload),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: controller.onReload,
       ),

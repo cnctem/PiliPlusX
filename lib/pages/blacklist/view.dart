@@ -24,12 +24,8 @@ class _BlackListPageState extends State<BlackListPage> {
 
   @override
   void dispose() {
-    if (_blackListController.loadingState.value.isSuccess) {
-      final blackMids =
-          _blackListController.loadingState.value.data
-              ?.map((e) => e.mid!)
-              .toSet() ??
-          {};
+    if (_blackListController.loadingState.value case Success(:final response)) {
+      final blackMids = response?.map((e) => e.mid!).toSet() ?? {};
       GlobalData().blackMids = blackMids;
       Pref.blackMids = blackMids;
     }
@@ -74,7 +70,7 @@ class _BlackListPageState extends State<BlackListPage> {
         itemCount: 12,
         itemBuilder: (context, index) => const MsgFeedTopSkeleton(),
       ),
-      Success(:var response) =>
+      Success(:final response) =>
         response != null && response.isNotEmpty
             ? SliverList.builder(
                 itemCount: response.length,
@@ -118,7 +114,7 @@ class _BlackListPageState extends State<BlackListPage> {
                 },
               )
             : HttpError(onReload: _blackListController.onReload),
-      Error(:var errMsg) => HttpError(
+      Error(:final errMsg) => HttpError(
         errMsg: errMsg,
         onReload: _blackListController.onReload,
       ),

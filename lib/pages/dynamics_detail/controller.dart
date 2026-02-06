@@ -1,4 +1,5 @@
 import 'package:PiliPlus/http/dynamics.dart';
+import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models/dynamics/result.dart';
 import 'package:PiliPlus/pages/common/dyn/common_dyn_controller.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
@@ -21,8 +22,8 @@ class DynamicDetailController extends CommonDynController {
   void onInit() {
     super.onInit();
     dynItem = Get.arguments['item'];
-    var commentType = dynItem.basic?.commentType;
-    var commentIdStr = dynItem.basic?.commentIdStr;
+    final commentType = dynItem.basic?.commentType;
+    final commentIdStr = dynItem.basic?.commentIdStr;
     if (commentType != null &&
         commentType != 0 &&
         commentIdStr != null &&
@@ -30,9 +31,8 @@ class DynamicDetailController extends CommonDynController {
       _init(commentIdStr, commentType);
     } else {
       DynamicsHttp.dynamicDetail(id: dynItem.idStr).then((res) {
-        if (res.isSuccess) {
-          final data = res.data;
-          _init(data.basic!.commentIdStr!, data.basic!.commentType!);
+        if (res case Success(:final response)) {
+          _init(response.basic!.commentIdStr!, response.basic!.commentType!);
         } else {
           res.toast();
         }

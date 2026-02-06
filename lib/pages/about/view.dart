@@ -11,17 +11,18 @@ import 'package:PiliPlus/services/logger.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/accounts/account.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
-import 'package:PiliPlus/utils/context_ext.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/login_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/update.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart' hide ListTile;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:get/get.dart' hide ContextExtensionss;
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:re_highlight/languages/json.dart';
@@ -92,6 +93,7 @@ class _AboutPageState extends State<AboutPage> {
                   context: context,
                   builder: (context) {
                     return AlertDialog(
+                      constraints: StyleString.dialogFixedConstraints,
                       content: TextField(
                         autofocus: true,
                         onSubmitted: (value) {
@@ -110,13 +112,14 @@ class _AboutPageState extends State<AboutPage> {
               child: Image.asset(
                 width: 150,
                 height: 150,
+                cacheWidth: 150.cacheSize(context),
                 'assets/images/logo/logo.png',
               ),
             ),
           ),
           ListTile(
             title: Text(
-              '${Constants.appName}${Utils.isHarmony ? '(鸿蒙版)' : ''}',
+              '${Constants.appName}${PlatformUtils.isHarmony ? '(鸿蒙版)' : ''}',
               textAlign: TextAlign.center,
               style: theme.textTheme.titleMedium!.copyWith(height: 2),
             ),
@@ -139,7 +142,7 @@ class _AboutPageState extends State<AboutPage> {
           ListTile(
             onTap: () => Update.checkUpdate(false),
             onLongPress: () => Utils.copyText(versionTag),
-            onSecondaryTap: Utils.isMobile
+            onSecondaryTap: PlatformUtils.isMobile
                 ? null
                 : () => Utils.copyText(versionTag),
             title: const Text('当前版本'),
@@ -161,7 +164,7 @@ Commit Hash: ${BuildConfig.commitHash}''',
               '${Constants.sourceCodeUrl}/commit/${BuildConfig.commitHash == 'N/A' ? 'HEAD' : BuildConfig.commitHash}',
             ),
             onLongPress: () => Utils.copyText(BuildConfig.commitHash),
-            onSecondaryTap: Utils.isMobile
+            onSecondaryTap: PlatformUtils.isMobile
                 ? null
                 : () => Utils.copyText(BuildConfig.commitHash),
           ),
@@ -201,7 +204,9 @@ Commit Hash: ${BuildConfig.commitHash}''',
           ListTile(
             onTap: () => Get.toNamed('/logs'),
             onLongPress: LoggerUtils.clearLogs,
-            onSecondaryTap: Utils.isMobile ? null : LoggerUtils.clearLogs,
+            onSecondaryTap: PlatformUtils.isMobile
+                ? null
+                : LoggerUtils.clearLogs,
             leading: const Icon(Icons.bug_report_outlined),
             title: const Text('错误日志'),
             subtitle: Text('长按清除日志', style: subTitleStyle),
@@ -325,7 +330,7 @@ Future<void> showImportExportDialog<T>(
   BuildContext context, {
   required String title,
   String? label,
-  required String Function() toJson,
+  required ValueGetter<String> toJson,
   required FutureOr<bool> Function(T json) fromJson,
 }) => showDialog(
   context: context,
@@ -450,10 +455,7 @@ Future<void> showImportExportDialog<T>(
               builder: (context) {
                 return AlertDialog(
                   title: Text('输入$title'),
-                  constraints: const BoxConstraints(
-                    minWidth: 420,
-                    maxWidth: 420,
-                  ),
+                  constraints: StyleString.dialogFixedConstraints,
                   content: TextFormField(
                     key: key,
                     minLines: 4,

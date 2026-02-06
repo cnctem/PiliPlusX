@@ -23,12 +23,16 @@ import 'package:PiliPlus/common/widgets/flutter/custom_layout.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/models/common/badge_type.dart';
 import 'package:PiliPlus/models/common/image_preview_type.dart';
-import 'package:PiliPlus/utils/context_ext.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/models/common/image_type.dart';
+import 'package:PiliPlus/utils/extension/context_ext.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
+import 'package:PiliPlus/utils/extension/size_ext.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/material.dart'
     hide CustomMultiChildLayout, MultiChildLayoutDelegate;
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/get_navigation.dart';
 
 class ImageModel {
   ImageModel({
@@ -74,6 +78,7 @@ class CustomGridView extends StatelessWidget {
   final bool fullScreen;
 
   static bool horizontalPreview = Pref.horizontalPreview;
+  static const _routes = ['/videoV', '/dynamicDetail'];
 
   void onTap(BuildContext context, int index) {
     final imgList = picArr.map(
@@ -90,6 +95,7 @@ class CustomGridView extends StatelessWidget {
     ).toList();
     if (horizontalPreview &&
         !fullScreen &&
+        _routes.contains(Get.currentRoute) &&
         !context.mediaQuerySize.isPortrait) {
       final scaffoldState = Scaffold.maybeOf(context);
       if (scaffoldState != null) {
@@ -172,13 +178,11 @@ class CustomGridView extends StatelessWidget {
           context,
         ).colorScheme.onInverseSurface.withValues(alpha: 0.4),
       ),
-      child: Center(
-        child: Image.asset(
-          'assets/images/loading.png',
-          width: imageWidth,
-          height: imageHeight,
-          cacheWidth: imageWidth.cacheSize(context),
-        ),
+      child: Image.asset(
+        'assets/images/loading.png',
+        width: imageWidth,
+        height: imageHeight,
+        cacheWidth: imageWidth.cacheSize(context),
       ),
     );
 
@@ -200,10 +204,10 @@ class CustomGridView extends StatelessWidget {
             final radius = borderRadius(column, length, index);
             return LayoutId(
               id: index,
-              child: Hero(
-                tag: item.url,
-                child: GestureDetector(
-                  onTap: () => onTap(context, index),
+              child: GestureDetector(
+                onTap: () => onTap(context, index),
+                child: Hero(
+                  tag: item.url,
                   child: Stack(
                     clipBehavior: Clip.none,
                     alignment: Alignment.center,
@@ -211,11 +215,11 @@ class CustomGridView extends StatelessWidget {
                       ClipRRect(
                         borderRadius: radius,
                         child: NetworkImgLayer(
-                          radius: 0,
+                          type: ImageType .emote,
                           src: item.url,
                           width: imageWidth,
                           height: imageHeight,
-                          isLongPic: item.isLongPic,
+                          alignment: item.isLongPic ? Alignment .topCenter : Alignment .center,
                           forceUseCacheWidth: item.width <= item.height,
                           getPlaceHolder: () => placeHolder,
                         ),

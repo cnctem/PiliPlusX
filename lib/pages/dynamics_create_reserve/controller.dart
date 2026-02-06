@@ -1,4 +1,5 @@
 import 'package:PiliPlus/http/dynamics.dart';
+import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models_new/dynamic/dyn_reserve_info/data.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:get/get.dart';
@@ -28,13 +29,12 @@ class CreateReserveController extends GetxController {
   }
 
   Future<void> queryData() async {
-    var res = await DynamicsHttp.reserveInfo(sid: sid);
-    if (res.isSuccess) {
-      ReserveInfoData data = res.data;
+    final res = await DynamicsHttp.reserveInfo(sid: sid);
+    if (res case Success(:final response)) {
       key = Utils.generateRandomString(6);
-      title.value = data.title!;
+      title.value = response.title!;
       date.value = DateTime.fromMillisecondsSinceEpoch(
-        data.livePlanStartTime! * 1000,
+        response.livePlanStartTime! * 1000,
       );
       canCreate.value = true;
     } else {
@@ -44,7 +44,7 @@ class CreateReserveController extends GetxController {
 
   Future<void> onCreate() async {
     final livePlanStartTime = date.value.millisecondsSinceEpoch ~/ 1000;
-    var res = sid == null
+    final res = sid == null
         ? await DynamicsHttp.createReserve(
             title: title.value,
             subType: subType.value,
@@ -56,10 +56,10 @@ class CreateReserveController extends GetxController {
             title: title.value,
             livePlanStartTime: livePlanStartTime,
           );
-    if (res.isSuccess) {
+    if (res case Success(:final response)) {
       Get.back(
         result: ReserveInfoData(
-          id: res.data,
+          id: response,
           title: title.value,
           livePlanStartTime: livePlanStartTime,
         ),

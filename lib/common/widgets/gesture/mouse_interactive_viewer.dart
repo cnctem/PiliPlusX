@@ -81,7 +81,9 @@ class _MouseInteractiveViewerState extends State<MouseInteractiveViewer>
 
   final GlobalKey _parentKey = GlobalKey();
   Animation<Offset>? _animation;
+  CurvedAnimation? _curvedAnimation;
   Animation<double>? _scaleAnimation;
+  CurvedAnimation? _curvedScaleAnimation;
   late Offset _scaleAnimationFocalPoint;
   late AnimationController _controller;
   late AnimationController _scaleController;
@@ -97,30 +99,7 @@ class _MouseInteractiveViewerState extends State<MouseInteractiveViewer>
     touchSlop: Platform.isIOS ? 9 : (Platform.operatingSystem == 'ohos' ? 1 : 4),
   );
 
-  // 在鸿蒙平台上使用 GestureArenaTeam 来让 ScaleGestureRecognizer 更积极地赢得手势竞争
-  late final GestureArenaTeam? _gestureArenaTeam =
-      Platform.operatingSystem == 'ohos' ? GestureArenaTeam() : null;
-
-  late final _scaleGestureRecognizer = () {
-    final recognizer = ScaleGestureRecognizer(
-      debugOwner: this,
-      allowedButtonsFilter: (buttons) => buttons == kPrimaryButton,
-      trackpadScrollToScaleFactor: Offset(0, -1 / widget.scaleFactor),
-      trackpadScrollCausesScale: widget.trackpadScrollCausesScale,
-    )
-      ..gestureSettings = gestureSettings
-      ..onStart = _onScaleStart
-      ..onUpdate = _onScaleUpdate
-      ..onEnd = _onScaleEnd;
-
-    // 在鸿蒙平台上，将 ScaleGestureRecognizer 添加到 GestureArenaTeam 并设置为 captain
-    if (_gestureArenaTeam case final team?) {
-      recognizer.team = team;
-      team.captain = recognizer;
-    }
-
-    return recognizer;
-  }();
+  late final ScaleGestureRecognizer _scaleGestureRecognizer;
 
   final bool _rotateEnabled = false;
 
@@ -465,7 +444,10 @@ class _MouseInteractiveViewerState extends State<MouseInteractiveViewer>
                   frictionSimulationY.finalX,
                 ),
               ).animate(
-                CurvedAnimation(parent: _controller, curve: Curves.decelerate),
+                _curvedAnimation ??= CurvedAnimation(
+                  parent: _controller,
+                  curve: Curves.decelerate,
+                ),
               )
               ..addListener(_handleInertiaAnimation);
         _controller
@@ -492,7 +474,7 @@ class _MouseInteractiveViewerState extends State<MouseInteractiveViewer>
                 begin: scale,
                 end: frictionSimulation.x(tFinal),
               ).animate(
-                CurvedAnimation(
+                _curvedScaleAnimation ??= CurvedAnimation(
                   parent: _scaleController,
                   curve: Curves.decelerate,
                 ),
@@ -714,6 +696,17 @@ class _MouseInteractiveViewerState extends State<MouseInteractiveViewer>
   @override
   void initState() {
     super.initState();
+    _scaleGestureRecognizer =
+        ScaleGestureRecognizer(
+            debugOwner: this,
+            allowedButtonsFilter: (buttons) => buttons == kPrimaryButton,
+            trackpadScrollToScaleFactor: Offset(0, -1 / widget.scaleFactor),
+            trackpadScrollCausesScale: widget.trackpadScrollCausesScale,
+          )
+          ..gestureSettings = gestureSettings
+          ..onStart = _onScaleStart
+          ..onUpdate = _onScaleUpdate
+          ..onEnd = _onScaleEnd;
     _controller = AnimationController(vsync: this);
     _scaleController = AnimationController(vsync: this);
 
@@ -740,7 +733,9 @@ class _MouseInteractiveViewerState extends State<MouseInteractiveViewer>
   @override
   void dispose() {
     _scaleGestureRecognizer.dispose();
+    _curvedAnimation?.dispose();
     _controller.dispose();
+    _curvedScaleAnimation?.dispose();
     _scaleController.dispose();
     _transformer.removeListener(_handleTransformation);
     if (widget.transformationController == null) {

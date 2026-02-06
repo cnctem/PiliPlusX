@@ -1,11 +1,14 @@
+﻿import 'package:PiliPlus/common/widgets/avatars.dart';
 import 'package:PiliPlus/common/widgets/flutter/dyn/ink_well.dart';
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
 import 'package:PiliPlus/models/dynamics/result.dart';
 import 'package:PiliPlus/pages/dynamics/widgets/action_panel.dart';
 import 'package:PiliPlus/pages/dynamics/widgets/author_panel.dart';
 import 'package:PiliPlus/pages/dynamics/widgets/dyn_content.dart';
+import 'package:PiliPlus/pages/dynamics/widgets/interaction.dart';
+import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
-import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:flutter/material.dart' hide InkWell;
 
 class DynamicPanel extends StatelessWidget {
@@ -14,7 +17,7 @@ class DynamicPanel extends StatelessWidget {
   final bool isDetail;
   final ValueChanged? onRemove;
   final bool isSave;
-  final Function(bool isTop, dynamic dynId)? onSetTop;
+  final void Function(bool isTop, Object dynId)? onSetTop;
   final VoidCallback? onBlock;
   final VoidCallback? onUnfold;
   final bool isDetailPortraitW;
@@ -67,7 +70,7 @@ class DynamicPanel extends StatelessWidget {
             ? null
             : () => PageUtils.pushDynDetail(item),
         onLongPress: showMore,
-        onSecondaryTap: Utils.isMobile ? null : showMore,
+        onSecondaryTap: PlatformUtils.isMobile ? null : showMore,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,6 +79,8 @@ class DynamicPanel extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(12, 12, 12, 6),
               child: authorWidget,
             ),
+            if (item.modules.moduleDispute case final moduleDispute?)
+              _buildDispute(theme, moduleDispute),
             ...dynContent(
               context,
               theme: theme,
@@ -87,45 +92,21 @@ class DynamicPanel extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             if (!isDetail) ...[
+              if (item.modules.moduleInteraction case ModuleInteraction(
+                :final items,
+              ))
+                if (items != null && items.isNotEmpty)
+                  dynInteraction(
+                    theme: theme,
+                    items: items,
+                  ),
               ActionPanel(item: item),
               if (item.modules.moduleFold case final moduleFold?) ...[
                 Divider(
                   height: 1,
                   color: theme.dividerColor.withValues(alpha: 0.1),
                 ),
-                InkWell(
-                  onTap: onUnfold,
-                  child: Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: Text.rich(
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        height: 1,
-                        fontSize: 13,
-                        color: theme.colorScheme.outline,
-                      ),
-                      strutStyle: const StrutStyle(
-                        height: 1,
-                        leading: 0,
-                        fontSize: 13,
-                      ),
-                      TextSpan(
-                        children: [
-                          TextSpan(text: moduleFold.statement ?? '展开'),
-                          WidgetSpan(
-                            alignment: PlaceholderAlignment.middle,
-                            child: Icon(
-                              size: 19,
-                              Icons.keyboard_arrow_down,
-                              color: theme.colorScheme.outline,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+                _buildFoldItem(theme, moduleFold),
               ],
             ] else if (!isSave)
               const SizedBox(height: 12),
@@ -215,5 +196,102 @@ class DynamicPanel extends StatelessWidget {
       cover: cover,
       bvid: bvid,
     );
+  }
+
+  Widget _buildFoldItem(ThemeData theme, ModuleFold moduleFold) {
+    Widget child = Text.rich(
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        height: 1,
+        fontSize: 13,
+        color: theme.colorScheme.outline,
+      ),
+      strutStyle: const StrutStyle(
+        height: 1,
+        leading: 0,
+        fontSize: 13,
+      ),
+      TextSpan(
+        children: [
+          TextSpan(text: moduleFold.statement ?? '展开'),
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Icon(
+              size: 19,
+              Icons.keyboard_arrow_down,
+              color: theme.colorScheme.outline,
+            ),
+          ),
+        ],
+      ),
+    );
+    final users = moduleFold.users;
+    if (users != null && users.isNotEmpty) {
+      child = Row(
+        spacing: 5,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          avatars(colorScheme: theme.colorScheme, users: users),
+          child,
+        ],
+      );
+    }
+    return InkWell(
+      onTap: onUnfold,
+      child: Container(
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: child,
+      ),
+    );
+  }
+
+  Widget _buildDispute(ThemeData theme, ModuleDispute moduleDispute) {
+    final child = Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(12, 0, 12, 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.secondaryContainer.withValues(
+          alpha: theme.brightness.isLight ? 0.5 : 0.7,
+        ),
+        borderRadius: const BorderRadius.all(Radius.circular(6)),
+      ),
+      child: Text.rich(
+        style: TextStyle(
+          height: 1,
+          fontSize: 13,
+          color: theme.colorScheme.onSecondaryContainer,
+        ),
+        strutStyle: const StrutStyle(
+          leading: 0,
+          height: 1,
+          fontSize: 13,
+        ),
+        TextSpan(
+          children: [
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: Icon(
+                  size: 15,
+                  Icons.warning_rounded,
+                  color: theme.colorScheme.onSecondaryContainer,
+                ),
+              ),
+            ),
+            TextSpan(text: moduleDispute.title),
+          ],
+        ),
+      ),
+    );
+    if (moduleDispute.jumpUrl?.isNotEmpty == true) {
+      return GestureDetector(
+        onTap: () => PageUtils.handleWebview(moduleDispute.jumpUrl!),
+        child: child,
+      );
+    }
+    return child;
   }
 }

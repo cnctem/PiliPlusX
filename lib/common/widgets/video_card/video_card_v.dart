@@ -6,6 +6,7 @@ import 'package:PiliPlus/common/widgets/stat/stat.dart';
 import 'package:PiliPlus/common/widgets/video_popup_menu.dart';
 import 'package:PiliPlus/http/search.dart';
 import 'package:PiliPlus/models/common/badge_type.dart';
+import 'package:PiliPlus/models/common/image_type.dart';
 import 'package:PiliPlus/models/common/stat_type.dart';
 import 'package:PiliPlus/models/model_rec_video_item.dart';
 import 'package:PiliPlus/utils/app_scheme.dart';
@@ -13,6 +14,7 @@ import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/duration_utils.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -80,7 +82,7 @@ class VideoCardV extends StatelessWidget {
           child: InkWell(
             onTap: () => onPushDetail(Utils.makeHeroTag(videoItem.aid)),
             onLongPress: onLongPress,
-            onSecondaryTap: Utils.isMobile ? null : onLongPress,
+            onSecondaryTap: PlatformUtils.isMobile ? null : onLongPress,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -97,7 +99,7 @@ class VideoCardV extends StatelessWidget {
                             src: videoItem.cover,
                             width: maxWidth,
                             height: maxHeight,
-                            radius: Utils.isHarmony ? StyleString.imgRadius.x : 0,
+                            type: ImageType.emote,
                           ),
                           if (videoItem.duration > 0)
                             PBadge(

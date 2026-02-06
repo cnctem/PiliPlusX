@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/harmony_adapt/status_bar.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:auto_orientation/auto_orientation.dart';
@@ -39,7 +40,7 @@ Future<void> exitDesktopFullscreen() async {
 Future<void> landscape() async {
   try {
     // 鸿蒙将小窗设为横屏
-    if (Utils.isHarmony) HarmonyChannel.setMiniWindowLandscape(true);
+    if (PlatformUtils.isHarmony) HarmonyChannel.setMiniWindowLandscape(true);
     await AutoOrientation.landscapeAutoMode(forceSensor: true);
   } catch (e) {
     print('横屏时出错：$e');
@@ -55,7 +56,7 @@ Future<void> verticalScreenForTwoSeconds() async {
 //全向
 bool allowRotateScreen = Pref.allowRotateScreen;
 Future<void> autoScreen() async {
-  if (Utils.isMobile && allowRotateScreen) {
+  if (PlatformUtils.isMobile && allowRotateScreen) {
     await SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       // DeviceOrientation.portraitDown,
@@ -67,7 +68,7 @@ Future<void> autoScreen() async {
     // 自动旋转方向类型 AUTO_ROTATION_UNSPECIFIED
     // 跟随传感器自动旋转，受控制中心的旋转开关控制，且可旋转方向受系统判定
     // （如在某种设备，可以旋转到竖屏、横屏、反向横屏三个方向，无法旋转到反向竖屏）。
-    if (Utils.isHarmony) await AutoOrientation.setScreenOrientationUser();
+    if (PlatformUtils.isHarmony) await AutoOrientation.setScreenOrientationUser();
   }
 }
 

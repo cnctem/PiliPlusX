@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "dart": {
+      "command": "dart",
+      "args": [
+        "mcp-server"
+      ],
+      "autoApprove": [
+        "analyze_files"
+      ]
+    }
+  }
+}

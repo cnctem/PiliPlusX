@@ -25,18 +25,17 @@ class PgcIndexController
   }
 
   Future<void> getPgcIndexCondition() async {
-    var res = await PgcHttp.pgcIndexCondition(
+    final res = await PgcHttp.pgcIndexCondition(
       seasonType: indexType == null ? 1 : null,
       type: 0,
       indexType: indexType,
     );
-    if (res.isSuccess) {
-      PgcIndexConditionData data = res.data;
-      if (data.order?.isNotEmpty == true) {
-        indexParams['order'] = data.order!.first.field;
+    if (res case Success(:final response)) {
+      if (response.order?.isNotEmpty == true) {
+        indexParams['order'] = response.order!.first.field;
       }
-      if (data.filter?.isNotEmpty == true) {
-        for (PgcConditionFilter item in data.filter!) {
+      if (response.filter?.isNotEmpty == true) {
+        for (PgcConditionFilter item in response.filter!) {
           indexParams['${item.field}'] = item.values?.firstOrNull?.keyword;
         }
       }

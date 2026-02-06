@@ -1,4 +1,5 @@
 import 'package:PiliPlus/models/common/image_preview_type.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -40,22 +41,25 @@ Widget htmlRender({
           if (clazz?.contains('cut-off') == true || height != null) {
             return CachedNetworkImage(
               width: maxWidth,
+              memCacheWidth: maxWidth.cacheSize(context),
               height: height != null ? double.parse(height) : null,
               imageUrl: ImageUtils.thumbnailUrl(imgUrl),
               fit: BoxFit.contain,
+              placeholder: (_, _) => const SizedBox.shrink(),
             );
           }
-          final size = isEmote ? 22.0 : null;
-          return Hero(
-            tag: imgUrl,
-            child: GestureDetector(
-              onTap: () => PageUtils.imageView(
-                imgList: [SourceModel(url: imgUrl)],
-                quality: 60,
-              ),
+          final width = isEmote ? 22.0 : maxWidth;
+          return GestureDetector(
+            onTap: () => PageUtils.imageView(
+              imgList: [SourceModel(url: imgUrl)],
+              quality: 60,
+            ),
+            child: Hero(
+              tag: imgUrl,
               child: CachedNetworkImage(
-                width: size,
-                height: size,
+                width: width,
+                height: isEmote ? 22.0 : null,
+                memCacheWidth: width.cacheSize(context),
                 imageUrl: ImageUtils.thumbnailUrl(imgUrl, 60),
                 fadeInDuration: const Duration(milliseconds: 120),
                 fadeOutDuration: const Duration(milliseconds: 120),

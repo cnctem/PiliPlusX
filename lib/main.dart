@@ -17,9 +17,11 @@ import 'package:PiliPlus/utils/app_scheme.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
 import 'package:PiliPlus/utils/calc_window_position.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
+import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/json_file_handler.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
@@ -48,7 +50,7 @@ WebViewEnvironment? webViewEnvironment;
 void main() async {
   ScalableWidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
-  if (Utils.isHarmony) await Utils.initHarmonyDeviceType();
+  if (PlatformUtils.isHarmony) await PlatformUtils.initHarmonyDeviceType();
   tmpDirPath = (await getTemporaryDirectory()).path;
   appSupportDirPath = (await getApplicationSupportDirectory()).path;
   try {
@@ -59,8 +61,7 @@ void main() async {
     exit(0);
   }
 
-  // 设置下载路径
-  if (Utils.isDesktop) {
+  if (PlatformUtils.isDesktop) {
     final customDownPath = Pref.downloadPath;
     if (customDownPath != null && customDownPath.isNotEmpty) {
       try {
@@ -98,7 +99,7 @@ void main() async {
 
   CacheManager.autoClearCache();
 
-  if (Utils.isMobile) {
+  if (PlatformUtils.isMobile) {
     await Future.wait([
       SystemChrome.setPreferredOrientations(
         [
@@ -112,7 +113,7 @@ void main() async {
     ]);
   }
 
-  if (Utils.isMobile || Utils.isHarmony) {
+  if (PlatformUtils.isMobile || PlatformUtils.isHarmony) {
     await setupServiceLocator();
   }
 
@@ -137,7 +138,7 @@ void main() async {
     displayType: SmartToastType.onlyRefresh,
   );
 
-  if (Utils.isMobile) {
+  if (PlatformUtils.isMobile) {
     PiliScheme.init();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(
@@ -149,25 +150,23 @@ void main() async {
       ),
     );
     if (Platform.isAndroid) {
-      late List<DisplayMode> modes;
-      FlutterDisplayMode.supported.then((value) {
-        modes = value;
+      FlutterDisplayMode.supported.then((mode) {
         final String? storageDisplay = GStorage.setting.get(
           SettingBoxKey.displayMode,
         );
         DisplayMode? displayMode;
         if (storageDisplay != null) {
-          displayMode = modes.firstWhereOrNull(
+          displayMode = mode.firstWhereOrNull(
             (e) => e.toString() == storageDisplay,
           );
         }
         FlutterDisplayMode.setPreferredMode(displayMode ?? DisplayMode.auto);
       });
     }
-  } else if (Utils.isDesktop && !Utils.isHarmony) {
+  } else if (PlatformUtils.isDesktop && !PlatformUtils.isHarmony) {
     await windowManager.ensureInitialized();
 
-    WindowOptions windowOptions = WindowOptions(
+    final windowOptions = WindowOptions(
       minimumSize: const Size(400, 720),
       skipTaskbar: false,
       titleBarStyle: Pref.showWindowTitleBar
@@ -186,8 +185,12 @@ void main() async {
     });
   }
 
+  if (Pref.dynamicColor) {
+    await MyApp.initPlatformState();
+  }
+
   // TODO: 鸿蒙待适配 异常捕获
-  if (Pref.enableLog && !Utils.isHarmony) {
+  if (Pref.enableLog && !PlatformUtils.isHarmony) {
     // 异常捕获 logo记录
     final customParameters = {
       'BuildConfig':
@@ -230,6 +233,8 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  static ColorScheme? _light, _dark;
+
   static ThemeData? darkThemeData;
 
   static void _onBack() {
@@ -238,7 +243,7 @@ class MyApp extends StatelessWidget {
       return;
     }
 
-    if (Get.isDialogOpen ?? Get.isBottomSheetOpen ?? false) {
+    if (Get.routing.route is! GetPageRoute) {
       Get.back();
       return;
     }
@@ -267,36 +272,25 @@ class MyApp extends StatelessWidget {
     Get.back();
   }
 
-  static Widget _build({
-    ColorScheme? lightColorScheme,
-    ColorScheme? darkColorScheme,
-  }) {
+  @override
+  Widget build(BuildContext context) {
+    final dynamicColor = Pref.dynamicColor && _light != null && _dark != null;
     late final brandColor = colorThemeTypes[Pref.customColor].color;
     late final variant = FlexSchemeVariant.values[Pref.schemeVariant];
     return GetMaterialApp(
       title: Constants.appName,
       theme: ThemeUtils.getThemeData(
-        colorScheme:
-            lightColorScheme ??
-            SeedColorScheme.fromSeeds(
-              variant: variant,
-              primaryKey: brandColor,
-              brightness: Brightness.light,
-              useExpressiveOnContainerColors: false,
-            ),
-        isDynamic: lightColorScheme != null,
+        colorScheme: dynamicColor
+            ? _light!
+            : brandColor.asColorSchemeSeed(variant, Brightness.light),
+        isDynamic: dynamicColor,
       ),
       darkTheme: ThemeUtils.getThemeData(
         isDark: true,
-        colorScheme:
-            darkColorScheme ??
-            SeedColorScheme.fromSeeds(
-              variant: variant,
-              primaryKey: brandColor,
-              brightness: Brightness.dark,
-              useExpressiveOnContainerColors: false,
-            ),
-        isDynamic: darkColorScheme != null,
+        colorScheme: dynamicColor
+            ? _dark!
+            : brandColor.asColorSchemeSeed(variant, Brightness.dark),
+        isDynamic: dynamicColor,
       ),
       themeMode: Pref.themeMode,
       localizationsDelegates: const [
@@ -325,7 +319,7 @@ class MyApp extends StatelessWidget {
             ),
             child: child!,
           );
-          if (Utils.isDesktop) {
+          if (PlatformUtils.isDesktop) {
             return Focus(
               canRequestFocus: false,
               onKeyEvent: (_, event) {
@@ -346,7 +340,7 @@ class MyApp extends StatelessWidget {
             alignment: Alignment.center,
             children: [
               // 看不见的地方加一个鸿蒙原生音量控件，
-              if (Utils.isHarmony) const HarmonyVolumeView(),
+              if (PlatformUtils.isHarmony) const HarmonyVolumeView(),
               child,
               // 调试代码用，ai生成git提交信息请忽略这部分改动
               // if (kDebugMode)
@@ -370,29 +364,55 @@ class MyApp extends StatelessWidget {
           PointerDeviceKind.invertedStylus,
           PointerDeviceKind.trackpad,
           PointerDeviceKind.unknown,
-          if (Utils.isDesktop) PointerDeviceKind.mouse,
+          if (PlatformUtils.isDesktop) PointerDeviceKind.mouse,
         },
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (!Platform.isIOS && Pref.dynamicColor) {
-      return DynamicColorBuilder(
-        builder: ((ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-          if (lightDynamic != null && darkDynamic != null) {
-            return _build(
-              lightColorScheme: lightDynamic.harmonized(),
-              darkColorScheme: darkDynamic.harmonized(),
-            );
-          } else {
-            return _build();
-          }
-        }),
-      );
+  /// from [DynamicColorBuilderState.initPlatformState]
+  static Future<bool> initPlatformState() async {
+    if (_light != null || _dark != null) return true;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      final corePalette = await DynamicColorPlugin.getCorePalette();
+
+      if (corePalette != null) {
+        if (kDebugMode) {
+          debugPrint('dynamic_color: Core palette detected.');
+        }
+        _light = corePalette.toColorScheme();
+        _dark = corePalette.toColorScheme(brightness: Brightness.dark);
+        return true;
+      }
+    } on PlatformException {
+      if (kDebugMode) {
+        debugPrint('dynamic_color: Failed to obtain core palette.');
+      }
     }
-    return _build();
+
+    try {
+      final Color? accentColor = await DynamicColorPlugin.getAccentColor();
+
+      if (accentColor != null) {
+        if (kDebugMode) {
+          debugPrint('dynamic_color: Accent color detected.');
+        }
+        final variant = FlexSchemeVariant.values[Pref.schemeVariant];
+        _light = accentColor.asColorSchemeSeed(variant, Brightness.light);
+        _dark = accentColor.asColorSchemeSeed(variant, Brightness.dark);
+        return true;
+      }
+    } on PlatformException {
+      if (kDebugMode) {
+        debugPrint('dynamic_color: Failed to obtain accent color.');
+      }
+    }
+    if (kDebugMode) {
+      debugPrint('dynamic_color: Dynamic color not detected on this device.');
+    }
+    GStorage.setting.put(SettingBoxKey.dynamicColor, false);
+    return false;
   }
 }
 

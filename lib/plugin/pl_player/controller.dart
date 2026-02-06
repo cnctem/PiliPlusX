@@ -35,17 +35,19 @@ import 'package:PiliPlus/plugin/pl_player/models/video_fit_type.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/utils/accounts.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/box_ext.dart';
+import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart' show PageUtils;
 import 'package:PiliPlus/utils/path_utils.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:archive/archive.dart' show getCrc32;
 import 'package:canvas_danmaku/canvas_danmaku.dart';
-import 'package:crclib/catalog.dart';
 import 'package:dio/dio.dart' show Options;
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:floating/floating.dart';
@@ -108,7 +110,7 @@ class PlPlayerController {
 
   /// 音量控制条
   final RxDouble volume = RxDouble(
-    Utils.isDesktop ? Pref.desktopVolume : 1.0,
+    PlatformUtils.isDesktop ? Pref.desktopVolume : 1.0,
   );
   final setSystemBrightness = Pref.setSystemBrightness;
 
@@ -225,10 +227,16 @@ class PlPlayerController {
 
   late final bool autoPiP = Pref.autoPiP;
   bool get isPipMode =>
-      ((Platform.isAndroid || Utils.isHarmony) && Floating().isPipMode) ||
-      (Utils.isDesktop && isDesktopPip);
+      ((Platform.isAndroid || PlatformUtils.isHarmony) && Floating().isPipMode) ||
+      (PlatformUtils.isDesktop && isDesktopPip);
   late bool isDesktopPip = false;
   late Rect _lastWindowBounds;
+
+  late final RxBool isAlwaysOnTop = false.obs;
+  Future<void> setAlwaysOnTop(bool value) {
+    isAlwaysOnTop.value = value;
+    return windowManager.setAlwaysOnTop(value);
+  }
 
   Offset initialFocalPoint = Offset.zero;
 
@@ -238,18 +246,8 @@ class PlPlayerController {
       windowManager.setTitleBarStyle(TitleBarStyle.normal),
       windowManager.setMinimumSize(const Size(400, 700)),
       windowManager.setBounds(_lastWindowBounds),
-      windowManager.setAlwaysOnTop(false),
+      setAlwaysOnTop(false),
       windowManager.setAspectRatio(0),
-      setting.putAll({
-        SettingBoxKey.windowSize: [
-          _lastWindowBounds.width,
-          _lastWindowBounds.height,
-        ],
-        SettingBoxKey.windowPosition: [
-          _lastWindowBounds.left,
-          _lastWindowBounds.top,
-        ],
-      }),
     ]);
   }
 
@@ -273,9 +271,9 @@ class PlPlayerController {
     }
 
     await windowManager.setMinimumSize(size);
+    setAlwaysOnTop(true);
     windowManager
       ..setSize(size)
-      ..setAlwaysOnTop(true)
       ..setAspectRatio(width / height);
   }
 
@@ -320,7 +318,7 @@ class PlPlayerController {
 
   void disableAutoEnterPip() {
     if (_shouldSetPip) {
-      if (Utils.isHarmony) {
+      if (PlatformUtils.isHarmony) {
         Floating().setAutoPip(false);
       } else {
         Utils.channel.invokeMethod('setPipAutoEnterEnabled', {
@@ -330,38 +328,28 @@ class PlPlayerController {
     }
   }
 
-  /// 弹幕权重
-  late final enableTapDm = Utils.isMobile && Pref.enableTapDm;
-  late int danmakuWeight = Pref.danmakuWeight;
+  // 弹幕相关配置
+  late final enableTapDm = PlatformUtils.isMobile && Pref.enableTapDm;
   late RuleFilter filters = Pref.danmakuFilterRule;
   // 关联弹幕控制器
   DanmakuController<DanmakuExtra>? danmakuController;
   bool showDanmaku = true;
   Set<int> dmState = <int>{};
   late final mergeDanmaku = Pref.mergeDanmaku;
-  late final String midHash = Crc32Xz()
-      .convert(utf8.encode(Accounts.main.mid.toString()))
-      .toRadixString(16);
-  // 弹幕相关配置
-  late Set<int> blockTypes = Pref.danmakuBlockType;
-  late bool blockColorful = blockTypes.contains(6);
-  late double showArea = Pref.danmakuShowArea;
-  late RxDouble danmakuOpacity = Pref.danmakuOpacity.obs;
-  late double danmakuFontScale = Pref.danmakuFontScale;
-  late double danmakuFontScaleFS = Pref.danmakuFontScaleFS;
-  late double danmakuStrokeWidth = Pref.strokeWidth;
-  late int danmakuFontWeight = Pref.fontWeight;
-  late bool massiveMode = Pref.danmakuMassiveMode;
-  late double danmakuDuration = Pref.danmakuDuration;
-  late double danmakuStaticDuration = Pref.danmakuStaticDuration;
+  late final String midHash = getCrc32(
+    ascii.encode(Accounts.main.mid.toString()),
+    0,
+  ).toRadixString(16);
+  late final RxDouble danmakuOpacity = Pref.danmakuOpacity.obs;
+
   late List<double> speedList = Pref.speedList;
   late bool enableAutoLongPressSpeed = Pref.enableAutoLongPressSpeed;
   late final showControlDuration = Pref.enableLongShowControl
       ? const Duration(seconds: 30)
       : const Duration(seconds: 3);
+  // 字幕
   late double subtitleFontScale = Pref.subtitleFontScale;
   late double subtitleFontScaleFS = Pref.subtitleFontScaleFS;
-  late double danmakuLineHeight = Pref.danmakuLineHeight;
   late int subtitlePaddingH = Pref.subtitlePaddingH;
   late int subtitlePaddingB = Pref.subtitlePaddingB;
   late double subtitleBgOpacity = Pref.subtitleBgOpacity;
@@ -413,7 +401,7 @@ class PlPlayerController {
 
   late final bool tempPlayerConf = Pref.tempPlayerConf;
 
-  late int? cacheVideoQa = Utils.isMobile ? null : Pref.defaultVideoQa;
+  late int? cacheVideoQa = PlatformUtils.isMobile ? null : Pref.defaultVideoQa;
   late int cacheAudioQa = Pref.defaultAudioQa;
   bool enableHeart = true;
 
@@ -581,7 +569,7 @@ class PlPlayerController {
             _shouldSetPip = true;
           }
         });
-      } else if (Utils.isHarmony) {
+      } else if (PlatformUtils.isHarmony) {
         _shouldSetPip = true;
       }
     }
@@ -630,7 +618,7 @@ class PlPlayerController {
     int? seasonId,
     int? pgcType,
     VideoType? videoType,
-    VoidCallback? callback,
+    VoidCallback? onInit,
     Volume? volume,
     String? dirPath,
     String? typeTag,
@@ -695,7 +683,7 @@ class PlPlayerController {
       // listen the video player events
       startListeners();
       await _initializePlayer();
-      callback?.call();
+      onInit?.call();
     } catch (err, stackTrace) {
       dataStatus.status.value = DataStatus.error;
       if (kDebugMode) {
@@ -813,7 +801,7 @@ class PlPlayerController {
         );
     final pp = player.platform!.maybeAsNativePlayer;
     if (_videoPlayerController == null) {
-      if (Utils.isDesktop) {
+      if (PlatformUtils.isDesktop) {
         pp.setVolume(this.volume.value * 100);
       }
       if (isAnim) {
@@ -1046,7 +1034,7 @@ class PlPlayerController {
         );
 
         /// 触发回调事件
-        for (var element in _statusListeners) {
+        for (final element in _statusListeners) {
           element(event ? PlayerStatus.playing : PlayerStatus.paused);
         }
         if (videoPlayerController!.state.position.inSeconds != 0) {
@@ -1058,7 +1046,7 @@ class PlPlayerController {
           playerStatus.value = PlayerStatus.completed;
 
           /// 触发回调事件
-          for (var element in _statusListeners) {
+          for (final element in _statusListeners) {
             element(PlayerStatus.completed);
           }
         } else {
@@ -1075,7 +1063,7 @@ class PlPlayerController {
         }
 
         /// 触发回调事件
-        for (var element in _positionListeners) {
+        for (final element in _positionListeners) {
           element(event);
         }
         makeHeartBeat(event.inSeconds);
@@ -1352,14 +1340,14 @@ class PlPlayerController {
   Timer? volumeTimer;
   final RxBool volumeInterceptEventStream = false.obs;
 
+  static final double maxVolume = PlatformUtils.isDesktop ? 2.0 : 1.0;
   Future<void> setVolume(double volume) async {
     if (this.volume.value != volume) {
       this.volume.value = volume;
       try {
-        if (Utils.isDesktop) {
-          // 鸿蒙pc也按应用内音量设置
+        if (PlatformUtils.isDesktop) {
           _videoPlayerController!.setVolume(volume * 100);
-        } else if (Utils.isHarmony) {
+        } else if (PlatformUtils.isHarmony) {
           // 否则如果是鸿蒙手机和平板，按系统音量设置
           HarmonyVolumeView.cntlr.setVolume(volume);
         } else {
@@ -1376,7 +1364,7 @@ class PlPlayerController {
     volumeTimer = Timer(const Duration(milliseconds: 200), () {
       volumeIndicator.value = false;
       volumeInterceptEventStream.value = false;
-      if (Utils.isDesktop) {
+      if (PlatformUtils.isDesktop) {
         setting.put(SettingBoxKey.desktopVolume, volume.toPrecision(3));
       }
     });
@@ -1408,7 +1396,7 @@ class PlPlayerController {
         _dataListenerForVideoFit = dataStatus.status.listen((status) {
           if (status == DataStatus.loaded) {
             _stopListenerForVideoFit();
-            var attr = VideoFitType.values[fitValue];
+            final attr = VideoFitType.values[fitValue];
             if (attr == VideoFitType.none || attr == VideoFitType.scaleDown) {
               videoFit.value = attr;
             }
@@ -1543,7 +1531,7 @@ class PlPlayerController {
   void toggleFullScreen(bool val) {
     isFullScreen.value = val;
     updateSubtitleStyle();
-    if (!Utils.isHarmony) return;
+    if (!PlatformUtils.isHarmony) return;
     // 鸿蒙小窗适配方向
 
     if (val) {
@@ -1579,7 +1567,7 @@ class PlPlayerController {
       this.isManualFS = isManualFS;
 
       if (status) {
-        if (Utils.isMobile) {
+        if (PlatformUtils.isMobile) {
           hideStatusBar();
           if (mode == FullScreenMode.none) {
             return;
@@ -1601,7 +1589,7 @@ class PlPlayerController {
           await enterDesktopFullscreen(inAppFullScreen: inAppFullScreen);
         }
       } else {
-        if (Utils.isMobile) {
+        if (PlatformUtils.isMobile) {
           showStatusBar();
           if (mode == FullScreenMode.none) {
             return;
@@ -1703,24 +1691,8 @@ class PlPlayerController {
     video.put(VideoBoxKey.playRepeat, type.index);
   }
 
-  void putDanmakuSettings() {
-    setting.putAll({
-      SettingBoxKey.danmakuWeight: danmakuWeight,
-      SettingBoxKey.danmakuBlockType: blockTypes.toList(),
-      SettingBoxKey.danmakuShowArea: showArea,
-      SettingBoxKey.danmakuOpacity: danmakuOpacity.value,
-      SettingBoxKey.danmakuFontScale: danmakuFontScale,
-      SettingBoxKey.danmakuFontScaleFS: danmakuFontScaleFS,
-      SettingBoxKey.danmakuDuration: danmakuDuration,
-      SettingBoxKey.danmakuStaticDuration: danmakuStaticDuration,
-      SettingBoxKey.strokeWidth: danmakuStrokeWidth,
-      SettingBoxKey.fontWeight: danmakuFontWeight,
-      SettingBoxKey.danmakuLineHeight: danmakuLineHeight,
-    });
-  }
-
   void putSubtitleSettings() {
-    setting.putAll({
+    setting.putAllNE({
       SettingBoxKey.subtitleFontScale: subtitleFontScale,
       SettingBoxKey.subtitleFontScaleFS: subtitleFontScaleFS,
       SettingBoxKey.subtitlePaddingH: subtitlePaddingH,
@@ -1743,13 +1715,17 @@ class PlPlayerController {
       }
       return;
     }
+
     _playerCount = 0;
+    danmakuController = null;
     _stopListenerForVideoFit();
     _stopListenerForEnterFullScreen();
     disableAutoEnterPip();
     setPlayCallBack(null);
     dmState.clear();
-    _clearPreview();
+    if (showSeekPreview) {
+      _clearPreview();
+    }
     Utils.channel.setMethodCallHandler(null);
     _timer?.cancel();
     _timerForSeek?.cancel();
@@ -1767,7 +1743,14 @@ class PlPlayerController {
     // playerStatus.close();
     // dataStatus.status.close();
 
+    if (PlatformUtils.isDesktop && isAlwaysOnTop.value) {
+      windowManager.setAlwaysOnTop(false);
+    }
+
     await removeListeners();
+    subscriptions.clear();
+    _positionListeners.clear();
+    _statusListeners.clear();
     if (playerStatus.playing) {
       WakelockPlus.disable();
     }
@@ -1803,7 +1786,7 @@ class PlPlayerController {
     );
   }
 
-  Map<String, WeakReference<ui.Image>>? previewCache;
+  late final Map<String, ui.Image?> previewCache = {};
   LoadingState<VideoShotData>? videoShot;
   late final RxBool showPreview = false.obs;
   late final showSeekPreview = Pref.showSeekPreview;
@@ -1815,14 +1798,13 @@ class PlPlayerController {
       getVideoShot();
       return;
     }
-    if (videoShot case Success<VideoShotData> success) {
-      final data = success.response;
+    if (videoShot case Success(:final response)) {
       if (!showPreview.value) {
         showPreview.value = true;
       }
       previewIndex.value = max(
         0,
-        (data.index.where((item) => item <= seconds).length - 2),
+        (response.index.where((item) => item <= seconds).length - 2),
       );
     }
   }
@@ -1831,19 +1813,15 @@ class PlPlayerController {
     showPreview.value = false;
     previewIndex.value = null;
     videoShot = null;
-    previewCache
-      ?..forEach((_, ref) {
-        try {
-          ref.target?.dispose();
-        } catch (_) {}
-      })
-      ..clear();
-    previewCache = null;
+    for (final i in previewCache.values) {
+      i?.dispose();
+    }
+    previewCache.clear();
   }
 
   Future<void> getVideoShot() async {
     try {
-      var res = await Request().get(
+      final res = await Request().get(
         '/x/player/videoshot',
         queryParameters: {
           // 'aid': IdUtils.bv2av(_bvid),
@@ -1877,8 +1855,9 @@ class PlPlayerController {
     videoPlayerController?.screenshot(format: 'image/png').then((value) {
       if (value != null) {
         SmartDialog.showToast('点击弹窗保存截图');
-        Get.dialog(
-          GestureDetector(
+        showDialog(
+          context: Get.context!,
+          builder: (context) => GestureDetector(
             onTap: () {
               Get.back();
               ImageUtils.saveByteImg(
