@@ -95,7 +95,6 @@ List<SettingsModel> get playSettings => [
     defaultVal: false,
   ),
   getVideoFilterSelectModel(
-    context: Get.context!,
     title: '右方向键/双击快进时长',
     suffix: 's',
     key: SettingBoxKey.fastForBackwardDuration,
@@ -104,7 +103,6 @@ List<SettingsModel> get playSettings => [
     isFilter: false,
   ),
   getVideoFilterSelectModel(
-    context: Get.context!,
     title: '左方向键/双击快退时长',
     suffix: 's',
     key: SettingBoxKey.fastForBackwardDuration_,
