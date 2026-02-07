@@ -159,7 +159,7 @@ class _DynTopicPageState extends State<DynTopicPage> with DynMixin {
       Loading() => const SliverAppBar(),
       Success(:final response) when response != null => DynamicSliverAppBarMedium(
         pinned: true,
-        afterCalc: (value) =>
+        onPerformLayout: (value) =>
             _controller.appbarOffset = value - kToolbarHeight - padding.top,
         title: IgnorePointer(child: Text(response.topicItem!.name)),
         flexibleSpace: Container(

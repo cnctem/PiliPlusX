@@ -166,7 +166,7 @@ void main() async {
     await windowManager.ensureInitialized();
 
     final windowOptions = WindowOptions(
-      minimumSize: const Size(140, 140),
+      minimumSize: const Size(400, 700),
       skipTaskbar: false,
       titleBarStyle: Pref.showWindowTitleBar
           ? TitleBarStyle.normal

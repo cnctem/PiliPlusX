@@ -246,7 +246,7 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
           id: id,
           oid: oid,
           rpid: rpid,
-          firstFloor: replyItem,
+          firstFloor: replyItem.replyControl.isNote ? null : replyItem,
           replyType: _videoReplyController.videoType.replyType,
           isVideoDetail: true,
           isNested: widget.isNested,

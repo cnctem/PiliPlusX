@@ -19,6 +19,7 @@ import 'package:PiliPlus/pages/save_panel/view.dart';
 import 'package:PiliPlus/pages/video/controller.dart';
 import 'package:PiliPlus/pages/video/reply/widgets/zan_grpc.dart';
 import 'package:PiliPlus/utils/accounts.dart';
+import 'package:PiliPlus/utils/app_scheme.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/duration_utils.dart';
 import 'package:PiliPlus/utils/extension/context_ext.dart';
@@ -797,23 +798,33 @@ class ReplyItemGrpc extends StatelessWidget {
     }
 
     if (!hasNote &&
-        (content.richText.hasNote() ||
-            replyItem.replyControl.bizScene == 'note')) {
+        replyItem.replyControl.isNote &&
+        replyItem.replyControl.isNoteV2) {
+      final Color color;
+      NoDeadlineTapGestureRecognizer? recognizer;
+
       final hasClickUrl = content.richText.note.hasClickUrl();
+      if (hasClickUrl || content.richText.opus.hasOpusId()) {
+        color = theme.colorScheme.primary;
+        recognizer = NoDeadlineTapGestureRecognizer()
+          ..onTap = () => hasClickUrl
+              ? PiliScheme.routePushFromUrl(content.richText.note.clickUrl)
+              : Get.toNamed(
+                  '/articlePage',
+                  parameters: {
+                    'id': content.richText.opus.opusId.toString(),
+                    'type': 'opus',
+                  },
+                );
+      } else {
+        color = theme.colorScheme.secondary;
+      }
       spanChildren.insert(
         0,
         TextSpan(
           text: '[笔记] ',
-          style: TextStyle(
-            color: hasClickUrl
-                ? theme.colorScheme.primary
-                : theme.colorScheme.secondary,
-          ),
-          recognizer: hasClickUrl
-              ? (NoDeadlineTapGestureRecognizer()
-                  ..onTap = () =>
-                      PageUtils.handleWebview(content.richText.note.clickUrl))
-              : null,
+          style: TextStyle(color: color),
+          recognizer: recognizer,
         ),
       );
     }

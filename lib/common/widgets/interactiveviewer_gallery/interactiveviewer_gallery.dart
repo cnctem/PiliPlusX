@@ -1,6 +1,10 @@
 import 'dart:io';
 
+import 'package:PiliPlus/common/widgets/flutter/page/page_view.dart';
+import 'package:PiliPlus/common/widgets/gesture/image_horizontal_drag_gesture_recognizer.dart';
 import 'package:PiliPlus/common/widgets/interactiveviewer_gallery/interactive_viewer_boundary.dart';
+import 'package:PiliPlus/common/widgets/scroll_physics.dart'
+    show CustomTabBarViewScrollPhysics;
 import 'package:PiliPlus/models/common/image_preview_type.dart';
 import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
@@ -10,7 +14,7 @@ import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_debounce/easy_throttle.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide PageView;
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
@@ -33,7 +37,6 @@ typedef IndexedFocusedWidgetBuilder =
       BuildContext context,
       int index,
       bool isFocus,
-      bool enablePageView,
     );
 
 typedef IndexedTagStringBuilder = String Function(int index);
@@ -82,15 +85,13 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
   late AnimationController _animationController;
   Animation<Matrix4>? _animation;
 
-  /// `true` when an source is zoomed in and not at the at a horizontal boundary
-  /// to disable the [PageView].
-  bool _enablePageView = true;
-
   late Offset _doubleTapLocalPosition;
 
   late final RxInt currentIndex = widget.initIndex.obs;
 
   late final int _quality = Pref.previewQ;
+
+  late final RxBool _hasScaled = false.obs;
 
   @override
   void initState() {
@@ -134,57 +135,8 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
     super.dispose();
   }
 
-  /// When the source gets scaled up, the swipe up / down to dismiss gets
-  /// disabled.
-  ///
-  /// When the scale resets, the dismiss and the page view swiping gets enabled.
   void _onScaleChanged(double scale) {
-    final bool initialScale = scale <= widget.minScale;
-
-    if (initialScale) {
-      if (!_enablePageView) {
-        setState(() {
-          _enablePageView = true;
-        });
-      }
-    } else {
-      if (_enablePageView) {
-        setState(() {
-          _enablePageView = false;
-        });
-      }
-    }
-  }
-
-  /// When the left boundary has been hit after scaling up the source, the page
-  /// view swiping gets enabled if it has a page to swipe to.
-  void _onLeftBoundaryHit() {
-    if (!_enablePageView && _pageController.page!.floor() > 0) {
-      setState(() {
-        _enablePageView = true;
-      });
-    }
-  }
-
-  /// When the right boundary has been hit after scaling up the source, the page
-  /// view swiping gets enabled if it has a page to swipe to.
-  void _onRightBoundaryHit() {
-    if (!_enablePageView &&
-        _pageController.page!.floor() < widget.sources.length - 1) {
-      setState(() {
-        _enablePageView = true;
-      });
-    }
-  }
-
-  /// When the source has been scaled up and no horizontal boundary has been hit,
-  /// the page view swiping gets disabled.
-  void _onNoBoundaryHit() {
-    if (_enablePageView) {
-      setState(() {
-        _enablePageView = false;
-      });
-    }
+    _hasScaled.value = scale > 1.0;
   }
 
   void _onPlay(String liveUrl) {
@@ -229,33 +181,25 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.widthOf(context);
     return Stack(
       clipBehavior: Clip.none,
       children: [
         InteractiveViewerBoundary(
           controller: _transformationController,
-          boundaryWidth: MediaQuery.widthOf(context),
-          onScaleChanged: _onScaleChanged,
-          onLeftBoundaryHit: _onLeftBoundaryHit,
-          onRightBoundaryHit: _onRightBoundaryHit,
-          onNoBoundaryHit: _onNoBoundaryHit,
+          boundaryWidth: width,
           maxScale: widget.maxScale,
           minScale: widget.minScale,
           onDismissed: Get.back,
-          onReset: () {
-            if (!_enablePageView) {
-              setState(() {
-                _enablePageView = true;
-              });
-            }
-          },
-          child: PageView.builder(
+          onInteractionEnd: (_) =>
+              _onScaleChanged(_transformationController.value.row0[0]),
+          child: PageView<ImageHorizontalDragGestureRecognizer>.builder(
             onPageChanged: _onPageChanged,
             controller: _pageController,
-            physics: _enablePageView
-                ? null
-                : const NeverScrollableScrollPhysics(),
             itemCount: widget.sources.length,
+            physics: const CustomTabBarViewScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
+            ),
             itemBuilder: (BuildContext context, int index) {
               final item = widget.sources[index];
               final isFileImg = item.sourceType == SourceType.fileImage;
@@ -283,38 +227,44 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
                         context,
                         index,
                         index == currentIndex.value,
-                        _enablePageView,
                       )
                     : _itemBuilder(index, item),
               );
             },
+            horizontalDragGestureRecognizer:
+                ImageHorizontalDragGestureRecognizer(
+                  width: width,
+                  transformationController: _transformationController,
+                ),
           ),
         ),
         Positioned(
           bottom: 0,
           left: 0,
           right: 0,
-          child: Container(
-            padding:
-                MediaQuery.viewPaddingOf(context) +
-                const EdgeInsets.fromLTRB(12, 8, 20, 8),
-            decoration: _enablePageView
-                ? BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withValues(alpha: 0.3),
-                      ],
+          child: Obx(
+            () => Container(
+              padding:
+                  MediaQuery.viewPaddingOf(context) +
+                  const EdgeInsets.fromLTRB(12, 8, 20, 8),
+              decoration: _hasScaled.value
+                  ? null
+                  : BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withValues(alpha: 0.3),
+                        ],
+                      ),
                     ),
-                  )
-                : null,
-            alignment: Alignment.center,
-            child: Obx(
-              () => Text(
-                "${currentIndex.value + 1}/${widget.sources.length}",
-                style: const TextStyle(color: Colors.white),
+              alignment: Alignment.center,
+              child: Obx(
+                () => Text(
+                  "${currentIndex.value + 1}/${widget.sources.length}",
+                  style: const TextStyle(color: Colors.white),
+                ),
               ),
             ),
           ),
