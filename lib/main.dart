@@ -308,13 +308,13 @@ class MyApp extends StatelessWidget {
         toastBuilder: (String msg) => CustomToast(msg: msg),
         loadingBuilder: (msg) => LoadingWidget(msg: msg),
         builder: (context, child) {
-          final mediaData = MediaQuery.of(context);
+          final data = MediaQuery.of(context);
           final scalableBinding =
               ScalableWidgetsFlutterBinding.ensureInitialized();
           child = MediaQuery(
-            data: mediaData.copyWith(
-              devicePixelRatio: scalableBinding.getEnabledPixelRatio(),
-              size: mediaData.size / scalableBinding.scale,
+            data: data.copyWith(
+              devicePixelRatio: scalableBinding.getLogicaPixelRatio(),
+              size: scalableBinding.toLogicaSize(data.size),
               textScaler: TextScaler.linear(Pref.defaultTextScale),
             ),
             child: child!,

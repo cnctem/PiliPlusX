@@ -36,7 +36,9 @@ class ScalableWidgetsFlutterBinding extends BindingBase
   /// 真实dpr
   late double _devicePixelRatio;
 
-  double getEnabledPixelRatio() => _scale * _devicePixelRatio;
+  double getLogicaPixelRatio() => _scale * _devicePixelRatio;
+
+  Size toLogicaSize(Size size) => size / _scale;
 
   // 3. 核心：重写 ViewConfiguration
   @override
@@ -46,11 +48,12 @@ class ScalableWidgetsFlutterBinding extends BindingBase
       flutterView.physicalConstraints,
     );
     _devicePixelRatio = flutterView.devicePixelRatio;
-    final enabledPixelRatio = getEnabledPixelRatio();
+    // print('设备真实dpr改变：$_devicePixelRatio');
+    final logicaPixelRatio = getLogicaPixelRatio();
     return ViewConfiguration(
       physicalConstraints: physicalConstraints,
-      logicalConstraints: physicalConstraints / enabledPixelRatio,
-      devicePixelRatio: enabledPixelRatio,
+      logicalConstraints: physicalConstraints / logicaPixelRatio,
+      devicePixelRatio: logicaPixelRatio,
     );
   }
 
