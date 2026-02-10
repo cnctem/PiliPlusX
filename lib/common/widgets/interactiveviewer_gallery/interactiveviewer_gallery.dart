@@ -119,7 +119,10 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
   @override
   void dispose() {
     widget.onClose?.call();
+    _player?.stop();
     _player?.dispose();
+    _player = null;
+    _videoController = null;
     _pageController.dispose();
     _animationController
       ..removeListener(listener)
