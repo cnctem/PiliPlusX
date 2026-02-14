@@ -18,6 +18,7 @@ abstract final class SettingBoxKey {
       hardwareDecoding = 'hardwareDecoding',
       videoSync = 'videoSync',
       autosync = 'autosync',
+      videoOutput = 'videoOutput',
       p1080 = 'p1080',
       enableAutoEnter = 'enableAutoEnter',
       enableAutoExit = 'enableAutoExit',
@@ -228,6 +229,9 @@ abstract final class SettingBoxKey {
       msgUnReadTypeV2 = 'msgUnReadTypeV2',
       navBarSort = 'navBarSort',
       tempPlayerConf = 'tempPlayerConf',
+      enableHDR = 'enableHDR',
+      platformView = 'platformView',
+      platformViewHCPP = 'platformViewHCPP',
       reduceLuxColor = 'reduceLuxColor',
       liveCdnUrl = 'liveCdnUrl';
 }
