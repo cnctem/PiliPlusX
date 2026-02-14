@@ -236,12 +236,8 @@ class _MainAppState extends PopScopeState<MainApp>
   }
 
   void _onBack() {
-    if (PlatformUtils.isDesktop) {
-      onWindowClose();
-    } else if (Platform.isAndroid) {
+    if (Platform.isAndroid) {
       Utils.channel.invokeMethod('back');
-    } else {
-      SystemNavigator.pop();
     }
   }
 
