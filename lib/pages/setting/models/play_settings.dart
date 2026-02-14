@@ -144,13 +144,17 @@ List<SettingsModel> get playSettings => [
         } catch (_) {}
       },
     ),
-  SwitchModel(
+  const SwitchModel(
     title: '启用键盘控制',
-    subtitle: '点击查看快捷键',
-    leading: const Icon(Icons.keyboard_alt_outlined),
+    subtitle: '部分快捷键无法关闭',
+    leading: Icon(Icons.keyboard_alt_outlined),
     setKey: SettingBoxKey.keyboardControl,
     defaultVal: true,
-    onTap: (context) {
+  ),
+  NormalModel(
+    title: '查看快捷键',
+    leading: const Icon(Icons.info_outline),
+    onTap: (context, setState) {
       showDialog(
         context: context,
         builder: (context) {
