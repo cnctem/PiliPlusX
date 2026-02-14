@@ -338,6 +338,10 @@ class MyApp extends StatelessWidget {
       return Focus(
         canRequestFocus: false,
         onKeyEvent: (_, event) {
+          if (!Pref.keyboardControl) {
+            return KeyEventResult.ignored;
+          }
+
           // 处理退出快捷键 (Cmd+Q)
           if (Platform.isMacOS) {
             final quitResult = ShortcutHandler.handleQuitKey(event);

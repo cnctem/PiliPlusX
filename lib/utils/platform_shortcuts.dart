@@ -5,6 +5,7 @@ import 'package:PiliPlus/pages/dynamics/controller.dart';
 import 'package:PiliPlus/pages/home/controller.dart';
 import 'package:PiliPlus/pages/main/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -27,6 +28,7 @@ bool get isPrimaryModifierPressed {
 class ShortcutHandler {
   // 处理退出快捷键 (Cmd+Q)
   static KeyEventResult? handleQuitKey(KeyEvent event) {
+    if (!Pref.keyboardControl) return null;
     if (event is! KeyDownEvent) return null;
 
     if (event.logicalKey != LogicalKeyboardKey.keyQ) {
@@ -36,13 +38,13 @@ class ShortcutHandler {
     if (defaultTargetPlatform == TargetPlatform.macOS &&
         HardwareKeyboard.instance.isMetaPressed) {
       exit(0);
-      return KeyEventResult.handled;
     }
     return null;
   }
 
   // 处理刷新快捷键
   static KeyEventResult? handleRefreshKey(KeyEvent event) {
+    if (!Pref.keyboardControl) return null;
     if (event is! KeyDownEvent) return null;
     // 1. 先匹配字母 R
     if (event.logicalKey != LogicalKeyboardKey.keyR) {
@@ -62,6 +64,7 @@ class ShortcutHandler {
 
   // 处理设置快捷键 (主修饰键 + ,)
   static KeyEventResult? handleSettingsKey(KeyEvent event) {
+    if (!Pref.keyboardControl) return null;
     if (event is! KeyDownEvent) return null;
     // 1. 先匹配逗号键
     if (event.logicalKey != LogicalKeyboardKey.comma) {
@@ -118,6 +121,7 @@ class ShortcutHandler {
 
   // 处理Alt+H/Opt+H返回主页快捷键
   static KeyEventResult? handleHomeShortcut(KeyEvent event) {
+    if (!Pref.keyboardControl) return null;
     if (event is! KeyDownEvent) return null;
     // 1. 先匹配字母 H
     if (event.logicalKey != LogicalKeyboardKey.keyH) {
