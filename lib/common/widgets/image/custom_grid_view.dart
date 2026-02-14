@@ -97,6 +97,8 @@ class CustomGridView extends StatelessWidget {
           liveUrl: isLive ? item.liveUrl : null,
           width: isLive ? item.width.toInt() : null,
           height: isLive ? item.height.toInt() : null,
+          // width: item.width.toInt(),
+          // height: item.height.toInt(),
         );
       },
     ).toList();

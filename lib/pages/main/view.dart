@@ -172,18 +172,19 @@ class _MainAppState extends PopScopeState<MainApp>
 
   void _onHideWindow() {
     if (_mainController.pauseOnMinimize) {
-      _mainController.isPlaying =
-          PlPlayerController.instance?.playerStatus.value ==
-          PlayerStatus.playing;
-      PlPlayerController.pauseIfExists();
+      if (PlPlayerController.instance case final player?) {
+        if (_mainController.isPlaying = player.playerStatus.isPlaying) {
+          player.pause();
+        }
+      } else {
+        _mainController.isPlaying = false;
+      }
     }
   }
 
   void _onShowWindow() {
-    if (_mainController.pauseOnMinimize) {
-      if (_mainController.isPlaying) {
-        PlPlayerController.playIfExists();
-      }
+    if (_mainController.pauseOnMinimize && _mainController.isPlaying) {
+      PlPlayerController.instance?.play();
     }
   }
 
@@ -216,9 +217,9 @@ class _MainAppState extends PopScopeState<MainApp>
 
   Future<void> _handleTray() async {
     if (Platform.isWindows) {
-      await trayManager.setIcon('assets/images/logo/app_icon.ico');
+      await trayManager.setIcon('assets/images/logo/ico/app_icon.ico');
     } else {
-      await trayManager.setIcon('assets/images/logo/logo_large.png');
+      await trayManager.setIcon('assets/images/logo/desktop/logo_large.png');
     }
     if (!Platform.isLinux) {
       await trayManager.setToolTip(Constants.appName);

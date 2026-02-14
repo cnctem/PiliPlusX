@@ -104,7 +104,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
       ..danmakuController = _liveRoomController.danmakuController;
     PlPlayerController.setPlayCallBack(plPlayerController.play);
     _liveRoomController.startLiveTimer();
-    if (plPlayerController.playerStatus.playing &&
+    if (plPlayerController.playerStatus.isPlaying &&
         plPlayerController.cid == null) {
       _liveRoomController
         ..danmakuController?.resume()
@@ -132,12 +132,12 @@ class _LiveRoomPageState extends State<LiveRoomPage>
       ..danmakuController?.pause()
       ..cancelLiveTimer()
       ..closeLiveMsg()
-      ..isPlaying = plPlayerController.playerStatus.playing;
+      ..isPlaying = plPlayerController.playerStatus.isPlaying;
     super.didPushNext();
   }
 
-  void playerListener(PlayerStatus? status) {
-    if (status == PlayerStatus.playing) {
+  void playerListener(PlayerStatus status) {
+    if (status.isPlaying) {
       _liveRoomController
         ..danmakuController?.resume()
         ..startLiveTimer()
@@ -733,7 +733,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
               onPageChanged: (value) =>
                   _liveRoomController.pageIndex.value = value,
               horizontalDragGestureRecognizer:
-                  CustomHorizontalDragGestureRecognizer(),
+                  CustomHorizontalDragGestureRecognizer.new,
               children: [
                 KeepAliveWrapper(builder: (context) => chat()),
                 SuperChatPanel(

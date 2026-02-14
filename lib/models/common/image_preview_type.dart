@@ -1,3 +1,5 @@
+import 'package:PiliPlus/common/constants.dart';
+
 enum SourceType { fileImage, networkImage, livePhoto }
 
 class SourceModel {
@@ -14,4 +16,11 @@ class SourceModel {
     this.width,
     this.height,
   });
+
+  bool get isLongPic {
+    if (width != null && height != null) {
+      return height! / width! > StyleString.imgMaxRatio;
+    }
+    return false;
+  }
 }
