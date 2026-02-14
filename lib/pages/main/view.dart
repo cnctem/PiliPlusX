@@ -49,6 +49,10 @@ class _MainAppState extends PopScopeState<MainApp>
         _handleTray();
       }
     }
+    canPopNotifier.value = _canPop();
+    ever(_mainController.selectedIndex, (int index) {
+      canPopNotifier.value = _canPop();
+    });
   }
 
   @override
@@ -235,27 +239,24 @@ class _MainAppState extends PopScopeState<MainApp>
     await trayManager.setContextMenu(trayMenu);
   }
 
-  static void _onBack() {
-    if (Platform.isAndroid) {
-      Utils.channel.invokeMethod('back');
-    } else {
-      SystemNavigator.pop();
-    }
+  bool _canPop() {
+    return _mainController.directExitOnBack ||
+        _mainController.selectedIndex.value == 0;
   }
 
   @override
   void onPopInvokedWithResult(bool didPop, Object? result) {
-    if (_mainController.directExitOnBack) {
-      _onBack();
-    } else {
-      if (_mainController.selectedIndex.value != 0) {
-        _mainController
-          ..setIndex(0)
-          ..showBottomBar?.value = true
-          ..setSearchBar();
+    if (didPop) {
+      if (Platform.isAndroid) {
+        Utils.channel.invokeMethod('back');
       } else {
-        _onBack();
+        SystemNavigator.pop();
       }
+    } else {
+      _mainController
+        ..setIndex(0)
+        ..showBottomBar?.value = true
+        ..setSearchBar();
     }
   }
 
