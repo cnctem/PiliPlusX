@@ -286,12 +286,12 @@
 - 在此致敬上游作者：[orz12/PiliPalaX](https://github.com/orz12/PiliPalaX)
 - 在此致敬上游作者：[bggRGjQaUbCoE/PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus)
 - 在此致敬上游作者：[gucooing/PiliPlus](https://github.com/gucooing/PiliPlus)
+- 在此致敬上游作者：[chenx-dust/PiliPlus](https://github.com/chenx-dust/PiliPlus)
+- 致谢鸿蒙版上游 [qinshah/PiliPlus](https://github.com/qinshah/PiliPlus)
+- 鸿蒙适配[致谢](https://github.com/cnctem/PiliPlusX/tree/ohos?tab=readme-ov-file#感谢)
 
-- [bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect)
+- bilibili-API-collect
 - [flutter_meedu_videoplayer](https://github.com/zezo357/flutter_meedu_videoplayer)
 - [media-kit](https://github.com/media-kit/media-kit)
 - [dio](https://pub.dev/packages/dio)
 - 等等
-
-- 致谢鸿蒙版上游 [qinshah/PiliPlus](https://github.com/qinshah/PiliPlus)
-- 鸿蒙适配[致谢](https://github.com/cnctem/PiliPlusX/tree/ohos?tab=readme-ov-file#感谢)
