@@ -71,6 +71,10 @@ class _MainAppState extends PopScopeState<MainApp>
       // FlutterSmartDialog throws
       PiliScheme.init();
     }
+    canPopNotifier.value = _canPop();
+    ever(_mainController.selectedIndex, (int index) {
+      canPopNotifier.value = _canPop();
+    });
   }
 
   @override
@@ -296,6 +300,11 @@ class _MainAppState extends PopScopeState<MainApp>
     await trayManager.setContextMenu(trayMenu);
   }
 
+  bool _canPop() {
+    return _mainController.directExitOnBack ||
+        _mainController.selectedIndex.value == 0;
+  }
+
   void _onBack() {
     if (PlatformUtils.isDesktop) {
       onWindowClose();
@@ -306,18 +315,14 @@ class _MainAppState extends PopScopeState<MainApp>
 
   @override
   void onPopInvokedWithResult(bool didPop, Object? result) {
-    if (_mainController.directExitOnBack) {
+    if (didPop) {
       _onBack();
     } else {
-      if (_mainController.selectedIndex.value != 0) {
-        _mainController
-          ..setIndex(0)
-          ..barOffset?.value = 0.0
-          ..showBottomBar?.value = true
-          ..setSearchBar();
-      } else {
-        _onBack();
-      }
+      _mainController
+        ..setIndex(0)
+        ..barOffset?.value = 0.0
+        ..showBottomBar?.value = true
+        ..setSearchBar();
     }
   }
 
