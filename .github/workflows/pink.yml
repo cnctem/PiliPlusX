@@ -22,6 +22,7 @@ jobs:
 
             - name: Rename package
               run: |
+                export LC_ALL=C
                 find . -path "./lib/utils/update.dart" -type f -exec sed -i 's/androidInfo\.supportedAbis\.first/"pink"/g' {} \;
                 sed -i 's/com\.gucooing\.piliplus/tv\.danmaku\.bili/g' \
                   android/app/build.gradle.kts \
