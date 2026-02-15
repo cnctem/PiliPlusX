@@ -193,7 +193,7 @@
   - [x] 弹幕
   - [x] 字幕
   - [x] 记忆播放
-  - [x] 视频比例：高度/宽度适应、填充、包含等
+  - [x] 视频比例: 高度/宽度适应、填充、包含等
      
 - [x] 搜索相关
   - [x] 热搜
@@ -215,7 +215,7 @@
 - [x] 设置相关
   - [x] 画质、音质、解码方式预设      
   - [x] 图片质量设定
-  - [x] 主题模式：亮色/暗色/跟随系统
+  - [x] 主题模式: 亮色/暗色/跟随系统
   - [x] 震动反馈(可选)
   - [x] 高帧率
   - [x] 自动全屏
@@ -258,9 +258,10 @@
 
 ## PiliPlusX版本说明
 
-- 主线版本：基于上游[`main`分支](https://github.com/bggRGjQaUbCoE/PiliPlus/tree/main)更新最及时，打包 Android、iOS、Windows、macOS 版本
-- oddo版本：基于上游[`flutter_3.35.7`分支](https://github.com/bggRGjQaUbCoE/PiliPlus/tree/flutter_3.35.7)，面向color OS等字体错误的定制安卓，仅打包 Android 版本
-- ohos版本：基于上游[qinshah/PiliPlus](https://github.com/qinshah/PiliPlus)
+- 主线版本: 基于上游[`main`分支](https://github.com/bggRGjQaUbCoE/PiliPlus/tree/main)更新最及时，打包 Android、iOS、Windows、macOS 版本
+- pink版本: 主线版本修改包名共存，详见 [#21](https://github.com/cnctem/PiliPlusX/issues/21)
+- oddo版本: 基于上游[`flutter_3.35.7`分支](https://github.com/bggRGjQaUbCoE/PiliPlus/tree/flutter_3.35.7)，面向color OS等字体错误的定制安卓，仅打包 Android 版本
+- ohos版本: 基于上游[qinshah/PiliPlus](https://github.com/qinshah/PiliPlus)
 
 ## PiliPlusX字体修复说明
 
@@ -282,11 +283,11 @@
 
 ## 致谢
 
-- 在此致敬原作者：[guozhigq/pilipala](https://github.com/guozhigq/pilipala)
-- 在此致敬上游作者：[orz12/PiliPalaX](https://github.com/orz12/PiliPalaX)
-- 在此致敬上游作者：[bggRGjQaUbCoE/PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus)
-- 在此致敬上游作者：[gucooing/PiliPlus](https://github.com/gucooing/PiliPlus)
-- 在此致敬上游作者：[chenx-dust/PiliPlus](https://github.com/chenx-dust/PiliPlus)
+- 在此致敬原作者: [guozhigq/pilipala](https://github.com/guozhigq/pilipala)
+- 在此致敬上游作者: [orz12/PiliPalaX](https://github.com/orz12/PiliPalaX)
+- 在此致敬上游作者: [bggRGjQaUbCoE/PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus)
+- 在此致敬上游作者: [gucooing/PiliPlus](https://github.com/gucooing/PiliPlus)
+- 在此致敬上游作者: [chenx-dust/PiliPlus](https://github.com/chenx-dust/PiliPlus)
 - 致谢鸿蒙版上游 [qinshah/PiliPlus](https://github.com/qinshah/PiliPlus)
 - 鸿蒙适配[致谢](https://github.com/cnctem/PiliPlusX/tree/ohos?tab=readme-ov-file#感谢)
 
