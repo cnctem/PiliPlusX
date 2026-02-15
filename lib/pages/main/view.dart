@@ -100,6 +100,10 @@ class _MainAppState extends PopScopeState<MainApp>
     if (PlatformUtils.isMobile || Platform.isLinux || Platform.isWindows) {
       PiliScheme.init();
     }
+    canPopNotifier.value = _canPop();
+    ever(_mainController.selectedIndex, (int index) {
+      canPopNotifier.value = _canPop();
+    });
   }
 
   @override
@@ -323,6 +327,11 @@ class _MainAppState extends PopScopeState<MainApp>
     await trayManager.setContextMenu(trayMenu);
   }
 
+  bool _canPop() {
+    return _mainController.directExitOnBack ||
+        _mainController.selectedIndex.value == 0;
+  }
+
   void _onBack() {
     if (OS.isHarmony) {
       SystemNavigator.pop();
@@ -335,18 +344,14 @@ class _MainAppState extends PopScopeState<MainApp>
 
   @override
   void onPopInvokedWithResult(bool didPop, Object? result) {
-    if (_mainController.directExitOnBack) {
+    if (didPop) {
       _onBack();
     } else {
-      if (_mainController.selectedIndex.value != 0) {
-        _mainController
-          ..setIndex(0)
-          ..barOffset?.value = 0.0
-          ..showBottomBar?.value = true
-          ..setSearchBar();
-      } else {
-        _onBack();
-      }
+      _mainController
+        ..setIndex(0)
+        ..barOffset?.value = 0.0
+        ..showBottomBar?.value = true
+        ..setSearchBar();
     }
   }
 
