@@ -239,7 +239,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: 8595bdf74408e342927659977470aa080ee62de8
+      resolved-ref: "8595bdf74408e342927659977470aa080ee62de8"
       url: "https://github.com/cnctem/canvas_danmaku.git"
     source: git
     version: "0.2.6"
