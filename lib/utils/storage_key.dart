@@ -64,6 +64,7 @@ abstract final class SettingBoxKey {
       showDynInteraction = 'showDynInteraction',
       enableHotKey = 'enableHotKey',
       enableSearchRcmd = 'enableSearchRcmd',
+      searchTypeSort = 'searchTypeSort',
       enableQuickFav = 'enableQuickFav',
       enableQuickShare = 'enableQuickShare',
       enableWordRe = 'enableWordRe',
