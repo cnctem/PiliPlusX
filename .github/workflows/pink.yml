@@ -23,7 +23,7 @@ jobs:
             - name: Rename package
               run: |
                 find . -path "./lib/utils/update.dart" -type f -exec sed -i 's/androidInfo\.supportedAbis\.first/"pink"/g' {} \;
-                sed -i '' 's/com\.gucooing\.piliplus/tv\.danmaku\.bili/g' \
+                sed -i 's/com\.gucooing\.piliplus/tv\.danmaku\.bili/g' \
                   android/app/build.gradle.kts \
                   android/app/src/profile/AndroidManifest.xml \
                   android/app/src/main/AndroidManifest.xml \
