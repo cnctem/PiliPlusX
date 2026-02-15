@@ -22,7 +22,6 @@ jobs:
 
             - name: Rename package
               run: |
-                grep -rl 'com\.gucooing\.piliplus' android lib
                 export LC_ALL=C
                 sed -i 's/androidInfo\.supportedAbis\.first/"pink"/g' lib/utils/update.dart
                 sed -i 's/com\.gucooing\.piliplus/tv\.danmaku\.bili/g' \
@@ -31,6 +30,8 @@ jobs:
                   android/app/src/main/AndroidManifest.xml \
                   android/app/src/main/kotlin/com/example/piliplus/MainActivity.kt \
                   lib/services/audio_handler.dart
+                grep -n '"pink"' lib/utils/update.dart || echo "update.dart 替换失败"
+                grep -n 'tv\.danmaku\.bili' android/app/build.gradle.kts | head -2 || echo "build.gradle.kts 替换失败"
               shell: bash
 
             - name: 构建Java环境
