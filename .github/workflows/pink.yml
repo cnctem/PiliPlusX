@@ -22,8 +22,13 @@ jobs:
 
             - name: Rename package
               run: |
-                grep -rl 'com\.gucooing\.piliplus' android lib | xargs -I{} sed -i 's/com\.gucooing\.piliplus/tv\.danmaku\.bili/g' "{}"
                 find . -path "./lib/utils/update.dart" -type f -exec sed -i 's/androidInfo\.supportedAbis\.first/"pink"/g' {} \;
+                sed -i '' 's/com\.gucooing\.piliplus/tv\.danmaku\.bili/g' \
+                  android/app/build.gradle.kts \
+                  android/app/src/profile/AndroidManifest.xml \
+                  android/app/src/main/AndroidManifest.xml \
+                  android/app/src/main/kotlin/com/example/piliplus/MainActivity.kt \
+                  lib/services/audio_handler.dart
               shell: bash
 
             - name: 构建Java环境
@@ -101,9 +106,8 @@ jobs:
                   files: |
                       PiliPlusX_android_*.apk
 
-            - name: 上传
+            - name: Upload Pink release
               uses: actions/upload-artifact@v5
               with:
-                  name: Android_arm64-v8a
-                  path: |
-                      PiliPlusX_android_*_pink.apk
+                  name: Android_Pink
+                  path: PiliPlusX_android_*_pink.apk
