@@ -213,6 +213,7 @@ class LiveRoomController extends GetxController {
       isLive: true,
       autoplay: autoplay,
       isVertical: isPortrait.value,
+      canHDR: false,
     );
   }
 

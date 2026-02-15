@@ -392,7 +392,15 @@ class PlPlayerController with BlockConfigMixin {
   bool enableHeart = true;
 
   late final bool enableHA = Pref.enableHA;
-  late final String hwdec = Pref.hardwareDecoding;
+  late final bool enableHDR = Platform.isAndroid && Pref.enableHDR;
+
+  bool? _canHDR;
+  String get hwdec =>
+      enableHDR && _canHDR == true ? 'mediacodec,auto' : Pref.hardwareDecoding;
+  String get vo =>
+      enableHDR && _canHDR == true ? 'mediacodec_embed,gpu' : Pref.videoOutput;
+  bool get platformView => Pref.platformView || (enableHDR && _canHDR == true);
+  late final bool platformViewHCPP = Pref.platformViewHCPP;
 
   late final progressType = Pref.btmProgressBehavior;
   late final enableQuickDouble = Pref.enableQuickDouble;
@@ -600,6 +608,7 @@ class PlPlayerController with BlockConfigMixin {
     String? dirPath,
     String? typeTag,
     int? mediaType,
+    bool? canHDR,
   }) async {
     try {
       this.dirPath = dirPath;
@@ -626,6 +635,7 @@ class PlPlayerController with BlockConfigMixin {
       _epid = epid;
       _seasonId = seasonId;
       _pgcType = pgcType;
+      _canHDR = canHDR;
 
       if (showSeekPreview) {
         _clearPreview();
@@ -830,7 +840,10 @@ class PlPlayerController with BlockConfigMixin {
       configuration: VideoControllerConfiguration(
         enableHardwareAcceleration: enableHA,
         androidAttachSurfaceAfterVideoParameters: false,
+        vo: vo.isEmpty ? null : vo,
         hwdec: enableHA ? hwdec : null,
+        usePlatformView: platformView,
+        useHCPP: platformViewHCPP,
       ),
     );
 
