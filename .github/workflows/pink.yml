@@ -22,6 +22,7 @@ jobs:
 
             - name: Rename package
               run: |
+                grep -rl 'com\.gucooing\.piliplus' android lib
                 export LC_ALL=C
                 sed -i 's/androidInfo\.supportedAbis\.first/"pink"/g' lib/utils/update.dart
                 sed -i 's/com\.gucooing\.piliplus/tv\.danmaku\.bili/g' \
