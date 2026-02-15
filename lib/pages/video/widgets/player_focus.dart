@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:math' as math;
 import 'dart:io' show exit, Platform;
+import 'dart:math' as math;
 
 import 'package:PiliPlus/pages/common/common_intro_controller.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';

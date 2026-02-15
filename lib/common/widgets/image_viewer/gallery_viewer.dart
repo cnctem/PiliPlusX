@@ -167,8 +167,6 @@ class _GalleryViewerState extends State<GalleryViewer>
     }
   }
 
-  bool isAnimating() => _animateController.value != 0;
-
   void _onDragStart(ScaleStartDetails details) {
     _dragging = true;
 
@@ -343,25 +341,26 @@ class _GalleryViewerState extends State<GalleryViewer>
 
   Widget _itemBuilder(BuildContext context, int index) {
     final item = widget.sources[index];
-    return Hero(
-      tag: item.url,
-      child: switch (item.sourceType) {
-        .fileImage => Image.file(
+    Widget child;
+    switch (item.sourceType) {
+      case SourceType.fileImage:
+        child = Image.file(
           key: _keys[index],
           File(item.url),
           filterQuality: .low,
           minScale: widget.minScale,
           maxScale: widget.maxScale,
           containerSize: _containerSize,
-          isAnimating: isAnimating,
           onDragStart: _onDragStart,
           onDragUpdate: _onDragUpdate,
           onDragEnd: _onDragEnd,
           tapGestureRecognizer: _tapGestureRecognizer,
           horizontalDragGestureRecognizer: _horizontalDragGestureRecognizer,
           onChangePage: _onChangePage,
-        ),
-        .networkImage => Image(
+        );
+      case SourceType.networkImage:
+        final isLongPic = item.isLongPic;
+        child = Image(
           key: _keys[index],
           image: CachedNetworkImageProvider(_getActualUrl(item.url)),
           minScale: widget.minScale,
@@ -385,7 +384,6 @@ class _GalleryViewerState extends State<GalleryViewer>
                   minScale: widget.minScale,
                   maxScale: widget.maxScale,
                   containerSize: _containerSize,
-                  isAnimating: isAnimating,
                   onDragStart: null,
                   onDragUpdate: null,
                   onDragEnd: null,
@@ -408,12 +406,15 @@ class _GalleryViewerState extends State<GalleryViewer>
             return child;
           },
           loadingBuilder: loadingBuilder,
-          isAnimating: isAnimating,
           onDragStart: _onDragStart,
           onDragUpdate: _onDragUpdate,
           onDragEnd: _onDragEnd,
-        ),
-        .livePhoto => Obx(
+        );
+        if (isLongPic) {
+          return child;
+        }
+      case SourceType.livePhoto:
+        child = Obx(
           key: _keys[index],
           () => _currIndex.value == index
               ? Viewer(
@@ -421,7 +422,6 @@ class _GalleryViewerState extends State<GalleryViewer>
                   maxScale: widget.maxScale,
                   containerSize: _containerSize,
                   childSize: _containerSize,
-                  isAnimating: isAnimating,
                   onDragStart: _onDragStart,
                   onDragUpdate: _onDragUpdate,
                   onDragEnd: _onDragEnd,
@@ -437,9 +437,9 @@ class _GalleryViewerState extends State<GalleryViewer>
                   ),
                 )
               : const SizedBox.shrink(),
-        ),
-      },
-    );
+        );
+    }
+    return Hero(tag: item.url, child: child);
   }
 
   void _onTap() {
