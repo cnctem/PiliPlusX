@@ -33,15 +33,25 @@ abstract class HarmonyChannel {
     _isFloatingWindow = isFloatingWindow;
     if (!isFloatingWindow) {
       ScalableWidgetsFlutterBinding.ensureInitialized().setScale(1);
-    } else if (_miniWindowLandscape) {
-      ScalableWidgetsFlutterBinding.ensureInitialized().setScale(
-        _miniWindowLandscapeScale,
-      );
+    } else {
+      if (_miniWindowLandscape) {
+        ScalableWidgetsFlutterBinding.ensureInitialized().setScale(
+          _miniWindowLandscapeScale,
+        );
+        _channel.invokeMethod('setMiniWindowLandscape', {
+          'landscape': true,
+        });
+      } else {
+        _channel.invokeMethod('setMiniWindowLandscape', {
+          'landscape': false,
+        });
+      }
     }
   }
 
   /// 设置小窗横屏
   static Future<bool> setMiniWindowLandscape(bool landscape) async {
+    _miniWindowLandscape = landscape;
     if (!landscape) {
       ScalableWidgetsFlutterBinding.ensureInitialized().setScale(1);
     } else if (_isFloatingWindow) {
@@ -49,13 +59,16 @@ abstract class HarmonyChannel {
         _miniWindowLandscapeScale,
       );
     }
-    final result = await _channel.invokeMethod<bool>('setMiniWindowLandscape', {
-      'landscape': landscape,
-    });
-    if (result == true) {
-      _miniWindowLandscape = landscape;
-      return true;
+    if (_isFloatingWindow) {
+      final result = await _channel.invokeMethod<bool>(
+        'setMiniWindowLandscape',
+        {'landscape': landscape},
+      );
+      if (result == true) {
+        return true;
+      }
+      return false;
     }
-    return false;
+    return true;
   }
 }
