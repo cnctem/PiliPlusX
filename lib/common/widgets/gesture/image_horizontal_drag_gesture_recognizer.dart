@@ -1,45 +1,32 @@
+import 'package:PiliPlus/common/widgets/gesture/horizontal_drag_gesture_recognizer.dart';
+import 'package:PiliPlus/common/widgets/gesture/image_tap_gesture_recognizer.dart'
+    show ImageGestureRecognizerMixin;
 import 'package:flutter/gestures.dart';
 
 typedef IsBoundaryAllowed =
     bool Function(Offset? initialPosition, OffsetPair lastPosition);
 
 class ImageHorizontalDragGestureRecognizer
-    extends HorizontalDragGestureRecognizer {
+    extends CustomHorizontalDragGestureRecognizer
+    with ImageGestureRecognizerMixin {
   ImageHorizontalDragGestureRecognizer({
     super.debugOwner,
     super.supportedDevices,
     super.allowedButtonsFilter,
   });
 
-  Offset? _initialPosition;
-
   IsBoundaryAllowed? isBoundaryAllowed;
-
-  int? _pointer;
-
-  @override
-  void addPointer(PointerDownEvent event) {
-    if (_pointer == event.pointer) {
-      return;
-    }
-    _pointer = event.pointer;
-    super.addPointer(event);
-  }
-
-  @override
-  void addAllowedPointer(PointerDownEvent event) {
-    super.addAllowedPointer(event);
-    _initialPosition = event.position;
-  }
 
   @override
   bool hasSufficientGlobalDistanceToAccept(
     PointerDeviceKind pointerDeviceKind,
     double? deviceTouchSlop,
   ) {
-    return globalDistanceMoved.abs() >
-            computeHitSlop(pointerDeviceKind, gestureSettings) &&
-        (isBoundaryAllowed?.call(_initialPosition, lastPosition) ?? true);
+    return super.hasSufficientGlobalDistanceToAccept(
+          pointerDeviceKind,
+          deviceTouchSlop,
+        ) &&
+        (isBoundaryAllowed?.call(initialPosition, lastPosition) ?? true);
   }
 
   @override

@@ -16,7 +16,6 @@
  */
 
 import 'dart:io' show File, Platform;
-import 'dart:ui' as ui;
 
 import 'package:PiliPlus/common/widgets/flutter/page/page_view.dart';
 import 'package:PiliPlus/common/widgets/gesture/image_horizontal_drag_gesture_recognizer.dart';
@@ -26,6 +25,7 @@ import 'package:PiliPlus/common/widgets/image_viewer/loading_indicator.dart';
 import 'package:PiliPlus/common/widgets/image_viewer/viewer.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart';
 import 'package:PiliPlus/models/common/image_preview_type.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
@@ -70,7 +70,7 @@ class _GalleryViewerState extends State<GalleryViewer>
   late Size _containerSize;
   late final int _quality;
   late final RxInt _currIndex;
-  late final List<GlobalKey> _keys;
+  GlobalKey? _key;
 
   Player? _player;
   Player get _effectivePlayer => _player ??= Player();
@@ -81,11 +81,11 @@ class _GalleryViewerState extends State<GalleryViewer>
   late final PageController _pageController;
 
   late final ImageTapGestureRecognizer _tapGestureRecognizer;
+  late final ImageDoubleTapGestureRecognizer _doubleTapGestureRecognizer;
   late final ImageHorizontalDragGestureRecognizer
   _horizontalDragGestureRecognizer;
   late final LongPressGestureRecognizer _longPressGestureRecognizer;
 
-  final Rx<Matrix4> _matrix = Rx(Matrix4.identity());
   late final AnimationController _animateController;
   late final Animation<Decoration> _opacityAnimation;
   double dx = 0, dy = 0;
@@ -106,23 +106,36 @@ class _GalleryViewerState extends State<GalleryViewer>
     super.initState();
     _quality = Pref.previewQ;
     _currIndex = widget.initIndex.obs;
-    _playIfNeeded(widget.initIndex);
-    _keys = List.generate(widget.sources.length, (_) => GlobalKey());
+    final item = widget.sources[widget.initIndex];
+    _playIfNeeded(item);
+
+    if (!item.isLongPic) {
+      _key = GlobalKey();
+      WidgetsBinding.instance.addPostFrameCallback((_) => _key = null);
+    }
 
     _pageController = PageController(initialPage: widget.initIndex);
 
     final gestureSettings = MediaQuery.maybeGestureSettingsOf(Get.context!);
     _tapGestureRecognizer = ImageTapGestureRecognizer()
-      ..onTap = _onTap
+      // ..onTap = _onTap
       ..gestureSettings = gestureSettings;
     if (PlatformUtils.isDesktop) {
       _tapGestureRecognizer.onSecondaryTapUp = _showDesktopMenu;
     }
-    _horizontalDragGestureRecognizer = ImageHorizontalDragGestureRecognizer()
+    _doubleTapGestureRecognizer = ImageDoubleTapGestureRecognizer()
+      ..onDoubleTap = () {}
       ..gestureSettings = gestureSettings;
+    _horizontalDragGestureRecognizer = ImageHorizontalDragGestureRecognizer();
     _longPressGestureRecognizer = LongPressGestureRecognizer()
       ..onLongPress = _onLongPress
       ..gestureSettings = gestureSettings;
+
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        _tapGestureRecognizer.onTap = _onTap;
+      }
+    });
 
     _animateController = AnimationController(
       duration: const Duration(milliseconds: 300),
@@ -135,27 +148,23 @@ class _GalleryViewerState extends State<GalleryViewer>
         end: const BoxDecoration(color: Colors.transparent),
       ),
     );
-
-    _animateController.addListener(_updateTransformation);
   }
 
-  void _updateTransformation() {
-    final val = _animateController.value;
-    final scale = ui.lerpDouble(1.0, 0.25, val)!;
+  Matrix4 _onTransform(double val) {
+    final scale = val.lerp(1.0, 0.25);
 
     // Matrix4.identity()
     //   ..translateByDouble(size.width / 2, size.height / 2, 0, 1)
     //   ..translateByDouble(size.width * val * dx, size.height * val * dy, 0, 1)
-    //   ..scaleByDouble(scale, scale, 1, 1)
+    //   ..scaleByDouble(scale, scale, scale, 1)
     //   ..translateByDouble(-size.width / 2, -size.height / 2, 0, 1);
 
     final tmp = (1.0 - scale) / 2.0;
-    _matrix.value = Matrix4.diagonal3Values(scale, scale, scale)
-      ..setTranslationRaw(
-        _containerSize.width * (val * dx + tmp),
-        _containerSize.height * (val * dy + tmp),
-        0,
-      );
+    return Matrix4.diagonal3Values(scale, scale, scale)..setTranslationRaw(
+      _containerSize.width * (val * dx + tmp),
+      _containerSize.height * (val * dy + tmp),
+      0,
+    );
   }
 
   void _updateMoveAnimation() {
@@ -218,13 +227,14 @@ class _GalleryViewerState extends State<GalleryViewer>
     _player = null;
     _videoController = null;
     _pageController.dispose();
-    _animateController
-      ..removeListener(_updateTransformation)
-      ..dispose();
+    _animateController.dispose();
     _tapGestureRecognizer.dispose();
+    _doubleTapGestureRecognizer
+      ..onDoubleTapDown = null
+      ..onDoubleTap = null
+      ..dispose();
     _longPressGestureRecognizer.dispose();
     _currIndex.close();
-    _matrix.close();
     if (widget.quality != _quality) {
       for (final item in widget.sources) {
         if (item.sourceType == SourceType.networkImage) {
@@ -237,6 +247,7 @@ class _GalleryViewerState extends State<GalleryViewer>
 
   void _onPointerDown(PointerDownEvent event) {
     _tapGestureRecognizer.addPointer(event);
+    _doubleTapGestureRecognizer.addPointer(event);
     _longPressGestureRecognizer.addPointer(event);
   }
 
@@ -248,26 +259,27 @@ class _GalleryViewerState extends State<GalleryViewer>
       child: DecoratedBoxTransition(
         decoration: _opacityAnimation,
         child: Stack(
+          fit: .expand,
+          alignment: .center,
           clipBehavior: .none,
           children: [
             LayoutBuilder(
               builder: (context, constraints) {
                 _containerSize = constraints.biggest;
-                return Obx(
-                  () => Transform(
-                    transform: _matrix.value,
-                    child:
-                        PageView<ImageHorizontalDragGestureRecognizer>.builder(
-                          controller: _pageController,
-                          onPageChanged: _onPageChanged,
-                          physics: const CustomTabBarViewScrollPhysics(
-                            parent: AlwaysScrollableScrollPhysics(),
-                          ),
-                          itemCount: widget.sources.length,
-                          itemBuilder: _itemBuilder,
-                          horizontalDragGestureRecognizer: () =>
-                              _horizontalDragGestureRecognizer,
-                        ),
+                return MatrixTransition(
+                  alignment: .topLeft,
+                  animation: _animateController,
+                  onTransform: _onTransform,
+                  child: PageView<ImageHorizontalDragGestureRecognizer>.builder(
+                    controller: _pageController,
+                    onPageChanged: _onPageChanged,
+                    physics: const CustomTabBarViewScrollPhysics(
+                      parent: AlwaysScrollableScrollPhysics(),
+                    ),
+                    itemCount: widget.sources.length,
+                    itemBuilder: _itemBuilder,
+                    horizontalDragGestureRecognizer: () =>
+                        _horizontalDragGestureRecognizer,
                   ),
                 );
               },
@@ -309,8 +321,7 @@ class _GalleryViewerState extends State<GalleryViewer>
     ),
   );
 
-  void _playIfNeeded(int index) {
-    final item = widget.sources[index];
+  void _playIfNeeded(SourceModel item) {
     if (item.sourceType == .livePhoto) {
       _effectivePlayer.open(Media(item.liveUrl!));
     }
@@ -318,7 +329,7 @@ class _GalleryViewerState extends State<GalleryViewer>
 
   void _onPageChanged(int index) {
     _player?.pause();
-    _playIfNeeded(index);
+    _playIfNeeded(widget.sources[index]);
     _currIndex.value = index;
   }
 
@@ -341,11 +352,11 @@ class _GalleryViewerState extends State<GalleryViewer>
 
   Widget _itemBuilder(BuildContext context, int index) {
     final item = widget.sources[index];
-    Widget child;
+    final Widget child;
     switch (item.sourceType) {
       case SourceType.fileImage:
         child = Image.file(
-          key: _keys[index],
+          key: _key,
           File(item.url),
           filterQuality: .low,
           minScale: widget.minScale,
@@ -355,18 +366,20 @@ class _GalleryViewerState extends State<GalleryViewer>
           onDragUpdate: _onDragUpdate,
           onDragEnd: _onDragEnd,
           tapGestureRecognizer: _tapGestureRecognizer,
+          doubleTapGestureRecognizer: _doubleTapGestureRecognizer,
           horizontalDragGestureRecognizer: _horizontalDragGestureRecognizer,
           onChangePage: _onChangePage,
         );
       case SourceType.networkImage:
         final isLongPic = item.isLongPic;
         child = Image(
-          key: _keys[index],
+          key: _key,
           image: CachedNetworkImageProvider(_getActualUrl(item.url)),
           minScale: widget.minScale,
           maxScale: widget.maxScale,
           containerSize: _containerSize,
           tapGestureRecognizer: _tapGestureRecognizer,
+          doubleTapGestureRecognizer: _doubleTapGestureRecognizer,
           horizontalDragGestureRecognizer: _horizontalDragGestureRecognizer,
           onChangePage: _onChangePage,
           frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
@@ -375,7 +388,7 @@ class _GalleryViewerState extends State<GalleryViewer>
             }
             if (frame == null) {
               if (widget.quality == _quality) {
-                return const SizedBox.expand();
+                return child;
               } else {
                 return Image(
                   image: CachedNetworkImageProvider(
@@ -388,6 +401,7 @@ class _GalleryViewerState extends State<GalleryViewer>
                   onDragUpdate: null,
                   onDragEnd: null,
                   tapGestureRecognizer: _tapGestureRecognizer,
+                  doubleTapGestureRecognizer: _doubleTapGestureRecognizer,
                   horizontalDragGestureRecognizer:
                       _horizontalDragGestureRecognizer,
                   onChangePage: _onChangePage,
@@ -415,7 +429,7 @@ class _GalleryViewerState extends State<GalleryViewer>
         }
       case SourceType.livePhoto:
         child = Obx(
-          key: _keys[index],
+          key: _key,
           () => _currIndex.value == index
               ? Viewer(
                   minScale: widget.minScale,
@@ -426,6 +440,7 @@ class _GalleryViewerState extends State<GalleryViewer>
                   onDragUpdate: _onDragUpdate,
                   onDragEnd: _onDragEnd,
                   tapGestureRecognizer: _tapGestureRecognizer,
+                  doubleTapGestureRecognizer: _doubleTapGestureRecognizer,
                   horizontalDragGestureRecognizer:
                       _horizontalDragGestureRecognizer,
                   onChangePage: _onChangePage,
@@ -572,28 +587,25 @@ class _GalleryViewerState extends State<GalleryViewer>
     Widget child,
     ImageChunkEvent? loadingProgress,
   ) {
-    if (loadingProgress != null) {
-      if (loadingProgress.cumulativeBytesLoaded !=
-              loadingProgress.expectedTotalBytes &&
-          loadingProgress.expectedTotalBytes != null) {
-        return Stack(
-          fit: .expand,
-          alignment: .center,
-          clipBehavior: .none,
-          children: [
-            child,
-            Center(
-              child: LoadingIndicator(
-                size: 39.4,
-                progress:
-                    loadingProgress.cumulativeBytesLoaded /
-                    loadingProgress.expectedTotalBytes!,
-              ),
+    return Stack(
+      fit: .expand,
+      alignment: .center,
+      clipBehavior: .none,
+      children: [
+        child,
+        if (loadingProgress != null &&
+            loadingProgress.expectedTotalBytes != null &&
+            loadingProgress.cumulativeBytesLoaded !=
+                loadingProgress.expectedTotalBytes)
+          Center(
+            child: LoadingIndicator(
+              size: 39.4,
+              progress:
+                  loadingProgress.cumulativeBytesLoaded /
+                  loadingProgress.expectedTotalBytes!,
             ),
-          ],
-        );
-      }
-    }
-    return child;
+          ),
+      ],
+    );
   }
 }
