@@ -20,7 +20,6 @@ body:
           required: true
         - label: 已排除设置问题
           required: true
-
   - type: checkboxes
     id: assign
     attributes:

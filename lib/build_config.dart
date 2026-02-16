@@ -9,7 +9,7 @@ class BuildConfig {
   );
   static const String versionTag = String.fromEnvironment(
     'pili.tag',
-    defaultValue: versionName,
+    defaultValue: 'N/A',
   );
 
   static const int buildTime = int.fromEnvironment('pili.time');

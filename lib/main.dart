@@ -17,6 +17,7 @@ import 'package:PiliPlus/utils/app_scheme.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
 import 'package:PiliPlus/utils/calc_window_position.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
+import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/json_file_handler.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
@@ -28,6 +29,7 @@ import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/theme_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/utils/window_control.dart';
 import 'package:catcher_2/catcher_2.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
@@ -39,6 +41,7 @@ import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:path/path.dart' as path;
@@ -167,7 +170,7 @@ void main() async {
     await windowManager.ensureInitialized();
 
     final windowOptions = WindowOptions(
-      minimumSize: const Size(400, 720),
+      minimumSize: const Size(400, 700),
       skipTaskbar: false,
       titleBarStyle: Pref.showWindowTitleBar
           ? TitleBarStyle.normal
@@ -182,6 +185,11 @@ void main() async {
       if (Pref.isWindowMaximized) await windowManager.maximize();
       await windowManager.show();
       await windowManager.focus();
+
+      // Restore window from minimized state on Windows
+      if (Platform.isWindows) {
+        await WindowControl.restoreWindow();
+      }
     });
   }
 

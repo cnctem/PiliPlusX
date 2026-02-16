@@ -539,7 +539,8 @@ class RefreshIndicatorState extends State<RefreshIndicator>
           _status == RefreshIndicatorStatus.armed,
     );
     double newValue =
-        _dragOffset! / (containerExtent * kDragContainerExtentPercentage);
+        _dragOffset! /
+        (containerExtent * (kDragContainerExtentPercentage + 0.01));
     if (_status == RefreshIndicatorStatus.armed) {
       newValue = math.max(newValue, 1.0 / _kDragSizeFactorLimit);
     }

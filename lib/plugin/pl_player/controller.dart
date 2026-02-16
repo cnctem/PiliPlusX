@@ -36,6 +36,7 @@ import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/extension/box_ext.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
@@ -379,6 +380,9 @@ class PlPlayerController {
   late final enableDragSubtitle = Pref.enableDragSubtitle;
   late final fastForBackwardDuration = Duration(
     seconds: Pref.fastForBackwardDuration,
+  );
+  late final fastForBackwardDuration_ = Duration(
+    seconds: Pref.fastForBackwardDuration_,
   );
 
   late final horizontalSeasonPanel = Pref.horizontalSeasonPanel;
@@ -1590,9 +1594,10 @@ class PlPlayerController {
         }
       } else {
         if (PlatformUtils.isMobile) {
-          showStatusBar();
-          if (mode == FullScreenMode.none) {
-            return;
+          if (!Pref.hideStatusBar) {
+            showStatusBar();
+          } else {
+            hideStatusBarKeepNav();
           }
           if (!horizontalScreen) {
             await verticalScreenForTwoSeconds();
@@ -1860,7 +1865,7 @@ class PlPlayerController {
           builder: (context) => GestureDetector(
             onTap: () {
               Get.back();
-              ImageUtils.saveByteImg(
+              ImageUtils.saveScreenShot(
                 bytes: value,
                 fileName: 'screenshot_${ImageUtils.time}',
               );

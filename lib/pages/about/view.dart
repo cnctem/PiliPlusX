@@ -12,6 +12,7 @@ import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/accounts/account.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
+import 'package:PiliPlus/utils/extension/context_ext.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/login_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
@@ -178,6 +179,12 @@ Commit Hash: ${BuildConfig.commitHash}''',
             leading: const Icon(Icons.code),
             title: const Text('Source Code'),
             subtitle: Text(Constants.sourceCodeUrl, style: subTitleStyle),
+          ),
+          ListTile(
+            onTap: () => PageUtils.launchURL(Constants.upstreamCodeUrl),
+            leading: const Icon(Icons.code),
+            title: const Text('Upstream Code'),
+            subtitle: Text(Constants.upstreamCodeUrl, style: subTitleStyle),
           ),
           if (Platform.isAndroid)
             ListTile(

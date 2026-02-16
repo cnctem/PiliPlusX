@@ -11,6 +11,7 @@ import 'package:PiliPlus/models/common/dynamic/up_panel_position.dart';
 import 'package:PiliPlus/models/common/home_tab_type.dart';
 import 'package:PiliPlus/models/common/msg/msg_unread_type.dart';
 import 'package:PiliPlus/models/common/nav_bar_config.dart';
+import 'package:PiliPlus/models/common/search/search_type.dart';
 import 'package:PiliPlus/models/common/theme/theme_color_type.dart';
 import 'package:PiliPlus/models/common/theme/theme_type.dart';
 import 'package:PiliPlus/pages/main/controller.dart';
@@ -24,6 +25,7 @@ import 'package:PiliPlus/pages/setting/widgets/select_dialog.dart';
 import 'package:PiliPlus/pages/setting/widgets/slide_dialog.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/utils/extension/get_ext.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/global_data.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
@@ -37,6 +39,46 @@ import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+
+/// 获取页面过渡动画的中文名称
+String _getTransitionLabel(Transition transition) {
+  switch (transition) {
+    case Transition.fade:
+      return 'fade (渐变动效)';
+    case Transition.fadeIn:
+      return 'fadeIn (褪色;渐变特效)';
+    case Transition.rightToLeft:
+      return 'rightToLeft (从右到左)';
+    case Transition.leftToRight:
+      return 'leftToRight (从左到右)';
+    case Transition.upToDown:
+      return 'upToDown (从上到下)';
+    case Transition.downToUp:
+      return 'downToUp (从下到上)';
+    case Transition.rightToLeftWithFade:
+      return 'rightToLeftWithFade (从右到左并渐隐)';
+    case Transition.leftToRightWithFade:
+      return 'leftToRightWithFade (从左到右并渐隐)';
+    case Transition.zoom:
+      return 'zoom (缩放)';
+    case Transition.topLevel:
+      return 'topLevel (顶级；最高级别)';
+    case Transition.noTransition:
+      return 'noTransition (无过渡)';
+    case Transition.cupertino:
+      return 'cupertino (库比蒂诺)';
+    case Transition.cupertinoDialog:
+      return 'cupertinoDialog (库比蒂诺对话框)';
+    case Transition.size:
+      return 'size (尺寸)';
+    case Transition.circularReveal:
+      return 'circularReveal (图形揭示)';
+    case Transition.native:
+      return 'native (原生样式)';
+    default:
+      return transition.name;
+  }
+}
 
 List<SettingsModel> get styleSettings => [
   if (PlatformUtils.isDesktop) ...[
@@ -77,9 +119,43 @@ List<SettingsModel> get styleSettings => [
     defaultVal: false,
     needReboot: true,
   ),
+  const SwitchModel(
+    title: '首页显示一键刷新',
+    subtitle: '桌面端友好；移动端不建议开启，可点击主菜单栏当前项刷新',
+    leading: Icon(Icons.refresh_rounded),
+    setKey: SettingBoxKey.showHomeRefreshFab,
+    defaultVal: false,
+  ),
+  const SwitchModel(
+    title: '动态页显示一键刷新',
+    subtitle: '桌面端友好；移动端不建议开启，可点击主菜单栏当前项刷新',
+    leading: Icon(Icons.refresh_rounded),
+    setKey: SettingBoxKey.showDynamicsRefreshFab,
+    defaultVal: false,
+  ),
+  if (PlatformUtils.isMobile) ...[
+    const SwitchModel(
+      title: '隐藏状态栏',
+      subtitle: '开启后将隐藏状态栏并移除安全边距，实测平板友好，非平板设备谨慎开启',
+      leading: Icon(Icons.fullscreen_outlined),
+      setKey: SettingBoxKey.hideStatusBar,
+      defaultVal: false,
+      needReboot: true,
+    ),
+  ],
+  if (!Platform.isMacOS) ...[
+    const SwitchModel(
+      title: '使用系统字体',
+      subtitle: '关闭后将使用内置HarmonyOS Sans字体',
+      leading: Icon(Icons.font_download_outlined),
+      setKey: SettingBoxKey.useSystemFont,
+      defaultVal: false,
+      needReboot: true,
+    ),
+  ],
   SwitchModel(
     title: 'App字体字重',
-    subtitle: '点击设置',
+    subtitle: '点击设置字重，iOS使用此选项需要开启“使用系统字体”',
     setKey: SettingBoxKey.appFontWeight,
     defaultVal: false,
     onTap: (context) {
@@ -112,7 +188,7 @@ List<SettingsModel> get styleSettings => [
   NormalModel(
     title: '页面过渡动画',
     leading: const Icon(Icons.animation),
-    getSubtitle: () => '当前：${Pref.pageTransition.name}',
+    getSubtitle: () => '当前：${_getTransitionLabel(Pref.pageTransition)}',
     onTap: (context, setState) async {
       final result = await showDialog<Transition>(
         context: context,
@@ -120,7 +196,9 @@ List<SettingsModel> get styleSettings => [
           return SelectDialog<Transition>(
             title: '页面过渡动画',
             value: Pref.pageTransition,
-            values: Transition.values.map((e) => (e, e.name)).toList(),
+            values: Transition.values
+                .map((e) => (e, _getTransitionLabel(e)))
+                .toList(),
           );
         },
       );
@@ -327,7 +405,7 @@ List<SettingsModel> get styleSettings => [
     title: '首页顶栏收起',
     subtitle: '首页列表滑动时，收起顶栏',
     leading: Icon(Icons.vertical_align_top_outlined),
-    setKey: SettingBoxKey.hideSearchBar,
+    setKey: SettingBoxKey.hideTopBar,
     defaultVal: true,
     needReboot: true,
   ),
@@ -335,15 +413,15 @@ List<SettingsModel> get styleSettings => [
     title: '首页底栏收起',
     subtitle: '首页列表滑动时，收起底栏',
     leading: Icon(Icons.vertical_align_bottom_outlined),
-    setKey: SettingBoxKey.hideTabBar,
+    setKey: SettingBoxKey.hideBottomBar,
     defaultVal: true,
     needReboot: true,
   ),
   SwitchModel(
     title: '顶/底栏滚动阈值',
     subtitle: '滚动多少像素后收起/展开顶底栏，默认50像素',
-    leading: const Icon(Icons.swipe_vertical),
-    defaultVal: false,
+    leading: Icon(Icons.swipe_vertical),
+    defaultVal: true,
     setKey: SettingBoxKey.enableScrollThreshold,
     needReboot: true,
     onTap: (context) {
@@ -730,6 +808,19 @@ List<SettingsModel> get styleSettings => [
     title: 'Navbar编辑',
     subtitle: '删除或调换Navbar',
     leading: const Icon(Icons.toc_outlined),
+  ),
+  NormalModel(
+    onTap: (context, setState) => Get.toNamed(
+      '/barSetting',
+      arguments: {
+        'key': SettingBoxKey.searchTypeSort,
+        'defaultBars': SearchType.values,
+        'title': '搜索分类',
+      },
+    ),
+    title: '搜索分类编辑',
+    subtitle: '删除或调换搜索分类',
+    leading: const Icon(Icons.manage_search_outlined),
   ),
   SwitchModel(
     title: '返回时直接退出',

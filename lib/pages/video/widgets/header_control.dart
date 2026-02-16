@@ -39,6 +39,7 @@ import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/accounts/account.dart';
+import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
@@ -48,6 +49,7 @@ import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/utils/request_utils.dart';
 import 'package:PiliPlus/utils/video_utils.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
@@ -1019,6 +1021,29 @@ class HeaderControlState extends State<HeaderControl>
                         Get.back();
                         final int quality = item.quality!;
                         final newQa = VideoQuality.fromCode(quality);
+
+                        if (newQa == VideoQuality.hdrVivid ||
+                            newQa == VideoQuality.dolbyVision ||
+                            newQa == VideoQuality.hdr) {
+                          SmartDialog.show(
+                            builder: (context) {
+                              final ThemeData theme = Theme.of(context);
+                              return AlertDialog(
+                                title: const Text('提示'),
+                                content: const Text(
+                                  '当前版本media_kit暂不支持HDR和杜比视界，将作SDR解析',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: SmartDialog.dismiss,
+                                    child: const Text('确定'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        }
+
                         videoDetailCtr
                           ..plPlayerController.cacheVideoQa = newQa.code
                           ..currentVideoQa.value = newQa
@@ -2284,6 +2309,32 @@ class HeaderControlState extends State<HeaderControl>
                       color: Colors.white,
                     ),
                     onTap: () => introController.actionShareVideo(context),
+                    onLongPress: () {
+                      if (!Pref.enableQuickShare) {
+                        SmartDialog.showToast('快速分享功能未开启');
+                        return;
+                      }
+                      try {
+                        final videoDetail = introController.videoDetail.value;
+                        final content = {
+                          "id": videoDetail.aid!.toString(),
+                          "title": videoDetail.title!,
+                          "headline": videoDetail.title!,
+                          "source": 5,
+                          "thumb": videoDetail.pic!,
+                          "author": videoDetail.owner!.name!,
+                          "author_id": videoDetail.owner!.mid!.toString(),
+                        };
+                        RequestUtils.pmShare(
+                          receiverId: Pref.quickShareId ?? 1004428694,
+                          content: content,
+                          avoidGetBack: true,
+                        );
+                        SmartDialog.showToast('快速分享成功');
+                      } catch (e) {
+                        SmartDialog.showToast('快速分享失败：${e.toString()}');
+                      }
+                    },
                     semanticsLabel: '分享',
                   ),
                 ),
