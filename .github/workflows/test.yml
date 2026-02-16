@@ -88,10 +88,10 @@ jobs:
         shell: bash
         continue-on-error: true
       - name: Package ohos build output
-        run: cp ./ohos/entry/build/default/outputs/default/entry-default-unsigned.hap PiliPlus_ohos_canary.hap
+        run: cp ./ohos/entry/build/default/outputs/default/entry-default-unsigned.hap PiliPlusX_ohos_canary.hap
         shell: bash
       - name: Upload ohos outputs
         uses: actions/upload-artifact@v4
         with:
           name: ohos_outputs
-          path: PiliPlus_ohos_*.hap
+          path: PiliPlusX_ohos_*.hap
