@@ -67,6 +67,11 @@ jobs:
           git clone -b oh-3.35.7-dev https://gitcode.com/openharmony-tpc/flutter_flutter.git $GITHUB_WORKSPACE/flutter
           echo "$GITHUB_WORKSPACE/flutter/bin" >> $GITHUB_PATH
         shell: bash
+      - name: Clean cache
+        run: |
+          rm -rf ~/.pub-cache/git/media-kit-*
+          rm -rf ~/.ohos-cache
+        shell: bash
       - name: Get Flutter dependencies
         run: flutter pub get
         shell: bash
