@@ -44,7 +44,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide DoubleExtension;
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 List<SettingsModel> get extraSettings => [
@@ -391,7 +391,7 @@ List<SettingsModel> get extraSettings => [
                     SettingBoxKey.danmakuLineHeight,
                     max(
                       1.0,
-                      double.tryParse(danmakuLineHeight)?.toPrecision(1) ?? 1.6,
+                      DoubleExt(double.tryParse(danmakuLineHeight) ?? 1.6).toPrecision(1),
                     ),
                   );
                   setState();

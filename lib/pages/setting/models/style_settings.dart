@@ -37,7 +37,7 @@ import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide DoubleExtension;
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 /// 获取页面过渡动画的中文名称
@@ -254,7 +254,7 @@ List<SettingsModel> get styleSettings => [
     leading: const Icon(Icons.calendar_view_week_outlined),
     title: '列表宽度（dp）限制',
     getSubtitle: () =>
-        '当前: 主页${Pref.recommendCardWidth.toInt()}dp 其他${Pref.smallCardWidth.toInt()}dp，屏幕宽度:${MediaQuery.widthOf(Get.context!).toPrecision(2)}dp。宽度越小列数越多。',
+        '当前: 主页${Pref.recommendCardWidth.toInt()}dp 其他${Pref.smallCardWidth.toInt()}dp，屏幕宽度:${DoubleExt(MediaQuery.widthOf(Get.context!)).toPrecision(2)}dp。宽度越小列数越多。',
   ),
   SwitchModel(
     title: '视频播放页使用深色主题',

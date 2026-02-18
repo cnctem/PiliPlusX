@@ -12,7 +12,7 @@ import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/accounts/account.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
-import 'package:PiliPlus/utils/extension/context_ext.dart';
+import 'package:PiliPlus/utils/extension/context_ext.dart' as local_ctx;
 import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/login_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
@@ -23,7 +23,7 @@ import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart' hide ListTile;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide ContextExtensions;
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:re_highlight/languages/json.dart';
@@ -355,7 +355,7 @@ Future<void> showImportExportDialog<T>(
               Get.back();
               final res = utf8.encode(toJson());
               final name =
-                  'piliplus_${label}_${context.isTablet ? 'pad' : 'phone'}_'
+                  'piliplus_${label}_${local_ctx.ContextExtensions(context).isTablet ? 'pad' : 'phone'}_'
                   '${DateFormat('yyyyMMddHHmmss').format(DateTime.now())}.json';
               Utils.saveBytes2File(
                 name: name,
@@ -405,7 +405,7 @@ Future<void> showImportExportDialog<T>(
             showDialog(
               context: context,
               builder: (context) {
-                final isDark = context.isDarkMode;
+                final isDark = local_ctx.ContextExtensions(context).isDarkMode;
                 if (isDark != isDarkMode) {
                   isDarkMode = isDark;
                   renderer = TextSpanRenderer(
