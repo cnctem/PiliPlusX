@@ -391,7 +391,7 @@ List<SettingsModel> get extraSettings => [
                     SettingBoxKey.danmakuLineHeight,
                     max(
                       1.0,
-                      double.tryParse(danmakuLineHeight)?.toPrecision(1) ?? 1.6,
+                      DoubleExt(double.tryParse(danmakuLineHeight) ?? 1.6).toPrecision(1),
                     ),
                   );
                   setState();
