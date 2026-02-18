@@ -1369,7 +1369,7 @@ class PlPlayerController {
       volumeIndicator.value = false;
       volumeInterceptEventStream.value = false;
       if (PlatformUtils.isDesktop) {
-        setting.put(SettingBoxKey.desktopVolume, volume.toPrecision(3));
+        setting.put(SettingBoxKey.desktopVolume, DoubleExt(volume).toPrecision(3));
       }
     });
   }

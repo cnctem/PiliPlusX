@@ -420,6 +420,9 @@ abstract final class Pref {
   static bool get showHotRcmd =>
       _setting.get(SettingBoxKey.showHotRcmd, defaultValue: false);
 
+  static bool get showDynamicsRefreshFab =>
+      _setting.get(SettingBoxKey.showDynamicsRefreshFab, defaultValue: true);
+
   static String get audioNormalization =>
       _setting.get(SettingBoxKey.audioNormalization, defaultValue: '0');
 

@@ -37,7 +37,7 @@ import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide DoubleExtension;
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 /// 获取页面过渡动画的中文名称
