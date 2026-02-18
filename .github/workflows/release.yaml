@@ -35,7 +35,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y curl xz-utils zip libglu1-mesa
+          sudo apt-get install -y curl xz-utils zip libglu1-mesa cmake ninja-build
         shell: bash
       - name: Setup HarmonyOS toolchain
         uses: ErBWs/setup-ohos@v1
@@ -49,8 +49,16 @@ jobs:
           distribution: 'temurin'
       - name: Setup flutter-ohos
         run: |
-          git clone -b oh-3.35.7-dev https://gitcode.com/openharmony-tpc/flutter_flutter.git $GITHUB_WORKSPACE/flutter
+          git clone -b oh-3.35.7-dev --depth 1 https://gitcode.com/openharmony-tpc/flutter_flutter.git $GITHUB_WORKSPACE/flutter
           echo "$GITHUB_WORKSPACE/flutter/bin" >> $GITHUB_PATH
+          flutter doctor -v
+        shell: bash
+
+      # 🔧 关键：清理可能的缓存污染
+      - name: Clean cache
+        run: |
+          rm -rf ~/.pub-cache/git/media-kit-*
+          rm -rf ~/.ohos-cache
         shell: bash
       - name: Get Flutter dependencies
         run: flutter pub get
@@ -69,7 +77,24 @@ jobs:
         run: flutter create --platforms ohos .
         shell: bash
       - name: Build Flutter for ohos
-        run: flutter build hap --release --dart-define-from-file=pili_release.json
+        run: |
+          flutter build hap --release --dart-define-from-file=pili_release.json --verbose
+          echo "Build exit code: $?"
+        shell: bash
+      - name: Locate build output
+        run: |
+          echo "Searching for .hap files..."
+          find . -name "*.hap" -type f 2>/dev/null | head -20
+          
+          # 尝试多个可能的路径
+          if [ -f "./ohos/entry/build/default/outputs/default/entry-default-unsigned.hap" ]; then
+            echo "HAP_PATH=./ohos/entry/build/default/outputs/default/entry-default-unsigned.hap" >> $GITHUB_ENV
+          elif [ -f "./build/ohos/outputs/default/entry-default-unsigned.hap" ]; then
+            echo "HAP_PATH=./build/ohos/outputs/default/entry-default-unsigned.hap" >> $GITHUB_ENV
+          else
+            echo "Error: HAP file not found in expected locations"
+            exit 1
+          fi
         shell: bash
         continue-on-error: true
       - name: Package ohos build output
