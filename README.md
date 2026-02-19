@@ -17,3 +17,5 @@
 - 功能请求 (FR) 请确认正在使用最新版本，设置中未搜索到该功能，且与系统特性无关（反例如 "适配某某品牌灵动岛"、"适配智感握姿"）
 - 鸿蒙版特有的 bug 请移步 [鸿蒙版 Issue](https://github.com/qinshah/PiliPlus/issues)），我也能看见，力所能及的会修
 - [最后欢迎在本许愿池提出你们的宝贵建议](https://github.com/cnctem/PiliPlusX/issues)
+
+[![Star History Chart](https://api.star-history.com/svg?repos=cnctem/PiliPlusX&type=Date)](https://star-history.com/#cnctem/PiliPlusX&Date)
