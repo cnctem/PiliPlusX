@@ -1,6 +1,6 @@
 # PiliPlus 许愿池
 
-原 PiliPlus 优化共存项目 PiliPlusX，维护占用太多个人精力，现本人想去学点别的，无力继续维护，还请移步[上游仓库](https://github.com/bggRGjQaUbCoE/PiliPlus)。Release 先关了，需要的话自己打包
+原 PiliPlus 优化共存项目 PiliPlusX，维护占用太多个人精力，现本人想去学点别的，无力继续维护，还请移步[上游仓库](https://github.com/bggRGjQaUbCoE/PiliPlus)
 
 有什么需求可以在 Issue 里提，我觉得合适有空就做，做完给 PR 给上游（[dom](https://github.com/bggRGjQaUbCoE) 大佬给不给通过另当别论）
 
