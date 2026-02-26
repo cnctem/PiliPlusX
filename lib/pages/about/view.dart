@@ -42,8 +42,7 @@ class AboutPage extends StatefulWidget {
 class _AboutPageState extends State<AboutPage> {
   final currentVersion =
       '${BuildConfig.versionName}+${BuildConfig.versionCode}';
-  final versionTag = 
-      '${BuildConfig.versionTag}+${BuildConfig.versionCode}';
+  final versionTag = '${BuildConfig.versionTag}+${BuildConfig.versionCode}';
   RxString cacheSize = ''.obs;
 
   late int _pressCount = 0;
@@ -172,6 +171,17 @@ Commit Hash: ${BuildConfig.commitHash}''',
             thickness: 1,
             height: 30,
             color: theme.colorScheme.outlineVariant,
+          ),
+          ListTile(
+            onTap: () => PageUtils.launchURL(
+              'https://github.com/bggRGjQaUbCoE/PiliPlus',
+            ),
+            leading: const Icon(Icons.code),
+            title: const Text('上游Source Code'),
+            subtitle: Text(
+              'https://github.com/bggRGjQaUbCoE/PiliPlus',
+              style: subTitleStyle,
+            ),
           ),
           ListTile(
             onTap: () => PageUtils.launchURL(Constants.sourceCodeUrl),
