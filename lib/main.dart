@@ -344,9 +344,9 @@ class MyApp extends StatelessWidget {
               child,
               // 调试代码用，ai生成git提交信息请忽略这部分改动
               // if (kDebugMode)
-              //   ElevatedButton(
-              //     onPressed: StatusBar.i.toggleHide,
-              //     child: const Text('测试'),
+              //   const ElevatedButton(
+              //     onPressed: HarmonyChannel.autoRotateLandscape,
+              //     child: Text('测试'),
               //   ),
             ],
           );

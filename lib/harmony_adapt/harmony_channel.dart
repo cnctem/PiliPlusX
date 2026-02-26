@@ -71,4 +71,8 @@ abstract class HarmonyChannel {
     }
     return true;
   }
+
+  static void autoRotateLandscape() {
+    _channel.invokeMethod('autoRotateLandscape');
+  }
 }

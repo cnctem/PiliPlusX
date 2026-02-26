@@ -38,13 +38,12 @@ Future<void> exitDesktopFullscreen() async {
 //横屏
 @pragma('vm:notify-debugger-on-exception')
 Future<void> landscape() async {
-  try {
-    // 鸿蒙将小窗设为横屏
-    if (PlatformUtils.isHarmony) HarmonyChannel.setMiniWindowLandscape(true);
-    await AutoOrientation.landscapeAutoMode(forceSensor: true);
-  } catch (e) {
-    print('横屏时出错：$e');
+  if (PlatformUtils.isHarmony) {
+    HarmonyChannel.setMiniWindowLandscape(true); //将小窗设为横屏
+    HarmonyChannel.autoRotateLandscape(); // 让左右横屏不受控制中心旋转开关控制
+    return;
   }
+  await AutoOrientation.landscapeAutoMode(forceSensor: true);
 }
 
 //竖屏
@@ -68,7 +67,9 @@ Future<void> autoScreen() async {
     // 自动旋转方向类型 AUTO_ROTATION_UNSPECIFIED
     // 跟随传感器自动旋转，受控制中心的旋转开关控制，且可旋转方向受系统判定
     // （如在某种设备，可以旋转到竖屏、横屏、反向横屏三个方向，无法旋转到反向竖屏）。
-    if (PlatformUtils.isHarmony) await AutoOrientation.setScreenOrientationUser();
+    if (PlatformUtils.isHarmony) {
+      await AutoOrientation.setScreenOrientationUser();
+    }
   }
 }
 
