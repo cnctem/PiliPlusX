@@ -17,24 +17,6 @@ abstract class Utils {
 
   static const channel = MethodChannel(Constants.appName);
 
-  static late final String harmonyDeviceType;
-
-  static Future<void> initHarmonyDeviceType() async {
-    final type = (await DeviceInfoPlugin().ohosInfo).deviceType;
-    if (type == null) throw Exception("Failed to init device type");
-    harmonyDeviceType = type;
-  }
-
-  static final isMobile =
-      Platform.isAndroid ||
-      Platform.isIOS ||
-      (isHarmony &&
-          (harmonyDeviceType == 'phone' || harmonyDeviceType == 'tablet'));
-
-  static final isDesktop = !isMobile;
-
-  static final isHarmony = Platform.operatingSystem == "ohos";
-
   static const jsonEncoder = JsonEncoder.withIndent('    ');
 
   static Future<void> saveBytes2File({
@@ -74,8 +56,8 @@ abstract class Utils {
     // TODO 鸿蒙未适配 判断是否为wifi
     // 这里做了catch，就先让鸿蒙返回true
     try {
-      final result = await Connectivity().checkConnectivity();
-      return result == ConnectivityResult.wifi;
+      return PlatformUtils.isMobile &&
+          (await Connectivity().checkConnectivity()) == ConnectivityResult.wifi;
     } catch (_) {
       return true;
     }

@@ -55,7 +55,7 @@ class _SearchTrendingPageState extends State<SearchTrendingPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final padding = MediaQuery.viewPaddingOf(context);
-    final size = context.mediaQuerySize;
+    final size = ContextExtensions(context).mediaQuerySize;
     final maxWidth = size.width - padding.horizontal;
     final width = size.isPortrait ? maxWidth : min(640.0, maxWidth * 0.6);
     final height = width * 528 / 1125;

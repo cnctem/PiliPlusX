@@ -33,10 +33,17 @@ class ScalableWidgetsFlutterBinding extends BindingBase
 
   double get scale => _scale;
 
-  /// 真实dpr
-  late double _devicePixelRatio;
+  double get _fixedScale => _scale * _firstDpr! / _dpr;
 
-  double getEnabledPixelRatio() => _scale * _devicePixelRatio;
+  /// 真实PixelRatio
+  late double _dpr;
+
+  /// 第一次获取的dpr
+  double? _firstDpr;
+
+  double getLogicaPixelRatio() => _scale * _firstDpr!;
+
+  Size toLogicaSize(Size size) => size / _scale;
 
   // 3. 核心：重写 ViewConfiguration
   @override
@@ -45,12 +52,16 @@ class ScalableWidgetsFlutterBinding extends BindingBase
     final physicalConstraints = BoxConstraints.fromViewConstraints(
       flutterView.physicalConstraints,
     );
-    _devicePixelRatio = flutterView.devicePixelRatio;
-    final enabledPixelRatio = getEnabledPixelRatio();
+    _dpr = flutterView.devicePixelRatio;
+    _firstDpr ??= _dpr;
+    if (_dpr != _firstDpr) {
+      debugPrint('出现了系统dpr变化的bug，直接强制禁止系统dpr变化');
+    }
+    final logicaPixelRatio = getLogicaPixelRatio();
     return ViewConfiguration(
       physicalConstraints: physicalConstraints,
-      logicalConstraints: physicalConstraints / enabledPixelRatio,
-      devicePixelRatio: enabledPixelRatio,
+      logicalConstraints: physicalConstraints / logicaPixelRatio,
+      devicePixelRatio: logicaPixelRatio,
     );
   }
 
@@ -58,8 +69,8 @@ class ScalableWidgetsFlutterBinding extends BindingBase
   void handlePointerEvent(PointerEvent event) {
     // 强制覆盖坐标
     final PointerEvent transformedEvent = event.copyWith(
-      position: event.position / _scale,
-      delta: event.delta / _scale,
+      position: event.position / _fixedScale,
+      delta: event.delta / _fixedScale,
     );
     // 将修正后的事件发送给 GestureBinding
     super.handlePointerEvent(transformedEvent);

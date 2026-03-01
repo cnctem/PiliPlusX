@@ -125,7 +125,7 @@ class _PlaySpeedPageState extends State<PlaySpeedPage> {
       isScrollControlled: true,
       clipBehavior: Clip.hardEdge,
       constraints: BoxConstraints(
-        maxWidth: min(640, context.mediaQueryShortestSide),
+        maxWidth: min(640, ContextExtensions(context).mediaQueryShortestSide),
       ),
       builder: (context) {
         return Column(

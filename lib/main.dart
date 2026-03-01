@@ -23,6 +23,7 @@ import 'package:PiliPlus/utils/app_scheme.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
 import 'package:PiliPlus/utils/calc_window_position.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
+import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/json_file_handler.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
@@ -56,7 +57,7 @@ WebViewEnvironment? webViewEnvironment;
 void main() async {
   ScalableWidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
-  if (Utils.isHarmony) await Utils.initHarmonyDeviceType();
+  if (PlatformUtils.isHarmony) await PlatformUtils.initHarmonyDeviceType();
   tmpDirPath = (await getTemporaryDirectory()).path;
   appSupportDirPath = (await getApplicationSupportDirectory()).path;
   try {
@@ -67,8 +68,7 @@ void main() async {
     exit(0);
   }
 
-  // 设置下载路径
-  if (Utils.isDesktop) {
+  if (PlatformUtils.isDesktop) {
     final customDownPath = Pref.downloadPath;
     if (customDownPath != null && customDownPath.isNotEmpty) {
       try {
@@ -120,7 +120,7 @@ void main() async {
     ]);
   }
 
-  if (Utils.isMobile || Utils.isHarmony) {
+  if (PlatformUtils.isMobile || PlatformUtils.isHarmony) {
     await setupServiceLocator();
   }
 
@@ -172,7 +172,7 @@ void main() async {
         FlutterDisplayMode.setPreferredMode(displayMode ?? DisplayMode.auto);
       });
     }
-  } else if (Utils.isDesktop && !Utils.isHarmony) {
+  } else if (PlatformUtils.isDesktop && !PlatformUtils.isHarmony) {
     await windowManager.ensureInitialized();
 
     WindowOptions windowOptions = WindowOptions(
@@ -199,8 +199,12 @@ void main() async {
     });
   }
 
+  if (Pref.dynamicColor) {
+    await MyApp.initPlatformState();
+  }
+
   // TODO: 鸿蒙待适配 异常捕获
-  if (Pref.enableLog && !Utils.isHarmony) {
+  if (Pref.enableLog && !PlatformUtils.isHarmony) {
     // 异常捕获 logo记录
     final customParameters = {
       'BuildConfig':
@@ -289,27 +293,17 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: Constants.appName,
       theme: ThemeUtils.getThemeData(
-        colorScheme:
-            lightColorScheme ??
-            SeedColorScheme.fromSeeds(
-              variant: variant,
-              primaryKey: brandColor,
-              brightness: Brightness.light,
-              useExpressiveOnContainerColors: false,
-            ),
-        isDynamic: lightColorScheme != null,
+        colorScheme: dynamicColor
+            ? _light!
+            : brandColor.asColorSchemeSeed(variant, Brightness.light),
+        isDynamic: dynamicColor,
       ),
       darkTheme: ThemeUtils.getThemeData(
         isDark: true,
-        colorScheme:
-            darkColorScheme ??
-            SeedColorScheme.fromSeeds(
-              variant: variant,
-              primaryKey: brandColor,
-              brightness: Brightness.dark,
-              useExpressiveOnContainerColors: false,
-            ),
-        isDynamic: darkColorScheme != null,
+        colorScheme: dynamicColor
+            ? _dark!
+            : brandColor.asColorSchemeSeed(variant, Brightness.dark),
+        isDynamic: dynamicColor,
       ),
       themeMode: Pref.themeMode,
       localizationsDelegates: const [
@@ -327,13 +321,13 @@ class MyApp extends StatelessWidget {
         toastBuilder: (String msg) => CustomToast(msg: msg),
         loadingBuilder: (msg) => LoadingWidget(msg: msg),
         builder: (context, child) {
-          final mediaData = MediaQuery.of(context);
+          final data = MediaQuery.of(context);
           final scalableBinding =
               ScalableWidgetsFlutterBinding.ensureInitialized();
           child = MediaQuery(
-            data: mediaData.copyWith(
-              devicePixelRatio: scalableBinding.getEnabledPixelRatio(),
-              size: mediaData.size / scalableBinding.scale,
+            data: data.copyWith(
+              devicePixelRatio: scalableBinding.getLogicaPixelRatio(),
+              size: scalableBinding.toLogicaSize(data.size),
               textScaler: TextScaler.linear(Pref.defaultTextScale),
             ),
             child: child!,
@@ -371,13 +365,13 @@ class MyApp extends StatelessWidget {
             alignment: Alignment.center,
             children: [
               // 看不见的地方加一个鸿蒙原生音量控件，
-              if (Utils.isHarmony) const HarmonyVolumeView(),
+              if (PlatformUtils.isHarmony) const HarmonyVolumeView(),
               child,
               // 调试代码用，ai生成git提交信息请忽略这部分改动
               // if (kDebugMode)
-              //   ElevatedButton(
-              //     onPressed: StatusBar.i.toggleHide,
-              //     child: const Text('测试'),
+              //   const ElevatedButton(
+              //     onPressed: HarmonyChannel.autoRotateLandscape,
+              //     child: Text('测试'),
               //   ),
             ],
           );
@@ -476,9 +470,28 @@ dynamic _getCurrentPageController() {
       return Get.find<DynamicsController>();
     }
 
-    return null;
-  } catch (e) {
-    return null;
+    try {
+      final Color? accentColor = await DynamicColorPlugin.getAccentColor();
+
+      if (accentColor != null) {
+        if (kDebugMode) {
+          debugPrint('dynamic_color: Accent color detected.');
+        }
+        final variant = FlexSchemeVariant.values[Pref.schemeVariant];
+        _light = accentColor.asColorSchemeSeed(variant, Brightness.light);
+        _dark = accentColor.asColorSchemeSeed(variant, Brightness.dark);
+        return true;
+      }
+    } on PlatformException {
+      if (kDebugMode) {
+        debugPrint('dynamic_color: Failed to obtain accent color.');
+      }
+    }
+    if (kDebugMode) {
+      debugPrint('dynamic_color: Dynamic color not detected on this device.');
+    }
+    GStorage.setting.put(SettingBoxKey.dynamicColor, false);
+    return false;
   }
 }
 

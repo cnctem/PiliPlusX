@@ -365,12 +365,12 @@ class AccountManager extends Interceptor {
         try {
           // TODO 鸿蒙待适配 Connectivity Checks the connection status of the device.
           // 在 OHOS 上调用 Connectivity 可能因权限未授予而报 201，直接跳过。
-          if (Utils.isHarmony) {
+          if (PlatformUtils.isHarmony) {
             desc = '';
-          } else if (Utils.isMobile) {
-            desc = (await Connectivity().checkConnectivity()).desc;
           } else {
-            desc = '';
+            desc = PlatformUtils.isMobile
+                ? (await Connectivity().checkConnectivity()).desc
+                : '';
           }
         } catch (_) {
           desc = '';

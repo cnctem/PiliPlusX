@@ -88,7 +88,7 @@ class SearchVideoController
       useSafeArea: true,
       isScrollControlled: true,
       constraints: BoxConstraints(
-        maxWidth: min(640, context.mediaQueryShortestSide),
+        maxWidth: min(640, ContextExtensions(context).mediaQueryShortestSide),
       ),
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {

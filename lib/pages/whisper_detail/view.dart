@@ -207,7 +207,46 @@ class _WhisperDetailPageState
     };
   }
 
-  void onLongPress(int index, Msg item) {
+  void _showMenu(Offset offset, int index, Msg item, bool isOwner) {
+    showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(offset.dx, offset.dy, offset.dx, 0),
+      items: [
+        if (isOwner)
+          PopupMenuItem(
+            height: 42,
+            onTap: () => _whisperDetailController.sendMsg(
+              message: '${item.msgKey}',
+              onClearText: editController.clear,
+              msgType: 5,
+              index: index,
+            ),
+            child: const Text('撤回', style: TextStyle(fontSize: 14)),
+          )
+        else
+          PopupMenuItem(
+            height: 42,
+            onTap: () => autoWrapReportDialog(
+              context,
+              ban: false,
+              ReportOptions.imMsgReport,
+              (reasonType, reasonDesc, banUid) =>
+                  _whisperDetailController.onReport(
+                    item,
+                    reasonType,
+                    reasonType == 0
+                        ? reasonDesc!
+                        : ReportOptions.imMsgReport['']![reasonType]!,
+                  ),
+            ),
+            child: const Text('举报', style: TextStyle(fontSize: 14)),
+          ),
+      ],
+    );
+  }
+
+  void onLongPress(int index, Msg item, bool isOwner) {
+    Feedback.forLongPress(context);
     showDialog(
       context: context,
       builder: (context) {

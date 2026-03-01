@@ -141,6 +141,22 @@ class _DownloadPanelState extends State<DownloadPanel> {
               ),
             ),
           ),
+          if (kDebugMode || PlatformUtils.isMobile) ...[
+            const Spacer(),
+            StreamBuilder(
+              stream: Connectivity().onConnectivityChanged,
+              builder: (context, snapshot) {
+                if (snapshot.data case final data?) {
+                  final network = data == ConnectivityResult.wifi
+                      ? 'WIFI'
+                      : '数据';
+                  return Text('当前网络：$network', style: textStyle);
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+            const SizedBox(width: 4),
+          ],
         ],
       ),
     );

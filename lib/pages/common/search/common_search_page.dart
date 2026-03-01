@@ -68,6 +68,7 @@ abstract class CommonSearchPageState<S extends StatefulWidget, R, T>
         textAlignVertical: TextAlignVertical.center,
         decoration: InputDecoration(
           hintText: '搜索',
+          visualDensity: VisualDensity.standard,
           border: InputBorder.none,
           suffixIcon: IconButton(
             tooltip: '清空',

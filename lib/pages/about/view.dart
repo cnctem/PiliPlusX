@@ -13,7 +13,7 @@ import 'package:PiliPlus/utils/accounts/account.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
 import 'package:PiliPlus/utils/context_ext.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/login_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
@@ -42,8 +42,7 @@ class AboutPage extends StatefulWidget {
 class _AboutPageState extends State<AboutPage> {
   final currentVersion =
       '${BuildConfig.versionName}+${BuildConfig.versionCode}';
-  final versionTag = 
-      '${BuildConfig.versionTag}+${BuildConfig.versionCode}';
+  final versionTag = '${BuildConfig.versionTag}+${BuildConfig.versionCode}';
   RxString cacheSize = ''.obs;
 
   late int _pressCount = 0;
@@ -122,7 +121,7 @@ class _AboutPageState extends State<AboutPage> {
           ),
           ListTile(
             title: Text(
-              '${Constants.appName}${Utils.isHarmony ? '(鸿蒙版)' : ''}',
+              '${Constants.appName}${PlatformUtils.isHarmony ? '(鸿蒙版)' : ''}',
               textAlign: TextAlign.center,
               style: theme.textTheme.titleMedium!.copyWith(height: 2),
             ),
@@ -145,7 +144,7 @@ class _AboutPageState extends State<AboutPage> {
           ListTile(
             onTap: () => Update.checkUpdate(false),
             onLongPress: () => Utils.copyText(versionTag),
-            onSecondaryTap: Utils.isMobile
+            onSecondaryTap: PlatformUtils.isMobile
                 ? null
                 : () => Utils.copyText(versionTag),
             title: const Text('当前版本'),
@@ -175,6 +174,17 @@ Commit Hash: ${BuildConfig.commitHash}''',
             thickness: 1,
             height: 30,
             color: theme.colorScheme.outlineVariant,
+          ),
+          ListTile(
+            onTap: () => PageUtils.launchURL(
+              'https://github.com/bggRGjQaUbCoE/PiliPlus',
+            ),
+            leading: const Icon(Icons.code),
+            title: const Text('上游Source Code'),
+            subtitle: Text(
+              'https://github.com/bggRGjQaUbCoE/PiliPlus',
+              style: subTitleStyle,
+            ),
           ),
           ListTile(
             onTap: () => PageUtils.launchURL(Constants.sourceCodeUrl),

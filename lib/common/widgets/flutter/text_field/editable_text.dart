@@ -25,7 +25,7 @@ import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/editable.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/spell_check.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/text_selection.dart';
-import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart'
@@ -1720,7 +1720,7 @@ class EditableText extends StatefulWidget {
       TargetPlatform.linux => true,
       TargetPlatform.macOS => true,
       TargetPlatform.windows => true,
-      _ => Utils.isDesktop,
+      _ => PlatformUtils.isDesktop,
     };
   }
 

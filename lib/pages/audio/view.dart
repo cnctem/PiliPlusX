@@ -13,7 +13,10 @@ import 'package:PiliPlus/pages/video/introduction/ugc/widgets/action_item.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/duration_utils.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart' hide DoubleExt;
+import 'package:PiliPlus/utils/extension/size_ext.dart';
+import 'package:PiliPlus/utils/extension/string_ext.dart';
+import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/num_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
@@ -306,9 +309,7 @@ class _AudioPageState extends State<AudioPage> {
                                               children: [
                                                 if (isCurr) ...[
                                                   WidgetSpan(
-                                                    alignment:
-                                                        PlaceholderAlignment
-                                                            .bottom,
+                                                    alignment: PlaceholderAlignment.bottom,
                                                     child: Image.asset(
                                                       'assets/images/live.gif',
                                                       width: 16,
@@ -350,8 +351,7 @@ class _AudioPageState extends State<AudioPage> {
                                         children: [
                                           if (isCurr) ...[
                                             WidgetSpan(
-                                              alignment:
-                                                  PlaceholderAlignment.bottom,
+                                              alignment: PlaceholderAlignment.bottom,
                                               child: Image.asset(
                                                 'assets/images/live.gif',
                                                 width: 16,

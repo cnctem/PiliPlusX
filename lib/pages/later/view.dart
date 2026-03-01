@@ -1,4 +1,4 @@
-import 'package:PiliPlus/common/widgets/appbar/appbar.dart';
+﻿import 'package:PiliPlus/common/widgets/appbar/appbar.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart';
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/models/common/later_view_type.dart';
@@ -249,6 +249,7 @@ class _LaterPageState extends State<LaterPage>
                             text: value ? '最早添加' : '最近添加',
                           ),
                           WidgetSpan(
+                            alignment: PlaceholderAlignment.middle,
                             child: Icon(
                               size: 16,
                               MdiIcons.unfoldMoreHorizontal,
@@ -292,6 +293,7 @@ class _LaterPageState extends State<LaterPage>
                         text: '清空',
                       ),
                       WidgetSpan(
+                        alignment: PlaceholderAlignment.middle,
                         child: Icon(
                           size: 16,
                           MdiIcons.unfoldMoreHorizontal,

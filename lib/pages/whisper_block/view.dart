@@ -1,4 +1,4 @@
-import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
+﻿import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/loading_widget.dart';
 import 'package:PiliPlus/grpc/bilibili/app/im/v1.pb.dart'
     show KeywordBlockingItem;
@@ -196,6 +196,7 @@ class _WhisperBlockPageState extends State<WhisperBlockPage> {
                 decoration: InputDecoration(
                   isDense: true,
                   hintText: '请输入',
+                  visualDensity: VisualDensity.standard,
                   hintStyle: const TextStyle(fontSize: 14),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 14,

@@ -1,4 +1,4 @@
-import 'dart:math' show max;
+﻿import 'dart:math' show max;
 
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/widgets/button/icon_button.dart';
@@ -26,6 +26,7 @@ import 'package:PiliPlus/pages/emote/view.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/context_ext.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
+import 'package:PiliPlus/utils/extension/context_ext.dart';
 import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
@@ -144,6 +145,7 @@ class _CreateDynPanelState extends CommonRichTextPubPageState<CreateDynPanel> {
                             TextSpan(
                               children: [
                                 WidgetSpan(
+                                  alignment: PlaceholderAlignment.middle,
                                   child: Padding(
                                     padding: const EdgeInsets.only(right: 5),
                                     child: Icon(
@@ -190,6 +192,7 @@ class _CreateDynPanelState extends CommonRichTextPubPageState<CreateDynPanel> {
                   decoration: InputDecoration(
                     hintText: '标题，选填20字',
                     isDense: true,
+                    visualDensity: VisualDensity.standard,
                     contentPadding: EdgeInsets.zero,
                     border: const OutlineInputBorder(
                       gapPadding: 0,
@@ -549,7 +552,7 @@ class _CreateDynPanelState extends CommonRichTextPubPageState<CreateDynPanel> {
 
   @override
   Widget buildMorePanel(ThemeData theme) {
-    double height = context.isTablet ? 300 : 170;
+    double height = ContextExtensions(context).isTablet ? 300 : 170;
     final keyboardHeight = controller.keyboardHeight;
     if (keyboardHeight != 0) {
       height = max(height, keyboardHeight);
@@ -665,31 +668,29 @@ class _CreateDynPanelState extends CommonRichTextPubPageState<CreateDynPanel> {
     selected: false,
   );
 
-  Widget _buildEditWidget(ThemeData theme) => Form(
-    autovalidateMode: AutovalidateMode.onUserInteraction,
-    child: Listener(
-      onPointerUp: (event) {
-        if (readOnly.value) {
-          updatePanelType(PanelType.keyboard);
-        }
-      },
-      child: Obx(
-        () => RichTextField(
-          key: key,
-          controller: editController,
-          minLines: 4,
-          maxLines: null,
-          focusNode: focusNode,
-          readOnly: readOnly.value,
-          onChanged: onChanged,
-          decoration: InputDecoration(
-            hintText: '说点什么吧',
-            hintStyle: TextStyle(color: theme.colorScheme.outline),
-            border: const OutlineInputBorder(
-              borderSide: BorderSide.none,
-              gapPadding: 0,
-            ),
-            contentPadding: EdgeInsets.zero,
+  Widget _buildEditWidget(ThemeData theme) => Listener(
+    onPointerUp: (event) {
+      if (readOnly.value) {
+        updatePanelType(PanelType.keyboard);
+      }
+    },
+    child: Obx(
+      () => RichTextField(
+        key: key,
+        controller: editController,
+        minLines: 4,
+        maxLines: null,
+        focusNode: focusNode,
+        readOnly: readOnly.value,
+        onChanged: onChanged,
+        onSubmitted: onSubmitted,
+        decoration: InputDecoration(
+          hintText: '说点什么吧',
+          visualDensity: VisualDensity.standard,
+          hintStyle: TextStyle(color: theme.colorScheme.outline),
+          border: const OutlineInputBorder(
+            borderSide: BorderSide.none,
+            gapPadding: 0,
           ),
           // inputFormatters: [LengthLimitingTextInputFormatter(1000)],
         ),

@@ -1,4 +1,4 @@
-import 'package:PiliPlus/common/widgets/button/icon_button.dart';
+﻿import 'package:PiliPlus/common/widgets/button/icon_button.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/self_sized_horizontal_list.dart';
 import 'package:PiliPlus/models/common/image_type.dart';
@@ -231,6 +231,7 @@ class _SharePanelState extends State<SharePanel> {
                   textInputAction: TextInputAction.newline,
                   decoration: InputDecoration(
                     hintText: '说说你的想法吧...',
+                    visualDensity: VisualDensity.standard,
                     hintStyle: const TextStyle(fontSize: 14),
                     border: const OutlineInputBorder(
                       borderSide: BorderSide.none,
@@ -239,8 +240,8 @@ class _SharePanelState extends State<SharePanel> {
                     filled: true,
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
+                      horizontal: 12,
+                      vertical: 6,
                     ),
                     fillColor: theme.colorScheme.onInverseSurface,
                   ),

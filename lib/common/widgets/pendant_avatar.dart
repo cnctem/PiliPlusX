@@ -44,6 +44,23 @@ class PendantAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isMemberAvatar = size == 80;
+    Widget? pendant;
+    if (showDynDecorate && !garbPendantImage.isNullOrEmpty) {
+      final pendantSize = size * 1.75;
+      pendant = Positioned(
+        // -(size * 1.75 - size) / 2
+        top: -0.375 * size + (size == 80 ? 2 : 0),
+        child: IgnorePointer(
+          child: NetworkImgLayer(
+            type: ImageType .emote,
+            width: pendantSize,
+            height: pendantSize,
+            src: garbPendantImage,
+            getPlaceHolder: () => const SizedBox.shrink(),
+          ),
+        ),
+      );
+    }
     return Stack(
       alignment: Alignment.bottomCenter,
       clipBehavior: Clip.none,

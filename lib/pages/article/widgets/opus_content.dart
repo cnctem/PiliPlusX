@@ -224,6 +224,8 @@ class OpusContent extends StatelessWidget {
               }
             case 3 when (element.line != null):
               return CachedNetworkImage(
+                fit: BoxFit.contain,
+                height: height,
                 width: maxWidth,
                 fit: BoxFit.contain,
                 height: element.line!.pic!.height?.toDouble(),

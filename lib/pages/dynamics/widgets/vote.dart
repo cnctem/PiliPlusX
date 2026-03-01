@@ -1,4 +1,5 @@
-import 'dart:async';
+﻿import 'dart:async';
+import 'dart:math';
 
 import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/dialog/report.dart';
@@ -6,6 +7,7 @@ import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/http/dynamics.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models/common/badge_type.dart';
+import 'package:PiliPlus/models/common/image_type.dart';
 import 'package:PiliPlus/models/dynamics/vote_model.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/grid.dart';
@@ -124,6 +126,102 @@ class _VotePanelState extends State<VotePanel> {
         ),
       ],
     ];
+    Widget title = Text(
+      _voteInfo.title ?? '',
+      style: theme.textTheme.titleMedium,
+    );
+    if (isLogin) {
+      title = Row(
+        spacing: 3,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: title),
+          Obx(() {
+            final list = followeeVote.value;
+            if (list != null && list.isNotEmpty) {
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      final colorScheme = ColorScheme.of(context);
+                      return AlertDialog(
+                        clipBehavior: Clip.hardEdge,
+                        title: const Text('关注的人的投票'),
+                        contentPadding: const EdgeInsets.only(top: 10, bottom: 12),
+                        content: SingleChildScrollView(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: list
+                                .map(
+                                  (e) => ListTile(
+                                    dense: true,
+                                    onTap: () =>
+                                        Get.toNamed('/member?mid=${e.mid}'),
+                                    leading: NetworkImgLayer(
+                                      src: e.face,
+                                      width: 40,
+                                      height: 40,
+                                      type: ImageType.avatar,
+                                    ),
+                                    title: Text.rich(
+                                      style: const TextStyle(fontSize: 13),
+                                      TextSpan(
+                                        children: [
+                                          TextSpan(text: e.name),
+                                          TextSpan(
+                                            text: ' 投给了',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: colorScheme.outline,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      style: const TextStyle(fontSize: 13),
+                                      e.votes
+                                          .map(
+                                            (vote) => _voteInfo.options
+                                                .firstWhereOrNull(
+                                                  (e) => e.optIdx == vote,
+                                                )
+                                                ?.optDesc,
+                                          )
+                                          .join('、'),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    avatars(
+                      colorScheme: theme.colorScheme,
+                      users: list.take(3),
+                    ),
+                    Icon(
+                      size: 18,
+                      color: theme.colorScheme.outline.withValues(alpha: .7),
+                      Icons.keyboard_arrow_right,
+                    ),
+                  ],
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          }),
+        ],
+      );
+    }
     Widget child = Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,7 +328,7 @@ class _VotePanelState extends State<VotePanel> {
                           src: opt.imgUrl,
                           width: constraints.maxWidth,
                           height: constraints.maxHeight,
-                          radius: 0,
+                          type: ImageType.emote,
                         ),
                       ),
                     ),

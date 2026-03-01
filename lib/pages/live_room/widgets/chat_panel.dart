@@ -254,4 +254,90 @@ class LiveRoomChatPanel extends StatelessWidget {
       );
     }
   }
+
+  void _showMsgMenu(
+    BuildContext context,
+    BuildContext itemContext,
+    TapUpDetails details,
+    DanmakuMsg item,
+  ) {
+    final dx = details.globalPosition.dx;
+    final renderBox = itemContext.findRenderObject() as RenderBox;
+    final dy = renderBox.localToGlobal(renderBox.size.bottomLeft(Offset.zero)).dy;
+    final autoScroll =
+        liveRoomController.autoScroll &&
+        !liveRoomController.disableAutoScroll.value;
+    if (autoScroll) {
+      liveRoomController.autoScroll = false;
+    }
+    showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(dx, dy, dx, 0),
+      items: <PopupMenuEntry<Never>>[
+        CustomPopupMenuItem(
+          height: 38,
+          child: Text(
+            item.name,
+            style: const TextStyle(fontSize: 13),
+          ),
+        ),
+        const CustomPopupMenuDivider(height: 1),
+        PopupMenuItem(
+          height: 38,
+          onTap: () => Get.toNamed('/member?mid=${item.uid}'),
+          child: const Text(
+            '去TA的个人空间',
+            style: TextStyle(fontSize: 13),
+          ),
+        ),
+        PopupMenuItem(
+          height: 38,
+          onTap: () => onAtUser(item),
+          child: const Text(
+            '@TA',
+            style: TextStyle(fontSize: 13),
+          ),
+        ),
+        PopupMenuItem(
+          height: 38,
+          onTap: () async {
+            if (!Accounts.main.isLogin) return;
+            final res = await LiveHttp.liveShieldUser(
+              uid: item.uid,
+              roomid: roomId,
+              type: 1,
+            );
+            if (res.isSuccess) {
+              SmartDialog.showToast('屏蔽成功');
+            } else {
+              res.toast();
+            }
+          },
+          child: const Text(
+            '屏蔽发送者',
+            style: TextStyle(fontSize: 13),
+          ),
+        ),
+        PopupMenuItem(
+          height: 38,
+          onTap: () => HeaderControl.reportLiveDanmaku(
+            context,
+            roomId: roomId,
+            msg: item.text,
+            extra: item.extra,
+          ),
+          child: const Text(
+            '举报选中弹幕',
+            style: TextStyle(fontSize: 13),
+          ),
+        ),
+      ],
+    ).whenComplete(() {
+      if (autoScroll && context.mounted) {
+        liveRoomController
+          ..autoScroll = true
+          ..scrollToBottom();
+      }
+    });
+  }
 }

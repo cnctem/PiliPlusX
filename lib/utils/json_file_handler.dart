@@ -35,12 +35,7 @@ class JsonFileHandler extends ReportHandler {
     bool handleWhenRejected = false,
   }) async {
     try {
-      final raf = await (await LoggerUtils.getLogsPath()).open(
-        mode: FileMode.writeOnlyAppend,
-      );
-      await raf.writeFrom(const []);
-      await raf.flush();
-      _future = Future.value(raf);
+      await _future;
       return JsonFileHandler._(
         enableDeviceParameters: enableDeviceParameters,
         enableApplicationParameters: enableApplicationParameters,

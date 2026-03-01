@@ -18,8 +18,9 @@ import 'package:PiliPlus/pages/share/view.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/widgets/menu_row.dart';
 import 'package:PiliPlus/services/shutdown_timer_service.dart';
 import 'package:PiliPlus/utils/app_scheme.dart';
-import 'package:PiliPlus/utils/context_ext.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/context_ext.dart';
+import 'package:PiliPlus/utils/extension/extension.dart';
+import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/global_data.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
@@ -325,7 +326,7 @@ abstract class PageUtils {
       useSafeArea: true,
       isScrollControlled: true,
       constraints: BoxConstraints(
-        maxWidth: min(640, context.mediaQueryShortestSide),
+        maxWidth: min(640, ContextExtensions(context).mediaQueryShortestSide),
       ),
       builder: (BuildContext context) {
         return DraggableScrollableSheet(
@@ -655,11 +656,24 @@ abstract class PageUtils {
     if (!context.mounted) {
       return;
     }
-    Get.generalDialog(
-      barrierLabel: '',
-      barrierDismissible: true,
-      pageBuilder: (buildContext, animation, secondaryAnimation) {
-        if (Get.context!.isPortrait) {
+    return Get.key.currentState!.push(
+      PublishRoute(
+        pageBuilder: (context, animation, secondaryAnimation) {
+          if (ContextExtensions(context).isPortrait) {
+            return SafeArea(
+              child: FractionallySizedBox(
+                heightFactor: 0.7,
+                widthFactor: 1.0,
+                alignment: Alignment.bottomCenter,
+                child: isFullScreen() && padding != null
+                    ? Padding(
+                        padding: EdgeInsets.only(bottom: padding),
+                        child: child,
+                      )
+                    : child,
+              ),
+            );
+          }
           return SafeArea(
             child: FractionallySizedBox(
               heightFactor: 0.7,
@@ -673,12 +687,19 @@ abstract class PageUtils {
                   : child,
             ),
           );
-        }
-        return SafeArea(
-          child: FractionallySizedBox(
-            widthFactor: 0.5,
-            heightFactor: 1.0,
-            alignment: Alignment.centerRight,
+        },
+        transitionDuration: const Duration(milliseconds: 350),
+        transitionBuilder: (context, animation, secondaryAnimation, child) {
+          final begin = ContextExtensions(context).isPortrait
+              ? const Offset(0.0, 1.0)
+              : const Offset(1.0, 0.0);
+          return SlideTransition(
+            position: animation.drive(
+              Tween(
+                begin: begin,
+                end: Offset.zero,
+              ).chain(CurveTween(curve: Curves.easeInOut)),
+            ),
             child: child,
           ),
         );

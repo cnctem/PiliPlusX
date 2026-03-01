@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
@@ -12,6 +12,7 @@ import 'package:PiliPlus/common/widgets/scroll_physics.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/main.dart';
 import 'package:PiliPlus/models/common/episode_panel_type.dart';
+import 'package:PiliPlus/models/common/image_type.dart';
 import 'package:PiliPlus/models_new/pgc/pgc_info_model/result.dart';
 import 'package:PiliPlus/models_new/video/video_detail/episode.dart' as ugc;
 import 'package:PiliPlus/models_new/video/video_detail/page.dart';
@@ -275,7 +276,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         }
       }
       // 播放完展示控制栏
-      if ((Platform.isAndroid || Utils.isHarmony) && !notExitFlag) {
+      if ((Platform.isAndroid || PlatformUtils.isHarmony) && !notExitFlag) {
         PiPStatus currentStatus = await Floating().pipStatus;
         if (currentStatus == PiPStatus.disabled) {
           plPlayerController!.onLockControl(false);
@@ -335,7 +336,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     );
 
     if (!Get.previousRoute.startsWith('/video')) {
-      if ((Platform.isAndroid || Utils.isHarmony) && !videoDetailController.setSystemBrightness) {
+      if ((Platform.isAndroid || PlatformUtils.isHarmony) && !videoDetailController.setSystemBrightness) {
         ScreenBrightnessPlatform.instance.resetApplicationScreenBrightness();
       }
       PlPlayerController.setPlayCallBack(null);
@@ -381,7 +382,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
     WidgetsBinding.instance.removeObserver(this);
 
-    if ((Platform.isAndroid || Utils.isHarmony) && !videoDetailController.setSystemBrightness) {
+    if ((Platform.isAndroid || PlatformUtils.isHarmony) && !videoDetailController.setSystemBrightness) {
       ScreenBrightnessPlatform.instance.resetApplicationScreenBrightness();
     }
 
@@ -429,7 +430,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     introController.startTimer();
 
     if (mounted &&
-        (Platform.isAndroid || Utils.isHarmony) &&
+        (Platform.isAndroid || PlatformUtils.isHarmony) &&
         !videoDetailController.setSystemBrightness) {
       if (videoDetailController.brightness != null) {
         plPlayerController?.brightness.value =
@@ -1592,9 +1593,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               return Positioned.fill(
                 child: GestureDetector(
                   onTap: handlePlay,
+                  behavior: HitTestBehavior.opaque,
                   child: Obx(
                     () => NetworkImgLayer(
-                      radius: 0,
+                      type: ImageType.emote,
                       quality: 60,
                       src: videoDetailController.cover.value,
                       width: width,

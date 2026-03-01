@@ -13,9 +13,8 @@ class NetworkImgLayer extends StatelessWidget {
     required this.width,
     this.height,
     this.type = ImageType.def,
-    this.fadeOutDuration,
-    this.fadeInDuration,
-    // 图片质量 默认1%
+    this.fadeOutDuration = const Duration(milliseconds: 120),
+    this.fadeInDuration = const Duration(milliseconds: 120),
     this.quality,
     this.semanticsLabel,
     this.radius,
@@ -23,13 +22,10 @@ class NetworkImgLayer extends StatelessWidget {
     this.isLongPic = false,
     this.forceUseCacheWidth = false,
     this.getPlaceHolder,
-    this.boxFit,
-  });
-
-  final String? src;
+    this.fit = BoxFit.cover,
+    this.alignment = Alignment.center,
   final double width;
   final double? height;
-  final ImageType type;
   final Duration? fadeOutDuration;
   final Duration? fadeInDuration;
   final int? quality;

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 typedef PopupMenuItemSelected<T> = bool Function(T value);
@@ -51,16 +51,28 @@ class _PopupMenuTextState<T> extends State<PopupMenuText<T>> {
               });
             }
           },
-          itemBuilder: widget.itemBuilder,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                widget.getSelectTitle(select),
-                style: TextStyle(
-                  height: 1,
-                  fontSize: 14,
-                  color: secondary,
+          itemBuilder: itemBuilder,
+          child: Text.rich(
+            style: TextStyle(
+              height: 1,
+              fontSize: 14,
+              color: secondary,
+            ),
+            strutStyle: const StrutStyle(
+              height: 1,
+              leading: 0,
+              fontSize: 14,
+            ),
+            TextSpan(
+              children: [
+                TextSpan(text: getSelectTitle(select)),
+                WidgetSpan(
+                  alignment: PlaceholderAlignment.middle,
+                  child: Icon(
+                    size: 14,
+                    MdiIcons.unfoldMoreHorizontal,
+                    color: secondary,
+                  ),
                 ),
                 strutStyle: const StrutStyle(
                   height: 1,

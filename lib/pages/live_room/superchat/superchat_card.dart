@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/models/common/image_type.dart';
@@ -102,16 +102,33 @@ class _SuperChatCardState extends State<SuperChatCard> {
                   height: 45,
                   type: ImageType.avatar,
                 ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      item.userInfo.uname,
-                      style: TextStyle(
-                        color: Utils.parseColor(item.userInfo.nameColor),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.userInfo.uname,
+                        style: TextStyle(
+                          color: Utils.parseColor(item.userInfo.nameColor),
+                        ),
+                      ),
+                      Text(
+                        "￥${item.price}",
+                        style: TextStyle(
+                          color: Utils.parseColor(item.backgroundPriceColor),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (_remains != null)
+                  Obx(
+                    () => Text(
+                      _remains.toString(),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
                       ),
                     ),
                     Text(

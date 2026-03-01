@@ -49,7 +49,7 @@ class SearchArticleController
       useSafeArea: true,
       isScrollControlled: true,
       constraints: BoxConstraints(
-        maxWidth: min(640, context.mediaQueryShortestSide),
+        maxWidth: min(640, ContextExtensions(context).mediaQueryShortestSide),
       ),
       builder: (context) {
         final theme = Theme.of(context);

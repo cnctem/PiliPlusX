@@ -77,7 +77,7 @@ class PlayerFocus extends StatelessWidget {
       }
     } else if (event is KeyUpEvent) {
       // 鸿蒙抬起按钮后恢复显示音量条
-      if (Utils.isHarmony) HarmonyVolumeView.cntlr.setPanleVisible(true);
+      if (PlatformUtils.isHarmony) HarmonyVolumeView.cntlr.setPanleVisible(true);
       if (plPlayerController.longPressTimer?.tick == 0 && hasPlayer) {
         _setVolume(isIncrease: isIncrease);
       }

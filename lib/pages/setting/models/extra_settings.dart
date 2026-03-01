@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'dart:math' show pi, max;
 
 import 'package:PiliPlus/common/widgets/custom_icon.dart';
@@ -142,16 +142,23 @@ List<SettingsModel> get extraSettings => [
           initialValue: pgcSkipType,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  pgcSkipType.title,
-                  style: TextStyle(fontSize: 14, height: 1, color: color),
-                  strutStyle: const StrutStyle(
-                    leading: 0,
-                    height: 1,
-                    fontSize: 14,
+            child: Text.rich(
+              style: TextStyle(fontSize: 14, height: 1, color: color),
+              strutStyle: const StrutStyle(
+                leading: 0,
+                height: 1,
+                fontSize: 14,
+              ),
+              TextSpan(
+                children: [
+                  TextSpan(text: pgcSkipType.title),
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.middle,
+                    child: Icon(
+                      MdiIcons.unfoldMoreHorizontal,
+                      size: 14,
+                      color: color,
+                    ),
                   ),
                 ),
                 Icon(
@@ -584,7 +591,7 @@ List<SettingsModel> get extraSettings => [
     subtitle: '相对减少手动播放加载时间',
     leading: const Icon(Icons.play_circle_outlined),
     setKey: SettingBoxKey.preInitPlayer,
-    defaultVal: Utils.isHarmony,
+    defaultVal: PlatformUtils.isHarmony,
   ),
   const SwitchModel(
     title: '首页切换页面动画',

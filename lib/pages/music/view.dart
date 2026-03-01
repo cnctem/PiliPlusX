@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'dart:math';
 
 import 'package:PiliPlus/common/widgets/badge.dart';
@@ -219,6 +219,7 @@ class _MusicDetailPageState extends CommonDynPageState<MusicDetailPage> {
           color: color,
         ),
         style: TextButton.styleFrom(
+          tapTargetSize: MaterialTapTargetSize.padded,
           padding: const EdgeInsets.symmetric(horizontal: 15),
           foregroundColor: outline,
         ),

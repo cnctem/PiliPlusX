@@ -1,4 +1,4 @@
-name: build
+name: build-test
 
 on:
   pull_request:
@@ -34,6 +34,19 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: 替换包名
+        run: |
+          export LC_ALL=C
+          sed -i 's/com\.example\.piliplus/com\.example\.pilitest/g' \
+            ohos/AppScope/app.json5 \
+            lib/services/audio_handler.dart
+        shell: bash
+      - name: Extract tag name
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+        shell: bash
+      - name: Echo build progress
+        run: echo "PiliPlus_ohos_${{ env.tag }}_unsigned.hap build progress"
+        shell: bash
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -66,6 +79,9 @@ jobs:
         run: |
           sed -i "s/name: PiliPlus/name: piliplus/g" pubspec.yaml
           find lib -type f -name "*.dart" -exec sed -i "s/import 'package:PiliPlus/import 'package:piliplus/g" {} \;
+        shell: bash
+      - name: Add ohos platform
+        run: flutter create --platforms ohos .
         shell: bash
       - name: Build Flutter for ohos
         run: flutter build hap --release --dart-define-from-file=pili_release.json

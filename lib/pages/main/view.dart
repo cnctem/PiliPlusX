@@ -329,7 +329,7 @@ class _MainAppState extends State<MainApp>
               children: [
                 if (!useBottomNav) ...[
                   _mainController.navigationBars.length > 1
-                      ? context.isTablet && _mainController.optTabletNav
+                      ? ContextExtensions(context).isTablet && _mainController.optTabletNav
                             ? Column(
                                 children: [
                                   const SizedBox(height: 25),

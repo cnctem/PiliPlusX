@@ -1,4 +1,4 @@
-import 'package:PiliPlus/common/skeleton/whisper_item.dart';
+﻿import 'package:PiliPlus/common/skeleton/whisper_item.dart';
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/grpc/bilibili/app/im/v1.pb.dart';
@@ -32,6 +32,7 @@ class _WhisperPageState extends State<WhisperPage> {
             final outsideItem = _controller.outsideItem.value;
             if (outsideItem != null && outsideItem.isNotEmpty) {
               return Row(
+                mainAxisSize: MainAxisSize.min,
                 children: outsideItem.map((e) {
                   return IconButton(
                     tooltip: e.hasTitle() ? e.title : null,

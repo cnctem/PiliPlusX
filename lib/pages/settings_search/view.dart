@@ -1,4 +1,4 @@
-import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
+﻿import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/view_sliver_safe_area.dart';
 import 'package:PiliPlus/pages/search/controller.dart' show DebounceStreamState;
 import 'package:PiliPlus/pages/setting/models/extra_settings.dart';
@@ -83,6 +83,7 @@ class _SettingsSearchPageState
           decoration: const InputDecoration(
             isDense: true,
             hintText: '搜索',
+            visualDensity: VisualDensity.standard,
             border: InputBorder.none,
           ),
         ),

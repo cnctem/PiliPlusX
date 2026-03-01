@@ -16,8 +16,6 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:live_photo_maker/live_photo_maker.dart';
-import 'package:permission_handler_ohos/permission_handler_ohos.dart'
-    as ph_ohos;
 import 'package:saver_gallery/saver_gallery.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -65,6 +63,7 @@ abstract class ImageUtils {
 
   // 获取存储权限
   static Future<bool> requestStoragePer(BuildContext context) async {
+    if(PlatformUtils.isHarmony) return true; // 鸿蒙直接跳过，保存图片时会申请
     await Permission.storage.request();
     PermissionStatus status = await Permission.storage.status;
     if (status == PermissionStatus.denied ||
@@ -106,8 +105,6 @@ abstract class ImageUtils {
   static Future<bool> checkPermissionDependOnSdkInt(
     BuildContext context,
   ) async {
-    // 鸿蒙权限在保存时单独申请，这里直接放行
-    if (Utils.isHarmony) return true;
     if (Platform.isAndroid) {
       if (await Utils.sdkInt <= 32) {
         if (!context.mounted) return false;
@@ -126,11 +123,6 @@ abstract class ImageUtils {
     required int width,
     required int height,
   }) async {
-    // TODO 鸿蒙待适配 下载Live Photo
-    if (Utils.isHarmony) {
-      SmartDialog.showToast('鸿蒙平台暂不支持 Live Photo 下载');
-      return false;
-    }
     try {
       if (Utils.isMobile && !await checkPermissionDependOnSdkInt(context)) {
         return false;
@@ -186,30 +178,6 @@ abstract class ImageUtils {
     }
   }
 
-  /// Harmony 相册权限申请，统一放这里，便于调试。
-  static Future<bool> _requestHarmonyAlbumPerms() async {
-    debugPrint('11111');
-    const perm = 'ohos.permission.WRITE_IMAGEVIDEO';
-    final status = await ph_ohos.PermissionHandlerOhos.checkPermissionStatus(
-      perm,
-    );
-    debugPrint('[ImageUtils] checkPermissionStatus($perm) -> $status');
-    if (status == ph_ohos.PermissionStatusOhos.granted) {
-      return true;
-    }
-
-    // 首次/未授权时主动拉起系统授权弹窗
-    final req = await ph_ohos.PermissionHandlerOhos.requestPermissions([perm]);
-    final reqStatus = req[perm];
-    debugPrint('[ImageUtils] requestPermissions($perm) -> $reqStatus');
-    if (reqStatus == ph_ohos.PermissionStatusOhos.granted) {
-      return true;
-    }
-
-    SmartDialog.showToast('请在系统设置中开启相册写入权限');
-    return false;
-  }
-
   static Future<bool> downloadImg(
     BuildContext context,
     List<String> imgList, [
@@ -258,20 +226,7 @@ abstract class ImageUtils {
         }
       });
       final result = await Future.wait(futures, eagerError: true);
-      if (Utils.isHarmony) {
-        // 鸿蒙：逐个保存并复用统一的保存逻辑（含权限检测）
-        for (var res in result) {
-          if (res.statusCode == 200) {
-            await saveFileImg(
-              filePath: res.filePath,
-              fileName: res.name,
-              del: res.del,
-            );
-          } else if (res.del) {
-            File(res.filePath).tryDel();
-          }
-        }
-      } else if (Utils.isMobile) {
+      if (PlatformUtils.isMobile) {
         final delList = <String>[];
         final saveList = <SaveFileData>[];
         for (var i in result) {
@@ -350,18 +305,9 @@ abstract class ImageUtils {
     required String fileName,
     String ext = 'png',
   }) async {
-    debugPrint(
-      '[ImageUtils] saveByteImg harmony=${Utils.isHarmony} name=$fileName',
-    );
-    SaveResult? result;
+    SaveResult? res;
     fileName += '.$ext';
-    if (Utils.isMobile || Utils.isHarmony) {
-      if (Utils.isHarmony) {
-        if (!await _requestHarmonyAlbumPerms()) {
-          SmartDialog.showToast('请先授予相册权限');
-          return null;
-        }
-      }
+    if (PlatformUtils.isMobile || PlatformUtils.isHarmony) {
       SmartDialog.showLoading(msg: '正在保存');
       result = await SaverGallery.saveImage(
         bytes,
@@ -437,23 +383,14 @@ abstract class ImageUtils {
     bool needToast = false,
     bool del = true,
   }) async {
-    debugPrint(
-      '[ImageUtils] saveFileImg harmony=${Utils.isHarmony} path=$filePath',
-    );
     final file = File(filePath);
     if (!file.existsSync()) {
       SmartDialog.showToast("文件不存在");
       return;
     }
-    SaveResult? result;
-    if (Utils.isMobile || Utils.isHarmony) {
-      if (Utils.isHarmony) {
-        if (!await _requestHarmonyAlbumPerms()) {
-          SmartDialog.showToast('请先授予相册权限');
-          return;
-        }
-      }
-      result = await SaverGallery.saveFile(
+    SaveResult? res;
+    if (PlatformUtils.isMobile || PlatformUtils.isHarmony) {
+      res = await SaverGallery.saveFile(
         filePath: filePath,
         fileName: fileName,
         androidRelativePath: _androidRelativePath,

@@ -1,4 +1,4 @@
-import 'package:PiliPlus/common/constants.dart';
+﻿import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/pendant_avatar.dart';
@@ -206,10 +206,13 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
                         children: [
                           WidgetSpan(
                             alignment: PlaceholderAlignment.middle,
-                            child: Icon(
-                              size: 13,
-                              Icons.error_outline,
-                              color: theme.colorScheme.outline,
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 2),
+                              child: Icon(
+                                size: 13,
+                                Icons.error_outline,
+                                color: theme.colorScheme.outline,
+                              ),
                             ),
                           ),
                           const WidgetSpan(child: SizedBox(width: 2)),

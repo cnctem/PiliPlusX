@@ -1,6 +1,7 @@
-import 'package:PiliPlus/common/constants.dart';
+﻿import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
+import 'package:PiliPlus/models/common/image_type.dart';
 import 'package:PiliPlus/models_new/live/live_feed_index/card_data_list_item.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
@@ -42,7 +43,7 @@ class LiveCardVApp extends StatelessWidget {
                         src: item.cover!,
                         width: maxWidth,
                         height: maxHeight,
-                        radius: 0,
+                        type: ImageType.emote,
                       ),
                       Positioned(
                         left: 0,

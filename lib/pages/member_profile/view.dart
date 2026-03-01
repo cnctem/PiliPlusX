@@ -1,10 +1,11 @@
-import 'dart:io' show File;
+﻿import 'dart:io' show File;
 
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/loading_widget.dart';
 import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
+import 'package:PiliPlus/models/common/image_type.dart';
 import 'package:PiliPlus/models/common/member/profile_type.dart';
 import 'package:PiliPlus/models/user/info.dart';
 import 'package:PiliPlus/models_new/account_myinfo/data.dart';
@@ -137,12 +138,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
             title: '头像',
             widget: Padding(
               padding: const EdgeInsets.symmetric(vertical: 5),
-              child: ClipOval(
-                child: CachedNetworkImage(
-                  width: 55,
-                  height: 55,
-                  imageUrl: ImageUtils.thumbnailUrl(response.face),
-                ),
+              child: NetworkImgLayer(
+                width: 55,
+                height: 55,
+                type: ImageType.avatar,
+                src: response.face,
               ),
             ),
             onTap: () => EasyThrottle.throttle(

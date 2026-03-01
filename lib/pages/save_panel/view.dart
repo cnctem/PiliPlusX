@@ -335,7 +335,7 @@ class _SavePanelState extends State<SavePanel> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final padding = MediaQuery.viewPaddingOf(context);
-    final maxWidth = context.mediaQueryShortestSide;
+    final maxWidth = ContextExtensions(context).mediaQueryShortestSide;
     late final coverSize = MediaQuery.textScalerOf(context).scale(65);
     return GestureDetector(
       behavior: HitTestBehavior.opaque,

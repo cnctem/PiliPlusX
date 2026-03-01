@@ -9,6 +9,13 @@ class DynamicCardSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final color = theme.colorScheme.onInverseSurface;
+    final buttonStyle = TextButton.styleFrom(
+      tapTargetSize: MaterialTapTargetSize.padded,
+      padding: const EdgeInsetsGeometry.symmetric(horizontal: 15),
+      foregroundColor: theme.colorScheme.outline.withValues(
+        alpha: 0.2,
+      ),
+    );
     return Skeleton(
       child: Container(
         padding: const EdgeInsets.only(left: 12, right: 12, top: 12),

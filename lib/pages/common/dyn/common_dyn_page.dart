@@ -10,7 +10,7 @@ import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/pages/common/dyn/common_dyn_controller.dart';
 import 'package:PiliPlus/pages/video/reply/widgets/reply_item_grpc.dart';
 import 'package:PiliPlus/pages/video/reply_reply/view.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/size_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/num_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
@@ -18,7 +18,7 @@ import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:get/get.dart' hide ContextExtensionss;
+import 'package:get/get.dart';
 
 abstract class CommonDynPageState<T extends StatefulWidget> extends State<T>
     with SingleTickerProviderStateMixin {
@@ -51,14 +51,9 @@ abstract class CommonDynPageState<T extends StatefulWidget> extends State<T>
   void listener() {
     final pos = scrollController.positions;
     controller.showTitle.value = pos.first.pixels > 55;
-
-    final direction1 = pos.first.userScrollDirection;
-    late final direction2 = pos.last.userScrollDirection;
-    if (direction1 == ScrollDirection.forward ||
-        direction2 == ScrollDirection.forward) {
+    if (pos.any((e) => e.userScrollDirection == ScrollDirection.forward)) {
       showFab();
-    } else if (direction1 == ScrollDirection.reverse ||
-        direction2 == ScrollDirection.reverse) {
+    } else if (pos.any((e) => e.userScrollDirection == ScrollDirection.reverse)) {
       hideFab();
     }
   }

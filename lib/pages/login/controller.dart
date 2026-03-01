@@ -136,10 +136,11 @@ class LoginPageController extends GetxController
       onSuccess();
     }
 
-    if (Utils.isDesktop || Utils.isHarmony) {
+    if (PlatformUtils.isDesktop || PlatformUtils.isHarmony) {
       // 极验插件不支持桌面和鸿蒙
-      Get.dialog<Map<String, dynamic>>(
-        GeetestWebviewDialog(geeGt, geeChallenge),
+      showDialog<Map<String, dynamic>>(
+        context: Get.context!,
+        builder: (context) => GeetestWebviewDialog(geeGt, geeChallenge),
       ).then((res) {
         if (res != null) {
           updateCaptchaData(res);
@@ -741,88 +742,9 @@ class LoginPageController extends GetxController
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('选择账号mid, 为0时使用匿名'),
-        titlePadding: const EdgeInsets.only(left: 22, top: 16, right: 22),
-        contentPadding: const EdgeInsets.symmetric(vertical: 5),
-        actionsPadding: const EdgeInsets.only(left: 16, right: 16, bottom: 10),
-        content: SingleChildScrollView(
-          child: Builder(
-            builder: (context) => RadioGroup(
-              groupValue: selectAccount[0],
-              onChanged: (v) {
-                selectAccount[0] = v!;
-                (context as Element).markNeedsBuild();
-              },
-              child: WrapRadioOptionsGroup<Account>(
-                groupTitle: '账号切换',
-                options: options,
-              ),
-            ),
-          ),
-        ),
-        actions: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TextButton(
-                onPressed: () {
-                  switchAccountDialogDetailed(context); // 打开详细弹窗
-                },
-                child: const Text('更多'),
-              ),
-              Row(
-                children: [
-                  TextButton(
-                    onPressed: Get.back,
-                    child: Text(
-                      '取消',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      for (final (i, v) in selectAccount.indexed) {
-                        if (selectAccount[0] != Accounts.accountMode[i]) {
-                          Accounts.set(AccountType.values[i], selectAccount[0]);
-                        }
-                      }
-                      Get.back();
-                    },
-                    child: const Text('确定'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  static Future<void>? switchAccountDialogDetailed(BuildContext context) {
-    if (Accounts.account.isEmpty) {
-      SmartDialog.showToast('请先登录');
-      return Get.toNamed('/loginPage');
-    }
-    final selectAccount = List.of(Accounts.accountMode);
-    final options = {
-      AnonymousAccount(): '0',
-      ...Accounts.account.toMap().map(
-          (k, v) => MapEntry(v, k as String),
-        ),
-    };
-    return showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('选择账号mid, 为0时使用匿名'),
-        titlePadding: const EdgeInsets.only(left: 22, top: 16, right: 22),
-        contentPadding: const EdgeInsets.symmetric(vertical: 5),
-        actionsPadding: const EdgeInsets.only(
-          left: 16,
-          right: 16,
-          bottom: 10,
-        ),
+        titlePadding: const EdgeInsetsGeometry.only(left: 22, top: 16, right: 22),
+        contentPadding: const EdgeInsetsGeometry.symmetric(vertical: 5),
+        actionsPadding: const EdgeInsetsGeometry.only(left: 16, right: 16, bottom: 10),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

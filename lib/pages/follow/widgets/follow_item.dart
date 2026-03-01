@@ -1,4 +1,4 @@
-import 'package:PiliPlus/common/widgets/pendant_avatar.dart';
+﻿import 'package:PiliPlus/common/widgets/pendant_avatar.dart';
 import 'package:PiliPlus/models_new/follow/list.dart';
 import 'package:PiliPlus/pages/share/view.dart' show UserModel;
 import 'package:PiliPlus/utils/feed_back.dart';
@@ -79,28 +79,27 @@ class FollowItem extends StatelessWidget {
                 ),
               ),
               if (isOwner ?? false)
-                SizedBox(
-                  height: 34,
-                  child: FilledButton.tonal(
-                    onPressed: () => RequestUtils.actionRelationMod(
-                      context: context,
-                      mid: item.mid,
-                      isFollow: item.attribute != -1,
-                      callback: callback,
-                    ),
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-                      foregroundColor: item.attribute == -1
-                          ? null
-                          : colorScheme.outline,
-                      backgroundColor: item.attribute == -1
-                          ? null
-                          : colorScheme.onInverseSurface,
-                    ),
-                    child: Text(
-                      '${item.attribute == -1 ? '' : '已'}关注',
-                      style: const TextStyle(fontSize: 12),
-                    ),
+                FilledButton.tonal(
+                  onPressed: () => RequestUtils.actionRelationMod(
+                    context: context,
+                    mid: item.mid,
+                    isFollow: item.attribute != -1,
+                    afterMod: afterMod,
+                  ),
+                  style: FilledButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    foregroundColor: item.attribute == -1
+                        ? null
+                        : colorScheme.outline,
+                    backgroundColor: item.attribute == -1
+                        ? null
+                        : colorScheme.onInverseSurface,
+                  ),
+                  child: Text(
+                    '${item.attribute == -1 ? '' : '已'}关注',
+                    style: const TextStyle(fontSize: 12),
                   ),
                 ),
             ],

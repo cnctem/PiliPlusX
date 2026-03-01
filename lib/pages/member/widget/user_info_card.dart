@@ -1,5 +1,5 @@
-import 'package:PiliPlus/common/constants.dart';
-import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
+﻿import 'package:PiliPlus/common/constants.dart';
+import 'package:PiliPlus/common/widgets/avatars.dart';
 import 'package:PiliPlus/common/widgets/pendant_avatar.dart';
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/models/common/image_preview_type.dart';
@@ -49,7 +49,8 @@ class UserInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isLight = colorScheme.isLight;
-    final isPortrait = context.width < 600;
+    final width = ContextExtensions(context).width;
+    final isPortrait = width < 600;
     return ViewSafeArea(
       top: !isPortrait,
       child: isPortrait
@@ -120,6 +121,10 @@ class UserInfoCard extends StatelessWidget {
       child: GestureDetector(
         onTap: () => PageUtils.imageView(imgList: [SourceModel(url: imgUrl)]),
         child: CachedNetworkImage(
+          fit: BoxFit.cover,
+          height: 135,
+          width: width,
+          memCacheWidth: width.cacheSize(context),
           imageUrl: ImageUtils.thumbnailUrl(imgUrl),
           width: double.infinity,
           height: 135,
@@ -389,6 +394,7 @@ class UserInfoCard extends StatelessWidget {
                   width: 1.0,
                   color: colorScheme.outline.withValues(alpha: 0.3),
                 ),
+                tapTargetSize: MaterialTapTargetSize.padded,
                 padding: EdgeInsets.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 visualDensity: VisualDensity.compact,
@@ -401,6 +407,7 @@ class UserInfoCard extends StatelessWidget {
                 backgroundColor: relation != 0
                     ? colorScheme.onInverseSurface
                     : null,
+                tapTargetSize: MaterialTapTargetSize.padded,
                 visualDensity: const VisualDensity(vertical: -1.8),
               ),
               child: Text.rich(
@@ -465,8 +472,9 @@ class UserInfoCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Stack(
-            clipBehavior: Clip.none,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Column(
                 mainAxisSize: MainAxisSize.min,

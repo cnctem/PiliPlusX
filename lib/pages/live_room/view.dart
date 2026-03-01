@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
@@ -143,7 +143,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
   void dispose() {
     videoPlayerServiceHandler?.onVideoDetailDispose(heroTag);
     WidgetsBinding.instance.removeObserver(this);
-    if ((Platform.isAndroid || Utils.isHarmony) && !plPlayerController.setSystemBrightness) {
+    if ((Platform.isAndroid || PlatformUtils.isHarmony) && !plPlayerController.setSystemBrightness) {
       ScreenBrightnessPlatform.instance.resetApplicationScreenBrightness();
     }
     PlPlayerController.setPlayCallBack(null);
@@ -184,7 +184,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
   @override
   Widget build(BuildContext context) {
     Widget child;
-    if ((Platform.isAndroid || Utils.isHarmony) && Floating().isPipMode) {
+    if ((Platform.isAndroid || PlatformUtils.isHarmony) && Floating().isPipMode) {
       child = videoPlayerPanel(
         isFullScreen,
         width: maxWidth,
@@ -523,6 +523,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
                           children: [
                             Row(
                               spacing: 10,
+                              mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Flexible(
@@ -539,6 +540,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
                             ),
                             Row(
                               spacing: 10,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 _liveRoomController.watchedWidget,
                                 _liveRoomController.timeWidget,
@@ -705,6 +707,16 @@ class _LiveRoomPageState extends State<LiveRoomPage>
       isPP: isPP,
       roomId: _liveRoomController.roomId,
       liveRoomController: _liveRoomController,
+      onAtUser: (item) => _liveRoomController
+        ..savedDanmaku = [
+          RichTextItem.fromStart(
+            '@${item.name} ',
+            rawText: item.uid.toString(),
+            type: RichTextType.at,
+            id: item.extra.id.toString(),
+          ),
+        ]
+        ..onSendDanmaku(),
     );
     return Padding(
       padding: EdgeInsets.only(bottom: 12, top: isPortrait ? 12 : 0),

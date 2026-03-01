@@ -1,4 +1,4 @@
-import 'dart:io' show File;
+﻿import 'dart:io' show File;
 
 import 'package:PiliPlus/common/widgets/button/icon_button.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
@@ -142,6 +142,7 @@ class _CreateVotePageState extends State<CreateVotePage> {
                           top: 4,
                           bottom: 4,
                         ),
+                        visualDensity: VisualDensity.standard,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         foregroundColor: theme.colorScheme.onSurfaceVariant,
                         backgroundColor: theme.colorScheme.onInverseSurface,

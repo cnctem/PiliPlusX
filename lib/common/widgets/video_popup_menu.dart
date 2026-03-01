@@ -130,21 +130,16 @@ class VideoPopupMenu extends StatelessWidget {
                                 context: context,
                                 builder: (context) {
                                   return Dialog(
-                                    child: ConstrainedBox(
-                                      constraints: const BoxConstraints(
-                                        minWidth: 280,
-                                        maxWidth: 420,
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 14,
-                                        ),
-                                        child: AiConclusionPanel.buildContent(
-                                          context,
-                                          Theme.of(context),
-                                          res,
-                                          tap: false,
-                                        ),
+                                    child: Padding(
+                                      padding:
+                                          const EdgeInsetsGeometry.symmetric(
+                                            vertical: 14,
+                                          ),
+                                      child: AiConclusionPanel.buildContent(
+                                        context,
+                                        Theme.of(context),
+                                        res,
+                                        tap: false,
                                       ),
                                     ),
                                   );

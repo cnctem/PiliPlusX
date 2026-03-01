@@ -1,4 +1,4 @@
-import 'dart:io' show File;
+﻿import 'dart:io' show File;
 
 import 'package:PiliPlus/common/widgets/loading_widget/loading_widget.dart';
 import 'package:PiliPlus/http/fav.dart';
@@ -179,6 +179,7 @@ class _CreateFavPageState extends State<CreateFavPage> {
           Builder(
             builder: (context) {
               return ListTile(
+                visualDensity: VisualDensity.standard,
                 tileColor: theme.colorScheme.onInverseSurface,
                 onTap: () {
                   EasyThrottle.throttle(
@@ -191,9 +192,7 @@ class _CreateFavPageState extends State<CreateFavPage> {
                           builder: (_) {
                             return AlertDialog(
                               clipBehavior: Clip.hardEdge,
-                              contentPadding: const EdgeInsets.symmetric(
-                                vertical: 12,
-                              ),
+                              contentPadding: const EdgeInsets.symmetric(vertical: 12),
                               content: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [

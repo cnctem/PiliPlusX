@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 
 import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
@@ -117,13 +117,36 @@ class LiveRoomController extends GetxController {
   final RxString title = ''.obs;
 
   final RxnString onlineCount = RxnString();
-  Widget get onlineWidget => Obx(() {
-    if (onlineCount.value case final onlineCount?) {
-      return Text(
-        '高能观众($onlineCount)',
-        style: const TextStyle(
-          fontSize: 12,
-          color: Colors.white,
+  Widget get onlineWidget => GestureDetector(
+    onTap: _showRank,
+    child: Obx(() {
+      if (onlineCount.value case final onlineCount?) {
+        return Text(
+          '高能观众($onlineCount)',
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.white,
+          ),
+        );
+      }
+      return const SizedBox.shrink();
+    }),
+  );
+
+  void _showRank() {
+    if (ruid case final ruid?) {
+      final heightFactor =
+          PlatformUtils.isMobile && !Get.mediaQuery.size.isPortrait ? 1.0 : 0.7;
+      showModalBottomSheet(
+        context: Get.context!,
+        useSafeArea: true,
+        clipBehavior: Clip.hardEdge,
+        isScrollControlled: true,
+        constraints: const BoxConstraints(maxWidth: 450),
+        builder: (context) => FractionallySizedBox(
+          widthFactor: 1.0,
+          heightFactor: heightFactor,
+          child: ContributionRankPanel(ruid: ruid, roomId: roomId),
         ),
       );
     }

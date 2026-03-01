@@ -105,14 +105,21 @@ dependencies:
   encrypt: ^5.0.3
 
   # 视频播放器
-  media_kit: 1.1.11 # Primary package.
-  # media_kit_video: ^1.2.5 # For video rendering.
+  media_kit:
+    git:
+      url: https://github.com/Predidit/media-kit.git
+      ref: afb5a1b179c212eac74a40012f21703d122112a5
+      path: ./media_kit
   media_kit_video:
     git:
-      url: https://github.com/bggRGjQaUbCoE/media-kit.git
-      path: media_kit_video
-      ref: version_1.2.5
-  media_kit_libs_video: 1.0.5
+      url: https://github.com/Predidit/media-kit.git
+      ref: afb5a1b179c212eac74a40012f21703d122112a5
+      path: ./media_kit_video
+  media_kit_libs_video:
+    git:
+      url: https://github.com/Predidit/media-kit.git
+      ref: afb5a1b179c212eac74a40012f21703d122112a5
+      path: ./libs/universal/media_kit_libs_video
 
   # 媒体通知
   # audio_service: ^0.18.15
@@ -129,7 +136,7 @@ dependencies:
 
   # 音量、亮度、屏幕控制
   flutter_volume_controller: ^1.3.3
-  wakelock_plus: 1.1.6
+  wakelock_plus: 1.3.3
   wakelock_plus_ohos: ^0.0.3
   # universal_platform: ^1.1.0
   # auto_orientation:
@@ -142,9 +149,6 @@ dependencies:
   protobuf: ^6.0.0
   # animations: ^2.0.11
 
-  # 获取appx信息
-  package_info_plus: ^4.2.0
-  package_info_plus_ohos: ^0.0.7
   url_launcher: ^6.3.1
   # 防抖节流
   easy_debounce: ^2.0.3
@@ -261,26 +265,6 @@ dependency_overrides:
     git:
       url: https://gitcode.com/openharmony-sig/flutter_plus_plugins.git
       path: packages/device_info_plus/device_info_plus
-  media_kit:
-    git:
-      url: https://github.com/ErBWs/media-kit.git
-      ref: feat-ohos
-      path: ./media_kit
-  media_kit_libs_ohos:
-    git:
-      url: https://github.com/ErBWs/media-kit.git
-      ref: feat-ohos
-      path: ./libs/ohos/media_kit_libs_ohos
-  media_kit_video:
-    git:
-      url: https://github.com/ErBWs/media-kit.git
-      ref: feat-ohos
-      path: ./media_kit_video
-  media_kit_libs_video:
-    git:
-      url: https://github.com/ErBWs/media-kit.git
-      ref: feat-ohos
-      path: ./libs/universal/media_kit_libs_video
   flutter_inappwebview:
     git:
       url: "https://gitcode.com/openharmony-sig/flutter_inappwebview.git"
@@ -313,6 +297,38 @@ dependency_overrides:
   path: ^1.9.1
   mime: ^2.0.0
   rxdart: ^0.28.0
+  media_kit_libs_linux:
+    git:
+      url: https://github.com/Predidit/media-kit.git
+      ref: afb5a1b179c212eac74a40012f21703d122112a5
+      path: ./libs/linux/media_kit_libs_linux
+  media_kit_libs_ios_video:
+    git:
+      url: https://github.com/Predidit/media-kit.git
+      ref: afb5a1b179c212eac74a40012f21703d122112a5
+      path: ./libs/ios/media_kit_libs_ios_video
+  media_kit_libs_macos_video:
+    git:
+      url: https://github.com/Predidit/media-kit.git
+      ref: afb5a1b179c212eac74a40012f21703d122112a5
+      path: ./libs/macos/media_kit_libs_macos_video
+  media_kit_libs_ohos:
+    git:
+      url: https://github.com/Predidit/media-kit.git
+      ref: afb5a1b179c212eac74a40012f21703d122112a5
+      path: ./libs/ohos/media_kit_libs_ohos
+  # media_kit_libs_android_video:
+  #   git:
+  #     url: https://github.com/Predidit/media-kit.git
+  #     ref: afb5a1b179c212eac74a40012f21703d122112a5
+  #     path: ./libs/android/media_kit_libs_android_video
+  # media_kit_libs_windows_video:
+  #   git:
+  #     url: https://github.com/Predidit/media-kit.git
+  #     ref: afb5a1b179c212eac74a40012f21703d122112a5
+  #     path: ./libs/windows/media_kit_libs_windows_video
+
+  # 上游指定的media_kit
   media_kit_native_event_loop:
     git:
       url: https://github.com/bggRGjQaUbCoE/media-kit.git

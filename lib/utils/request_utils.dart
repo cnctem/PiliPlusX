@@ -177,7 +177,7 @@ abstract class RequestUtils {
                         useSafeArea: true,
                         isScrollControlled: true,
                         constraints: BoxConstraints(
-                          maxWidth: min(640, context.mediaQueryShortestSide),
+                          maxWidth: min(640, ContextExtensions(context).mediaQueryShortestSide),
                         ),
                         builder: (BuildContext context) {
                           return DraggableScrollableSheet(

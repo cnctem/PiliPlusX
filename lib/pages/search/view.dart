@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
 import 'package:PiliPlus/common/widgets/disabled_icon.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/loading_widget.dart';
@@ -73,6 +73,7 @@ class _SearchPageState extends State<SearchPage> {
           textInputAction: TextInputAction.search,
           onChanged: _searchController.onChange,
           decoration: InputDecoration(
+            visualDensity: VisualDensity.standard,
             hintText: _searchController.hintText ?? '搜索',
             border: InputBorder.none,
           ),

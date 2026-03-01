@@ -1,4 +1,5 @@
-import 'dart:convert';
+﻿import 'dart:convert';
+import 'dart:math';
 
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
@@ -64,106 +65,98 @@ class ChatItem extends StatelessWidget {
         : theme.colorScheme.onSurfaceVariant;
     late final dynamic content = jsonDecode(item.content);
 
-    return isRevoke
-        ? const SizedBox.shrink()
-        : Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 6, bottom: 18),
-                child: Text(
-                  DateFormatUtils.chatFormat(item.timestamp.toInt()),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: theme.colorScheme.outline),
-                ),
-              ),
-              isSystem
-                  ? messageContent(
-                      context: context,
-                      theme: theme,
-                      content: content,
-                      textColor: textColor,
+    Widget child = messageContent(
+      context: context,
+      theme: theme,
+      content: content,
+      textColor: textColor,
+    );
+
+    final isSystem =
+        msgType == MsgType.EN_MSG_TYPE_VIDEO_CARD.value ||
+        msgType == MsgType.EN_MSG_TYPE_TIP_MESSAGE.value ||
+        msgType == MsgType.EN_MSG_TYPE_NOTIFY_MSG.value ||
+        msgType == MsgType.EN_MSG_TYPE_PICTURE_CARD.value ||
+        msgType == 16;
+
+    if (!isSystem) {
+      final isPic = msgType == MsgType.EN_MSG_TYPE_PIC.value; // 图片
+      child = Row(
+        mainAxisAlignment: isOwner ? MainAxisAlignment.end : MainAxisAlignment.start,
+        children: [
+          Container(
+            constraints: const BoxConstraints(maxWidth: 300.0),
+            decoration: BoxDecoration(
+              color: isOwner
+                  ? theme.colorScheme.secondaryContainer
+                  : theme.colorScheme.onInverseSurface,
+              borderRadius: isOwner
+                  ? const BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                      bottomLeft: Radius.circular(16),
+                      bottomRight: Radius.circular(6),
                     )
-                  : GestureDetector(
-                      onLongPress: () {
-                        Feedback.forLongPress(context);
-                        onLongPress!();
-                      },
-                      onSecondaryTap: Utils.isMobile ? null : onLongPress,
-                      child: Row(
-                        mainAxisAlignment: isOwner
-                            ? MainAxisAlignment.end
-                            : MainAxisAlignment.start,
-                        children: [
-                          Container(
-                            constraints: const BoxConstraints(maxWidth: 300.0),
-                            decoration: BoxDecoration(
-                              color: isOwner
-                                  ? theme.colorScheme.secondaryContainer
-                                  : theme.colorScheme.onInverseSurface,
-                              borderRadius: isOwner
-                                  ? const BorderRadius.only(
-                                      topLeft: Radius.circular(16),
-                                      topRight: Radius.circular(16),
-                                      bottomLeft: Radius.circular(16),
-                                      bottomRight: Radius.circular(6),
-                                    )
-                                  : const BorderRadius.only(
-                                      topLeft: Radius.circular(16),
-                                      topRight: Radius.circular(16),
-                                      bottomLeft: Radius.circular(6),
-                                      bottomRight: Radius.circular(16),
-                                    ),
-                            ),
-                            padding: EdgeInsets.only(
-                              top: 8,
-                              bottom: 6,
-                              left: isPic ? 8 : 12,
-                              right: isPic ? 8 : 12,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: isOwner
-                                  ? CrossAxisAlignment.end
-                                  : CrossAxisAlignment.start,
-                              children: [
-                                messageContent(
-                                  context: context,
-                                  theme: theme,
-                                  content: content,
-                                  textColor: textColor,
-                                ),
-                                SizedBox(height: isPic ? 7 : 2),
-                                if (item.msgStatus == 1)
-                                  Text(
-                                    '  已撤回',
-                                    style: theme.textTheme.labelSmall!.copyWith(
-                                      color: theme.colorScheme.onErrorContainer,
-                                    ),
-                                  ),
-                                if (item.msgSource >= 8 &&
-                                    item.msgSource <= 11) ...[
-                                  Divider(
-                                    height: 10,
-                                    thickness: 1,
-                                    color: theme.colorScheme.outline.withValues(
-                                      alpha: 0.2,
-                                    ),
-                                  ),
-                                  Text(
-                                    '此条消息为自动回复',
-                                    style: theme.textTheme.labelMedium!
-                                        .copyWith(
-                                          color: theme.colorScheme.outline,
-                                        ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                  : const BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                      bottomLeft: Radius.circular(6),
+                      bottomRight: Radius.circular(16),
                     ),
-            ],
-          );
+            ),
+            padding: isPic
+                ? const EdgeInsets.only(top: 8, bottom: 6, left: 8, right: 8)
+                : const EdgeInsets.only(top: 8, bottom: 6, left: 12, right: 12),
+            child: Column(
+              crossAxisAlignment: isOwner ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              children: [
+                child,
+                isPic ? const SizedBox(height: 7) : const SizedBox(height: 2),
+                if (item.msgStatus == 1)
+                  Text(
+                    '  已撤回',
+                    style: theme.textTheme.labelSmall!.copyWith(
+                      color: theme.colorScheme.onErrorContainer,
+                    ),
+                  ),
+                if (item.msgSource >= 8 && item.msgSource <= 11) ...[
+                  Divider(
+                    height: 10,
+                    thickness: 1,
+                    color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                  ),
+                  Text(
+                    '此条消息为自动回复',
+                    style: theme.textTheme.labelMedium!.copyWith(
+                      color: theme.colorScheme.outline,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 6, bottom: 18),
+          child: Text(
+            DateFormatUtils.chatFormat(item.timestamp.toInt()),
+            textAlign: TextAlign.center,
+            style: TextStyle(color: theme.colorScheme.outline),
+          ),
+        ),
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onLongPress: onLongPress,
+          onSecondaryTapUp: onSecondaryTapUp,
+          child: child,
+        ),
+      ],
+    );
   }
 
   Widget messageContent({

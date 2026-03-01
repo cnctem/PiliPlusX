@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:math';
 
 import 'package:PiliPlus/common/widgets/custom_sliver_persistent_header_delegate.dart';
@@ -36,7 +36,7 @@ class DynMentionPanel extends StatefulWidget {
       useSafeArea: true,
       isScrollControlled: true,
       constraints: BoxConstraints(
-        maxWidth: min(600, context.mediaQueryShortestSide),
+        maxWidth: min(600, ContextExtensions(context).mediaQueryShortestSide),
       ),
       builder: (context) => topic_sheet.DraggableScrollableSheet(
         expand: false,
@@ -108,6 +108,7 @@ class _DynMentionPanelState
             controller: _controller.controller,
             onChanged: ctr!.add,
             decoration: InputDecoration(
+              visualDensity: VisualDensity.standard,
               border: const OutlineInputBorder(
                 gapPadding: 0,
                 borderSide: BorderSide.none,

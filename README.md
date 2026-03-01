@@ -1,6 +1,6 @@
 # 当前分支(ohos)说明
 
-这是一个适配鸿蒙的分支，目前处于可用水平，大部分功能正常，目前主要问题是没有硬件解码
+这是一个适配鸿蒙的分支，目前大部分功能正常，主要问题是没有硬件解码
 
 上游 [qinshah/PiliPlus](https://github.com/qinshah/PiliPlus)
 
@@ -14,9 +14,11 @@
 
 ## 如何运行此项目到鸿蒙
 
-- 需要鸿蒙flutter3.35.7
+- 1、需要鸿蒙flutter3.35.7，其余环境配置可参考[鸿蒙flutter仓库的教程](https://gitcode.com/openharmony-tpc/flutter_flutter/tree/oh-3.35.7-dev#flutter-sdk-%E4%BB%93%E5%BA%93)
 
-- 其余可参考[鸿蒙flutter仓库的教程](https://gitcode.com/openharmony-tpc/flutter_flutter/tree/oh-3.35.7-dev#flutter-sdk-%E4%BB%93%E5%BA%93)
+- 2、手动创建ohos/build-profile.json5文件，见ohos/关于build-profile.json5
+
+- 3、若遇到类似 **Package not available (the pubspec for image_picker 1.1.2 from git has version 1.0.2).** 这样的报错，可参考[这篇掘金](https://juejin.cn/post/7602936997175132212)
 
 ### 欢迎你参与适配，让鸿蒙PiliPlus更完善
 

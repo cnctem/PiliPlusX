@@ -24,6 +24,7 @@ class ActionPanel extends StatelessWidget {
     final comment = moduleStat.comment!;
     final like = moduleStat.like!;
     final btnStyle = TextButton.styleFrom(
+      tapTargetSize: MaterialTapTargetSize.padded,
       padding: const EdgeInsets.symmetric(horizontal: 15),
       foregroundColor: outline,
     );

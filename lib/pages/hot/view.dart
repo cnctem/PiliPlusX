@@ -1,9 +1,11 @@
-import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
+﻿import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
+import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/video_card/video_card_h.dart';
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models/common/home_tab_type.dart';
+import 'package:PiliPlus/models/common/image_type.dart';
 import 'package:PiliPlus/models/model_hot_video_item.dart';
 import 'package:PiliPlus/pages/common/common_page.dart';
 import 'package:PiliPlus/pages/home/controller.dart';
@@ -44,7 +46,8 @@ class _HotPageState extends CommonPageState<HotPage, HotController>
           CachedNetworkImage(
             width: 35,
             height: 35,
-            imageUrl: ImageUtils.thumbnailUrl(iconUrl),
+            type: ImageType.emote,
+            src: iconUrl,
           ),
           const SizedBox(height: 4),
           Text(

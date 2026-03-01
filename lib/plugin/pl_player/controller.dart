@@ -35,7 +35,8 @@ import 'package:PiliPlus/plugin/pl_player/models/video_fit_type.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/utils/accounts.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/box_ext.dart';
+import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart' show PageUtils;
@@ -225,8 +226,8 @@ class PlPlayerController {
 
   late final bool autoPiP = Pref.autoPiP;
   bool get isPipMode =>
-      ((Platform.isAndroid || Utils.isHarmony) && Floating().isPipMode) ||
-      (Utils.isDesktop && isDesktopPip);
+      ((Platform.isAndroid || PlatformUtils.isHarmony) && Floating().isPipMode) ||
+      (PlatformUtils.isDesktop && isDesktopPip);
   late bool isDesktopPip = false;
   late Rect _lastWindowBounds;
 
@@ -314,7 +315,7 @@ class PlPlayerController {
 
   void disableAutoEnterPip() {
     if (_shouldSetPip) {
-      if (Utils.isHarmony) {
+      if (PlatformUtils.isHarmony) {
         Floating().setAutoPip(false);
       } else {
         Utils.channel.invokeMethod('setPipAutoEnterEnabled', {
@@ -581,7 +582,7 @@ class PlPlayerController {
             _shouldSetPip = true;
           }
         });
-      } else if (Utils.isHarmony) {
+      } else if (PlatformUtils.isHarmony) {
         _shouldSetPip = true;
       }
     }
@@ -1356,10 +1357,9 @@ class PlPlayerController {
     if (this.volume.value != volume) {
       this.volume.value = volume;
       try {
-        if (Utils.isDesktop) {
-          // 鸿蒙pc也按应用内音量设置
+        if (PlatformUtils.isDesktop) {
           _videoPlayerController!.setVolume(volume * 100);
-        } else if (Utils.isHarmony) {
+        } else if (PlatformUtils.isHarmony) {
           // 否则如果是鸿蒙手机和平板，按系统音量设置
           HarmonyVolumeView.cntlr.setVolume(volume);
         } else {
@@ -1543,7 +1543,7 @@ class PlPlayerController {
   void toggleFullScreen(bool val) {
     isFullScreen.value = val;
     updateSubtitleStyle();
-    if (!Utils.isHarmony) return;
+    if (!PlatformUtils.isHarmony) return;
     // 鸿蒙小窗适配方向
 
     if (val) {

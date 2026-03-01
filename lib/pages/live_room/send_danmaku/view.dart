@@ -1,5 +1,6 @@
-import 'dart:async';
+﻿import 'dart:async';
 
+import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/text_field.dart';
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/http/live.dart';
@@ -130,7 +131,7 @@ class _ReplyPageState extends CommonRichTextPubPageState<LiveSendDmPanel> {
       ),
       Container(
         height: 52,
-        padding: const EdgeInsets.only(left: 12, right: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -140,11 +141,11 @@ class _ReplyPageState extends CommonRichTextPubPageState<LiveSendDmPanel> {
               () => FilledButton.tonal(
                 onPressed: enablePublish.value ? onPublish : null,
                 style: FilledButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
                     vertical: 10,
                   ),
-                  visualDensity: VisualDensity.compact,
                 ),
                 child: const Text('发送'),
               ),
@@ -162,6 +163,20 @@ class _ReplyPageState extends CommonRichTextPubPageState<LiveSendDmPanel> {
     int? dmType,
     emoticonOptions,
   }) async {
+    int replyMid = 0;
+    String replyDmid = '';
+    if (message == null) {
+      final buffer = StringBuffer();
+      for (final e in editController.items) {
+        if (e.type == RichTextType.at) {
+          replyMid = int.parse(e.rawText);
+          replyDmid = e.id!;
+        } else {
+          buffer.write(e.rawText);
+        }
+      }
+      message = buffer.toString();
+    }
     final res = await LiveHttp.sendLiveMsg(
       roomId: liveRoomController.roomId,
       msg: message ?? editController.rawText,

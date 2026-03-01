@@ -21,13 +21,9 @@ Future<void> autoWrapReportDialog(
       return AlertDialog(
         constraints: const BoxConstraints(minWidth: 280, maxWidth: 420),
         title: const Text('举报'),
-        titlePadding: const EdgeInsets.only(left: 22, top: 16, right: 22),
-        contentPadding: const EdgeInsets.symmetric(vertical: 5),
-        actionsPadding: const EdgeInsets.only(
-          left: 16,
-          right: 16,
-          bottom: 10,
-        ),
+        titlePadding: const EdgeInsetsGeometry.only(left: 22, top: 16, right: 22),
+        contentPadding: const EdgeInsetsGeometry.symmetric(vertical: 5),
+        actionsPadding: const EdgeInsetsGeometry.only(left: 16, right: 16, bottom: 10),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,11 +37,7 @@ Future<void> autoWrapReportDialog(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Padding(
-                          padding: EdgeInsets.only(
-                            left: 22,
-                            right: 22,
-                            bottom: 5,
-                          ),
+                          padding: EdgeInsetsGeometry.only(left: 22, right: 22, bottom: 5),
                           child: Text('请选择举报的理由：'),
                         ),
                         RadioGroup(
@@ -66,26 +58,19 @@ Future<void> autoWrapReportDialog(
                         ),
                         if (reasonType == 0)
                           Padding(
-                            padding: const EdgeInsets.only(
-                              left: 22,
-                              top: 5,
-                              right: 22,
-                            ),
-                            child: Form(
+                            padding: const EdgeInsetsGeometry.only(left: 22, top: 5, right: 22),
+                            child: TextFormField(
                               key: key,
-                              child: TextFormField(
-                                autofocus: true,
-                                minLines: 2,
-                                maxLines: 4,
-                                initialValue: reasonDesc,
-                                decoration: const InputDecoration(
-                                  labelText: '为帮助审核人员更快处理，请补充问题类型和出现位置等详细信息',
-                                  border: OutlineInputBorder(),
-                                  contentPadding: EdgeInsets.all(10),
-                                ),
-                                onChanged: (value) => reasonDesc = value,
-                                validator: (value) =>
-                                    value.isNullOrEmpty ? '理由不能为空' : null,
+                              autofocus: true,
+                              minLines: 2,
+                              maxLines: 4,
+                              initialValue: reasonDesc,
+                              decoration: const InputDecoration(
+                                labelText: '为帮助审核人员更快处理，请补充问题类型和出现位置等详细信息',
+                                border: OutlineInputBorder(),
+                                contentPadding: EdgeInsetsGeometry.all(10),
+                                labelStyle: TextStyle(fontSize: 14),
+                                floatingLabelStyle: TextStyle(fontSize: 14),
                               ),
                             ),
                           ),

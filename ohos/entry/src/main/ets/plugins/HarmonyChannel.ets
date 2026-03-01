@@ -39,16 +39,18 @@ export default class HarmonyChannel implements FlutterPlugin {
 
   async onMethodCall(call: MethodCall, result: MethodResult): Promise<void> {
     switch (call.method) {
-      case "csy": {
+      case "csy":
         result.success(await this.csy(call));
         break;
-      }
-      case "setMiniWindowLandscape": {
+      case "setMiniWindowLandscape":
         const landscape: boolean = call.argument("landscape") ?? false;
         await this.setMiniWindowLandscape(landscape);
         result.success(true);
         break;
-      }
+      case "autoRotateLandscape":
+        await this.autoRotateLandscape();
+        result.success(true);
+        break;
       // case 'setWindowLayoutFullScreen': {
       //   this.lastWindow ??= await window.getLastWindow(getContext())
       //   this.lastWindow.setWindowLayoutFullScreen(call.argument('fullScreen'));
@@ -72,5 +74,10 @@ export default class HarmonyChannel implements FlutterPlugin {
     } else {
       this.lastWindow.disableLandscapeMultiWindow();
     }
+  }
+
+  async autoRotateLandscape() {
+    this.lastWindow ??= await window.getLastWindow(getContext());
+    this.lastWindow.setPreferredOrientation(window.Orientation.AUTO_ROTATION_LANDSCAPE)
   }
 }

@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
@@ -39,7 +39,8 @@ import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/accounts/account.dart';
-import 'package:PiliPlus/utils/extension.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
+import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
@@ -1106,10 +1107,13 @@ class HeaderControlState extends State<HeaderControl>
                                     leading: 0,
                                     height: 1,
                                   ),
-                                  style: TextStyle(
-                                    height: 1,
-                                    fontSize: 14,
-                                    color: theme.colorScheme.secondary,
+                                  WidgetSpan(
+                                    alignment: PlaceholderAlignment.middle,
+                                    child: Icon(
+                                      MdiIcons.unfoldMoreHorizontal,
+                                      size: 14,
+                                      color: theme.colorScheme.secondary,
+                                    ),
                                   ),
                                 ),
                                 Icon(
@@ -1985,7 +1989,7 @@ class HeaderControlState extends State<HeaderControl>
         void updateOpacity(double val) {
           subtitleBgOpacity = val.toPrecision(2);
           plPlayerController
-            ..subtitleBgOpacity = subtitleBgOpacity
+            ..subtitleBgOpacity = DoubleExt(val).toPrecision(2)
             ..updateSubtitleStyle();
           setState(() {});
         }
@@ -2745,8 +2749,8 @@ class HeaderControlState extends State<HeaderControl>
                 ),
               ],
               if (Platform.isAndroid ||
-                  Utils.isHarmony ||
-                  (Utils.isDesktop && !isFullScreen))
+                  PlatformUtils.isHarmony ||
+                  (PlatformUtils.isDesktop && !isFullScreen))
                 SizedBox(
                   width: 42,
                   height: 34,
@@ -2756,12 +2760,12 @@ class HeaderControlState extends State<HeaderControl>
                       padding: WidgetStatePropertyAll(EdgeInsets.zero),
                     ),
                     onPressed: () async {
-                      if (!kDebugMode && Utils.isHarmony) {
+                      if (!kDebugMode && PlatformUtils.isHarmony) {
                         // TODO
                         SmartDialog.showToast('鸿蒙待适配');
                         return;
                       }
-                      if (Utils.isDesktop) {
+                      if (PlatformUtils.isDesktop) {
                         plPlayerController.toggleDesktopPip();
                         return;
                       }

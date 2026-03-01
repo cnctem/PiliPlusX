@@ -430,7 +430,7 @@ abstract class Pref {
   }
 
   static bool get preInitPlayer =>
-      _setting.get(SettingBoxKey.preInitPlayer, defaultValue: Utils.isHarmony);
+      _setting.get(SettingBoxKey.preInitPlayer, defaultValue: PlatformUtils.isHarmony);
 
   static bool get mainTabBarView =>
       _setting.get(SettingBoxKey.mainTabBarView, defaultValue: false);
@@ -571,7 +571,7 @@ abstract class Pref {
   static bool get isTablet {
     bool isTablet;
     if (Get.context != null) {
-      isTablet = Get.context!.isTablet;
+      isTablet = ContextExtensions(Get.context!).isTablet;
     } else {
       final view = WidgetsBinding.instance.platformDispatcher.views.first;
       final screenSize = view.physicalSize / view.devicePixelRatio;

@@ -1,4 +1,4 @@
-import 'package:PiliPlus/common/widgets/scroll_physics.dart';
+﻿import 'package:PiliPlus/common/widgets/scroll_physics.dart';
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/models/common/member/search_type.dart';
 import 'package:PiliPlus/pages/member_search/child/view.dart';
@@ -41,6 +41,7 @@ class _MemberSearchPageState extends State<MemberSearchPage> {
           textAlignVertical: TextAlignVertical.center,
           decoration: InputDecoration(
             hintText: '搜索',
+            visualDensity: VisualDensity.standard,
             border: InputBorder.none,
             suffixIcon: IconButton(
               tooltip: '清空',

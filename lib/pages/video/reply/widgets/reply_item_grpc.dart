@@ -1,4 +1,4 @@
-import 'dart:math';
+﻿import 'dart:math';
 
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
@@ -83,7 +83,7 @@ class ReplyItemGrpc extends StatelessWidget {
       useSafeArea: true,
       isScrollControlled: true,
       constraints: BoxConstraints(
-        maxWidth: min(640, context.mediaQueryShortestSide),
+        maxWidth: min(640, ContextExtensions(context).mediaQueryShortestSide),
       ),
       builder: (context) {
         return morePanel(
@@ -481,7 +481,7 @@ class ReplyItemGrpc extends StatelessWidget {
                   useSafeArea: true,
                   isScrollControlled: true,
                   constraints: BoxConstraints(
-                    maxWidth: min(640, context.mediaQueryShortestSide),
+                    maxWidth: min(640, ContextExtensions(context).mediaQueryShortestSide),
                   ),
                   builder: (context) {
                     return morePanel(
@@ -1033,10 +1033,7 @@ class ReplyItemGrpc extends StatelessWidget {
                       maxWidth: 425,
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 16,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                       child: SelectableText(
                         message,
                         style: const TextStyle(fontSize: 15, height: 1.7),

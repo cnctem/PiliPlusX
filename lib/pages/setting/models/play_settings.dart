@@ -14,7 +14,6 @@ import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
-import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -227,7 +226,7 @@ List<SettingsModel> get playSettings => [
     setKey: SettingBoxKey.continuePlayInBackground,
     defaultVal: false,
   ),
-  if (Platform.isAndroid || (Utils.isHarmony && kDebugMode)) ...[
+  if (Platform.isAndroid || (PlatformUtils.isHarmony && kDebugMode)) ...[
     SwitchModel(
       title: '后台画中画',
       subtitle: '进入后台时以小窗形式（PiP）播放',

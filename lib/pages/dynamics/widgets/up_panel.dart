@@ -1,4 +1,4 @@
-import 'package:PiliPlus/common/widgets/flutter/dyn/ink_well.dart';
+﻿import 'package:PiliPlus/common/widgets/flutter/dyn/ink_well.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/models/common/dynamic/up_panel_position.dart';
 import 'package:PiliPlus/models/common/image_type.dart';
@@ -150,9 +150,20 @@ class _UpPanelState extends State<UpPanel> {
 
     Widget avatar;
     if (isAll) {
-      avatar = const CircleAvatar(
-        backgroundColor: Color(0xFF5CB67B),
-        backgroundImage: AssetImage('assets/images/logo/logo_X.png'),
+      avatar = DecoratedBox(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            width: 5,
+            color: const Color(0xFF5CB67B),
+          ),
+        ),
+        child: Image.asset(
+          width: 38,
+          height: 38,
+          cacheWidth: 38.cacheSize(context),
+          'assets/images/logo/logo.png',
+        ),
       );
     } else {
       avatar = Stack(
@@ -185,6 +196,39 @@ class _UpPanelState extends State<UpPanel> {
           ),
         ],
       );
+      if (isLive) {
+        avatar = Stack(
+          clipBehavior: Clip.none,
+          children: [
+            avatar,
+            Positioned(
+              top: isLive && !isTop ? -5 : 0,
+              right: -6,
+              child: Badge(
+                label: const Text(' Live '),
+                textColor: theme.colorScheme.onSecondaryContainer,
+                backgroundColor: theme.colorScheme.secondaryContainer
+                    .withValues(alpha: 0.75),
+              ),
+            ),
+          ],
+        );
+      } else if (data.hasUpdate ?? false) {
+        avatar = Stack(
+          clipBehavior: Clip.none,
+          children: [
+            avatar,
+            Positioned(
+              top: 0,
+              right: 4,
+              child: Badge(
+                smallSize: 8,
+                backgroundColor: theme.colorScheme.primary,
+              ),
+            ),
+          ],
+        );
+      }
     }
 
     return SizedBox(

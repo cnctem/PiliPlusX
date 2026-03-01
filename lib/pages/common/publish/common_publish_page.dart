@@ -154,7 +154,7 @@ abstract class CommonPublishPageState<T extends CommonPublishPage>
   }
 
   Widget buildEmojiPickerPanel() {
-    double height = context.isTablet ? 300 : 170;
+    double height = ContextExtensions(context).isTablet ? 300 : 170;
     final keyboardHeight = controller.keyboardHeight;
     if (keyboardHeight != 0) {
       height = max(height, keyboardHeight);

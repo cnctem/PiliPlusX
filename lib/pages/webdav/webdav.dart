@@ -55,7 +55,7 @@ class WebDav {
   String _getFileName() {
     final type = Utils.isDesktop
         ? 'desktop'
-        : Get.context!.isTablet
+        : ContextExtensions(Get.context!).isTablet
         ? 'pad'
         : 'phone';
     return 'piliplus_settings_$type.json';
