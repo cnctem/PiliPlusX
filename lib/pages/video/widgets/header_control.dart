@@ -65,8 +65,12 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 
 mixin TimeBatteryMixin<T extends StatefulWidget> on State<T> {
   ContextSingleTicker? provider;
-  ContextSingleTicker get effectiveProvider =>
-      provider ??= ContextSingleTicker(context, autoStart:()=> false);
+  ContextSingleTicker get effectiveProvider => provider ??= ContextSingleTicker(
+    context,
+    autoStart: () =>
+        plPlayerController.showControls.value &&
+        !plPlayerController.controlsLock.value,
+  );
 
   bool get isPortrait;
   bool get isFullScreen;
