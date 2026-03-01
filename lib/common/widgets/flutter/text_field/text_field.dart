@@ -18,7 +18,7 @@ import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/cupertino/spell_check_suggestions_toolbar.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/cupertino/text_field.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/editable_text.dart';
-import 'package:PiliPlus/common/widgets/flutter/text_field/spell_check.dart';
+import 'package:PiliPlus/common/widgets/flutter/text_field/spell_check.dart' hide buildTextSpanWithSpellCheckSuggestions;
 import 'package:PiliPlus/common/widgets/flutter/text_field/spell_check_suggestions_toolbar.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/system_context_menu.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/text_selection.dart';
@@ -1313,8 +1313,7 @@ class RichTextFieldState extends State<RichTextField>
               enabled: _isEnabled,
               hintMaxLines:
                   widget.decoration?.hintMaxLines ??
-                  // //  TODO 直接注释掉的代码 3.32.4-ohos-0.0.1不支持
-                  // themeData.inputDecorationTheme.hintMaxLines ??
+                  themeData.inputDecorationTheme.hintMaxLines ??
                   widget.maxLines,
             );
 
@@ -1744,7 +1743,21 @@ class RichTextFieldState extends State<RichTextField>
         handleDidLoseAccessibilityFocus = () {
           _effectiveFocusNode.unfocus();
         };
-      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        forcePressEnabled = false;
+        textSelectionControls ??= materialTextSelectionHandleControls;
+        paintCursorAboveText = false;
+        cursorOpacityAnimates ??= false;
+        cursorColor = _hasError
+            ? _errorColor
+            : widget.cursorColor ??
+                  selectionStyle.cursorColor ??
+                  theme.colorScheme.primary;
+        selectionColor =
+            selectionStyle.selectionColor ??
+            theme.colorScheme.primary.withValues(alpha: 0.40);
 
       case TargetPlatform.linux:
         forcePressEnabled = false;

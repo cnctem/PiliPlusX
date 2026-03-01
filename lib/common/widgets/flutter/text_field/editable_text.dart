@@ -25,6 +25,7 @@ import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/editable.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/spell_check.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/text_selection.dart';
+import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart'
@@ -1713,15 +1714,13 @@ class EditableText extends StatefulWidget {
       return true;
     }
     return switch (defaultTargetPlatform) {
-      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
-      // TargetPlatform.android => false,
-      // TargetPlatform.iOS => false,
-      // TargetPlatform.fuchsia => false,
+      TargetPlatform.android => false,
+      TargetPlatform.iOS => false,
+      TargetPlatform.fuchsia => false,
       TargetPlatform.linux => true,
       TargetPlatform.macOS => true,
       TargetPlatform.windows => true,
-      _ => false,
-      // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
+      _ => Utils.isDesktop,
     };
   }
 

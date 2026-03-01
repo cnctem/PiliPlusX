@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:PiliPlus/common/widgets/marquee.dart';
-import 'package:PiliPlus/pages/live_room/controller.dart';
 import 'package:PiliPlus/pages/video/widgets/header_control.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/common_btn.dart';
@@ -22,7 +21,6 @@ class LiveHeaderControl extends StatefulWidget {
     required this.onSendDanmaku,
     required this.onPlayAudio,
     required this.isPortrait,
-    required this.liveController,
   });
 
   final String? title;
@@ -31,7 +29,6 @@ class LiveHeaderControl extends StatefulWidget {
   final VoidCallback onSendDanmaku;
   final VoidCallback onPlayAudio;
   final bool isPortrait;
-  final LiveRoomController liveController;
 
   @override
   State<LiveHeaderControl> createState() => _LiveHeaderControlState();
@@ -39,7 +36,6 @@ class LiveHeaderControl extends StatefulWidget {
 
 class _LiveHeaderControlState extends State<LiveHeaderControl>
     with TimeBatteryMixin {
-  @override
   late final plPlayerController = widget.plPlayerController;
 
   @override
@@ -55,12 +51,10 @@ class _LiveHeaderControlState extends State<LiveHeaderControl>
   Widget build(BuildContext context) {
     final isFullScreen = this.isFullScreen;
     showCurrTimeIfNeeded(isFullScreen);
-    final liveController = widget.liveController;
     Widget child;
-    child = Obx(
-      () => MarqueeText(
-        key: titleKey,
-        liveController.title.value,
+    if (widget.title case final title?) {
+      child = MarqueeText(
+        title,
         spacing: 30,
         velocity: 30,
         style: const TextStyle(
@@ -68,35 +62,30 @@ class _LiveHeaderControlState extends State<LiveHeaderControl>
           height: 1,
           color: Colors.white,
         ),
-      ),
-    );
-    if (isFullScreen) {
-      child = Column(
-        spacing: 5,
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          child,
-          Row(
-            spacing: 10,
-            children: [
-              if (widget.upName case final upName?)
-                Text(
-                  upName,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.white,
-                  ),
-                ),
-              liveController.watchedWidget,
-              liveController.onlineWidget,
-              liveController.timeWidget,
-            ],
-          ),
-        ],
       );
+      if (isFullScreen && widget.upName != null) {
+        child = Column(
+          spacing: 5,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            child,
+            Text(
+              widget.upName!,
+              maxLines: 1,
+              style: const TextStyle(
+                fontSize: 12,
+                height: 1,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        );
+      }
+      child = Expanded(child: child);
+    } else {
+      child = const Spacer();
     }
-    child = Expanded(child: child);
     return AppBar(
       backgroundColor: Colors.transparent,
       foregroundColor: Colors.white,
