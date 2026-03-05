@@ -621,6 +621,15 @@ List<SettingsModel> get extraSettings => [
     setKey: SettingBoxKey.showSeekPreview,
     defaultVal: true,
   ),
+  if (Platform.isAndroid) ...[
+    getSaveImgPathModel(
+      context: Get.context!,
+      title: '图片&截图 保存路径',
+      key1: SettingBoxKey.saveImgPath,
+      key2: SettingBoxKey.saveScreenshotPath,
+      suffix: 'bili',
+    ),
+  ],
   const SwitchModel(
     title: '显示高能进度条',
     subtitle: '高能进度条反应了在时域上，单位时间内弹幕发送量的变化趋势',
@@ -782,6 +791,99 @@ List<SettingsModel> get extraSettings => [
           controller.defaultSearch.value = '';
         }
       } catch (_) {}
+    },
+  ),
+  const SwitchModel(
+    title: '显示剪贴板搜索',
+    subtitle: '首页搜索框旁显示剪贴板粘贴按钮',
+    leading: Icon(Icons.paste),
+    setKey: SettingBoxKey.showClipboardSearch,
+    defaultVal: true,
+  ),
+  const SwitchModel(
+    title: '剪贴板无痕搜索',
+    subtitle: '剪贴板搜索时不记录搜索历史',
+    leading: Icon(Icons.visibility_off_outlined),
+    setKey: SettingBoxKey.clipboardSearchIncognito,
+    defaultVal: false,
+  ),
+  const SwitchModel(
+    title: '长按展示视频卡片替换为加入稍后再看',
+    leading: Icon(Icons.watch_later_outlined),
+    setKey: SettingBoxKey.defaultAddWatchLater,
+    defaultVal: false,
+  ),
+  const SwitchModel(
+    title: '在"我的"页点击主菜单"我的"打开稍后再看',
+    subtitle: '关闭选项 默认打开账号选择器',
+    leading: Icon(Icons.watch_later_outlined),
+    setKey: SettingBoxKey.defaultShowWatchLater,
+    defaultVal: false,
+  ),
+  SwitchModel(
+    title: '快速分享给指定用户',
+    subtitle: '长按分享触发，点击指定用户',
+    leading: const Icon(FontAwesomeIcons.shareFromSquare),
+    setKey: SettingBoxKey.enableQuickShare,
+    defaultVal: false,
+    onChanged: (value) async {
+      if (value && Accounts.main.isLogin) {
+        final TextEditingController controller = TextEditingController();
+        final quickShareId = Pref.quickShareId;
+        if (quickShareId != null && quickShareId != 1004428694) {
+          controller.text = quickShareId.toString();
+        }
+        final result = await showDialog<bool>(
+          context: Get.context!,
+          builder: (context) => AlertDialog(
+            title: const Text('默认分享对象的mid'),
+            content: TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                hintText: '空白默认为开发者mid',
+              ),
+              keyboardType: TextInputType.number,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
+                child: const Text('确定'),
+              ),
+            ],
+          ),
+        );
+
+        if (result == true) {
+          final inputText = controller.text.trim();
+          if (inputText.isEmpty) {
+            // 如果为空，使用默认值
+            await GStorage.setting.put(SettingBoxKey.quickShareId, 1004428694);
+            SmartDialog.showToast('设置成功');
+          } else {
+            final mid = int.tryParse(inputText);
+            if (mid != null) {
+              // 如果是有效的整数，保存
+              await GStorage.setting.put(SettingBoxKey.quickShareId, mid);
+              SmartDialog.showToast('设置成功');
+            } else {
+              // 如果不是有效的整数，显示错误并关闭选项
+              SmartDialog.showToast('请输入正确mid');
+              await GStorage.setting.put(SettingBoxKey.enableQuickShare, false);
+            }
+          }
+        } else {
+          // 用户点击取消，关闭选项
+          await GStorage.setting.put(SettingBoxKey.enableQuickShare, false);
+        }
+      }
     },
   ),
   SwitchModel(
@@ -1145,6 +1247,70 @@ List<SettingsModel> get extraSettings => [
       }
     },
   ),
+  NormalModel(
+    title: '设置港澳台代理',
+    leading: const Icon(Icons.sailing_rounded),
+    getSubtitle: () {
+      final url = Pref.apiHKUrl;
+      return '当前港澳台代理配置: 「${url == '' ? '不代理' : Pref.apiHKUrl}」';
+    },
+
+    onTap: (context,setState) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          String valueStr = Pref.apiHKUrl;
+          return AlertDialog(
+            title: const Text('港澳台代理链接'),
+            content: TextField(
+              autofocus: true,
+              onChanged: (value) => valueStr = value,
+              keyboardType: TextInputType.url,
+              decoration: const InputDecoration(
+                hintText: '请输入URL如:https://app.bilibili.com',
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: Get.back,
+                child: Text(
+                  '取消',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () async {
+                  if (!valueStr.isNotEmpty) {
+                    SmartDialog.showToast('代理链接不能为空');
+                    return;
+                  }
+                  if (!valueStr.toLowerCase().startsWith('http')) {
+                    SmartDialog.showToast('代理链接格式错误');
+                    return;
+                  }
+
+                  if (valueStr.toLowerCase().endsWith('/')) {
+                    SmartDialog.showToast('末尾不能有/');
+                    return;
+                  }
+
+                  Get.back();
+                  await GStorage.setting.put(
+                    SettingBoxKey.apiHKUrl,
+                    valueStr,
+                  );
+                  setState();
+                },
+                child: const Text('确定'),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  ),
 ];
 
 Future<void> audioNormalization(
@@ -1242,4 +1408,543 @@ Future<void> audioNormalization(
       setState();
     }
   }
+}
+
+void _showDownPathDialog(BuildContext context, VoidCallback setState) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      clipBehavior: Clip.hardEdge,
+      contentPadding: const EdgeInsets.symmetric(vertical: 12),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            onTap: () {
+              Get.back();
+              Utils.copyText(downloadPath);
+            },
+            dense: true,
+            title: const Text('复制', style: TextStyle(fontSize: 14)),
+          ),
+          ListTile(
+            onTap: () {
+              Get.back();
+              final defPath = defDownloadPath;
+              if (downloadPath == defPath) return;
+              downloadPath = defPath;
+              setState();
+              Get.find<DownloadService>().initDownloadList();
+              GStorage.setting.delete(SettingBoxKey.downloadPath);
+            },
+            dense: true,
+            title: const Text('重置', style: TextStyle(fontSize: 14)),
+          ),
+          ListTile(
+            onTap: () async {
+              Get.back();
+              final path = await FilePicker.platform.getDirectoryPath();
+              if (path == null || path == downloadPath) return;
+              downloadPath = path;
+              setState();
+              Get.find<DownloadService>().initDownloadList();
+              GStorage.setting.put(SettingBoxKey.downloadPath, path);
+            },
+            dense: true,
+            title: const Text('设置新路径', style: TextStyle(fontSize: 14)),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+void _showDynDialog(BuildContext context) {
+  String dynamicPeriod = Pref.dynamicPeriod.toString();
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('检查周期'),
+      content: TextFormField(
+        autofocus: true,
+        initialValue: dynamicPeriod,
+        keyboardType: TextInputType.number,
+        onChanged: (value) => dynamicPeriod = value,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        decoration: const InputDecoration(suffixText: 'min'),
+      ),
+      actions: [
+        TextButton(
+          onPressed: Get.back,
+          child: Text(
+            '取消',
+            style: TextStyle(color: ColorScheme.of(context).outline),
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            try {
+              final val = int.parse(dynamicPeriod);
+              Get.back();
+              GStorage.setting.put(SettingBoxKey.dynamicPeriod, val);
+              Get.find<MainController>().dynamicPeriod = val * 60 * 1000;
+            } catch (e) {
+              SmartDialog.showToast(e.toString());
+            }
+          },
+          child: const Text('确定'),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showReplyLengthDialog(BuildContext context, VoidCallback setState) {
+  String replyLengthLimit = ReplyItemGrpc.replyLengthLimit.toString();
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('评论折叠行数'),
+      content: TextFormField(
+        autofocus: true,
+        initialValue: replyLengthLimit,
+        keyboardType: TextInputType.number,
+        onChanged: (value) => replyLengthLimit = value,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        decoration: const InputDecoration(suffixText: '行'),
+      ),
+      actions: [
+        TextButton(
+          onPressed: Get.back,
+          child: Text(
+            '取消',
+            style: TextStyle(color: ColorScheme.of(context).outline),
+          ),
+        ),
+        TextButton(
+          onPressed: () async {
+            try {
+              final val = int.parse(replyLengthLimit);
+              Get.back();
+              ReplyItemGrpc.replyLengthLimit = val == 0 ? null : val;
+              await GStorage.setting.put(SettingBoxKey.replyLengthLimit, val);
+              setState();
+            } catch (e) {
+              SmartDialog.showToast(e.toString());
+            }
+          },
+          child: const Text('确定'),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showDmHeightDialog(BuildContext context, VoidCallback setState) {
+  String danmakuLineHeight = Pref.danmakuLineHeight.toString();
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('弹幕行高'),
+      content: TextFormField(
+        autofocus: true,
+        initialValue: danmakuLineHeight,
+        keyboardType: const .numberWithOptions(decimal: true),
+        onChanged: (value) => danmakuLineHeight = value,
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'[\d\.]+')),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: Get.back,
+          child: Text(
+            '取消',
+            style: TextStyle(color: ColorScheme.of(context).outline),
+          ),
+        ),
+        TextButton(
+          onPressed: () async {
+            try {
+              final val = max(
+                1.0,
+                double.parse(danmakuLineHeight).toPrecision(1),
+              );
+              Get.back();
+              await GStorage.setting.put(SettingBoxKey.danmakuLineHeight, val);
+              setState();
+            } catch (e) {
+              SmartDialog.showToast(e.toString());
+            }
+          },
+          child: const Text('确定'),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showTouchSlopDialog(BuildContext context, VoidCallback setState) {
+  String initialValue = Pref.touchSlopH.toString();
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('横向滑动阈值'),
+      content: TextFormField(
+        autofocus: true,
+        initialValue: initialValue,
+        keyboardType: const .numberWithOptions(decimal: true),
+        onChanged: (value) => initialValue = value,
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'[\d\.]+')),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: Get.back,
+          child: Text(
+            '取消',
+            style: TextStyle(color: ColorScheme.of(context).outline),
+          ),
+        ),
+        TextButton(
+          onPressed: () async {
+            try {
+              final val = double.parse(initialValue);
+              Get.back();
+              touchSlopH = val;
+              await GStorage.setting.put(SettingBoxKey.touchSlopH, val);
+              setState();
+            } catch (e) {
+              SmartDialog.showToast(e.toString());
+            }
+          },
+          child: const Text('确定'),
+        ),
+      ],
+    ),
+  );
+}
+
+Future<void> _showRefreshDragDialog(
+  BuildContext context,
+  VoidCallback setState,
+) async {
+  final res = await showDialog<double>(
+    context: context,
+    builder: (context) => SliderDialog(
+      title: '刷新滑动距离',
+      min: 0,
+      max: 0.5,
+      divisions: 10,
+      precise: 2,
+      value: Pref.refreshDragPercentage,
+      suffix: 'x',
+    ),
+  );
+  if (res != null) {
+    kDragContainerExtentPercentage = res;
+    await GStorage.setting.put(SettingBoxKey.refreshDragPercentage, res);
+    Get.forceAppUpdate();
+  }
+}
+
+Future<void> _showRefreshDialog(
+  BuildContext context,
+  VoidCallback setState,
+) async {
+  final res = await showDialog<double>(
+    context: context,
+    builder: (context) => SliderDialog(
+      title: '刷新指示器高度',
+      min: 10.0,
+      max: 100.0,
+      divisions: 9,
+      value: Pref.refreshDisplacement,
+    ),
+  );
+  if (res != null) {
+    displacement = res;
+    await GStorage.setting.put(SettingBoxKey.refreshDisplacement, res);
+    Get.forceAppUpdate();
+  }
+}
+
+Future<void> _showSuperResolutionDialog(
+  BuildContext context,
+  VoidCallback setState,
+) async {
+  final res = await showDialog<SuperResolutionType>(
+    context: context,
+    builder: (context) => SelectDialog<SuperResolutionType>(
+      title: '超分辨率',
+      value: Pref.superResolutionType,
+      values: SuperResolutionType.values.map((e) => (e, e.label)).toList(),
+    ),
+  );
+  if (res != null) {
+    await GStorage.setting.put(
+      SettingBoxKey.superResolutionType,
+      res.index,
+    );
+    setState();
+  }
+}
+
+Future<void> _showFavDialog(BuildContext context) async {
+  if (Accounts.main.isLogin) {
+    final res = await FavHttp.allFavFolders(Accounts.main.mid);
+    if (res case Success(:final response)) {
+      final list = response.list;
+      if (list == null || list.isEmpty) {
+        return;
+      }
+      final quickFavId = Pref.quickFavId;
+      if (!context.mounted) return;
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          clipBehavior: Clip.hardEdge,
+          title: const Text('选择默认收藏夹'),
+          contentPadding: const EdgeInsets.only(top: 5, bottom: 18),
+          content: SingleChildScrollView(
+            child: RadioGroup(
+              onChanged: (value) {
+                Get.back();
+                GStorage.setting.put(SettingBoxKey.quickFavId, value);
+                SmartDialog.showToast('设置成功');
+              },
+              groupValue: quickFavId,
+              child: Column(
+                children: list
+                    .map(
+                      (item) => RadioListTile(
+                        toggleable: true,
+                        dense: true,
+                        title: Text(item.title),
+                        value: item.id,
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+          ),
+        ),
+      );
+    } else {
+      res.toast();
+    }
+  }
+}
+
+Future<void> _showReplyCountDialog(
+  BuildContext context,
+  VoidCallback setState,
+) async {
+  final res = await showDialog<double>(
+    context: context,
+    builder: (context) => SliderDialog(
+      title: '连接重试次数',
+      min: 0,
+      max: 8,
+      divisions: 8,
+      precise: 0,
+      value: Pref.retryCount.toDouble(),
+    ),
+  );
+  if (res != null) {
+    await GStorage.setting.put(SettingBoxKey.retryCount, res.toInt());
+    setState();
+    SmartDialog.showToast('重启生效');
+  }
+}
+
+Future<void> _showReplyDelayDialog(
+  BuildContext context,
+  VoidCallback setState,
+) async {
+  final res = await showDialog<double>(
+    context: context,
+    builder: (context) => SliderDialog(
+      title: '连接重试间隔',
+      min: 0,
+      max: 1000,
+      divisions: 10,
+      precise: 0,
+      value: Pref.retryDelay.toDouble(),
+      suffix: 'ms',
+    ),
+  );
+  if (res != null) {
+    await GStorage.setting.put(SettingBoxKey.retryDelay, res.toInt());
+    setState();
+    SmartDialog.showToast('重启生效');
+  }
+}
+
+Future<void> _showReplySortDialog(
+  BuildContext context,
+  VoidCallback setState,
+) async {
+  final res = await showDialog<ReplySortType>(
+    context: context,
+    builder: (context) => SelectDialog<ReplySortType>(
+      title: '评论展示',
+      value: Pref.replySortType,
+      values: ReplySortType.values.map((e) => (e, e.title)).toList(),
+    ),
+  );
+  if (res != null) {
+    await GStorage.setting.put(SettingBoxKey.replySortType, res.index);
+    setState();
+  }
+}
+
+Future<void> _showDefDynDialog(
+  BuildContext context,
+  VoidCallback setState,
+) async {
+  final res = await showDialog<DynamicsTabType>(
+    context: context,
+    builder: (context) => SelectDialog<DynamicsTabType>(
+      title: '动态展示',
+      value: Pref.defaultDynamicType,
+      values: DynamicsTabType.values.take(4).map((e) => (e, e.label)).toList(),
+    ),
+  );
+  if (res != null) {
+    await GStorage.setting.put(
+      SettingBoxKey.defaultDynamicType,
+      res.index,
+    );
+    setState();
+  }
+}
+
+Future<void> _showMemberTabDialog(
+  BuildContext context,
+  VoidCallback setState,
+) async {
+  final res = await showDialog<MemberTabType>(
+    context: context,
+    builder: (context) => SelectDialog<MemberTabType>(
+      title: '用户页默认展示TAB',
+      value: Pref.memberTab,
+      values: MemberTabType.values.map((e) => (e, e.title)).toList(),
+    ),
+  );
+  if (res != null) {
+    await GStorage.setting.put(SettingBoxKey.memberTab, res.index);
+    setState();
+  }
+}
+
+void _showProxyDialog(BuildContext context) {
+  String systemProxyHost = Pref.systemProxyHost;
+  String systemProxyPort = Pref.systemProxyPort;
+
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('设置代理'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 6),
+          TextFormField(
+            initialValue: systemProxyHost,
+            decoration: const InputDecoration(
+              isDense: true,
+              labelText: '请输入Host，使用 . 分割',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(6)),
+              ),
+            ),
+            onChanged: (e) => systemProxyHost = e,
+          ),
+          const SizedBox(height: 10),
+          TextFormField(
+            initialValue: systemProxyPort,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              isDense: true,
+              labelText: '请输入Port',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(6)),
+              ),
+            ),
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            onChanged: (e) => systemProxyPort = e,
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: Get.back,
+          child: Text(
+            '取消',
+            style: TextStyle(color: ColorScheme.of(context).outline),
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            Get.back();
+            GStorage.setting.put(
+              SettingBoxKey.systemProxyHost,
+              systemProxyHost,
+            );
+            GStorage.setting.put(
+              SettingBoxKey.systemProxyPort,
+              systemProxyPort,
+            );
+          },
+          child: const Text('确认'),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showCacheDialog(BuildContext context, VoidCallback setState) {
+  String valueStr = '';
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('最大缓存大小'),
+      content: TextField(
+        autofocus: true,
+        onChanged: (value) => valueStr = value,
+        keyboardType: TextInputType.number,
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'[\d\.]+')),
+        ],
+        decoration: const InputDecoration(suffixText: 'MB'),
+      ),
+      actions: [
+        TextButton(
+          onPressed: Get.back,
+          child: Text(
+            '取消',
+            style: TextStyle(color: ColorScheme.of(context).outline),
+          ),
+        ),
+        TextButton(
+          onPressed: () async {
+            try {
+              final val = num.parse(valueStr);
+              Get.back();
+              await GStorage.setting.put(
+                SettingBoxKey.maxCacheSize,
+                val * 1024 * 1024,
+              );
+              setState();
+            } catch (e) {
+              SmartDialog.showToast(e.toString());
+            }
+          },
+          child: const Text('确定'),
+        ),
+      ],
+    ),
+  );
 }

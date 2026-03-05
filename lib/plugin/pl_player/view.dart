@@ -51,6 +51,7 @@ import 'package:PiliPlus/plugin/pl_player/widgets/play_pause_btn.dart';
 import 'package:PiliPlus/utils/duration_utils.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
+import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
@@ -646,11 +647,34 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 )
                 .toList();
           },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              plPlayerController.videoFit.value.desc,
-              style: const TextStyle(color: Colors.white, fontSize: 13),
+          child: GestureDetector(
+            onLongPress: () {
+              feedBack();
+              final currentFit = plPlayerController.videoFit.value;
+              if (currentFit == VideoFitType.contain) {
+                plPlayerController.toggleVideoFit(VideoFitType.cover);
+                SmartDialog.showToast(VideoFitType.cover.desc);
+              } else {
+                plPlayerController.toggleVideoFit(VideoFitType.contain);
+                SmartDialog.showToast(VideoFitType.contain.desc);
+              }
+            },
+            onSecondaryTap: () {
+              final currentFit = plPlayerController.videoFit.value;
+              if (currentFit == VideoFitType.contain) {
+                plPlayerController.toggleVideoFit(VideoFitType.cover);
+                SmartDialog.showToast(VideoFitType.cover.desc);
+              } else {
+                plPlayerController.toggleVideoFit(VideoFitType.contain);
+                SmartDialog.showToast(VideoFitType.contain.desc);
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                plPlayerController.videoFit.value.desc,
+                style: const TextStyle(color: Colors.white, fontSize: 13),
+              ),
             ),
           ),
         ),
@@ -798,12 +822,27 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 )
                 .toList();
           },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              "${plPlayerController.playbackSpeed}X",
-              style: const TextStyle(color: Colors.white, fontSize: 13),
-              semanticsLabel: "${plPlayerController.playbackSpeed}倍速",
+          child: GestureDetector(
+            onLongPress: () {
+              feedBack();
+              final double currentSpeed = plPlayerController.playbackSpeed;
+              final newSpeed = currentSpeed == 1.0 ? 2.0 : 1.0;
+              plPlayerController.setPlaybackSpeed(newSpeed);
+              SmartDialog.showToast("${newSpeed}x播放");
+            },
+            onSecondaryTap: () {
+              final double currentSpeed = plPlayerController.playbackSpeed;
+              final newSpeed = currentSpeed == 1.0 ? 2.0 : 1.0;
+              plPlayerController.setPlaybackSpeed(newSpeed);
+              SmartDialog.showToast("${newSpeed}x播放");
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                "${plPlayerController.playbackSpeed}X",
+                style: const TextStyle(color: Colors.white, fontSize: 13),
+                semanticsLabel: "${plPlayerController.playbackSpeed}倍速",
+              ),
             ),
           ),
         ),

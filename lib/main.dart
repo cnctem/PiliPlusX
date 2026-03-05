@@ -9,6 +9,7 @@ import 'package:PiliPlus/harmony_adapt/scalable_binding.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/models/common/theme/theme_color_type.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
+import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/router/app_pages.dart';
 import 'package:PiliPlus/services/account_service.dart';
 import 'package:PiliPlus/services/download/download_service.dart';
@@ -308,6 +309,11 @@ class MyApp extends StatelessWidget {
         toastBuilder: (String msg) => CustomToast(msg: msg),
         loadingBuilder: (msg) => LoadingWidget(msg: msg),
         builder: (context, child) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (PlatformUtils.isMobile && Pref.hideStatusBar) {
+              hideStatusBarKeepNav();
+            }
+          });
           final data = MediaQuery.of(context);
           final scalableBinding =
               ScalableWidgetsFlutterBinding.ensureInitialized();

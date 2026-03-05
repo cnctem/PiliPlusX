@@ -380,6 +380,9 @@ class PlPlayerController {
   late final fastForBackwardDuration = Duration(
     seconds: Pref.fastForBackwardDuration,
   );
+  late final fastForBackwardDuration_ = Duration(
+    seconds: Pref.fastForBackwardDuration_,
+  );
 
   late final horizontalSeasonPanel = Pref.horizontalSeasonPanel;
   late final preInitPlayer = Pref.preInitPlayer;
@@ -1590,9 +1593,10 @@ class PlPlayerController {
         }
       } else {
         if (PlatformUtils.isMobile) {
-          showStatusBar();
-          if (mode == FullScreenMode.none) {
-            return;
+          if (!Pref.hideStatusBar) {
+            showStatusBar();
+          } else {
+            hideStatusBarKeepNav();
           }
           if (!horizontalScreen) {
             await verticalScreenForTwoSeconds();
