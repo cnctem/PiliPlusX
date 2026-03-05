@@ -16,11 +16,13 @@ import 'package:PiliPlus/http/validate.dart';
 import 'package:PiliPlus/http/video.dart';
 import 'package:PiliPlus/models/dynamics/result.dart';
 import 'package:PiliPlus/models/login/model.dart';
+import 'package:PiliPlus/models_new/fav/fav_detail/media.dart';
+import 'package:PiliPlus/models_new/later/list.dart';
 import 'package:PiliPlus/pages/common/multi_select/base.dart';
-import 'package:PiliPlus/pages/common/multi_select/multi_select_controller.dart';
 import 'package:PiliPlus/pages/dynamics_tab/controller.dart';
+import 'package:PiliPlus/pages/fav_detail/controller.dart'
+    show BaseFavController;
 import 'package:PiliPlus/pages/group_panel/view.dart';
-import 'package:PiliPlus/pages/later/controller.dart';
 import 'package:PiliPlus/pages/login/geetest/geetest_webview_dialog.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/extension/context_ext.dart';
@@ -385,10 +387,10 @@ abstract final class RequestUtils {
     }
   }
 
-  static void onCopyOrMove<R, T extends MultiSelectData>({
+  static void onCopyOrMove<T extends MultiSelectData>({
     required BuildContext context,
     required bool isCopy,
-    required MultiSelectController<R, T> ctr,
+    required CommonMultiSelectMixin<T> ctr,
     required dynamic mediaId,
     required dynamic mid,
   }) {
@@ -435,18 +437,20 @@ abstract final class RequestUtils {
                 TextButton(
                   onPressed: () {
                     if (checkedId != null) {
-                      Set removeList = ctr.allChecked.toSet();
+                      final removeList = ctr.allChecked.toSet();
                       SmartDialog.showLoading();
                       FavHttp.copyOrMoveFav(
                         isCopy: isCopy,
-                        isFav: ctr is! LaterController,
+                        isFav: ctr is BaseFavController,
                         srcMediaId: mediaId,
                         tarMediaId: checkedId,
                         resources: removeList
                             .map(
-                              (item) => ctr is LaterController
-                                  ? item.aid
-                                  : '${item.id}:${item.type}',
+                              (e) => switch (e) {
+                                LaterItemModel _ => e.aid,
+                                FavDetailItemModel _ => '${e.id}:${e.type}',
+                                _ => throw UnsupportedError(e.toString()),
+                              },
                             )
                             .join(','),
                         mid: isCopy ? mid : null,
