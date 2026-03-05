@@ -20,6 +20,7 @@ import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/json_file_handler.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
+import 'package:PiliPlus/utils/platform_shortcuts.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
@@ -27,6 +28,7 @@ import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/theme_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/utils/window_control.dart';
 import 'package:catcher_2/catcher_2.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
@@ -36,6 +38,7 @@ import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:path/path.dart' as path;
@@ -319,6 +322,11 @@ class MyApp extends StatelessWidget {
         child: child!,
       );
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (PlatformUtils.isMobile && Pref.hideStatusBar) {
+        hideStatusBarKeepNav();
+      }
+    });
     if (PlatformUtils.isDesktop) {
       return BackDetector(
         onBack: _onBack,
