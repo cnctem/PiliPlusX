@@ -222,7 +222,7 @@ class _HomePageState extends State<HomePage>
                   Padding(
                     padding: const EdgeInsets.only(right: 10),
                     child: InkWell(
-                      borderRadius: borderRadius,
+                      borderRadius: const BorderRadius.all(Radius.circular(25)),
                       onTap: () async {
                         ClipboardData? data = await Clipboard.getData(
                           Clipboard.kTextPlain,
