@@ -173,17 +173,6 @@ Commit Hash: ${BuildConfig.commitHash}''',
             color: theme.colorScheme.outlineVariant,
           ),
           ListTile(
-            onTap: () => PageUtils.launchURL(
-              'https://github.com/bggRGjQaUbCoE/PiliPlus',
-            ),
-            leading: const Icon(Icons.code),
-            title: const Text('上游Source Code'),
-            subtitle: Text(
-              'https://github.com/bggRGjQaUbCoE/PiliPlus',
-              style: subTitleStyle,
-            ),
-          ),
-          ListTile(
             onTap: () => PageUtils.launchURL(Constants.sourceCodeUrl),
             leading: const Icon(Icons.code),
             title: const Text('Source Code'),
