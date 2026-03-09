@@ -193,7 +193,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       Future.microtask(() async {
         try {
           if (PlatformUtils.isHarmony) {
-            // 移动端是鸿蒙也把播放器音量设为系统音量
+            HarmonyVolumeView.cntlr.setPanleVisible(false);
             final volume = await HarmonyVolumeView.cntlr.getVolume();
             debugPrint('获取鸿蒙音量：$volume');
             if (volume != null) plPlayerController.volume.value = volume;
@@ -206,7 +206,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             if (mounted &&
                 !plPlayerController.volumeInterceptEventStream.value) {
               plPlayerController.volume.value = value;
-              if (Platform.isIOS && !FlutterVolumeController.showSystemUI) {
+              if (Platform.isIOS && !FlutterVolumeController.showSystemUI || PlatformUtils.isHarmony) {
                 plPlayerController
                   ..volumeIndicator.value = true
                   ..volumeTimer?.cancel()
@@ -371,6 +371,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     animationController.dispose();
     if (PlatformUtils.isMobile) {
       FlutterVolumeController.removeListener();
+      if (PlatformUtils.isHarmony) {
+        HarmonyVolumeView.cntlr.setPanleVisible(true);
+      }
     }
     transformationController.dispose();
     _removeDmAction();
@@ -1238,8 +1241,6 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   }
 
   void _onInteractionEnd(ScaleEndDetails details) {
-    // 鸿蒙滑动结束之后，恢复显示音量条
-    if (PlatformUtils.isHarmony) HarmonyVolumeView.cntlr.setPanleVisible(true);
     if (plPlayerController.showSeekPreview) {
       plPlayerController.showPreview.value = false;
     }
@@ -1468,8 +1469,6 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   }
 
   void _onPointerPanZoomEnd(PointerPanZoomEndEvent event) {
-    // 鸿蒙滑动结束之后，恢复显示音量条
-    if (PlatformUtils.isHarmony) HarmonyVolumeView.cntlr.setPanleVisible(true);
     _gestureType = null;
   }
 
