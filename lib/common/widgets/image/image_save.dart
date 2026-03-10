@@ -19,7 +19,9 @@ void imageSaveDialog({
   // 如果设置了自动添加到稍后再看且有aid或bvid，则直接添加
   if ((Pref.defaultAddWatchLater || autoAddToWatchLater) &&
       (aid != null || bvid != null)) {
-    UserHttp.toViewLater(aid: aid, bvid: bvid);
+    UserHttp.toViewLater(aid: aid, bvid: bvid).then(
+      (res) => SmartDialog.showToast(res['msg']),
+    );
     // 如果是自动添加，则不显示对话框
     if (Pref.defaultAddWatchLater) {
       return;
