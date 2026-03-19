@@ -554,6 +554,7 @@ class AudioController extends GetxController
     MainReplyPage.toMainReplyPage(
       oid: oid.toInt(),
       replyType: isUgc ? 1 : 14,
+      heroTag: Get.arguments['heroTag'],
     );
   }
 
