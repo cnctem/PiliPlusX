@@ -14,7 +14,8 @@ class SuperChatItem {
   String token;
   int ts;
   UserInfo userInfo;
-  bool expired = false;
+  late bool expired = false;
+  late bool deleted = false;
 
   SuperChatItem({
     required this.id,
@@ -91,4 +92,19 @@ class SuperChatItem {
       userInfo: userInfo ?? this.userInfo,
     );
   }
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'id': id,
+    'uid': uid,
+    'price': price,
+    'background_color': backgroundColor,
+    'background_bottom_color': backgroundBottomColor,
+    'background_price_color': backgroundPriceColor,
+    'message_font_color': messageFontColor,
+    'end_time': endTime,
+    'message': message,
+    'token': token,
+    'ts': ts,
+    'user_info': userInfo.toJson(),
+  };
 }

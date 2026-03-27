@@ -20,6 +20,7 @@ import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/widget_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
+import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart' hide TextField;
@@ -197,7 +198,7 @@ class _WhisperDetailPageState
   void _showMenu(Offset offset, int index, Msg item, bool isOwner) {
     showMenu(
       context: context,
-      position: RelativeRect.fromLTRB(offset.dx, offset.dy, offset.dx, 0),
+      position: PageUtils.menuPosition(offset),
       items: [
         if (isOwner)
           PopupMenuItem(

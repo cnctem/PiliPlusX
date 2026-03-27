@@ -4,8 +4,8 @@ import 'package:PiliPlus/build_config.dart';
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/widgets/custom_toast.dart';
 import 'package:PiliPlus/common/widgets/mouse_back.dart';
+import 'package:PiliPlus/common/widgets/scale_app.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_volume.dart';
-import 'package:PiliPlus/harmony_adapt/scalable_binding.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/models/common/theme/theme_color_type.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
@@ -30,7 +30,6 @@ import 'package:PiliPlus/utils/theme_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:catcher_2/catcher_2.dart';
 import 'package:dynamic_color/dynamic_color.dart';
-import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/material.dart';
@@ -48,7 +47,7 @@ import 'package:window_manager/window_manager.dart' hide calcWindowPosition;
 WebViewEnvironment? webViewEnvironment;
 
 void main() async {
-  ScalableWidgetsFlutterBinding.ensureInitialized();
+  ScaledWidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
   if (PlatformUtils.isHarmony) await PlatformUtils.initHarmonyDeviceType();
   tmpDirPath = (await getTemporaryDirectory()).path;
@@ -60,6 +59,7 @@ void main() async {
     if (kDebugMode) debugPrint('GStorage init error: $e');
     exit(0);
   }
+  ScaledWidgetsFlutterBinding.instance.setScaleFactor(Pref.uiScale);
 
   if (PlatformUtils.isDesktop) {
     final customDownPath = Pref.downloadPath;
@@ -276,7 +276,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final dynamicColor = Pref.dynamicColor && _light != null && _dark != null;
     late final brandColor = colorThemeTypes[Pref.customColor].color;
-    late final variant = FlexSchemeVariant.values[Pref.schemeVariant];
+    late final variant = Pref.schemeVariant;
     return GetMaterialApp(
       title: Constants.appName,
       theme: ThemeUtils.getThemeData(
@@ -305,20 +305,30 @@ class MyApp extends StatelessWidget {
       getPages: Routes.getPages,
       defaultTransition: Pref.pageTransition,
       builder: FlutterSmartDialog.init(
-        toastBuilder: (String msg) => CustomToast(msg: msg),
+        toastBuilder: (msg) => CustomToast(msg: msg),
         loadingBuilder: (msg) => LoadingWidget(msg: msg),
         builder: (context, child) {
-          final data = MediaQuery.of(context);
-          final scalableBinding =
-              ScalableWidgetsFlutterBinding.ensureInitialized();
-          child = MediaQuery(
-            data: data.copyWith(
-              devicePixelRatio: scalableBinding.getLogicaPixelRatio(),
-              size: scalableBinding.toLogicaSize(data.size),
-              textScaler: TextScaler.linear(Pref.defaultTextScale),
-            ),
-            child: child!,
-          );
+          final uiScale = Pref.uiScale;
+          final mediaQuery = MediaQuery.of(context);
+          final textScaler = TextScaler.linear(Pref.defaultTextScale);
+          if (uiScale != 1.0) {
+            child = MediaQuery(
+              data: mediaQuery.copyWith(
+                textScaler: textScaler,
+                size: mediaQuery.size / uiScale,
+                padding: mediaQuery.padding / uiScale,
+                viewInsets: mediaQuery.viewInsets / uiScale,
+                viewPadding: mediaQuery.viewPadding / uiScale,
+                devicePixelRatio: mediaQuery.devicePixelRatio * uiScale,
+              ),
+              child: child!,
+            );
+          } else {
+            child = MediaQuery(
+              data: mediaQuery.copyWith(textScaler: textScaler),
+              child: child!,
+            );
+          }
           if (PlatformUtils.isDesktop) {
             return Focus(
               canRequestFocus: false,
@@ -398,7 +408,7 @@ class MyApp extends StatelessWidget {
         if (kDebugMode) {
           debugPrint('dynamic_color: Accent color detected.');
         }
-        final variant = FlexSchemeVariant.values[Pref.schemeVariant];
+        final variant = Pref.schemeVariant;
         _light = accentColor.asColorSchemeSeed(variant, Brightness.light);
         _dark = accentColor.asColorSchemeSeed(variant, Brightness.dark);
         return true;

@@ -146,7 +146,7 @@ abstract final class Utils {
     return Clipboard.setData(ClipboardData(text: text));
   }
 
-  static String makeHeroTag(v) {
+  static String makeHeroTag(dynamic v) {
     return v.toString() + random.nextInt(9999).toString();
   }
 

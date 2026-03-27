@@ -11,6 +11,7 @@ import 'package:PiliPlus/utils/utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
@@ -326,9 +327,9 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
       child: Hero(
         tag: item.url,
         child: switch (item.sourceType) {
-          SourceType.fileImage => Image(
+          SourceType.fileImage => Image.file(
+            File(item.url),
             filterQuality: FilterQuality.low,
-            image: FileImage(File(item.url)),
           ),
           SourceType.networkImage => CachedNetworkImage(
             fadeInDuration: Duration.zero,
@@ -336,6 +337,9 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
             imageUrl: _getActualUrl(item.url),
             placeholderFadeInDuration: Duration.zero,
             placeholder: (context, url) {
+              if (widget.quality == _quality) {
+                return const SizedBox.expand();
+              }
               return CachedNetworkImage(
                 fadeInDuration: Duration.zero,
                 fadeOutDuration: Duration.zero,
@@ -408,6 +412,7 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
   }
 
   void onLongPress(SourceModel item) {
+    HapticFeedback.mediumImpact();
     showDialog(
       context: context,
       builder: (context) {
@@ -437,10 +442,7 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
               ListTile(
                 onTap: () {
                   Get.back();
-                  ImageUtils.downloadImg(
-                    this.context,
-                    [item.url],
-                  );
+                  ImageUtils.downloadImg([item.url]);
                 },
                 dense: true,
                 title: const Text('保存图片', style: TextStyle(fontSize: 14)),
@@ -459,7 +461,6 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
                   onTap: () {
                     Get.back();
                     ImageUtils.downloadImg(
-                      this.context,
                       widget.sources.map((item) => item.url).toList(),
                     );
                   },
@@ -471,7 +472,6 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
                   onTap: () {
                     Get.back();
                     ImageUtils.downloadLivePhoto(
-                      context: this.context,
                       url: item.url,
                       liveUrl: item.liveUrl!,
                       width: item.width!,
@@ -494,7 +494,7 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
   void _showDesktopMenu(Offset offset, SourceModel item) {
     showMenu(
       context: context,
-      position: RelativeRect.fromLTRB(offset.dx, offset.dy, offset.dx, 0),
+      position: PageUtils.menuPosition(offset),
       items: [
         PopupMenuItem(
           height: 42,
@@ -503,7 +503,7 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
         ),
         PopupMenuItem(
           height: 42,
-          onTap: () => ImageUtils.downloadImg(context, [item.url]),
+          onTap: () => ImageUtils.downloadImg([item.url]),
           child: const Text('保存图片', style: TextStyle(fontSize: 14)),
         ),
         PopupMenuItem(
@@ -515,7 +515,6 @@ class _InteractiveviewerGalleryState extends State<InteractiveviewerGallery>
           PopupMenuItem(
             height: 42,
             onTap: () => ImageUtils.downloadLivePhoto(
-              context: context,
               url: item.url,
               liveUrl: item.liveUrl!,
               width: item.width!,

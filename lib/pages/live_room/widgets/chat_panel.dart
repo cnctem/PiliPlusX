@@ -9,6 +9,7 @@ import 'package:PiliPlus/pages/live_room/superchat/superchat_card.dart';
 import 'package:PiliPlus/pages/video/widgets/header_control.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
+import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -233,11 +234,7 @@ class LiveRoomChatPanel extends StatelessWidget {
           src: uemote.url,
           type: ImageType.emote,
           width: isUpower ? uemote.width : uemote.width / devicePixelRatio,
-          height: uemote.height == null
-              ? null
-              : isUpower
-              ? uemote.height!
-              : uemote.height! / devicePixelRatio,
+          height: isUpower ? uemote.height : uemote.height / devicePixelRatio,
         ),
       );
     }
@@ -314,6 +311,14 @@ class LiveRoomChatPanel extends StatelessWidget {
           ),
         ),
         const CustomPopupMenuDivider(height: 1),
+        PopupMenuItem(
+          height: 38,
+          onTap: () => Utils.copyText(Utils.jsonEncoder.convert(item.toJson())),
+          child: const Text(
+            '复制弹幕信息',
+            style: TextStyle(fontSize: 13),
+          ),
+        ),
         PopupMenuItem(
           height: 38,
           onTap: () => Get.toNamed('/member?mid=${item.uid}'),

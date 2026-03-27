@@ -115,8 +115,8 @@ class _LiveRoomPageState extends State<LiveRoomPage>
       }
       await _liveRoomController.playerInit(autoplay: shouldPlay);
     }
+    if (!mounted) return;
     plPlayerController.addStatusLister(playerListener);
-
     super.didPopNext();
   }
 

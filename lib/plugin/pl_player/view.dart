@@ -1224,11 +1224,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   }
 
   void onDoubleTapDownMobile(TapDownDetails details) {
-    if (plPlayerController.controlsLock.value) {
-      return;
-    }
-    if (plPlayerController.isLive) {
-      plPlayerController.doubleTapFuc(DoubleTapType.center);
+    if (plPlayerController.isLive || plPlayerController.controlsLock.value) {
       return;
     }
     final double tapPosition = details.localPosition.dx;
@@ -1245,7 +1241,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   }
 
   void onTapDesktop() {
-    if (plPlayerController.controlsLock.value) {
+    if (plPlayerController.isLive || plPlayerController.controlsLock.value) {
       return;
     }
     plPlayerController.onDoubleTapCenter();

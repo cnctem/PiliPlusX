@@ -3,6 +3,7 @@
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/models/common/image_type.dart';
 import 'package:PiliPlus/models_new/live/live_superchat/item.dart';
+import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -93,7 +94,7 @@ class _SuperChatCardState extends State<SuperChatCard> {
     }
     showMenu(
       context: context,
-      position: RelativeRect.fromLTRB(offset.dx, offset.dy, offset.dx, 0),
+      position: PageUtils.menuPosition(offset),
       items: [
         PopupMenuItem(
           height: 38,
@@ -101,6 +102,14 @@ class _SuperChatCardState extends State<SuperChatCard> {
           child: Text(
             '访问: ${item.userInfo.uname}',
             style: const TextStyle(fontSize: 13),
+          ),
+        ),
+        PopupMenuItem(
+          height: 38,
+          onTap: () => Utils.copyText(Utils.jsonEncoder.convert(item.toJson())),
+          child: const Text(
+            '复制 SC 信息',
+            style: TextStyle(fontSize: 13),
           ),
         ),
         PopupMenuItem(
@@ -133,9 +142,7 @@ class _SuperChatCardState extends State<SuperChatCard> {
           onSecondaryTapUp: PlatformUtils.isDesktop ? showMenu : null,
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(8),
-              ),
+              borderRadius: const BorderRadiusGeometry.vertical(top: Radius.circular(8)),
               color: Utils.parseColor(item.backgroundColor),
               border: Border(top: border, left: border, right: border),
             ),
@@ -185,16 +192,22 @@ class _SuperChatCardState extends State<SuperChatCard> {
         ),
         Container(
           decoration: BoxDecoration(
-            borderRadius: const BorderRadius.vertical(
-              bottom: Radius.circular(8),
-            ),
+            borderRadius: const BorderRadiusGeometry.vertical(bottom: Radius.circular(8)),
             color: bottomColor,
           ),
           padding: const EdgeInsets.all(8),
           child: SelectionArea(
             child: Text(
               item.message,
-              style: TextStyle(color: Utils.parseColor(item.messageFontColor)),
+              style: TextStyle(
+                color: Utils.parseColor(item.messageFontColor),
+                decoration: widget.persistentSC && item.deleted
+                    ? TextDecoration.lineThrough
+                    : null,
+                decorationThickness: 1.5,
+                decorationStyle: TextDecorationStyle.double,
+                decorationColor: Colors.white,
+              ),
             ),
           ),
         ),

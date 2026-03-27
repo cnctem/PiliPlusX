@@ -12,6 +12,7 @@ import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
+import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/material.dart' hide ListTile;
@@ -102,38 +103,35 @@ class WhisperSessionItem extends StatelessWidget {
         },
       ),
       onSecondaryTapUp: PlatformUtils.isDesktop
-          ? (details) {
-              final offset = details.globalPosition;
-              showMenu(
-                context: context,
-                position: RelativeRect.fromLTRB(offset.dx, offset.dy, offset.dx, 0),
-                items: [
+          ? (details) => showMenu(
+              context: context,
+              position: PageUtils.menuPosition(details.globalPosition),
+              items: [
+                PopupMenuItem(
+                  height: 42,
+                  onTap: () => onSetTop(item.isPinned, item.id),
+                  child: Text(item.isPinned ? '移除置顶' : '置顶'),
+                ),
+                if (item.id.privateId.hasTalkerUid())
                   PopupMenuItem(
                     height: 42,
-                    onTap: () => onSetTop(item.isPinned, item.id),
-                    child: Text(item.isPinned ? '移除置顶' : '置顶'),
+                    onTap: () =>
+                        onSetMute(item.isMuted, item.id.privateId.talkerUid),
+                    child: Text('${item.isMuted ? '关闭' : '开启'}免打扰'),
                   ),
-                  if (item.id.privateId.hasTalkerUid())
-                    PopupMenuItem(
-                      height: 42,
-                      onTap: () =>
-                          onSetMute(item.isMuted, item.id.privateId.talkerUid),
-                      child: Text('${item.isMuted ? '关闭' : '开启'}免打扰'),
+                if (item.id.privateId.hasTalkerUid())
+                  PopupMenuItem(
+                    height: 42,
+                    onTap: () => showConfirmDialog(
+                      context: context,
+                      title: '确定删除该对话？',
+                      onConfirm: () =>
+                          onRemove(item.id.privateId.talkerUid.toInt()),
                     ),
-                  if (item.id.privateId.hasTalkerUid())
-                    PopupMenuItem(
-                      height: 42,
-                      onTap: () => showConfirmDialog(
-                        context: context,
-                        title: '确定删除该对话？',
-                        onConfirm: () =>
-                            onRemove(item.id.privateId.talkerUid.toInt()),
-                      ),
-                      child: const Text('删除'),
-                    ),
-                ],
-              );
-            }
+                    child: const Text('删除'),
+                  ),
+              ],
+            )
           : null,
       onTap: () {
         if (item.hasUnread()) {

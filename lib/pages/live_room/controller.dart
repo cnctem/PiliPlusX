@@ -331,15 +331,11 @@ class LiveRoomController extends GetxController {
 
   @pragma('vm:notify-debugger-on-exception')
   Future<void> prefetch() async {
-    final res = await LiveHttp.liveRoomDanmaPrefetch(roomId: roomId);
-    if (res['status']) {
-      if (res['data'] case List list) {
-        try {
-          messages.addAll(
-            list.cast<Map<String, dynamic>>().map(DanmakuMsg.fromPrefetch),
-          );
-          scrollToBottom();
-        } catch (_) {}
+    final res = await LiveHttp.liveRoomDmPrefetch(roomId: roomId);
+    if (res case Success(:final response)) {
+      if (response != null && response.isNotEmpty) {
+        messages.addAll(response);
+        scrollToBottom();
       }
     }
   }
@@ -518,6 +514,27 @@ class LiveRoomController extends GetxController {
           }
           addDm(item);
           break;
+        case 'SUPER_CHAT_MESSAGE_DELETE' when showSuperChat:
+          if (obj['roomid'] == roomId) {
+            final ids = obj['data']?['ids'] as List?;
+            if (ids != null && ids.isNotEmpty) {
+              if (superChatType == SuperChatType.valid) {
+                superChatMsg.removeWhere((e) => ids.contains(e.id));
+              } else {
+                bool? refresh;
+                for (final id in ids) {
+                  if (superChatMsg.firstWhereOrNull((e) => e.id == id)
+                      case final item?) {
+                    item.deleted = true;
+                    refresh ??= true;
+                  }
+                }
+                if (refresh ?? false) {
+                  superChatMsg.refresh();
+                }
+              }
+            }
+          }
         case 'WATCHED_CHANGE':
           watchedShow.value = obj['data']['text_large'];
           break;

@@ -10,6 +10,7 @@ import 'package:PiliPlus/models/common/live/live_search_type.dart';
 import 'package:PiliPlus/models_new/live/live_area_list/area_item.dart';
 import 'package:PiliPlus/models_new/live/live_area_list/area_list.dart';
 import 'package:PiliPlus/models_new/live/live_contribution_rank/data.dart';
+import 'package:PiliPlus/models_new/live/live_danmaku/danmaku_msg.dart';
 import 'package:PiliPlus/models_new/live/live_dm_block/data.dart';
 import 'package:PiliPlus/models_new/live/live_dm_block/shield_info.dart';
 import 'package:PiliPlus/models_new/live/live_dm_block/shield_user_list.dart';
@@ -122,7 +123,9 @@ abstract final class LiveHttp {
     }
   }
 
-  static Future liveRoomDanmaPrefetch({required Object roomId}) async {
+  static Future<LoadingState<List<DanmakuMsg>?>> liveRoomDmPrefetch({
+    required Object roomId,
+  }) async {
     final res = await Request().get(
       Api.liveRoomDmPrefetch,
       queryParameters: {'roomid': roomId},
@@ -134,9 +137,17 @@ abstract final class LiveHttp {
       ),
     );
     if (res.data['code'] == 0) {
-      return {'status': true, 'data': res.data['data']?['room']};
+      try {
+        return Success(
+          (res.data['data']?['room'] as List?)
+              ?.map((e) => DanmakuMsg.fromPrefetch(e))
+              .toList(),
+        );
+      } catch (e) {
+        return Error(e.toString());
+      }
     } else {
-      return {'status': false, 'msg': res.data['message']};
+      return Error(res.data['message']);
     }
   }
 

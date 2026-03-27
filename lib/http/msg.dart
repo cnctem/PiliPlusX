@@ -18,7 +18,7 @@ import 'package:PiliPlus/models_new/upload_bfs/data.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/wbi_sign.dart';
 import 'package:dio/dio.dart';
-import 'package:uuid/uuid.dart';
+import 'package:uuid/v4.dart';
 
 abstract final class MsgHttp {
   static Future<LoadingState<MsgReplyData>> msgFeedReplyMe({
@@ -152,7 +152,7 @@ abstract final class MsgHttp {
     }
   }
 
-  static Future uploadImage({
+  static Future<LoadingState<Map>> uploadImage({
     required dynamic path,
     required String bucket,
     required String dir,
@@ -167,15 +167,9 @@ abstract final class MsgHttp {
       }),
     );
     if (res.data['code'] == 0) {
-      return {
-        'status': true,
-        'data': res.data['data'],
-      };
+      return Success(res.data['data']);
     } else {
-      return {
-        'status': false,
-        'msg': res.data['message'],
-      };
+      return Error(res.data['message']);
     }
   }
 
@@ -426,7 +420,7 @@ abstract final class MsgHttp {
   }
 
   static String getDevId() {
-    return const Uuid().v4();
+    return const UuidV4().generate();
   }
 
   static Future<LoadingState<Null>> msgSetNotice({
