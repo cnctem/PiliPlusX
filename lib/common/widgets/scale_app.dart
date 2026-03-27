@@ -17,6 +17,8 @@ class ScaledWidgetsFlutterBinding extends WidgetsFlutterBinding {
   /// Calculate scale factor from device size.
   double _scaleFactor;
 
+  double get scaleFactor => _scaleFactor;
+
   /// Update scaleFactor callback, then rebuild layout
   void setScaleFactor(double scaleFactor) {
     if (_scaleFactor == scaleFactor) return;

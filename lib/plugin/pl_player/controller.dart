@@ -226,7 +226,8 @@ class PlPlayerController {
 
   late final bool autoPiP = Pref.autoPiP;
   bool get isPipMode =>
-      ((Platform.isAndroid || PlatformUtils.isHarmony) && Floating().isPipMode) ||
+      ((Platform.isAndroid || PlatformUtils.isHarmony) &&
+          Floating().isPipMode) ||
       (PlatformUtils.isDesktop && isDesktopPip);
   late bool isDesktopPip = false;
   late Rect _lastWindowBounds;
@@ -1530,14 +1531,11 @@ class PlPlayerController {
     isFullScreen.value = val;
     updateSubtitleStyle();
     if (!PlatformUtils.isHarmony) return;
-    // 鸿蒙小窗适配方向
 
-    if (val) {
-      // 横向全屏需设置小窗横屏
-      if (!isVertical) HarmonyChannel.setMiniWindowLandscape(true);
-    } else {
-      // 退出全屏取消鸿蒙小窗横屏
-      HarmonyChannel.setMiniWindowLandscape(false);
+    if (!val) {
+      HarmonyChannel.onLandscapeOrMiniWindowChange(false, null); // 非横屏
+    } else if (!isVertical) {
+      HarmonyChannel.onLandscapeOrMiniWindowChange(true, null); // 横屏
     }
   }
 

@@ -308,7 +308,8 @@ class MyApp extends StatelessWidget {
         toastBuilder: (msg) => CustomToast(msg: msg),
         loadingBuilder: (msg) => LoadingWidget(msg: msg),
         builder: (context, child) {
-          final uiScale = Pref.uiScale;
+          // 鸿蒙小窗横屏临时缩小时需要获取真正的缩放比例
+          final uiScale = ScaledWidgetsFlutterBinding.instance.scaleFactor;
           final mediaQuery = MediaQuery.of(context);
           final textScaler = TextScaler.linear(Pref.defaultTextScale);
           if (uiScale != 1.0) {

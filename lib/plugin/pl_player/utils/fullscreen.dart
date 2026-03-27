@@ -39,7 +39,6 @@ Future<void> exitDesktopFullscreen() async {
 @pragma('vm:notify-debugger-on-exception')
 Future<void> landscape() async {
   if (PlatformUtils.isHarmony) {
-    HarmonyChannel.setMiniWindowLandscape(true); //将小窗设为横屏
     HarmonyChannel.autoRotateLandscape(); // 让左右横屏不受控制中心旋转开关控制
     return;
   }
