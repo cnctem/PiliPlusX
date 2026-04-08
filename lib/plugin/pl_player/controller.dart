@@ -1,4 +1,4 @@
-import 'dart:async' show StreamSubscription, Timer;
+import 'dart:async' show StreamSubscription, Timer, unawaited;
 import 'dart:convert' show ascii, utf8;
 import 'dart:io' show Platform;
 import 'dart:math' show max, min;
@@ -609,6 +609,17 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       .._playerCount += 1;
   }
 
+  String? _activeVideoContextKey;
+
+  void resetTempPlayerSettingsToDefault() {
+    if (!tempPlayerConf) {
+      return;
+    }
+    if (_playbackSpeed.value != playSpeedDefault) {
+      unawaited(setPlaybackSpeed(playSpeedDefault));
+    }
+  }
+
   bool _processing = false;
   bool get processing => _processing;
 
@@ -643,8 +654,16 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   }) async {
     try {
       _processing = true;
+      final nextVideoContextKey =
+          '${videoType ?? VideoType.ugc}:$bvid:$cid:$epid:$seasonId';
+      final shouldResetTempSettings = _activeVideoContextKey != null &&
+          _activeVideoContextKey != nextVideoContextKey;
+      _activeVideoContextKey = nextVideoContextKey;
       // 换视频/换P：解除倍速锁定并恢复锁定前速度。
       await releaseSpeedLock();
+      if (shouldResetTempSettings) {
+        resetTempPlayerSettingsToDefault();
+      }
       this.isLive = isLive;
       _videoType = videoType ?? VideoType.ugc;
       this.width = width;
