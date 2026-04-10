@@ -169,6 +169,16 @@ List<SettingsModel> get styleSettings => [
     leading: const Icon(Icons.zoom_in_outlined),
     onTap: _showUiScaleDialog,
   ),
+  if (Platform.isAndroid) ...[
+    const SwitchModel(
+      title: '预测性返回',
+      subtitle: '开启后使用安卓原生过渡动画，关闭后使用下方设置的页面过渡动画',
+      leading: Icon(Icons.arrow_back),
+      setKey: SettingBoxKey.enablePredictiveBack,
+      defaultVal: false,
+      needReboot: true,
+    ),
+  ],
   NormalModel(
     title: '页面过渡动画',
     leading: const Icon(Icons.animation),
