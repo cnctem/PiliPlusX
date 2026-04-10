@@ -832,11 +832,18 @@ abstract final class Pref {
   static bool get enableHeroCoverAnimation =>
       _setting.get(SettingBoxKey.enableHeroCoverAnimation, defaultValue: false);
 
-  static Transition get pageTransition =>
-      Transition.values[_setting.get(
-        SettingBoxKey.pageTransition,
-        defaultValue: Transition.cupertino.index,
-      )];
+  static Transition get pageTransition {
+    if (Platform.isAndroid && enablePredictiveBack) {
+      return Transition.native;
+    }
+    return Transition.values[_setting.get(
+      SettingBoxKey.pageTransition,
+      defaultValue: Transition.cupertino.index,
+    )];
+  }
+
+  static bool get enablePredictiveBack =>
+      _setting.get(SettingBoxKey.enablePredictiveBack, defaultValue: false);
 
   static bool get enableQuickDouble =>
       _setting.get(SettingBoxKey.enableQuickDouble, defaultValue: false);
