@@ -28,7 +28,11 @@ class Request {
 
   static final Request _instance = Request._internal();
   static late AccountManager accountManager;
+  static final _enableHttp2 = Pref.enableHttp2;
   static late final Dio dio;
+  static Dio? _http11Dio;
+  static Dio get http11Dio =>
+      _http11Dio ??= _enableHttp2 ? _cloneHttp11Dio() : dio;
   factory Request() => _instance;
 
   /// 设置cookie
@@ -96,11 +100,26 @@ class Request {
     } catch (_) {}
   }
 
+  static Dio _cloneHttp11Dio() {
+    final h11 = dio.clone(
+      httpClientAdapter:
+          (dio.httpClientAdapter as Http2Adapter).fallbackAdapter,
+    );
+    final interceptors = h11.interceptors;
+    for (var i = 0; i < interceptors.length; i++) {
+      final elem = interceptors[i];
+      if (elem is RetryInterceptor) {
+        interceptors[i] = elem.copyWith(client: h11);
+        break;
+      }
+    }
+    return h11;
+  }
+
   /*
    * config it and create
    */
   Request._internal() {
-    final enableHttp2 = Pref.enableHttp2;
     //BaseOptions、Options、RequestOptions 都可以配置参数，优先级别依次递增，且可以根据优先级别覆盖参数
     BaseOptions options = BaseOptions(
       //请求基地址,可以包含子路径
@@ -112,7 +131,7 @@ class Request {
       //Http请求头.
       headers: {
         'user-agent': 'Dart/3.6 (dart:io)', // Http2Adapter不会自动添加标头
-        if (!enableHttp2) 'connection': 'keep-alive',
+        if (!_enableHttp2) 'connection': 'keep-alive',
         'accept-encoding': 'br,gzip',
       },
       responseDecoder: _responseDecoder, // Http2Adapter没有自动解压
@@ -143,7 +162,7 @@ class Request {
     );
 
     dio = Dio(options)
-      ..httpClientAdapter = enableHttp2
+      ..httpClientAdapter = _enableHttp2
           ? Http2Adapter(
               ConnectionManager(
                 idleTimeout: const Duration(seconds: 15),
@@ -168,7 +187,11 @@ class Request {
           : http11Adapter;
 
     // 先于其他Interceptor
-    dio.interceptors.add(RetryInterceptor(Pref.retryCount, Pref.retryDelay));
+    if (Pref.retryCount != 0) {
+      dio.interceptors.add(
+        RetryInterceptor(dio, Pref.retryCount, Pref.retryDelay),
+      );
+    }
 
     // 港澳台支持
     dio.interceptors.add(HkApiRetryInterceptor());

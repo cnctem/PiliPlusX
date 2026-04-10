@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:math' show min;
 import 'dart:ui';
 
-import 'package:PiliPlus/common/constants.dart';
+import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/pair.dart';
 import 'package:PiliPlus/common/widgets/progress_bar/segment_progress_bar.dart';
 import 'package:PiliPlus/grpc/bilibili/app/listener/v1.pbenum.dart'
@@ -71,7 +71,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:flutter_volume_controller/flutter_volume_controller.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:media_kit/media_kit.dart' hide Subtitle;
 import 'package:path/path.dart' as path;
 
@@ -108,7 +108,7 @@ class VideoDetailController extends GetxController
 
   // 请求返回的视频信息
   late PlayUrlModel data;
-  final Rx<LoadingState> videoState = LoadingState.loading().obs;
+  final RxBool videoState = false.obs;
 
   /// 播放器配置 画质 音质 解码格式
   final Rxn<VideoQuality> currentVideoQa = Rxn<VideoQuality>();
@@ -268,8 +268,6 @@ class VideoDetailController extends GetxController
       }
     }
   }
-
-  bool imageview = false;
 
   final isLoginVideo = Accounts.get(AccountType.video).isLogin;
 
@@ -663,7 +661,9 @@ class VideoDetailController extends GetxController
             (isFileSource
                 ? true
                 : videoPlayerKey.currentState?.mounted == true)) {
-      return playerInit(autoFullScreenFlag: autoFullScreenFlag);
+      return playerInit(
+        autoFullScreenFlag: autoFullScreenFlag && _autoPlay.value,
+      );
     }
     return null;
   }
@@ -687,6 +687,7 @@ class VideoDetailController extends GetxController
               dir: args['dirPath'],
               typeTag: entry.typeTag!,
               isMp4: entry.mediaType == 1,
+              hasDashAudio: entry.hasDashAudio,
             )
           : NetworkSource(
               videoSource: video ?? videoUrl!,
@@ -708,9 +709,7 @@ class VideoDetailController extends GetxController
       pgcType: isUgc ? null : pgcType,
       videoType: videoType,
       onInit: () {
-        if (videoState.value is! Success) {
-          videoState.value = const Success(null);
-        }
+        videoState.value = true;
         setSubtitle(vttSubtitlesIndex.value);
       },
       width: firstVideo.width,
@@ -842,7 +841,7 @@ class VideoDetailController extends GetxController
       if (data.dash == null) {
         SmartDialog.showToast('视频资源不存在');
         _autoPlay.value = false;
-        videoState.value = const Error('视频资源不存在');
+        videoState.value = false;
         if (plPlayerController.isFullScreen.value) {
           plPlayerController.toggleFullScreen(false);
         }
@@ -937,7 +936,7 @@ class VideoDetailController extends GetxController
       await _initPlayerIfNeeded(autoFullScreenFlag);
     } else {
       _autoPlay.value = false;
-      videoState.value = result..toast();
+      videoState.value = false;
       if (plPlayerController.isFullScreen.value) {
         plPlayerController.toggleFullScreen(false);
       }
@@ -1484,7 +1483,7 @@ class VideoDetailController extends GetxController
     showDialog(
       context: Get.context!,
       builder: (context) => AlertDialog(
-        constraints: StyleString.dialogFixedConstraints,
+        constraints: Style.dialogFixedConstraints,
         title: const Text('播放地址'),
         content: Column(
           spacing: 20,

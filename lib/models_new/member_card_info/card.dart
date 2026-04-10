@@ -4,8 +4,6 @@ class Card {
   String? mid;
   String? name;
   String? face;
-  int? fans;
-  int? attention;
   BaseOfficialVerify? official;
   Vip? vip;
 
@@ -13,8 +11,6 @@ class Card {
     this.mid,
     this.name,
     this.face,
-    this.fans,
-    this.attention,
     this.official,
     this.vip,
   });
@@ -23,8 +19,6 @@ class Card {
     mid: json['mid'] as String?,
     name: json['name'] as String?,
     face: json['face'] as String?,
-    fans: json['fans'] as int?,
-    attention: json['attention'] as int?,
     official: json['Official'] == null
         ? null
         : BaseOfficialVerify.fromJson(

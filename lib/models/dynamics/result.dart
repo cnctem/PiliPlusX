@@ -7,6 +7,7 @@ import 'package:PiliPlus/models/model_avatar.dart';
 import 'package:PiliPlus/models/model_owner.dart';
 import 'package:PiliPlus/models_new/live/live_feed_index/watched_show.dart';
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
+import 'package:PiliPlus/utils/parse_string.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 
@@ -102,6 +103,8 @@ class DynamicItemModel {
   DynamicItemModel? orig;
   String? type;
   bool? visible;
+
+  late bool linkFolded = false;
 
   // opus
   Fallback? fallback;
@@ -421,7 +424,7 @@ class ModuleAuthorModel extends Avatar {
     pubTime = json['pub_time'];
     pubTs = json['pub_ts'] == 0 ? null : Utils.safeToInt(json['pub_ts']);
     type = json['type'];
-    if (PendantAvatar.showDynDecorate) {
+    if (PendantAvatar.showDecorate) {
       decorate = json['decorate'] == null
           ? null
           : Decorate.fromJson(json['decorate']);
@@ -429,7 +432,7 @@ class ModuleAuthorModel extends Avatar {
       pendant = null;
     }
     isTop = json['is_top'];
-    badgeText = _parseString(json['icon_badge']?['text']);
+    badgeText = noneNullOrEmptyString(json['icon_badge']?['text']);
   }
 }
 
@@ -682,7 +685,9 @@ class Vote {
   Vote.fromJson(Map<String, dynamic> json) {
     joinNum = Utils.safeToInt(json['join_num']);
     voteId = Utils.safeToInt(json['vote_id']);
-    title = _parseString(json['title']) ?? _parseString(json['desc']);
+    title =
+        noneNullOrEmptyString(json['title']) ??
+        noneNullOrEmptyString(json['desc']);
   }
 }
 
@@ -1170,16 +1175,11 @@ class Emoji {
 
   Emoji.fromJson(Map<String, dynamic> json) {
     url =
-        _parseString(json['webp_url']) ??
-        _parseString(json['gif_url']) ??
-        _parseString(json['icon_url']);
+        noneNullOrEmptyString(json['webp_url']) ??
+        noneNullOrEmptyString(json['gif_url']) ??
+        noneNullOrEmptyString(json['icon_url']);
     size = json['size'] ?? 1;
   }
-}
-
-String? _parseString(String? value) {
-  if (value == null || value.isEmpty) return null;
-  return value;
 }
 
 class DynamicNoneModel {
@@ -1297,7 +1297,7 @@ class ModuleTag {
   String? text;
 
   ModuleTag.fromJson(Map<String, dynamic> json) {
-    text = _parseString(json['text']);
+    text = noneNullOrEmptyString(json['text']);
   }
 }
 

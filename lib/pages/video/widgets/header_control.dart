@@ -35,7 +35,6 @@ import 'package:PiliPlus/pages/video/widgets/header_mixin.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/data_source.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
-import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/services/shutdown_timer_service.dart'
     show shutdownTimerService;
@@ -64,7 +63,7 @@ import 'package:flutter/material.dart' hide showBottomSheet;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
@@ -566,15 +565,18 @@ class HeaderControlState extends State<HeaderControl>
                             );
                           },
                         ),
-                      Obx(
-                        () => ActionRowLineItem(
-                          iconData: Icons.play_circle_outline,
-                          onTap: plPlayerController.setContinuePlayInBackground,
-                          text: " 后台播放 ",
-                          selectStatus:
-                              plPlayerController.continuePlayInBackground.value,
+                      if (PlatformUtils.isMobile)
+                        Obx(
+                          () => ActionRowLineItem(
+                            iconData: Icons.play_circle_outline,
+                            onTap:
+                                plPlayerController.setContinuePlayInBackground,
+                            text: " 后台播放 ",
+                            selectStatus: plPlayerController
+                                .continuePlayInBackground
+                                .value,
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),
@@ -668,7 +670,7 @@ class HeaderControlState extends State<HeaderControl>
                   onTap: () async {
                     Get.back();
                     try {
-                      final result = await FilePicker.platform.pickFiles();
+                      final result = await FilePicker.pickFiles();
                       if (result != null) {
                         final file = result.files.single;
                         final path = file.path;
@@ -1778,21 +1780,8 @@ class HeaderControlState extends State<HeaderControl>
                     size: 15,
                     color: Colors.white,
                   ),
-                  onPressed: () {
-                    if (plPlayerController.onPopInvokedWithResult(
-                      false,
-                      null,
-                    )) {
-                      return;
-                    }
-                    if (PlatformUtils.isMobile &&
-                        !horizontalScreen &&
-                        !isPortrait) {
-                      verticalScreenForTwoSeconds();
-                    } else {
-                      Get.back();
-                    }
-                  },
+                  onPressed: () =>
+                      plPlayerController.onPopInvokedWithResult(false, null),
                 ),
               ),
               if (!plPlayerController.isDesktopPip &&
@@ -1808,12 +1797,7 @@ class HeaderControlState extends State<HeaderControl>
                       size: 15,
                       color: Colors.white,
                     ),
-                    onPressed: () {
-                      videoDetailCtr.plPlayerController
-                        ..isCloseAll = true
-                        ..dispose();
-                      Get.until((route) => route.isFirst);
-                    },
+                    onPressed: plPlayerController.onCloseAll,
                   ),
                 ),
               title,

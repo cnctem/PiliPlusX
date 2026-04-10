@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:PiliPlus/common/constants.dart';
+import 'package:PiliPlus/common/assets.dart';
+import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/flutter/list_tile.dart';
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
@@ -17,6 +18,7 @@ import 'package:PiliPlus/utils/extension/get_ext.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
+import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart' hide ListTile;
 import 'package:get/get.dart';
@@ -105,7 +107,7 @@ class _MediaPageState extends CommonPageState<MinePage>
             (e) => Flexible(
               child: InkWell(
                 onTap: e.onTap,
-                borderRadius: StyleString.mdRadius,
+                borderRadius: Style.mdRadius,
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 80),
                   child: AspectRatio(
@@ -160,6 +162,15 @@ class _MediaPageState extends CommonPageState<MinePage>
           ),
           msgBadge(_mainController),
         ],
+        if (GStorage.reply != null)
+          IconButton(
+            iconSize: iconSize,
+            padding: padding,
+            style: style,
+            tooltip: '评论记录',
+            onPressed: () => Get.toNamed('/myReply'),
+            icon: const Icon(Icons.message_outlined),
+          ),
         Obx(
           () {
             final anonymity = MineController.anonymity.value;
@@ -263,7 +274,7 @@ class _MediaPageState extends CommonPageState<MinePage>
                               right: -1,
                               bottom: -2,
                               child: Image.asset(
-                                'assets/images/big-vip.png',
+                                Assets.vipIcon,
                                 height: 19,
                                 cacheHeight: 19.cacheSize(context),
                                 semanticLabel: "大会员",
@@ -276,7 +287,7 @@ class _MediaPageState extends CommonPageState<MinePage>
                           width: 55,
                           height: 55,
                           cacheHeight: 55.cacheSize(context),
-                          'assets/images/noface.jpeg',
+                          Assets.avatarPlaceHolder,
                           semanticLabel: "默认头像",
                         ),
                       ),
@@ -404,7 +415,7 @@ class _MediaPageState extends CommonPageState<MinePage>
     return Flexible(
       child: InkWell(
         onTap: onTap,
-        borderRadius: StyleString.mdRadius,
+        borderRadius: Style.mdRadius,
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 80),
           child: AspectRatio(

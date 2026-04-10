@@ -20,7 +20,7 @@ enum HomeTabType implements EnumWithLabel {
   rank('分区'),
   bangumi('番剧'),
   hk_bangumi('港澳台番剧'),
-  cinema('影视')
+  cinema('影视'),
   ;
 
   @override

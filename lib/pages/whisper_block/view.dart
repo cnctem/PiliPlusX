@@ -37,7 +37,7 @@ class _WhisperBlockPageState extends State<WhisperBlockPage> {
     LoadingState<List<KeywordBlockingItem>?> loadingState,
   ) {
     return switch (loadingState) {
-      Loading() => loadingWidget,
+      Loading() => m3eLoading,
       Success(:final response) =>
         response != null && response.isNotEmpty
             ? Column(
@@ -81,8 +81,8 @@ class _WhisperBlockPageState extends State<WhisperBlockPage> {
                                 onTap: (keyword) {
                                   showConfirmDialog(
                                     context: context,
-                                    title: '删除屏蔽词？',
-                                    content: '该屏蔽词将不再生效',
+                                    title: const Text('删除屏蔽词？'),
+                                    content: const Text('该屏蔽词将不再生效'),
                                     onConfirm: () => _controller.onRemove(e),
                                   );
                                 },

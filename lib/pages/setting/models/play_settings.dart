@@ -10,8 +10,6 @@ import 'package:PiliPlus/pages/setting/widgets/shortcut_keys_dialog.dart';
 import 'package:PiliPlus/plugin/pl_player/models/bottom_progress_behavior.dart';
 import 'package:PiliPlus/plugin/pl_player/models/fullscreen_mode.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
-import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart'
-    show allowRotateScreen;
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
@@ -196,21 +194,14 @@ List<SettingsModel> get playSettings => [
     setKey: SettingBoxKey.enableLongShowControl,
     defaultVal: false,
   ),
-  SwitchModel(
-    title: '全向旋转',
-    subtitle: '小屏可受重力转为临时全屏，若系统锁定旋转仍触发请关闭，关闭会影响横屏适配',
-    leading: const Icon(Icons.screen_rotation_alt_outlined),
-    setKey: SettingBoxKey.allowRotateScreen,
-    defaultVal: true,
-    onChanged: (value) => allowRotateScreen = value,
-  ),
-  const SwitchModel(
-    title: '后台播放',
-    subtitle: '进入后台时继续播放',
-    leading: Icon(Icons.motion_photos_pause_outlined),
-    setKey: SettingBoxKey.continuePlayInBackground,
-    defaultVal: false,
-  ),
+  if (PlatformUtils.isMobile)
+    const SwitchModel(
+      title: '后台播放',
+      subtitle: '进入后台时继续播放',
+      leading: Icon(Icons.motion_photos_pause_outlined),
+      setKey: SettingBoxKey.continuePlayInBackground,
+      defaultVal: false,
+    ),
   if (Platform.isAndroid) ...[
     SwitchModel(
       title: '后台画中画',

@@ -37,9 +37,6 @@ import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 abstract final class PageUtils {
-  static final RouteObserver<PageRoute> routeObserver =
-      RouteObserver<PageRoute>();
-
   static RelativeRect menuPosition(Offset offset) {
     return .fromLTRB(offset.dx, offset.dy, offset.dx, 0);
   }
@@ -48,6 +45,8 @@ abstract final class PageUtils {
     int initialPage = 0,
     required List<SourceModel> imgList,
     int? quality,
+    ValueChanged<int>? onPageChanged,
+    String tag = '',
   }) {
     return Get.key.currentState!.push<void>(
       HeroDialogRoute(
@@ -55,6 +54,8 @@ abstract final class PageUtils {
           sources: imgList,
           initIndex: initialPage,
           quality: quality ?? GlobalData().imgQuality,
+          onPageChanged: onPageChanged,
+          tag: tag,
         ),
       ),
     );
@@ -110,6 +111,7 @@ abstract final class PageUtils {
     String? id,
     Object? rid,
     bool off = false,
+    Object? type,
   }) async {
     assert(id != null || rid != null);
     SmartDialog.showLoading();
@@ -139,7 +141,7 @@ abstract final class PageUtils {
         );
       }
     } else {
-      res.toast();
+      SmartDialog.showToast('${type != null ? 'type: $type ' : ''}$res');
     }
   }
 
@@ -218,6 +220,10 @@ abstract final class PageUtils {
           },
         );
       } else {
+        if (item.linkFolded) {
+          pushDynFromId(id: item.idStr);
+          return;
+        }
         toDupNamed(
           '/dynamicDetail',
           arguments: {
@@ -531,7 +537,7 @@ abstract final class PageUtils {
     if (off) {
       Get.offNamed('/liveRoom', arguments: roomId);
     } else {
-      Get.toNamed('/liveRoom', arguments: roomId);
+      PageUtils.toDupNamed('/liveRoom', arguments: roomId);
     }
   }
 
@@ -584,6 +590,7 @@ abstract final class PageUtils {
     bool isPgc = true,
     int? progress, // milliseconds
     int? aid,
+    bool off = false,
   }) {
     RegExpMatch? match = _pgcRegex.firstMatch(uri);
     if (match != null) {
@@ -594,12 +601,14 @@ abstract final class PageUtils {
           seasonId: isSeason ? id : null,
           epId: isSeason ? null : id,
           progress: progress,
+          off: off,
         );
       } else {
         viewPugv(
           seasonId: isSeason ? id : null,
           epId: isSeason ? null : id,
           aid: aid,
+          off: off,
         );
       }
       return true;
@@ -627,6 +636,7 @@ abstract final class PageUtils {
     dynamic seasonId,
     dynamic epId,
     int? progress, // milliseconds
+    bool off = false,
   }) async {
     try {
       SmartDialog.showLoading(msg: '资源获取中');
@@ -651,6 +661,7 @@ abstract final class PageUtils {
               'pgcApi': true,
               'pgcItem': response,
             },
+            off: off,
           );
         }
 
@@ -699,6 +710,7 @@ abstract final class PageUtils {
             extraArguments: {
               'pgcItem': response,
             },
+            off: off,
           );
           return;
         } else {
@@ -724,6 +736,7 @@ abstract final class PageUtils {
     dynamic seasonId,
     dynamic epId,
     int? aid,
+    bool off = false,
   }) async {
     try {
       SmartDialog.showLoading(msg: '资源获取中');
@@ -751,6 +764,7 @@ abstract final class PageUtils {
             extraArguments: {
               'pgcItem': response,
             },
+            off: off,
           );
         } else {
           SmartDialog.showToast('资源加载失败');

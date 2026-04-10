@@ -12,6 +12,13 @@ import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart'
 import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/material.dart' hide RefreshIndicator;
 
+/// The distance from the child's top or bottom [edgeOffset] where
+/// the refresh indicator will settle. During the drag that exposes the refresh
+/// indicator, its actual displacement may significantly exceed this value.
+///
+/// In most cases, [displacement] distance starts counting from the parent's
+/// edges. However, if [edgeOffset] is larger than zero then the [displacement]
+/// value is calculated from that offset instead of the parent's edge.
 double displacement = Pref.refreshDisplacement;
 
 // The over-scroll distance that moves the indicator to its maximum
@@ -125,7 +132,6 @@ class RefreshIndicator extends StatefulWidget {
   /// The [semanticsValue] may be used to specify progress on the widget.
   const RefreshIndicator({
     super.key,
-    this.displacement = 40.0,
     this.edgeOffset = 0.0,
     required this.onRefresh,
     this.color,
@@ -144,15 +150,6 @@ class RefreshIndicator extends StatefulWidget {
   ///
   /// Typically a [ListView] or [CustomScrollView].
   final Widget child;
-
-  /// The distance from the child's top or bottom [edgeOffset] where
-  /// the refresh indicator will settle. During the drag that exposes the refresh
-  /// indicator, its actual displacement may significantly exceed this value.
-  ///
-  /// In most cases, [displacement] distance starts counting from the parent's
-  /// edges. However, if [edgeOffset] is larger than zero then the [displacement]
-  /// value is calculated from that offset instead of the parent's edge.
-  final double displacement;
 
   /// The offset where [RefreshProgressIndicator] starts to appear on drag start.
   ///
@@ -220,8 +217,8 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   RefreshIndicatorStatus? _status;
   late Future<void> _pendingRefreshFuture;
   double? _dragOffset;
-  late Color _effectiveValueColor =
-      widget.color ?? Theme.of(context).colorScheme.primary;
+  late Color _effectiveValueColor;
+  // late Color _backgroundColor;
 
   static final Animatable<double> _threeQuarterTween = Tween<double>(
     begin: 0.0,
@@ -277,9 +274,10 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   }
 
   void _setupColorTween() {
+    final colorScheme = ColorScheme.of(context);
+    // _backgroundColor = colorScheme.surfaceContainerHighest;
     // Reset the current value color.
-    _effectiveValueColor =
-        widget.color ?? Theme.of(context).colorScheme.primary;
+    _effectiveValueColor = widget.color ?? colorScheme.primary;
     final Color color = _effectiveValueColor;
     if (color.a == 0) {
       // Set an always stopped animation instead of a driven tween.
@@ -522,7 +520,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
               axisAlignment: 1.0,
               sizeFactor: _positionFactor, // This is what brings it down.
               child: Padding(
-                padding: EdgeInsets.only(top: widget.displacement),
+                padding: EdgeInsets.only(top: displacement),
                 child: Align(
                   alignment: Alignment.topCenter,
                   child: ScaleTransition(
@@ -561,28 +559,56 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   }
 
   bool _onDrag(double offset, double viewportDimension) {
-    if (_positionController.value > 0.0 &&
-        _status == RefreshIndicatorStatus.drag) {
+    if (_positionController.value > 0.0 && _status == .drag) {
       _dragOffset = _dragOffset! + offset;
       _checkDragOffset(viewportDimension);
       return true;
     }
     return false;
   }
+
+  // late final _refreshKey = GlobalKey();
+  // Widget _m3eRefreshProgressIndicator(bool showIndeterminateIndicator) {
+  //   const indicatorMargin = EdgeInsets.all(4);
+  //   const indicatorPadding = EdgeInsets.all(6);
+  //   const indicatorSize = 41.0;
+
+  //   final progress = _value.value;
+  //   return Padding(
+  //     padding: indicatorMargin,
+  //     child: SizedBox(
+  //       width: indicatorSize,
+  //       height: indicatorSize,
+  //       child: Material(
+  //         type: MaterialType.circle,
+  //         color: _backgroundColor,
+  //         elevation: widget.elevation,
+  //         child: Padding(
+  //           padding: indicatorPadding,
+  //           child: showIndeterminateIndicator
+  //               ? M3ELoadingIndicator(
+  //                   childKey: _refreshKey,
+  //                   color: _effectiveValueColor,
+  //                   morphs: Morphs.refreshMorphs,
+  //                   size: null,
+  //                 )
+  //               : RawM3ELoadingIndicator(
+  //                   key: _refreshKey,
+  //                   morph: Morphs.manualMorph,
+  //                   progress: progress,
+  //                   angle: -progress * math.pi,
+  //                   color: _valueColor.value!,
+  //                   size: null,
+  //                 ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 }
 
-Widget refreshIndicator({
-  required RefreshCallback onRefresh,
-  required Widget child,
-  bool isClampingScrollPhysics = false,
-}) {
-  return RefreshIndicator(
-    displacement: displacement,
-    onRefresh: onRefresh,
-    isClampingScrollPhysics: isClampingScrollPhysics,
-    child: child,
-  );
-}
+// ignore: camel_case_types
+typedef refreshIndicator = RefreshIndicator;
 
 class RefreshScrollBehavior extends CustomScrollBehavior {
   const RefreshScrollBehavior(

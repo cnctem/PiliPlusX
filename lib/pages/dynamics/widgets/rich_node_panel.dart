@@ -17,6 +17,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
+const _linkFoldedText = '网页链接';
+
 // 富文本
 TextSpan? richNode(
   BuildContext context, {
@@ -41,12 +43,19 @@ TextSpan? richNode(
       // 动态页面 richTextNodes 层级可能与主页动态层级不同
       richTextNodes = summary?.richTextNodes;
       if (title != null && title.isNotEmpty) {
-        spanChildren.add(
-          TextSpan(
-            text: '$title\n',
+        if (richTextNodes == null || richTextNodes.isEmpty) {
+          return TextSpan(
+            text: title,
             style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        );
+          );
+        } else {
+          spanChildren.add(
+            TextSpan(
+              text: '$title\n',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          );
+        }
       }
     }
 
@@ -56,6 +65,9 @@ TextSpan? richNode(
       for (final i in richTextNodes) {
         switch (i.type) {
           case 'RICH_TEXT_NODE_TYPE_TEXT':
+            if (i.origText == _linkFoldedText) {
+              item.linkFolded = true;
+            }
             spanChildren.add(
               TextSpan(
                 text: i.origText,
@@ -95,6 +107,10 @@ TextSpan? richNode(
             break;
           // 网页链接
           case 'RICH_TEXT_NODE_TYPE_WEB':
+            final hasLink = i.jumpUrl?.isNotEmpty ?? false;
+            if (!hasLink) {
+              item.linkFolded = true;
+            }
             spanChildren
               ..add(
                 WidgetSpan(
@@ -110,10 +126,10 @@ TextSpan? richNode(
                 TextSpan(
                   text: i.text,
                   style: style,
-                  recognizer: i.origText == null
-                      ? null
-                      : (NoDeadlineTapGestureRecognizer()
-                          ..onTap = () => PageUtils.handleWebview(i.origText!)),
+                  recognizer: hasLink
+                      ? (NoDeadlineTapGestureRecognizer()
+                          ..onTap = () => PageUtils.handleWebview(i.jumpUrl!))
+                      : null,
                 ),
               );
             break;

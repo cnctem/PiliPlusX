@@ -17,11 +17,11 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
 # update when release
-version: 2.0.0+1
+version: 2.0.3+1
 
 environment:
   sdk: ">=3.10.0"
-  flutter: 3.41.4 # update `.fvmrc` config
+  flutter: 3.41.6 # update `.fvmrc` config
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -63,8 +63,7 @@ dependencies:
 
   # 存储
   path_provider: ^2.1.5
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
+  hive_ce: ^2.19.3
 
   # 设备信息
   device_info_plus: ^12.1.0
@@ -98,7 +97,10 @@ dependencies:
       url: https://github.com/bggRGjQaUbCoE/material_design_icons_flutter.git
       ref: const
   # toast
-  flutter_smart_dialog: ^4.9.8+5
+  flutter_smart_dialog:
+    git:
+      url: https://github.com/bggRGjQaUbCoE/flutter_smart_dialog.git
+      ref: main
   # 下滑关闭
   # dismissible_page: ^1.0.2
   # custom_sliding_segmented_control: ^1.8.4
@@ -124,9 +126,13 @@ dependencies:
   flutter_volume_controller: ^1.3.3
   wakelock_plus: ^1.2.8
   # universal_platform: ^1.1.0
-  auto_orientation:
+  # auto_orientation:
+  #   git:
+  #     url: https://github.com/bggRGjQaUbCoE/auto_orientation.git
+  #     ref: master
+  native_device_orientation:
     git:
-      url: https://github.com/bggRGjQaUbCoE/auto_orientation.git
+      url: https://github.com/bggRGjQaUbCoE/flutter_native_device_orientation.git
       ref: master
   protobuf: ^6.0.0
   # animations: ^2.0.11
@@ -186,7 +192,7 @@ dependencies:
   intl: ^0.20.2
   archive: ^4.0.0
   flutter_svg: ^2.0.14
-  image_cropper: ^11.0.0
+  image_cropper: ^12.0.0
   #解压直播消息
   brotli: ^0.6.0
   expandable: ^5.0.1
@@ -218,13 +224,14 @@ dependencies:
   file_picker:
     git:
       url: https://github.com/bggRGjQaUbCoE/flutter_file_picker.git
-      ref: v10.3.10
+      ref: mod
   super_sliver_list:
     git:
       url: https://github.com/bggRGjQaUbCoE/super_sliver_list.git
       ref: mod
   dlna_dart: ^0.1.0
   battery_plus: ^7.0.0
+  material_new_shapes: ^1.0.0
 
   vector_math: any
   fixnum: any
@@ -278,7 +285,20 @@ dependency_overrides:
       url: https://github.com/My-Responsitories/media-kit.git
       path: libs/windows/media_kit_libs_windows_video
       ref: version_1.2.5
+  media_kit_libs_ios_video:
+    git:
+      url: https://github.com/bggRGjQaUbCoE/media-kit.git
+      path: libs/ios/media_kit_libs_ios_video
+      ref: dev
+  media_kit_libs_macos_video:
+    git:
+      url: https://github.com/bggRGjQaUbCoE/media-kit.git
+      path: libs/macos/media_kit_libs_macos_video
+      ref: dev
   font_awesome_flutter: 10.9.0
+  # TODO: remove
+  # https://github.com/flutter/flutter/issues/184750
+  path_provider_android: 2.2.23
 
 dev_dependencies:
   flutter_test:

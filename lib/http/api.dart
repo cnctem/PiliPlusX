@@ -649,14 +649,9 @@ abstract final class Api {
   /// mid
   static const getMemberViewApi = '/x/space/upstat';
 
-  /// 查询某个专栏
-  /// mid
-  /// season_id
-  /// sort_reverse
-  /// page_num
-  /// page_size
-  static const getSeasonDetailApi =
-      '/x/polymer/web-space/seasons_archives_list';
+  static const seasonArchives = '/x/polymer/web-space/seasons_archives_list';
+
+  static const seriesArchives = '/x/series/archives';
 
   /// 获取未读动态数
   static const getUnreadDynamic = '/x/web-interface/dynamic/entrance';
@@ -835,6 +830,10 @@ abstract final class Api {
 
   static const String dynReserve = '/x/dynamic/feed/reserve/click';
 
+  static const String spaceReserve = '/x/space/reserve';
+
+  static const String spaceReserveCancel = '/x/space/reserve/cancel';
+
   static const String favPugv = '/pugv/app/web/favorite/page';
 
   static const String addFavPugv = '/pugv/app/web/favorite/add';
@@ -999,4 +998,10 @@ abstract final class Api {
   static const String replySubjectModify = '/x/v2/reply/subject/modify';
 
   static const String videoshot = '/x/player/videoshot';
+
+  static const String liveMedalWall =
+      '${HttpString.liveBaseUrl}/xlive/web-ucenter/user/MedalWall';
+
+  static const String memberGuard =
+      '${HttpString.liveBaseUrl}/xlive/app-ucenter/v1/guard/MainGuardCardAll';
 }

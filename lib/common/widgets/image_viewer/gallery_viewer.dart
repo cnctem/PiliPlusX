@@ -54,6 +54,8 @@ class GalleryViewer extends StatefulWidget {
     required this.quality,
     required this.sources,
     this.initIndex = 0,
+    this.onPageChanged,
+    this.tag = '',
   });
 
   final double minScale;
@@ -61,6 +63,8 @@ class GalleryViewer extends StatefulWidget {
   final int quality;
   final List<SourceModel> sources;
   final int initIndex;
+  final ValueChanged<int>? onPageChanged;
+  final String tag;
 
   @override
   State<GalleryViewer> createState() => _GalleryViewerState();
@@ -346,6 +350,7 @@ class _GalleryViewerState extends State<GalleryViewer>
     _player?.pause();
     _playIfNeeded(widget.sources[index]);
     _currIndex.value = index;
+    widget.onPageChanged?.call(index);
   }
 
   late final ValueChanged<int>? _onChangePage = widget.sources.length == 1
@@ -469,7 +474,7 @@ class _GalleryViewerState extends State<GalleryViewer>
               : const SizedBox.shrink(),
         );
     }
-    return Hero(tag: item.url, child: child);
+    return Hero(tag: '${item.url}${widget.tag}', child: child);
   }
 
   void _onTap() {

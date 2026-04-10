@@ -1,5 +1,5 @@
-import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/skeleton/video_card_v.dart';
+import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/button/icon_button.dart';
 import 'package:PiliPlus/common/widgets/button/more_btn.dart';
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
@@ -21,6 +21,7 @@ import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class LivePage extends StatefulWidget {
   const LivePage({super.key});
@@ -50,8 +51,8 @@ class _LivePageState extends State<LivePage>
     final ThemeData theme = Theme.of(context);
     return Container(
       clipBehavior: Clip.hardEdge,
-      margin: const EdgeInsets.symmetric(horizontal: StyleString.safeSpace),
-      decoration: const BoxDecoration(borderRadius: StyleString.mdRadius),
+      margin: const EdgeInsets.symmetric(horizontal: Style.safeSpace),
+      decoration: const BoxDecoration(borderRadius: Style.mdRadius),
       child: refreshIndicator(
         onRefresh: controller.onRefresh,
         child: CustomScrollView(
@@ -60,7 +61,7 @@ class _LivePageState extends State<LivePage>
           slivers: [
             SliverPadding(
               padding: const EdgeInsets.only(
-                top: StyleString.cardSpace,
+                top: Style.cardSpace,
                 bottom: 100,
               ),
               sliver: SliverMainAxisGroup(
@@ -130,6 +131,20 @@ class _LivePageState extends State<LivePage>
                     ),
                     iconButton(
                       size: 26,
+                      iconSize: 18,
+                      context: context,
+                      tooltip: '切换${controller.showFirstFrame ? '封面' : '首帧'}',
+                      icon: controller.showFirstFrame
+                          ? const Icon(MdiIcons.alphaFBox)
+                          : const Icon(MdiIcons.image),
+                      onPressed: () {
+                        controller.showFirstFrame = !controller.showFirstFrame;
+                        setState(() {});
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    iconButton(
+                      size: 26,
                       iconSize: 16,
                       context: context,
                       tooltip: '游戏赛事',
@@ -161,10 +176,10 @@ class _LivePageState extends State<LivePage>
   }
 
   late final gridDelegate = SliverGridDelegateWithExtentAndRatio(
-    mainAxisSpacing: StyleString.cardSpace,
-    crossAxisSpacing: StyleString.cardSpace,
+    mainAxisSpacing: Style.cardSpace,
+    crossAxisSpacing: Style.cardSpace,
     maxCrossAxisExtent: Grid.smallCardWidth,
-    childAspectRatio: StyleString.aspectRatio,
+    childAspectRatio: Style.aspectRatio,
     mainAxisExtent: textScaler.scale(90),
   );
 
@@ -224,9 +239,13 @@ class _LivePageState extends State<LivePage>
                     if (item is LiveCardList) {
                       return LiveCardVApp(
                         item: item.cardData!.smallCardV1!,
+                        showFirstFrame: controller.showFirstFrame,
                       );
                     }
-                    return LiveCardVApp(item: item);
+                    return LiveCardVApp(
+                      item: item,
+                      showFirstFrame: controller.showFirstFrame,
+                    );
                   },
                   itemCount: response.length,
                 )

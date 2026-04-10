@@ -135,7 +135,7 @@ abstract final class PgcHttp {
     }
   }
 
-  static Future<LoadingState<Null>> pgcReviewLike({
+  static Future<LoadingState<void>> pgcReviewLike({
     required Object mediaId,
     required Object reviewId,
   }) async {
@@ -156,7 +156,7 @@ abstract final class PgcHttp {
     }
   }
 
-  static Future<LoadingState<Null>> pgcReviewDislike({
+  static Future<LoadingState<void>> pgcReviewDislike({
     required Object mediaId,
     required Object reviewId,
   }) async {
@@ -177,7 +177,7 @@ abstract final class PgcHttp {
     }
   }
 
-  static Future<LoadingState<Null>> pgcReviewPost({
+  static Future<LoadingState<void>> pgcReviewPost({
     required Object mediaId,
     required int score,
     required String content,
@@ -201,7 +201,7 @@ abstract final class PgcHttp {
     }
   }
 
-  static Future<LoadingState<Null>> pgcReviewMod({
+  static Future<LoadingState<void>> pgcReviewMod({
     required Object mediaId,
     required int score,
     required String content,
@@ -225,7 +225,7 @@ abstract final class PgcHttp {
     }
   }
 
-  static Future<LoadingState<Null>> pgcReviewDel({
+  static Future<LoadingState<void>> pgcReviewDel({
     required Object mediaId,
     required Object reviewId,
   }) async {

@@ -45,6 +45,8 @@ switch ($platform.ToLower()) {
 git config --global user.name "ci"
 git config --global user.email "example@example.com"
 
+git reset --hard HEAD
+
 foreach ($pick in $picks) {
     git stash
     git cherry-pick $pick --no-edit
@@ -70,4 +72,11 @@ foreach ($patch in $patches) {
     if ($LASTEXITCODE -eq 0) {
         Write-Host "$patch applied"
     }
+}
+
+# TODO: remove
+if ($platform.ToLower() -eq "android") {
+    "69e31205362b4e59b7eb89b24797e687b4b67afe" | Set-Content -Path .\bin\internal\engine.version
+    Remove-Item -Path ".\bin\cache" -Recurse -Force
+    flutter --version
 }

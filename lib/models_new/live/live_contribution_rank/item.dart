@@ -1,20 +1,18 @@
-import 'package:PiliPlus/models_new/live/live_contribution_rank/medal_info.dart';
+import 'package:PiliPlus/models_new/live/live_medal_wall/uinfo_medal.dart';
 
 class LiveContributionRankItem {
   int? uid;
   String? name;
   String? face;
-  int? rank;
   int? score;
-  MedalInfo? medalInfo;
+  UinfoMedal? uinfoMedal;
 
   LiveContributionRankItem({
     this.uid,
     this.name,
     this.face,
-    this.rank,
     this.score,
-    this.medalInfo,
+    this.uinfoMedal,
   });
 
   factory LiveContributionRankItem.fromJson(Map<String, dynamic> json) =>
@@ -22,10 +20,9 @@ class LiveContributionRankItem {
         uid: json['uid'] as int?,
         name: json['name'] as String?,
         face: json['face'] as String?,
-        rank: json['rank'] as int?,
         score: json['score'] as int?,
-        medalInfo: json['medal_info'] == null
+        uinfoMedal: json['uinfo']?['medal'] == null
             ? null
-            : MedalInfo.fromJson(json['medal_info'] as Map<String, dynamic>),
+            : UinfoMedal.fromJson(json['uinfo']?['medal']),
       );
 }

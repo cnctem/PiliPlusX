@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 Widget avatars({
   required ColorScheme colorScheme,
   required Iterable<Owner> users,
+  double gap = 6.0,
 }) {
-  const gap = 6.0;
   const size = 22.0;
   const padding = 0.8;
-  const offset = size - gap;
+  final offset = size - gap;
   const imgSize = size - 2 * padding;
   if (users.length == 1) {
     return NetworkImgLayer(

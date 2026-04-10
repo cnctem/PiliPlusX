@@ -1,10 +1,11 @@
 import 'dart:async';
 
-import 'package:PiliPlus/common/constants.dart';
+import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/appbar/appbar.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
 import 'package:PiliPlus/common/widgets/flutter/layout_builder.dart';
+import 'package:PiliPlus/common/widgets/flutter/pop_scope.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/select_mask.dart';
@@ -49,7 +50,7 @@ class _DownloadPageState extends State<DownloadPage> {
     final padding = MediaQuery.viewPaddingOf(context);
     return Obx(() {
       final enableMultiSelect = _controller.enableMultiSelect.value;
-      return PopScope(
+      return popScope(
         canPop: !enableMultiSelect,
         onPopInvokedWithResult: (didPop, result) {
           if (enableMultiSelect) {
@@ -247,7 +248,7 @@ class _DownloadPageState extends State<DownloadPage> {
                       Get.back();
                       showConfirmDialog(
                         context: context,
-                        title: '确定删除？',
+                        title: const Text('确定删除？'),
                         onConfirm: () async {
                           await GStorage.watchProgress.deleteAll(
                             pageInfo.entries.map((e) => e.cid.toString()),
@@ -312,7 +313,7 @@ class _DownloadPageState extends State<DownloadPage> {
         onSecondaryTap: PlatformUtils.isMobile ? null : onLongPress,
         child: Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: StyleString.safeSpace,
+            horizontal: Style.safeSpace,
             vertical: 5,
           ),
           child: Row(
@@ -322,7 +323,7 @@ class _DownloadPageState extends State<DownloadPage> {
                 clipBehavior: Clip.none,
                 children: [
                   AspectRatio(
-                    aspectRatio: StyleString.aspectRatio,
+                    aspectRatio: Style.aspectRatio,
                     child: LayoutBuilder(
                       builder: (context, constraints) => NetworkImgLayer(
                         src: pageInfo.cover,

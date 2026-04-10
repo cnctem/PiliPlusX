@@ -1,4 +1,4 @@
-import 'package:fixnum/fixnum.dart';
+import 'package:fixnum/fixnum.dart' show Int64;
 
 class MsgFeedUnread {
   int at = 0;

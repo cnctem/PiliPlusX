@@ -429,8 +429,8 @@ class _ReplyPageState extends CommonRichTextPubPageState<ReplyPage> {
     );
     if (res case Success(:final response)) {
       hasPub = true;
-      SmartDialog.showToast(response['success_toast']);
-      Get.back(result: response['reply']);
+      SmartDialog.showToast('发送成功');
+      Get.back(result: response);
     } else {
       res.toast();
     }

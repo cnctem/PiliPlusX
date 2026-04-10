@@ -68,8 +68,9 @@ class PlDanmakuController {
     if (elems.isEmpty) return;
     final uniques = HashMap<String, DanmakuElem>();
 
-    final shouldFilter = _plPlayerController.filters.count != 0;
+    final filters = _plPlayerController.filters;
     final danmakuWeight = DanmakuOptions.danmakuWeight;
+    final shouldFilter = filters.count != 0;
     for (final element in elems) {
       if (_isLogin) {
         element.isSelf = element.midHash == _plPlayerController.midHash;
@@ -87,7 +88,7 @@ class PlDanmakuController {
         }
 
         if (element.weight < danmakuWeight ||
-            (shouldFilter && _plPlayerController.filters.remove(element))) {
+            (shouldFilter && filters.remove(element))) {
           continue;
         }
       }

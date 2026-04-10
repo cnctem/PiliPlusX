@@ -35,11 +35,11 @@ abstract final class AppSign {
       assert(value != null, 'remove null value');
       result.write(separator);
       separator = '&';
-      result.write(Uri.encodeQueryComponent(key));
+      result.write(Uri.encodeComponent(key));
       if (value != null && value.isNotEmpty) {
         result
           ..write('=')
-          ..write(Uri.encodeQueryComponent(value));
+          ..write(Uri.encodeComponent(value));
       }
     }
 
