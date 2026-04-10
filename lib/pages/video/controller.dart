@@ -173,6 +173,7 @@ class VideoDetailController extends GetxController
   late bool isExpanding = false;
   late bool isCollapsing = false;
   AnimationController? animController;
+  bool imageview = false;
 
   AnimationController get animationController =>
       animController ??= AnimationController(

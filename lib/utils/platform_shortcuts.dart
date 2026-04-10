@@ -147,9 +147,8 @@ class ShortcutHandler {
     // 清理播放器资源（如果存在）
     final plCtr = PlPlayerController.instance;
     if (plCtr != null) {
-      plCtr
-        ..isCloseAll = true
-        ..dispose();
+      plCtr.onCloseAll();
+      return;
     }
     // 返回主页
     Get.until((route) => route.isFirst);

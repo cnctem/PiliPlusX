@@ -449,7 +449,7 @@ class LiveRoomController extends GetxController {
       }
     }
 
-    messages.addOnly(msg);
+    messages.add(msg);
   }
 
   @pragma('vm:notify-debugger-on-exception')

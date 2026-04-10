@@ -8,6 +8,7 @@ import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/custom_icon.dart';
 import 'package:PiliPlus/common/widgets/flutter/pop_scope.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
+import 'package:PiliPlus/common/widgets/image_viewer/hero_dialog_route.dart';
 import 'package:PiliPlus/common/widgets/keep_alive_wrapper.dart';
 import 'package:PiliPlus/common/widgets/route_aware_mixin.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart';
@@ -366,6 +367,11 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   @override
   // 离开当前页面时
   void didPushNext() {
+    if (Get.routing.route is HeroDialogRoute) {
+      videoDetailController.imageview = true;
+      return;
+    }
+
     super.didPushNext();
     isShowing = false;
 
@@ -394,6 +400,11 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   @override
   // 返回当前页面时
   void didPopNext() {
+    if (videoDetailController.imageview) {
+      videoDetailController.imageview = false;
+      return;
+    }
+
     super.didPopNext();
 
     if (videoDetailController.plPlayerController.isCloseAll) {
