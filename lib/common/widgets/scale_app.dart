@@ -26,6 +26,7 @@ class ScaledWidgetsFlutterBinding extends WidgetsFlutterBinding {
     handleMetricsChanged();
   }
 
+  double? _firstDpr;
   double devicePixelRatioScaled = 0;
 
   static ScaledWidgetsFlutterBinding? _binding;
@@ -47,7 +48,11 @@ class ScaledWidgetsFlutterBinding extends WidgetsFlutterBinding {
   ViewConfiguration createViewConfigurationFor(RenderView renderView) {
     final view = renderView.flutterView;
     final devicePixelRatio = view.devicePixelRatio;
-    devicePixelRatioScaled = devicePixelRatio * _scaleFactor;
+    _firstDpr ??= devicePixelRatio;
+    devicePixelRatioScaled = _firstDpr! * _scaleFactor;
+    if (devicePixelRatio != _firstDpr) {
+      debugPrint('已忽略dpr变化: $devicePixelRatio');
+    }
     final BoxConstraints physicalConstraints =
         BoxConstraints.fromViewConstraints(view.physicalConstraints);
     return ViewConfiguration(
