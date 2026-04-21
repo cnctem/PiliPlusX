@@ -16,6 +16,7 @@ void main() async {
     'pili.time': DateTime.now().millisecondsSinceEpoch ~/ 1000,
     'pili.hash': commitHash,
     'pili.code': versionCode,
+    'ENABLE_FLEX_OVERFLOW': false
   };
   File('./.vscode/env.json')
     ..createSync(recursive: true)

@@ -44,6 +44,7 @@ try {
         'pili.hash' = $commitHash
         'pili.time' = $buildTime
         'pili.tag' = $tag
+        'ENABLE_FLEX_OVERFLOW' = 'false'
     }
 
     $data | ConvertTo-Json -Compress | Out-File 'pili_release.json' -Encoding UTF8
