@@ -216,6 +216,7 @@ abstract final class SettingBoxKey {
       dynamicsShowAllFollowedUp = 'dynamicsShowAllFollowedUp',
       useSideBar = 'useSideBar',
       enableMYBar = 'enableMYBar',
+      enableLGBar = 'enableLGBar',
       hideSearchBar = 'hideSearchBar',
       hideTabBar = 'hideTabBar',
       scrollThreshold = 'scrollThreshold',

@@ -51,6 +51,11 @@ class MainController extends GetxController
   late int lastCheckUnreadAt = 0;
 
   final enableMYBar = Pref.enableMYBar;
+  final enableLGBar = Pref.enableLGBar.obs;
+  void updateEnableLGBar() {
+    enableLGBar.value = Pref.enableLGBar;
+  }
+
   final useSideBar = Pref.useSideBar;
   final mainTabBarView = Pref.mainTabBarView;
   late final optTabletNav = Pref.optTabletNav;

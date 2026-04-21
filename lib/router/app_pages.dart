@@ -11,6 +11,7 @@ import 'package:PiliPlus/pages/dynamics_create_vote/view.dart';
 import 'package:PiliPlus/pages/dynamics_detail/view.dart';
 import 'package:PiliPlus/pages/dynamics_topic/view.dart';
 import 'package:PiliPlus/pages/dynamics_topic_rcmd/view.dart';
+import 'package:PiliPlus/pages/experimental/view.dart';
 import 'package:PiliPlus/pages/fan/view.dart';
 import 'package:PiliPlus/pages/fav/view.dart';
 import 'package:PiliPlus/pages/fav_create/view.dart';
@@ -129,6 +130,8 @@ class Routes {
     GetPage(name: '/fontSizeSetting', page: () => const FontSizeSelectPage()),
     // 屏幕帧率
     GetPage(name: '/displayModeSetting', page: () => const SetDisplayMode()),
+    // 试验性
+    GetPage(name: '/experimentalSetting', page: () => const ExperimentalPage()),
     // 关于
     GetPage(name: '/about', page: () => const AboutPage()),
     //

@@ -23,6 +23,7 @@ import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
@@ -247,42 +248,43 @@ class _MainAppState extends State<MainApp>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
     final padding = MediaQuery.viewPaddingOf(context);
     useBottomNav =
         !_mainController.useSideBar && MediaQuery.sizeOf(context).isPortrait;
     Widget? bottomNav = useBottomNav
         ? _mainController.navigationBars.length > 1
-              ? _mainController.enableMYBar
-                    ? Obx(
-                        () => NavigationBar(
-                          maintainBottomViewPadding: true,
-                          onDestinationSelected: _mainController.setIndex,
+              ? Obx(
+                  () {
+                    final enableLGBar = _mainController.enableLGBar.value;
+                    if (enableLGBar) {
+                      return Obx(
+                        () => GlassBottomBar(
+                          quality: GlassQuality.premium,
+                          selectedIconColor: theme.colorScheme.primary,
+                          unselectedIconColor: theme.hintColor,
+                          indicatorColor: primary.withValues(alpha: 0.1),
+                          magnification: 1.2,
+                          indicatorSettings: LiquidGlassSettings(
+                            blur: 0,
+                            glassColor: primary.withValues(alpha: 0.2),
+                            saturation: 1.2,
+                            ambientStrength: 0.5,
+                            thickness: 30,
+                          ),
+                          glassSettings: const LiquidGlassSettings(
+                            blur: 30,
+                            glassColor: Color.fromRGBO(255, 255, 255, 0.15),
+                            ambientStrength: 0.5,
+                            saturation: 1.2,
+                          ),
+                          verticalPadding: 16,
+                          barHeight: 56,
                           selectedIndex: _mainController.selectedIndex.value,
-                          destinations: _mainController.navigationBars
+                          onTabSelected: _mainController.setIndex,
+                          tabs: _mainController.navigationBars
                               .map(
-                                (e) => NavigationDestination(
-                                  label: e.label,
-                                  icon: _buildIcon(type: e),
-                                  selectedIcon: _buildIcon(
-                                    type: e,
-                                    selected: true,
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      )
-                    : Obx(
-                        () => BottomNavigationBar(
-                          currentIndex: _mainController.selectedIndex.value,
-                          onTap: _mainController.setIndex,
-                          iconSize: 16,
-                          selectedFontSize: 12,
-                          unselectedFontSize: 12,
-                          type: BottomNavigationBarType.fixed,
-                          items: _mainController.navigationBars
-                              .map(
-                                (e) => BottomNavigationBarItem(
+                                (e) => GlassBottomBarTab(
                                   label: e.label,
                                   icon: _buildIcon(type: e),
                                   activeIcon: _buildIcon(
@@ -293,7 +295,53 @@ class _MainAppState extends State<MainApp>
                               )
                               .toList(),
                         ),
-                      )
+                      );
+                    }
+                    return _mainController.enableMYBar
+                        ? Obx(
+                            () => NavigationBar(
+                              maintainBottomViewPadding: true,
+                              onDestinationSelected: _mainController.setIndex,
+                              selectedIndex:
+                                  _mainController.selectedIndex.value,
+                              destinations: _mainController.navigationBars
+                                  .map(
+                                    (e) => NavigationDestination(
+                                      label: e.label,
+                                      icon: _buildIcon(type: e),
+                                      selectedIcon: _buildIcon(
+                                        type: e,
+                                        selected: true,
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                          )
+                        : Obx(
+                            () => BottomNavigationBar(
+                              currentIndex: _mainController.selectedIndex.value,
+                              onTap: _mainController.setIndex,
+                              iconSize: 16,
+                              selectedFontSize: 12,
+                              unselectedFontSize: 12,
+                              type: BottomNavigationBarType.fixed,
+                              items: _mainController.navigationBars
+                                  .map(
+                                    (e) => BottomNavigationBarItem(
+                                      label: e.label,
+                                      icon: _buildIcon(type: e),
+                                      activeIcon: _buildIcon(
+                                        type: e,
+                                        selected: true,
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                          );
+                  },
+                )
               : null
         : null;
     return PopScope(
@@ -331,7 +379,8 @@ class _MainAppState extends State<MainApp>
               children: [
                 if (!useBottomNav) ...[
                   _mainController.navigationBars.length > 1
-                      ? ContextExtensions(context).isTablet && _mainController.optTabletNav
+                      ? ContextExtensions(context).isTablet &&
+                                _mainController.optTabletNav
                             ? Column(
                                 children: [
                                   const SizedBox(height: 25),

@@ -3,6 +3,7 @@ import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/http/login.dart';
 import 'package:PiliPlus/models/common/setting_type.dart';
 import 'package:PiliPlus/pages/about/view.dart';
+import 'package:PiliPlus/pages/experimental/view.dart';
 import 'package:PiliPlus/pages/login/controller.dart';
 import 'package:PiliPlus/pages/setting/extra_setting.dart';
 import 'package:PiliPlus/pages/setting/play_setting.dart';
@@ -80,6 +81,10 @@ class _SettingPageState extends State<SettingPage> {
       icon: Icon(MdiIcons.databaseCogOutline),
     ),
     _SettingsModel(
+      type: SettingType.experimentalSetting,
+      icon: Icon(Icons.science_outlined),
+    ),
+    _SettingsModel(
       type: SettingType.about,
       icon: Icon(Icons.info_outline),
     ),
@@ -130,6 +135,9 @@ class _SettingPageState extends State<SettingPage> {
                         showAppBar: false,
                       ),
                       SettingType.webdavSetting => const WebDavSettingPage(
+                        showAppBar: false,
+                      ),
+                      SettingType.experimentalSetting => const ExperimentalPage(
                         showAppBar: false,
                       ),
                       SettingType.about => const AboutPage(showAppBar: false),

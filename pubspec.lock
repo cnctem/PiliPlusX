@@ -764,6 +764,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.0.33"
+  flutter_shaders:
+    dependency: transitive
+    description:
+      name: flutter_shaders
+      sha256: "34794acadd8275d971e02df03afee3dee0f98dbfb8c4837082ad0034f612a3e2"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.1.3"
   flutter_smart_dialog:
     dependency: "direct main"
     description:
@@ -1089,6 +1097,15 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.1.1"
+  liquid_glass_widgets:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "3de1e7c493c79ab938f017b384770d6a76d7eeb7"
+      url: "https://github.com/qinshah/liquid_glass_widgets.git"
+    source: git
+    version: "0.8.1"
   list_counter:
     dependency: transitive
     description:
@@ -1253,7 +1270,7 @@ packages:
     source: hosted
     version: "0.1.1"
   meta:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: meta
       sha256: e3641ec5d63ebf0d9b41bd43201a66e3fc79a65db5f61fc181f04cd27aab950c

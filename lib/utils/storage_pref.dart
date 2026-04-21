@@ -460,8 +460,10 @@ abstract final class Pref {
     return superResolutionType ?? SuperResolutionType.disable;
   }
 
-  static bool get preInitPlayer =>
-      _setting.get(SettingBoxKey.preInitPlayer, defaultValue: PlatformUtils.isHarmony);
+  static bool get preInitPlayer => _setting.get(
+    SettingBoxKey.preInitPlayer,
+    defaultValue: PlatformUtils.isHarmony,
+  );
 
   static bool get mainTabBarView =>
       _setting.get(SettingBoxKey.mainTabBarView, defaultValue: false);
@@ -720,6 +722,9 @@ abstract final class Pref {
 
   static bool get enableMYBar =>
       _setting.get(SettingBoxKey.enableMYBar, defaultValue: true);
+
+  static bool get enableLGBar =>
+      _setting.get(SettingBoxKey.enableLGBar, defaultValue: false);
 
   static Transition get pageTransition =>
       Transition.values[_setting.get(

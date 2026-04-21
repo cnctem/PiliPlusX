@@ -6,6 +6,7 @@ enum SettingType {
   styleSetting('外观设置'),
   extraSetting('其它设置'),
   webdavSetting('WebDAV 设置'),
+  experimentalSetting('试验性功能'),
   about('关于')
   ;
 

@@ -30,6 +30,9 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  liquid_glass_widgets: # 液态玻璃 修复相同index重复点击不回调(PR中)
+    git:
+      url: https://github.com/qinshah/liquid_glass_widgets.git
   flutter:
     sdk: flutter
   flutter_localizations:
@@ -260,6 +263,7 @@ dependencies:
   characters: any
 
 dependency_overrides:
+  meta: ^1.16.0 # 兼容液态玻璃
   device_info_plus:
     git:
       url: https://gitcode.com/openharmony-sig/flutter_plus_plugins.git
