@@ -259,41 +259,47 @@ class _MainAppState extends State<MainApp>
                     final enableLGBar = _mainController.enableLGBar.value;
                     if (enableLGBar) {
                       return Obx(
-                        () => GlassBottomBar(
-                          quality: GlassQuality.premium,
-                          selectedIconColor: theme.colorScheme.primary,
-                          unselectedIconColor: theme.hintColor,
-                          indicatorColor: primary.withValues(alpha: 0.1),
-                          magnification: 1.2,
-                          indicatorSettings: LiquidGlassSettings(
-                            blur: 0,
-                            glassColor: primary.withValues(alpha: 0.2),
-                            saturation: 1.2,
-                            ambientStrength: 0.5,
-                            thickness: 30,
+                        () => Align(
+                          alignment: Alignment.bottomCenter,
+                          child: SizedBox(
+                            width: 488,
+                            child: GlassBottomBar(
+                              quality: GlassQuality.premium,
+                              selectedIconColor: theme.colorScheme.primary,
+                              unselectedIconColor: theme.hintColor,
+                              indicatorColor: primary.withValues(alpha: 0.1),
+                              magnification: 1.2,
+                              indicatorSettings: LiquidGlassSettings(
+                                blur: 0,
+                                glassColor: primary.withValues(alpha: 0.2),
+                                saturation: 1.2,
+                                ambientStrength: 0.5,
+                                thickness: 30,
+                              ),
+                              glassSettings: const LiquidGlassSettings(
+                                blur: 30,
+                                glassColor: Color.fromRGBO(255, 255, 255, 0.15),
+                                ambientStrength: 0.5,
+                                saturation: 1.2,
+                              ),
+                              verticalPadding: 16,
+                              barHeight: 56,
+                              selectedIndex: _mainController.selectedIndex.value,
+                              onTabSelected: _mainController.setIndex,
+                              tabs: _mainController.navigationBars
+                                  .map(
+                                    (e) => GlassBottomBarTab(
+                                      label: e.label,
+                                      icon: _buildIcon(type: e),
+                                      activeIcon: _buildIcon(
+                                        type: e,
+                                        selected: true,
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
                           ),
-                          glassSettings: const LiquidGlassSettings(
-                            blur: 30,
-                            glassColor: Color.fromRGBO(255, 255, 255, 0.15),
-                            ambientStrength: 0.5,
-                            saturation: 1.2,
-                          ),
-                          verticalPadding: 16,
-                          barHeight: 56,
-                          selectedIndex: _mainController.selectedIndex.value,
-                          onTabSelected: _mainController.setIndex,
-                          tabs: _mainController.navigationBars
-                              .map(
-                                (e) => GlassBottomBarTab(
-                                  label: e.label,
-                                  icon: _buildIcon(type: e),
-                                  activeIcon: _buildIcon(
-                                    type: e,
-                                    selected: true,
-                                  ),
-                                ),
-                              )
-                              .toList(),
                         ),
                       );
                     }
