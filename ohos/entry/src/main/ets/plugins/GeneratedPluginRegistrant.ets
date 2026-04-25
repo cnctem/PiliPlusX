@@ -9,6 +9,7 @@ import PermissionHandlerOhosPlugin from 'permission_handler_ohos';
 import MediaKitVideoPlugin from 'media_kit_video';
 import MediaKitLibsOhosPlugin from 'media_kit_libs_ohos';
 import ImagePickerPlugin from 'image_picker_ohos';
+import FlutterVolumeControllerPlugin from 'flutter_volume_controller';
 import InAppWebViewFlutterPlugin from 'flutter_inappwebview_ohos';
 import FloatingPlugin from 'floating';
 import DeviceInfoPlusOhosPlugin from 'device_info_plus';
@@ -41,6 +42,7 @@ export class GeneratedPluginRegistrant {
       flutterEngine.getPlugins()?.add(new MediaKitVideoPlugin());
       flutterEngine.getPlugins()?.add(new MediaKitLibsOhosPlugin());
       flutterEngine.getPlugins()?.add(new ImagePickerPlugin());
+      flutterEngine.getPlugins()?.add(new FlutterVolumeControllerPlugin());
       flutterEngine.getPlugins()?.add(new InAppWebViewFlutterPlugin());
       flutterEngine.getPlugins()?.add(new FloatingPlugin());
       flutterEngine.getPlugins()?.add(new DeviceInfoPlusOhosPlugin());

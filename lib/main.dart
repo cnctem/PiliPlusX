@@ -5,7 +5,6 @@ import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/widgets/custom_toast.dart';
 import 'package:PiliPlus/common/widgets/mouse_back.dart';
 import 'package:PiliPlus/common/widgets/scale_app.dart';
-import 'package:PiliPlus/harmony_adapt/harmony_volume.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/models/common/theme/theme_color_type.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
@@ -350,8 +349,9 @@ class MyApp extends StatelessWidget {
           return Stack(
             alignment: Alignment.center,
             children: [
-              // 看不见的地方加一个鸿蒙原生音量控件，
-              if (PlatformUtils.isHarmony) const HarmonyVolumeView(),
+              // 看不见的地方加鸿蒙音量面板，
+              if (PlatformUtils.isHarmony)
+                const OhosView(viewType: 'AVVolumePanel'),
               child,
               // 调试代码用，ai生成git提交信息请忽略这部分改动
               // if (kDebugMode)

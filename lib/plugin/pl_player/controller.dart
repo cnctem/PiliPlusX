@@ -6,7 +6,6 @@ import 'dart:ui' as ui;
 
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
-import 'package:PiliPlus/harmony_adapt/harmony_volume.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/ua_type.dart';
@@ -111,6 +110,9 @@ class PlPlayerController {
   final RxDouble volume = RxDouble(
     PlatformUtils.isDesktop ? Pref.desktopVolume : 1.0,
   );
+
+  /// 音量控制条
+  final harmonyVolume = 0.0.obs;
   final setSystemBrightness = Pref.setSystemBrightness;
 
   /// 亮度控制条
@@ -1341,22 +1343,21 @@ class PlPlayerController {
 
   static final double maxVolume = PlatformUtils.isDesktop ? 2.0 : 1.0;
   Future<void> setVolume(double volume) async {
-    if (this.volume.value != volume) {
+    // if (this.volume.value != volume) { // 在鸿蒙有时第一次设置并不成功
       this.volume.value = volume;
       try {
         if (PlatformUtils.isDesktop) {
           _videoPlayerController!.setVolume(volume * 100);
-        } else if (PlatformUtils.isHarmony) {
-          // 否则如果是鸿蒙手机和平板，按系统音量设置
-          HarmonyVolumeView.cntlr.setVolume(volume);
         } else {
           FlutterVolumeController.updateShowSystemUI(false);
           await FlutterVolumeController.setVolume(volume);
+          harmonyVolume.value =
+              await FlutterVolumeController.getVolume() ?? harmonyVolume.value;
         }
       } catch (err) {
         if (kDebugMode) debugPrint(err.toString());
       }
-    }
+    // }
     volumeIndicator.value = true;
     volumeInterceptEventStream.value = true;
     volumeTimer?.cancel();

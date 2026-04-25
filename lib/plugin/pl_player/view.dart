@@ -12,7 +12,6 @@ import 'package:PiliPlus/common/widgets/pair.dart';
 import 'package:PiliPlus/common/widgets/progress_bar/audio_video_progress_bar.dart';
 import 'package:PiliPlus/common/widgets/progress_bar/segment_progress_bar.dart';
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
-import 'package:PiliPlus/harmony_adapt/harmony_volume.dart';
 import 'package:PiliPlus/harmony_adapt/status_bar.dart';
 import 'package:PiliPlus/models/common/sponsor_block/action_type.dart';
 import 'package:PiliPlus/models/common/sponsor_block/post_segment_model.dart';
@@ -191,21 +190,16 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     if (PlatformUtils.isMobile) {
       Future.microtask(() async {
         try {
-          if (PlatformUtils.isHarmony) {
-            HarmonyVolumeView.cntlr.setPanleVisible(false);
-            final volume = await HarmonyVolumeView.cntlr.getVolume();
-            debugPrint('获取鸿蒙音量：$volume');
-            if (volume != null) plPlayerController.volume.value = volume;
-          } else {
-            FlutterVolumeController.updateShowSystemUI(true);
-            plPlayerController.volume.value =
-                (await FlutterVolumeController.getVolume())!;
-          }
-          void listener(double value) {
+          FlutterVolumeController.updateShowSystemUI(true);
+          plPlayerController.volume.value =
+              (await FlutterVolumeController.getVolume())!;
+          FlutterVolumeController.addListener((double value) {
             if (mounted &&
                 !plPlayerController.volumeInterceptEventStream.value) {
               plPlayerController.volume.value = value;
-              if (Platform.isIOS && !FlutterVolumeController.showSystemUI || PlatformUtils.isHarmony) {
+              plPlayerController.harmonyVolume.value = value;
+              if (Platform.isIOS && !FlutterVolumeController.showSystemUI ||
+                  PlatformUtils.isHarmony) {
                 plPlayerController
                   ..volumeIndicator.value = true
                   ..volumeTimer?.cancel()
@@ -216,13 +210,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   });
               }
             }
-          }
-
-          if (PlatformUtils.isHarmony) {
-            HarmonyVolumeView.cntlr.addListener(listener);
-          } else {
-            FlutterVolumeController.addListener(listener);
-          }
+          });
         } catch (e) {
           debugPrint('音量初始化处理失败: $e');
         }
@@ -370,10 +358,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     animationController.dispose();
     if (PlatformUtils.isMobile) {
       FlutterVolumeController.removeListener();
-      if (PlatformUtils.isHarmony) {
-        HarmonyVolumeView.cntlr.setPanleVisible(true);
-      }
     }
+    FlutterVolumeController.updateShowSystemUI(true);
     transformationController.dispose();
     _removeDmAction();
     super.dispose();
@@ -1638,7 +1624,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 alignment: Alignment.center,
                 child: Obx(
                   () {
-                    final volume = plPlayerController.volume.value;
+                    final volume = PlatformUtils.isHarmony
+                        ? plPlayerController.harmonyVolume.value
+                        : plPlayerController.volume.value;
                     return AnimatedOpacity(
                       curve: Curves.easeInOut,
                       opacity: plPlayerController.volumeIndicator.value
