@@ -56,6 +56,7 @@ import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:collection/collection.dart';
@@ -197,7 +198,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             if (mounted &&
                 !plPlayerController.volumeInterceptEventStream.value) {
               plPlayerController.volume.value = value;
-              plPlayerController.harmonyVolume.value = value;
+              plPlayerController.actualVolume.value = value;
               if (Platform.isIOS && !FlutterVolumeController.showSystemUI ||
                   PlatformUtils.isHarmony) {
                 plPlayerController
@@ -1624,8 +1625,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 alignment: Alignment.center,
                 child: Obx(
                   () {
-                    final volume = PlatformUtils.isHarmony
-                        ? plPlayerController.harmonyVolume.value
+                    final volume = Pref.showActualVolume
+                        ? plPlayerController.actualVolume.value
                         : plPlayerController.volume.value;
                     return AnimatedOpacity(
                       curve: Curves.easeInOut,

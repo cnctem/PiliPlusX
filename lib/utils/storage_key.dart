@@ -1,6 +1,9 @@
 // ignore_for_file: constant_identifier_names
 
 abstract final class SettingBoxKey {
+  static const String enableLGBar = 'enableLGBar',
+      showActualVolume = 'showActualVolume';
+
   static const String btmProgressBehavior = 'btmProgressBehavior',
       defaultVideoQa = 'defaultVideoQa',
       defaultVideoQaCellular = 'defaultVideoQaCellular',
@@ -216,7 +219,6 @@ abstract final class SettingBoxKey {
       dynamicsShowAllFollowedUp = 'dynamicsShowAllFollowedUp',
       useSideBar = 'useSideBar',
       enableMYBar = 'enableMYBar',
-      enableLGBar = 'enableLGBar',
       hideSearchBar = 'hideSearchBar',
       hideTabBar = 'hideTabBar',
       scrollThreshold = 'scrollThreshold',

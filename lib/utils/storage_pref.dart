@@ -726,6 +726,9 @@ abstract final class Pref {
   static bool get enableLGBar =>
       _setting.get(SettingBoxKey.enableLGBar, defaultValue: false);
 
+  static bool get showActualVolume =>
+      _setting.get(SettingBoxKey.showActualVolume, defaultValue: false);
+
   static Transition get pageTransition =>
       Transition.values[_setting.get(
         SettingBoxKey.pageTransition,

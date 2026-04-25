@@ -111,8 +111,8 @@ class PlPlayerController {
     PlatformUtils.isDesktop ? Pref.desktopVolume : 1.0,
   );
 
-  /// 音量控制条
-  final harmonyVolume = 0.0.obs;
+  /// 实际音量
+  final actualVolume = 0.0.obs;
   final setSystemBrightness = Pref.setSystemBrightness;
 
   /// 亮度控制条
@@ -1343,7 +1343,8 @@ class PlPlayerController {
 
   static final double maxVolume = PlatformUtils.isDesktop ? 2.0 : 1.0;
   Future<void> setVolume(double volume) async {
-    // if (this.volume.value != volume) { // 在鸿蒙有时第一次设置并不成功
+    if (this.volume.value != volume ||
+        await FlutterVolumeController.getVolume() != this.volume.value) {
       this.volume.value = volume;
       try {
         if (PlatformUtils.isDesktop) {
@@ -1351,13 +1352,13 @@ class PlPlayerController {
         } else {
           FlutterVolumeController.updateShowSystemUI(false);
           await FlutterVolumeController.setVolume(volume);
-          harmonyVolume.value =
-              await FlutterVolumeController.getVolume() ?? harmonyVolume.value;
+          actualVolume.value =
+              await FlutterVolumeController.getVolume() ?? actualVolume.value;
         }
       } catch (err) {
         if (kDebugMode) debugPrint(err.toString());
       }
-    // }
+    }
     volumeIndicator.value = true;
     volumeInterceptEventStream.value = true;
     volumeTimer?.cancel();
