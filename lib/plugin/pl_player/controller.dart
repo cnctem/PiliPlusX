@@ -1344,11 +1344,13 @@ class PlPlayerController {
   static final double maxVolume = PlatformUtils.isDesktop ? 2.0 : 1.0;
   Future<void> setVolume(double volume) async {
     if (this.volume.value != volume ||
-        await FlutterVolumeController.getVolume() != this.volume.value) {
+        (PlatformUtils.isMobile &&
+            await FlutterVolumeController.getVolume() != this.volume.value)) {
       this.volume.value = volume;
       try {
         if (PlatformUtils.isDesktop) {
           _videoPlayerController!.setVolume(volume * 100);
+          actualVolume.value = volume;
         } else {
           FlutterVolumeController.updateShowSystemUI(false);
           await FlutterVolumeController.setVolume(volume);
