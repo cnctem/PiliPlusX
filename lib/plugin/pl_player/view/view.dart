@@ -1165,8 +1165,15 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           final double volume = clampDouble(
             plPlayerController.volume.value - delta.dy / level,
             0.0,
-            plPlayerController.maxVolume,
+            plPlayerController.gestureVolumeMax,
           );
+          // 音量增强：触达 1.0 时提示再次滑动才能突破
+          if (volume >= 1.0 &&
+              !plPlayerController.volumeBoostUnlocked &&
+              Pref.enableAppVolume &&
+              Pref.enableVolumeBoost) {
+            SmartDialog.showToast('再次滑动以突破 100%');
+          }
           plPlayerController.setVolume(volume);
         },
       );
@@ -1178,6 +1185,12 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       _onHorizontalDragEnd();
     }
     _initialFocalPoint = null;
+    // 松手后：若音量已在 1.0，解锁下次可突破；否则重置
+    if (plPlayerController.volume.value >= 1.0) {
+      plPlayerController.volumeBoostUnlocked = true;
+    } else {
+      plPlayerController.onVolumeGestureEnd();
+    }
     _gestureType = null;
   }
 
@@ -1367,8 +1380,15 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           final double volume = clampDouble(
             plPlayerController.volume.value - event.localPanDelta.dy / level,
             0.0,
-            plPlayerController.maxVolume,
+            plPlayerController.gestureVolumeMax,
           );
+          // 音量增强：触达 1.0 时提示再次滑动才能突破
+          if (volume >= 1.0 &&
+              !plPlayerController.volumeBoostUnlocked &&
+              Pref.enableAppVolume &&
+              Pref.enableVolumeBoost) {
+            SmartDialog.showToast('再次滑动以突破 100%');
+          }
           plPlayerController.setVolume(volume);
         },
       );
@@ -1378,6 +1398,12 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   void _onPointerPanZoomEnd(PointerPanZoomEndEvent event) {
     if (_gestureType == .horizontal) {
       _onHorizontalDragEnd();
+    }
+    // 松手后：若音量已在 1.0，解锁下次可突破；否则重置
+    if (plPlayerController.volume.value >= 1.0) {
+      plPlayerController.volumeBoostUnlocked = true;
+    } else {
+      plPlayerController.onVolumeGestureEnd();
     }
     _gestureType = null;
   }
