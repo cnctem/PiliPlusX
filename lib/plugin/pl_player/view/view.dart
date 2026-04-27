@@ -63,6 +63,7 @@ import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:collection/collection.dart';
@@ -269,15 +270,27 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     if (PlatformUtils.isMobile) {
       Future.microtask(() {
         try {
-          FlutterVolumeController.updateShowSystemUI(true);
-          _getCurrVolume();
-          FlutterVolumeController.addListener(
-            _onVolumeChanged,
-            // The plugin defaults to ambient and overwrites AVAudioSession.
-            // Keep media playback audible regardless of listener/mpv init order.
-            category: AudioSessionCategory.playback,
-            emitOnStart: false,
-          );
+          if (Pref.enableAppVolume) {
+            // 应用内音量模式：显示系统原生 HUD，不显示应用内指示器
+            FlutterVolumeController.updateShowSystemUI(true);
+            plPlayerController.systemVolume.value =
+                (await FlutterVolumeController.getVolume()) ?? 1.0;
+            FlutterVolumeController.addListener((double value) {
+              if (mounted && !plPlayerController.volumeInterceptEventStream) {
+                plPlayerController.systemVolume.value = value;
+              }
+            }, category: AudioSessionCategory.playback, emitOnStart: false);
+          } else {
+            FlutterVolumeController.updateShowSystemUI(true);
+            _getCurrVolume();
+            FlutterVolumeController.addListener(
+              _onVolumeChanged,
+              // The plugin defaults to ambient and overwrites AVAudioSession.
+              // Keep media playback audible regardless of listener/mpv init order.
+              category: AudioSessionCategory.playback,
+              emitOnStart: false,
+            );
+          }
         } catch (_) {}
 
         try {
