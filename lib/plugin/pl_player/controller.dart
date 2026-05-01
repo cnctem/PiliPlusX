@@ -752,7 +752,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       'volume-max': kMaxVolume.toString(),
     };
     if (PlatformUtils.isMobile && Pref.enableAppVolume) {
+      // 移动平台应用内音量模式：初始化系统音量
       systemVolume.value = (await FlutterVolumeController.getVolume()) ?? 1.0;
+      // 从持久化存储读取应用内音量，并覆盖默认播放器音量
       volume.value = Pref.appVolume;
       opt['volume'] = (volume.value * 100).toString();
     }
