@@ -109,6 +109,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       videoDetailController.plPlayerController.pipNoDanmaku;
 
   bool isShowing = true;
+  bool _initialOrientationHandled = false;
 
   bool get isFullScreen =>
       videoDetailController.plPlayerController.isFullScreen.value;
@@ -530,6 +531,40 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     }
   }
 
+  void _handleAutoFullscreenByOrientation() {
+    if (!PlatformUtils.isMobile) return;
+
+    final bool fullscreenGate =
+        !videoDetailController.horizontalScreen ||
+        Pref.enableLandscapeAutoFullscreen;
+    if (!fullscreenGate) return;
+
+    if (!_initialOrientationHandled) {
+      _initialOrientationHandled = true;
+      if (videoDetailController.horizontalScreen) return;
+    }
+
+    if (!isPortrait &&
+        !isFullScreen &&
+        plPlayerController != null &&
+        videoDetailController.autoPlay.value) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        plPlayerController!.triggerFullScreen(
+          status: true,
+          isManualFS: false,
+          mode: FullScreenMode.gravity,
+        );
+      });
+    } else if (isPortrait &&
+        isFullScreen &&
+        plPlayerController?.isManualFS == false &&
+        plPlayerController?.controlsLock.value == false) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        plPlayerController!.triggerFullScreen(status: false);
+      });
+    }
+  }
+
   Widget get childWhenDisabled {
     videoDetailController.animationController
       ..removeListener(animListener)
@@ -547,27 +582,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         hideStatusBar();
       }
     }
-    if (PlatformUtils.isMobile) {
-      if (!isPortrait &&
-          !isFullScreen &&
-          plPlayerController != null &&
-          videoDetailController.autoPlay.value) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          plPlayerController!.triggerFullScreen(
-            status: true,
-            isManualFS: false,
-            mode: FullScreenMode.gravity,
-          );
-        });
-      } else if (isPortrait &&
-          isFullScreen &&
-          plPlayerController?.isManualFS == false &&
-          plPlayerController?.controlsLock.value == false) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          plPlayerController!.triggerFullScreen(status: false);
-        });
-      }
-    }
+    _handleAutoFullscreenByOrientation();
     return Obx(
       () {
         final isFullScreen = this.isFullScreen;
@@ -891,21 +906,24 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     );
   }
 
-  Widget get childWhenDisabledLandscape => Obx(
-    () {
-      final isFullScreen = this.isFullScreen;
-      return Scaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: AppBar(backgroundColor: Colors.black, toolbarHeight: 0),
-        body: Padding(
-          padding: !isFullScreen
-              ? padding.copyWith(top: 0, bottom: 0)
-              : EdgeInsets.zero,
-          child: childWhenDisabledLandscapeInner(isFullScreen, padding),
-        ),
-      );
-    },
-  );
+  Widget get childWhenDisabledLandscape {
+    _handleAutoFullscreenByOrientation();
+    return Obx(
+      () {
+        final isFullScreen = this.isFullScreen;
+        return Scaffold(
+          resizeToAvoidBottomInset: false,
+          appBar: AppBar(backgroundColor: Colors.black, toolbarHeight: 0),
+          body: Padding(
+            padding: !isFullScreen
+                ? padding.copyWith(top: 0, bottom: 0)
+                : EdgeInsets.zero,
+            child: childWhenDisabledLandscapeInner(isFullScreen, padding),
+          ),
+        );
+      },
+    );
+  }
 
   Widget childSplit(double ratio) {
     final double videoHeight = maxHeight - padding.vertical;
@@ -1118,7 +1136,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     );
   });
 
-  Widget get childWhenDisabledAlmostSquare => Obx(() {
+  Widget get childWhenDisabledAlmostSquare {
+    _handleAutoFullscreenByOrientation();
+    return Obx(() {
     final isFullScreen = this.isFullScreen;
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -1130,7 +1150,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         child: childWhenDisabledAlmostSquareInner(isFullScreen, padding),
       ),
     );
-  });
+    });
+  }
 
   Widget childWhenDisabledAlmostSquareInner(
     bool isFullScreen,

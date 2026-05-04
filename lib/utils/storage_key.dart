@@ -162,7 +162,8 @@ abstract final class SettingBoxKey {
       saveImgPath = 'saveImgPath',
       saveScreenshotPath = 'saveScreenshotPath',
       enableImgMenu = 'enableImgMenu',
-      showDynDispute = 'showDynDispute';
+      showDynDispute = 'showDynDispute',
+      enableLandscapeAutoFullscreen = 'enableLandscapeAutoFullscreen';
 
   static const String minimizeOnExit = 'minimizeOnExit',
       windowSize = 'windowSize',
