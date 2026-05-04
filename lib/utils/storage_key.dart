@@ -165,7 +165,8 @@ abstract final class SettingBoxKey {
       showDynDispute = 'showDynDispute',
       touchSlopH = 'touchSlopH',
       floatingNavBar = 'floatingNavBar',
-      removeSafeArea = 'removeSafeArea';
+      removeSafeArea = 'removeSafeArea',
+      enableLandscapeAutoFullscreen = 'enableLandscapeAutoFullscreen';
 
   static const String minimizeOnExit = 'minimizeOnExit',
       windowSize = 'windowSize',

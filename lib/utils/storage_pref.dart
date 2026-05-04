@@ -1045,4 +1045,7 @@ abstract final class Pref {
 
   static bool get removeSafeArea =>
       _setting.get(SettingBoxKey.removeSafeArea, defaultValue: false);
+
+  static bool get enableLandscapeAutoFullscreen =>
+      _setting.get(SettingBoxKey.enableLandscapeAutoFullscreen, defaultValue: false);
 }
