@@ -109,6 +109,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       videoDetailController.plPlayerController.pipNoDanmaku;
 
   bool isShowing = true;
+  bool _initialOrientationHandled = false;
+  bool? _lastIsPortrait;
 
   bool get isFullScreen =>
       videoDetailController.plPlayerController.isFullScreen.value;
@@ -335,7 +337,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     );
 
     if (!Get.previousRoute.startsWith('/video')) {
-      if ((Platform.isAndroid || PlatformUtils.isHarmony) && !videoDetailController.setSystemBrightness) {
+      if ((Platform.isAndroid || PlatformUtils.isHarmony) &&
+          !videoDetailController.setSystemBrightness) {
         ScreenBrightnessPlatform.instance.resetApplicationScreenBrightness();
       }
       PlPlayerController.setPlayCallBack(null);
@@ -381,7 +384,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
     WidgetsBinding.instance.removeObserver(this);
 
-    if ((Platform.isAndroid || PlatformUtils.isHarmony) && !videoDetailController.setSystemBrightness) {
+    if ((Platform.isAndroid || PlatformUtils.isHarmony) &&
+        !videoDetailController.setSystemBrightness) {
       ScreenBrightnessPlatform.instance.resetApplicationScreenBrightness();
     }
 
@@ -530,6 +534,69 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     }
   }
 
+  void _handleAutoFullscreenByOrientation() {
+    if (!PlatformUtils.isMobile) {
+      _lastIsPortrait = isPortrait;
+      return;
+    }
+
+    final bool enableHorizontalScreenAutoFullscreen =
+        videoDetailController.horizontalScreen &&
+        Pref.enableLandscapeAutoFullscreen;
+    final previousIsPortrait = _lastIsPortrait;
+    _lastIsPortrait = isPortrait;
+
+    final bool shouldEnterFullscreen =
+        !isPortrait &&
+        !isFullScreen &&
+        plPlayerController != null &&
+        videoDetailController.autoPlay.value;
+    final bool shouldExitFullscreen =
+        isPortrait &&
+        isFullScreen &&
+        plPlayerController?.isManualFS == false &&
+        plPlayerController?.controlsLock.value == false;
+
+    if (enableHorizontalScreenAutoFullscreen) {
+      if (!_initialOrientationHandled) {
+        _initialOrientationHandled = true;
+        return;
+      }
+      if (previousIsPortrait == null || previousIsPortrait == isPortrait) {
+        return;
+      }
+      if (shouldEnterFullscreen && previousIsPortrait) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          plPlayerController!.triggerFullScreen(
+            status: true,
+            isManualFS: false,
+            mode: FullScreenMode.gravity,
+          );
+        });
+      } else if (shouldExitFullscreen && !previousIsPortrait) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          plPlayerController!.triggerFullScreen(status: false);
+        });
+      }
+      return;
+    }
+
+    if (shouldEnterFullscreen && !videoDetailController.horizontalScreen) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        plPlayerController!.triggerFullScreen(
+          status: true,
+          isManualFS: false,
+          mode: FullScreenMode.gravity,
+        );
+      });
+    } else if (shouldExitFullscreen &&
+        !videoDetailController.horizontalScreen) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        plPlayerController!.triggerFullScreen(status: false);
+      });
+    }
+  }
+
   Widget get childWhenDisabled {
     videoDetailController.animationController
       ..removeListener(animListener)
@@ -547,31 +614,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         hideStatusBar();
       }
     }
-    if (PlatformUtils.isMobile) {
-      if (!isPortrait &&
-          !isFullScreen &&
-          plPlayerController != null &&
-          videoDetailController.autoPlay.value &&
-          (!videoDetailController.horizontalScreen ||
-              Pref.enableLandscapeAutoFullscreen)) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          plPlayerController!.triggerFullScreen(
-            status: true,
-            isManualFS: false,
-            mode: FullScreenMode.gravity,
-          );
-        });
-      } else if (isPortrait &&
-          isFullScreen &&
-          plPlayerController?.isManualFS == false &&
-          plPlayerController?.controlsLock.value == false &&
-          (!videoDetailController.horizontalScreen ||
-              Pref.enableLandscapeAutoFullscreen)) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          plPlayerController!.triggerFullScreen(status: false);
-        });
-      }
-    }
+    _handleAutoFullscreenByOrientation();
     return Obx(
       () {
         final isFullScreen = this.isFullScreen;
