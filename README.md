@@ -1,51 +1,14 @@
-# 当前分支(ohos)说明
-
-这是一个适配鸿蒙的分支，目前大部分功能正常，主要问题是没有硬件解码
-
-> [!WARNING]
-> 生活所迫没有太多时间能花在这个项目上，更新慢请见谅
-
-### 其它细节和问题：[issues 看板](https://github.com/users/qinshah/projects/1)
-
-## 需要提issue？
-
-先确认有无已存在的类似issue，再确认是不是鸿蒙版特有的移植问题
-
-因为这个分支只做移植适配工作，一般情况下不增加新功能或更改特性
-
-## 如何运行此项目到鸿蒙
-
-- 1、需要鸿蒙flutter3.35.7，其余环境配置可参考[鸿蒙flutter仓库的教程](https://gitcode.com/openharmony-tpc/flutter_flutter/tree/oh-3.35.7-dev#flutter-sdk-%E4%BB%93%E5%BA%93)
-
-- 2、手动创建ohos/build-profile.json5文件，见ohos/关于build-profile.json5
-
-- 3、若遇到类似 **Package not available (the pubspec for image_picker 1.1.2 from git has version 1.0.2).** 这样的报错，可参考[这篇掘金](https://juejin.cn/post/7602936997175132212)
-
-### 欢迎你参与适配，让鸿蒙PiliPlus更完善
-
-## 感谢
-
-- 上游项目
-
-- media_kit 适配者[ErBW_s](https://github.com/ErBWs)
-
-- 所有开发者和贡献者
-
-- ......
-
-# 以下是原上游项目 readme
-
 <div align="center">
-    <img width="200" height="200" src="assets/images/logo/logo.png">
+    <img width="200" height="200" src="assets/images/logo/logo_X.png">
 </div>
 
+
+
 <div align="center">
-    <h1>PiliPlus</h1>
+    <h1>PiliPlusX</h1>
 <div align="center">
     
-![GitHub repo size](https://img.shields.io/github/repo-size/bggRGjQaUbCoE/PiliPlus) 
-![GitHub Repo stars](https://img.shields.io/github/stars/bggRGjQaUbCoE/PiliPlus) 
-![GitHub all releases](https://img.shields.io/github/downloads/bggRGjQaUbCoE/PiliPlus/total) 
+
 </div>
     <p>使用Flutter开发的BiliBili第三方客户端</p>
     
@@ -57,17 +20,30 @@
 <br/>
 </div>
 
+
 <br/>
+
+## 空降指挥部
+
+- PiliPlus [特色功能](#功能)
+- PiliPlusX 独家功能见 [TODO List](https://github.com/cnctem/PiliPlusX/blob/dev/docs/TODO.md) 完成项
+- [下载最新版本](https://github.com/cnctem/PiliPlusX/releases/latest)
+- [快捷键功能说明](docs/快捷键说明.md)
+- [安卓字体修复说明](#PiliPlusX字体修复说明)
+- [鸿蒙版详情](https://github.com/cnctem/PiliPlusX/tree/ohos#当前分支ohos说明)
+- [港澳台代理](#港澳台代理)
+- [致谢](#致谢)
+- [请提出你的宝贵建议!](https://github.com/cnctem/PiliPlusX/issues)
 
 ## 适配平台
 
 - [x] Android
 - [x] iOS
-- [x] Pad
+- [x] HarmonyOS [(分支说明)](https://github.com/cnctem/PiliPlusX/tree/ohos#当前分支ohos说明)
+- [x] Pad & Fold
+- [x] macOS
 - [x] Windows
-- [x] Linux
-
-[![Packaging status](https://repology.org/badge/vertical-allrepos/piliplus.svg)](https://repology.org/project/piliplus/versions)
+- [x] Linux (需自行编译体验, [详情](https://github.com/cnctem/PiliPlusX/issues/7#issuecomment-3650079829))
 
 ## refactor
 
@@ -120,7 +96,7 @@
 - [x] 合并弹幕
 - [x] 会员彩色弹幕
 - [x] 播放全部/继续播放/倒序播放
-- [x] Cookie 登录
+- [x] Cookie登录
 - [x] 显示视频分段信息
 - [x] 调节字幕大小
 - [x] 调节全屏弹幕大小
@@ -142,7 +118,7 @@
 - [x] 三连动画
 - [x] 番剧三连
 - [x] 带图评论
-- [x] 视频 TAG
+- [x] 视频TAG
 - [x] 筛选搜索
 - [x] 转发动态
 - [x] 合集图片
@@ -163,20 +139,23 @@
 - [x] 评论显示
 - [x] 亮度调节
 - [x] 视频播放
-- [x] 视频 staff
-- [x] 防止 bottomsheet 遮挡全屏视频
+- [x] 视频staff
+- [x] 防止bottomsheet遮挡全屏视频
+- [x] 回车绑定发送
+- [x] 选择鸿蒙黑体/系统字体
 - [x] 其他
 
 ## fix
 
 - [x] 番剧分集点赞/投币/收藏
+- [x] 字体回调（Flutter 3.38 导致）
 - [x] bugs
 
 <br/>
 
 ## 功能
 
-- [x] 推荐视频列表(app 端)
+- [x] 推荐视频列表(app端)
 - [x] 最热视频列表
 - [x] 热门直播
 - [x] 番剧列表
@@ -193,6 +172,7 @@
   - [x] 观看记录
   - [x] 我的收藏
   - [x] 站内私信
+  
 - [x] 动态相关
   - [x] 全部、投稿、番剧分类查看
   - [x] 动态评论查看
@@ -205,7 +185,7 @@
   - [x] 垂直方向上滑全屏、下滑退出全屏
   - [x] 水平方向手势快进/快退
   - [x] 全屏方向设置
-  - [x] 倍速选择/长按 2 倍速
+  - [x] 倍速选择/长按2倍速
   - [x] 硬件加速（视机型而定）
   - [x] 画质选择（高清画质未解锁）
   - [x] 音质选择（视视频而定）
@@ -213,15 +193,17 @@
   - [x] 弹幕
   - [x] 字幕
   - [x] 记忆播放
-  - [x] 视频比例：高度/宽度适应、填充、包含等
+  - [x] 视频比例: 高度/宽度适应、填充、包含等
+     
 - [x] 搜索相关
   - [x] 热搜
   - [x] 搜索历史
   - [x] 默认搜索词
   - [x] 投稿、番剧、直播间、用户搜索
   - [x] 视频搜索排序、按时长筛选
+    
 - [x] 视频详情页相关
-  - [x] 视频选集(分 p)切换
+  - [x] 视频选集(分p)切换
   - [x] 点赞、投币、收藏/取消收藏
   - [x] 相关视频查看
   - [x] 评论用户身份标识
@@ -231,9 +213,9 @@
   - [x] 评论笔记图片查看、保存
 
 - [x] 设置相关
-  - [x] 画质、音质、解码方式预设
+  - [x] 画质、音质、解码方式预设      
   - [x] 图片质量设定
-  - [x] 主题模式：亮色/暗色/跟随系统
+  - [x] 主题模式: 亮色/暗色/跟随系统
   - [x] 震动反馈(可选)
   - [x] 高帧率
   - [x] 自动全屏
@@ -244,40 +226,73 @@
 
 ## 下载
 
-可以通过右侧 release 进行下载或拉取代码到本地进行编译
+可以通过右侧release进行下载或拉取代码到本地进行编译
 
 <br/>
+
+## 港澳台代理
+
+由于PiliPlus使用了web接口,所以不能直接使用哔哩漫游的公共服务器
+
+搭建方法: 直接反向代理api.bilibili.com或添加下面几个路由的支持:
+```text
+/x/web-interface/view
+/x/web-interface/wbi/search/type
+/x/player/wbi/playurl
+/pgc/season/index/result
+/pgc/web/timeline
+/pgc/season/index/condition
+/pgc/player/web/v2/playurl
+/pgc/view/web/season
+```
+
+可用的公共服务器:
+
+注意:由于请求代理服务器会携带cookie，所以请使用可信任的代理服务器或不登录账号进行使用
+
+|提供者|服务器|捐赠|
+|------|------|:----:|
+|gucooing|https://blblapi.alsl.xyz||
+
+感谢 [gucooing](https://github.com/gucooing) !
+
+## PiliPlusX版本说明
+
+- 主线版本: 基于上游[`main`分支](https://github.com/bggRGjQaUbCoE/PiliPlus/tree/main)更新最及时，打包 Android、iOS、Windows、macOS 版本
+- pink版本: 主线版本修改包名共存，详见 [#21](https://github.com/cnctem/PiliPlusX/issues/21)
+- oddo版本: 基于上游[`flutter_3.35.7`分支](https://github.com/bggRGjQaUbCoE/PiliPlus/tree/flutter_3.35.7)，面向color OS等字体错误的定制安卓，仅打包 Android 版本
+- ohos版本: 基于上游[qinshah/PiliPlus](https://github.com/qinshah/PiliPlus)
+
+## PiliPlusX字体修复说明
+
+- 字体问题由`flutter3.38.x`要求显式定义字体，而color OS及个别定制安卓的字体机制采用映射到系统Roboto的方案，导致flutter找不到定义的字体从而产生字体问题，表现为显示为一种错误的衬线字体
+- 主线版本 在关闭设置项“使用系统字体”后将字体指定为使用鸿蒙黑体，基本解决问题
+- 如果你是ColorOS等字体错误的定制安卓，且希望显示手机自定义主题字体，推荐使用oddo版本，通过使用`flutter3.35.7`彻底解决字体问题。下载最新oddo版 [v1.1.1.6-oddo](https://github.com/cnctem/PiliPlusX/releases/tag/v1.1.1.6)
+- 由于ColorOS在逐步推送修复完Flutter字体回退问题的OTA更新，oddo分支将不再维护，主线版本内嵌字体也将在后续版本改为支持用户导入字体
+
 
 ## 声明
 
-此项目（PiliPlus）是个人为了兴趣而开发, 仅用于学习和测试，请于下载后 24 小时内删除。
-所用 API 皆从官方网站收集, 不提供任何破解内容。
-在此致敬原作者：[guozhigq/pilipala](https://github.com/guozhigq/pilipala)
-在此致敬上游作者：[orz12/PiliPalaX](https://github.com/orz12/PiliPalaX)
-本仓库做了更激进的修改，感谢原作者的开源精神。
+此项目（PiliPlusX）是个人学习 Flutter 而开发，仅用于交流学习 Flutter 技术，请于下载后24小时内删除，严禁在互联网上传播软件安装包！
 
-感谢使用
+上游项目声明
+>此项目（PiliPlus）是个人为了兴趣而开发，仅用于学习和测试，请于下载后24小时内删除。
+所用API皆从官方网站收集, 不提供任何破解内容。
 
-<br/>
+**感谢使用**
 
 ## 致谢
 
-- [bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect)
+- 在此致敬原作者: [guozhigq/pilipala](https://github.com/guozhigq/pilipala)
+- 在此致敬上游作者: [orz12/PiliPalaX](https://github.com/orz12/PiliPalaX)
+- 在此致敬上游作者: [bggRGjQaUbCoE/PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus)
+- 在此致敬上游作者: [gucooing/PiliPlus](https://github.com/gucooing/PiliPlus)
+- 在此致敬上游作者: [chenx-dust/PiliPlus](https://github.com/chenx-dust/PiliPlus)
+- 致谢鸿蒙版上游 [qinshah/PiliPlus](https://github.com/qinshah/PiliPlus)
+- 鸿蒙适配[致谢](https://github.com/cnctem/PiliPlusX/tree/ohos?tab=readme-ov-file#感谢)
+
+- bilibili-API-collect
 - [flutter_meedu_videoplayer](https://github.com/zezo357/flutter_meedu_videoplayer)
 - [media-kit](https://github.com/media-kit/media-kit)
 - [dio](https://pub.dev/packages/dio)
 - 等等
-
-<br/>
-<br/>
-<br/>
-
-## Star History
-
-<a href="https://www.star-history.com/#bggRGjQaUbCoE/PiliPlus&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=bggRGjQaUbCoE/PiliPlus&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=bggRGjQaUbCoE/PiliPlus&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=bggRGjQaUbCoE/PiliPlus&type=Date" />
- </picture>
-</a>
