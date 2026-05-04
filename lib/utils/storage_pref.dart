@@ -41,6 +41,7 @@ import 'package:flex_seed_scheme/flex_seed_scheme.dart' show FlexSchemeVariant;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:uuid/uuid.dart';
 
 abstract final class Pref {
   static final Box _setting = GStorage.setting;
@@ -145,6 +146,8 @@ abstract final class Pref {
 
   static int get picQuality =>
       _setting.get(SettingBoxKey.defaultPicQa, defaultValue: 10);
+
+  static ThemeType get themeType => ThemeType.values[_themeTypeInt];
 
   static DynamicBadgeMode get dynamicBadgeType =>
       DynamicBadgeMode.values[_setting.get(
@@ -558,8 +561,17 @@ abstract final class Pref {
   static int get fastForBackwardDuration =>
       _setting.get(SettingBoxKey.fastForBackwardDuration, defaultValue: 10);
 
+  static int get fastForBackwardDuration_ =>
+      _setting.get(SettingBoxKey.fastForBackwardDuration_, defaultValue: 10);
+
   static bool get recordSearchHistory =>
       _setting.get(SettingBoxKey.recordSearchHistory, defaultValue: true);
+
+  static bool get clipboardSearchIncognito =>
+      _setting.get(SettingBoxKey.clipboardSearchIncognito, defaultValue: false);
+
+  static bool get showClipboardSearch =>
+      _setting.get(SettingBoxKey.showClipboardSearch, defaultValue: true);
 
   static String get webdavUri =>
       _setting.get(SettingBoxKey.webdavUri, defaultValue: '');
@@ -578,6 +590,9 @@ abstract final class Pref {
 
   static num get maxCacheSize =>
       _setting.get(SettingBoxKey.maxCacheSize) ?? pow(1024, 3);
+
+  static String get apiHKUrl =>
+      _setting.get(SettingBoxKey.apiHKUrl, defaultValue: '');
 
   static bool get optTabletNav =>
       _setting.get(SettingBoxKey.optTabletNav, defaultValue: true);
@@ -640,7 +655,7 @@ abstract final class Pref {
       _setting.get(SettingBoxKey.enableAutoExit, defaultValue: true);
 
   static bool get autoPlayEnable =>
-      _setting.get(SettingBoxKey.autoPlayEnable, defaultValue: false);
+      _setting.get(SettingBoxKey.autoPlayEnable, defaultValue: true);
 
   static bool get pipNoDanmaku =>
       _setting.get(SettingBoxKey.pipNoDanmaku, defaultValue: false);
@@ -672,6 +687,9 @@ abstract final class Pref {
   static bool get useSideBar =>
       _setting.get(SettingBoxKey.useSideBar, defaultValue: false);
 
+  static bool get hideStatusBar =>
+      _setting.get(SettingBoxKey.hideStatusBar, defaultValue: false);
+
   static bool get dynamicsShowAllFollowedUp => _setting.get(
     SettingBoxKey.dynamicsShowAllFollowedUp,
     defaultValue: false,
@@ -685,6 +703,9 @@ abstract final class Pref {
 
   static bool get enableQuickFav =>
       _setting.get(SettingBoxKey.enableQuickFav, defaultValue: false);
+
+  static bool get enableQuickShare =>
+      _setting.get(SettingBoxKey.enableQuickShare, defaultValue: false);
 
   static bool get p1080 =>
       _setting.get(SettingBoxKey.p1080, defaultValue: true);
@@ -736,7 +757,7 @@ abstract final class Pref {
       )];
 
   static bool get enableQuickDouble =>
-      _setting.get(SettingBoxKey.enableQuickDouble, defaultValue: true);
+      _setting.get(SettingBoxKey.enableQuickDouble, defaultValue: false);
 
   static bool get fullScreenGestureReverse =>
       _setting.get(SettingBoxKey.fullScreenGestureReverse, defaultValue: false);
@@ -814,6 +835,12 @@ abstract final class Pref {
   static bool get defaultShowComment =>
       _setting.get(SettingBoxKey.defaultShowComment, defaultValue: false);
 
+  static bool get defaultShowWatchLater =>
+      _setting.get(SettingBoxKey.defaultShowWatchLater, defaultValue: false);
+
+  static bool get defaultAddWatchLater =>
+      _setting.get(SettingBoxKey.defaultAddWatchLater, defaultValue: false);
+
   static bool get enableTrending =>
       _setting.get(SettingBoxKey.enableHotKey, defaultValue: true);
 
@@ -821,7 +848,7 @@ abstract final class Pref {
       _setting.get(SettingBoxKey.enableSearchRcmd, defaultValue: true);
 
   static bool get enableSaveLastData =>
-      _setting.get(SettingBoxKey.enableSaveLastData, defaultValue: true);
+      _setting.get(SettingBoxKey.enableSaveLastData, defaultValue: false);
 
   static double get defaultToastOp =>
       _setting.get(SettingBoxKey.defaultToastOp, defaultValue: 1.0);
@@ -845,6 +872,8 @@ abstract final class Pref {
       _localCache.get(LocalCacheKey.historyPause, defaultValue: false);
 
   static int? get quickFavId => _setting.get(SettingBoxKey.quickFavId);
+
+  static int? get quickShareId => _setting.get(SettingBoxKey.quickShareId);
 
   static bool get tempPlayerConf =>
       _setting.get(SettingBoxKey.tempPlayerConf, defaultValue: false);
@@ -932,6 +961,11 @@ abstract final class Pref {
       _setting.get(SettingBoxKey.setSystemBrightness, defaultValue: false);
 
   static String? get downloadPath => _setting.get(SettingBoxKey.downloadPath);
+
+  static String? get saveImgPath => _setting.get(SettingBoxKey.saveImgPath);
+
+  static String? get saveScreenshotPath =>
+      _setting.get(SettingBoxKey.saveScreenshotPath);
 
   static String? get liveCdnUrl => _setting.get(SettingBoxKey.liveCdnUrl);
 

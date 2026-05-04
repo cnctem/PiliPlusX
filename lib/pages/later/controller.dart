@@ -36,11 +36,12 @@ mixin BaseLaterController
         final res = await UserHttp.toViewDel(
           aids: removeList.map((item) => item.aid).join(','),
         );
-        if (res.isSuccess) {
+        if (res['status']) {
           updateCount?.call(removeList.length);
           afterDelete(removeList);
         }
         SmartDialog.dismiss();
+        SmartDialog.showToast(res['msg']);
       },
     );
   }
@@ -69,12 +70,13 @@ mixin BaseLaterController
               onPressed: () async {
                 Get.back();
                 final res = await UserHttp.toViewDel(aids: aid.toString());
-                if (res.isSuccess) {
+                if (res['status']) {
                   loadingState
                     ..value.data!.removeAt(index)
                     ..refresh();
                   updateCount?.call(1);
                 }
+                SmartDialog.showToast(res['msg']);
               },
               child: const Text('确认移除'),
             ),

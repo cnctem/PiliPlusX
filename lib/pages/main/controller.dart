@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' show max;
 
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/grpc/dyn.dart';
@@ -9,6 +10,7 @@ import 'package:PiliPlus/models/common/msg/msg_unread_type.dart';
 import 'package:PiliPlus/models/common/nav_bar_config.dart';
 import 'package:PiliPlus/pages/dynamics/controller.dart';
 import 'package:PiliPlus/pages/home/controller.dart';
+import 'package:PiliPlus/pages/login/controller.dart';
 import 'package:PiliPlus/pages/mine/view.dart';
 import 'package:PiliPlus/services/account_service.dart';
 import 'package:PiliPlus/utils/extension/get_ext.dart';
@@ -89,7 +91,7 @@ class MainController extends GetxController
     if (navigationBars.length > 1 && Pref.hideTabBar) {
       bottomBar = true.obs;
     }
-    dynamicBadgeMode = Pref.dynamicBadgeMode;
+    dynamicBadgeMode = DynamicBadgeMode.values[Pref.dynamicBadgeMode];
 
     hasDyn = navigationBars.contains(NavigationBarType.dynamics);
     if (dynamicBadgeMode != DynamicBadgeMode.hidden) {
@@ -215,6 +217,7 @@ class MainController extends GetxController
   void setNavBarConfig() {
     List<int>? navBarSort =
         (GStorage.setting.get(SettingBoxKey.navBarSort) as List?)?.fromCast();
+    int defaultHomePage = Pref.defaultHomePage;
     late final List<NavigationBarType> navigationBars;
     if (navBarSort == null || navBarSort.isEmpty) {
       navigationBars = NavigationBarType.values;
@@ -224,7 +227,10 @@ class MainController extends GetxController
           .toList();
     }
     this.navigationBars = navigationBars;
-    selectedIndex.value = Pref.defaultHomePageIndex;
+    selectedIndex.value = max(
+      0,
+      navigationBars.indexWhere((e) => e.index == defaultHomePage),
+    );
   }
 
   void checkDefaultSearch([bool shouldCheck = false]) {
@@ -311,6 +317,13 @@ class MainController extends GetxController
           homeController.toTopOrRefresh();
         } else if (currentNav == NavigationBarType.dynamics) {
           dynamicController.toTopOrRefresh();
+        } else if (currentNav == NavigationBarType.mine) {
+          // 二次点击"我的" 打开稍后再看 或 打开账号选择器
+          if (Pref.defaultShowWatchLater) {
+            Get.toNamed('/later');
+          } else {
+            LoginPageController.switchAccountDialog(Get.context!);
+          }
         }
       }
       _lastSelectTime = now;

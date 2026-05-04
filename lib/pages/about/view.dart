@@ -65,24 +65,6 @@ class _AboutPageState extends State<AboutPage> {
     );
   }
 
-  void _showDialog() => showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        constraints: StyleString.dialogFixedConstraints,
-        content: TextField(
-          autofocus: true,
-          onSubmitted: (value) {
-            Get.back();
-            if (value.isNotEmpty) {
-              PageUtils.handleWebview(value, inApp: true);
-            }
-          },
-        ),
-      );
-    },
-  );
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -106,10 +88,25 @@ class _AboutPageState extends State<AboutPage> {
               _pressCount++;
               if (_pressCount == 5) {
                 _pressCount = 0;
-                _showDialog();
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      constraints: StyleString.dialogFixedConstraints,
+                      content: TextField(
+                        autofocus: true,
+                        onSubmitted: (value) {
+                          Get.back();
+                          if (value.isNotEmpty) {
+                            PageUtils.handleWebview(value, inApp: true);
+                          }
+                        },
+                      ),
+                    );
+                  },
+                );
               }
             },
-            onSecondaryTap: PlatformUtils.isDesktop ? _showDialog : null,
             child: ExcludeSemantics(
               child: Image.asset(
                 width: 150,
@@ -176,21 +173,16 @@ Commit Hash: ${BuildConfig.commitHash}''',
             color: theme.colorScheme.outlineVariant,
           ),
           ListTile(
-            onTap: () => PageUtils.launchURL(
-              'https://github.com/bggRGjQaUbCoE/PiliPlus',
-            ),
-            leading: const Icon(Icons.code),
-            title: const Text('上游Source Code'),
-            subtitle: Text(
-              'https://github.com/bggRGjQaUbCoE/PiliPlus',
-              style: subTitleStyle,
-            ),
-          ),
-          ListTile(
             onTap: () => PageUtils.launchURL(Constants.sourceCodeUrl),
             leading: const Icon(Icons.code),
             title: const Text('Source Code'),
             subtitle: Text(Constants.sourceCodeUrl, style: subTitleStyle),
+          ),
+          ListTile(
+            onTap: () => PageUtils.launchURL(Constants.upstreamCodeUrl),
+            leading: const Icon(Icons.code),
+            title: const Text('Upstream Code'),
+            subtitle: Text(Constants.upstreamCodeUrl, style: subTitleStyle),
           ),
           if (Platform.isAndroid)
             ListTile(

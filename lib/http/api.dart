@@ -410,7 +410,7 @@ abstract final class Api {
 
   // github 获取最新版
   static const String latestApp =
-      'https://api.github.com/repos/qinshah/PiliPlus/releases';
+      'https://api.github.com/repos/cnctem/PiliPlusX/releases';
 
   // 多少人在看
   // https://api.bilibili.com/x/player/online/total?aid=913663681&cid=1203559746&bvid=BV1MM4y1s7NZ&ts=56427838
@@ -986,14 +986,4 @@ abstract final class Api {
       '${HttpString.liveBaseUrl}/av/v1/SuperChat/report';
 
   static const String imMsgReport = '${HttpString.tUrl}/x/bplus/im/report/add';
-
-  static const String dynPrivatePubSetting =
-      '/x/dynamic/feed/dyn/private_pub_setting';
-
-  static const String editDyn = '/x/dynamic/feed/edit/dyn';
-
-  static const String replyInteraction =
-      '/x/v2/reply/subject/interaction-status';
-
-  static const String replySubjectModify = '/x/v2/reply/subject/modify';
 }
