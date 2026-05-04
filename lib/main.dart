@@ -329,6 +329,18 @@ class MyApp extends StatelessWidget {
               child: child!,
             );
           }
+          Future<void> hideStatusBarKeepNav() async {
+            await SystemChrome.setEnabledSystemUIMode(
+              SystemUiMode.manual,
+              overlays: [SystemUiOverlay.bottom],
+            );
+          }
+
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (PlatformUtils.isMobile && Pref.hideStatusBar) {
+              hideStatusBarKeepNav();
+            }
+          });
           if (PlatformUtils.isDesktop) {
             return Focus(
               canRequestFocus: false,
