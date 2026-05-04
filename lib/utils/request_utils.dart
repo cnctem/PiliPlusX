@@ -17,10 +17,10 @@ import 'package:PiliPlus/http/video.dart';
 import 'package:PiliPlus/models/dynamics/result.dart';
 import 'package:PiliPlus/models/login/model.dart';
 import 'package:PiliPlus/pages/common/multi_select/base.dart';
-import 'package:PiliPlus/pages/common/multi_select/multi_select_controller.dart';
 import 'package:PiliPlus/pages/dynamics_tab/controller.dart';
 import 'package:PiliPlus/pages/group_panel/view.dart';
-import 'package:PiliPlus/pages/later/controller.dart';
+import 'package:PiliPlus/models_new/fav/fav_detail/media.dart';
+import 'package:PiliPlus/models_new/later/list.dart';
 import 'package:PiliPlus/pages/login/geetest/geetest_webview_dialog.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/extension/context_ext.dart';
@@ -68,6 +68,7 @@ abstract final class RequestUtils {
     required int receiverId,
     required Map content,
     String? message,
+    bool avoidGetBack = false,
   }) async {
     final ownerMid = Accounts.main.mid;
     final contentRes = await ImGrpc.sendMsg(
@@ -393,7 +394,7 @@ abstract final class RequestUtils {
   static void onCopyOrMove<R, T extends MultiSelectData>({
     required BuildContext context,
     required bool isCopy,
-    required MultiSelectController<R, T> ctr,
+    required CommonMultiSelectMixin<T> ctr,
     required dynamic mediaId,
     required dynamic mid,
   }) {
@@ -440,18 +441,23 @@ abstract final class RequestUtils {
                 TextButton(
                   onPressed: () {
                     if (checkedId != null) {
-                      Set removeList = ctr.allChecked.toSet();
+                      final removeList = ctr.allChecked.toSet();
+                      final isLater = removeList.isNotEmpty &&
+                          removeList.first is LaterItemModel;
                       SmartDialog.showLoading();
                       FavHttp.copyOrMoveFav(
                         isCopy: isCopy,
-                        isFav: ctr is! LaterController,
+                        isFav: !isLater,
                         srcMediaId: mediaId,
                         tarMediaId: checkedId,
                         resources: removeList
                             .map(
-                              (item) => ctr is LaterController
-                                  ? item.aid
-                                  : '${item.id}:${item.type}',
+                              (item) => switch (item) {
+                                LaterItemModel item => item.aid,
+                                FavDetailItemModel item =>
+                                  '${item.id}:${item.type}',
+                                _ => throw UnsupportedError(item.toString()),
+                              },
                             )
                             .join(','),
                         mid: isCopy ? mid : null,

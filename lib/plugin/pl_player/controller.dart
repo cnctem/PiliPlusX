@@ -383,6 +383,9 @@ class PlPlayerController {
   late final fastForBackwardDuration = Duration(
     seconds: Pref.fastForBackwardDuration,
   );
+  late final fastForBackwardDuration_ = Duration(
+    seconds: Pref.fastForBackwardDuration_,
+  );
 
   late final horizontalSeasonPanel = Pref.horizontalSeasonPanel;
   late final preInitPlayer = Pref.preInitPlayer;

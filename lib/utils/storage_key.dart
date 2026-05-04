@@ -151,6 +151,8 @@ abstract final class SettingBoxKey {
       showFsScreenshotBtn = 'showFsScreenshotBtn',
       showFsLockBtn = 'showFsLockBtn',
       silentDownImg = 'silentDownImg',
+      showHomeRefreshFab = 'showHomeRefreshFab',
+      showDynamicsRefreshFab = 'showDynamicsRefreshFab',
       showMemberShop = 'showMemberShop',
       enablePlayAll = 'enablePlayAll',
       enableTapDm = 'enableTapDm',

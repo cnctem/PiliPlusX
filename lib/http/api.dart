@@ -986,4 +986,14 @@ abstract final class Api {
       '${HttpString.liveBaseUrl}/av/v1/SuperChat/report';
 
   static const String imMsgReport = '${HttpString.tUrl}/x/bplus/im/report/add';
+
+  static const String dynPrivatePubSetting =
+      '/x/dynamic/feed/dyn/private_pub_setting';
+
+  static const String editDyn = '/x/dynamic/feed/edit/dyn';
+
+  static const String replyInteraction =
+      '/x/v2/reply/subject/interaction-status';
+
+  static const String replySubjectModify = '/x/v2/reply/subject/modify';
 }

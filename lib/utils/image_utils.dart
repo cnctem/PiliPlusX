@@ -75,7 +75,9 @@ abstract final class ImageUtils {
     }
   }
 
-  static Future<bool> checkPermissionDependOnSdkInt() async {
+  static Future<bool> checkPermissionDependOnSdkInt([
+    BuildContext? context,
+  ]) async {
     if (PlatformUtils.isHarmony) return true; // 鸿蒙图片保存权限由插件后续请求
     if (Platform.isAndroid) {
       if (await Utils.sdkInt < 29) {

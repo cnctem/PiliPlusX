@@ -40,7 +40,8 @@ class _FavSearchPageState
     return [
       TextButton(
         style: btnStyle,
-        onPressed: () => RequestUtils.onCopyOrMove<FavDetailItemModel>(
+        onPressed: () =>
+            RequestUtils.onCopyOrMove<FavDetailData, FavDetailItemModel>(
           context: context,
           isCopy: true,
           ctr: controller,
@@ -51,7 +52,8 @@ class _FavSearchPageState
       ),
       TextButton(
         style: btnStyle,
-        onPressed: () => RequestUtils.onCopyOrMove<FavDetailItemModel>(
+        onPressed: () =>
+            RequestUtils.onCopyOrMove<FavDetailData, FavDetailItemModel>(
           context: context,
           isCopy: false,
           ctr: controller,

@@ -35,7 +35,7 @@ class _LaterSearchPageState
     return [
       TextButton(
         style: btnStyle,
-        onPressed: () => RequestUtils.onCopyOrMove<LaterItemModel>(
+        onPressed: () => RequestUtils.onCopyOrMove<LaterData, LaterItemModel>(
           context: context,
           isCopy: true,
           ctr: controller,
@@ -46,7 +46,7 @@ class _LaterSearchPageState
       ),
       TextButton(
         style: btnStyle,
-        onPressed: () => RequestUtils.onCopyOrMove<LaterItemModel>(
+        onPressed: () => RequestUtils.onCopyOrMove<LaterData, LaterItemModel>(
           context: context,
           isCopy: false,
           ctr: controller,

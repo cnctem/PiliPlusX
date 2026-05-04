@@ -433,10 +433,12 @@ class VideoDetailController extends GetxController
                   final res = await UserHttp.toViewDel(
                     aids: item.aid.toString(),
                   );
-                  if (res['status']) {
+                  if (res.isSuccess) {
                     mediaList.removeAt(index);
+                    SmartDialog.showToast('移除成功');
+                  } else {
+                    res.toast();
                   }
-                  SmartDialog.showToast(res['msg']);
                 } else {
                   final res = await FavHttp.favVideo(
                     resources: '${item.aid}:${item.type}',
@@ -1590,8 +1592,7 @@ class VideoDetailController extends GetxController
       if (response.subtitle?.subtitles?.isNotEmpty == true) {
         subtitles.value = response.subtitle!.subtitles!;
 
-        final idx = switch (SubtitlePrefType.values[Pref
-            .subtitlePreferenceV2]) {
+        final idx = switch (Pref.subtitlePreferenceV2) {
           SubtitlePrefType.off => 0,
           SubtitlePrefType.on => 1,
           SubtitlePrefType.withoutAi =>

@@ -77,7 +77,7 @@ class DynamicsController extends GetxController
     tabController = TabController(
       length: DynamicsTabType.values.length,
       vsync: this,
-      initialIndex: Pref.defaultDynamicType,
+      initialIndex: Pref.defaultDynamicType.index,
     );
     queryFollowUp();
   }

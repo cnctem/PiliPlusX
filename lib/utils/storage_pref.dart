@@ -147,8 +147,6 @@ abstract final class Pref {
   static int get picQuality =>
       _setting.get(SettingBoxKey.defaultPicQa, defaultValue: 10);
 
-  static ThemeType get themeType => ThemeType.values[_themeTypeInt];
-
   static DynamicBadgeMode get dynamicBadgeType =>
       DynamicBadgeMode.values[_setting.get(
         SettingBoxKey.dynamicBadgeMode,
@@ -189,6 +187,12 @@ abstract final class Pref {
         SettingBoxKey.upPanelPosition,
         defaultValue: UpPanelPosition.leftFixed.index,
       )];
+
+  static bool get showHomeRefreshFab =>
+      _setting.get(SettingBoxKey.showHomeRefreshFab, defaultValue: false);
+
+  static bool get showDynamicsRefreshFab =>
+      _setting.get(SettingBoxKey.showDynamicsRefreshFab, defaultValue: false);
 
   static FullScreenMode get fullScreenMode =>
       FullScreenMode.values[_setting.get(
