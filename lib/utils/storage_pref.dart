@@ -989,4 +989,7 @@ abstract final class Pref {
 
   static bool get showDynDispute =>
       _setting.get(SettingBoxKey.showDynDispute, defaultValue: false);
+
+  static bool get enableLandscapeAutoFullscreen =>
+      _setting.get(SettingBoxKey.enableLandscapeAutoFullscreen, defaultValue: false);
 }

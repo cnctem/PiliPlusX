@@ -551,7 +551,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       if (!isPortrait &&
           !isFullScreen &&
           plPlayerController != null &&
-          videoDetailController.autoPlay.value) {
+          videoDetailController.autoPlay.value &&
+          (!videoDetailController.horizontalScreen ||
+              Pref.enableLandscapeAutoFullscreen)) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           plPlayerController!.triggerFullScreen(
             status: true,
@@ -562,7 +564,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       } else if (isPortrait &&
           isFullScreen &&
           plPlayerController?.isManualFS == false &&
-          plPlayerController?.controlsLock.value == false) {
+          plPlayerController?.controlsLock.value == false &&
+          (!videoDetailController.horizontalScreen ||
+              Pref.enableLandscapeAutoFullscreen)) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           plPlayerController!.triggerFullScreen(status: false);
         });

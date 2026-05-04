@@ -229,6 +229,14 @@ List<SettingsModel> get playSettings => [
     setKey: SettingBoxKey.enableAutoExit,
     defaultVal: true,
   ),
+  if (PlatformUtils.isMobile)
+    const SwitchModel(
+      title: '平板模式竖屏播放页转横屏时全屏',
+      subtitle: '当开启时，在平板/横屏布局模式下，竖屏旋转到横屏自动全屏',
+      leading: Icon(Icons.screen_rotation_alt_outlined),
+      setKey: SettingBoxKey.enableLandscapeAutoFullscreen,
+      defaultVal: false,
+    ),
   const SwitchModel(
     title: '延长播放控件显示时间',
     subtitle: '开启后延长至30秒，便于屏幕阅读器滑动切换控件焦点',
