@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 
-import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/utils/device_utils.dart';
 import 'package:flutter/services.dart'
     show
         SystemChrome,
@@ -49,6 +49,10 @@ Future<void>? portraitUpMode() {
   return _setPreferredOrientations(const [.portraitUp]);
 }
 
+Future<void>? portraitDownMode() {
+  return _setPreferredOrientations(const [.portraitDown]);
+}
+
 Future<void>? landscapeLeftMode() {
   return _setPreferredOrientations(const [.landscapeLeft]);
 }
@@ -59,16 +63,17 @@ Future<void>? landscapeRightMode() {
 
 Future<void>? fullMode() {
   return _setPreferredOrientations(
-    const [.portraitUp, .landscapeLeft, .landscapeRight],
+    const [.portraitUp, .portraitDown, .landscapeLeft, .landscapeRight],
   );
 }
 
-bool _showStatusBar = true;
-Future<void>? hideStatusBar() {
-  if (!_showStatusBar) {
+bool _showSystemBar = true;
+bool get showSystemBar_ => _showSystemBar;
+Future<void>? hideSystemBar() {
+  if (!_showSystemBar) {
     return null;
   }
-  _showStatusBar = false;
+  _showSystemBar = false;
   return SystemChrome.setEnabledSystemUIMode(.immersiveSticky);
 }
 
@@ -81,13 +86,13 @@ Future<void> hideStatusBarKeepNav() async {
 }
 
 //退出全屏显示
-Future<void>? showStatusBar() {
-  if (_showStatusBar) {
+Future<void>? showSystemBar() {
+  if (_showSystemBar) {
     return null;
   }
-  _showStatusBar = true;
+  _showSystemBar = true;
   return SystemChrome.setEnabledSystemUIMode(
-    Platform.isAndroid && Utils.sdkInt < 29 ? .manual : .edgeToEdge,
+    Platform.isAndroid && DeviceUtils.sdkInt < 29 ? .manual : .edgeToEdge,
     overlays: SystemUiOverlay.values,
   );
 }

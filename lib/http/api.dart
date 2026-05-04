@@ -1004,4 +1004,8 @@ abstract final class Api {
 
   static const String memberGuard =
       '${HttpString.liveBaseUrl}/xlive/app-ucenter/v1/guard/MainGuardCardAll';
+
+  static const String bubble = '/x/tribee/v1/dyn/all';
+
+  static const String sortFollowTag = '/x/relation/tags/update_sort';
 }

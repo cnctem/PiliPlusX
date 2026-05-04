@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
 import 'package:PiliPlus/grpc/bilibili/im/type.pbenum.dart';
 import 'package:PiliPlus/grpc/bilibili/main/community/reply/v1.pb.dart'
     show ReplyInfo;
@@ -29,14 +30,17 @@ import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/extension/context_ext.dart';
 import 'package:PiliPlus/utils/extension/size_ext.dart';
 import 'package:PiliPlus/utils/extension/string_ext.dart';
+import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:PiliPlus/utils/theme_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show LengthLimitingTextInputFormatter;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:gt3_flutter_plugin/gt3_flutter_plugin.dart';
@@ -97,6 +101,35 @@ abstract final class RequestUtils {
       }
     } else {
       return false;
+    }
+  }
+
+  static Future<void> createFavTag(
+    BuildContext context,
+    ValueChanged<({int tagid, String tagName})> onSuccess,
+  ) async {
+    String tagName = '';
+    final onCreate = await showConfirmDialog(
+      context: context,
+      title: const Text('新建分组'),
+      content: TextFormField(
+        autofocus: true,
+        initialValue: tagName,
+        onChanged: (value) => tagName = value,
+        inputFormatters: [
+          LengthLimitingTextInputFormatter(16),
+        ],
+        decoration: const InputDecoration(border: OutlineInputBorder()),
+      ),
+    );
+    if (onCreate) {
+      final res = await MemberHttp.createFollowTag(tagName);
+      if (res case Success(:final response)) {
+        onSuccess((tagid: response, tagName: tagName));
+        SmartDialog.showToast('创建成功');
+      } else {
+        res.toast();
+      }
     }
   }
 
@@ -189,17 +222,13 @@ abstract final class RequestUtils {
                           expand: false,
                           snapSizes: [maxChildSize],
                           initialChildSize: maxChildSize,
-                          builder:
-                              (
-                                BuildContext context,
-                                ScrollController scrollController,
-                              ) {
-                                return GroupPanel(
-                                  mid: mid,
-                                  tags: followStatus!.tag,
-                                  scrollController: scrollController,
-                                );
-                              },
+                          builder: (context, scrollController) {
+                            return GroupPanel(
+                              mid: mid,
+                              tags: followStatus!.tag,
+                              scrollController: scrollController,
+                            );
+                          },
                         );
                       },
                     );
@@ -318,6 +347,7 @@ abstract final class RequestUtils {
             clearCookie: true,
           );
           final isSuccess = res.isSuccess;
+          final theme = ThemeUtils.theme;
           final actions = [
             if (!isSuccess)
               TextButton(
@@ -328,7 +358,7 @@ abstract final class RequestUtils {
                     '/webview',
                     parameters: {
                       'url':
-                          'https://www.bilibili.com/h5/comment/appeal?${Utils.themeUrl(Get.isDarkMode)}',
+                          'https://www.bilibili.com/h5/comment/appeal?${ThemeUtils.themeUrl(theme.isDark)}',
                     },
                   );
                 },
@@ -339,7 +369,7 @@ abstract final class RequestUtils {
                 onPressed: Get.back,
                 child: Text(
                   '关闭',
-                  style: TextStyle(color: Get.theme.colorScheme.outline),
+                  style: TextStyle(color: theme.colorScheme.outline),
                 ),
               ),
           ];
@@ -494,10 +524,6 @@ abstract final class RequestUtils {
     String vVoucher,
     ValueChanged<String> onSuccess,
   ) async {
-    if (Platform.isLinux) {
-      return;
-    }
-
     final res = await ValidateHttp.gaiaVgateRegister(vVoucher);
     if (!res.isSuccess) {
       res.toast();

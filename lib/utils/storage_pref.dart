@@ -25,12 +25,14 @@ import 'package:PiliPlus/models/common/video/video_decode_type.dart';
 import 'package:PiliPlus/models/common/video/video_quality.dart';
 import 'package:PiliPlus/models/user/danmaku_rule.dart';
 import 'package:PiliPlus/models/user/info.dart';
+import 'package:PiliPlus/pages/setting/pages/fullscreen_sc_size.dart'
+    show kFullScreenSCWidth;
 import 'package:PiliPlus/plugin/pl_player/models/audio_output_type.dart';
 import 'package:PiliPlus/plugin/pl_player/models/bottom_progress_behavior.dart';
 import 'package:PiliPlus/plugin/pl_player/models/fullscreen_mode.dart';
 import 'package:PiliPlus/plugin/pl_player/models/hwdec_type.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
-import 'package:PiliPlus/utils/extension/context_ext.dart';
+import 'package:PiliPlus/utils/device_utils.dart';
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/global_data.dart';
 import 'package:PiliPlus/utils/login_utils.dart';
@@ -196,13 +198,17 @@ abstract final class Pref {
   static bool get showDynamicsRefreshFab =>
       _setting.get(SettingBoxKey.showDynamicsRefreshFab, defaultValue: false);
 
-  static FullScreenMode get fullScreenMode =>
-      FullScreenMode.values[_setting.get(
-        SettingBoxKey.fullScreenMode,
-        defaultValue: horizontalScreen
-            ? FullScreenMode.none.index
-            : FullScreenMode.auto.index,
-      )];
+  static FullScreenMode get fullScreenMode {
+    int? index = _setting.get(SettingBoxKey.fullScreenMode);
+    if (index == null) {
+      final FullScreenMode mode = horizontalScreen && DeviceUtils.isTablet
+          ? .none
+          : .auto;
+      _setting.put(SettingBoxKey.fullScreenMode, mode.index);
+      return mode;
+    }
+    return FullScreenMode.values[index];
+  }
 
   static BtmProgressBehavior get btmProgressBehavior =>
       BtmProgressBehavior.values[_setting.get(
@@ -388,12 +394,12 @@ abstract final class Pref {
 
   static bool get horizontalSeasonPanel => _setting.get(
     SettingBoxKey.horizontalSeasonPanel,
-    defaultValue: PlatformUtils.isDesktop,
+    defaultValue: horizontalScreen,
   );
 
   static bool get horizontalMemberPage => _setting.get(
     SettingBoxKey.horizontalMemberPage,
-    defaultValue: PlatformUtils.isDesktop,
+    defaultValue: horizontalScreen,
   );
 
   static int? get replyLengthLimit {
@@ -624,20 +630,14 @@ abstract final class Pref {
   static bool get optTabletNav =>
       _setting.get(SettingBoxKey.optTabletNav, defaultValue: true);
 
-  static bool get horizontalScreen =>
-      _setting.get(SettingBoxKey.horizontalScreen) ?? isTablet;
-
-  static bool get isTablet {
-    bool isTablet;
-    if (Get.context != null) {
-      isTablet = Get.context!.isTablet;
-    } else {
-      final view = WidgetsBinding.instance.platformDispatcher.views.first;
-      final screenSize = view.physicalSize / view.devicePixelRatio;
-      isTablet = screenSize.shortestSide >= 600;
+  static bool get horizontalScreen {
+    bool? horizontalScreen = _setting.get(SettingBoxKey.horizontalScreen);
+    if (horizontalScreen == null) {
+      final isTablet = DeviceUtils.isTablet;
+      _setting.put(SettingBoxKey.horizontalScreen, isTablet);
+      return isTablet;
     }
-    _setting.put(SettingBoxKey.horizontalScreen, isTablet);
-    return isTablet;
+    return horizontalScreen;
   }
 
   static String get banWordForDyn =>
@@ -695,8 +695,10 @@ abstract final class Pref {
     return scale.clamp(0.5, 3.0);
   }
 
-  static bool get dynamicsWaterfallFlow =>
-      _setting.get(SettingBoxKey.dynamicsWaterfallFlow, defaultValue: true);
+  static bool get dynamicsWaterfallFlow => _setting.get(
+    SettingBoxKey.dynamicsWaterfallFlow,
+    defaultValue: horizontalScreen,
+  );
 
   static bool get hideTopBar => _setting.get(
     SettingBoxKey.hideTopBar,
@@ -947,6 +949,11 @@ abstract final class Pref {
         defaultValue: SuperChatType.valid.index,
       )];
 
+  static double get fullScreenSCWidth => _setting.get(
+    SettingBoxKey.fullScreenSCWidth,
+    defaultValue: kFullScreenSCWidth,
+  );
+
   static bool get minimizeOnExit =>
       _setting.get(SettingBoxKey.minimizeOnExit, defaultValue: true);
 
@@ -1035,4 +1042,7 @@ abstract final class Pref {
 
   static bool get floatingNavBar =>
       _setting.get(SettingBoxKey.floatingNavBar, defaultValue: false);
+
+  static bool get removeSafeArea =>
+      _setting.get(SettingBoxKey.removeSafeArea, defaultValue: false);
 }

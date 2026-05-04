@@ -101,7 +101,7 @@ class OpusContent extends StatelessWidget {
             ),
             alignment: Alignment.centerLeft,
             placeholderBuilder: (_) => Text(latex),
-            errorWidget: Text(latex),
+            errorBuilder: (_) => Text(latex),
           ),
         );
       default:
@@ -151,7 +151,7 @@ class OpusContent extends StatelessWidget {
       style: _getStyle(
         word?.style,
         color ?? defaultColor,
-        word?.fontSize,
+        word?.effectiveFontSize,
       ),
     );
   }
@@ -713,7 +713,7 @@ Widget moduleBlockedItem(
   ThemeData theme,
   ModuleBlocked moduleBlocked,
 ) {
-  late final isDarkMode = theme.brightness.isDark;
+  late final isDarkMode = theme.isDark;
 
   BoxDecoration? bgImg(double width) {
     return moduleBlocked.bgImg == null

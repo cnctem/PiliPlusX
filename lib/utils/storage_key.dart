@@ -23,6 +23,7 @@ abstract final class SettingBoxKey {
       enableAutoExit = 'enableAutoExit',
       enableOnlineTotal = 'enableOnlineTotal',
       superChatType = 'superChatType',
+      fullScreenSCWidth = 'fullScreenSCWidth',
       keyboardControl = 'keyboardControl',
       pauseOnMinimize = 'pauseOnMinimize',
       pgcSkipType = 'pgcSkipType',
@@ -163,7 +164,8 @@ abstract final class SettingBoxKey {
       showDynamicsRefreshFab = 'showDynamicsRefreshFab',
       showDynDispute = 'showDynDispute',
       touchSlopH = 'touchSlopH',
-      floatingNavBar = 'floatingNavBar';
+      floatingNavBar = 'floatingNavBar',
+      removeSafeArea = 'removeSafeArea';
 
   static const String minimizeOnExit = 'minimizeOnExit',
       windowSize = 'windowSize',

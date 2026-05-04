@@ -17,7 +17,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
 # update when release
-version: 2.0.3+1
+version: 2.0.6+1
 
 environment:
   sdk: ">=3.10.0"
@@ -79,6 +79,10 @@ dependencies:
   # 浏览器
   # webview_flutter: ^4.10.0
   flutter_inappwebview: ^6.1.5
+  desktop_webview_window:
+    git:
+      url: https://github.com/Predidit/linux_webview_window
+      ref: main
   # 解决sliver滑动不同步
   # extended_nested_scroll_view: ^6.2.1
   extended_nested_scroll_view:
@@ -290,15 +294,7 @@ dependency_overrides:
       url: https://github.com/bggRGjQaUbCoE/media-kit.git
       path: libs/ios/media_kit_libs_ios_video
       ref: dev
-  media_kit_libs_macos_video:
-    git:
-      url: https://github.com/bggRGjQaUbCoE/media-kit.git
-      path: libs/macos/media_kit_libs_macos_video
-      ref: dev
   font_awesome_flutter: 10.9.0
-  # TODO: remove
-  # https://github.com/flutter/flutter/issues/184750
-  path_provider_android: 2.2.23
 
 dev_dependencies:
   flutter_test:
@@ -354,9 +350,9 @@ flutter:
     - path: assets/images/lv/
     - path: assets/images/logo/
     - path: assets/images/logo/ico/
-      platforms: [windows]
+      platforms: [ windows ]
     - path: assets/images/logo/desktop/
-      platforms: [linux, macos]
+      platforms: [ linux, macos ]
     - path: assets/images/live/
     - path: assets/images/video/
     - path: assets/images/paycoins/

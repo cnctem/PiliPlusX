@@ -7,7 +7,6 @@ import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/scale_app.dart';
 import 'package:PiliPlus/common/widgets/stateful_builder.dart';
-import 'package:PiliPlus/main.dart';
 import 'package:PiliPlus/models/common/bar_hide_type.dart';
 import 'package:PiliPlus/models/common/dynamic/dynamic_badge_mode.dart';
 import 'package:PiliPlus/models/common/dynamic/up_panel_position.dart';
@@ -37,6 +36,7 @@ import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:PiliPlus/utils/theme_utils.dart';
 import 'package:flutter/material.dart' hide StatefulBuilder;
 import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -148,14 +148,18 @@ List<SettingsModel> get styleSettings => [
       needReboot: true,
     ),
   ],
-  SwitchModel(
-    title: 'App字体字重',
-    subtitle: '点击设置字重，iOS使用此选项需要开启“使用系统字体”',
-    setKey: SettingBoxKey.appFontWeight,
-    defaultVal: false,
-    leading: const Icon(Icons.text_fields),
-    onChanged: (_) => Get.updateMyAppTheme(),
-    onTap: _showFontWeightDialog,
+  SplitModel(
+    normalModel: const NormalModel.split(
+      title: 'App字体字重',
+      subtitle: '点击设置',
+      leading: Icon(Icons.text_fields),
+    ),
+    switchModel: SwitchModel.split(
+      defaultVal: false,
+      setKey: SettingBoxKey.appFontWeight,
+      onChanged: (_) => Get.updateMyAppTheme(),
+      onTap: _showFontWeightDialog,
+    ),
   ),
   NormalModel(
     title: '应用字体',
@@ -232,23 +236,24 @@ List<SettingsModel> get styleSettings => [
         '当前: 主页${Pref.recommendCardWidth.toInt()}dp 其他${Pref.smallCardWidth.toInt()}dp，屏幕宽度:${MediaQuery.widthOf(Get.context!).toPrecision(2)}dp。宽度越小列数越多。',
     onTap: _showCardWidthDialog,
   ),
-  SwitchModel(
-    title: '视频播放页使用深色主题',
-    leading: const Icon(Icons.dark_mode_outlined),
-    setKey: SettingBoxKey.darkVideoPage,
+  const SwitchModel(
+    title: '播放页移除安全边距',
+    leading: Icon(Icons.fit_screen_outlined),
+    setKey: SettingBoxKey.removeSafeArea,
     defaultVal: false,
-    onChanged: (value) {
-      if (value && MyApp.darkThemeData == null) {
-        Get.updateMyAppTheme();
-      }
-    },
   ),
   const SwitchModel(
+    title: '视频播放页使用深色主题',
+    leading: Icon(Icons.dark_mode_outlined),
+    setKey: SettingBoxKey.darkVideoPage,
+    defaultVal: false,
+  ),
+  SwitchModel(
     title: '动态页启用瀑布流',
     subtitle: '关闭会显示为单列',
-    leading: Icon(Icons.view_array_outlined),
+    leading: const Icon(Icons.view_array_outlined),
     setKey: SettingBoxKey.dynamicsWaterfallFlow,
-    defaultVal: true,
+    defaultVal: Pref.horizontalScreen,
     needReboot: true,
   ),
   NormalModel(
@@ -385,7 +390,7 @@ List<SettingsModel> get styleSettings => [
     setKey: SettingBoxKey.isPureBlackTheme,
     defaultVal: false,
     onChanged: (value) {
-      if (Get.isDarkMode || Pref.darkVideoPage) {
+      if (ThemeUtils.isDarkMode || Pref.darkVideoPage) {
         Get.updateMyAppTheme();
       }
     },
@@ -1053,7 +1058,7 @@ Future<void> _showThemeTypeDialog(
       Get.find<MineController>().themeType.value = res;
     } catch (_) {}
     GStorage.setting.put(SettingBoxKey.themeMode, res.index);
-    Get.changeThemeMode(res.toThemeMode);
+    Get.changeThemeMode(ThemeUtils.themeMode = res.toThemeMode);
     setState();
   }
 }
