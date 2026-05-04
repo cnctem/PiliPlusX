@@ -78,7 +78,6 @@ Future<void>? hideSystemBar() {
 }
 
 Future<void> hideStatusBarKeepNav() async {
-  _showStatusBar = false;
   await SystemChrome.setEnabledSystemUIMode(
     SystemUiMode.manual,
     overlays: [SystemUiOverlay.bottom],

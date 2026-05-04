@@ -363,7 +363,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   // 离开当前页面时
   void didPushNext() {
     if (Get.routing.route is HeroDialogRoute) {
-      videoDetailController.imageview = true;
       return;
     }
 
@@ -395,11 +394,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   @override
   // 返回当前页面时
   void didPopNext() {
-    if (videoDetailController.imageview) {
-      videoDetailController.imageview = false;
-      return;
-    }
-
     super.didPopNext();
 
     if (videoDetailController.plPlayerController.isCloseAll) {
