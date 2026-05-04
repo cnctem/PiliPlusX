@@ -345,11 +345,6 @@ class MyApp extends StatelessWidget {
         child: child!,
       );
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (PlatformUtils.isMobile && Pref.hideStatusBar) {
-        hideStatusBarKeepNav();
-      }
-    });
     if (PlatformUtils.isDesktop) {
       return Focus(
         canRequestFocus: false,

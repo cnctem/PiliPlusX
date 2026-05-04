@@ -77,12 +77,6 @@ Future<void>? hideSystemBar() {
   return SystemChrome.setEnabledSystemUIMode(.immersiveSticky);
 }
 
-Future<void> hideStatusBarKeepNav() async {
-  await SystemChrome.setEnabledSystemUIMode(
-    SystemUiMode.manual,
-    overlays: [SystemUiOverlay.bottom],
-  );
-}
 
 //退出全屏显示
 Future<void>? showSystemBar() {

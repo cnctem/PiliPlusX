@@ -722,9 +722,6 @@ abstract final class Pref {
   static bool get useSideBar =>
       _setting.get(SettingBoxKey.useSideBar, defaultValue: false);
 
-  static bool get hideStatusBar =>
-      _setting.get(SettingBoxKey.hideStatusBar, defaultValue: false);
-
   static bool get dynamicsShowAllFollowedUp => _setting.get(
     SettingBoxKey.dynamicsShowAllFollowedUp,
     defaultValue: false,
@@ -776,19 +773,10 @@ abstract final class Pref {
   static bool get enableMYBar =>
       _setting.get(SettingBoxKey.enableMYBar, defaultValue: true);
 
-  static Transition get pageTransition {
-    // 如果启用预测性返回，使用 native；否则使用设置的值
-    if (Platform.isAndroid && enablePredictiveBack) {
-      return Transition.native;
-    }
-    return Transition.values[_setting.get(
-      SettingBoxKey.pageTransition,
-      defaultValue: Platform.isAndroid ? 0 : Transition.native.index,
-    )];
-  }
-
-  static bool get enablePredictiveBack =>
-      _setting.get(SettingBoxKey.enablePredictiveBack, defaultValue: false);
+  static Transition get pageTransition => Transition.values[_setting.get(
+    SettingBoxKey.pageTransition,
+    defaultValue: Platform.isAndroid ? 0 : Transition.native.index,
+  )];
 
   static bool get enableQuickDouble =>
       _setting.get(SettingBoxKey.enableQuickDouble, defaultValue: false);
