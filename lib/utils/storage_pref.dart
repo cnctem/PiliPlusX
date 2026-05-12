@@ -237,6 +237,13 @@ abstract final class Pref {
     defaultValue: VideoQuality.high1080.code,
   );
 
+  /// 半屏默认画质。null = 跟随全屏默认画质
+  static int? get defaultVideoQaHalfScreen {
+    final val = _setting.get(SettingBoxKey.defaultVideoQaHalfScreen);
+    if (val == null || val == -1) return null;
+    return val as int;
+  }
+
   static int get defaultAudioQa => _setting.get(
     SettingBoxKey.defaultAudioQa,
     defaultValue: AudioQuality.hiRes.code,
