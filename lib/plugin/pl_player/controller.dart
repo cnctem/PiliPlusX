@@ -133,6 +133,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   final RxBool controlsLock = false.obs;
 
   final RxBool isFullScreen = false.obs;
+  void Function(bool isFullScreen)? onFullScreenChanged;
   bool isLive = false;
 
   bool _isVertical = false;
@@ -1580,6 +1581,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   void _setFullScreen(bool val) {
     isFullScreen.value = val;
     updateSubtitleStyle();
+    onFullScreenChanged?.call(val);
   }
 
   double screenRatio = 0.0;
