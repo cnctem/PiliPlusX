@@ -125,12 +125,11 @@ class SelectionAreaState extends State<SelectionArea> {
     final TextSelectionControls controls =
         widget.selectionControls ??
         switch (Theme.of(context).platform) {
-          TargetPlatform.android ||
-          TargetPlatform.fuchsia => materialTextSelectionHandleControls,
           TargetPlatform.linux ||
           TargetPlatform.windows => desktopTextSelectionHandleControls,
           TargetPlatform.iOS => cupertinoTextSelectionHandleControls,
           TargetPlatform.macOS => cupertinoDesktopTextSelectionHandleControls,
+          _ => materialTextSelectionHandleControls, // android, fuchsia, 鸿蒙
         };
     return SelectableRegion(
       key: _selectableRegionKey,

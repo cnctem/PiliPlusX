@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:PiliPlus/common/widgets/flutter/selectable_text/tap_and_drag.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart'
     hide
@@ -290,8 +292,7 @@ class SelectableRegion extends StatefulWidget {
       // it needs an anchor for the popup.
       // See: https://github.com/flutter/flutter/issues/141775.
       TargetPlatform.iOS => false,
-      _ =>
-        selectionGeometry.status == SelectionStatus.uncollapsed,
+      _ => selectionGeometry.status == SelectionStatus.uncollapsed,
     };
     final bool canShare = onShare != null && platformCanShare;
 
@@ -471,6 +472,9 @@ class SelectableRegionState extends State<SelectableRegion>
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         return;
+      default:
+        if (PlatformUtils.isHarmony && PlatformUtils.isDesktop) return;
+        break;
     }
 
     // Hide the text selection toolbar on mobile when orientation changes.
@@ -597,28 +601,27 @@ class SelectableRegionState extends State<SelectableRegion>
   // would be used.
   int _getEffectiveConsecutiveTapCount(int rawCount) {
     int maxConsecutiveTap = 3;
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        if (_lastPointerDeviceKind != null &&
-            _lastPointerDeviceKind != PointerDeviceKind.mouse) {
-          // When the pointer device kind is not precise like a mouse, native
-          // Android resets the tap count at 2. For example, this is so the
-          // selection can collapse on the third tap.
-          maxConsecutiveTap = 2;
-        }
-        // From observation, these platforms reset their tap count to 0 when
-        // the number of consecutive taps exceeds the max consecutive tap supported.
-        // For example on native Android, when going past a triple click,
-        // on the fourth click the selection is moved to the precise click
-        // position, on the fifth click the word at the position is selected, and
-        // on the sixth click the paragraph at the position is selected.
-        return rawCount <= maxConsecutiveTap
-            ? rawCount
-            : (rawCount % maxConsecutiveTap == 0
-                  ? maxConsecutiveTap
-                  : rawCount % maxConsecutiveTap);
-      case TargetPlatform.linux:
+    if (PlatformUtils.isMobile) {
+      if (_lastPointerDeviceKind != null &&
+          _lastPointerDeviceKind != PointerDeviceKind.mouse) {
+        // When the pointer device kind is not precise like a mouse, native
+        // Android resets the tap count at 2. For example, this is so the
+        // selection can collapse on the third tap.
+        maxConsecutiveTap = 2;
+      }
+      // From observation, these platforms reset their tap count to 0 when
+      // the number of consecutive taps exceeds the max consecutive tap supported.
+      // For example on native Android, when going past a triple click,
+      // on the fourth click the selection is moved to the precise click
+      // position, on the fifth click the word at the position is selected, and
+      // on the sixth click the paragraph at the position is selected.
+      return rawCount <= maxConsecutiveTap
+          ? rawCount
+          : (rawCount % maxConsecutiveTap == 0
+                ? maxConsecutiveTap
+                : rawCount % maxConsecutiveTap);
+    } else {
+      if (defaultTargetPlatform == TargetPlatform.linux) {
         // From observation, these platforms reset their tap count to 0 when
         // the number of consecutive taps exceeds the max consecutive tap supported.
         // For example on Debian Linux with GTK, when going past a triple click,
@@ -630,14 +633,12 @@ class SelectableRegionState extends State<SelectableRegion>
             : (rawCount % maxConsecutiveTap == 0
                   ? maxConsecutiveTap
                   : rawCount % maxConsecutiveTap);
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        // From observation, these platforms hold their tap count at the max
-        // consecutive tap supported. For example on macOS, when going past a triple
-        // click, the selection should be retained at the paragraph that was first
-        // selected on triple click.
-        return min(rawCount, maxConsecutiveTap);
+      }
+      // From observation, these platforms hold their tap count at the max
+      // consecutive tap supported. For example on macOS, when going past a triple
+      // click, the selection should be retained at the paragraph that was first
+      // selected on triple click.
+      return min(rawCount, maxConsecutiveTap);
     }
   }
 
@@ -738,34 +739,29 @@ class SelectableRegionState extends State<SelectableRegion>
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
         _focusNode.requestFocus();
-        switch (defaultTargetPlatform) {
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
-          case TargetPlatform.iOS:
-            // On mobile platforms the selection is set on tap up for the first
-            // tap.
-            break;
-          case TargetPlatform.macOS:
-          case TargetPlatform.linux:
-          case TargetPlatform.windows:
-            hideToolbar();
-            // It is impossible to extend the selection when the shift key is
-            // pressed and the start of the selection has not been initialized.
-            // In this case we fallback on collapsing the selection to first
-            // initialize the selection.
-            final bool isShiftPressedValid =
-                _isShiftPressed &&
-                _selectionDelegate.value.startSelectionPoint != null;
-            if (isShiftPressedValid) {
-              _selectEndTo(offset: details.globalPosition);
-              _selectionStatusNotifier.value =
-                  SelectableRegionSelectionStatus.changing;
-              break;
-            }
-            clearSelection();
-            _collapseSelectionAt(offset: details.globalPosition);
+        if (PlatformUtils.isMobile) {
+          // On mobile platforms the selection is set on tap up for the first
+          // tap.
+          break;
+        } else {
+          hideToolbar();
+          // It is impossible to extend the selection when the shift key is
+          // pressed and the start of the selection has not been initialized.
+          // In this case we fallback on collapsing the selection to first
+          // initialize the selection.
+          final bool isShiftPressedValid =
+              _isShiftPressed &&
+              _selectionDelegate.value.startSelectionPoint != null;
+          if (isShiftPressedValid) {
+            _selectEndTo(offset: details.globalPosition);
             _selectionStatusNotifier.value =
                 SelectableRegionSelectionStatus.changing;
+            break;
+          }
+          clearSelection();
+          _collapseSelectionAt(offset: details.globalPosition);
+          _selectionStatusNotifier.value =
+              SelectableRegionSelectionStatus.changing;
         }
       case 2:
         switch (defaultTargetPlatform) {
@@ -784,34 +780,24 @@ class SelectableRegionState extends State<SelectableRegion>
                 !_isPrecisePointerDevice(details.kind!)) {
               _showHandles();
             }
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
-          case TargetPlatform.macOS:
-          case TargetPlatform.linux:
-          case TargetPlatform.windows:
+          default:
             _selectWordAt(offset: details.globalPosition);
             _selectionStatusNotifier.value =
                 SelectableRegionSelectionStatus.changing;
         }
       case 3:
-        switch (defaultTargetPlatform) {
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
-          case TargetPlatform.iOS:
-            if (details.kind != null &&
-                _isPrecisePointerDevice(details.kind!)) {
-              // Triple tap on static text is only supported on mobile
-              // platforms using a precise pointer device.
-              _selectParagraphAt(offset: details.globalPosition);
-              _selectionStatusNotifier.value =
-                  SelectableRegionSelectionStatus.changing;
-            }
-          case TargetPlatform.macOS:
-          case TargetPlatform.linux:
-          case TargetPlatform.windows:
+        if (PlatformUtils.isMobile) {
+          if (details.kind != null && _isPrecisePointerDevice(details.kind!)) {
+            // Triple tap on static text is only supported on mobile
+            // platforms using a precise pointer device.
             _selectParagraphAt(offset: details.globalPosition);
             _selectionStatusNotifier.value =
                 SelectableRegionSelectionStatus.changing;
+          } else {
+            _selectParagraphAt(offset: details.globalPosition);
+            _selectionStatusNotifier.value =
+                SelectableRegionSelectionStatus.changing;
+          }
         }
     }
     _updateSelectedContentIfNeeded();
@@ -842,9 +828,10 @@ class SelectableRegionState extends State<SelectableRegion>
         _selectionStatusNotifier.value =
             SelectableRegionSelectionStatus.changing;
       case 2:
-        switch (defaultTargetPlatform) {
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
+        if (PlatformUtils.isMobile) {
+          if (Platform.isAndroid ||
+              Platform.isFuchsia ||
+              PlatformUtils.isHarmony) {
             // Double tap + drag is only supported on Android when using a precise
             // pointer device or when not on the web.
             if (!kIsWeb ||
@@ -858,7 +845,7 @@ class SelectableRegionState extends State<SelectableRegion>
               _selectionStatusNotifier.value =
                   SelectableRegionSelectionStatus.changing;
             }
-          case TargetPlatform.iOS:
+          } else if (Platform.isIOS) {
             if (kIsWeb &&
                 details.kind != null &&
                 !_isPrecisePointerDevice(details.kind!) &&
@@ -879,37 +866,21 @@ class SelectableRegionState extends State<SelectableRegion>
                 !_isPrecisePointerDevice(details.kind!)) {
               _showHandles();
             }
-          case TargetPlatform.macOS:
-          case TargetPlatform.linux:
-          case TargetPlatform.windows:
-            _selectEndTo(
-              offset: details.globalPosition,
-              continuous: true,
-              textGranularity: TextGranularity.word,
-            );
-            _selectionStatusNotifier.value =
-                SelectableRegionSelectionStatus.changing;
+          }
+        } else {
+          _selectEndTo(
+            offset: details.globalPosition,
+            continuous: true,
+            textGranularity: TextGranularity.word,
+          );
+          _selectionStatusNotifier.value =
+              SelectableRegionSelectionStatus.changing;
         }
       case 3:
-        switch (defaultTargetPlatform) {
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
-          case TargetPlatform.iOS:
-            // Triple tap + drag is only supported on mobile devices when using
-            // a precise pointer device.
-            if (details.kind != null &&
-                _isPrecisePointerDevice(details.kind!)) {
-              _selectEndTo(
-                offset: details.globalPosition,
-                continuous: true,
-                textGranularity: TextGranularity.paragraph,
-              );
-              _selectionStatusNotifier.value =
-                  SelectableRegionSelectionStatus.changing;
-            }
-          case TargetPlatform.macOS:
-          case TargetPlatform.linux:
-          case TargetPlatform.windows:
+        if (PlatformUtils.isMobile) {
+          // Triple tap + drag is only supported on mobile devices when using
+          // a precise pointer device.
+          if (details.kind != null && _isPrecisePointerDevice(details.kind!)) {
             _selectEndTo(
               offset: details.globalPosition,
               continuous: true,
@@ -917,6 +888,15 @@ class SelectableRegionState extends State<SelectableRegion>
             );
             _selectionStatusNotifier.value =
                 SelectableRegionSelectionStatus.changing;
+          }
+        } else {
+          _selectEndTo(
+            offset: details.globalPosition,
+            continuous: true,
+            textGranularity: TextGranularity.paragraph,
+          );
+          _selectionStatusNotifier.value =
+              SelectableRegionSelectionStatus.changing;
         }
     }
     _updateSelectedContentIfNeeded();
@@ -932,22 +912,18 @@ class SelectableRegionState extends State<SelectableRegion>
     // device kind is not precise, for example at the end of a double tap + drag
     // to select on native iOS.
     final bool shouldShowSelectionOverlayOnMobile = !isPointerPrecise;
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
+
+    if (PlatformUtils.isMobile) {
+      if (Platform.isAndroid || Platform.isFuchsia || PlatformUtils.isHarmony) {
         if (shouldShowSelectionOverlayOnMobile) {
           _showHandles();
           _showToolbar();
         }
-      case TargetPlatform.iOS:
+      } else if (Platform.isIOS) {
         if (shouldShowSelectionOverlayOnMobile) {
           _showToolbar();
         }
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        // The selection overlay is not shown on desktop platforms after a drag.
-        break;
+      }
     }
     _finalizeSelection();
     _updateSelectedContentIfNeeded();
@@ -970,31 +946,26 @@ class SelectableRegionState extends State<SelectableRegion>
     }
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
-        switch (defaultTargetPlatform) {
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
-          case TargetPlatform.iOS:
-            hideToolbar();
-            _collapseSelectionAt(offset: details.globalPosition);
-            _selectionStatusNotifier.value =
-                SelectableRegionSelectionStatus.changing;
-          case TargetPlatform.macOS:
-          case TargetPlatform.linux:
-          case TargetPlatform.windows:
+        if (PlatformUtils.isMobile) {
+          hideToolbar();
+          _collapseSelectionAt(offset: details.globalPosition);
+          _selectionStatusNotifier.value =
+              SelectableRegionSelectionStatus.changing;
           // On desktop platforms the selection is set on tap down.
         }
       case 2:
         final bool isPointerPrecise = _isPrecisePointerDevice(details.kind);
-        switch (defaultTargetPlatform) {
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
+        if (PlatformUtils.isMobile) {
+          if (Platform.isAndroid ||
+              Platform.isFuchsia ||
+              PlatformUtils.isHarmony) {
             if (!isPointerPrecise) {
               // On Android, a double tap will only show the selection overlay after
               // the following tap up when the pointer device kind is not precise.
               _showHandles();
               _showToolbar();
             }
-          case TargetPlatform.iOS:
+          } else if (Platform.isIOS) {
             if (!isPointerPrecise) {
               if (kIsWeb) {
                 // Double tap on iOS web only triggers when a drag begins after the double tap.
@@ -1004,12 +975,7 @@ class SelectableRegionState extends State<SelectableRegion>
               // the following tap up when the pointer device kind is not precise.
               _showToolbar();
             }
-          case TargetPlatform.macOS:
-          case TargetPlatform.linux:
-          case TargetPlatform.windows:
-            // The selection overlay is not shown on desktop platforms
-            // on a double click.
-            break;
+          }
         }
     }
     _finalizeSelectableRegionStatus();
@@ -1081,25 +1047,6 @@ class SelectableRegionState extends State<SelectableRegion>
     _lastSecondaryTapDownPosition = details.globalPosition;
     _focusNode.requestFocus();
     switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.windows:
-        // If _lastSecondaryTapDownPosition is within the current selection then
-        // keep the current selection, if not then collapse it.
-        final bool lastSecondaryTapDownPositionWasOnActiveSelection =
-            _positionIsOnActiveSelection(
-              globalPosition: details.globalPosition,
-            );
-        if (lastSecondaryTapDownPositionWasOnActiveSelection) {
-          // Restore _lastSecondaryTapDownPosition since it may be cleared if a user
-          // accesses contextMenuAnchors.
-          _lastSecondaryTapDownPosition = details.globalPosition;
-          _showHandles();
-          _showToolbar(location: _lastSecondaryTapDownPosition);
-          _updateSelectedContentIfNeeded();
-          return;
-        }
-        _collapseSelectionAt(offset: _lastSecondaryTapDownPosition!);
       case TargetPlatform.iOS:
         _selectWordAt(offset: _lastSecondaryTapDownPosition!);
       case TargetPlatform.macOS:
@@ -1121,6 +1068,30 @@ class SelectableRegionState extends State<SelectableRegion>
               globalPosition: details.globalPosition,
             );
         if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
+          _collapseSelectionAt(offset: _lastSecondaryTapDownPosition!);
+        }
+      case _:
+        if ([
+              TargetPlatform.android,
+              TargetPlatform.fuchsia,
+              TargetPlatform.windows,
+            ].contains(defaultTargetPlatform) ||
+            PlatformUtils.isHarmony) {
+          // If _lastSecondaryTapDownPosition is within the current selection then
+          // keep the current selection, if not then collapse it.
+          final bool lastSecondaryTapDownPositionWasOnActiveSelection =
+              _positionIsOnActiveSelection(
+                globalPosition: details.globalPosition,
+              );
+          if (lastSecondaryTapDownPositionWasOnActiveSelection) {
+            // Restore _lastSecondaryTapDownPosition since it may be cleared if a user
+            // accesses contextMenuAnchors.
+            _lastSecondaryTapDownPosition = details.globalPosition;
+            _showHandles();
+            _showToolbar(location: _lastSecondaryTapDownPosition);
+            _updateSelectedContentIfNeeded();
+            return;
+          }
           _collapseSelectionAt(offset: _lastSecondaryTapDownPosition!);
         }
     }
@@ -1792,51 +1763,46 @@ class SelectableRegionState extends State<SelectableRegion>
         _copy();
 
         // On Android copy should clear the selection.
-        switch (defaultTargetPlatform) {
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
+        if (PlatformUtils.isMobile) {
+          if (Platform.isAndroid ||
+              Platform.isFuchsia ||
+              PlatformUtils.isHarmony) {
             clearSelection();
             _selectionStatusNotifier.value =
                 SelectableRegionSelectionStatus.changing;
             _finalizeSelectableRegionStatus();
-          case TargetPlatform.iOS:
+          } else if (Platform.isIOS) {
             hideToolbar(false);
-          case TargetPlatform.linux:
-          case TargetPlatform.macOS:
-          case TargetPlatform.windows:
-            hideToolbar();
+          }
+        } else {
+          hideToolbar();
         }
       },
       onSelectAll: () {
-        switch (defaultTargetPlatform) {
-          case TargetPlatform.android:
-          case TargetPlatform.iOS:
-          case TargetPlatform.fuchsia:
-            selectAll(SelectionChangedCause.toolbar);
-          case TargetPlatform.linux:
-          case TargetPlatform.macOS:
-          case TargetPlatform.windows:
-            selectAll();
-            hideToolbar();
+        if (PlatformUtils.isMobile) {
+          selectAll(SelectionChangedCause.toolbar);
+        } else {
+          selectAll();
+          hideToolbar();
         }
       },
       onShare: () {
         _share();
 
         // On Android, share should clear the selection.
-        switch (defaultTargetPlatform) {
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
+        if (PlatformUtils.isMobile) {
+          if (Platform.isAndroid ||
+              Platform.isFuchsia ||
+              PlatformUtils.isHarmony) {
             clearSelection();
             _selectionStatusNotifier.value =
                 SelectableRegionSelectionStatus.changing;
             _finalizeSelectableRegionStatus();
-          case TargetPlatform.iOS:
+          } else if (Platform.isIOS) {
             hideToolbar(false);
-          case TargetPlatform.linux:
-          case TargetPlatform.macOS:
-          case TargetPlatform.windows:
-            hideToolbar();
+          }
+        } else {
+          hideToolbar();
         }
       },
     )..addAll(_textProcessingActionButtonItems);

@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:PiliPlus/common/widgets/flutter/selectable_text/tap_and_drag.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart'
     hide
@@ -205,18 +206,6 @@ class _TextSelectionGestureDetectorState
   // would be used.
   static int _getEffectiveConsecutiveTapCount(int rawCount) {
     switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-        // From observation, these platform's reset their tap count to 0 when
-        // the number of consecutive taps exceeds 3. For example on Debian Linux
-        // with GTK, when going past a triple click, on the fourth click the
-        // selection is moved to the precise click position, on the fifth click
-        // the word at the position is selected, and on the sixth click the
-        // paragraph at the position is selected.
-        return rawCount <= 3
-            ? rawCount
-            : (rawCount % 3 == 0 ? 3 : rawCount % 3);
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         // From observation, these platform's either hold their tap count at 3.
@@ -231,6 +220,16 @@ class _TextSelectionGestureDetectorState
         // the clicked position will be selected, and on the next click the
         // paragraph at the position is selected.
         return rawCount < 2 ? rawCount : 2 + rawCount % 2;
+      case _: //TargetPlatform.android:TargetPlatform.fuchsia:TargetPlatform.linux:鸿蒙
+        // From observation, these platform's reset their tap count to 0 when
+        // the number of consecutive taps exceeds 3. For example on Debian Linux
+        // with GTK, when going past a triple click, on the fourth click the
+        // selection is moved to the precise click position, on the fifth click
+        // the word at the position is selected, and on the sixth click the
+        // paragraph at the position is selected.
+        return rawCount <= 3
+            ? rawCount
+            : (rawCount % 3 == 0 ? 3 : rawCount % 3);
     }
   }
 
@@ -346,53 +345,48 @@ class _TextSelectionGestureDetectorState
     if (widget.onDragSelectionStart != null ||
         widget.onDragSelectionUpdate != null ||
         widget.onDragSelectionEnd != null) {
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.iOS:
-          gestures[TapAndHorizontalDragGestureRecognizer] =
-              GestureRecognizerFactoryWithHandlers<
-                TapAndHorizontalDragGestureRecognizer
-              >(
-                () => TapAndHorizontalDragGestureRecognizer(debugOwner: this),
-                (TapAndHorizontalDragGestureRecognizer instance) {
-                  instance
-                    // Text selection should start from the position of the first pointer
-                    // down event.
-                    ..dragStartBehavior = DragStartBehavior.down
-                    ..eagerVictoryOnDrag =
-                        defaultTargetPlatform != TargetPlatform.iOS
-                    ..onTapTrackStart = _handleTapTrackStart
-                    ..onTapTrackReset = _handleTapTrackReset
-                    ..onTapDown = _handleTapDown
-                    ..onDragStart = _handleDragStart
-                    ..onDragUpdate = _handleDragUpdate
-                    ..onDragEnd = _handleDragEnd
-                    ..onTapUp = _handleTapUp
-                    ..onCancel = _handleTapCancel;
-                },
-              );
-        case TargetPlatform.linux:
-        case TargetPlatform.macOS:
-        case TargetPlatform.windows:
-          gestures[TapAndPanGestureRecognizer] =
-              GestureRecognizerFactoryWithHandlers<TapAndPanGestureRecognizer>(
-                () => TapAndPanGestureRecognizer(debugOwner: this),
-                (TapAndPanGestureRecognizer instance) {
-                  instance
-                    // Text selection should start from the position of the first pointer
-                    // down event.
-                    ..dragStartBehavior = DragStartBehavior.down
-                    ..onTapTrackStart = _handleTapTrackStart
-                    ..onTapTrackReset = _handleTapTrackReset
-                    ..onTapDown = _handleTapDown
-                    ..onDragStart = _handleDragStart
-                    ..onDragUpdate = _handleDragUpdate
-                    ..onDragEnd = _handleDragEnd
-                    ..onTapUp = _handleTapUp
-                    ..onCancel = _handleTapCancel;
-                },
-              );
+      if (PlatformUtils.isMobile) {
+        gestures[TapAndHorizontalDragGestureRecognizer] =
+            GestureRecognizerFactoryWithHandlers<
+              TapAndHorizontalDragGestureRecognizer
+            >(
+              () => TapAndHorizontalDragGestureRecognizer(debugOwner: this),
+              (TapAndHorizontalDragGestureRecognizer instance) {
+                instance
+                  // Text selection should start from the position of the first pointer
+                  // down event.
+                  ..dragStartBehavior = DragStartBehavior.down
+                  ..eagerVictoryOnDrag =
+                      defaultTargetPlatform != TargetPlatform.iOS
+                  ..onTapTrackStart = _handleTapTrackStart
+                  ..onTapTrackReset = _handleTapTrackReset
+                  ..onTapDown = _handleTapDown
+                  ..onDragStart = _handleDragStart
+                  ..onDragUpdate = _handleDragUpdate
+                  ..onDragEnd = _handleDragEnd
+                  ..onTapUp = _handleTapUp
+                  ..onCancel = _handleTapCancel;
+              },
+            );
+      } else {
+        gestures[TapAndPanGestureRecognizer] =
+            GestureRecognizerFactoryWithHandlers<TapAndPanGestureRecognizer>(
+              () => TapAndPanGestureRecognizer(debugOwner: this),
+              (TapAndPanGestureRecognizer instance) {
+                instance
+                  // Text selection should start from the position of the first pointer
+                  // down event.
+                  ..dragStartBehavior = DragStartBehavior.down
+                  ..onTapTrackStart = _handleTapTrackStart
+                  ..onTapTrackReset = _handleTapTrackReset
+                  ..onTapDown = _handleTapDown
+                  ..onDragStart = _handleDragStart
+                  ..onDragUpdate = _handleDragUpdate
+                  ..onDragEnd = _handleDragEnd
+                  ..onTapUp = _handleTapUp
+                  ..onCancel = _handleTapCancel;
+              },
+            );
       }
     }
 

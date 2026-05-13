@@ -300,7 +300,7 @@ List<SettingsModel> get extraSettings => [
         '当前:「${Pref.superResolutionType.label}」\n默认设置对番剧生效, 其他视频默认关闭\n超分辨率需要启用硬件解码, 若启用硬件解码后仍然不生效, 尝试切换硬件解码器为 auto-copy',
     onTap: _showSuperResolutionDialog,
   ),
-  const SwitchModel(
+  SwitchModel(
     title: '提前初始化播放器',
     subtitle: '相对减少手动播放加载时间',
     leading: const Icon(Icons.play_circle_outlined),

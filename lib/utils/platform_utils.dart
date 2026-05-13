@@ -16,7 +16,8 @@ abstract final class PlatformUtils {
       Platform.isAndroid ||
       Platform.isIOS ||
       (isHarmony &&
-          (harmonyDeviceType == 'phone' || harmonyDeviceType == 'tablet'));
+          (harmonyDeviceType == 'phone' || harmonyDeviceType == 'tablet')) ||
+      Platform.isFuchsia;
 
   static final isDesktop = !isMobile;
 }

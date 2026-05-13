@@ -38,13 +38,10 @@ abstract class HarmonyChannel {
     _miniWindow = miniWindow;
     if (_miniWindow && _landscape) {
       _setMiniWindowLandscape(true);
-      ScaledWidgetsFlutterBinding.instance.setScaleFactor(
-        _miniWindowLandscapeScale,
-      );
+      ScaledWidgetsFlutterBinding.instance.scaleFactor =
+          _miniWindowLandscapeScale;
     } else {
-      ScaledWidgetsFlutterBinding.instance.setScaleFactor(
-        Pref.uiScale,
-      );
+      ScaledWidgetsFlutterBinding.instance.scaleFactor = Pref.uiScale;
       _setMiniWindowLandscape(false);
     }
   }

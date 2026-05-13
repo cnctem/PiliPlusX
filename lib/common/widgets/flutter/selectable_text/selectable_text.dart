@@ -681,10 +681,7 @@ class _SelectableTextState extends State<SelectableText>
           _editableText?.bringIntoView(selection.base);
         }
         return;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
+      case _:
       // Do nothing.
     }
   }
@@ -792,10 +789,10 @@ class _SelectableTextState extends State<SelectableText>
           0,
         );
 
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         forcePressEnabled = false;
-        textSelectionControls ??= materialTextSelectionHandleControls;
+        textSelectionControls ??= desktopTextSelectionHandleControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
         cursorColor =
@@ -805,11 +802,9 @@ class _SelectableTextState extends State<SelectableText>
         selectionColor =
             selectionStyle.selectionColor ??
             theme.colorScheme.primary.withOpacity(0.40);
-
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
+      case _: // Android, Fuchsia, 鸿蒙
         forcePressEnabled = false;
-        textSelectionControls ??= desktopTextSelectionHandleControls;
+        textSelectionControls ??= materialTextSelectionHandleControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
         cursorColor =
