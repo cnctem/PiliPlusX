@@ -836,7 +836,11 @@ class VideoDetailController extends GetxController
           segmentList.map((e) {
             double start = (e.segment.first / duration).clamp(0.0, 1.0);
             double end = (e.segment.second / duration).clamp(0.0, 1.0);
-            return Segment(start, end, _getColor(e.segmentType));
+            return Segment(
+              start: start,
+              end: end,
+              color: _getColor(e.segmentType),
+            );
           }),
         );
 
@@ -935,10 +939,12 @@ class VideoDetailController extends GetxController
     return Align(
       alignment: Alignment.centerLeft,
       child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(-1, 0),
-          end: Offset.zero,
-        ).animate(animation),
+        position: animation.drive(
+          Tween<Offset>(
+            begin: const Offset(-1.0, 0.0),
+            end: Offset.zero,
+          ),
+        ),
         child: Padding(
           padding: const EdgeInsets.only(top: 5),
           child: GestureDetector(
@@ -1448,10 +1454,10 @@ class VideoDetailController extends GetxController
   }
 
   RxList<Subtitle> subtitles = RxList<Subtitle>();
-  late final Map<int, String> vttSubtitles = {};
+  final Map<int, ({bool isData, String id})> vttSubtitles = {};
   late final RxInt vttSubtitlesIndex = (-1).obs;
   late final RxBool showVP = true.obs;
-  late final RxList<Segment> viewPointList = <Segment>[].obs;
+  late final RxList<ViewPointSegment> viewPointList = <ViewPointSegment>[].obs;
 
   // 设定字幕轨道
   Future<void> setSubtitle(int index) async {
@@ -1463,19 +1469,21 @@ class VideoDetailController extends GetxController
       return;
     }
 
-    Future<void> setSub(String subtitle) async {
+    Future<void> setSub(({bool isData, String id}) subtitle) async {
       final sub = subtitles[index - 1];
       await plPlayerController.videoPlayerController?.setSubtitleTrack(
-        SubtitleTrack.data(
-          subtitle,
-          title: sub.lanDoc,
-          language: sub.lan,
+        SubtitleTrack(
+          subtitle.id,
+          sub.lanDoc,
+          sub.lan,
+          uri: !subtitle.isData,
+          data: subtitle.isData,
         ),
       );
       vttSubtitlesIndex.value = index;
     }
 
-    String? subtitle = vttSubtitles[index - 1];
+    ({bool isData, String id})? subtitle = vttSubtitles[index - 1];
     if (subtitle != null) {
       await setSub(subtitle);
     } else {
@@ -1483,8 +1491,9 @@ class VideoDetailController extends GetxController
         subtitles[index - 1].subtitleUrl!,
       );
       if (!isClosed && result != null) {
-        vttSubtitles[index - 1] = result;
-        await setSub(result);
+        final subtitle = (isData: true, id: result);
+        vttSubtitles[index - 1] = subtitle;
+        await setSub(subtitle);
       }
     }
   }
@@ -1573,14 +1582,13 @@ class VideoDetailController extends GetxController
               0.0,
               1.0,
             );
-            return Segment(
-              start,
-              start,
-              Colors.black.withValues(alpha: 0.5),
-              item.content,
-              item.imgUrl,
-              item.from,
-              item.to,
+            return ViewPointSegment(
+              start: start,
+              end: start,
+              title: item.content,
+              url: item.imgUrl,
+              from: item.from,
+              to: item.to,
             );
           }).toList();
         } catch (_) {}
@@ -1658,6 +1666,8 @@ class VideoDetailController extends GetxController
       ?..removeListener(scrollListener)
       ..dispose();
     animController?.dispose();
+    subtitles.clear();
+    vttSubtitles.clear();
     super.onClose();
   }
 

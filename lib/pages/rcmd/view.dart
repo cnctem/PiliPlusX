@@ -42,10 +42,7 @@ class _RcmdPageState extends CommonPageState<RcmdPage, RcmdController>
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               SliverPadding(
-                padding: const EdgeInsets.only(
-                  top: StyleString.cardSpace,
-                  bottom: 100,
-                ),
+                padding: const .only(top: StyleString.cardSpace, bottom: 100),
                 sliver: Obx(() => _buildBody(controller.loadingState.value)),
               ),
             ],
@@ -83,12 +80,10 @@ class _RcmdPageState extends CommonPageState<RcmdPage, RcmdController>
                         child: Card(
                           child: Container(
                             alignment: Alignment.center,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                            ),
+                            padding: const .symmetric(horizontal: 10),
                             child: Text(
                               '上次看到这里\n点击刷新',
-                              textAlign: TextAlign.center,
+                              textAlign: .center,
                               style: TextStyle(
                                 color: Theme.of(
                                   context,
@@ -99,9 +94,7 @@ class _RcmdPageState extends CommonPageState<RcmdPage, RcmdController>
                         ),
                       );
                     }
-                    int actualIndex = controller.lastRefreshAt == null
-                        ? index
-                        : index > controller.lastRefreshAt!
+                    final actualIndex = index > controller.lastRefreshAt!
                         ? index - 1
                         : index;
                     return VideoCardV(
