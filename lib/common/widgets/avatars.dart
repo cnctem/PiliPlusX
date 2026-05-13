@@ -1,5 +1,4 @@
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
-import 'package:PiliPlus/models/common/image_type.dart';
 import 'package:PiliPlus/models/model_owner.dart';
 import 'package:flutter/material.dart';
 
@@ -9,13 +8,15 @@ Widget avatars({
 }) {
   const gap = 6.0;
   const size = 22.0;
+  const padding = 0.8;
   const offset = size - gap;
+  const imgSize = size - 2 * padding;
   if (users.length == 1) {
     return NetworkImgLayer(
       src: users.first.face,
-      width: size,
-      height: size,
-      type: ImageType.avatar,
+      width: imgSize,
+      height: imgSize,
+      type: .avatar,
     );
   } else {
     final decoration = BoxDecoration(
@@ -37,12 +38,12 @@ Widget avatars({
                 child: DecoratedBox(
                   decoration: decoration,
                   child: Padding(
-                    padding: const EdgeInsetsGeometry .all(.8),
+                    padding: const .all(padding),
                     child: NetworkImgLayer(
                       src: e.$2.face,
-                      width: size - .8,
-                      height: size - .8,
-                      type: ImageType .avatar,
+                      width: imgSize,
+                      height: imgSize,
+                      type: .avatar,
                     ),
                   ),
                 ),

@@ -22,7 +22,7 @@ class RcmdPage extends StatefulWidget {
 class _RcmdPageState extends CommonPageState<RcmdPage, RcmdController>
     with AutomaticKeepAliveClientMixin {
   @override
-  late RcmdController controller = Get.put(RcmdController());
+  final RcmdController controller = Get.put(RcmdController());
 
   @override
   bool get wantKeepAlive => true;

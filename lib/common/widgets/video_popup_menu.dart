@@ -102,19 +102,17 @@ class VideoPopupMenu extends StatelessWidget {
                         if (res != null && context.mounted) {
                           showDialog(
                             context: context,
-                            builder: (context) {
-                              return Dialog(
-                                child: Padding(
-                                  padding: const .symmetric(vertical: 14),
-                                  child: AiConclusionPanel.buildContent(
-                                    context,
-                                    Theme.of(context),
-                                    res,
-                                    tap: false,
-                                  ),
+                            builder: (context) => Dialog(
+                              child: Padding(
+                                padding: const .symmetric(vertical: 14),
+                                child: AiConclusionPanel.buildContent(
+                                  context,
+                                  Theme.of(context),
+                                  res,
+                                  tap: false,
                                 ),
-                              );
-                            },
+                              ),
+                            ),
                           );
                         }
                       },
@@ -242,74 +240,70 @@ class VideoPopupMenu extends StatelessWidget {
                       } else {
                         showDialog(
                           context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              content: SingleChildScrollView(
-                                child: Column(
-                                  children: [
-                                    const SizedBox(height: 5),
-                                    const Text("web端暂不支持精细选择"),
-                                    const SizedBox(height: 5),
-                                    Wrap(
-                                      spacing: 5.0,
-                                      runSpacing: 2.0,
-                                      children: [
-                                        FilledButton.tonal(
-                                          onPressed: () async {
-                                            Get.back();
-                                            SmartDialog.showLoading(
-                                              msg: '正在提交',
-                                            );
-                                            final res =
-                                                await VideoHttp.dislikeVideo(
-                                                  bvid: videoItem.bvid!,
-                                                  type: true,
-                                                );
-                                            SmartDialog.dismiss();
-                                            if (res.isSuccess) {
-                                              SmartDialog.showToast('点踩成功');
-                                              onRemove?.call();
-                                            } else {
-                                              res.toast();
-                                            }
-                                          },
-                                          style: FilledButton.styleFrom(
-                                            visualDensity:
-                                                VisualDensity.compact,
-                                          ),
-                                          child: const Text("点踩"),
+                          builder: (context) => AlertDialog(
+                            content: SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  const SizedBox(height: 5),
+                                  const Text("web端暂不支持精细选择"),
+                                  const SizedBox(height: 5),
+                                  Wrap(
+                                    spacing: 5.0,
+                                    runSpacing: 2.0,
+                                    children: [
+                                      FilledButton.tonal(
+                                        onPressed: () async {
+                                          Get.back();
+                                          SmartDialog.showLoading(
+                                            msg: '正在提交',
+                                          );
+                                          final res =
+                                              await VideoHttp.dislikeVideo(
+                                                bvid: videoItem.bvid!,
+                                                type: true,
+                                              );
+                                          SmartDialog.dismiss();
+                                          if (res.isSuccess) {
+                                            SmartDialog.showToast('点踩成功');
+                                            onRemove?.call();
+                                          } else {
+                                            res.toast();
+                                          }
+                                        },
+                                        style: FilledButton.styleFrom(
+                                          visualDensity: VisualDensity.compact,
                                         ),
-                                        FilledButton.tonal(
-                                          onPressed: () async {
-                                            Get.back();
-                                            SmartDialog.showLoading(
-                                              msg: '正在提交',
-                                            );
-                                            final res =
-                                                await VideoHttp.dislikeVideo(
-                                                  bvid: videoItem.bvid!,
-                                                  type: false,
-                                                );
-                                            SmartDialog.dismiss();
-                                            SmartDialog.showToast(
-                                              res.isSuccess
-                                                  ? '取消踩'
-                                                  : res.toString(),
-                                            );
-                                          },
-                                          style: FilledButton.styleFrom(
-                                            visualDensity:
-                                                VisualDensity.compact,
-                                          ),
-                                          child: const Text("撤销"),
+                                        child: const Text("点踩"),
+                                      ),
+                                      FilledButton.tonal(
+                                        onPressed: () async {
+                                          Get.back();
+                                          SmartDialog.showLoading(
+                                            msg: '正在提交',
+                                          );
+                                          final res =
+                                              await VideoHttp.dislikeVideo(
+                                                bvid: videoItem.bvid!,
+                                                type: false,
+                                              );
+                                          SmartDialog.dismiss();
+                                          SmartDialog.showToast(
+                                            res.isSuccess
+                                                ? '取消踩'
+                                                : res.toString(),
+                                          );
+                                        },
+                                        style: FilledButton.styleFrom(
+                                          visualDensity: VisualDensity.compact,
                                         ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                                        child: const Text("撤销"),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
-                            );
-                          },
+                            ),
+                          ),
                         );
                       }
                     },
