@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/widgets/appbar/appbar.dart';
@@ -15,14 +16,17 @@ import 'package:PiliPlus/pages/download/detail/view.dart';
 import 'package:PiliPlus/pages/download/detail/widgets/item.dart';
 import 'package:PiliPlus/pages/download/search/view.dart';
 import 'package:PiliPlus/services/download/download_service.dart';
-import 'package:PiliPlus/utils/extension/iterable_ext.dart' show IterableExt;
 import 'package:PiliPlus/utils/grid.dart';
+import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
+import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart'
     hide SliverGridDelegateWithMaxCrossAxisExtent;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:path/path.dart' as path;
+import 'package:share_plus/share_plus.dart';
 
 class DownloadPage extends StatefulWidget {
   const DownloadPage({super.key});
@@ -40,6 +44,35 @@ class _DownloadPageState extends State<DownloadPage> {
   void dispose() {
     _progress.dispose();
     super.dispose();
+  }
+
+  Future<void> _shareEntries(List<BiliDownloadEntryInfo> entries) async {
+    final xFiles = <XFile>[];
+    for (final entry in entries) {
+      final videoFileName =
+          entry.mediaType == 1 ? PathUtils.videoNameType1 : PathUtils.videoNameType2;
+      final videoPath = path.join(entry.entryDirPath, entry.typeTag, videoFileName);
+      final videoFile = File(videoPath);
+      if (videoFile.existsSync()) {
+        xFiles.add(XFile(videoPath, name: '${entry.title}.mp4'));
+      }
+      if (entry.mediaType != 1 && entry.hasDashAudio) {
+        final audioPath =
+            path.join(entry.entryDirPath, entry.typeTag, PathUtils.audioNameType2);
+        final audioFile = File(audioPath);
+        if (audioFile.existsSync()) {
+          xFiles.add(XFile(audioPath, name: 'audio_${entry.title}.m4s'));
+        }
+      }
+    }
+    if (xFiles.isEmpty) {
+      SmartDialog.showToast('没有可分享的文件');
+      return;
+    }
+    await Share.shareXFiles(
+      xFiles,
+      sharePositionOrigin: await Utils.sharePositionOrigin,
+    );
   }
 
   @override
@@ -87,6 +120,23 @@ class _DownloadPageState extends State<DownloadPage> {
                 },
                 child: Text(
                   '更新',
+                  style: TextStyle(color: theme.colorScheme.onSurface),
+                ),
+              ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                ),
+                onPressed: () async {
+                  final allChecked = _controller.allChecked.toSet();
+                  final list = <BiliDownloadEntryInfo>[];
+                  for (final page in allChecked) {
+                    list.addAll(page.entries);
+                  }
+                  await _shareEntries(list);
+                },
+                child: Text(
+                  '分享',
                   style: TextStyle(color: theme.colorScheme.onSurface),
                 ),
               ),

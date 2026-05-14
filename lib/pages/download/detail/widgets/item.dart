@@ -101,6 +101,17 @@ class DetailItem extends StatelessWidget {
                       style: TextStyle(fontSize: 14),
                     ),
                   ),
+                  ListTile(
+                    onTap: () {
+                      Get.back();
+                      entry.shareSelf();
+                    },
+                    dense: true,
+                    title: const Text(
+                      '分享',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
                 ],
               ),
             ),
