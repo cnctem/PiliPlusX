@@ -358,6 +358,7 @@ abstract final class UserHttp {
     bool desc = true,
     dynamic sortField = 1,
     bool direction = false,
+    int? pn,
   }) async {
     final res = await Request().get(
       Api.mediaList,
@@ -373,6 +374,7 @@ abstract final class UserHttp {
         'sort_field': sortField,
         'tid': 0,
         'with_current': withCurrent,
+        if (pn != null) ...{'pn': pn, 'use_pn': true},
       },
     );
     if (res.data['code'] == 0) {
