@@ -108,6 +108,8 @@ class VideoDetailController extends GetxController
   late ListOrder _listOrder = ListOrder.asc;
   ListOrder get listOrder => _listOrder;
   static final _random = Random();
+  List<int> _shuffledPages = [];
+  int _shufflePageIdx = 0;
   late final RxList<MediaListItemModel> mediaList = <MediaListItemModel>[].obs;
   late String watchLaterTitle;
 
@@ -472,16 +474,25 @@ class VideoDetailController extends GetxController
     int? pn,
   }) async {
     final count = args['count'];
-    if (!isReverse && count != null && mediaList.length >= count) {
-      return;
+    if (!isReverse && !isLoadPrevious) {
+      if (_listOrder.isShuffle && pn == null) {
+        // shuffle mode load-more: use next page from shuffled sequence
+        pn = _nextShufflePage();
+        if (pn == null) return;
+      } else if (count != null && mediaList.length >= count) {
+        return;
+      }
     }
+    final isShufflePn = pn != null;
     final res = await UserHttp.getMediaList(
       type: args['mediaType'] ?? sourceType.mediaType,
       bizId: args['mediaId'] ?? -1,
       ps: 20,
       direction: isLoadPrevious ? true : false,
       pn: pn,
-      oid: isReverse
+      oid: isShufflePn
+          ? null
+          : isReverse
           ? null
           : mediaList.isEmpty
           ? args['isContinuePlaying'] == true
@@ -490,7 +501,9 @@ class VideoDetailController extends GetxController
           : isLoadPrevious
           ? mediaList.first.aid
           : mediaList.last.aid,
-      otype: isReverse
+      otype: isShufflePn
+          ? null
+          : isReverse
           ? null
           : mediaList.isEmpty
           ? null
@@ -553,6 +566,36 @@ class VideoDetailController extends GetxController
     }
   }
 
+  void _initShufflePages() {
+    final count = args['count'];
+    if (count == null || count <= 0) {
+      _shuffledPages = [1];
+      _shufflePageIdx = 0;
+      return;
+    }
+    final totalPages = (count / 20).ceil();
+    _shuffledPages = List.generate(totalPages, (i) => i + 1);
+    _shuffledPages.shuffle(_random);
+    // Ensure first page has enough items to trigger load-more
+    final firstPageLastItem = count - (totalPages - 1) * 20;
+    if (_shuffledPages[0] == totalPages && firstPageLastItem < 2) {
+      for (int i = 1; i < _shuffledPages.length; i++) {
+        if (_shuffledPages[i] != totalPages) {
+          final temp = _shuffledPages[0];
+          _shuffledPages[0] = _shuffledPages[i];
+          _shuffledPages[i] = temp;
+          break;
+        }
+      }
+    }
+    _shufflePageIdx = 0;
+  }
+
+  int? _nextShufflePage() {
+    if (_shufflePageIdx >= _shuffledPages.length) return null;
+    return _shuffledPages[_shufflePageIdx++];
+  }
+
   // 稍后再看面板展开
   void showMediaListPanel(BuildContext context) {
     if (mediaList.isNotEmpty) {
@@ -571,13 +614,12 @@ class VideoDetailController extends GetxController
         onReverse: () {
           _listOrder = _listOrder.next;
           if (_listOrder.isShuffle) {
-            // random page jump + local shuffle
-            final count = args['count'];
-            final pn = count != null
-                ? _random.nextInt((count / 20).ceil().clamp(1, 9999)) + 1
-                : 1;
+            _initShufflePages();
+            final pn = _nextShufflePage();
             getMediaList(isReverse: true, pn: pn);
           } else {
+            _shuffledPages = [];
+            _shufflePageIdx = 0;
             getMediaList(isReverse: true);
           }
         },
