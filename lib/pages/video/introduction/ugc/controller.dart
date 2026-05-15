@@ -110,7 +110,7 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
         // keep reversed pages
         response
           ..pages = videoDetail.value.pages
-          ..isPageReversed = videoDetail.value.isPageReversed;
+          ..listOrder = videoDetail.value.listOrder;
       }
       videoDetail.value = response;
       try {
@@ -564,6 +564,20 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
     }
   }
 
+  bool _isShuffleMode(bool isPart) {
+    final videoDetail = this.videoDetail.value;
+    if (isPart) return videoDetail.listOrder.isShuffle;
+    if (videoDetailCtr.isPlayAll) return videoDetailCtr.listOrder.isShuffle;
+    if (videoDetail.ugcSeason != null) {
+      return videoDetail
+          .ugcSeason!
+          .sections![videoDetailCtr.seasonIndex.value]
+          .listOrder
+          .isShuffle;
+    }
+    return false;
+  }
+
   /// 播放上一个
   @override
   bool prevPlay([bool skipPart = false]) {
@@ -589,7 +603,7 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
       (e) =>
           e.cid ==
           (skipPart
-              ? videoDetail.isPageReversed
+              ? videoDetail.listOrder.isDesc
                     ? videoDetail.pages!.last.cid
                     : videoDetail.pages!.first.cid
               : this.cid.value),
@@ -603,6 +617,9 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
       if (isPart &&
           (videoDetailCtr.isPlayAll || videoDetail.ugcSeason != null)) {
         return prevPlay(true);
+      }
+      if (_isShuffleMode(isPart)) {
+        return false;
       }
       if (playRepeat == PlayRepeat.listCycle) {
         prevIndex = episodes.length - 1;
@@ -671,7 +688,7 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
         (e) =>
             e.cid ==
             (skipPart
-                ? videoDetail.isPageReversed
+                ? videoDetail.listOrder.isDesc
                       ? videoDetail.pages!.last.cid
                       : videoDetail.pages!.first.cid
                 : this.cid.value),
@@ -692,6 +709,9 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
           return nextPlay(true);
         }
 
+        if (_isShuffleMode(isPart)) {
+          return false;
+        }
         if (playRepeat == PlayRepeat.listCycle) {
           nextIndex = 0;
         } else if (playRepeat == PlayRepeat.autoPlayRelated &&
