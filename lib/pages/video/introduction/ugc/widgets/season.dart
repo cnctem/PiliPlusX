@@ -45,10 +45,11 @@ class _SeasonPanelState extends State<SeasonPanel> {
       tag: widget.heroTag,
     );
 
-    // pages 可空：cid 尚未解析（为 0）且 pages 为空时，原写法会在 initState 抛空断言
+    // pages 可空：cid 尚未解析（为 0）且 pages 为空时，不能抛空断言。
     final pages = videoDetail.pages;
-    _videoDetailController.seasonCid = pages?.isNotEmpty == true
-        ? (videoDetail.isPageReversed ? pages!.last.cid : pages!.first.cid)
+    final hasPages = pages?.isNotEmpty == true;
+    _videoDetailController.seasonCid = hasPages
+        ? (videoDetail.listOrder.isDesc ? pages!.last.cid : pages!.first.cid)
         : (ugcIntroController.cid.value != 0
               ? ugcIntroController.cid.value
               : null);

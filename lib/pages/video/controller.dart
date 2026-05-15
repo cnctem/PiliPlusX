@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math' show min;
+import 'dart:math' show Random, min;
 import 'dart:ui';
 
 import 'package:PiliPlus/common/style.dart';
@@ -19,6 +19,7 @@ import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/user.dart';
 import 'package:PiliPlus/http/video.dart';
 import 'package:PiliPlus/models/common/account_type.dart';
+import 'package:PiliPlus/models/common/list_order.dart';
 import 'package:PiliPlus/models/common/sponsor_block/action_type.dart';
 import 'package:PiliPlus/models/common/sponsor_block/post_segment_model.dart';
 import 'package:PiliPlus/models/common/sponsor_block/segment_model.dart';
@@ -109,7 +110,9 @@ class VideoDetailController extends GetxController
   late SourceType sourceType;
   late BiliDownloadEntryInfo entry;
   late bool isFileSource;
-  late bool _mediaDesc = false;
+  late ListOrder _listOrder = ListOrder.asc;
+  ListOrder get listOrder => _listOrder;
+  static final _random = Random();
   late final RxList<MediaListItemModel> mediaList = <MediaListItemModel>[].obs;
   late String watchLaterTitle;
 
@@ -464,7 +467,7 @@ class VideoDetailController extends GetxController
       initFileSource(args['entry']);
     } else if (isPlayAll) {
       watchLaterTitle = args['favTitle'];
-      _mediaDesc = args['desc'];
+      _listOrder = args['desc'] == true ? ListOrder.desc : ListOrder.asc;
       getMediaList();
     }
 
@@ -483,6 +486,7 @@ class VideoDetailController extends GetxController
   Future<void> getMediaList({
     bool isReverse = false,
     bool isLoadPrevious = false,
+    int? pn,
   }) async {
     final count = args['count'];
     if (!isReverse && count != null && mediaList.length >= count) {
@@ -493,6 +497,7 @@ class VideoDetailController extends GetxController
       bizId: args['mediaId'] ?? -1,
       ps: 20,
       direction: isLoadPrevious ? true : false,
+      pn: pn,
       oid: isReverse
           ? null
           : mediaList.isEmpty
@@ -509,7 +514,7 @@ class VideoDetailController extends GetxController
           : isLoadPrevious
           ? mediaList.first.type
           : mediaList.last.type,
-      desc: _mediaDesc,
+      desc: _listOrder.isDesc,
       sortField: args['sortField'] ?? 1,
       withCurrent: mediaList.isEmpty && args['isContinuePlaying'] == true
           ? true
@@ -519,6 +524,9 @@ class VideoDetailController extends GetxController
       if (response.mediaList.isNotEmpty) {
         if (isReverse) {
           mediaList.value = response.mediaList;
+          if (_listOrder.isShuffle) {
+            mediaList.shuffle();
+          }
           for (final item in mediaList) {
             if (item.cid != null) {
               try {
@@ -531,6 +539,8 @@ class VideoDetailController extends GetxController
           }
         } else if (isLoadPrevious) {
           mediaList.insertAll(0, response.mediaList);
+        } else if (_listOrder.isShuffle) {
+          _shuffleInsert(response.mediaList);
         } else {
           mediaList.addAll(response.mediaList);
         }
@@ -540,6 +550,27 @@ class VideoDetailController extends GetxController
     }
   }
 
+  void _shuffleInsert(List<MediaListItemModel> newItems) {
+    if (newItems.isEmpty) return;
+    final currentIdx = mediaList.indexWhere((e) => e.bvid == bvid);
+    final insertStart = currentIdx < 0 ? 0 : currentIdx + 1;
+    final newTotal = mediaList.length - insertStart + newItems.length;
+    // Fisher-Yates partial shuffle for unique positions
+    final range = List.generate(newTotal, (i) => insertStart + i);
+    for (int i = 0; i < newItems.length; i++) {
+      final j = i + _random.nextInt(range.length - i);
+      final temp = range[i];
+      range[i] = range[j];
+      range[j] = temp;
+    }
+    final positions = range.sublist(0, newItems.length)..sort();
+    // Insert back-to-front to preserve earlier indices
+    for (int i = newItems.length - 1; i >= 0; i--) {
+      mediaList.insert(positions[i], newItems[i]);
+    }
+  }
+
+  // 稍后再看面板展开
   void showMediaListPanel(BuildContext context) {
     if (mediaList.isNotEmpty) {
       Widget panel() => MediaListPanel(
@@ -553,10 +584,19 @@ class VideoDetailController extends GetxController
         bvid: bvid,
         count: args['count'],
         loadMoreMedia: getMediaList,
-        desc: _mediaDesc,
+        listOrder: _listOrder,
         onReverse: () {
-          _mediaDesc = !_mediaDesc;
-          getMediaList(isReverse: true);
+          _listOrder = _listOrder.next;
+          if (_listOrder.isShuffle) {
+            // random page jump + local shuffle
+            final count = args['count'];
+            final pn = count != null
+                ? _random.nextInt((count / 20).ceil().clamp(1, 9999)) + 1
+                : 1;
+            getMediaList(isReverse: true, pn: pn);
+          } else {
+            getMediaList(isReverse: true);
+          }
         },
         loadPrevious: args['isContinuePlaying'] == true
             ? () => getMediaList(isLoadPrevious: true)
@@ -1441,7 +1481,7 @@ class VideoDetailController extends GetxController
   void updateMediaListHistory(int aid) {
     if (args['sortField'] != null) {
       VideoHttp.medialistHistory(
-        desc: _mediaDesc ? 1 : 0,
+        desc: _listOrder.isDesc ? 1 : 0,
         oid: aid,
         upperMid: args['mediaId'],
       );
