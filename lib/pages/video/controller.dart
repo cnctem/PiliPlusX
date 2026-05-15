@@ -537,18 +537,20 @@ class VideoDetailController extends GetxController
     if (newItems.isEmpty) return;
     final currentIdx = mediaList.indexWhere((e) => e.bvid == bvid);
     final insertStart = currentIdx < 0 ? 0 : currentIdx + 1;
-    final newTotal = mediaList.length - insertStart + newItems.length;
+    // Positions: insertStart..mediaList.length (inclusive, "append" is valid)
+    final available = mediaList.length - insertStart + 1;
+    final pickCount = newItems.length.clamp(0, available);
+    final range = List.generate(available, (i) => insertStart + i);
     // Fisher-Yates partial shuffle for unique positions
-    final range = List.generate(newTotal, (i) => insertStart + i);
-    for (int i = 0; i < newItems.length; i++) {
+    for (int i = 0; i < pickCount; i++) {
       final j = i + _random.nextInt(range.length - i);
       final temp = range[i];
       range[i] = range[j];
       range[j] = temp;
     }
-    final positions = range.sublist(0, newItems.length)..sort();
+    final positions = range.sublist(0, pickCount)..sort();
     // Insert back-to-front to preserve earlier indices
-    for (int i = newItems.length - 1; i >= 0; i--) {
+    for (int i = pickCount - 1; i >= 0; i--) {
       mediaList.insert(positions[i], newItems[i]);
     }
   }
