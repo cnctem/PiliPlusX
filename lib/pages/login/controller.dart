@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:gt3_flutter_plugin/gt3_flutter_plugin.dart';
+import 'package:os_type/os_type.dart';
 
 class LoginPageController extends GetxController
     with GetSingleTickerProviderStateMixin {
@@ -136,7 +137,7 @@ class LoginPageController extends GetxController
       onSuccess();
     }
 
-    if (PlatformUtils.isDesktop || PlatformUtils.isHarmony) {
+    if (PlatformUtils.isDesktop || OS.isHarmony) {
       // 极验插件不支持桌面和鸿蒙
       showDialog<Map<String, dynamic>>(
         context: Get.context!,

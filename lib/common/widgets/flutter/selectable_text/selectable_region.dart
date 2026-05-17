@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:os_type/os_type.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 // Examples can assume:
@@ -473,7 +474,7 @@ class SelectableRegionState extends State<SelectableRegion>
       case TargetPlatform.windows:
         return;
       default:
-        if (PlatformUtils.isHarmony && PlatformUtils.isDesktop) return;
+        if (OS.isHarmony && PlatformUtils.isDesktop) return;
         break;
     }
 
@@ -831,7 +832,7 @@ class SelectableRegionState extends State<SelectableRegion>
         if (PlatformUtils.isMobile) {
           if (Platform.isAndroid ||
               Platform.isFuchsia ||
-              PlatformUtils.isHarmony) {
+              OS.isHarmony) {
             // Double tap + drag is only supported on Android when using a precise
             // pointer device or when not on the web.
             if (!kIsWeb ||
@@ -914,7 +915,7 @@ class SelectableRegionState extends State<SelectableRegion>
     final bool shouldShowSelectionOverlayOnMobile = !isPointerPrecise;
 
     if (PlatformUtils.isMobile) {
-      if (Platform.isAndroid || Platform.isFuchsia || PlatformUtils.isHarmony) {
+      if (Platform.isAndroid || Platform.isFuchsia || OS.isHarmony) {
         if (shouldShowSelectionOverlayOnMobile) {
           _showHandles();
           _showToolbar();
@@ -958,7 +959,7 @@ class SelectableRegionState extends State<SelectableRegion>
         if (PlatformUtils.isMobile) {
           if (Platform.isAndroid ||
               Platform.isFuchsia ||
-              PlatformUtils.isHarmony) {
+              OS.isHarmony) {
             if (!isPointerPrecise) {
               // On Android, a double tap will only show the selection overlay after
               // the following tap up when the pointer device kind is not precise.
@@ -1076,7 +1077,7 @@ class SelectableRegionState extends State<SelectableRegion>
               TargetPlatform.fuchsia,
               TargetPlatform.windows,
             ].contains(defaultTargetPlatform) ||
-            PlatformUtils.isHarmony) {
+            OS.isHarmony) {
           // If _lastSecondaryTapDownPosition is within the current selection then
           // keep the current selection, if not then collapse it.
           final bool lastSecondaryTapDownPositionWasOnActiveSelection =
@@ -1766,7 +1767,7 @@ class SelectableRegionState extends State<SelectableRegion>
         if (PlatformUtils.isMobile) {
           if (Platform.isAndroid ||
               Platform.isFuchsia ||
-              PlatformUtils.isHarmony) {
+              OS.isHarmony) {
             clearSelection();
             _selectionStatusNotifier.value =
                 SelectableRegionSelectionStatus.changing;
@@ -1793,7 +1794,7 @@ class SelectableRegionState extends State<SelectableRegion>
         if (PlatformUtils.isMobile) {
           if (Platform.isAndroid ||
               Platform.isFuchsia ||
-              PlatformUtils.isHarmony) {
+              OS.isHarmony) {
             clearSelection();
             _selectionStatusNotifier.value =
                 SelectableRegionSelectionStatus.changing;

@@ -19,6 +19,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:live_photo_maker/live_photo_maker.dart';
+import 'package:os_type/os_type.dart';
 import 'package:saver_gallery/saver_gallery.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -75,7 +76,7 @@ abstract final class ImageUtils {
   }
 
   static Future<bool> checkPermissionDependOnSdkInt() async {
-    if (PlatformUtils.isHarmony) return true; // 鸿蒙图片保存权限由插件后续请求
+    if (OS.isHarmony) return true; // 鸿蒙图片保存权限由插件后续请求
     if (Platform.isAndroid) {
       if (await Utils.sdkInt < 29) {
         return requestPer();
@@ -292,7 +293,7 @@ abstract final class ImageUtils {
   }) async {
     SaveResult? res;
     fileName += '.$ext';
-    if (PlatformUtils.isMobile || PlatformUtils.isHarmony) {
+    if (PlatformUtils.isMobile || OS.isHarmony) {
       SmartDialog.showLoading(msg: '正在保存');
       res = await SaverGallery.saveImage(
         bytes,
@@ -336,7 +337,7 @@ abstract final class ImageUtils {
       return;
     }
     SaveResult? res;
-    if (PlatformUtils.isMobile || PlatformUtils.isHarmony) {
+    if (PlatformUtils.isMobile || OS.isHarmony) {
       res = await SaverGallery.saveFile(
         filePath: filePath,
         fileName: fileName,

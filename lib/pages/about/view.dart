@@ -25,6 +25,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:os_type/os_type.dart';
 import 'package:re_highlight/languages/json.dart';
 import 'package:re_highlight/re_highlight.dart';
 import 'package:re_highlight/styles/github-dark.dart';
@@ -119,7 +120,7 @@ class _AboutPageState extends State<AboutPage> {
           ),
           ListTile(
             title: Text(
-              '${Constants.appName}${PlatformUtils.isHarmony ? '(鸿蒙版)' : ''}',
+              '${Constants.appName}${OS.isHarmony ? '(鸿蒙版)' : ''}',
               textAlign: TextAlign.center,
               style: theme.textTheme.titleMedium!.copyWith(height: 2),
             ),

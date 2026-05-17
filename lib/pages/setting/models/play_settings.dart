@@ -20,6 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:os_type/os_type.dart';
 
 List<SettingsModel> get playSettings => [
   const SwitchModel(
@@ -190,7 +191,7 @@ List<SettingsModel> get playSettings => [
     setKey: SettingBoxKey.continuePlayInBackground,
     defaultVal: false,
   ),
-  if (Platform.isAndroid || (PlatformUtils.isHarmony && kDebugMode)) ...[
+  if (Platform.isAndroid || (OS.isHarmony && kDebugMode)) ...[
     SwitchModel(
       title: '后台画中画',
       subtitle: '进入后台时以小窗形式（PiP）播放',

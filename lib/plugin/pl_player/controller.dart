@@ -59,6 +59,7 @@ import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:os_type/os_type.dart';
 import 'package:path/path.dart' as path;
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:window_manager/window_manager.dart';
@@ -229,8 +230,7 @@ class PlPlayerController {
 
   late final bool autoPiP = Pref.autoPiP;
   bool get isPipMode =>
-      ((Platform.isAndroid || PlatformUtils.isHarmony) &&
-          Floating().isPipMode) ||
+      ((Platform.isAndroid || OS.isHarmony) && Floating().isPipMode) ||
       (PlatformUtils.isDesktop && isDesktopPip);
   late bool isDesktopPip = false;
   late Rect _lastWindowBounds;
@@ -328,7 +328,7 @@ class PlPlayerController {
 
   void _disableAutoEnterPip() {
     if (_shouldSetPip) {
-      if (PlatformUtils.isHarmony) {
+      if (OS.isHarmony) {
         Floating().setAutoPip(false);
       } else {
         Utils.channel.invokeMethod('setPipAutoEnterEnabled', {
@@ -578,7 +578,7 @@ class PlPlayerController {
             _shouldSetPip = true;
           }
         });
-      } else if (PlatformUtils.isHarmony) {
+      } else if (OS.isHarmony) {
         _shouldSetPip = true;
       }
     }
@@ -1545,7 +1545,7 @@ class PlPlayerController {
   void toggleFullScreen(bool val) {
     isFullScreen.value = val;
     updateSubtitleStyle();
-    if (!PlatformUtils.isHarmony) return;
+    if (!OS.isHarmony) return;
 
     if (!val) {
       HarmonyChannel.onLandscapeOrMiniWindowChange(false, null); // 非横屏

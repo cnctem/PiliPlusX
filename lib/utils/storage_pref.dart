@@ -42,6 +42,7 @@ import 'package:flex_seed_scheme/flex_seed_scheme.dart' show FlexSchemeVariant;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:os_type/os_type.dart';
 
 abstract final class Pref {
   static final Box _setting = GStorage.setting;
@@ -468,7 +469,7 @@ abstract final class Pref {
 
   static bool get preInitPlayer => _setting.get(
     SettingBoxKey.preInitPlayer,
-    defaultValue: PlatformUtils.isHarmony,
+    defaultValue: OS.isHarmony,
   );
 
   static bool get mainTabBarView =>

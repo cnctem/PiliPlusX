@@ -77,6 +77,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:os_type/os_type.dart';
 import 'package:screen_brightness_platform_interface/constant/plugin_channel.dart';
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
 import 'package:window_manager/window_manager.dart';
@@ -206,7 +207,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
               plPlayerController.volume.value = value;
               plPlayerController.actualVolume.value = value;
               if (Platform.isIOS && !FlutterVolumeController.showSystemUI ||
-                  PlatformUtils.isHarmony) {
+                  OS.isHarmony) {
                 plPlayerController
                   ..volumeIndicator.value = true
                   ..volumeTimer?.cancel()
@@ -245,7 +246,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                     .listen(listener);
         } catch (e) {
           debugPrint('监听屏幕亮度失败: $e');
-          if (PlatformUtils.isHarmony) {
+          if (OS.isHarmony) {
             debugPrint('尝试鸿蒙number类型的亮度监听: $e');
             _harmonyOnApplicationScreenBrightnessChanged ??=
                 pluginEventChannelApplicationBrightnessChanged
@@ -309,7 +310,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       }
     } else {
       // 需要后台播放，防止鸿蒙切到后台被暂停
-      if (PlatformUtils.isHarmony) {
+      if (OS.isHarmony) {
         harmonyBackPlayingSub?.cancel();
         harmonyBackPlayingSub = player.stream.playing.listen((playing) {
           if (!playing) {

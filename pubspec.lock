@@ -798,9 +798,9 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: feat-ohos
-      resolved-ref: f8c1bc059c963e4ca2bd8520ffcc41608e42c416
-      url: "https://github.com/ErBWs/flutter_volume_controller.git"
+      ref: ohos
+      resolved-ref: "3047a06bceacc36958ff662a93815a2d63aa9330"
+      url: "https://github.com/qinshah/flutter_volume_controller.git"
     source: git
     version: "1.3.4"
   flutter_web_plugins:
@@ -1309,6 +1309,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.1.0"
+  os_type:
+    dependency: "direct main"
+    description:
+      name: os_type
+      sha256: "06966db0645d191ccf01ff11106d225a9c748a9f3ff59ff64464ffefe196514f"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.2.2"
   package_config:
     dependency: transitive
     description:

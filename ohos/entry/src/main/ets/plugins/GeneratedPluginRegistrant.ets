@@ -6,6 +6,7 @@ import PathProviderPlugin from 'path_provider_ohos';
 import ScreenBrightnessOhosPlugin from 'screen_brightness_ohos';
 import SaverGalleryPlugin from 'saver_gallery';
 import PermissionHandlerOhosPlugin from 'permission_handler_ohos';
+import OsTypePlugin from 'os_type';
 import MediaKitVideoPlugin from 'media_kit_video';
 import MediaKitLibsOhosPlugin from 'media_kit_libs_ohos';
 import ImagePickerPlugin from 'image_picker_ohos';
@@ -39,6 +40,7 @@ export class GeneratedPluginRegistrant {
       flutterEngine.getPlugins()?.add(new ScreenBrightnessOhosPlugin());
       flutterEngine.getPlugins()?.add(new SaverGalleryPlugin());
       flutterEngine.getPlugins()?.add(new PermissionHandlerOhosPlugin());
+      flutterEngine.getPlugins()?.add(new OsTypePlugin());
       flutterEngine.getPlugins()?.add(new MediaKitVideoPlugin());
       flutterEngine.getPlugins()?.add(new MediaKitLibsOhosPlugin());
       flutterEngine.getPlugins()?.add(new ImagePickerPlugin());

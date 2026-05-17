@@ -47,6 +47,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:os_type/os_type.dart';
 
 List<SettingsModel> get extraSettings => [
   if (PlatformUtils.isDesktop) ...[
@@ -305,7 +306,7 @@ List<SettingsModel> get extraSettings => [
     subtitle: '相对减少手动播放加载时间',
     leading: const Icon(Icons.play_circle_outlined),
     setKey: SettingBoxKey.preInitPlayer,
-    defaultVal: PlatformUtils.isHarmony,
+    defaultVal: OS.isHarmony,
   ),
   const SwitchModel(
     title: '首页切换页面动画',

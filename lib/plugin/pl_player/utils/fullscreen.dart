@@ -8,6 +8,7 @@ import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:auto_orientation/auto_orientation.dart';
 import 'package:flutter/services.dart';
+import 'package:os_type/os_type.dart';
 
 bool _isDesktopFullScreen = false;
 
@@ -38,7 +39,7 @@ Future<void> exitDesktopFullscreen() async {
 //横屏
 @pragma('vm:notify-debugger-on-exception')
 Future<void> landscape() async {
-  if (PlatformUtils.isHarmony) {
+  if (OS.isHarmony) {
     HarmonyChannel.autoRotateLandscape(); // 让左右横屏不受控制中心旋转开关控制
     return;
   }
@@ -66,7 +67,7 @@ Future<void> autoScreen() async {
     // 自动旋转方向类型 AUTO_ROTATION_UNSPECIFIED
     // 跟随传感器自动旋转，受控制中心的旋转开关控制，且可旋转方向受系统判定
     // （如在某种设备，可以旋转到竖屏、横屏、反向横屏三个方向，无法旋转到反向竖屏）。
-    if (PlatformUtils.isHarmony) {
+    if (OS.isHarmony) {
       await AutoOrientation.setScreenOrientationUser();
     }
   }

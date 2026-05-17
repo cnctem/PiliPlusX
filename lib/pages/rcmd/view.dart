@@ -7,10 +7,10 @@ import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/pages/common/common_page.dart';
 import 'package:PiliPlus/pages/rcmd/controller.dart';
 import 'package:PiliPlus/utils/grid.dart';
-import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:os_type/os_type.dart';
 
 class RcmdPage extends StatefulWidget {
   const RcmdPage({super.key});
@@ -32,7 +32,7 @@ class _RcmdPageState extends CommonPageState<RcmdPage, RcmdController>
     super.build(context);
     return onBuild(
       Container(
-        clipBehavior: PlatformUtils.isHarmony ? Clip.none : Clip.hardEdge,
+        clipBehavior: OS.isHarmony ? Clip.none : Clip.hardEdge,
         margin: const EdgeInsets.symmetric(horizontal: StyleString.safeSpace),
         decoration: const BoxDecoration(borderRadius: StyleString.mdRadius),
         child: refreshIndicator(

@@ -38,6 +38,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:os_type/os_type.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:window_manager/window_manager.dart' hide calcWindowPosition;
@@ -64,7 +65,7 @@ Future<void> _initDownPath() async {
     } else {
       downloadPath = defDownloadPath;
     }
-  } else if (PlatformUtils.isHarmony) {
+  } else if (OS.isHarmony) {
     downloadPath = 'storage/Users/currentUser/Download/com.example.piliplus';
   } else if (Platform.isAndroid) {
     final externalStorageDirPath = (await getExternalStorageDirectory())?.path;
@@ -87,7 +88,7 @@ Future<void> _initAppPath() async {
 void main() async {
   ScaledWidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
-  if (PlatformUtils.isHarmony) await PlatformUtils.initHarmonyDeviceType();
+  if (OS.isHarmony) await OS.initHarmonyDeviceType();
   await _initAppPath();
   try {
     await GStorage.init();
@@ -121,7 +122,7 @@ void main() async {
     ]);
   }
 
-  if (PlatformUtils.isMobile || PlatformUtils.isHarmony) {
+  if (PlatformUtils.isMobile || OS.isHarmony) {
     await setupServiceLocator();
   }
 
@@ -171,7 +172,7 @@ void main() async {
         FlutterDisplayMode.setPreferredMode(displayMode ?? DisplayMode.auto);
       });
     }
-  } else if (PlatformUtils.isDesktop && !PlatformUtils.isHarmony) {
+  } else if (PlatformUtils.isDesktop && !OS.isHarmony) {
     await windowManager.ensureInitialized();
 
     final windowOptions = WindowOptions(
@@ -198,7 +199,7 @@ void main() async {
   }
 
   // TODO: 鸿蒙待适配 异常捕获
-  if (Pref.enableLog && !PlatformUtils.isHarmony) {
+  if (Pref.enableLog && !OS.isHarmony) {
     // 异常捕获 logo记录
     final customParameters = {
       'BuildConfig':
@@ -345,7 +346,7 @@ class MyApp extends StatelessWidget {
       alignment: Alignment.center,
       children: [
         // 看不见的地方加鸿蒙音量面板，
-        if (PlatformUtils.isHarmony) const OhosView(viewType: 'AVVolumePanel'),
+        if (OS.isHarmony) const OhosView(viewType: 'AVVolumePanel'),
         child,
         // 调试代码用，ai生成git提交信息请忽略这部分改动
         // if (kDebugMode)

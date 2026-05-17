@@ -12,7 +12,6 @@ import 'package:PiliPlus/common/widgets/scroll_physics.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/main.dart';
 import 'package:PiliPlus/models/common/episode_panel_type.dart';
-import 'package:PiliPlus/models/common/image_type.dart';
 import 'package:PiliPlus/models_new/pgc/pgc_info_model/result.dart';
 import 'package:PiliPlus/models_new/video/video_detail/episode.dart' as ugc;
 import 'package:PiliPlus/models_new/video/video_detail/page.dart';
@@ -67,6 +66,7 @@ import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:os_type/os_type.dart';
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
 
 class VideoDetailPageV extends StatefulWidget {
@@ -277,7 +277,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         }
       }
       // 播放完展示控制栏
-      if ((Platform.isAndroid || PlatformUtils.isHarmony) && !notExitFlag) {
+      if ((Platform.isAndroid || OS.isHarmony) && !notExitFlag) {
         PiPStatus currentStatus = await Floating().pipStatus;
         if (currentStatus == PiPStatus.disabled) {
           plPlayerController!.onLockControl(false);
@@ -334,7 +334,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     );
 
     if (!Get.previousRoute.startsWith('/video')) {
-      if ((Platform.isAndroid || PlatformUtils.isHarmony) && !videoDetailController.setSystemBrightness) {
+      if ((Platform.isAndroid || OS.isHarmony) && !videoDetailController.setSystemBrightness) {
         ScreenBrightnessPlatform.instance.resetApplicationScreenBrightness();
       }
       PlPlayerController.setPlayCallBack(null);
@@ -380,7 +380,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
     WidgetsBinding.instance.removeObserver(this);
 
-    if ((Platform.isAndroid || PlatformUtils.isHarmony) && !videoDetailController.setSystemBrightness) {
+    if ((Platform.isAndroid || OS.isHarmony) && !videoDetailController.setSystemBrightness) {
       ScreenBrightnessPlatform.instance.resetApplicationScreenBrightness();
     }
 
@@ -428,7 +428,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     introController.startTimer();
 
     if (mounted &&
-        (Platform.isAndroid || PlatformUtils.isHarmony) &&
+        (Platform.isAndroid || OS.isHarmony) &&
         !videoDetailController.setSystemBrightness) {
       if (videoDetailController.brightness != null) {
         plPlayerController?.brightness.value =

@@ -63,6 +63,7 @@ import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:os_type/os_type.dart';
 
 mixin TimeBatteryMixin<T extends StatefulWidget> on State<T> {
   PlPlayerController get plPlayerController;
@@ -2017,7 +2018,7 @@ class HeaderControlState extends State<HeaderControl>
                 ),
               ),
               if (Platform.isAndroid ||
-                  PlatformUtils.isHarmony ||
+                  OS.isHarmony ||
                   (PlatformUtils.isDesktop && !isFullScreen))
                 SizedBox(
                   width: btnWidth,
@@ -2026,7 +2027,7 @@ class HeaderControlState extends State<HeaderControl>
                     tooltip: '画中画',
                     style: btnStyle,
                     onPressed: () async {
-                      if (!kDebugMode && PlatformUtils.isHarmony) {
+                      if (!kDebugMode && OS.isHarmony) {
                         // TODO
                         SmartDialog.showToast('鸿蒙待适配');
                         return;
