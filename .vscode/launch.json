@@ -2,8 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "run",
-      "noDebug": true,
+      "name": "debug",
       "request": "launch",
       "type": "dart",
       "preLaunchTask": "build_env",
@@ -12,7 +11,7 @@
       ]
     },
     {
-      "name": "run release",
+      "name": "release",
       "noDebug": true,
       "request": "launch",
       "type": "dart",
