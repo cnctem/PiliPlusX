@@ -64,6 +64,8 @@ Future<void> _initDownPath() async {
     } else {
       downloadPath = defDownloadPath;
     }
+  } else if (PlatformUtils.isHarmony) {
+    downloadPath = 'storage/Users/currentUser/Download/com.example.piliplus';
   } else if (Platform.isAndroid) {
     final externalStorageDirPath = (await getExternalStorageDirectory())?.path;
     downloadPath = externalStorageDirPath != null
@@ -311,7 +313,7 @@ class MyApp extends StatelessWidget {
   }
 
   static Widget _builder(BuildContext context, Widget? child) {
-          // 鸿蒙小窗横屏临时缩小时需要获取真正的缩放比例
+    // 鸿蒙小窗横屏临时缩小时需要获取真正的缩放比例
     final uiScale = ScaledWidgetsFlutterBinding.instance.scaleFactor;
     final mediaQuery = MediaQuery.of(context);
     final textScaler = TextScaler.linear(Pref.defaultTextScale);
@@ -340,20 +342,19 @@ class MyApp extends StatelessWidget {
       );
     }
     return Stack(
-            alignment: Alignment.center,
-            children: [
-              // 看不见的地方加鸿蒙音量面板，
-              if (PlatformUtils.isHarmony)
-                const OhosView(viewType: 'AVVolumePanel'),
-              child,
-              // 调试代码用，ai生成git提交信息请忽略这部分改动
-              // if (kDebugMode)
-              //   const ElevatedButton(
-              //     onPressed: HarmonyChannel.autoRotateLandscape,
-              //     child: Text('测试'),
-              //   ),
-            ],
-          );
+      alignment: Alignment.center,
+      children: [
+        // 看不见的地方加鸿蒙音量面板，
+        if (PlatformUtils.isHarmony) const OhosView(viewType: 'AVVolumePanel'),
+        child,
+        // 调试代码用，ai生成git提交信息请忽略这部分改动
+        // if (kDebugMode)
+        //   const ElevatedButton(
+        //     onPressed: HarmonyChannel.autoRotateLandscape,
+        //     child: Text('测试'),
+        //   ),
+      ],
+    );
   }
 
   /// from [DynamicColorBuilderState.initPlatformState]
