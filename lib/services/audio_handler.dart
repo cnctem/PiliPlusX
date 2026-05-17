@@ -2,6 +2,11 @@ import 'dart:async' show unawaited;
 import 'dart:io' show File, Platform;
 import 'dart:ui' show PlatformDispatcher;
 
+import 'package:get/get.dart';
+import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';
+import 'package:PiliPlus/pages/video/introduction/pgc/controller.dart';
+import 'package:PiliPlus/pages/audio/controller.dart';
+
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/grpc/bilibili/app/listener/v1.pb.dart' show DetailItem;
 import 'package:PiliPlus/models_new/download/bili_download_entry_info.dart';
@@ -65,6 +70,42 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
   Future<void>? Function(Duration position)? onSeek;
   Future<bool>? Function()? onSkipToNext;
   Future<bool>? Function()? onSkipToPrevious;
+  String? currentHeroTag;
+
+  @override
+  Future<void> skipToNext() async {
+    if (onSkipToNext != null) {
+      await onSkipToNext?.call();
+      return;
+    }
+    if (currentHeroTag != null) {
+      try {
+        if (Get.isRegistered<UgcIntroController>(tag: currentHeroTag!)) {
+          Get.find<UgcIntroController>(tag: currentHeroTag!).nextPlay();
+        } else if (Get.isRegistered<PgcIntroController>(tag: currentHeroTag!)) {
+          Get.find<PgcIntroController>(tag: currentHeroTag!).nextPlay();
+        }
+      } catch (_) {}
+    }
+  }
+
+  @override
+  Future<void> skipToPrevious() async {
+    if (onSkipToPrevious != null) {
+      await onSkipToPrevious?.call();
+      return;
+    }
+    if (currentHeroTag != null) {
+      try {
+        if (Get.isRegistered<UgcIntroController>(tag: currentHeroTag!)) {
+          Get.find<UgcIntroController>(tag: currentHeroTag!).prevPlay();
+        } else if (Get.isRegistered<PgcIntroController>(tag: currentHeroTag!)) {
+          Get.find<PgcIntroController>(tag: currentHeroTag!).prevPlay();
+        }
+      } catch (_) {}
+    }
+  }
+
 
   @override
   Future<void> play() {
@@ -87,16 +128,6 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
         Future.syncValue(null);
   }
 
-  @override
-  Future<void> skipToNext() async {
-    await onSkipToNext?.call();
-  }
-
-  @override
-  Future<void> skipToPrevious() async {
-    await onSkipToPrevious?.call();
-  }
-
   void setMediaItem(MediaItem newMediaItem) {
     if (!enableBackgroundPlay) return;
     // if (kDebugMode) {
@@ -110,6 +141,27 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
 
   Duration? _lastPos;
   _StatusConfig? _lastConfig;
+
+  bool _hasEpisodes() {
+    if (currentHeroTag == null) return false;
+    try {
+      if (Get.isRegistered<UgcIntroController>(tag: currentHeroTag!)) {
+        final ctr = Get.find<UgcIntroController>(tag: currentHeroTag!);
+        final videoDetail = ctr.videoDetail.value;
+        final isSeason = videoDetail.ugcSeason != null;
+        final isPart = videoDetail.pages != null && videoDetail.pages!.length > 1;
+        final isPlayAll = ctr.videoDetailCtr.isPlayAll;
+        return isSeason || isPart || isPlayAll;
+      } else if (Get.isRegistered<PgcIntroController>(tag: currentHeroTag!)) {
+        return true;
+      } else if (Get.isRegistered<AudioController>(tag: currentHeroTag!)) {
+        final ctr = Get.find<AudioController>(tag: currentHeroTag!);
+        return ctr.playlist != null && ctr.playlist!.isNotEmpty;
+      }
+    } catch (_) {}
+    return false;
+  }
+
   void onUpdateState(
     PlayerStatus status,
     bool isBuffering,
@@ -164,51 +216,55 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
     required Duration position,
     required double speed,
   }) {
+    final hasEpisodes = _hasEpisodes();
+
+    final controls = <MediaControl>[
+      if (!isLive && hasEpisodes) MediaControl.skipToPrevious,
+      if (!isLive)
+        MediaControl.rewind.copyWith(
+          androidIcon: 'drawable/ic_player_rewind_10s',
+        ),
+      if (playing) MediaControl.pause else MediaControl.play,
+      if (!isLive)
+        MediaControl.fastForward.copyWith(
+          androidIcon: 'drawable/ic_player_fast_forward_10s',
+        ),
+      if (!isLive && hasEpisodes) MediaControl.skipToNext,
+    ];
+
+    int playPauseIndex = controls.indexWhere(
+      (c) => c.action == MediaAction.play || c.action == MediaAction.pause,
+    );
+    List<int> compactIndices;
+    if (controls.length >= 3) {
+      if (playPauseIndex > 0 && playPauseIndex < controls.length - 1) {
+        compactIndices = [
+          playPauseIndex - 1,
+          playPauseIndex,
+          playPauseIndex + 1,
+        ];
+      } else {
+        compactIndices = [0, 1, 2];
+      }
+    } else {
+      compactIndices = List.generate(controls.length, (i) => i);
+    }
+
     playbackState.add(
       playbackState.value.copyWith(
         processingState: state,
         updatePosition: position,
         speed: speed,
-        controls: [
-          if (!isLive)
-            const MediaControl(
-              androidIcon: 'drawable/ic_player_rewind_10s',
-              label: 'Rewind',
-              action: .rewind,
-            ),
-          if (!isLive)
-            MediaControl.skipToPrevious.copyWith(
-              androidIcon: 'drawable/ic_skip_previous',
-            ),
-          if (playing)
-            const MediaControl(
-              androidIcon: 'drawable/ic_player_pause',
-              label: 'Pause',
-              action: .pause,
-            )
-          else
-            const MediaControl(
-              androidIcon: 'drawable/ic_player_play',
-              label: 'Play',
-              action: .play,
-            ),
-          if (!isLive)
-            MediaControl.skipToNext.copyWith(
-              androidIcon: 'drawable/ic_skip_next',
-            ),
-          if (!isLive)
-            const MediaControl(
-              androidIcon: 'drawable/ic_player_fast_forward_10s',
-              label: 'Fast Forward',
-              action: .fastForward,
-            ),
-        ],
+        controls: controls,
+        androidCompactActionIndices: compactIndices,
         repeatMode: repeatMode,
         playing: playing,
-        systemActions: const {
+        systemActions: {
           MediaAction.seek,
-          MediaAction.skipToNext,
-          MediaAction.skipToPrevious,
+          if (!isLive && hasEpisodes) MediaAction.skipToPrevious,
+          MediaAction.rewind,
+          MediaAction.fastForward,
+          if (!isLive && hasEpisodes) MediaAction.skipToNext,
         },
       ),
     );
@@ -231,6 +287,7 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
     String? cover,
   }) {
     if (!enableBackgroundPlay) return;
+    currentHeroTag = herotag;
     // if (kDebugMode) {
     //   debugPrint('当前调用栈为：');
     //   debugPrint(StackTrace.current);
