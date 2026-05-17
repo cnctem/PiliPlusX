@@ -905,15 +905,16 @@ class PlPlayerController {
 
     late final String videoUri;
     if (isFileSource) {
-      videoUri = path.join(
-        dirPath!,
-        typeTag!,
-        mediaType == 1
-            ? PathUtils.videoNameType1
-            : onlyPlayAudio.value
-            ? PathUtils.audioNameType2
-            : PathUtils.videoNameType2,
-      );
+      videoUri =
+          'file://${path.join(
+            dirPath!,
+            typeTag!,
+            mediaType == 1
+                ? PathUtils.videoNameType1
+                : onlyPlayAudio.value
+                ? PathUtils.audioNameType2
+                : PathUtils.videoNameType2,
+          )}';
     } else {
       videoUri = dataSource.videoSource!;
     }
