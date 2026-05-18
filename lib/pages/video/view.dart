@@ -432,6 +432,13 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       }
     }
 
+    // 重注册全屏画质切换回调。
+    // PlPlayerController 是单例，新视频页面 push 时会覆盖回调为其 controller 的闭包，
+    // 返回本页后必须重新注册，否则进入全屏时会使用错误 controller 的数据。
+    if (Platform.isAndroid || Platform.isIOS) {
+      videoDetailController.setupFullScreenQualitySwitch();
+    }
+
     plPlayerController
       ?..addStatusLister(playerListener)
       ..addPositionListener(positionListener);
