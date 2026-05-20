@@ -313,13 +313,13 @@ abstract final class ImageUtils {
         _thumbRegex,
         onMatch: (match) {
           hasMatch = true;
-          String suffix = match.group(3) ?? '.avif';
+          String suffix = match.group(3) ?? '.webp';
           return '@$paramsStr$suffix';
         },
         onNonMatch: (str) => str,
       );
       if (!hasMatch) {
-        src += '@$paramsStr.avif';
+        src += '@$paramsStr.webp';
       }
     }
     return src.http2https;

@@ -61,31 +61,26 @@ class NetworkImgLayer extends StatelessWidget {
   Widget _buildImage(
     BuildContext context, {
     required bool isEmote,
-    required bool isAvatar,
+    required bool isAvatar
   }) {
-    /* 因为获取图片的时候就已经在服务端对图片进行下采样了，故不需要再判断memCacheWidth和memCacheHeight来实现节省内存的操作了。
     int? memCacheWidth, memCacheHeight;
     if (cacheWidth ?? width <= height) {
       memCacheWidth = width.cacheSize(context);
     } else {
       memCacheHeight = height.cacheSize(context);
-    } */
+    }
    
-    // 取组件显示的分辨率作为图片请求的分辨率，防止图片因为放缩而受影响
-    int? expectedImageWidth = width.cacheSize(context);
-    int? expectedImageHeight = height.cacheSize(context);
     return CachedNetworkImage(
-      imageUrl: ImageUtils.thumbnailUrlWithSize(
+      imageUrl: (isEmote) ? ImageUtils.thumbnailUrl(src, quality) :ImageUtils.thumbnailUrlWithSize(
         src,
-        expectedImageWidth,
-        expectedImageHeight,
+        memCacheWidth,
+        memCacheHeight,
         quality,
       ),
       width: width,
       height: height,
-      /* 因为获取图片的时候就已经在服务端对图片进行下采样了，故不需要传入memCacheWidth和memCacheHeight来实现节省内存的操作了。
       memCacheWidth: memCacheWidth,
-      memCacheHeight: memCacheHeight, */
+      memCacheHeight: memCacheHeight,
       fit: fit,
       alignment: alignment,
       fadeOutDuration: fadeOutDuration,
