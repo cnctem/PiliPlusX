@@ -286,6 +286,45 @@ abstract final class ImageUtils {
     return src.http2https;
   }
 
+  static String thumbnailUrlWithSize(
+    String? src,
+    int? expectedWidth,
+    int? expectedHeight, [
+    int maxQuality = 1,
+  ]) {
+    if (src != null &&
+        (expectedWidth != null ||
+            expectedHeight != null ||
+            maxQuality != 100)) {
+      // 确定质量
+      int finalQuality = maxQuality;
+      if (maxQuality != 100) {
+        finalQuality = math.max(maxQuality, GlobalData().imgQuality);
+      }
+      // 构建参数字符串
+      List<String> params = [];
+      if (expectedWidth != null) params.add('${expectedWidth}w');
+      if (expectedHeight != null) params.add('${expectedHeight}h');
+      if (maxQuality != 100) params.add('${finalQuality}q');
+      String paramsStr = params.join('_'); // 可能为空，但如果进入处理块则至少有一个参数
+
+      bool hasMatch = false;
+      src = src.splitMapJoin(
+        _thumbRegex,
+        onMatch: (match) {
+          hasMatch = true;
+          String suffix = match.group(3) ?? '.webp';
+          return '@$paramsStr$suffix';
+        },
+        onNonMatch: (str) => str,
+      );
+      if (!hasMatch) {
+        src += '@$paramsStr.webp';
+      }
+    }
+    return src.http2https;
+  }
+
   static Future<SaveResult?> saveByteImg({
     required Uint8List bytes,
     required String fileName,

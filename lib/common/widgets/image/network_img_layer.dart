@@ -61,7 +61,7 @@ class NetworkImgLayer extends StatelessWidget {
   Widget _buildImage(
     BuildContext context, {
     required bool isEmote,
-    required bool isAvatar,
+    required bool isAvatar
   }) {
     int? memCacheWidth, memCacheHeight;
     if (cacheWidth ?? width <= height) {
@@ -69,8 +69,14 @@ class NetworkImgLayer extends StatelessWidget {
     } else {
       memCacheHeight = height.cacheSize(context);
     }
+   
     return CachedNetworkImage(
-      imageUrl: ImageUtils.thumbnailUrl(src, quality),
+      imageUrl: (isEmote) ? ImageUtils.thumbnailUrl(src, quality) :ImageUtils.thumbnailUrlWithSize(
+        src,
+        memCacheWidth,
+        memCacheHeight,
+        quality,
+      ),
       width: width,
       height: height,
       memCacheWidth: memCacheWidth,
