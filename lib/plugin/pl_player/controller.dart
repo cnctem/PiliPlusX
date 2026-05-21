@@ -838,10 +838,10 @@ class PlPlayerController with BlockConfigMixin {
         extras['lavfi-complex'] = '"[aid1] $audioNormalization [ao]"';
       }
     }
-
+    if(dataSource is FileSource) video = 'file://$video';
     await player.open(
       Media(
-        'file://$video',
+        video,
         start: seekTo,
         extras: extras.isEmpty ? null : extras,
         httpHeaders: {
