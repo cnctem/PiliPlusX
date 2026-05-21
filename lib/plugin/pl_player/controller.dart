@@ -841,7 +841,7 @@ class PlPlayerController with BlockConfigMixin {
 
     await player.open(
       Media(
-        video,
+        'file://$video',
         start: seekTo,
         extras: extras.isEmpty ? null : extras,
         httpHeaders: {
