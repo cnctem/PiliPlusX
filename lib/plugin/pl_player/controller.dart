@@ -806,8 +806,14 @@ class PlPlayerController with BlockConfigMixin {
       if (onlyPlayAudio.value) {
         video = audio;
       } else {
-        extras['audio-files'] =
-            '"${Platform.isWindows ? audio.replaceAll(';', r'\;') : audio.replaceAll(':', r'\:')}"';
+        var audioUri = Platform.isWindows
+            ? audio.replaceAll(';', '\\;')
+            : audio.replaceAll(':', '\\:');
+        extras['audio-files'] = audioUri;
+        player.platform!.maybeAsNativePlayer.setProperty(
+          'audio-files',
+          audioUri,
+        );
       }
     }
 
@@ -838,16 +844,16 @@ class PlPlayerController with BlockConfigMixin {
         extras['lavfi-complex'] = '"[aid1] $audioNormalization [ao]"';
       }
     }
-    if(dataSource is FileSource) video = 'file://$video';
+    if (dataSource is FileSource) video = 'file://$video';
     await player.open(
       Media(
         video,
-        start: seekTo,
-        extras: extras.isEmpty ? null : extras,
         httpHeaders: {
           'user-agent': BrowserUa.pc,
           'referer': HttpString.baseUrl,
         },
+        start: seekTo,
+        extras: extras.isEmpty ? null : extras,
       ),
       play: false,
     );
@@ -873,6 +879,8 @@ class PlPlayerController with BlockConfigMixin {
         audioUri = Platform.isWindows
             ? dataSource.audioSource!.replaceAll(';', '\\;')
             : dataSource.audioSource!.replaceAll(':', '\\:');
+        await (_videoPlayerController!.platform!).maybeAsNativePlayer
+            .setProperty('audio-files', audioUri);
       }
     }
     await _videoPlayerController!.open(
