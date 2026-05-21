@@ -340,20 +340,7 @@ class MyApp extends StatelessWidget {
         child: child,
       );
     }
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        // 看不见的地方加鸿蒙音量面板，
-        if (OS.isHarmony) const OhosView(viewType: 'AVVolumePanel'),
-        child,
-        // 调试代码用，ai生成git提交信息请忽略这部分改动
-        // if (kDebugMode)
-        //   const ElevatedButton(
-        //     onPressed: HarmonyChannel.autoRotateLandscape,
-        //     child: Text('测试'),
-        //   ),
-      ],
-    );
+    return child;
   }
 
   /// from [DynamicColorBuilderState.initPlatformState]
