@@ -767,11 +767,12 @@ packages:
   flutter_smart_dialog:
     dependency: "direct main"
     description:
-      name: flutter_smart_dialog
-      sha256: "72762b20c25f8e12d490332004c9cca327f39dfc1fcba66124c6b7c108b68850"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "4.9.8+10"
+      path: "."
+      ref: main
+      resolved-ref: "1dbede0ee22f161ec2c928e1e82f0ae9339a097d"
+      url: "https://github.com/bggRGjQaUbCoE/flutter_smart_dialog.git"
+    source: git
+    version: "5.1.0"
   flutter_sortable_wrap:
     dependency: "direct main"
     description:
@@ -827,11 +828,12 @@ packages:
   get:
     dependency: "direct main"
     description:
-      name: get
-      sha256: "5ed34a7925b85336e15d472cc4cfe7d9ebf4ab8e8b9f688585bf6b50f4c3d79a"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "4.7.3"
+      path: "."
+      ref: "81b8a71982f89b46fa868b315cd71ff6a6ddf895"
+      resolved-ref: "81b8a71982f89b46fa868b315cd71ff6a6ddf895"
+      url: "https://github.com/bggRGjQaUbCoE/getx.git"
+    source: git
+    version: "4.7.2"
   glob:
     dependency: transitive
     description:

@@ -1,8 +1,8 @@
 import 'dart:io' show Platform;
 
 import 'package:PiliPlus/common/widgets/gesture/tap_gesture_recognizer.dart';
-import 'package:PiliPlus/common/widgets/image/custom_grid_view.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
+import 'package:PiliPlus/common/widgets/image_grid/image_grid_view.dart';
 import 'package:PiliPlus/http/dynamics.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/search.dart';
@@ -17,12 +17,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
+const _linkFoldedText = '网页链接';
+
 // 富文本
 TextSpan? richNode(
   BuildContext context, {
   required ThemeData theme,
   required DynamicItemModel item,
-  required double maxWidth,
 }) {
   try {
     late final style = TextStyle(color: theme.colorScheme.primary);
@@ -42,12 +43,19 @@ TextSpan? richNode(
       // 动态页面 richTextNodes 层级可能与主页动态层级不同
       richTextNodes = summary?.richTextNodes;
       if (title != null && title.isNotEmpty) {
-        spanChildren.add(
-          TextSpan(
-            text: '$title\n',
+        if (richTextNodes == null || richTextNodes.isEmpty) {
+          return TextSpan(
+            text: title,
             style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        );
+          );
+        } else {
+          spanChildren.add(
+            TextSpan(
+              text: '$title\n',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          );
+        }
       }
     }
 
@@ -57,6 +65,9 @@ TextSpan? richNode(
       for (final i in richTextNodes) {
         switch (i.type) {
           case 'RICH_TEXT_NODE_TYPE_TEXT':
+            if (i.origText == _linkFoldedText) {
+              item.linkFolded = true;
+            }
             spanChildren.add(
               TextSpan(
                 text: i.origText,
@@ -96,6 +107,10 @@ TextSpan? richNode(
             break;
           // 网页链接
           case 'RICH_TEXT_NODE_TYPE_WEB':
+            final hasLink = i.jumpUrl?.isNotEmpty ?? false;
+            if (!hasLink) {
+              item.linkFolded = true;
+            }
             spanChildren
               ..add(
                 WidgetSpan(
@@ -111,10 +126,10 @@ TextSpan? richNode(
                 TextSpan(
                   text: i.text,
                   style: style,
-                  recognizer: i.origText == null
-                      ? null
-                      : (NoDeadlineTapGestureRecognizer()
-                          ..onTap = () => PageUtils.handleWebview(i.origText!)),
+                  recognizer: hasLink
+                      ? (NoDeadlineTapGestureRecognizer()
+                          ..onTap = () => PageUtils.handleWebview(i.jumpUrl!))
+                      : null,
                 ),
               );
             break;
@@ -252,9 +267,8 @@ TextSpan? richNode(
                 ..add(const TextSpan(text: '\n'))
                 ..add(
                   WidgetSpan(
-                    child: CustomGridView(
+                    child: ImageGridView(
                       fullScreen: true,
-                      maxWidth: maxWidth,
                       picArr: i.pics!
                           .map(
                             (item) => ImageModel(

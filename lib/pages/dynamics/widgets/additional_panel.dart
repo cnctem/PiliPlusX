@@ -1,5 +1,4 @@
 import 'package:PiliPlus/common/constants.dart';
-import 'package:PiliPlus/common/widgets/flutter/dyn/ink_well.dart';
 import 'package:PiliPlus/common/widgets/gesture/tap_gesture_recognizer.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/http/dynamics.dart';
@@ -9,11 +8,10 @@ import 'package:PiliPlus/models/dynamics/result.dart';
 import 'package:PiliPlus/pages/dynamics/widgets/vote.dart';
 import 'package:PiliPlus/utils/app_scheme.dart';
 import 'package:PiliPlus/utils/num_utils.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
-import 'package:flutter/material.dart' hide InkWell;
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-Widget addWidget(
+Widget? addWidget(
   BuildContext context, {
   required int floor,
   required ThemeData theme,
@@ -29,7 +27,7 @@ Widget addWidget(
   try {
     switch (type) {
       // 转发的投稿
-      case 'ADDITIONAL_TYPE_UGC':
+      case 'ADDITIONAL_TYPE_UGC' when (additional.ugc != null):
         final ugc = additional.ugc!;
         child = InkWell(
           borderRadius: borderRadius,
@@ -74,7 +72,7 @@ Widget addWidget(
           ),
         );
 
-      case 'ADDITIONAL_TYPE_RESERVE':
+      case 'ADDITIONAL_TYPE_RESERVE' when (additional.reserve != null):
         final reserve = additional.reserve!;
         if (reserve.state != -1 && reserve.title != null) {
           child = InkWell(
@@ -215,7 +213,8 @@ Widget addWidget(
           );
         }
 
-      case 'ADDITIONAL_TYPE_UPOWER_LOTTERY':
+      case 'ADDITIONAL_TYPE_UPOWER_LOTTERY'
+          when (additional.upowerLottery != null):
         final content = additional.upowerLottery!;
         child = InkWell(
           borderRadius: borderRadius,
@@ -310,7 +309,7 @@ Widget addWidget(
         );
 
       // 商品
-      case 'ADDITIONAL_TYPE_GOODS':
+      case 'ADDITIONAL_TYPE_GOODS' when (additional.goods != null):
         final content = additional.goods!;
         if (content.items?.isNotEmpty == true) {
           child = Column(
@@ -397,7 +396,7 @@ Widget addWidget(
           );
         }
 
-      case 'ADDITIONAL_TYPE_VOTE':
+      case 'ADDITIONAL_TYPE_VOTE' when (additional.vote != null):
         final vote = additional.vote!;
         child = InkWell(
           borderRadius: borderRadius,
@@ -485,7 +484,7 @@ Widget addWidget(
           ),
         );
 
-      case 'ADDITIONAL_TYPE_COMMON':
+      case 'ADDITIONAL_TYPE_COMMON' when (additional.common != null):
         final content = additional.common!;
         child = InkWell(
           borderRadius: borderRadius,
@@ -559,7 +558,7 @@ Widget addWidget(
           ),
         );
 
-      case 'ADDITIONAL_TYPE_MATCH':
+      case 'ADDITIONAL_TYPE_MATCH' when (additional.match != null):
         final content = additional.match!;
         Widget teamItem(TTeam team, Alignment alignment, EdgeInsets padding) {
           return Expanded(
@@ -689,13 +688,7 @@ Widget addWidget(
         ),
       );
     } else {
-      if (kDebugMode) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Text('additional panel\ntype: $type'),
-        );
-      }
-      return const SizedBox.shrink();
+      return null;
     }
   } catch (e) {
     return Padding(

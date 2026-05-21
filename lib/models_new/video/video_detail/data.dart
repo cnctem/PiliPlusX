@@ -9,6 +9,7 @@ import 'package:PiliPlus/models_new/video/video_detail/stat.dart';
 import 'package:PiliPlus/models_new/video/video_detail/subtitle.dart';
 import 'package:PiliPlus/models_new/video/video_detail/ugc_season.dart';
 import 'package:PiliPlus/models_new/video/video_detail/user_garb.dart';
+import 'package:PiliPlus/utils/parse_string.dart';
 
 class VideoDetailData {
   String? bvid;
@@ -177,6 +178,6 @@ class VideoDetailData {
         staff: (json["staff"] as List?)
             ?.map((item) => Staff.fromJson(item))
             .toList(),
-        redirectUrl: json['redirect_url'],
+        redirectUrl: noneNullOrEmptyString(json['redirect_url']),
       );
 }

@@ -18,6 +18,7 @@
 import 'dart:io' show File, Platform;
 
 import 'package:PiliPlus/common/widgets/colored_box_transition.dart';
+import 'package:PiliPlus/common/widgets/flutter/layout_builder.dart';
 import 'package:PiliPlus/common/widgets/flutter/page/page_view.dart';
 import 'package:PiliPlus/common/widgets/gesture/image_horizontal_drag_gesture_recognizer.dart';
 import 'package:PiliPlus/common/widgets/image_viewer/image.dart';
@@ -35,7 +36,7 @@ import 'package:PiliPlus/utils/utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart' hide Image, PageView;
+import 'package:flutter/material.dart' hide Image, PageView, LayoutBuilder;
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
@@ -53,6 +54,7 @@ class GalleryViewer extends StatefulWidget {
     required this.quality,
     required this.sources,
     this.initIndex = 0,
+    this.onPageChanged,
   });
 
   final double minScale;
@@ -60,6 +62,7 @@ class GalleryViewer extends StatefulWidget {
   final int quality;
   final List<SourceModel> sources;
   final int initIndex;
+  final ValueChanged<int>? onPageChanged;
 
   @override
   State<GalleryViewer> createState() => _GalleryViewerState();
@@ -345,6 +348,7 @@ class _GalleryViewerState extends State<GalleryViewer>
     _player?.pause();
     _playIfNeeded(widget.sources[index]);
     _currIndex.value = index;
+    widget.onPageChanged?.call(index);
   }
 
   late final ValueChanged<int>? _onChangePage = widget.sources.length == 1
@@ -403,8 +407,12 @@ class _GalleryViewerState extends State<GalleryViewer>
                 return child;
               } else {
                 return Image(
-                  image: CachedNetworkImageProvider(
-                    ImageUtils.thumbnailUrl(item.url, widget.quality),
+                  image: ResizeImage.resizeIfNeeded(
+                    _containerSize.width.cacheSize(context),
+                    null,
+                    CachedNetworkImageProvider(
+                      ImageUtils.thumbnailUrl(item.url, widget.quality),
+                    ),
                   ),
                   minScale: widget.minScale,
                   maxScale: widget.maxScale,

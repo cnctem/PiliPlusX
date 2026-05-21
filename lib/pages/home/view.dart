@@ -26,6 +26,9 @@ class _HomePageState extends CommonPageState<HomePage>
   final _mainController = Get.find<MainController>();
 
   @override
+  bool get needsCorrection => _homeController.hideTopBar;
+
+  @override
   bool get wantKeepAlive => true;
 
   @override

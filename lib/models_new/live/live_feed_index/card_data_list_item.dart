@@ -1,4 +1,5 @@
 import 'package:PiliPlus/models_new/live/live_feed_index/watched_show.dart';
+import 'package:PiliPlus/utils/parse_string.dart';
 
 class CardLiveItem {
   int? roomid;
@@ -6,6 +7,8 @@ class CardLiveItem {
   String? uname;
   String? face;
   String? cover;
+  String? _systemCover;
+  String? get systemCover => _systemCover ?? cover;
   String? title;
   int? liveTime;
   String? areaName;
@@ -21,6 +24,7 @@ class CardLiveItem {
     this.uname,
     this.face,
     this.cover,
+    String? systemCover,
     this.title,
     this.liveTime,
     this.areaName,
@@ -29,7 +33,7 @@ class CardLiveItem {
     this.areaV2ParentName,
     this.areaV2ParentId,
     this.watchedShow,
-  });
+  }) : _systemCover = noneNullOrEmptyString(systemCover);
 
   factory CardLiveItem.fromJson(Map<String, dynamic> json) => CardLiveItem(
     roomid: json['roomid'] ?? json['id'],
@@ -37,6 +41,7 @@ class CardLiveItem {
     uname: json['uname'] as String?,
     face: json['face'] as String?,
     cover: json['cover'] as String?,
+    systemCover: json['system_cover'],
     title: json['title'] as String?,
     liveTime: json['live_time'] as int?,
     areaName: json['area_name'] as String?,

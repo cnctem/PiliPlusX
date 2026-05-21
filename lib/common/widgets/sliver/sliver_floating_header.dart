@@ -28,10 +28,10 @@ class SliverFloatingHeaderWidget extends SingleChildRenderObjectWidget {
   const SliverFloatingHeaderWidget({
     super.key,
     required Widget super.child,
-    this.backgroundColor,
+    required this.backgroundColor,
   });
 
-  final Color? backgroundColor;
+  final Color backgroundColor;
 
   @override
   RenderObject createRenderObject(BuildContext context) =>
@@ -48,11 +48,11 @@ class SliverFloatingHeaderWidget extends SingleChildRenderObjectWidget {
 
 class RenderSliverFloatingHeader extends RenderSliverSingleBoxAdapter {
   RenderSliverFloatingHeader({
-    required Color? backgroundColor,
+    required Color backgroundColor,
   }) : _backgroundColor = backgroundColor;
 
-  Color? _backgroundColor;
-  set backgroundColor(Color? value) {
+  Color _backgroundColor;
+  set backgroundColor(Color value) {
     if (_backgroundColor == value) return;
     _backgroundColor = value;
     markNeedsPaint();
@@ -135,19 +135,23 @@ class RenderSliverFloatingHeader extends RenderSliverSingleBoxAdapter {
   void paint(PaintingContext context, Offset offset) {
     if (child != null && geometry!.visible) {
       offset += Offset(0.0, childMainAxisPosition(child!));
-      if (_backgroundColor != null) {
-        final size = child!.size;
-        context.canvas.drawRect(
-          Rect.fromLTWH(
-            offset.dx,
-            offset.dy - 2,
-            size.width,
-            size.height + 2,
-          ),
-          Paint()..color = _backgroundColor!,
-        );
-      }
+      final size = child!.size;
+      context.canvas.drawRect(
+        Rect.fromLTWH(
+          offset.dx,
+          offset.dy - 2,
+          size.width,
+          size.height + 2,
+        ),
+        Paint()..color = _backgroundColor,
+      );
       context.paintChild(child!, offset);
     }
   }
+
+  @override
+  bool hitTestSelf({
+    required double mainAxisPosition,
+    required double crossAxisPosition,
+  }) => true;
 }

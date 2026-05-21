@@ -10,7 +10,6 @@ import 'package:PiliPlus/pages/common/publish/publish_route.dart';
 import 'package:PiliPlus/pages/video/reply_new/view.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/reply_utils.dart';
-import 'package:PiliPlus/utils/request_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/material.dart';
@@ -71,6 +70,9 @@ abstract class ReplyController<R> extends CommonListController<R, ReplyInfo> {
       if (data.hasUpTop()) {
         data.replies.insert(0, data.upTop);
       }
+      if (subjectControl?.title == ReplySortType.select.title) {
+        sortType.value = .select;
+      }
     }
     isEnd = data.cursor.isEnd;
     return false;
@@ -87,7 +89,6 @@ abstract class ReplyController<R> extends CommonListController<R, ReplyInfo> {
   // 排序搜索评论
   void queryBySort() {
     if (isLoading) return;
-    feedBack();
     switch (sortType.value) {
       case ReplySortType.time:
         sortType.value = ReplySortType.hot;
@@ -97,7 +98,10 @@ abstract class ReplyController<R> extends CommonListController<R, ReplyInfo> {
         sortType.value = ReplySortType.time;
         mode.value = Mode.MAIN_LIST_TIME;
         break;
+      case ReplySortType.select:
+        return;
     }
+    feedBack();
     onReload();
   }
 
@@ -169,10 +173,9 @@ abstract class ReplyController<R> extends CommonListController<R, ReplyInfo> {
           ),
         )
         .then(
-          (res) {
-            if (res != null) {
+          (replyInfo) {
+            if (replyInfo is ReplyInfo) {
               savedReplies.remove(key);
-              ReplyInfo replyInfo = RequestUtils.replyCast(res);
               if (loadingState.value case Success(:final response)) {
                 if (response == null) {
                   loadingState.value = Success([replyInfo]);

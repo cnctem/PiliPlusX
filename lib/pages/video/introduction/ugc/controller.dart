@@ -90,6 +90,14 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
     queryVideoTags();
     final res = await VideoHttp.videoIntro(bvid: bvid);
     if (res case Success(:final response)) {
+      if (response.redirectUrl != null &&
+          videoDetailCtr.epId == null &&
+          videoDetailCtr.seasonId == null) {
+        if (!isClosed) {
+          PageUtils.viewPgcFromUri(response.redirectUrl!, off: true);
+        }
+        return;
+      }
       videoPlayerServiceHandler?.onVideoDetailChange(
         response,
         cid.value,

@@ -15,6 +15,7 @@ import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
 import 'package:PiliPlus/utils/calc_window_position.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
+import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/json_file_handler.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
@@ -264,26 +265,34 @@ class MyApp extends StatelessWidget {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final dynamicColor = Pref.dynamicColor && _light != null && _dark != null;
+  static (ThemeData, ThemeData) getAllTheme() {
+    final dynamicColor = _light != null && _dark != null && Pref.dynamicColor;
     late final brandColor = colorThemeTypes[Pref.customColor].color;
     late final variant = Pref.schemeVariant;
-    return GetMaterialApp(
-      title: Constants.appName,
-      theme: ThemeUtils.getThemeData(
+    return (
+      ThemeUtils.getThemeData(
         colorScheme: dynamicColor
             ? _light!
             : brandColor.asColorSchemeSeed(variant, Brightness.light),
         isDynamic: dynamicColor,
       ),
-      darkTheme: ThemeUtils.getThemeData(
+      ThemeUtils.getThemeData(
         isDark: true,
         colorScheme: dynamicColor
             ? _dark!
             : brandColor.asColorSchemeSeed(variant, Brightness.dark),
         isDynamic: dynamicColor,
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final (light, dark) = getAllTheme();
+    return GetMaterialApp(
+      title: Constants.appName,
+      theme: light,
+      darkTheme: dark,
       themeMode: Pref.themeMode,
       localizationsDelegates: const [
         GlobalCupertinoLocalizations.delegate,

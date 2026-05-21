@@ -405,7 +405,7 @@ abstract final class MemberHttp {
       'offset': offset ?? '',
       'host_mid': mid,
       'timezone_offset': '-480',
-      'features': 'itemOpusStyle,listOnlyfans',
+      'features': Constants.dynFeatures,
       'platform': 'web',
       'web_location': '333.1387',
       'dm_img_list': '[]',
@@ -457,7 +457,7 @@ abstract final class MemberHttp {
         'page': pn,
         'offset': offset,
         'keyword': keyword,
-        'features': 'itemOpusStyle,listOnlyfans',
+        'features': Constants.dynFeatures,
         'web_location': 333.1387,
       },
     );
@@ -482,7 +482,7 @@ abstract final class MemberHttp {
     }
   }
 
-  static Future<LoadingState<Null>> specialAction({
+  static Future<LoadingState<void>> specialAction({
     int? fid,
     bool isAdd = true,
   }) async {
@@ -502,7 +502,7 @@ abstract final class MemberHttp {
   }
 
   // 设置分组
-  static Future<LoadingState<Null>> addUsers(String fids, String tagids) async {
+  static Future<LoadingState<void>> addUsers(String fids, String tagids) async {
     final res = await Request().post(
       Api.addUsers,
       queryParameters: {
@@ -555,7 +555,7 @@ abstract final class MemberHttp {
     }
   }
 
-  static Future<LoadingState<Null>> createFollowTag(Object tagName) async {
+  static Future<LoadingState<void>> createFollowTag(Object tagName) async {
     final res = await Request().post(
       Api.createFollowTag,
       queryParameters: {
@@ -575,7 +575,7 @@ abstract final class MemberHttp {
     }
   }
 
-  static Future<LoadingState<Null>> updateFollowTag(
+  static Future<LoadingState<void>> updateFollowTag(
     Object tagid,
     Object name,
   ) async {
@@ -599,7 +599,7 @@ abstract final class MemberHttp {
     }
   }
 
-  static Future<LoadingState<Null>> delFollowTag(Object tagid) async {
+  static Future<LoadingState<void>> delFollowTag(Object tagid) async {
     final res = await Request().post(
       Api.delFollowTag,
       queryParameters: {

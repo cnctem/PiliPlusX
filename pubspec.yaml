@@ -17,7 +17,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
 # update when release
-version: 2.0.0+4882
+version: 2.0.1+4882
 
 environment:
   sdk: ">=3.11.1"
@@ -42,7 +42,11 @@ dependencies:
   # 动态取色
   dynamic_color: ^1.8.1
 
-  get: ^4.7.2
+  # get: ^4.7.2
+  get:
+    git:
+      url: https://github.com/bggRGjQaUbCoE/getx.git
+      ref: 81b8a71982f89b46fa868b315cd71ff6a6ddf895
 
   # 网络
   dio: ^5.9.1
@@ -98,7 +102,10 @@ dependencies:
       url: https://github.com/bggRGjQaUbCoE/material_design_icons_flutter.git
       ref: const
   # toast
-  flutter_smart_dialog: ^4.9.8+5
+  flutter_smart_dialog:
+    git:
+      url: https://github.com/bggRGjQaUbCoE/flutter_smart_dialog.git
+      ref: main
   # 下滑关闭
   # dismissible_page: ^1.0.2
   # custom_sliding_segmented_control: ^1.8.4

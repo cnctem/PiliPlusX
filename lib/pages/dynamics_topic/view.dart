@@ -350,10 +350,7 @@ class _DynTopicPageState extends State<DynTopicPage> with DynMixin {
 
                           final item = response[index];
                           if (item.dynamicCardItem != null) {
-                            return DynamicPanel(
-                              item: item.dynamicCardItem!,
-                              maxWidth: maxWidth,
-                            );
+                            return DynamicPanel(item: item.dynamicCardItem!);
                           }
 
                           return Text(item.topicType ?? 'err');
@@ -368,10 +365,7 @@ class _DynTopicPageState extends State<DynTopicPage> with DynMixin {
                         }
                         final item = response[index];
                         if (item.dynamicCardItem != null) {
-                          return DynamicPanel(
-                            item: item.dynamicCardItem!,
-                            maxWidth: maxWidth,
-                          );
+                          return DynamicPanel(item: item.dynamicCardItem!);
                         } else {
                           return Text(item.topicType ?? 'err');
                         }

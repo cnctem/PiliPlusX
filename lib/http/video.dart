@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:PiliPlus/common/constants.dart';
+import 'package:PiliPlus/grpc/bilibili/main/community/reply/v1.pb.dart'
+    show ReplyInfo;
 import 'package:PiliPlus/http/api.dart';
 import 'package:PiliPlus/http/browser_ua.dart';
 import 'package:PiliPlus/http/init.dart';
@@ -32,10 +34,14 @@ import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/global_data.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
 import 'package:PiliPlus/utils/recommend_filter.dart';
+import 'package:PiliPlus/utils/request_utils.dart';
+import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:PiliPlus/utils/utils.dart';
 import 'package:PiliPlus/utils/wbi_sign.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show compute;
+import 'package:protobuf/protobuf.dart';
 
 /// view层根据 status 判断渲染逻辑
 abstract final class VideoHttp {
@@ -339,7 +345,7 @@ abstract final class VideoHttp {
   }
 
   // 投币
-  static Future<LoadingState<Null>> coinVideo({
+  static Future<LoadingState<void>> coinVideo({
     required String bvid,
     required int multiply,
     int selectLike = 0,
@@ -437,7 +443,7 @@ abstract final class VideoHttp {
   }
 
   // （取消）点踩
-  static Future<LoadingState<Null>> dislikeVideo({
+  static Future<LoadingState<void>> dislikeVideo({
     required String bvid,
     required bool type,
   }) async {
@@ -460,7 +466,7 @@ abstract final class VideoHttp {
   }
 
   // 推送不感兴趣反馈
-  static Future<LoadingState<Null>> feedDislike({
+  static Future<LoadingState<void>> feedDislike({
     required String goto,
     required int id,
     int? reasonId,
@@ -489,7 +495,7 @@ abstract final class VideoHttp {
   }
 
   // 推送不感兴趣取消
-  static Future<LoadingState<Null>> feedDislikeCancel({
+  static Future<LoadingState<void>> feedDislikeCancel({
     required String goto,
     required int id,
     int? reasonId,
@@ -524,7 +530,7 @@ abstract final class VideoHttp {
   // parent	num	父评论rpid	非必要	二级评论同根评论id 大于二级评论为要回复的评论id
   // message	str	发送评论内容	必要	最大1000字符
   // plat	num	发送平台标识	非必要	1：web端 2：安卓客户端  3：ios客户端  4：wp客户端
-  static Future<LoadingState<Map>> replyAdd({
+  static Future<LoadingState<ReplyInfo?>> replyAdd({
     required int type,
     required int oid,
     required String message,
@@ -552,13 +558,27 @@ abstract final class VideoHttp {
       options: Options(contentType: Headers.formUrlEncodedContentType),
     );
     if (res.data['code'] == 0) {
-      return Success(res.data['data']);
+      try {
+        final replyInfo = RequestUtils.replyCast(res.data['data']['reply']);
+        GStorage.reply?.put(
+          replyInfo.id.toString(),
+          (replyInfo.deepCopy()
+                ..unknownFields.clear()
+                ..clearMemberV2()
+                ..clearTrackInfo())
+              .writeToBuffer(),
+        );
+        return Success(replyInfo);
+      } catch (e, s) {
+        Utils.reportError(e, s);
+        return const Success(null);
+      }
     } else {
       return Error(res.data['message']);
     }
   }
 
-  static Future<LoadingState<Null>> replyDel({
+  static Future<LoadingState<void>> replyDel({
     required int type, //replyType
     required int oid,
     required int rpid,
@@ -574,6 +594,7 @@ abstract final class VideoHttp {
       options: Options(contentType: Headers.formUrlEncodedContentType),
     );
     if (res.data['code'] == 0) {
+      GStorage.reply?.delete(rpid.toString());
       return const Success(null);
     } else {
       return const Error('请退出账号后重新登录');
@@ -581,7 +602,7 @@ abstract final class VideoHttp {
   }
 
   // 操作用户关系
-  static Future<LoadingState<Null>> relationMod({
+  static Future<LoadingState<void>> relationMod({
     required int mid,
     required int act,
     required int reSrc,
