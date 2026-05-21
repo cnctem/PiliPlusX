@@ -798,9 +798,9 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: ohos
-      resolved-ref: "3047a06bceacc36958ff662a93815a2d63aa9330"
-      url: "https://github.com/qinshah/flutter_volume_controller.git"
+      ref: feat-ohos
+      resolved-ref: "5e9c0060446a3c09458390ca9b6dddf732bf71e6"
+      url: "https://github.com/ErBWs/flutter_volume_controller.git"
     source: git
     version: "1.3.4"
   flutter_web_plugins:
