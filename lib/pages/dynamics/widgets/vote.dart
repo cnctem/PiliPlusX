@@ -534,7 +534,7 @@ class PercentageChip extends StatelessWidget {
   }
 }
 
-Future showVoteDialog(
+Future<void> showVoteDialog(
   BuildContext context,
   int voteId, [
   int? dynamicId,

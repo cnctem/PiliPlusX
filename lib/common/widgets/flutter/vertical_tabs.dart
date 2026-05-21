@@ -1571,7 +1571,6 @@ class _VerticalTabBarState extends State<VerticalTabBar> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    assert(debugCheckHasMaterial(context));
     _updateTabController();
     _initIndicatorPainter();
   }
@@ -1654,7 +1653,11 @@ class _VerticalTabBarState extends State<VerticalTabBar> {
       tabCenter +
           paddingTop -
           viewportWidth / 2.0 +
-          (_mainCtr.useBottomNav && (_mainCtr.showBottomBar?.value ?? true)
+          (_mainCtr.useBottomNav &&
+                  switch (_mainCtr.barHideType) {
+                    .instant => _mainCtr.showBottomBar?.value ?? true,
+                    .sync => (_mainCtr.barOffset?.value ?? 0) == 0,
+                  }
               ? 80.0
               : 0.0),
       minExtent,

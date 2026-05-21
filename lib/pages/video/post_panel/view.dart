@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:PiliPlus/common/widgets/button/icon_button.dart';
@@ -183,10 +184,9 @@ class _PostPanelState extends State<PostPanel>
   late final List<PostSegmentModel> list = videoDetailController.postList;
 
   late final double videoDuration =
-      plPlayerController.durationSeconds.value.inMilliseconds / 1000;
+      plPlayerController.duration.value.inMilliseconds / 1000;
 
-  double get currentPos =>
-      plPlayerController.position.value.inMilliseconds / 1000;
+  double currentPos() => plPlayerController.position.inMilliseconds / 1000;
 
   @override
   Widget buildPage(ThemeData theme) {
@@ -210,7 +210,7 @@ class _PostPanelState extends State<PostPanel>
                   PostSegmentModel(
                     segment: Pair(
                       first: 0,
-                      second: currentPos,
+                      second: currentPos(),
                     ),
                     category: SegmentType.sponsor,
                     actionType: ActionType.skip,
@@ -316,7 +316,7 @@ class _PostPanelState extends State<PostPanel>
       SmartDialog.showToast('提交成功');
       list.clear();
       videoDetailController.handleSBData(response);
-      if (videoDetailController.positionSubscription == null) {
+      if (videoDetailController.blockListener == null) {
         videoDetailController.initSkip();
       }
     } else {
@@ -349,7 +349,7 @@ class _PostPanelState extends State<PostPanel>
                   PostPanel.segmentWidget(
                     theme,
                     item: item,
-                    currentPos: () => currentPos,
+                    currentPos: currentPos,
                     videoDuration: videoDuration,
                   ),
                 Wrap(
@@ -464,23 +464,37 @@ class _PostPanelState extends State<PostPanel>
             tooltip: '预览',
             icon: const Icon(Icons.preview_outlined),
             onPressed: () async {
-              final videoCtr = widget.plPlayerController.videoPlayerController;
-              if (videoCtr != null) {
+              final player = plPlayerController.videoPlayerController;
+              if (player != null) {
                 final start = (item.segment.first * 1000).round();
                 final seek = max(0, start - 2000);
-                await videoCtr.seek(Duration(milliseconds: seek));
-                if (!videoCtr.state.playing) {
-                  await videoCtr.play();
+                await player.seek(Duration(milliseconds: seek));
+                if (!player.state.playing) {
+                  await player.play();
                 }
-                final delay = start - seek;
-                if (delay > 0) {
-                  await Future.delayed(Duration(milliseconds: delay));
-                }
-                videoCtr.seek(
-                  Duration(
-                    milliseconds: (item.segment.second * 1000).round(),
-                  ),
+                Future<void> seekTo() => player.seek(
+                  Duration(milliseconds: (item.segment.second * 1000).round()),
                 );
+                if (start > seek) {
+                  final posSub = player.stream.position.listen(
+                    null,
+                    cancelOnError: true,
+                  );
+                  final timer = Timer(
+                    const Duration(seconds: 10),
+                    posSub.cancel,
+                  );
+                  final duration = Duration(milliseconds: start);
+                  posSub.onData((pos) {
+                    if (pos >= duration) {
+                      seekTo();
+                      timer.cancel();
+                      posSub.cancel();
+                    }
+                  });
+                } else {
+                  seekTo();
+                }
               }
             },
           ),

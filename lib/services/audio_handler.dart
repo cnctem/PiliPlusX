@@ -43,9 +43,9 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
   static final List<MediaItem> _item = [];
   bool enableBackgroundPlay;
 
-  Future<void> Function()? onPlay;
-  Future<void> Function()? onPause;
-  Future<void> Function(Duration position)? onSeek;
+  Future<void>? Function()? onPlay;
+  Future<void>? Function()? onPause;
+  Future<void>? Function(Duration position)? onSeek;
 
   @override
   Future<void> play() {
@@ -96,8 +96,7 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
     }
 
     final AudioProcessingState processingState;
-    final playing = status == PlayerStatus.playing;
-    if (status == PlayerStatus.completed) {
+    if (status.isCompleted) {
       processingState = AudioProcessingState.completed;
     } else if (isBuffering) {
       processingState = AudioProcessingState.buffering;
@@ -105,6 +104,7 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
       processingState = AudioProcessingState.ready;
     }
 
+    final playing = status.isPlaying;
     playbackState.add(
       playbackState.value.copyWith(
         processingState: isBuffering
@@ -154,78 +154,80 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
     Uri getUri(String? cover) => Uri.parse(ImageUtils.safeThumbnailUrl(cover));
 
     late final id = '$cid$herotag';
-    MediaItem? mediaItem;
-    if (data is VideoDetailData) {
-      if ((data.pages?.length ?? 0) > 1) {
-        final current = data.pages?.firstWhereOrNull(
-          (element) => element.cid == cid,
-        );
+    final MediaItem mediaItem;
+    switch (data) {
+      case VideoDetailData(:final pages):
+        if (pages != null && pages.length > 1) {
+          final current = pages.firstWhereOrNull((e) => e.cid == cid);
+          mediaItem = MediaItem(
+            id: id,
+            title: current?.part ?? '',
+            artist: data.owner?.name,
+            duration: Duration(seconds: current?.duration ?? 0),
+            artUri: getUri(data.pic),
+          );
+        } else {
+          mediaItem = MediaItem(
+            id: id,
+            title: data.title ?? '',
+            artist: data.owner?.name,
+            duration: Duration(seconds: data.duration ?? 0),
+            artUri: getUri(data.pic),
+          );
+        }
+      case EpisodeItem():
         mediaItem = MediaItem(
           id: id,
-          title: current?.part ?? '',
-          artist: data.owner?.name,
-          duration: Duration(seconds: current?.duration ?? 0),
-          artUri: getUri(data.pic),
+          title: data.showTitle ?? data.longTitle ?? data.title ?? '',
+          artist: artist,
+          duration: data.from == 'pugv'
+              ? Duration(seconds: data.duration ?? 0)
+              : Duration(milliseconds: data.duration ?? 0),
+          artUri: getUri(data.cover),
         );
-      } else {
+      case RoomInfoH5Data():
         mediaItem = MediaItem(
           id: id,
-          title: data.title ?? '',
-          artist: data.owner?.name,
-          duration: Duration(seconds: data.duration ?? 0),
-          artUri: getUri(data.pic),
-        );
-      }
-    } else if (data is EpisodeItem) {
-      mediaItem = MediaItem(
-        id: id,
-        title: data.showTitle ?? data.longTitle ?? data.title ?? '',
-        artist: artist,
-        duration: data.from == 'pugv'
-            ? Duration(seconds: data.duration ?? 0)
-            : Duration(milliseconds: data.duration ?? 0),
-        artUri: getUri(data.cover),
-      );
-    } else if (data is RoomInfoH5Data) {
-      mediaItem = MediaItem(
-        id: id,
-        title: data.roomInfo?.title ?? '',
-        artist: data.anchorInfo?.baseInfo?.uname,
-        artUri: getUri(data.roomInfo?.cover),
-        isLive: true,
-        // 设置直播间时长为0，解决鸿蒙因时长为null而不显示媒体组件
+          title: data.roomInfo?.title ?? '',
+          artist: data.anchorInfo?.baseInfo?.uname,
+          artUri: getUri(data.roomInfo?.cover),
+          isLive: true,
+          // 设置直播间时长为0，解决鸿蒙因时长为null而不显示媒体组件
         duration: Duration.zero,
       );
-    } else if (data is Part) {
-      mediaItem = MediaItem(
-        id: id,
-        title: data.part ?? '',
-        artist: artist,
-        duration: Duration(seconds: data.duration ?? 0),
-        artUri: getUri(cover),
-      );
-    } else if (data is DetailItem) {
-      mediaItem = MediaItem(
-        id: id,
-        title: data.arc.title,
-        artist: data.owner.name,
-        duration: Duration(seconds: data.arc.duration.toInt()),
-        artUri: getUri(data.arc.cover),
-      );
-    } else if (data is BiliDownloadEntryInfo) {
-      final coverFile = File(path.join(data.entryDirPath, PathUtils.coverName));
-      final uri = coverFile.existsSync()
-          ? coverFile.absolute.uri
-          : getUri(data.cover);
-      mediaItem = MediaItem(
-        id: id,
-        title: data.showTitle,
-        artist: data.ownerName,
-        duration: Duration(milliseconds: data.totalTimeMilli),
-        artUri: uri,
-      );
+      case Part():
+        mediaItem = MediaItem(
+          id: id,
+          title: data.part ?? '',
+          artist: artist,
+          duration: Duration(seconds: data.duration ?? 0),
+          artUri: getUri(cover),
+        );
+      case DetailItem(:final arc):
+        mediaItem = MediaItem(
+          id: id,
+          title: arc.title,
+          artist: data.owner.name,
+          duration: Duration(seconds: arc.duration.toInt()),
+          artUri: getUri(arc.cover),
+        );
+      case BiliDownloadEntryInfo():
+        final coverFile = File(
+          path.join(data.entryDirPath, PathUtils.coverName),
+        );
+        final uri = coverFile.existsSync()
+            ? coverFile.absolute.uri
+            : getUri(data.cover);
+        mediaItem = MediaItem(
+          id: id,
+          title: data.showTitle,
+          artist: data.ownerName,
+          duration: Duration(milliseconds: data.totalTimeMilli),
+          artUri: uri,
+        );
+      default:
+        return;
     }
-    if (mediaItem == null) return;
     // if (kDebugMode) debugPrint("exist: ${PlPlayerController.instanceExists()}");
     if (!PlPlayerController.instanceExists()) return;
     _item.add(mediaItem);

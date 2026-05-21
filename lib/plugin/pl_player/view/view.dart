@@ -11,6 +11,7 @@ import 'package:PiliPlus/common/widgets/gesture/immediate_tap_gesture_recognizer
 import 'package:PiliPlus/common/widgets/gesture/mouse_interactive_viewer.dart';
 import 'package:PiliPlus/common/widgets/loading_widget.dart';
 import 'package:PiliPlus/common/widgets/pair.dart';
+import 'package:PiliPlus/common/widgets/player_bar.dart';
 import 'package:PiliPlus/common/widgets/progress_bar/audio_video_progress_bar.dart';
 import 'package:PiliPlus/common/widgets/progress_bar/segment_progress_bar.dart';
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
@@ -68,7 +69,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show RenderProxyBox;
+import 'package:flutter/rendering.dart'
+    show RenderProxyBox, SemanticsConfiguration;
 import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -81,6 +83,8 @@ import 'package:os_type/os_type.dart';
 import 'package:screen_brightness_platform_interface/constant/plugin_channel.dart';
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
 import 'package:window_manager/window_manager.dart';
+
+part 'widgets.dart';
 
 class PLVideoPlayer extends StatefulWidget {
   const PLVideoPlayer({
@@ -154,40 +158,66 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   // Timer? _accessibilityDebounce;
   // double _lastAnnouncedValue = -1;
 
-  StreamSubscription? _listener;
-  StreamSubscription? _controlsListener;
-
   bool _pauseDueToPauseUponEnteringBackgroundMode = false;
+
+  StreamSubscription? _brightnessListener;
+
+  int? tmpSubtitlePaddingB;
+  StreamSubscription? _controlsListener;
+  void _controlListener(bool val) {
+    final visible = val && !plPlayerController.controlsLock.value;
+
+    if ((widget.headerControl.key as GlobalKey<TimeBatteryMixin>).currentState
+        case final state?) {
+      if (state.mounted) {
+        state.getBatteryLevelIfNeeded();
+        state.provider
+          ?..startIfNeeded()
+          ..muted = !visible;
+        if (visible) {
+          state.startClock();
+        } else {
+          state.stopClock();
+        }
+      }
+    }
+
+    if (visible) {
+      animationController.forward();
+    } else {
+      animationController.reverse();
+    }
+
+    if (widget.videoDetailController case final controller?) {
+      if (controller.vttSubtitlesIndex.value != 0) {
+        if (visible) {
+          const int minPadding = 70;
+          if (plPlayerController.subtitlePaddingB < minPadding) {
+            tmpSubtitlePaddingB = plPlayerController.subtitlePaddingB;
+            plPlayerController
+              ..subtitlePaddingB = minPadding
+              ..subtitleConfig.value = plPlayerController.getSubConfig;
+          }
+        } else {
+          if (tmpSubtitlePaddingB != null) {
+            plPlayerController
+              ..subtitlePaddingB = tmpSubtitlePaddingB!
+              ..subtitleConfig.value = plPlayerController.getSubConfig;
+            tmpSubtitlePaddingB = null;
+          }
+        }
+      }
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
-    _controlsListener = plPlayerController.showControls.listen((bool val) {
-      final visible = val && !plPlayerController.controlsLock.value;
-
-      if ((widget.headerControl.key as GlobalKey<TimeBatteryMixin>).currentState
-          case final state?) {
-        if (state.mounted) {
-          state.getBatteryLevelIfNeeded();
-          state.provider
-            ?..startIfNeeded()
-            ..muted = !visible;
-          if (visible) {
-            state.startClock();
-          } else {
-            state.stopClock();
-          }
-        }
-      }
-
-      if (visible) {
-        animationController.forward();
-      } else {
-        animationController.reverse();
-      }
-    });
+    _controlsListener = plPlayerController.showControls.listen(
+      _controlListener,
+    );
     transformationController = TransformationController();
     animationController = AnimationController(
       vsync: this,
@@ -202,8 +232,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           plPlayerController.volume.value =
               (await FlutterVolumeController.getVolume())!;
           FlutterVolumeController.addListener((double value) {
-            if (mounted &&
-                !plPlayerController.volumeInterceptEventStream.value) {
+            if (mounted && !plPlayerController.volumeInterceptEventStream) {
               plPlayerController.volume.value = value;
               plPlayerController.actualVolume.value = value;
               if (Platform.isIOS && !FlutterVolumeController.showSystemUI ||
@@ -218,10 +247,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   });
               }
             }
-          });
-        } catch (e) {
-          debugPrint('音量初始化处理失败: $e');
-        }
+          }, emitOnStart: false);
+        } catch (_) {}
       });
 
       Future.microtask(() async {
@@ -235,7 +262,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             }
           }
 
-          _listener = Platform.isIOS || plPlayerController.setSystemBrightness
+          _brightnessListener =
+              Platform.isIOS || plPlayerController.setSystemBrightness
               ? ScreenBrightnessPlatform
                     .instance
                     .onSystemScreenBrightnessChanged
@@ -289,11 +317,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final player = plPlayerController.videoController?.player;
-    if (player == null) return;
-    final continuePlay = plPlayerController.continuePlayInBackground.value;
-    if (continuePlay) {}
-    if (!continuePlay) {
+    late final player = plPlayerController.videoPlayerController;
+    if(player == null) return;
+    if (!plPlayerController.continuePlayInBackground.value) {
       if (const [
         AppLifecycleState.paused,
         AppLifecycleState.detached,
@@ -357,7 +383,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     _tapGestureRecognizer.dispose();
     _longPressRecognizer?.dispose();
     _doubleTapGestureRecognizer.dispose();
-    _listener?.cancel();
+    _brightnessListener?.cancel();
     _controlsListener?.cancel();
     animationController.dispose();
     if (PlatformUtils.isMobile) {
@@ -426,38 +452,15 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       ),
 
       /// 时间进度
-      BottomControlType.time => Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          // 播放时间
-          Obx(
-            () => Text(
-              DurationUtils.formatDuration(
-                plPlayerController.positionSeconds.value,
-              ),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 10,
-                height: 1.4,
-                fontFeatures: [FontFeature.tabularFigures()],
-              ),
-            ),
+      BottomControlType.time => Obx(
+        () => _VideoTime(
+          position: DurationUtils.formatDuration(
+            plPlayerController.positionSeconds.value,
           ),
-          Obx(
-            () => Text(
-              DurationUtils.formatDuration(
-                plPlayerController.durationSeconds.value.inSeconds,
-              ),
-              style: const TextStyle(
-                color: Color(0xFFD0D0D0),
-                fontSize: 10,
-                height: 1.4,
-                fontFeatures: [FontFeature.tabularFigures()],
-              ),
-            ),
+          duration: DurationUtils.formatDuration(
+            plPlayerController.duration.value.inSeconds,
           ),
-        ],
+        ),
       ),
 
       /// 高能进度条
@@ -535,6 +538,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
               tooltip: '分段信息',
               icon: DisabledIcon(
                 iconSize: 22,
+                color: Colors.white,
                 disable: !show,
                 child: Transform.rotate(
                   angle: math.pi / 2,
@@ -943,41 +947,34 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       if (isNotFileSource && flag) BottomControlType.qa,
       if (!plPlayerController.isDesktopPip) BottomControlType.fullscreen,
     ];
-
-    return Row(
+    return PlayerBar(
       children: [
-        ...userSpecifyItemLeft.map(progressWidget),
-        Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) => FittedBox(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minWidth: constraints.maxWidth),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    if (isFullScreen)
-                      SizedBox(
-                        width: 42,
-                        height: 34,
-                        child: IconButton(
-                          tooltip: '切换状态栏隐藏',
-                          style: const ButtonStyle(
-                            padding: WidgetStatePropertyAll(EdgeInsets.zero),
-                          ),
-                          onPressed: StatusBar.i.toggleHide,
-                          icon: const Icon(
-                            Icons.ad_units,
-                            size: 19,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ...userSpecifyItemRight.map(progressWidget),
-                  ],
+        Row(
+          mainAxisSize: .min,
+          children: userSpecifyItemLeft.map(progressWidget).toList(),
+        ),
+        Row(
+          mainAxisSize: .min,
+          children: [
+            if (isFullScreen)
+              SizedBox(
+                width: 42,
+                height: 34,
+                child: IconButton(
+                  tooltip: '切换状态栏隐藏',
+                  style: const ButtonStyle(
+                    padding: WidgetStatePropertyAll(EdgeInsets.zero),
+                  ),
+                  onPressed: StatusBar.i.toggleHide,
+                  icon: const Icon(
+                    Icons.ad_units,
+                    size: 19,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-            ),
-          ),
+            ...userSpecifyItemRight.map(progressWidget),
+          ],
         ),
       ],
     );
@@ -1082,15 +1079,12 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       if (plPlayerController.isLive) return;
 
       final int curSliderPosition =
-          plPlayerController.sliderPosition.value.inMilliseconds;
+          plPlayerController.sliderPosition.inMilliseconds;
       final int newPos =
           (curSliderPosition +
                   (plPlayerController.sliderScale * delta.dx / maxWidth)
                       .round())
-              .clamp(
-                0,
-                plPlayerController.duration.value.inMilliseconds,
-              );
+              .clamp(0, plPlayerController.duration.value.inMilliseconds);
       final Duration result = Duration(milliseconds: newPos);
       final height = maxHeight * 0.125;
       if (details.localFocalPoint.dy <= height &&
@@ -1199,11 +1193,11 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     if (plPlayerController.isSliderMoving.value) {
       if (plPlayerController.cancelSeek == true) {
         plPlayerController.onUpdatedSliderProgress(
-          plPlayerController.position.value,
+          plPlayerController.position,
         );
       } else {
         plPlayerController.seekTo(
-          plPlayerController.sliderPosition.value,
+          plPlayerController.sliderPosition,
           isSeek: false,
         );
       }
@@ -1374,15 +1368,12 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
       Offset delta = event.localPanDelta;
       final int curSliderPosition =
-          plPlayerController.sliderPosition.value.inMilliseconds;
+          plPlayerController.sliderPosition.inMilliseconds;
       final int newPos =
           (curSliderPosition +
                   (plPlayerController.sliderScale * delta.dx / maxWidth)
                       .round())
-              .clamp(
-                0,
-                plPlayerController.duration.value.inMilliseconds,
-              );
+              .clamp(0, plPlayerController.duration.value.inMilliseconds);
       final Duration result = Duration(milliseconds: newPos);
       if (plPlayerController.cancelSeek == true) {
         plPlayerController
@@ -1603,7 +1594,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                                   return Text(
                                     DurationUtils.formatDuration(
                                       plPlayerController
-                                          .durationSeconds
+                                          .duration
                                           .value
                                           .inSeconds,
                                     ),
@@ -1728,39 +1719,42 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
               top: -1,
               bottom: -1,
               child: ClipRect(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    AppBarAni(
-                      isTop: true,
-                      controller: animationController,
-                      isFullScreen: isFullScreen,
-                      child: plPlayerController.isDesktopPip
-                          ? GestureDetector(
-                              behavior: HitTestBehavior.translucent,
-                              onPanStart: (_) => windowManager.startDragging(),
-                              child: widget.headerControl,
-                            )
-                          : widget.headerControl,
-                    ),
-                    AppBarAni(
-                      isTop: false,
-                      controller: animationController,
-                      isFullScreen: isFullScreen,
-                      child:
-                          widget.bottomControl ??
-                          BottomControl(
-                            maxWidth: maxWidth,
-                            isFullScreen: isFullScreen,
-                            controller: plPlayerController,
-                            videoDetailController: videoDetailController,
-                            buildBottomControl: () => buildBottomControl(
-                              videoDetailController,
-                              maxWidth > maxHeight,
+                child: RepaintBoundary(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      AppBarAni(
+                        isTop: true,
+                        controller: animationController,
+                        isFullScreen: isFullScreen,
+                        child: plPlayerController.isDesktopPip
+                            ? GestureDetector(
+                                behavior: HitTestBehavior.translucent,
+                                onPanStart: (_) =>
+                                    windowManager.startDragging(),
+                                child: widget.headerControl,
+                              )
+                            : widget.headerControl,
+                      ),
+                      AppBarAni(
+                        isTop: false,
+                        controller: animationController,
+                        isFullScreen: isFullScreen,
+                        child:
+                            widget.bottomControl ??
+                            BottomControl(
+                              maxWidth: maxWidth,
+                              isFullScreen: isFullScreen,
+                              controller: plPlayerController,
+                              videoDetailController: videoDetailController,
+                              buildBottomControl: () => buildBottomControl(
+                                videoDetailController,
+                                maxWidth > maxHeight,
+                              ),
                             ),
-                          ),
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -1775,46 +1769,47 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             //         ..scale(0.5)
             //         ..translate(-0.5, -0.5);
 
-        //       showRestoreScaleBtn.value = true;
-        //     },
-        //     child: const Text('scale'),
-        //   ),
-        // ),
-        Obx(
-          () =>
-              showRestoreScaleBtn.value && plPlayerController.showControls.value
-              ? Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 95),
-                    child: FilledButton.tonal(
-                      style: FilledButton.styleFrom(
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        backgroundColor: colorScheme.secondaryContainer
-                            .withValues(alpha: 0.8),
-                        visualDensity: VisualDensity.compact,
-                        padding: const EdgeInsets.all(15),
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(6),
+            //       showRestoreScaleBtn.value = true;
+            //     },
+            //     child: const Text('scale'),
+            //   ),
+            // ),
+            Obx(
+              () =>
+                  showRestoreScaleBtn.value &&
+                      plPlayerController.showControls.value
+                  ? Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 95),
+                        child: FilledButton.tonal(
+                          style: FilledButton.styleFrom(
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            backgroundColor: colorScheme.secondaryContainer
+                                .withValues(alpha: 0.8),
+                            visualDensity: VisualDensity.compact,
+                            padding: const EdgeInsets.all(15),
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(6),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                      onPressed: () async {
-                        showRestoreScaleBtn.value = false;
-                        final animController = AnimationController(
-                          vsync: this,
-                          duration: const Duration(milliseconds: 255),
-                        );
-                        final anim = animController.drive(
-                          Matrix4Tween(
-                            begin: transformationController.value,
-                            end: Matrix4.identity(),
-                          ).chain(CurveTween(curve: Curves.easeOut)),
-                        );
-                        void listener() {
-                          transformationController.value = anim.value;
-                        }
+                          onPressed: () async {
+                            showRestoreScaleBtn.value = false;
+                            final animController = AnimationController(
+                              vsync: this,
+                              duration: const Duration(milliseconds: 255),
+                            );
+                            final anim = animController.drive(
+                              Matrix4Tween(
+                                begin: transformationController.value,
+                                end: Matrix4.identity(),
+                              ).chain(CurveTween(curve: Curves.easeOut)),
+                            );
+                            void listener() {
+                              transformationController.value = anim.value;
+                            }
 
                             animController.addListener(listener);
                             await animController.forward(from: 0);
@@ -1829,85 +1824,93 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   : const SizedBox.shrink(),
             ),
 
-        /// 进度条 live模式下禁用
-        if (!isLive &&
-            plPlayerController.progressType != BtmProgressBehavior.alwaysHide)
-          Positioned(
-            bottom: -2.2,
-            left: 0,
-            right: 0,
-            child: Obx(
-              () {
-                final showControls = plPlayerController.showControls.value;
-                final offstage = switch (plPlayerController.progressType) {
-                  BtmProgressBehavior.onlyShowFullScreen =>
-                    showControls || !isFullScreen,
-                  BtmProgressBehavior.onlyHideFullScreen =>
-                    showControls || isFullScreen,
-                  _ => showControls,
-                };
-                return Offstage(
-                  offstage: offstage,
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    alignment: Alignment.bottomCenter,
-                    children: [
-                      Obx(() {
-                        final int value =
-                            plPlayerController.sliderPositionSeconds.value;
-                        final int max =
-                            plPlayerController.durationSeconds.value.inSeconds;
-                        final int buffer =
-                            plPlayerController.bufferedSeconds.value;
-                        return ProgressBar(
-                          progress: Duration(seconds: value),
-                          buffered: Duration(seconds: buffer),
-                          total: Duration(seconds: max),
-                          progressBarColor: primary,
-                          baseBarColor: const Color(0x33FFFFFF),
-                          bufferedBarColor: bufferedBarColor,
-                          thumbColor: primary,
-                          thumbGlowColor: thumbGlowColor,
-                          barHeight: 3.5,
-                          thumbRadius: 2.5,
-                        );
-                      }),
-                      if (plPlayerController.enableBlock &&
-                          videoDetailController.segmentProgressList.isNotEmpty)
-                        Positioned(
-                          left: 0,
-                          right: 0,
-                          bottom: 0.75,
-                          child: SegmentProgressBar(
-                            segments: videoDetailController.segmentProgressList,
-                          ),
-                        ),
-                      if (plPlayerController.showViewPoints &&
-                          videoDetailController.viewPointList.isNotEmpty &&
-                          videoDetailController.showVP.value)
-                        Padding(
-                          padding: const .only(bottom: 4.25),
-                          child: ViewPointSegmentProgressBar(
-                            segments: videoDetailController.viewPointList,
-                            onSeek: PlatformUtils.isMobile
-                                ? (position) => plPlayerController.seekTo(
-                                    position,
-                                    isSeek: false,
-                                  )
-                                : null,
-                          ),
-                        ),
-                      if (plPlayerController.showDmChart &&
-                          videoDetailController.showDmTrendChart.value)
-                        if (videoDetailController.dmTrend.value?.dataOrNull
-                            case final list?)
-                          buildDmChart(primary, list, videoDetailController),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
+            /// 进度条 live模式下禁用
+            if (!isLive &&
+                plPlayerController.progressType !=
+                    BtmProgressBehavior.alwaysHide)
+              Positioned(
+                bottom: -2.2,
+                left: 0,
+                right: 0,
+                child: Obx(
+                  () {
+                    final showControls = plPlayerController.showControls.value;
+                    final offstage = switch (plPlayerController.progressType) {
+                      BtmProgressBehavior.onlyShowFullScreen =>
+                        showControls || !isFullScreen,
+                      BtmProgressBehavior.onlyHideFullScreen =>
+                        showControls || isFullScreen,
+                      _ => showControls,
+                    };
+                    return Offstage(
+                      offstage: offstage,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        alignment: Alignment.bottomCenter,
+                        children: [
+                          Obx(() {
+                            final int value =
+                                plPlayerController.sliderPositionSeconds.value;
+                            final int max =
+                                plPlayerController.duration.value.inSeconds;
+                            final int buffer =
+                                plPlayerController.bufferedSeconds.value;
+                            return ProgressBar(
+                              progress: Duration(seconds: value),
+                              buffered: Duration(seconds: buffer),
+                              total: Duration(seconds: max),
+                              progressBarColor: primary,
+                              baseBarColor: const Color(0x33FFFFFF),
+                              bufferedBarColor: bufferedBarColor,
+                              thumbColor: primary,
+                              thumbGlowColor: thumbGlowColor,
+                              barHeight: 3.5,
+                              thumbRadius: 2.5,
+                            );
+                          }),
+                          if (plPlayerController.enableBlock &&
+                              videoDetailController
+                                  .segmentProgressList
+                                  .isNotEmpty)
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              bottom: 0.75,
+                              child: SegmentProgressBar(
+                                segments:
+                                    videoDetailController.segmentProgressList,
+                              ),
+                            ),
+                          if (plPlayerController.showViewPoints &&
+                              videoDetailController.viewPointList.isNotEmpty &&
+                              videoDetailController.showVP.value)
+                            Padding(
+                              padding: const .only(bottom: 4.25),
+                              child: ViewPointSegmentProgressBar(
+                                segments: videoDetailController.viewPointList,
+                                onSeek: PlatformUtils.isMobile
+                                    ? (position) => plPlayerController.seekTo(
+                                        position,
+                                        isSeek: false,
+                                      )
+                                    : null,
+                              ),
+                            ),
+                          if (plPlayerController.showDmChart &&
+                              videoDetailController.showDmTrendChart.value)
+                            if (videoDetailController.dmTrend.value?.dataOrNull
+                                case final list?)
+                              buildDmChart(
+                                primary,
+                                list,
+                                videoDetailController,
+                              ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
 
             if (!isLive && plPlayerController.showSeekPreview)
               buildSeekPreviewWidget(
@@ -2006,7 +2009,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             Obx(() {
               if (plPlayerController.dataStatus.loading ||
                   (plPlayerController.isBuffering.value &&
-                      plPlayerController.playerStatus.playing)) {
+                      plPlayerController.playerStatus.isPlaying)) {
                 return Center(
                   child: GestureDetector(
                     onTap: plPlayerController.refreshPlayer,
@@ -2030,8 +2033,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                           ),
                           if (plPlayerController.isBuffering.value)
                             Obx(() {
-                              if (plPlayerController.buffered.value ==
-                                  Duration.zero) {
+                              if (plPlayerController.bufferedSeconds.value ==
+                                  0) {
                                 return const Text(
                                   '加载中...',
                                   style: TextStyle(
@@ -2206,8 +2209,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   }
 
   late final segment = Pair(
-    first: plPlayerController.position.value.inMilliseconds / 1000.0,
-    second: plPlayerController.position.value.inMilliseconds / 1000.0,
+    first: plPlayerController.position.inMilliseconds / 1000.0,
+    second: plPlayerController.position.inMilliseconds / 1000.0,
   );
 
   Future<void> screenshotWebp() async {
@@ -2221,14 +2224,14 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
     final ctr = plPlayerController;
     final theme = Theme.of(context);
-    final currentPos = ctr.position.value.inMilliseconds / 1000.0;
-    final duration = ctr.durationSeconds.value.inMilliseconds / 1000.0;
+    final currentPos = ctr.position.inMilliseconds / 1000.0;
+    final duration = ctr.duration.value.inMilliseconds / 1000.0;
     final model = PostSegmentModel(
       segment: segment,
       category: SegmentType.sponsor,
       actionType: ActionType.skip,
     );
-    final isPlay = ctr.playerStatus.playing;
+    final isPlay = ctr.playerStatus.isPlaying;
     if (isPlay) ctr.pause();
 
     WebpPreset preset = WebpPreset.def;
@@ -2561,382 +2564,4 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       ),
     );
   }
-}
-
-Widget buildDmChart(
-  Color color,
-  List<double> dmTrend,
-  VideoDetailController videoDetailController, [
-  double offset = 0,
-]) {
-  return IgnorePointer(
-    child: Container(
-      height: 12,
-      margin: EdgeInsets.only(
-        bottom:
-            videoDetailController.viewPointList.isNotEmpty &&
-                videoDetailController.showVP.value
-            ? 19.25 + offset
-            : 4.25 + offset,
-      ),
-      child: LineChart(
-        LineChartData(
-          titlesData: const FlTitlesData(show: false),
-          lineTouchData: const LineTouchData(enabled: false),
-          gridData: const FlGridData(show: false),
-          borderData: FlBorderData(show: false),
-          minX: 0,
-          maxX: (dmTrend.length - 1).toDouble(),
-          minY: 0,
-          maxY: dmTrend.max,
-          lineBarsData: [
-            LineChartBarData(
-              spots: List.generate(
-                dmTrend.length,
-                (index) => FlSpot(
-                  index.toDouble(),
-                  dmTrend[index],
-                ),
-              ),
-              isCurved: true,
-              barWidth: 1,
-              color: color,
-              dotData: const FlDotData(show: false),
-              belowBarData: BarAreaData(
-                show: true,
-                color: color.withValues(alpha: 0.4),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-Widget buildSeekPreviewWidget(
-  PlPlayerController plPlayerController,
-  double maxWidth,
-  double maxHeight,
-  ValueGetter<bool> isMounted,
-) {
-  return Obx(
-    () {
-      if (!plPlayerController.showPreview.value) {
-        return const SizedBox.shrink();
-      }
-
-      try {
-        final data = plPlayerController.videoShot!.data;
-
-        final double scale =
-            plPlayerController.isFullScreen.value &&
-                (PlatformUtils.isDesktop || !plPlayerController.isVertical)
-            ? 4
-            : 3;
-        double height = 27 * scale;
-        final compatHeight = maxHeight - 140;
-        if (compatHeight > 50) {
-          height = math.min(height, compatHeight);
-        }
-
-        final int imgXLen = data.imgXLen;
-        final int imgYLen = data.imgYLen;
-        final int totalPerImage = data.totalPerImage;
-        double imgXSize = data.imgXSize;
-        double imgYSize = data.imgYSize;
-
-        return Align(
-          alignment: Alignment.center,
-          child: Obx(
-            () {
-              final index = plPlayerController.previewIndex.value!;
-              int pageIndex = (index ~/ totalPerImage).clamp(
-                0,
-                data.image.length - 1,
-              );
-              int align = index % totalPerImage;
-              int x = align % imgXLen;
-              int y = align ~/ imgYLen;
-              final url = data.image[pageIndex];
-
-              return ClipRRect(
-                borderRadius: StyleString.mdRadius,
-                child: VideoShotImage(
-                  url: url,
-                  x: x,
-                  y: y,
-                  imgXSize: imgXSize,
-                  imgYSize: imgYSize,
-                  height: height,
-                  imageCache: plPlayerController.previewCache,
-                  onSetSize: (xSize, ySize) => data
-                    ..imgXSize = imgXSize = xSize
-                    ..imgYSize = imgYSize = ySize,
-                  isMounted: isMounted,
-                ),
-              );
-            },
-          ),
-        );
-      } catch (e) {
-        if (kDebugMode) rethrow;
-        return const SizedBox.shrink();
-      }
-    },
-  );
-}
-
-class VideoShotImage extends StatefulWidget {
-  const VideoShotImage({
-    super.key,
-    required this.imageCache,
-    required this.url,
-    required this.x,
-    required this.y,
-    required this.imgXSize,
-    required this.imgYSize,
-    required this.height,
-    required this.onSetSize,
-    required this.isMounted,
-  });
-
-  final Map<String, ui.Image?> imageCache;
-  final String url;
-  final int x;
-  final int y;
-  final double imgXSize;
-  final double imgYSize;
-  final double height;
-  final Function(double imgXSize, double imgYSize) onSetSize;
-  final ValueGetter<bool> isMounted;
-
-  @override
-  State<VideoShotImage> createState() => _VideoShotImageState();
-}
-
-Future<ui.Image?> _getImg(String url) async {
-  final cacheManager = DefaultCacheManager();
-  final cacheKey = Utils.getFileName(url, fileExt: false);
-  try {
-    final fileInfo = await cacheManager.getSingleFile(
-      ImageUtils.safeThumbnailUrl(url),
-      key: cacheKey,
-      headers: Constants.baseHeaders,
-    );
-    return _loadImg(fileInfo.path);
-  } catch (_) {
-    return null;
-  }
-}
-
-Future<ui.Image?> _loadImg(String path) async {
-  final codec = await ui.instantiateImageCodecFromBuffer(
-    await ImmutableBuffer.fromFilePath(path),
-  );
-  final frame = await codec.getNextFrame();
-  codec.dispose();
-  return frame.image;
-}
-
-class _VideoShotImageState extends State<VideoShotImage> {
-  late Size _size;
-  late Rect _srcRect;
-  late Rect _dstRect;
-  late RRect _rrect;
-  ui.Image? _image;
-
-  @override
-  void initState() {
-    super.initState();
-    _initSize();
-    _loadImg();
-  }
-
-  void _initSizeIfNeeded() {
-    if (_size.width.isNaN) {
-      _initSize();
-    }
-  }
-
-  void _initSize() {
-    if (widget.imgXSize == 0) {
-      if (_image != null) {
-        final imgXSize = _image!.width / 10;
-        final imgYSize = _image!.height / 10;
-        final height = widget.height;
-        final width = height * imgXSize / imgYSize;
-        _setRect(width, height);
-        _setSrcRect(imgXSize, imgYSize);
-        widget.onSetSize(imgXSize, imgYSize);
-      } else {
-        _setRect(double.nan, double.nan);
-        _setSrcRect(widget.imgXSize, widget.imgYSize);
-      }
-    } else {
-      final height = widget.height;
-      final width = height * widget.imgXSize / widget.imgYSize;
-      _setRect(width, height);
-      _setSrcRect(widget.imgXSize, widget.imgYSize);
-    }
-  }
-
-  void _setRect(double width, double height) {
-    _size = Size(width, height);
-    _dstRect = Rect.fromLTRB(0, 0, width, height);
-    _rrect = RRect.fromRectAndRadius(_dstRect, const Radius.circular(10));
-  }
-
-  void _setSrcRect(double imgXSize, double imgYSize) {
-    _srcRect = Rect.fromLTWH(
-      widget.x * imgXSize,
-      widget.y * imgYSize,
-      imgXSize,
-      imgYSize,
-    );
-  }
-
-  void _loadImg() {
-    final url = widget.url;
-    _image = widget.imageCache[url];
-    if (_image != null) {
-      _initSizeIfNeeded();
-    } else if (!widget.imageCache.containsKey(url)) {
-      widget.imageCache[url] = null;
-      _getImg(url).then((image) {
-        if (image != null) {
-          if (widget.isMounted()) {
-            widget.imageCache[url] = image;
-          }
-          if (mounted) {
-            _image = image;
-            _initSizeIfNeeded();
-            setState(() {});
-          }
-        } else {
-          widget.imageCache.remove(url);
-        }
-      });
-    }
-  }
-
-  @override
-  void didUpdateWidget(VideoShotImage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.url != widget.url) {
-      _loadImg();
-    }
-    if (oldWidget.x != widget.x || oldWidget.y != widget.y) {
-      _setSrcRect(widget.imgXSize, widget.imgYSize);
-    }
-  }
-
-  late final _imgPaint = Paint()..filterQuality = FilterQuality.medium;
-  late final _borderPaint = Paint()
-    ..color = Colors.white
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 1.5;
-
-  @override
-  Widget build(BuildContext context) {
-    if (_image != null) {
-      return CroppedImage(
-        size: _size,
-        image: _image!,
-        srcRect: _srcRect,
-        dstRect: _dstRect,
-        rrect: _rrect,
-        imgPaint: _imgPaint,
-        borderPaint: _borderPaint,
-      );
-    }
-    return const SizedBox.shrink();
-  }
-}
-
-const double _triangleHeight = 5.6;
-
-class _DanmakuTip extends SingleChildRenderObjectWidget {
-  const _DanmakuTip({
-    this.offset = 0,
-    super.child,
-  });
-
-  final double offset;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    return _RenderDanmakuTip(offset: offset);
-  }
-
-  @override
-  void updateRenderObject(
-    BuildContext context,
-    _RenderDanmakuTip renderObject,
-  ) {
-    renderObject.offset = offset;
-  }
-}
-
-class _RenderDanmakuTip extends RenderProxyBox {
-  _RenderDanmakuTip({
-    required double offset,
-  }) : _offset = offset;
-
-  double _offset;
-  double get offset => _offset;
-  set offset(double value) {
-    if (_offset == value) return;
-    _offset = value;
-    markNeedsPaint();
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    final paint = Paint()
-      ..color = const Color(0xB3000000)
-      ..style = PaintingStyle.fill;
-
-    final strokePaint = Paint()
-      ..color = const Color(0x7EFFFFFF)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.25;
-
-    final radius = size.height / 2;
-    const triangleBase = _triangleHeight * 2 / 3;
-
-    final triangleCenterX = (size.width / 2 + _offset).clamp(
-      radius + triangleBase,
-      size.width - radius - triangleBase,
-    );
-    final path = Path()
-      // triangle (exceed)
-      ..moveTo(triangleCenterX - triangleBase, 0)
-      ..lineTo(triangleCenterX, -_triangleHeight)
-      ..lineTo(triangleCenterX + triangleBase, 0)
-      // top
-      ..lineTo(size.width - radius, 0)
-      // right
-      ..arcToPoint(
-        Offset(size.width - radius, size.height),
-        radius: Radius.circular(radius),
-      )
-      // bottom
-      ..lineTo(radius, size.height)
-      // left
-      ..arcToPoint(
-        Offset(radius, 0),
-        radius: Radius.circular(radius),
-      )
-      ..close();
-
-    context.canvas
-      ..drawPath(path, paint)
-      ..drawPath(path, strokePaint);
-
-    super.paint(context, offset);
-  }
-
-  @override
-  bool get isRepaintBoundary => true;
 }

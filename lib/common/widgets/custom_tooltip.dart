@@ -252,16 +252,8 @@ class _RenderToolTip extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    RenderBox? child = firstChild;
-    while (child != null) {
-      final childParentData = child.parentData as MultiChildLayoutParentData;
-      context.paintChild(child, childParentData.offset + offset);
-      child = childParentData.nextSibling;
-    }
+    defaultPaint(context, offset);
   }
-
-  @override
-  bool get isRepaintBoundary => true;
 }
 
 class Triangle extends LeafRenderObjectWidget {
@@ -328,14 +320,11 @@ class RenderTriangle extends RenderBox {
       ..style = PaintingStyle.fill;
 
     final path = Path()
-      ..moveTo(0, 0)
-      ..lineTo(size.width, 0)
-      ..lineTo(size.width / 2, size.height)
+      ..moveTo(offset.dx, offset.dy)
+      ..lineTo(offset.dx + size.width, offset.dy)
+      ..lineTo(offset.dx + size.width / 2, size.height + offset.dy)
       ..close();
 
     context.canvas.drawPath(path, paint);
   }
-
-  @override
-  bool get isRepaintBoundary => true;
 }

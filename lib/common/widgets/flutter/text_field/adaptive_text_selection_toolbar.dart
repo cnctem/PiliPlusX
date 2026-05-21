@@ -274,25 +274,24 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
             buttonItem: buttonItem,
           );
         });
-      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
-      // case TargetPlatform.fuchsia:
-      // case TargetPlatform.android:
-      //   final List<Widget> buttons = <Widget>[];
-      //   for (int i = 0; i < buttonItems.length; i++) {
-      //     final ContextMenuButtonItem buttonItem = buttonItems[i];
-      //     buttons.add(
-      //       TextSelectionToolbarTextButton(
-      //         padding: TextSelectionToolbarTextButton.getPadding(
-      //           i,
-      //           buttonItems.length,
-      //         ),
-      //         onPressed: buttonItem.onPressed,
-      //         alignment: AlignmentDirectional.centerStart,
-      //         child: Text(getButtonLabel(context, buttonItem)),
-      //       ),
-      //     );
-      //   }
-      //   return buttons;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.android:
+        final buttons = <Widget>[];
+        for (var i = 0; i < buttonItems.length; i++) {
+          final ContextMenuButtonItem buttonItem = buttonItems[i];
+          buttons.add(
+            TextSelectionToolbarTextButton(
+              padding: TextSelectionToolbarTextButton.getPadding(
+                i,
+                buttonItems.length,
+              ),
+              onPressed: buttonItem.onPressed,
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(getButtonLabel(context, buttonItem)),
+            ),
+          );
+        }
+        return buttons;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         return buttonItems.map((ContextMenuButtonItem buttonItem) {

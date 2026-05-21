@@ -14,7 +14,7 @@ import 'package:flutter/gestures.dart'
         BaseTapAndDragGestureRecognizer,
         TapAndHorizontalDragGestureRecognizer,
         TapAndPanGestureRecognizer;
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide SelectableRegion;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -280,25 +280,29 @@ class SelectableRegion extends StatefulWidget {
     required final VoidCallback onSelectAll,
     required final VoidCallback? onShare,
   }) {
-    final bool canCopy =
-        selectionGeometry.status == SelectionStatus.uncollapsed;
+    final canCopy = selectionGeometry.status == SelectionStatus.uncollapsed;
     final bool canSelectAll = selectionGeometry.hasContent;
-    final bool platformCanShare = switch (defaultTargetPlatform) {
-      TargetPlatform.macOS ||
-      TargetPlatform.fuchsia ||
-      TargetPlatform.linux ||
-      TargetPlatform.windows => false,
-      // TODO(bleroux): the share button should be shown on iOS but the share
-      // functionality requires some changes on the engine side because, on iPad,
-      // it needs an anchor for the popup.
-      // See: https://github.com/flutter/flutter/issues/141775.
-      TargetPlatform.iOS => false,
-      _ => selectionGeometry.status == SelectionStatus.uncollapsed,
-    };
+    // The share button is not supported on the web.
+    final bool platformCanShare =
+        !kIsWeb &&
+        switch (defaultTargetPlatform) {
+          TargetPlatform.android =>
+            selectionGeometry.status == SelectionStatus.uncollapsed,
+          TargetPlatform.macOS ||
+          TargetPlatform.fuchsia ||
+          TargetPlatform.linux ||
+          TargetPlatform.windows => false,
+          // TODO(bleroux): the share button should be shown on iOS but the share
+          // functionality requires some changes on the engine side because, on iPad,
+          // it needs an anchor for the popup.
+          // See: https://github.com/flutter/flutter/issues/141775.
+          TargetPlatform.iOS => false,
+          _ => selectionGeometry.status == SelectionStatus.uncollapsed,
+        };
     final bool canShare = onShare != null && platformCanShare;
 
     // On Android, the share button is before the select all button.
-    final bool showShareBeforeSelectAll =
+    final showShareBeforeSelectAll =
         defaultTargetPlatform == TargetPlatform.android;
 
     // Determine which buttons will appear so that the order and total number is
@@ -412,6 +416,16 @@ class SelectableRegionState extends State<SelectableRegion>
   Orientation? _lastOrientation;
   SelectedContent? _lastSelectedContent;
 
+  /// Whether the native browser context menu is enabled.
+  // TODO(Renzo-Olivares): Re-enable web context menu for Android
+  // and iOS when https://github.com/flutter/flutter/issues/177123
+  // is resolved.
+  bool get _webContextMenuEnabled =>
+      kIsWeb &&
+      BrowserContextMenu.enabled &&
+      defaultTargetPlatform != TargetPlatform.android &&
+      defaultTargetPlatform != TargetPlatform.iOS;
+
   /// The [SelectionOverlay] that is currently visible on the screen.
   ///
   /// Can be null if there is no visible [SelectionOverlay].
@@ -518,7 +532,7 @@ class SelectableRegionState extends State<SelectableRegion>
 
   void _handleFocusChanged() {
     if (!_focusNode.hasFocus) {
-      if (kIsWeb) {
+      if (_webContextMenuEnabled) {
         PlatformSelectableRegionContextMenu.detach(_selectionDelegate);
       }
       if (SchedulerBinding.instance.lifecycleState ==
@@ -536,7 +550,7 @@ class SelectableRegionState extends State<SelectableRegion>
         _finalizeSelectableRegionStatus();
       }
     }
-    if (kIsWeb) {
+    if (_webContextMenuEnabled) {
       PlatformSelectableRegionContextMenu.attach(_selectionDelegate);
     }
   }
@@ -601,7 +615,7 @@ class SelectableRegionState extends State<SelectableRegion>
   // This method should be used in all instances when details.consecutiveTapCount
   // would be used.
   int _getEffectiveConsecutiveTapCount(int rawCount) {
-    int maxConsecutiveTap = 3;
+    var maxConsecutiveTap = 3;
     if (PlatformUtils.isMobile) {
       if (_lastPointerDeviceKind != null &&
           _lastPointerDeviceKind != PointerDeviceKind.mouse) {
@@ -830,9 +844,7 @@ class SelectableRegionState extends State<SelectableRegion>
             SelectableRegionSelectionStatus.changing;
       case 2:
         if (PlatformUtils.isMobile) {
-          if (Platform.isAndroid ||
-              Platform.isFuchsia ||
-              OS.isHarmony) {
+          if (Platform.isAndroid || Platform.isFuchsia || OS.isHarmony) {
             // Double tap + drag is only supported on Android when using a precise
             // pointer device or when not on the web.
             if (!kIsWeb ||
@@ -957,9 +969,7 @@ class SelectableRegionState extends State<SelectableRegion>
       case 2:
         final bool isPointerPrecise = _isPrecisePointerDevice(details.kind);
         if (PlatformUtils.isMobile) {
-          if (Platform.isAndroid ||
-              Platform.isFuchsia ||
-              OS.isHarmony) {
+          if (Platform.isAndroid || Platform.isFuchsia || OS.isHarmony) {
             if (!isPointerPrecise) {
               // On Android, a double tap will only show the selection overlay after
               // the following tap up when the pointer device kind is not precise.
@@ -1149,21 +1159,9 @@ class SelectableRegionState extends State<SelectableRegion>
         _selectionOverlay != null &&
         (_selectionOverlay!.isDraggingStartHandle ||
             _selectionOverlay!.isDraggingEndHandle);
-    if (widget.selectionControls is! TextSelectionHandleControls) {
-      if (!draggingHandles) {
-        _selectionOverlay!.hideMagnifier();
-        _selectionOverlay!.showToolbar();
-      }
-    } else {
-      if (!draggingHandles) {
-        _selectionOverlay!.hideMagnifier();
-        _selectionOverlay!.showToolbar(
-          context: context,
-          contextMenuBuilder: (BuildContext context) {
-            return widget.contextMenuBuilder!(context, this);
-          },
-        );
-      }
+    if (!draggingHandles) {
+      _selectionOverlay!.hideMagnifier();
+      _showToolbar();
     }
     _finalizeSelection();
     _updateSelectedContentIfNeeded();
@@ -1307,13 +1305,13 @@ class SelectableRegionState extends State<SelectableRegion>
     final Vector3 globalTransform = _selectable!
         .getTransformTo(null)
         .getTranslation();
-    final Offset globalTransformAsOffset = Offset(
+    final globalTransformAsOffset = Offset(
       globalTransform.x,
       globalTransform.y,
     );
     final Offset globalSelectionPointPosition =
         selectionPoint.localPosition + globalTransformAsOffset;
-    final Rect caretRect = Rect.fromLTWH(
+    final caretRect = Rect.fromLTWH(
       globalSelectionPointPosition.dx,
       globalSelectionPointPosition.dy - selectionPoint.lineHeight,
       0,
@@ -1411,7 +1409,7 @@ class SelectableRegionState extends State<SelectableRegion>
     // functionality depending on the browser (such as translate). Due to this,
     // we should not show a Flutter toolbar for the editable text elements
     // unless the browser's context menu is explicitly disabled.
-    if (kIsWeb && BrowserContextMenu.enabled) {
+    if (_webContextMenuEnabled) {
       return false;
     }
 
@@ -1420,6 +1418,9 @@ class SelectableRegionState extends State<SelectableRegion>
     }
 
     _selectionOverlay!.toolbarLocation = location;
+    // TODO(Renzo-Olivares): Remove the logic below that does a runtimeType
+    // check for TextSelectionHandleControls when TextSelectionHandleControls
+    // is fully removed, see: https://github.com/flutter/flutter/pull/124262.
     if (widget.selectionControls is! TextSelectionHandleControls) {
       _selectionOverlay!.showToolbar();
       return true;
@@ -1655,7 +1656,7 @@ class SelectableRegionState extends State<SelectableRegion>
   ///    for the default context menu buttons.
   TextSelectionToolbarAnchors get contextMenuAnchors {
     if (_lastSecondaryTapDownPosition != null) {
-      final TextSelectionToolbarAnchors anchors = TextSelectionToolbarAnchors(
+      final anchors = TextSelectionToolbarAnchors(
         primaryAnchor: _lastSecondaryTapDownPosition!,
       );
       // Clear the state of _lastSecondaryTapDownPosition after use since a user may
@@ -1663,7 +1664,7 @@ class SelectableRegionState extends State<SelectableRegion>
       _lastSecondaryTapDownPosition = null;
       return anchors;
     }
-    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
+    final renderBox = context.findRenderObject()! as RenderBox;
     return TextSelectionToolbarAnchors.fromSelection(
       renderBox: renderBox,
       startGlyphHeight: startGlyphHeight,
@@ -1765,9 +1766,7 @@ class SelectableRegionState extends State<SelectableRegion>
 
         // On Android copy should clear the selection.
         if (PlatformUtils.isMobile) {
-          if (Platform.isAndroid ||
-              Platform.isFuchsia ||
-              OS.isHarmony) {
+          if (Platform.isAndroid || Platform.isFuchsia || OS.isHarmony) {
             clearSelection();
             _selectionStatusNotifier.value =
                 SelectableRegionSelectionStatus.changing;
@@ -1792,9 +1791,7 @@ class SelectableRegionState extends State<SelectableRegion>
 
         // On Android, share should clear the selection.
         if (PlatformUtils.isMobile) {
-          if (Platform.isAndroid ||
-              Platform.isFuchsia ||
-              OS.isHarmony) {
+          if (Platform.isAndroid || Platform.isFuchsia || OS.isHarmony) {
             clearSelection();
             _selectionStatusNotifier.value =
                 SelectableRegionSelectionStatus.changing;
@@ -1810,7 +1807,7 @@ class SelectableRegionState extends State<SelectableRegion>
   }
 
   List<ContextMenuButtonItem> get _textProcessingActionButtonItems {
-    final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
+    final buttonItems = <ContextMenuButtonItem>[];
     final SelectedContent? data = _selectable?.getSelectedContent();
     if (data == null) {
       return buttonItems;
@@ -2015,7 +2012,7 @@ class SelectableRegionState extends State<SelectableRegion>
         child: widget.child,
       ),
     );
-    if (kIsWeb) {
+    if (_webContextMenuEnabled) {
       result = PlatformSelectableRegionContextMenu(child: result);
     }
     return CompositedTransformTarget(

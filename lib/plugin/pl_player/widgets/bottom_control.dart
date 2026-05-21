@@ -2,7 +2,7 @@ import 'package:PiliPlus/common/widgets/progress_bar/audio_video_progress_bar.da
 import 'package:PiliPlus/common/widgets/progress_bar/segment_progress_bar.dart';
 import 'package:PiliPlus/pages/video/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
-import 'package:PiliPlus/plugin/pl_player/view.dart';
+import 'package:PiliPlus/plugin/pl_player/view/view.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
@@ -30,20 +30,20 @@ class BottomControl extends StatelessWidget {
     controller.onChangedSliderStart(duration.timeStamp);
   }
 
-  void onDragUpdate(ThumbDragDetails duration, int max) {
+  void onDragUpdate(ThumbDragDetails duration) {
     if (!controller.isFileSource && controller.showSeekPreview) {
       controller.updatePreviewIndex(duration.timeStamp.inSeconds);
     }
     controller.onUpdatedSliderProgress(duration.timeStamp);
   }
 
-  void onSeek(Duration duration, int max) {
+  void onSeek(Duration duration) {
     if (controller.showSeekPreview) {
       controller.showPreview.value = false;
     }
     controller
       ..onChangedSliderEnd()
-      ..onChangedSlider(duration.inSeconds.toDouble())
+      ..onChangedSlider(duration.inSeconds)
       ..seekTo(Duration(seconds: duration.inSeconds), isSeek: false);
   }
 
@@ -72,8 +72,7 @@ class BottomControl extends StatelessWidget {
                   children: [
                     Obx(() {
                       final int value = controller.sliderPositionSeconds.value;
-                      final int max =
-                          controller.durationSeconds.value.inSeconds;
+                      final int max = controller.duration.value.inSeconds;
                       return ProgressBar(
                         progress: Duration(seconds: value),
                         buffered: Duration(
@@ -89,8 +88,8 @@ class BottomControl extends StatelessWidget {
                         thumbRadius: 7,
                         thumbGlowRadius: 25,
                         onDragStart: onDragStart,
-                        onDragUpdate: (e) => onDragUpdate(e, max),
-                        onSeek: (e) => onSeek(e, max),
+                        onDragUpdate: onDragUpdate,
+                        onSeek: onSeek,
                       );
                     }),
                     if (controller.enableBlock &&

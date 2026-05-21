@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/http/api.dart';
+import 'package:PiliPlus/http/browser_ua.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/login.dart';
-import 'package:PiliPlus/http/ua_type.dart';
 import 'package:PiliPlus/models/common/account_type.dart';
 import 'package:PiliPlus/models/common/video/video_type.dart';
 import 'package:PiliPlus/models/home/rcmd/result.dart';
@@ -25,6 +25,7 @@ import 'package:PiliPlus/models_new/video/video_detail/video_detail_response.dar
 import 'package:PiliPlus/models_new/video/video_note_list/data.dart';
 import 'package:PiliPlus/models_new/video/video_play_info/data.dart';
 import 'package:PiliPlus/models_new/video/video_relation/data.dart';
+import 'package:PiliPlus/models_new/video/video_shot/data.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/app_sign.dart';
 import 'package:PiliPlus/utils/extension/string_ext.dart';
@@ -223,10 +224,7 @@ abstract final class VideoHttp {
     });
 
     try {
-      final res = await Request().get(
-        videoType.api,
-        queryParameters: params,
-      );
+      final res = await Request().get(videoType.api, queryParameters: params);
 
       if (res.data['code'] == 0) {
         late PlayUrlModel data;
@@ -295,10 +293,7 @@ abstract final class VideoHttp {
   }) async {
     final res = await Request().get(
       Api.videoRelation,
-      queryParameters: {
-        'aid': IdUtils.bv2av(bvid),
-        'bvid': bvid,
-      },
+      queryParameters: {'aid': IdUtils.bv2av(bvid), 'bvid': bvid},
     );
     if (res.data['code'] == 0) {
       return Success(VideoRelation.fromJson(res.data['data']));
@@ -374,16 +369,14 @@ abstract final class VideoHttp {
   }) async {
     final res = await Request().post(
       Api.pgcTriple,
-      data: {
-        'ep_id': epId,
-        'csrf': Accounts.main.csrf,
-      },
+      data: {'ep_id': epId, 'csrf': Accounts.main.csrf},
       options: Options(
         contentType: Headers.formUrlEncodedContentType,
         headers: {
           'origin': 'https://www.bilibili.com',
-          'referer': 'https://www.bilibili.com/bangumi/play/ss$seasonId',
-          'user-agent': UaType.pc.ua,
+          'referer':
+              'https://www.bilibili.com/bangumi/play/${seasonId == null ? "ep$epId" : "ss$seasonId"}',
+          'user-agent': BrowserUa.pc,
         },
       ),
     );
@@ -415,7 +408,7 @@ abstract final class VideoHttp {
         headers: {
           'origin': 'https://www.bilibili.com',
           'referer': 'https://www.bilibili.com/video/$bvid',
-          'user-agent': UaType.pc.ua,
+          'user-agent': BrowserUa.pc,
         },
       ),
     );
@@ -433,10 +426,7 @@ abstract final class VideoHttp {
   }) async {
     final res = await Request().post(
       Api.likeVideo,
-      data: {
-        'aid': IdUtils.bv2av(bvid).toString(),
-        'like': type ? '0' : '1',
-      },
+      data: {'aid': IdUtils.bv2av(bvid).toString(), 'like': type ? '0' : '1'},
       options: Options(contentType: Headers.formUrlEncodedContentType),
     );
     if (res.data['code'] == 0) {
@@ -612,7 +602,7 @@ abstract final class VideoHttp {
         'extend_content': jsonEncode({
           "entity": "user",
           "entity_id": mid,
-          'fp': UaType.pc.ua,
+          'fp': BrowserUa.pc,
         }),
         'csrf': Accounts.main.csrf,
       },
@@ -621,7 +611,7 @@ abstract final class VideoHttp {
         headers: {
           'origin': 'https://space.bilibili.com',
           'referer': 'https://space.bilibili.com/$mid/dynamic',
-          'user-agent': UaType.pc.ua,
+          'user-agent': BrowserUa.pc,
         },
       ),
     );
@@ -639,18 +629,11 @@ abstract final class VideoHttp {
     }
   }
 
-  static Future<void> roomEntryAction({
-    required Object roomId,
-  }) {
+  static Future<void> roomEntryAction({required Object roomId}) {
     return Request().post(
       Api.roomEntryAction,
-      queryParameters: {
-        'csrf': Accounts.heartbeat.csrf,
-      },
-      data: {
-        'room_id': roomId,
-        'platform': 'pc',
-      },
+      queryParameters: {'csrf': Accounts.heartbeat.csrf},
+      data: {'room_id': roomId, 'platform': 'pc'},
     );
   }
 
@@ -660,11 +643,7 @@ abstract final class VideoHttp {
   }) {
     return Request().post(
       Api.historyReport,
-      data: {
-        'aid': aid,
-        'type': type,
-        'csrf': Accounts.heartbeat.csrf,
-      },
+      data: {'aid': aid, 'type': type, 'csrf': Accounts.heartbeat.csrf},
       options: Options(contentType: Headers.formUrlEncodedContentType),
     );
   }
@@ -718,10 +697,7 @@ abstract final class VideoHttp {
   static Future<LoadingState<String>> pgcAdd({int? seasonId}) async {
     final res = await Request().post(
       Api.pgcAdd,
-      data: {
-        'season_id': seasonId,
-        'csrf': Accounts.main.csrf,
-      },
+      data: {'season_id': seasonId, 'csrf': Accounts.main.csrf},
       options: Options(contentType: Headers.formUrlEncodedContentType),
     );
     if (res.data['code'] == 0) {
@@ -735,10 +711,7 @@ abstract final class VideoHttp {
   static Future<LoadingState<String>> pgcDel({int? seasonId}) async {
     final res = await Request().post(
       Api.pgcDel,
-      data: {
-        'season_id': seasonId,
-        'csrf': Accounts.main.csrf,
-      },
+      data: {'season_id': seasonId, 'csrf': Accounts.main.csrf},
       options: Options(contentType: Headers.formUrlEncodedContentType),
     );
     if (res.data['code'] == 0) {
@@ -759,9 +732,7 @@ abstract final class VideoHttp {
         'status': status,
         'csrf': Accounts.main.csrf,
       },
-      options: Options(
-        contentType: Headers.formUrlEncodedContentType,
-      ),
+      options: Options(contentType: Headers.formUrlEncodedContentType),
     );
     if (res.data['code'] == 0) {
       return Success(res.data['result']['toast']);
@@ -779,11 +750,7 @@ abstract final class VideoHttp {
     assert(aid != null || bvid != null);
     final res = await Request().get(
       Api.onlineTotal,
-      queryParameters: {
-        'aid': aid,
-        'bvid': bvid,
-        'cid': cid,
-      },
+      queryParameters: {'aid': aid, 'bvid': bvid, 'cid': cid},
     );
     if (res.data['code'] == 0) {
       return Success(res.data['data']['total']);
@@ -895,10 +862,7 @@ abstract final class VideoHttp {
   ) async {
     final res = await Request().get(
       Api.getRankApi,
-      queryParameters: await WbiSign.makSign({
-        'rid': rid,
-        'type': 'all',
-      }),
+      queryParameters: await WbiSign.makSign({'rid': rid, 'type': 'all'}),
     );
     if (res.data['code'] == 0) {
       List<HotVideoItemModel> list = <HotVideoItemModel>[];
@@ -994,9 +958,7 @@ abstract final class VideoHttp {
   popularSeriesList() async {
     final res = await Request().get(
       Api.popularSeriesList,
-      queryParameters: await WbiSign.makSign({
-        'web_location': 333.934,
-      }),
+      queryParameters: await WbiSign.makSign({'web_location': 333.934}),
     );
     if (res.data['code'] == 0) {
       return Success(
@@ -1068,14 +1030,41 @@ abstract final class VideoHttp {
       'qn': qn ?? 80,
     };
     AppSign.appSign(params);
-    final res = await Request().get(
-      Api.tvPlayUrl,
-      queryParameters: params,
-    );
+    final res = await Request().get(Api.tvPlayUrl, queryParameters: params);
     if (res.data['code'] == 0) {
       return Success(PlayUrlModel.fromJson(res.data['data']));
     } else {
       return Error(res.data['message']);
     }
+  }
+
+  static Future<LoadingState<VideoShotData>> videoshot({
+    required String bvid,
+    required int cid,
+  }) async {
+    final res = await Request().get(
+      Api.videoshot,
+      queryParameters: {
+        // 'aid': IdUtils.bv2av(_bvid),
+        'bvid': bvid,
+        'cid': cid,
+        'index': 1,
+      },
+      options: Options(
+        headers: {
+          'user-agent': BrowserUa.pc,
+          'referer': 'https://www.bilibili.com/video/$bvid',
+        },
+      ),
+    );
+    if (res.data['code'] == 0) {
+      final data = VideoShotData.fromJson(res.data['data']);
+      if (data.index.isNotEmpty) {
+        return Success(data);
+      } else {
+        return const Error(null);
+      }
+    }
+    return Error(res.data['message']);
   }
 }

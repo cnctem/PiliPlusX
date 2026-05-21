@@ -10,7 +10,6 @@ import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models/common/image_type.dart';
 import 'package:PiliPlus/models_new/live/live_feed_index/card_data_list_item.dart';
 import 'package:PiliPlus/models_new/live/live_feed_index/card_list.dart';
-import 'package:PiliPlus/pages/common/common_page.dart';
 import 'package:PiliPlus/pages/live/controller.dart';
 import 'package:PiliPlus/pages/live/widgets/live_item_app.dart';
 import 'package:PiliPlus/pages/live_area/view.dart';
@@ -31,10 +30,9 @@ class LivePage extends StatefulWidget {
   State<LivePage> createState() => _LivePageState();
 }
 
-class _LivePageState extends CommonPageState<LivePage, LiveController>
+class _LivePageState extends State<LivePage>
     with AutomaticKeepAliveClientMixin {
-  @override
-  LiveController controller = Get.put(LiveController());
+  final LiveController controller = Get.put(LiveController());
 
   @override
   bool get wantKeepAlive => true;
@@ -51,31 +49,29 @@ class _LivePageState extends CommonPageState<LivePage, LiveController>
   Widget build(BuildContext context) {
     super.build(context);
     final ThemeData theme = Theme.of(context);
-    return onBuild(
-      Container(
-        clipBehavior: Clip.hardEdge,
-        margin: const EdgeInsets.symmetric(horizontal: StyleString.safeSpace),
-        decoration: const BoxDecoration(borderRadius: StyleString.mdRadius),
-        child: refreshIndicator(
-          onRefresh: controller.onRefresh,
-          child: CustomScrollView(
-            controller: controller.scrollController,
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              SliverPadding(
-                padding: const EdgeInsets.only(
-                  top: StyleString.cardSpace,
-                  bottom: 100,
-                ),
-                sliver: SliverMainAxisGroup(
-                  slivers: [
-                    Obx(() => _buildTop(theme, controller.topState.value)),
-                    Obx(() => _buildBody(theme, controller.loadingState.value)),
-                  ],
-                ),
+    return Container(
+      clipBehavior: Clip.hardEdge,
+      margin: const EdgeInsets.symmetric(horizontal: StyleString.safeSpace),
+      decoration: const BoxDecoration(borderRadius: StyleString.mdRadius),
+      child: refreshIndicator(
+        onRefresh: controller.onRefresh,
+        child: CustomScrollView(
+          controller: controller.scrollController,
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.only(
+                top: StyleString.cardSpace,
+                bottom: 100,
               ),
-            ],
-          ),
+              sliver: SliverMainAxisGroup(
+                slivers: [
+                  Obx(() => _buildTop(theme, controller.topState.value)),
+                  Obx(() => _buildBody(theme, controller.loadingState.value)),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -300,6 +296,7 @@ class _LivePageState extends CommonPageState<LivePage, LiveController>
         height: 68.0 + textScaler.scale(12),
         child: CustomScrollView(
           scrollDirection: Axis.horizontal,
+          controller: controller.followController,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             SliverFixedExtentList.builder(

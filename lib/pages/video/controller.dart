@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' show min;
 import 'dart:ui';
 
@@ -7,12 +8,9 @@ import 'package:PiliPlus/common/widgets/pair.dart';
 import 'package:PiliPlus/common/widgets/progress_bar/segment_progress_bar.dart';
 import 'package:PiliPlus/grpc/bilibili/app/listener/v1.pbenum.dart'
     show PlaylistSource;
-import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/http/fav.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
-import 'package:PiliPlus/http/sponsor_block.dart';
-import 'package:PiliPlus/http/ua_type.dart';
 import 'package:PiliPlus/http/user.dart';
 import 'package:PiliPlus/http/video.dart';
 import 'package:PiliPlus/main.dart';
@@ -21,7 +19,6 @@ import 'package:PiliPlus/models/common/sponsor_block/action_type.dart';
 import 'package:PiliPlus/models/common/sponsor_block/post_segment_model.dart';
 import 'package:PiliPlus/models/common/sponsor_block/segment_model.dart';
 import 'package:PiliPlus/models/common/sponsor_block/segment_type.dart';
-import 'package:PiliPlus/models/common/sponsor_block/skip_type.dart';
 import 'package:PiliPlus/models/common/video/audio_quality.dart';
 import 'package:PiliPlus/models/common/video/source_type.dart';
 import 'package:PiliPlus/models/common/video/subtitle_pref_type.dart';
@@ -32,7 +29,6 @@ import 'package:PiliPlus/models/video/play/url.dart';
 import 'package:PiliPlus/models_new/download/bili_download_entry_info.dart';
 import 'package:PiliPlus/models_new/media_list/media_list.dart';
 import 'package:PiliPlus/models_new/pgc/pgc_info_model/result.dart';
-import 'package:PiliPlus/models_new/sponsor_block/segment_item.dart';
 import 'package:PiliPlus/models_new/video/video_detail/data.dart';
 import 'package:PiliPlus/models_new/video/video_detail/episode.dart' as ugc;
 import 'package:PiliPlus/models_new/video/video_detail/page.dart';
@@ -42,6 +38,7 @@ import 'package:PiliPlus/models_new/video/video_stein_edgeinfo/data.dart';
 import 'package:PiliPlus/pages/audio/view.dart';
 import 'package:PiliPlus/pages/common/publish/publish_route.dart';
 import 'package:PiliPlus/pages/search/widgets/search_text.dart';
+import 'package:PiliPlus/pages/sponsor_block/block_mixin.dart';
 import 'package:PiliPlus/pages/video/download_panel/view.dart';
 import 'package:PiliPlus/pages/video/introduction/pgc/controller.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';
@@ -56,16 +53,16 @@ import 'package:PiliPlus/plugin/pl_player/models/heart_beat_type.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/services/download/download_service.dart';
 import 'package:PiliPlus/utils/accounts.dart';
-import 'package:PiliPlus/utils/duration_utils.dart';
+import 'package:PiliPlus/utils/extension/file_ext.dart';
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/extension/size_ext.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
+import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:PiliPlus/utils/video_utils.dart';
-import 'package:easy_debounce/easy_throttle.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
@@ -73,11 +70,11 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:flutter_volume_controller/flutter_volume_controller.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:media_kit/media_kit.dart';
+import 'package:media_kit/media_kit.dart' hide Subtitle;
+import 'package:path/path.dart' as path;
 
 class VideoDetailController extends GetxController
-    with GetTickerProviderStateMixin {
+    with GetTickerProviderStateMixin, BlockMixin {
   /// 路由传参
   late final Map args;
   late String bvid;
@@ -91,6 +88,7 @@ class VideoDetailController extends GetxController
 
   // 视频类型 默认投稿视频
   late final VideoType videoType;
+  @override
   late final isUgc = videoType == VideoType.ugc;
   VideoType? _actualVideoType;
 
@@ -116,7 +114,7 @@ class VideoDetailController extends GetxController
   late VideoDecodeFormatType currentDecodeFormats;
 
   // 是否开始自动播放 存在多p的情况下，第二p需要为true
-  final RxBool autoPlay = Pref.autoPlayEnable.obs;
+  final RxBool _autoPlay = Pref.autoPlayEnable.obs;
 
   final videoPlayerKey = GlobalKey();
   final childKey = GlobalKey<ScaffoldState>();
@@ -163,7 +161,6 @@ class VideoDetailController extends GetxController
   late final RxInt seasonIndex = 0.obs;
 
   PlayerStatus? playerStatus;
-  StreamSubscription<Duration>? positionSubscription;
 
   late final scrollKey = GlobalKey<ExtendedNestedScrollViewState>();
   late final RxBool isVertical = false.obs;
@@ -276,7 +273,7 @@ class VideoDetailController extends GetxController
 
   late final watchProgress = GStorage.watchProgress;
   void cacheLocalProgress() {
-    if (plPlayerController.playerStatus.completed) {
+    if (plPlayerController.playerStatus.isCompleted) {
       watchProgress.put(cid.value.toString(), entry.totalTimeMilli);
     } else if (playedTime case final playedTime?) {
       watchProgress.put(cid.value.toString(), playedTime.inMilliseconds);
@@ -485,460 +482,30 @@ class VideoDetailController extends GetxController
   bool get showVideoSheet =>
       (!horizontalScreen && !isPortrait) || plPlayerController.isDesktopPip;
 
-  late final _isBlock = isUgc || !plPlayerController.enablePgcSkip;
-  int? _lastPos;
-  late final List<PostSegmentModel> postList = [];
-  late final List<SegmentModel> segmentList = <SegmentModel>[];
-  late final RxList<Segment> segmentProgressList = <Segment>[].obs;
+  @override
+  late final RxString videoLabel = ''.obs;
+  @override
+  int? get timeLength => data.timeLength;
+  @override
+  BlockConfigMixin get blockConfig => plPlayerController;
+  @override
+  Player? get player => plPlayerController.videoPlayerController;
+  @override
+  bool get isFullScreen => plPlayerController.isFullScreen.value;
+  @override
+  bool get autoPlay => _autoPlay.value;
+  set autoPlay(bool value) => _autoPlay.value = value;
+  @override
+  bool get preInitPlayer => plPlayerController.preInitPlayer;
+  @override
+  int get currPosInMilliseconds =>
+      defaultST?.inMilliseconds ?? plPlayerController.position.inMilliseconds;
+  @override
+  Future<void> seekTo(Duration duration, {required bool isSeek}) =>
+      plPlayerController.seekTo(duration, isSeek: isSeek);
 
-  Color _getColor(SegmentType segment) =>
-      plPlayerController.blockColor[segment.index];
-  late RxString videoLabel = ''.obs;
-
-  Timer? skipTimer;
-  late final listKey = GlobalKey<AnimatedListState>();
-  late final List listData = [];
-
-  void _vote(String uuid, int type) {
-    SponsorBlock.voteOnSponsorTime(
-      uuid: uuid,
-      type: type,
-    ).then((i) => SmartDialog.showToast(i.isSuccess ? '投票成功' : '投票失败: $i'));
-  }
-
-  void _showCategoryDialog(BuildContext context, SegmentModel segment) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        clipBehavior: Clip.hardEdge,
-        contentPadding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: SegmentType.values
-                .map(
-                  (item) => ListTile(
-                    dense: true,
-                    onTap: () {
-                      Get.back();
-                      SponsorBlock.voteOnSponsorTime(
-                        uuid: segment.UUID,
-                        category: item,
-                      ).then((i) {
-                        SmartDialog.showToast(
-                          '类别更改${i.isSuccess ? '成功' : '失败: $i'}',
-                        );
-                      });
-                    },
-                    title: Text.rich(
-                      TextSpan(
-                        children: [
-                          WidgetSpan(
-                            alignment: PlaceholderAlignment.middle,
-                            child: Container(
-                              height: 10,
-                              width: 10,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: _getColor(item),
-                              ),
-                            ),
-                            style: const TextStyle(fontSize: 14, height: 1),
-                          ),
-                          TextSpan(
-                            text: ' ${item.title}',
-                            style: const TextStyle(fontSize: 14, height: 1),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                )
-                .toList(),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showVoteDialog(BuildContext context, SegmentModel segment) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        clipBehavior: Clip.hardEdge,
-        contentPadding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                dense: true,
-                title: const Text(
-                  '赞成票',
-                  style: TextStyle(fontSize: 14),
-                ),
-                onTap: () {
-                  Get.back();
-                  _vote(segment.UUID, 1);
-                },
-              ),
-              ListTile(
-                dense: true,
-                title: const Text(
-                  '反对票',
-                  style: TextStyle(fontSize: 14),
-                ),
-                onTap: () {
-                  Get.back();
-                  _vote(segment.UUID, 0);
-                },
-              ),
-              ListTile(
-                dense: true,
-                title: const Text(
-                  '更改类别',
-                  style: TextStyle(fontSize: 14),
-                ),
-                onTap: () {
-                  Get.back();
-                  _showCategoryDialog(context, segment);
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void showSBDetail(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        clipBehavior: Clip.hardEdge,
-        contentPadding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: segmentList
-                .map(
-                  (item) => ListTile(
-                    onTap: () {
-                      Get.back();
-                      if (_isBlock) {
-                        _showVoteDialog(context, item);
-                      }
-                    },
-                    dense: true,
-                    title: Text.rich(
-                      TextSpan(
-                        children: [
-                          WidgetSpan(
-                            alignment: PlaceholderAlignment.middle,
-                            child: Container(
-                              height: 10,
-                              width: 10,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: _getColor(item.segmentType),
-                              ),
-                            ),
-                            style: const TextStyle(fontSize: 14, height: 1),
-                          ),
-                          TextSpan(
-                            text: ' ${item.segmentType.title}',
-                            style: const TextStyle(fontSize: 14, height: 1),
-                          ),
-                        ],
-                      ),
-                    ),
-                    contentPadding: const EdgeInsets.only(left: 16, right: 8),
-                    subtitle: Text(
-                      '${DurationUtils.formatDuration(item.segment.first / 1000)} 至 ${DurationUtils.formatDuration(item.segment.second / 1000)}',
-                      style: const TextStyle(fontSize: 13),
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          item.skipType.label,
-                          style: const TextStyle(fontSize: 13),
-                        ),
-                        if (item.segment.second != 0)
-                          SizedBox(
-                            width: 36,
-                            height: 36,
-                            child: IconButton(
-                              tooltip: item.skipType == SkipType.showOnly
-                                  ? '跳至此片段'
-                                  : '跳过此片段',
-                              onPressed: () {
-                                Get.back();
-                                onSkip(
-                                  item,
-                                  isSkip: item.skipType != SkipType.showOnly,
-                                  isSeek: false,
-                                );
-                              },
-                              style: IconButton.styleFrom(
-                                padding: EdgeInsets.zero,
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              ),
-                              icon: Icon(
-                                item.skipType == SkipType.showOnly
-                                    ? Icons.my_location
-                                    : MdiIcons.debugStepOver,
-                                size: 18,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withValues(alpha: 0.7),
-                              ),
-                            ),
-                          )
-                        else
-                          const SizedBox(width: 10),
-                      ],
-                    ),
-                  ),
-                )
-                .toList(),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showBlockToast(String msg) {
-    SmartDialog.showToast(
-      msg,
-      alignment: plPlayerController.isFullScreen.value
-          ? const Alignment(0, 0.7)
-          : null,
-    );
-  }
-
-  Future<void> _querySponsorBlock() async {
-    positionSubscription?.cancel();
-    positionSubscription = null;
-    videoLabel.value = '';
-    segmentList.clear();
-    segmentProgressList.clear();
-
-    final result = await SponsorBlock.getSkipSegments(
-      bvid: bvid,
-      cid: cid.value,
-    );
-    switch (result) {
-      case Success<List<SegmentItemModel>>(:final response):
-        handleSBData(response);
-      case Error(:final code) when code != 404:
-        if (kDebugMode) {
-          result.toast();
-        }
-      default:
-    }
-  }
-
-  Future<void> handleSBData(List<SegmentItemModel> list) async {
-    if (list.isNotEmpty) {
-      try {
-        Future? future;
-        final duration = list.first.videoDuration ?? data.timeLength!;
-        // segmentList
-        segmentList.addAll(
-          list
-              .where(
-                (item) =>
-                    plPlayerController.enableList.contains(item.category) &&
-                    item.segment[1] >= item.segment[0],
-              )
-              .map(
-                (item) {
-                  final segmentType = SegmentType.values.byName(item.category);
-                  if (item.segment[0] == 0 && item.segment[1] == 0) {
-                    videoLabel.value +=
-                        '${videoLabel.value.isNotEmpty ? '/' : ''}${segmentType.title}';
-                  }
-                  SkipType skipType;
-                  if (_isBlock) {
-                    skipType = plPlayerController
-                        .blockSettings[segmentType.index]
-                        .second;
-                    if (skipType != SkipType.showOnly) {
-                      if (item.segment[1] == item.segment[0] ||
-                          item.segment[1] - item.segment[0] <
-                              plPlayerController.blockLimit) {
-                        skipType = SkipType.showOnly;
-                      }
-                    }
-                  } else {
-                    skipType = Pref.pgcSkipType;
-                  }
-
-                  final segmentModel = SegmentModel(
-                    UUID: item.uuid,
-                    segmentType: segmentType,
-                    segment: Pair(
-                      first: item.segment[0],
-                      second: item.segment[1],
-                    ),
-                    skipType: skipType,
-                  );
-
-                  if (positionSubscription == null &&
-                      autoPlay.value &&
-                      plPlayerController.videoPlayerController != null) {
-                    final currPost =
-                        defaultST?.inMilliseconds ??
-                        plPlayerController.position.value.inMilliseconds;
-
-                    if (currPost >= segmentModel.segment.first &&
-                        currPost < segmentModel.segment.second) {
-                      _lastPos = currPost;
-
-                      switch (segmentModel.skipType) {
-                        case SkipType.alwaysSkip:
-                        case SkipType.skipOnce:
-                          segmentModel.hasSkipped = true;
-                          final videoPlayerController =
-                              plPlayerController.videoPlayerController!;
-                          if (videoPlayerController.state.playing) {
-                            future = onSkip(
-                              segmentModel,
-                            );
-                          } else {
-                            videoPlayerController.stream.playing.firstWhere((
-                              e,
-                            ) {
-                              if (e) {
-                                future = onSkip(
-                                  segmentModel,
-                                );
-                                return true;
-                              }
-                              return false;
-                            });
-                          }
-
-                          break;
-                        case SkipType.skipManually:
-                          onAddItem(segmentModel);
-                          break;
-                        default:
-                          break;
-                      }
-                    }
-                  }
-
-                  return segmentModel;
-                },
-              ),
-        );
-
-        // _segmentProgressList
-        segmentProgressList.addAll(
-          segmentList.map((e) {
-            double start = (e.segment.first / duration).clamp(0.0, 1.0);
-            double end = (e.segment.second / duration).clamp(0.0, 1.0);
-            return Segment(
-              start: start,
-              end: end,
-              color: _getColor(e.segmentType),
-            );
-          }),
-        );
-
-        if (positionSubscription == null &&
-            (autoPlay.value || plPlayerController.preInitPlayer)) {
-          await future;
-          initSkip();
-        }
-      } catch (e) {
-        if (kDebugMode) debugPrint('failed to parse sponsorblock: $e');
-      }
-    }
-  }
-
-  void initSkip() {
-    if (isClosed) return;
-    if (segmentList.isNotEmpty) {
-      positionSubscription?.cancel();
-      positionSubscription = plPlayerController
-          .videoPlayerController
-          ?.stream
-          .position
-          .listen((position) {
-            int currentPos = position.inSeconds;
-            if (currentPos != _lastPos) {
-              _lastPos = currentPos;
-              final msPos = currentPos * 1000;
-              for (SegmentModel item in segmentList) {
-                // if (kDebugMode) {
-                //   debugPrint(
-                //       '${position.inSeconds},,${item.segment.first},,${item.segment.second},,${item.skipType.name},,${item.hasSkipped}');
-                // }
-                if (msPos <= item.segment.first &&
-                    item.segment.first <= msPos + 1000) {
-                  switch (item.skipType) {
-                    case SkipType.alwaysSkip:
-                      onSkip(item, isSeek: false);
-                      break;
-                    case SkipType.skipOnce:
-                      if (!item.hasSkipped) {
-                        item.hasSkipped = true;
-                        onSkip(item, isSeek: false);
-                      }
-                      break;
-                    case SkipType.skipManually:
-                      onAddItem(item);
-                      break;
-                    default:
-                      break;
-                  }
-                  break;
-                }
-              }
-            }
-          });
-    }
-  }
-
-  void onAddItem(dynamic item) {
-    if (listData.contains(item)) return;
-    listData.insert(0, item);
-    listKey.currentState?.insertItem(0);
-    skipTimer ??= Timer.periodic(const Duration(seconds: 4), (_) {
-      if (listData.isNotEmpty) {
-        onRemoveItem(listData.length - 1, listData.last);
-      }
-    });
-  }
-
-  void cancelSkipTimer() {
-    skipTimer?.cancel();
-    skipTimer = null;
-  }
-
-  void onRemoveItem(int index, item) {
-    EasyThrottle.throttle(
-      'onRemoveItem',
-      const Duration(milliseconds: 500),
-      () {
-        try {
-          listData.removeAt(index);
-          if (listData.isEmpty) {
-            cancelSkipTimer();
-          }
-          listKey.currentState?.removeItem(
-            index,
-            (context, animation) => buildItem(item, animation),
-          );
-        } catch (_) {}
-      },
-    );
-  }
-
-  Widget buildItem(dynamic item, Animation<double> animation) {
+  @override
+  Widget buildItem(Object item, Animation<double> animation) {
     final theme = Get.theme;
     return Align(
       alignment: Alignment.centerLeft,
@@ -966,7 +533,7 @@ class VideoDetailController extends GetxController
               fontSize: 14,
               text: item is SegmentModel
                   ? '跳过: ${item.segmentType.shortTitle}'
-                  : '上次看到第${item + 1}P，点击跳转',
+                  : '上次看到第${(item as int) + 1}P，点击跳转',
               onTap: (_) {
                 if (item is int) {
                   try {
@@ -993,36 +560,6 @@ class VideoDetailController extends GetxController
     );
   }
 
-  Future<void> onSkip(
-    SegmentModel item, {
-    bool isSkip = true,
-    bool isSeek = true,
-  }) async {
-    try {
-      await plPlayerController.seekTo(
-        Duration(milliseconds: item.segment.second),
-        isSeek: isSeek,
-      );
-      if (isSkip) {
-        if (autoPlay.value && Pref.blockToast) {
-          _showBlockToast('已跳过${item.segmentType.shortTitle}片段');
-        }
-        if (_isBlock && Pref.blockTrack) {
-          SponsorBlock.viewedVideoSponsorTime(item.UUID);
-        }
-      } else {
-        _showBlockToast('已跳至${item.segmentType.shortTitle}');
-      }
-    } catch (e) {
-      if (kDebugMode) debugPrint('failed to skip: $e');
-      if (isSkip) {
-        _showBlockToast('${item.segmentType.shortTitle}片段跳过失败');
-      } else {
-        _showBlockToast('跳转失败');
-      }
-    }
-  }
-
   ({int mode, int fontSize, Color color})? dmConfig;
   String? savedDanmaku;
 
@@ -1032,7 +569,8 @@ class VideoDetailController extends GetxController
       SmartDialog.showToast('UP主已关闭弹幕');
       return;
     }
-    final isPlaying = autoPlay.value && plPlayerController.playerStatus.playing;
+    final isPlaying =
+        _autoPlay.value && plPlayerController.playerStatus.isPlaying;
     if (isPlaying) {
       await plPlayerController.pause();
     }
@@ -1042,7 +580,7 @@ class VideoDetailController extends GetxController
           return SendDanmakuPanel(
             cid: cid.value,
             bvid: bvid,
-            progress: plPlayerController.position.value.inMilliseconds,
+            progress: plPlayerController.position.inMilliseconds,
             initialValue: savedDanmaku,
             onSave: (danmaku) => savedDanmaku = danmaku,
             onSuccess: (danmakuModel) {
@@ -1092,8 +630,8 @@ class VideoDetailController extends GetxController
   void updatePlayer() {
     final currentVideoQa = this.currentVideoQa.value;
     if (currentVideoQa == null) return;
-    autoPlay.value = true;
-    playedTime = plPlayerController.position.value;
+    _autoPlay.value = true;
+    playedTime = plPlayerController.position;
     plPlayerController
       ..removeListeners()
       ..isBuffering.value = false
@@ -1119,7 +657,7 @@ class VideoDetailController extends GetxController
   }
 
   Future<void>? _initPlayerIfNeeded() {
-    if (autoPlay.value ||
+    if (_autoPlay.value ||
         (plPlayerController.preInitPlayer && !plPlayerController.processing) &&
             (isFileSource
                 ? true
@@ -1137,24 +675,22 @@ class VideoDetailController extends GetxController
     bool? autoplay,
     Volume? volume,
   }) async {
-    final onlyPlayAudio = plPlayerController.onlyPlayAudio.value;
+    Duration? seek = seekToTime ?? defaultST ?? playedTime;
+    if (seek == null || seek == Duration.zero) {
+      seek = getFirstSegment();
+    }
     await plPlayerController.setDataSource(
-      DataSource(
-        videoSource: isFileSource
-            ? null
-            : onlyPlayAudio
-            ? audio ?? audioUrl
-            : video ?? videoUrl,
-        audioSource: isFileSource || onlyPlayAudio ? null : audio ?? audioUrl,
-        type: isFileSource ? DataSourceType.file : DataSourceType.network,
-        httpHeaders: isFileSource
-            ? null
-            : {
-                'user-agent': UaType.pc.ua,
-                'referer': HttpString.baseUrl,
-              },
-      ),
-      seekTo: seekToTime ?? defaultST ?? playedTime,
+      isFileSource
+          ? FileSource(
+              dir: args['dirPath'],
+              typeTag: entry.typeTag!,
+              isMp4: entry.mediaType == 1,
+            )
+          : NetworkSource(
+              videoSource: video ?? videoUrl!,
+              audioSource: audio ?? audioUrl,
+            ),
+      seekTo: seek,
       duration:
           duration ??
           (data.timeLength == null
@@ -1164,7 +700,7 @@ class VideoDetailController extends GetxController
       aid: aid,
       bvid: bvid,
       cid: cid.value,
-      autoplay: autoplay ?? autoPlay.value,
+      autoplay: autoplay ?? _autoPlay.value,
       epid: isUgc ? null : epId,
       seasonId: isUgc ? null : seasonId,
       pgcType: isUgc ? null : pgcType,
@@ -1178,9 +714,6 @@ class VideoDetailController extends GetxController
       width: firstVideo.width,
       height: firstVideo.height,
       volume: volume ?? this.volume,
-      dirPath: isFileSource ? args['dirPath'] : null,
-      typeTag: isFileSource ? entry.typeTag : null,
-      mediaType: isFileSource ? entry.mediaType : null,
     );
 
     if (isClosed) return;
@@ -1230,8 +763,8 @@ class VideoDetailController extends GetxController
       return;
     }
     isQuerying = true;
-    if (plPlayerController.enableSponsorBlock && _isBlock && !fromReset) {
-      _querySponsorBlock();
+    if (plPlayerController.enableSponsorBlock && isBlock && !fromReset) {
+      querySponsorBlock(bvid: bvid, cid: cid.value);
     }
     if (plPlayerController.cacheVideoQa == null) {
       final isWiFi = await Utils.isWiFi;
@@ -1262,22 +795,16 @@ class VideoDetailController extends GetxController
 
       volume = data.volume;
 
-      final progress = args['progress'];
+      final progress = args.remove('progress');
       if (progress != null) {
         this.defaultST = Duration(milliseconds: progress);
-        args['progress'] = null;
-      } else {
-        this.defaultST =
-            defaultST ??
-            (data.lastPlayTime == null
-                ? Duration.zero
-                : Duration(milliseconds: data.lastPlayTime!));
+      } else if (defaultST == null && data.lastPlayTime != null) {
+        this.defaultST = Duration(milliseconds: data.lastPlayTime!);
       }
 
       if (!isUgc && !fromReset && plPlayerController.enablePgcSkip) {
         if (data.clipInfoList case final clipInfoList?) {
-          positionSubscription?.cancel();
-          positionSubscription = null;
+          resetBlock();
           handleSBData(clipInfoList);
         }
       }
@@ -1310,7 +837,7 @@ class VideoDetailController extends GetxController
       }
       if (data.dash == null) {
         SmartDialog.showToast('视频资源不存在');
-        autoPlay.value = false;
+        _autoPlay.value = false;
         videoState.value = const Error('视频资源不存在');
         if (plPlayerController.isFullScreen.value) {
           plPlayerController.toggleFullScreen(false);
@@ -1405,7 +932,7 @@ class VideoDetailController extends GetxController
       }
       await _initPlayerIfNeeded();
     } else {
-      autoPlay.value = false;
+      _autoPlay.value = false;
       videoState.value = result..toast();
       if (plPlayerController.isFullScreen.value) {
         plPlayerController.toggleFullScreen(false);
@@ -1414,13 +941,14 @@ class VideoDetailController extends GetxController
     isQuerying = false;
   }
 
+  late final List<PostSegmentModel> postList = <PostSegmentModel>[];
   void onBlock(BuildContext context) {
     if (postList.isEmpty) {
       postList.add(
         PostSegmentModel(
           segment: Pair(
             first: 0,
-            second: plPlayerController.position.value.inMilliseconds / 1000,
+            second: plPlayerController.position.inMilliseconds / 1000,
           ),
           category: SegmentType.sponsor,
           actionType: ActionType.skip,
@@ -1476,14 +1004,26 @@ class VideoDetailController extends GetxController
 
     Future<void> setSub(({bool isData, String id}) subtitle) async {
       final sub = subtitles[index - 1];
+
+      String subUri = subtitle.id;
+      File? file;
+      if (subtitle.isData) {
+        subUri = path.join(tmpDirPath, '${cid.value}-${sub.lan}.vtt');
+        file = File(subUri);
+        if (!file.existsSync()) {
+          await file.writeAsString(subtitle.id);
+          try {
+            plPlayerController.videoPlayerController!.platform?.release.add(
+              file.tryDel,
+            );
+          } catch (_) {
+            file.tryDel();
+            return;
+          }
+        }
+      }
       await plPlayerController.videoPlayerController?.setSubtitleTrack(
-        SubtitleTrack(
-          subtitle.id,
-          sub.lanDoc,
-          sub.lan,
-          uri: !subtitle.isData,
-          data: subtitle.isData,
-        ),
+        SubtitleTrack(subUri, sub.lanDoc, sub.lan, uri: true),
       );
       vttSubtitlesIndex.value = index;
     }
@@ -1628,7 +1168,7 @@ class VideoDetailController extends GetxController
 
   void makeHeartBeat() {
     if (plPlayerController.enableHeart &&
-        !plPlayerController.playerStatus.completed &&
+        !plPlayerController.playerStatus.isCompleted &&
         playedTime != null) {
       try {
         plPlayerController.makeHeartBeat(
@@ -1637,7 +1177,7 @@ class VideoDetailController extends GetxController
                     ? -1
                     : playedTime!.inSeconds
               : playedTime!.inSeconds,
-          type: HeartBeatType.status,
+          type: HeartBeatType.completed,
           isManual: true,
           aid: aid,
           bvid: bvid,
@@ -1653,9 +1193,6 @@ class VideoDetailController extends GetxController
 
   @override
   void onClose() {
-    cancelSkipTimer();
-    positionSubscription?.cancel();
-    positionSubscription = null;
     cid.close();
     if (isFileSource) {
       cacheLocalProgress();
@@ -1710,13 +1247,8 @@ class VideoDetailController extends GetxController
       }
 
       // sponsor block
-      if (plPlayerController.enableBlock) {
-        _lastPos = null;
-        positionSubscription?.cancel();
-        positionSubscription = null;
-        videoLabel.value = '';
-        segmentList.clear();
-        segmentProgressList.clear();
+      if (blockConfig.enableBlock) {
+        resetBlock();
       }
 
       // interactive video
@@ -1839,7 +1371,7 @@ class VideoDetailController extends GetxController
       oid: aid,
       subId: [cid.value],
       from: from,
-      heroTag: autoPlay.value ? heroTag : null,
+      heroTag: _autoPlay.value ? heroTag : null,
       start: playedTime,
       audioUrl: audioUrl,
       extraId: extraId,

@@ -104,7 +104,7 @@ class MpvConvertWebp {
         final text = log.text.toDartString().trim();
         debugPrint('WebpConvert: $level $prefix : $text');
         if (kDebugMode) {
-          _success = level != 'error' && level != 'fatal';
+          if (level == 'error' || level == 'fatal') _success = false;
         } else {
           _success = false;
         }
@@ -120,7 +120,7 @@ class MpvConvertWebp {
 
   void _command(List<String> args) {
     final pointers = args.map((e) => e.toNativeUtf8().cast<Int8>()).toList();
-    final arr = calloc<Pointer<Int8>>(128);
+    final arr = calloc<Pointer<Int8>>(pointers.length + 1);
     for (int i = 0; i < args.length; i++) {
       arr[i] = pointers[i];
     }

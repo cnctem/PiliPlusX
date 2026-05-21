@@ -1,52 +1,48 @@
+import 'package:PiliPlus/common/widgets/gesture/horizontal_drag_gesture_recognizer.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart' show TransformationController;
+
+mixin ImageGestureRecognizerMixin on GestureRecognizer {
+  int? _pointer;
+
+  @override
+  void addPointer(PointerDownEvent event) {
+    if (_pointer == event.pointer) {
+      return;
+    }
+    _pointer = event.pointer;
+    super.addPointer(event);
+  }
+}
+
+typedef IsBoundaryAllowed =
+    bool Function(Offset? initialPosition, OffsetPair lastPosition);
 
 class ImageHorizontalDragGestureRecognizer
-    extends HorizontalDragGestureRecognizer {
+    extends CustomHorizontalDragGestureRecognizer
+    with ImageGestureRecognizerMixin {
   ImageHorizontalDragGestureRecognizer({
     super.debugOwner,
     super.supportedDevices,
     super.allowedButtonsFilter,
-    required this.width,
-    required this.transformationController,
   });
 
-  Offset? _initialPosition;
-
-  final double width;
-  final TransformationController transformationController;
-
-  @override
-  void addAllowedPointer(PointerDownEvent event) {
-    super.addAllowedPointer(event);
-    _initialPosition = event.position;
-  }
-
-  bool _isBoundaryAllowed() {
-    if (_initialPosition == null) {
-      return true;
-    }
-    final storage = transformationController.value.storage;
-    final scale = storage[0];
-    if (scale <= 1.0) {
-      return true;
-    }
-    final double xOffset = storage[12];
-    final double boundaryEnd = width * scale;
-    final int xPos = (boundaryEnd + xOffset).round();
-    return (boundaryEnd.round() == xPos &&
-            lastPosition.global.dx > _initialPosition!.dx) ||
-        (width.round() == xPos &&
-            lastPosition.global.dx < _initialPosition!.dx);
-  }
+  IsBoundaryAllowed? isBoundaryAllowed;
 
   @override
   bool hasSufficientGlobalDistanceToAccept(
     PointerDeviceKind pointerDeviceKind,
     double? deviceTouchSlop,
   ) {
-    return globalDistanceMoved.abs() >
-            computeHitSlop(pointerDeviceKind, gestureSettings) &&
-        _isBoundaryAllowed();
+    return super.hasSufficientGlobalDistanceToAccept(
+          pointerDeviceKind,
+          deviceTouchSlop,
+        ) &&
+        (isBoundaryAllowed?.call(initialPosition, lastPosition) ?? true);
+  }
+
+  @override
+  void dispose() {
+    isBoundaryAllowed = null;
+    super.dispose();
   }
 }

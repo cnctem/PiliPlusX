@@ -34,9 +34,12 @@ import 'package:PiliPlus/pages/video/introduction/ugc/widgets/action_item.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/widgets/menu_row.dart';
 import 'package:PiliPlus/pages/video/widgets/header_mixin.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
+import 'package:PiliPlus/plugin/pl_player/models/data_source.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/services/service_locator.dart';
+import 'package:PiliPlus/services/shutdown_timer_service.dart'
+    show shutdownTimerService;
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/accounts/account.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
@@ -419,7 +422,10 @@ class HeaderControlState extends State<HeaderControl>
                   dense: true,
                   onTap: () {
                     Get.back();
-                    PageUtils.scheduleExit(this.context, isFullScreen);
+                    shutdownTimerService.showScheduleExitDialog(
+                      this.context,
+                      isFullScreen: isFullScreen,
+                    );
                   },
                   leading: const Icon(Icons.hourglass_top_outlined, size: 20),
                   title: const Text('定时关闭', style: titleStyle),
@@ -461,14 +467,15 @@ class HeaderControlState extends State<HeaderControl>
                     final value = plPlayerController.superResolutionType.value;
                     return (value, value.label);
                   },
-                  itemBuilder: (_) => enumItemBuilder<SuperResolutionType>(
+                  itemBuilder: (_) => enumItemBuilder(
                     SuperResolutionType.values,
                   ),
                   onSelected: (value, setState) {
                     plPlayerController.setShader(value);
                     setState();
                   },
-                  descPosType: .title,
+                  descFontSize: 12,
+                  descPosType: .subtitle,
                 ),
                 if (!isFileSource)
                   ListTile(
@@ -538,7 +545,9 @@ class HeaderControlState extends State<HeaderControl>
                           );
                         },
                       ),
-                      if ((isFileSource && plPlayerController.mediaType != 1) ||
+                      if ((isFileSource &&
+                              !(plPlayerController.dataSource as FileSource)
+                                  .isMp4) ||
                           (!isFileSource &&
                               videoDetailCtr.audioUrl?.isNotEmpty == true))
                         Obx(
@@ -611,18 +620,21 @@ class HeaderControlState extends State<HeaderControl>
                     ),
                   ),
                 ],
-                ListTile(
+                PopupListTile(
                   dense: true,
-                  onTap: () {
-                    Get.back();
-                    showSetRepeat();
-                  },
                   leading: const Icon(Icons.repeat, size: 20),
-                  title: const Text('播放顺序', style: titleStyle),
-                  subtitle: Text(
-                    plPlayerController.playRepeat.desc,
-                    style: subTitleStyle,
-                  ),
+                  title: const Text('播放顺序'),
+                  value: () {
+                    final value = plPlayerController.playRepeat;
+                    return (value, value.label);
+                  },
+                  itemBuilder: (_) => enumItemBuilder(PlayRepeat.values),
+                  onSelected: (value, setState) {
+                    plPlayerController.setPlayRepeat(value);
+                    setState();
+                  },
+                  descPosType: .subtitle,
+                  descFontSize: 12,
                 ),
                 ListTile(
                   dense: true,
@@ -759,7 +771,6 @@ class HeaderControlState extends State<HeaderControl>
     final hwdec = await player.platform!.maybeAsNativePlayer.getProperty(
       'hwdec-current',
     );
-    if (!context.mounted) return;
     showDialog(
       context: context,
       builder: (context) {
@@ -850,16 +861,6 @@ class HeaderControlState extends State<HeaderControl>
                       title: const Text("rate"),
                       subtitle: Text(state.rate.toString()),
                       onTap: () => Utils.copyText('rate\n${state.rate}'),
-                    ),
-                    ListTile(
-                      dense: true,
-                      title: const Text("AudioBitrate"),
-                      subtitle: Text(
-                        state.audioBitrate.toString(),
-                      ),
-                      onTap: () => Utils.copyText(
-                        'AudioBitrate\n${state.audioBitrate}',
-                      ),
                     ),
                     ListTile(
                       dense: true,
@@ -1657,58 +1658,6 @@ class HeaderControlState extends State<HeaderControl>
     );
   }
 
-  /// 播放顺序
-  void showSetRepeat() {
-    showBottomSheet(
-      (context, setState) {
-        final theme = Theme.of(context);
-        return Padding(
-          padding: const EdgeInsets.all(12),
-          child: Material(
-            clipBehavior: Clip.hardEdge,
-            color: theme.colorScheme.surface,
-            borderRadius: const BorderRadius.all(Radius.circular(12)),
-            child: CustomScrollView(
-              slivers: [
-                const SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 45,
-                    child: Center(
-                      child: Text('选择播放顺序', style: titleStyle),
-                    ),
-                  ),
-                ),
-                SliverList.builder(
-                  itemCount: PlayRepeat.values.length,
-                  itemBuilder: (context, index) {
-                    final i = PlayRepeat.values[index];
-                    return ListTile(
-                      dense: true,
-                      onTap: () {
-                        Get.back();
-                        plPlayerController.setPlayRepeat(i);
-                      },
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                      ),
-                      title: Text(i.desc),
-                      trailing: plPlayerController.playRepeat == i
-                          ? Icon(
-                              Icons.done,
-                              color: theme.colorScheme.primary,
-                            )
-                          : null,
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   late final isFileSource = videoDetailCtr.isFileSource;
 
   @override
@@ -1940,8 +1889,7 @@ class HeaderControlState extends State<HeaderControl>
                           child: IconButton(
                             tooltip: '片段信息',
                             style: btnStyle,
-                            onPressed: () =>
-                                videoDetailCtr.showSBDetail(context),
+                            onPressed: videoDetailCtr.showSBDetail,
                             icon: const Icon(
                               MdiIcons.advertisements,
                               size: 19,

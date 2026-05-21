@@ -24,6 +24,7 @@ class PopupListTile<T> extends StatefulWidget {
     required this.value,
     required this.itemBuilder,
     required this.onSelected,
+    this.descFontSize = 13,
   });
 
   final bool? dense;
@@ -36,6 +37,7 @@ class PopupListTile<T> extends StatefulWidget {
   final ValueGetter<(T, String)> value;
   final PopupMenuItemBuilder<T> itemBuilder;
   final PopupMenuItemSelected<T> onSelected;
+  final double descFontSize;
 
   @override
   State<PopupListTile<T>> createState() => _PopupListTileState<T>();
@@ -45,22 +47,22 @@ class _PopupListTileState<T> extends State<PopupListTile<T>> {
   final _key = PlatformUtils.isDesktop ? null : GlobalKey();
 
   void _showButtonMenu(TapUpDetails details, T value) {
-    final box = context.findRenderObject() as RenderBox;
-    final offset = box.localToGlobal(box.size.topLeft(.zero));
+    final thisOffset = details.globalPosition - details.localPosition;
     final double dx;
     if (PlatformUtils.isDesktop) {
       dx = details.globalPosition.dx + 1;
     } else {
-      final box = _key!.currentContext!.findRenderObject() as RenderBox;
-      final offset = box.localToGlobal(box.size.topLeft(.zero));
-      dx = offset.dx;
+      final thisBox = context.findRenderObject() as RenderBox;
+      final titleBox = _key!.currentContext!.findRenderObject() as RenderBox;
+      final titleOffset = titleBox.localToGlobal(.zero, ancestor: thisBox);
+      dx = thisOffset.dx + titleOffset.dx;
     }
     showMenu<T?>(
       context: context,
-      position: RelativeRect.fromLTRB(dx, offset.dy + 5, dx, 0),
+      position: RelativeRect.fromLTRB(dx, thisOffset.dy + 5, dx, 0),
       items: widget.itemBuilder(context),
       initialValue: value,
-      requestFocus: true,
+      requestFocus: false,
     ).then<void>((T? newValue) {
       if (!mounted) {
         return;
@@ -88,7 +90,7 @@ class _PopupListTileState<T> extends State<PopupListTile<T>> {
     final desc = Text(
       descStr,
       style: TextStyle(
-        fontSize: 13,
+        fontSize: widget.descFontSize,
         color: widget.enabled
             ? theme.colorScheme.secondary
             : theme.disabledColor,

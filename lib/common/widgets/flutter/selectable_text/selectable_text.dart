@@ -8,7 +8,8 @@ import 'package:PiliPlus/common/widgets/flutter/selectable_text/text_selection.d
 import 'package:flutter/cupertino.dart'
     hide TextSelectionGestureDetectorBuilder;
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart' hide TextSelectionGestureDetectorBuilder;
+import 'package:flutter/material.dart'
+    hide SelectableText, TextSelectionGestureDetectorBuilder;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -610,8 +611,9 @@ class _SelectableTextState extends State<SelectableText>
     super.didUpdateWidget(oldWidget);
     if (widget.data != oldWidget.data ||
         widget.textSpan != oldWidget.textSpan) {
-      _controller.removeListener(_onControllerChanged);
-      _controller.dispose();
+      _controller
+        ..removeListener(_onControllerChanged)
+        ..dispose();
       _controller = _TextSpanEditingController(
         textSpan: widget.textSpan ?? TextSpan(text: widget.data),
       );
@@ -763,7 +765,7 @@ class _SelectableTextState extends State<SelectableText>
             cupertinoTheme.primaryColor;
         selectionColor =
             selectionStyle.selectionColor ??
-            cupertinoTheme.primaryColor.withOpacity(0.40);
+            cupertinoTheme.primaryColor.withValues(alpha: 0.40);
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(
           iOSHorizontalOffset / MediaQuery.devicePixelRatioOf(context),
@@ -782,7 +784,7 @@ class _SelectableTextState extends State<SelectableText>
             cupertinoTheme.primaryColor;
         selectionColor =
             selectionStyle.selectionColor ??
-            cupertinoTheme.primaryColor.withOpacity(0.40);
+            cupertinoTheme.primaryColor.withValues(alpha: 0.40);
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(
           iOSHorizontalOffset / MediaQuery.devicePixelRatioOf(context),
@@ -801,7 +803,7 @@ class _SelectableTextState extends State<SelectableText>
             theme.colorScheme.primary;
         selectionColor =
             selectionStyle.selectionColor ??
-            theme.colorScheme.primary.withOpacity(0.40);
+            theme.colorScheme.primary.withValues(alpha: 0.40);
       case _: // Android, Fuchsia, 鸿蒙
         forcePressEnabled = false;
         textSelectionControls ??= materialTextSelectionHandleControls;
@@ -813,7 +815,7 @@ class _SelectableTextState extends State<SelectableText>
             theme.colorScheme.primary;
         selectionColor =
             selectionStyle.selectionColor ??
-            theme.colorScheme.primary.withOpacity(0.40);
+            theme.colorScheme.primary.withValues(alpha: 0.40);
     }
 
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);

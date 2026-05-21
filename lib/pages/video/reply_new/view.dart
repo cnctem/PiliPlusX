@@ -382,11 +382,10 @@ class _ReplyPageState extends CommonRichTextPubPageState<ReplyPage> {
                         .videoPlayerController
                         ?.screenshot(format: 'image/png');
                     if (res != null) {
-                      final file = File(
-                        '$tmpDirPath/${Utils.generateRandomString(8)}.png',
-                      );
-                      await file.writeAsBytes(res);
-                      imageList.add(FilePicModel(path: file.path));
+                      final path =
+                          '$tmpDirPath/${Utils.generateRandomString(8)}.png';
+                      await File(path).writeAsBytes(res);
+                      imageList.add(FilePicModel(path: path));
                     } else {
                       debugPrint('null screenshot');
                     }

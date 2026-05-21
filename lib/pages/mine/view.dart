@@ -31,10 +31,9 @@ class MinePage extends StatefulWidget {
   State<MinePage> createState() => _MediaPageState();
 }
 
-class _MediaPageState extends CommonPageState<MinePage, MineController>
+class _MediaPageState extends CommonPageState<MinePage>
     with AutomaticKeepAliveClientMixin {
-  @override
-  MineController controller = Get.putOrFind(MineController.new);
+  final MineController controller = Get.putOrFind(MineController.new);
   late final MainController _mainController = Get.find<MainController>();
 
   @override
@@ -45,19 +44,19 @@ class _MediaPageState extends CommonPageState<MinePage, MineController>
       _mainController.selectedIndex.value == 0;
 
   @override
-  bool onNotification(UserScrollNotification notification) {
+  bool onNotificationType1(UserScrollNotification notification) {
     if (checkPage) {
       return false;
     }
-    return super.onNotification(notification);
+    return super.onNotificationType1(notification);
   }
 
   @override
-  void listener() {
+  bool onNotificationType2(ScrollNotification notification) {
     if (checkPage) {
-      return;
+      return false;
     }
-    super.listener();
+    return super.onNotificationType2(notification);
   }
 
   @override
@@ -65,21 +64,20 @@ class _MediaPageState extends CommonPageState<MinePage, MineController>
     super.build(context);
     final theme = Theme.of(context);
     final secondary = theme.colorScheme.secondary;
-    return onBuild(
-      Column(
-        children: [
-          Padding(
-            padding: const .symmetric(vertical: 10),
-            child: _buildHeaderActions,
-          ),
-          Expanded(
-            child: Material(
-              type: .transparency,
-              child: refreshIndicator(
-                onRefresh: controller.onRefresh,
-                child: ListView(
+    return Column(
+      children: [
+        Padding(
+          padding: const .symmetric(vertical: 10),
+          child: _buildHeaderActions,
+        ),
+        Expanded(
+          child: Material(
+            type: .transparency,
+            child: refreshIndicator(
+              onRefresh: controller.onRefresh,
+              child: onBuild(
+                ListView(
                   padding: const .only(bottom: 100),
-                  controller: controller.scrollController,
                   physics: const AlwaysScrollableScrollPhysics(),
                   children: [
                     _buildUserInfo(theme, secondary),
@@ -94,8 +92,8 @@ class _MediaPageState extends CommonPageState<MinePage, MineController>
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -433,6 +431,11 @@ class _MediaPageState extends CommonPageState<MinePage, MineController>
     );
   }
 
+  void _autoRefresh() => Future.delayed(
+    const Duration(milliseconds: 150),
+    () => controller.onRefresh(isManual: false),
+  );
+
   Widget _buildFav(ThemeData theme, Color secondary) {
     return Column(
       children: [
@@ -441,12 +444,7 @@ class _MediaPageState extends CommonPageState<MinePage, MineController>
           color: theme.dividerColor.withValues(alpha: 0.1),
         ),
         ListTile(
-          onTap: () => Get.toNamed('/fav')?.whenComplete(
-            () => Future.delayed(
-              const Duration(milliseconds: 150),
-              controller.onRefresh,
-            ),
-          ),
+          onTap: () => Get.toNamed('/fav')?.whenComplete(_autoRefresh),
           dense: true,
           title: Padding(
             padding: const EdgeInsets.only(left: 10),
@@ -507,6 +505,7 @@ class _MediaPageState extends CommonPageState<MinePage, MineController>
           return SizedBox(
             height: 200,
             child: ListView.separated(
+              controller: controller.scrollController,
               padding: const .only(left: 20, top: 10, right: 20),
               itemCount: response.list.length + (flag ? 1 : 0),
               itemBuilder: (context, index) {
@@ -524,12 +523,8 @@ class _MediaPageState extends CommonPageState<MinePage, MineController>
                             ),
                           ),
                         ),
-                        onPressed: () => Get.toNamed('/fav')?.whenComplete(
-                          () => Future.delayed(
-                            const Duration(milliseconds: 150),
-                            controller.onRefresh,
-                          ),
-                        ),
+                        onPressed: () =>
+                            Get.toNamed('/fav')?.whenComplete(_autoRefresh),
                         icon: Icon(
                           Icons.arrow_forward_ios,
                           size: 18,
@@ -542,10 +537,7 @@ class _MediaPageState extends CommonPageState<MinePage, MineController>
                   return FavFolderItem(
                     heroTag: Utils.generateRandomString(8),
                     item: response.list[index],
-                    onPop: () => Future.delayed(
-                      const Duration(milliseconds: 150),
-                      controller.onRefresh,
-                    ),
+                    onPop: _autoRefresh,
                   );
                 }
               },

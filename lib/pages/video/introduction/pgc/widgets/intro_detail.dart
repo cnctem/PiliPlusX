@@ -96,13 +96,9 @@ class _IntroDetailState extends State<PgcIntroPanel>
   Widget buildList(ThemeData theme) {
     return TabBarView<TabBarDragGestureRecognizer>(
       controller: _tabController,
-      physics: const CustomTabBarViewScrollPhysics(),
-      horizontalDragGestureRecognizer: TabBarDragGestureRecognizer(
-        isDxAllowed: (double dx) => enableSlide
-            ? dx > CommonSlideMixin.offset &&
-                  dx < maxWidth - CommonSlideMixin.offset
-            : true,
-      ),
+      physics: clampingScrollPhysics,
+      horizontalDragGestureRecognizer: () =>
+          TabBarDragGestureRecognizer(isDxAllowed: isDxAllowed),
       children: [
         KeepAliveWrapper(builder: (context) => _buildInfo(theme)),
         PgcReviewPage(

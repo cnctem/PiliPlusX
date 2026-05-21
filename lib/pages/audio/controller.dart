@@ -12,19 +12,21 @@ import 'package:PiliPlus/grpc/bilibili/app/listener/v1.pb.dart'
         ListOrder,
         DashItem,
         ResponseUrl;
+import 'package:PiliPlus/http/browser_ua.dart';
 import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/http/loading_state.dart';
-import 'package:PiliPlus/http/ua_type.dart';
 import 'package:PiliPlus/pages/common/common_intro_controller.dart'
     show FavMixin;
 import 'package:PiliPlus/pages/dynamics_repost/view.dart';
 import 'package:PiliPlus/pages/main_reply/view.dart';
+import 'package:PiliPlus/pages/sponsor_block/block_mixin.dart';
 import 'package:PiliPlus/pages/video/controller.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/widgets/triple_mixin.dart';
 import 'package:PiliPlus/pages/video/pay_coins/view.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/services/service_locator.dart';
+import 'package:PiliPlus/services/shutdown_timer_service.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
@@ -42,17 +44,25 @@ import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
 
 class AudioController extends GetxController
-    with GetTickerProviderStateMixin, TripleMixin, FavMixin {
+    with
+        GetTickerProviderStateMixin,
+        TripleMixin,
+        FavMixin,
+        BlockConfigMixin,
+        BlockMixin {
   late Int64 id;
   late Int64 oid;
   late List<Int64> subId;
   late int itemType;
   Int64? extraId;
   late final PlaylistSource from;
-  late final isVideo = itemType == 1;
+  @override
+  late final bool isUgc = itemType == 1;
 
-  final Rx<DetailItem?> audioItem = Rx<DetailItem?>(null);
+  final audioItem = Rxn<DetailItem>();
 
+  bool _hasInit = false;
+  @override
   Player? player;
   late int cacheAudioQa;
 
@@ -62,7 +72,7 @@ class AudioController extends GetxController
 
   late final AnimationController animController;
 
-  Set<StreamSubscription>? _subscriptions;
+  List<StreamSubscription>? _subscriptions;
 
   int? index;
   List<DetailItem>? playlist;
@@ -108,11 +118,8 @@ class AudioController extends GetxController
     final String? audioUrl = args['audioUrl'];
     final hasAudioUrl = audioUrl != null;
     if (hasAudioUrl) {
-      _onOpenMedia(
-        audioUrl,
-        ua: UaType.pc.ua,
-        referer: HttpString.baseUrl,
-      );
+      _querySponsorBlock();
+      _onOpenMedia(audioUrl, ua: BrowserUa.pc, referer: HttpString.baseUrl);
     }
     Utils.isWiFi.then((isWiFi) {
       cacheAudioQa = isWiFi ? Pref.defaultAudioQa : Pref.defaultAudioQaCellular;
@@ -129,18 +136,28 @@ class AudioController extends GetxController
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
+
+    if (shutdownTimerService.isActive) {
+      shutdownTimerService
+        ..onPause = onPause
+        ..isPlaying = isPlaying;
+    }
   }
 
-  Future<void> onPlay() async {
-    await player?.play();
+  bool isPlaying() {
+    return player?.state.playing ?? false;
   }
 
-  Future<void> onPause() async {
-    await player?.pause();
+  Future<void>? onPlay() {
+    return player?.play();
   }
 
-  Future<void> onSeek(Duration duration) async {
-    await player?.seek(duration);
+  Future<void>? onPause() {
+    return player?.pause();
+  }
+
+  Future<void>? onSeek(Duration duration) {
+    return player?.seek(duration);
   }
 
   void _updateCurrItem(DetailItem item) {
@@ -202,7 +219,19 @@ class AudioController extends GetxController
     }
   }
 
+  @pragma('vm:notify-debugger-on-exception')
+  void _querySponsorBlock() {
+    if (isUgc && enableSponsorBlock) {
+      try {
+        final bvid = IdUtils.av2bv(oid.toInt());
+        final cid = subId.first.toInt();
+        querySponsorBlock(bvid: bvid, cid: cid);
+      } catch (_) {}
+    }
+  }
+
   Future<bool> _queryPlayUrl() async {
+    _querySponsorBlock();
     final res = await AudioGrpc.audioPlayUrl(
       itemType: itemType,
       oid: oid,
@@ -245,13 +274,13 @@ class AudioController extends GetxController
     }
   }
 
-  void _onOpenMedia(
+  Future<void> _onOpenMedia(
     String url, {
-    String? referer,
     String ua = Constants.userAgentApp,
-  }) {
-    _initPlayerIfNeeded();
-    player!.open(
+    String? referer,
+  }) async {
+    await _initPlayerIfNeeded();
+    player?.open(
       Media(
         url,
         start: _start,
@@ -264,9 +293,17 @@ class AudioController extends GetxController
     _start = null;
   }
 
-  void _initPlayerIfNeeded() {
-    player ??= Player();
-    _subscriptions ??= {
+  Future<void> _initPlayerIfNeeded() async {
+    if (_hasInit) return;
+    _hasInit = true;
+    assert(player == null, _subscriptions = null);
+    player = Player();
+    if (isClosed) {
+      player!.dispose();
+      player = null;
+      return;
+    }
+    _subscriptions = [
       player!.stream.position.listen((position) {
         if (isDragging) return;
         if (position.inSeconds != this.position.value.inSeconds) {
@@ -275,11 +312,9 @@ class AudioController extends GetxController
           videoPlayerServiceHandler?.onPositionChange(position);
         }
       }),
-      player!.stream.duration.listen((duration) {
-        this.duration.value = duration;
-      }),
+      player!.stream.duration.listen(duration.call),
       player!.stream.playing.listen((playing) {
-        PlayerStatus playerStatus;
+        final PlayerStatus playerStatus;
         if (playing) {
           animController.forward();
           playerStatus = PlayerStatus.playing;
@@ -297,34 +332,34 @@ class AudioController extends GetxController
           false,
         );
         if (completed) {
-          switch (playMode.value) {
-            case PlayRepeat.pause:
-              break;
-            case PlayRepeat.listOrder:
-              playNext(nextPart: true);
-              break;
-            case PlayRepeat.singleCycle:
-              _replay();
-              break;
-            case PlayRepeat.listCycle:
-              if (!playNext(nextPart: true)) {
-                if (index != null && index != 0 && playlist != null) {
-                  playIndex(0);
-                } else {
-                  _replay();
+          if (shutdownTimerService.isWaiting) {
+            shutdownTimerService.handleWaiting();
+          } else {
+            switch (playMode.value) {
+              case PlayRepeat.pause:
+                break;
+              case PlayRepeat.listOrder:
+                playNext(nextPart: true);
+                break;
+              case PlayRepeat.singleCycle:
+                onPlay();
+                break;
+              case PlayRepeat.listCycle:
+                if (!playNext(nextPart: true)) {
+                  if (index != null && index != 0 && playlist != null) {
+                    playIndex(0);
+                  } else {
+                    onPlay();
+                  }
                 }
-              }
-              break;
-            case PlayRepeat.autoPlayRelated:
-              break;
+                break;
+              case PlayRepeat.autoPlayRelated:
+                break;
+            }
           }
         }
       }),
-    };
-  }
-
-  void _replay() {
-    player?.seek(Duration.zero).whenComplete(player!.play);
+    ];
   }
 
   @override
@@ -470,12 +505,12 @@ class AudioController extends GetxController
   void showReply() {
     MainReplyPage.toMainReplyPage(
       oid: oid.toInt(),
-      replyType: isVideo ? 1 : 14,
+      replyType: isUgc ? 1 : 14,
     );
   }
 
   void actionShareVideo(BuildContext context) {
-    final audioUrl = isVideo
+    final audioUrl = isUgc
         ? '${HttpString.baseUrl}/video/${IdUtils.av2bv(oid.toInt())}'
         : '${HttpString.baseUrl}/audio/au$oid';
     showDialog(
@@ -547,7 +582,7 @@ class AudioController extends GetxController
                     useSafeArea: true,
                     builder: (context) => RepostPanel(
                       rid: oid.toInt(),
-                      dynType: isVideo ? 8 : 256,
+                      dynType: isUgc ? 8 : 256,
                       pic: arc.cover,
                       title: arc.title,
                       uname: owner.name,
@@ -556,7 +591,7 @@ class AudioController extends GetxController
                 }
               },
             ),
-            if (isVideo)
+            if (isUgc)
               ListTile(
                 dense: true,
                 title: const Text(
@@ -673,19 +708,8 @@ class AudioController extends GetxController
     }
   }
 
-  // Timer? _timer;
-
-  // void _cancelTimer() {
-  //   _timer?.cancel();
-  //   _timer = null;
-  // }
-
-  // void showTimerDialog() {
-  //   // TODO
-  // }
-
   @override
-  (Object, int) get getFavRidType => (oid, isVideo ? 2 : 12);
+  (Object, int) get getFavRidType => (oid, isUgc ? 2 : 12);
 
   @override
   void updateFavCount(int count) {
@@ -723,8 +747,30 @@ class AudioController extends GetxController
   }
 
   @override
+  BlockConfigMixin get blockConfig => this;
+
+  @override
+  int get currPosInMilliseconds => position.value.inMilliseconds;
+
+  @override
+  Future<void>? seekTo(Duration duration, {required bool isSeek}) =>
+      onSeek(duration);
+
+  @override
+  int? get timeLength => duration.value.inMilliseconds;
+
+  @override
+  bool get autoPlay => true;
+
+  @override
+  bool get preInitPlayer => true;
+
+  @override
   void onClose() {
-    // _cancelTimer();
+    shutdownTimerService
+      ..onPause = null
+      ..isPlaying = null
+      ..reset();
     videoPlayerServiceHandler
       ?..onPlay = null
       ..onPause = null

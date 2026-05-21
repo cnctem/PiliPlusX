@@ -53,7 +53,12 @@ jobs:
 
       - name: apply modal barrier patch
         working-directory: ${{ env.FLUTTER_ROOT }}
-        run: git apply $GITHUB_WORKSPACE/lib/scripts/modal-barrier-patch.diff
+        run: git apply $GITHUB_WORKSPACE/lib/scripts/modal_barrier_patch.diff || true
+        continue-on-error: true
+
+      - name: apply mouse cursor patch
+        working-directory: ${{ env.FLUTTER_ROOT }}
+        run: git apply $GITHUB_WORKSPACE/lib/scripts/mouse_cursor_patch.diff || true
         continue-on-error: true
 
         #TODO: deb and rpm packages need to be build
@@ -75,7 +80,7 @@ jobs:
           printf "复制文件...\n"
           cp -r ../build/linux/x64/release/bundle/* opt/PiliPlus
           cp -r ../assets/linux/DEBIAN .
-          cp ../assets/linux/piliplus.desktop usr/share/applications
+          cp ../assets/linux/com.example.piliplus.desktop usr/share/applications
           cp ../assets/images/logo/logo.png usr/share/icons/hicolor/512x512/apps/piliplus.png
 
           printf "修改控制文件...\n"
@@ -117,7 +122,7 @@ jobs:
           SRC_DIR="$PWD/piliplus-${{ env.version }}"
           mkdir -p "$SRC_DIR/bundle" "$SRC_DIR/assets"
           cp -r build/linux/x64/release/bundle/* "$SRC_DIR/bundle/"
-          cp assets/linux/piliplus.desktop "$SRC_DIR/assets/piliplus.desktop"
+          cp assets/linux/com.example.piliplus.desktop "$SRC_DIR/assets/com.example.piliplus.desktop"
           cp assets/images/logo/logo.png "$SRC_DIR/assets/piliplus.png"
           tar -zcvf "$RPM_BUILD_ROOT/SOURCES/piliplus-${{ env.version }}.tar.gz" -C "$PWD" "piliplus-${{ env.version }}"
 
@@ -150,7 +155,7 @@ jobs:
 
           # 桌面集成
           mkdir -p %{buildroot}/usr/share/applications
-          install -m 644 assets/piliplus.desktop %{buildroot}/usr/share/applications/piliplus.desktop
+          install -m 644 assets/com.example.piliplus.desktop %{buildroot}/usr/share/applications/com.example.piliplus.desktop
 
           mkdir -p %{buildroot}/usr/share/icons/hicolor/512x512/apps
           install -m 644 assets/piliplus.png %{buildroot}/usr/share/icons/hicolor/512x512/apps/piliplus.png
@@ -166,7 +171,7 @@ jobs:
           %files
           /opt/PiliPlus
           /usr/bin/piliplus
-          /usr/share/applications/piliplus.desktop
+          /usr/share/applications/com.example.piliplus.desktop
           /usr/share/icons/hicolor/512x512/apps/piliplus.png
 
           %changelog
@@ -202,8 +207,8 @@ jobs:
           cp -r build/linux/x64/release/bundle/* "$APPDIR/usr/bin/"
 
           printf "复制桌面文件和图标...\n"
-          cp assets/linux/piliplus.desktop "$APPDIR/piliplus.desktop"
-          cp assets/linux/piliplus.desktop "$APPDIR/usr/share/applications/piliplus.desktop"
+          cp assets/linux/com.example.piliplus.desktop "$APPDIR/com.example.piliplus.desktop"
+          cp assets/linux/com.example.piliplus.desktop "$APPDIR/usr/share/applications/com.example.piliplus.desktop"
           cp assets/images/logo/logo.png "$APPDIR/piliplus.png"
           cp assets/images/logo/logo.png "$APPDIR/usr/share/icons/hicolor/512x512/apps/piliplus.png"
 
@@ -219,8 +224,8 @@ jobs:
           chmod +x "$APPDIR/AppRun"
 
           printf "修改桌面文件中的 Exec 路径...\n"
-          sed -i 's|Exec=piliplus|Exec=piliplus|g' "$APPDIR/piliplus.desktop"
-          sed -i 's|Icon=piliplus|Icon=piliplus|g' "$APPDIR/piliplus.desktop"
+          sed -i 's|Exec=piliplus|Exec=piliplus|g' "$APPDIR/com.example.piliplus.desktop"
+          sed -i 's|Icon=piliplus|Icon=piliplus|g' "$APPDIR/com.example.piliplus.desktop"
 
           printf "打包 AppImage...\n"
           ARCH=x86_64 ./appimagetool-x86_64.AppImage "$APPDIR" "PiliPlus_linux_${{ env.version }}_amd64.AppImage"
@@ -241,25 +246,29 @@ jobs:
             PiliPlus_linux_*.AppImage
 
       - name: Upload linux targz package
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
+          archive: false
           name: Linux_targz_amd64_packege
           path: PiliPlus_linux_*.tar.gz
 
       - name: Upload linux deb package
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
+          archive: false
           name: Linux_deb_amd64_package
           path: PiliPlus_linux_*.deb
 
       - name: Upload linux rpm package
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
+          archive: false
           name: Linux_rpm_amd64_package
           path: PiliPlus_linux_*.rpm
 
       - name: Upload linux AppImage package
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
+          archive: false
           name: Linux_AppImage_amd64_package
           path: PiliPlus_linux_*.AppImage

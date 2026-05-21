@@ -35,6 +35,7 @@ class _MainAppState extends PopScopeState<MainApp>
     with RouteAware, WidgetsBindingObserver, WindowListener, TrayListener {
   final _mainController = Get.put(MainController());
   late final _setting = GStorage.setting;
+  late EdgeInsets _padding;
 
   @override
   void initState() {
@@ -48,12 +49,16 @@ class _MainAppState extends PopScopeState<MainApp>
         trayManager.addListener(this);
         _handleTray();
       }
+    } else {
+      // FlutterSmartDialog throws
+      PiliScheme.init();
     }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _padding = MediaQuery.viewPaddingOf(context);
     final brightness = Theme.brightnessOf(context);
     NetworkImgLayer.reduce =
         NetworkImgLayer.reduceLuxColor != null && brightness.isDark;
@@ -172,18 +177,19 @@ class _MainAppState extends PopScopeState<MainApp>
 
   void _onHideWindow() {
     if (_mainController.pauseOnMinimize) {
-      _mainController.isPlaying =
-          PlPlayerController.instance?.playerStatus.value ==
-          PlayerStatus.playing;
-      PlPlayerController.pauseIfExists();
+      if (PlPlayerController.instance case final player?) {
+        if (_mainController.isPlaying = player.playerStatus.isPlaying) {
+          player.pause();
+        }
+      } else {
+        _mainController.isPlaying = false;
+      }
     }
   }
 
   void _onShowWindow() {
-    if (_mainController.pauseOnMinimize) {
-      if (_mainController.isPlaying) {
-        PlPlayerController.playIfExists();
-      }
+    if (_mainController.pauseOnMinimize && _mainController.isPlaying) {
+      PlPlayerController.instance?.play();
     }
   }
 
@@ -216,9 +222,9 @@ class _MainAppState extends PopScopeState<MainApp>
 
   Future<void> _handleTray() async {
     if (Platform.isWindows) {
-      await trayManager.setIcon('assets/images/logo/app_icon.ico');
+      await trayManager.setIcon('assets/images/logo/ico/app_icon.ico');
     } else {
-      await trayManager.setIcon('assets/images/logo/logo_large.png');
+      await trayManager.setIcon('assets/images/logo/desktop/logo_large.png');
     }
     if (!Platform.isLinux) {
       await trayManager.setToolTip(Constants.appName);
@@ -237,8 +243,6 @@ class _MainAppState extends PopScopeState<MainApp>
   static void _onBack() {
     if (Platform.isAndroid) {
       Utils.channel.invokeMethod('back');
-    } else {
-      SystemNavigator.pop();
     }
   }
 
@@ -250,6 +254,7 @@ class _MainAppState extends PopScopeState<MainApp>
       if (_mainController.selectedIndex.value != 0) {
         _mainController
           ..setIndex(0)
+          ..barOffset?.value = 0.0
           ..showBottomBar?.value = true
           ..setSearchBar();
       } else {
@@ -258,102 +263,116 @@ class _MainAppState extends PopScopeState<MainApp>
     }
   }
 
-  Widget? _bottomNav(ThemeData theme) {
-    Widget? bottomNav;
-    if (_mainController.navigationBars.length <= 1) return null;
-    if (_mainController.enableLGBar.value) {
-      final primary = theme.colorScheme.primary;
-      bottomNav = Obx(
-        () => Align(
-          alignment: Alignment.bottomCenter,
-          child: SizedBox(
-            width: 488,
-            child: GlassBottomBar(
-              quality: GlassQuality.premium,
-              selectedIconColor: theme.colorScheme.primary,
-              unselectedIconColor: theme.hintColor,
-              indicatorColor: primary.withValues(alpha: 0.1),
-              magnification: 1.2,
-              indicatorSettings: LiquidGlassSettings(
-                blur: 0,
-                glassColor: primary.withValues(alpha: 0.2),
-                saturation: 1.2,
-                ambientStrength: 0.5,
-                thickness: 30,
-              ),
-              glassSettings: const LiquidGlassSettings(
-                blur: 30,
-                glassColor: Color.fromRGBO(255, 255, 255, 0.15),
-                ambientStrength: 0.5,
-                saturation: 1.2,
-              ),
-              verticalPadding: 16,
-              barHeight: 56,
-              selectedIndex: _mainController.selectedIndex.value,
-              onTabSelected: _mainController.setIndex,
-              tabs: _mainController.navigationBars
-                  .map(
-                    (e) => GlassBottomBarTab(
-                      label: e.label,
-                      icon: _buildIcon(type: e),
-                      activeIcon: _buildIcon(
-                        type: e,
-                        selected: true,
+  Widget? get _bottomNav {
+    Widget? bottomNav = _mainController.navigationBars.length > 1
+        ? _mainController.enableLGBar.value
+              ? Obx(
+                  () {
+                    final theme = Theme.of(context);
+                    final primary = theme.colorScheme.primary;
+                    return Align(
+                      alignment: Alignment.bottomCenter,
+                      child: SizedBox(
+                        width: 488,
+                        child: GlassBottomBar(
+                          quality: GlassQuality.premium,
+                          selectedIconColor: theme.colorScheme.primary,
+                          unselectedIconColor: theme.hintColor,
+                          indicatorColor: primary.withValues(alpha: 0.1),
+                          magnification: 1.2,
+                          indicatorSettings: LiquidGlassSettings(
+                            blur: 0,
+                            glassColor: primary.withValues(alpha: 0.2),
+                            saturation: 1.2,
+                            ambientStrength: 0.5,
+                            thickness: 30,
+                          ),
+                          glassSettings: const LiquidGlassSettings(
+                            blur: 30,
+                            glassColor: Color.fromRGBO(255, 255, 255, 0.15),
+                            ambientStrength: 0.5,
+                            saturation: 1.2,
+                          ),
+                          verticalPadding: 16,
+                          barHeight: 56,
+                          selectedIndex: _mainController.selectedIndex.value,
+                          onTabSelected: _mainController.setIndex,
+                          tabs: _mainController.navigationBars
+                              .map(
+                                (e) => GlassBottomBarTab(
+                                  label: e.label,
+                                  icon: _buildIcon(type: e),
+                                  activeIcon: _buildIcon(
+                                    type: e,
+                                    selected: true,
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        ),
                       ),
-                    ),
-                  )
-                  .toList(),
+                    );
+                  },
+                )
+              : _mainController.enableMYBar
+              ? Obx(
+                  () => NavigationBar(
+                    maintainBottomViewPadding: true,
+                    onDestinationSelected: _mainController.setIndex,
+                    selectedIndex: _mainController.selectedIndex.value,
+                    destinations: _mainController.navigationBars
+                        .map(
+                          (e) => NavigationDestination(
+                            label: e.label,
+                            icon: _buildIcon(type: e),
+                            selectedIcon: _buildIcon(type: e, selected: true),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                )
+              : Obx(
+                  () => BottomNavigationBar(
+                    currentIndex: _mainController.selectedIndex.value,
+                    onTap: _mainController.setIndex,
+                    iconSize: 16,
+                    selectedFontSize: 12,
+                    unselectedFontSize: 12,
+                    type: .fixed,
+                    items: _mainController.navigationBars
+                        .map(
+                          (e) => BottomNavigationBarItem(
+                            label: e.label,
+                            icon: _buildIcon(type: e),
+                            activeIcon: _buildIcon(type: e, selected: true),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                )
+        : null;
+    if (bottomNav != null && _mainController.hideBottomBar) {
+      if (_mainController.barOffset case final barOffset?) {
+        return Obx(
+          () => FractionalTranslation(
+            translation: Offset(
+              0.0,
+              barOffset.value / StyleString.topBarHeight,
             ),
+            child: bottomNav,
           ),
-        ),
-      );
-    } else if (_mainController.enableMYBar) {
-      bottomNav = Obx(
-        () => NavigationBar(
-          maintainBottomViewPadding: true,
-          onDestinationSelected: _mainController.setIndex,
-          selectedIndex: _mainController.selectedIndex.value,
-          destinations: _mainController.navigationBars
-              .map(
-                (e) => NavigationDestination(
-                  label: e.label,
-                  icon: _buildIcon(type: e),
-                  selectedIcon: _buildIcon(type: e, selected: true),
-                ),
-              )
-              .toList(),
-        ),
-      );
-    } else {
-      bottomNav = Obx(
-        () => BottomNavigationBar(
-          currentIndex: _mainController.selectedIndex.value,
-          onTap: _mainController.setIndex,
-          iconSize: 16,
-          selectedFontSize: 12,
-          unselectedFontSize: 12,
-          type: .fixed,
-          items: _mainController.navigationBars
-              .map(
-                (e) => BottomNavigationBarItem(
-                  label: e.label,
-                  icon: _buildIcon(type: e),
-                  activeIcon: _buildIcon(type: e, selected: true),
-                ),
-              )
-              .toList(),
-        ),
-      );
-    }
-    if (_mainController.showBottomBar case final bottomBar?) {
-      return Obx(
-        () => AnimatedSlide(
-          curve: Curves.easeInOutCubicEmphasized,
-          duration: const Duration(milliseconds: 500),
-          offset: Offset(0, bottomBar.value ? 0 : 1),
-          child: bottomNav,
-        ),
-      );
+        );
+      }
+      if (_mainController.showBottomBar case final showBottomBar?) {
+        return Obx(
+          () => AnimatedSlide(
+            curve: Curves.easeInOutCubicEmphasized,
+            duration: const Duration(milliseconds: 500),
+            offset: Offset(0, showBottomBar.value ? 0 : 1),
+            child: bottomNav,
+          ),
+        );
+      }
     }
     return bottomNav;
   }
@@ -428,8 +447,6 @@ class _MainAppState extends PopScopeState<MainApp>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final padding = MediaQuery.viewPaddingOf(context);
-
     Widget child;
     if (_mainController.mainTabBarView) {
       child = CustomTabBarView(
@@ -448,7 +465,7 @@ class _MainAppState extends PopScopeState<MainApp>
 
     Widget? bottomNav;
     if (_mainController.useBottomNav) {
-      bottomNav = _bottomNav(theme);
+      bottomNav = _bottomNav;
       child = Row(children: [Expanded(child: child)]);
     } else {
       child = Row(
@@ -456,7 +473,7 @@ class _MainAppState extends PopScopeState<MainApp>
           _sideBar(theme),
           VerticalDivider(
             width: 1,
-            endIndent: padding.bottom,
+            endIndent: _padding.bottom,
             color: theme.colorScheme.outline.withValues(alpha: 0.06),
           ),
           Expanded(child: child),
@@ -470,8 +487,8 @@ class _MainAppState extends PopScopeState<MainApp>
       appBar: AppBar(toolbarHeight: 0),
       body: Padding(
         padding: EdgeInsets.only(
-          left: _mainController.useBottomNav ? padding.left : 0.0,
-          right: padding.right,
+          left: _mainController.useBottomNav ? _padding.left : 0.0,
+          right: _padding.right,
         ),
         child: child,
       ),

@@ -148,6 +148,6 @@ pili_release.json
 
 dist
 
-test.dart
+test*.dart
 
 ohos/build-profile.json5

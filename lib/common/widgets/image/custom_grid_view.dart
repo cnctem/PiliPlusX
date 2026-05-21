@@ -30,14 +30,16 @@ import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
-import 'package:flutter/material.dart'
-    hide CustomMultiChildLayout, MultiChildLayoutDelegate;
+import 'package:flutter/gestures.dart'
+    show TapGestureRecognizer, LongPressGestureRecognizer;
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart'
     show
         ContainerRenderObjectMixin,
         RenderBoxContainerDefaultsMixin,
         MultiChildLayoutParentData,
-        BoxHitTestResult;
+        BoxHitTestResult,
+        BoxHitTestEntry;
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/get_navigation.dart';
@@ -97,6 +99,7 @@ class CustomGridView extends StatelessWidget {
           liveUrl: isLive ? item.liveUrl : null,
           width: isLive ? item.width.toInt() : null,
           height: isLive ? item.height.toInt() : null,
+          isLongPic: item.isLongPic,
         );
       },
     ).toList();
@@ -148,8 +151,9 @@ class CustomGridView extends StatelessWidget {
 
   static bool enableImgMenu = Pref.enableImgMenu;
 
-  void _showMenu(BuildContext context, Offset offset, ImageModel item) {
+  void _showMenu(BuildContext context, int index, Offset offset) {
     HapticFeedback.mediumImpact();
+    final item = picArr[index];
     showMenu(
       context: context,
       position: PageUtils.menuPosition(offset),
@@ -253,53 +257,53 @@ class CustomGridView extends StatelessWidget {
           column: column,
           width: imageWidth,
           height: imageHeight,
+          onTap: (index) => onTap(context, index),
+          onSecondaryTapUp: enableImgMenu && PlatformUtils.isDesktop
+              ? (index, offset) => _showMenu(context, index, offset)
+              : null,
+          onLongPressStart: enableImgMenu && PlatformUtils.isMobile
+              ? (index, offset) => _showMenu(context, index, offset)
+              : null,
           children: List.generate(length, (index) {
             final item = picArr[index];
             final borderRadius = _borderRadius(column, length, index);
+            Widget child = Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                NetworkImgLayer(
+                  src: item.url,
+                  width: imageWidth,
+                  height: imageHeight,
+                  borderRadius: borderRadius,
+                  alignment: item.isLongPic ? .topCenter : .center,
+                  cacheWidth: item.width <= item.height,
+                  getPlaceHolder: () => placeHolder,
+                ),
+                if (item.isLivePhoto)
+                  const PBadge(
+                    text: 'Live',
+                    right: 8,
+                    bottom: 8,
+                    type: PBadgeType.gray,
+                  )
+                else if (item.isLongPic)
+                  const PBadge(
+                    text: '长图',
+                    right: 8,
+                    bottom: 8,
+                  ),
+              ],
+            );
+            if (!item.isLongPic) {
+              child = Hero(
+                tag: item.url,
+                child: child,
+              );
+            }
             return LayoutId(
               id: index,
-              child: GestureDetector(
-                onTap: () => onTap(context, index),
-                onSecondaryTapUp: enableImgMenu && PlatformUtils.isDesktop
-                    ? (details) =>
-                          _showMenu(context, details.globalPosition, item)
-                    : null,
-                onLongPressStart: enableImgMenu && PlatformUtils.isMobile
-                    ? (details) =>
-                          _showMenu(context, details.globalPosition, item)
-                    : null,
-                child: Hero(
-                  tag: item.url,
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    alignment: Alignment.center,
-                    children: [
-                      NetworkImgLayer(
-                        src: item.url,
-                        width: imageWidth,
-                        height: imageHeight,
-                        borderRadius: borderRadius,
-                        alignment: item.isLongPic ? .topCenter : .center,
-                        cacheWidth: item.width <= item.height,
-                        getPlaceHolder: () => placeHolder,
-                      ),
-                      if (item.isLivePhoto)
-                        const PBadge(
-                          text: 'Live',
-                          right: 8,
-                          bottom: 8,
-                          type: PBadgeType.gray,
-                        )
-                      else if (item.isLongPic)
-                        const PBadge(
-                          text: '长图',
-                          right: 8,
-                          bottom: 8,
-                        ),
-                    ],
-                  ),
-                ),
-              ),
+              child: child,
             );
           }),
         ),
@@ -316,12 +320,18 @@ class ImageGrid extends MultiChildRenderObjectWidget {
     required this.column,
     required this.width,
     required this.height,
+    required this.onTap,
+    required this.onSecondaryTapUp,
+    required this.onLongPressStart,
   });
 
   final double space;
   final int column;
   final double width;
   final double height;
+  final ValueChanged<int> onTap;
+  final OnShowMenu? onSecondaryTapUp;
+  final OnShowMenu? onLongPressStart;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -330,6 +340,9 @@ class ImageGrid extends MultiChildRenderObjectWidget {
       column: column,
       width: width,
       height: height,
+      onTap: onTap,
+      onSecondaryTapUp: onSecondaryTapUp,
+      onLongPressStart: onLongPressStart,
     );
   }
 
@@ -339,9 +352,14 @@ class ImageGrid extends MultiChildRenderObjectWidget {
       ..space = space
       ..column = column
       ..width = width
-      ..height = height;
+      ..height = height
+      ..onTap = onTap
+      ..onSecondaryTapUp = onSecondaryTapUp
+      ..onLongPressStart = onLongPressStart;
   }
 }
+
+typedef OnShowMenu = Function(int index, Offset offset);
 
 class RenderImageGrid extends RenderBox
     with
@@ -352,10 +370,54 @@ class RenderImageGrid extends RenderBox
     required int column,
     required double width,
     required double height,
+    required ValueChanged<int> onTap,
+    required OnShowMenu? onSecondaryTapUp,
+    required OnShowMenu? onLongPressStart,
   }) : _space = space,
        _column = column,
        _width = width,
-       _height = height;
+       _height = height,
+       _onTap = onTap,
+       _onSecondaryTapUp = onSecondaryTapUp,
+       _onLongPressStart = onLongPressStart {
+    _tapGestureRecognizer = TapGestureRecognizer()..onTap = _handleOnTap;
+    if (onSecondaryTapUp != null) {
+      _tapGestureRecognizer.onSecondaryTapUp = _handleSecondaryTapUp;
+    }
+    if (onLongPressStart != null) {
+      _longPressGestureRecognizer = LongPressGestureRecognizer()
+        ..onLongPressStart = _handleLongPressStart;
+    }
+  }
+
+  ValueChanged<int> _onTap;
+  set onTap(ValueChanged<int> value) {
+    _onTap = value;
+  }
+
+  OnShowMenu? _onSecondaryTapUp;
+  set onSecondaryTapUp(OnShowMenu? value) {
+    _onSecondaryTapUp = value;
+  }
+
+  OnShowMenu? _onLongPressStart;
+  set onLongPressStart(OnShowMenu? value) {
+    _onLongPressStart = value;
+  }
+
+  int? _index;
+
+  void _handleOnTap() {
+    _onTap(_index!);
+  }
+
+  void _handleSecondaryTapUp(TapUpDetails details) {
+    _onSecondaryTapUp!(_index!, details.globalPosition);
+  }
+
+  void _handleLongPressStart(LongPressStartDetails details) {
+    _onLongPressStart!(_index!, details.globalPosition);
+  }
 
   double _space;
   double get space => _space;
@@ -410,7 +472,7 @@ class RenderImageGrid extends RenderBox
     while (child != null) {
       final childParentData = child.parentData as MultiChildLayoutParentData;
       final index = childParentData.id as int;
-      child.layout(itemConstraints, parentUsesSize: true);
+      child.layout(itemConstraints);
       childParentData.offset = Offset(
         (space + width) * (index % column),
         (space + height) * (index ~/ column),
@@ -421,19 +483,62 @@ class RenderImageGrid extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    RenderBox? child = firstChild;
-    while (child != null) {
-      final childParentData = child.parentData as MultiChildLayoutParentData;
-      context.paintChild(child, childParentData.offset + offset);
-      child = childParentData.nextSibling;
-    }
+    defaultPaint(context, offset);
   }
 
   @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
-    return defaultHitTestChildren(result, position: position);
+    RenderBox? child = lastChild;
+    while (child != null) {
+      final childParentData = child.parentData as MultiChildLayoutParentData;
+      final bool isHit = result.addWithPaintOffset(
+        offset: childParentData.offset,
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset transformed) {
+          assert(transformed == position - childParentData.offset);
+          if (child!.size.contains(transformed)) {
+            result.add(BoxHitTestEntry(child, transformed));
+            return true;
+          }
+          return false;
+        },
+      );
+      if (isHit) {
+        _index = childParentData.id as int;
+        return true;
+      }
+      child = childParentData.previousSibling;
+    }
+    _index = null;
+    return false;
   }
 
   @override
-  bool get isRepaintBoundary => true;
+  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    if (event is PointerDownEvent) {
+      _tapGestureRecognizer.addPointer(event);
+      _longPressGestureRecognizer?.addPointer(event);
+    }
+  }
+
+  late final TapGestureRecognizer _tapGestureRecognizer;
+  LongPressGestureRecognizer? _longPressGestureRecognizer;
+
+  @override
+  void dispose() {
+    _tapGestureRecognizer
+      ..onTap = null
+      ..onSecondaryTapUp = null
+      ..dispose();
+    _longPressGestureRecognizer
+      ?..onLongPressStart = null
+      ..dispose();
+    _longPressGestureRecognizer = null;
+    _onSecondaryTapUp = null;
+    _onLongPressStart = null;
+    super.dispose();
+  }
+
+  @override
+  bool get isRepaintBoundary => true; // gif repaint
 }
