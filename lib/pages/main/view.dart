@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
+import 'package:os_type/os_type.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -242,6 +243,7 @@ class _MainAppState extends PopScopeState<MainApp>
   }
 
   static void _onBack() {
+    if (OS.isHarmony) SystemNavigator.pop();
     if (Platform.isAndroid) {
       Utils.channel.invokeMethod('back');
     }
