@@ -82,10 +82,28 @@ Future<void> _initDownPath() async {
   } else if (OS.isHarmony) {
     downloadPath = 'storage/Users/currentUser/Download/com.example.piliplus';
   } else if (Platform.isAndroid) {
+    final customDownPath = Pref.downloadPath;
     final externalStorageDirPath = (await getExternalStorageDirectory())?.path;
-    downloadPath = externalStorageDirPath != null
+    final androidDefaultDownloadPath = externalStorageDirPath != null
         ? path.join(externalStorageDirPath, PathUtils.downloadDir)
         : defDownloadPath;
+    if (customDownPath != null && customDownPath.isNotEmpty) {
+      try {
+        final dir = Directory(customDownPath);
+        if (!dir.existsSync()) {
+          await dir.create(recursive: true);
+        }
+        downloadPath = customDownPath;
+      } catch (e) {
+        downloadPath = androidDefaultDownloadPath;
+        await GStorage.setting.delete(SettingBoxKey.downloadPath);
+        if (kDebugMode) {
+          debugPrint('download path error: $e');
+        }
+      }
+    } else {
+      downloadPath = androidDefaultDownloadPath;
+    }
   } else {
     downloadPath = defDownloadPath;
   }

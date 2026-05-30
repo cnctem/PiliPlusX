@@ -40,6 +40,8 @@ abstract final class PiliAndroidHelper {
 
   static (int, int)? maxScreenSize() => null;
 
+  static String? getStorageVolumeDescription(String uuid) => null;
+
   static void createShortcut(
     String id,
     String uri,
