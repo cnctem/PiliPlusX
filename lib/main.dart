@@ -43,7 +43,6 @@ import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:path/path.dart' as path;
@@ -76,10 +75,28 @@ Future<void> _initDownPath() async {
       downloadPath = defDownloadPath;
     }
   } else if (Platform.isAndroid) {
+    final customDownPath = Pref.downloadPath;
     final externalStorageDirPath = (await getExternalStorageDirectory())?.path;
-    downloadPath = externalStorageDirPath != null
+    final androidDefaultDownloadPath = externalStorageDirPath != null
         ? path.join(externalStorageDirPath, PathUtils.downloadDir)
         : defDownloadPath;
+    if (customDownPath != null && customDownPath.isNotEmpty) {
+      try {
+        final dir = Directory(customDownPath);
+        if (!dir.existsSync()) {
+          await dir.create(recursive: true);
+        }
+        downloadPath = customDownPath;
+      } catch (e) {
+        downloadPath = androidDefaultDownloadPath;
+        await GStorage.setting.delete(SettingBoxKey.downloadPath);
+        if (kDebugMode) {
+          debugPrint('download path error: $e');
+        }
+      }
+    } else {
+      downloadPath = androidDefaultDownloadPath;
+    }
   } else {
     downloadPath = defDownloadPath;
   }
