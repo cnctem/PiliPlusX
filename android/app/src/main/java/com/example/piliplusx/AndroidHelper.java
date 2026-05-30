@@ -21,6 +21,8 @@ import android.graphics.drawable.Icon;
 import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Build;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Rational;
@@ -243,6 +245,24 @@ public final class AndroidHelper {
         } catch (Exception ignored) {
             return null;
         }
+    }
+
+    public static String getStorageVolumeDescription(String uuid) {
+        if (uuid == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            return null;
+        }
+
+        try {
+            Context context = getContext();
+            StorageManager storageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
+            for (StorageVolume volume : storageManager.getStorageVolumes()) {
+                if (uuid.equalsIgnoreCase(volume.getUuid())) {
+                    return volume.getDescription(context);
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+        return null;
     }
 
     public static void createShortcut(@NonNull String id, @NonNull String uri, @NonNull String label, @NonNull String icon) {
