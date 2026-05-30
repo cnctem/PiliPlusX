@@ -612,6 +612,43 @@ extension type AndroidHelper._(jni$_.JObject _$this) implements jni$_.JObject {
     ).object<jni$_.JIntArray?>();
   }
 
+  static final _id_getStorageVolumeDescription = _class.staticMethodId(
+    r'getStorageVolumeDescription',
+    r'(Ljava/lang/String;)Ljava/lang/String;',
+  );
+
+  static final _getStorageVolumeDescription =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String getStorageVolumeDescription(java.lang.String uuid)`
+  /// The returned object must be released after use, by calling the [release] method.
+  static jni$_.JString? getStorageVolumeDescription(
+    jni$_.JString uuid,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$uuid = uuid.reference;
+    return _getStorageVolumeDescription(
+      _$$classRef.pointer,
+      _id_getStorageVolumeDescription.pointer,
+      _$uuid.pointer,
+    ).object<jni$_.JString?>();
+  }
+
   static final _id_createShortcut = _class.staticMethodId(
     r'createShortcut',
     r'(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V',

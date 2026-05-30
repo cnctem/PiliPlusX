@@ -104,6 +104,17 @@ abstract final class PiliAndroidHelper {
     return null;
   }
 
+  static String? getStorageVolumeDescription(String uuid) {
+    final jUuid = uuid.toJString();
+    try {
+      return AndroidHelper.getStorageVolumeDescription(
+        jUuid,
+      )?.toDartString(releaseOriginal: true);
+    } finally {
+      jUuid.release();
+    }
+  }
+
   static void createShortcut(String id, String uri, String label, String path) {
     final jId = id.toJString();
     final jUri = uri.toJString();
