@@ -440,7 +440,7 @@ class ChatItem extends StatelessWidget {
                     clipBehavior: Clip.none,
                     children: [
                       NetworkImgLayer(
-                        type: ImageType.emote,
+                        borderRadius: BorderRadius.zero, // 此处应为非表情类型，且默认不需要圆角
                         width: constrains.maxWidth,
                         height:
                             constrains.maxWidth / StyleString.aspectRatio16x9,

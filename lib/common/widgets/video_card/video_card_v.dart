@@ -100,7 +100,7 @@ class VideoCardV extends StatelessWidget {
                             src: videoItem.cover,
                             width: maxWidth,
                             height: maxHeight,
-                            type: ImageType.emote,
+                            borderRadius: BorderRadius.zero, // 此处应为非表情类型，且默认不需要圆角
                           ),
                           if (videoItem.duration > 0)
                             PBadge(
