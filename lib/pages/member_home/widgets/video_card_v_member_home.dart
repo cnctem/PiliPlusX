@@ -93,7 +93,7 @@ class VideoCardVMemberHome extends StatelessWidget {
                         src: videoItem.cover,
                         width: maxWidth,
                         height: maxHeight,
-                        type: ImageType.emote,
+                        borderRadius: BorderRadius.zero, // 不传type，反而传radius来防止图片被重复加圆角
                       ),
                       if (videoItem.duration > 0)
                         PBadge(
