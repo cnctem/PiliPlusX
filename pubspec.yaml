@@ -117,17 +117,17 @@ dependencies:
   media_kit:
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: afb5a1b179c212eac74a40012f21703d122112a5
+      ref: 13b332ad3fd4cd5d84c64670eceda48a6d54504e
       path: ./media_kit
   media_kit_video:
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: afb5a1b179c212eac74a40012f21703d122112a5
+      ref: 13b332ad3fd4cd5d84c64670eceda48a6d54504e
       path: ./media_kit_video
   media_kit_libs_video:
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: afb5a1b179c212eac74a40012f21703d122112a5
+      ref: 13b332ad3fd4cd5d84c64670eceda48a6d54504e
       path: ./libs/universal/media_kit_libs_video
 
   # 媒体通知
@@ -144,10 +144,7 @@ dependencies:
       ref: br_v0.2.2_ohos
 
   # 音量、亮度、屏幕控制
-  flutter_volume_controller: # 音量.鸿蒙适配
-    git:
-      url: https://github.com/ErBWs/flutter_volume_controller.git
-      ref: feat-ohos
+  flutter_volume_controller: ^2.0.1 # 已支持鸿蒙
   wakelock_plus: 1.3.3
   wakelock_plus_ohos: ^0.0.3
   # universal_platform: ^1.1.0
@@ -313,32 +310,32 @@ dependency_overrides:
   media_kit_libs_linux:
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: afb5a1b179c212eac74a40012f21703d122112a5
+      ref: 13b332ad3fd4cd5d84c64670eceda48a6d54504e
       path: ./libs/linux/media_kit_libs_linux
   media_kit_libs_ios_video:
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: afb5a1b179c212eac74a40012f21703d122112a5
+      ref: 13b332ad3fd4cd5d84c64670eceda48a6d54504e
       path: ./libs/ios/media_kit_libs_ios_video
   media_kit_libs_macos_video:
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: afb5a1b179c212eac74a40012f21703d122112a5
+      ref: 13b332ad3fd4cd5d84c64670eceda48a6d54504e
       path: ./libs/macos/media_kit_libs_macos_video
   media_kit_libs_ohos:
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: afb5a1b179c212eac74a40012f21703d122112a5
+      ref: 13b332ad3fd4cd5d84c64670eceda48a6d54504e
       path: ./libs/ohos/media_kit_libs_ohos
   # media_kit_libs_android_video:
   #   git:
   #     url: https://github.com/Predidit/media-kit.git
-  #     ref: afb5a1b179c212eac74a40012f21703d122112a5
+  #     ref: 13b332ad3fd4cd5d84c64670eceda48a6d54504e
   #     path: ./libs/android/media_kit_libs_android_video
   # media_kit_libs_windows_video:
   #   git:
   #     url: https://github.com/Predidit/media-kit.git
-  #     ref: afb5a1b179c212eac74a40012f21703d122112a5
+  #     ref: 13b332ad3fd4cd5d84c64670eceda48a6d54504e
   #     path: ./libs/windows/media_kit_libs_windows_video
 
   # 上游指定的media_kit
