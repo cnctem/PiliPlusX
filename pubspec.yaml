@@ -361,6 +361,12 @@ dependency_overrides:
       ref: br_image_picker-v1.1.2_ohos
   win32: 5.5.3
   js: 0.7.0
+  # image_cropper 鸿蒙化适配
+  image_cropper:
+    git: 
+      url: https://gitcode.com/openharmony-sig/fluttertpc_image_cropper.git
+      path: ./image_cropper
+      ref: br_v11.0.0_ohos
 
 dev_dependencies:
   flutter_test:

@@ -17,7 +17,6 @@ import 'package:PiliPlus/pages/dynamics_mention/view.dart';
 import 'package:PiliPlus/utils/extension/file_ext.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/string_ext.dart';
-import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
@@ -202,17 +201,18 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
         path = file.path;
     }
     if (!mounted || path.isEmpty) return;
-    late final colorScheme = ColorScheme.of(context);
     final croppedFile = await ImageCropper.platform.cropImage(
       sourcePath: path,
       uiSettings: [
-        AndroidUiSettings(
-          toolbarTitle: '裁剪',
-          toolbarColor: colorScheme.secondaryContainer,
-          toolbarWidgetColor: colorScheme.onSecondaryContainer,
-          statusBarLight: colorScheme.isLight,
-        ),
-        IOSUiSettings(title: '裁剪'),
+        // 鸿蒙化image_croppper修复，只能使用WebUiSettings
+        WebUiSettings(
+            context: context,
+            presentStyle: WebPresentStyle.dialog,
+            size: const CropperSize(
+              width: 520,
+              height: 520,
+            ),
+          ),
       ],
     );
     if (croppedFile != null) {
