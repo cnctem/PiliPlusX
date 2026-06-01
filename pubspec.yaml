@@ -270,6 +270,7 @@ dependencies:
   http2: any
   screen_retriever: any
   characters: any
+  cached_network_image_ce: ^4.6.4
 
 dependency_overrides:
   meta: ^1.16.0 # 兼容液态玻璃

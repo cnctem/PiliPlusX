@@ -3,7 +3,7 @@ import 'package:PiliPlus/models/common/image_type.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class NetworkImgLayer extends StatelessWidget {
@@ -13,8 +13,8 @@ class NetworkImgLayer extends StatelessWidget {
     required this.width,
     required this.height,
     this.type = ImageType.def,
-    this.fadeOutDuration = const Duration(milliseconds: 120),
-    this.fadeInDuration = const Duration(milliseconds: 120),
+    this.fadeOutDuration = Duration.zero,
+    this.fadeInDuration = Duration.zero,
     this.quality = 1,
     this.borderRadius = StyleString.mdRadius,
     this.getPlaceHolder,
@@ -89,7 +89,7 @@ class NetworkImgLayer extends StatelessWidget {
       placeholder: (_, _) =>
           getPlaceHolder?.call() ??
           _placeholder(context, isEmote: isEmote, isAvatar: isAvatar),
-      errorWidget: (_, _, _) =>
+      errorBuilder: (_, _, _) =>
           _placeholder(context, isEmote: isEmote, isAvatar: isAvatar),
       colorBlendMode: reduce ? BlendMode.modulate : null,
       color: reduce ? reduceLuxColor : null,
