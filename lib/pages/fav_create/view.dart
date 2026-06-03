@@ -6,6 +6,7 @@ import 'package:PiliPlus/http/fav.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/msg.dart';
 import 'package:PiliPlus/utils/extension/file_ext.dart';
+import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/fav_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:easy_debounce/easy_throttle.dart';
@@ -123,6 +124,23 @@ class _CreateFavPageState extends State<CreateFavPage> {
           final croppedFile = await ImageCropper.platform.cropImage(
             sourcePath: imgPath,
             uiSettings: [
+              AndroidUiSettings(
+                toolbarTitle: '裁剪',
+                toolbarColor: theme.colorScheme.secondaryContainer,
+                toolbarWidgetColor: theme.colorScheme.onSecondaryContainer,
+                statusBarLight: theme.colorScheme.isLight,
+                aspectRatioPresets: [CropAspectRatioPreset.ratio16x9],
+                lockAspectRatio: true,
+                hideBottomControls: true,
+                initAspectRatio: CropAspectRatioPreset.ratio16x9,
+              ),
+              IOSUiSettings(
+                title: '裁剪',
+                // aspectRatioPresets: [CropAspectRatioPreset.ratio16x9],
+                // aspectRatioLockEnabled: false,
+                // resetAspectRatioEnabled: false,
+                // aspectRatioPickerButtonHidden: true,
+              ),
               // 鸿蒙化image_croppper修复，只能使用WebUiSettings
               WebUiSettings(
                 context: context,

@@ -493,6 +493,25 @@ class _EditProfilePageState extends State<EditProfilePage> {
           final croppedFile = await ImageCropper.platform.cropImage(
             sourcePath: imagePath,
             uiSettings: [
+              AndroidUiSettings(
+                toolbarTitle: '裁剪',
+                toolbarColor: theme.colorScheme.secondaryContainer,
+                toolbarWidgetColor: theme.colorScheme.onSecondaryContainer,
+                statusBarLight: theme.colorScheme.isLight,
+                aspectRatioPresets: const [CropAspectRatioPresetCustom()],
+                lockAspectRatio: true,
+                hideBottomControls: true,
+                cropStyle: CropStyle.circle,
+                initAspectRatio: const CropAspectRatioPresetCustom(),
+              ),
+              IOSUiSettings(
+                title: '裁剪',
+                aspectRatioPresets: const [CropAspectRatioPresetCustom()],
+                cropStyle: CropStyle.circle,
+                aspectRatioLockEnabled: true,
+                resetAspectRatioEnabled: false,
+                aspectRatioPickerButtonHidden: true,
+              ),
               // 鸿蒙化image_croppper修复，只能使用WebUiSettings
               WebUiSettings(
                 context: context,
