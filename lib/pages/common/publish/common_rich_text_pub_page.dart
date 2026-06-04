@@ -213,6 +213,15 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
           statusBarLight: colorScheme.isLight,
         ),
         IOSUiSettings(title: '裁剪'),
+        // 鸿蒙化image_croppper修复，只能使用WebUiSettings
+        WebUiSettings(
+            context: context,
+            presentStyle: WebPresentStyle.dialog,
+            size: const CropperSize(
+              width: 520,
+              height: 520,
+            ),
+          ),
       ],
     );
     if (croppedFile != null) {
