@@ -60,20 +60,24 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
     if (currentHeroTag == null) return;
     // 直接尝试 find，不检查 isRegistered
     try {
-      Get.find<UgcIntroController>(tag: currentHeroTag!).nextPlay();
-      return;
+      final ctr = Get.find<UgcIntroController>(tag: currentHeroTag!);
+      if (ctr.nextPlay()) return;
     } catch (_) {}
     try {
-      Get.find<PgcIntroController>(tag: currentHeroTag!).nextPlay();
-      return;
+      final ctr = Get.find<PgcIntroController>(tag: currentHeroTag!);
+      if (ctr.nextPlay()) return;
     } catch (_) {}
     try {
-      Get.find<LocalIntroController>(tag: currentHeroTag!).nextPlay();
-      return;
+      final ctr = Get.find<LocalIntroController>(tag: currentHeroTag!);
+      if (ctr.nextPlay()) return;
     } catch (_) {}
     try {
-      Get.find<AudioController>(tag: currentHeroTag!).playNext();
-      return;
+      final ctr = Get.find<AudioController>(tag: currentHeroTag!);
+      if (ctr.playNext()) return;
+    } catch (_) {}
+    // 如果带 tag 找不到，尝试找最近的 AudioController（听视频模式）
+    try {
+      Get.find<AudioController>().playNext();
     } catch (_) {}
   }
 
@@ -86,20 +90,24 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
     if (currentHeroTag == null) return;
     // 直接尝试 find，不检查 isRegistered
     try {
-      Get.find<UgcIntroController>(tag: currentHeroTag!).prevPlay();
-      return;
+      final ctr = Get.find<UgcIntroController>(tag: currentHeroTag!);
+      if (ctr.prevPlay()) return;
     } catch (_) {}
     try {
-      Get.find<PgcIntroController>(tag: currentHeroTag!).prevPlay();
-      return;
+      final ctr = Get.find<PgcIntroController>(tag: currentHeroTag!);
+      if (ctr.prevPlay()) return;
     } catch (_) {}
     try {
-      Get.find<LocalIntroController>(tag: currentHeroTag!).prevPlay();
-      return;
+      final ctr = Get.find<LocalIntroController>(tag: currentHeroTag!);
+      if (ctr.prevPlay()) return;
     } catch (_) {}
     try {
-      Get.find<AudioController>(tag: currentHeroTag!).playPrev();
-      return;
+      final ctr = Get.find<AudioController>(tag: currentHeroTag!);
+      if (ctr.playPrev()) return;
+    } catch (_) {}
+    // 如果带 tag 找不到，尝试找最近的 AudioController（听视频模式）
+    try {
+      Get.find<AudioController>().playPrev();
     } catch (_) {}
   }
 
@@ -160,6 +168,11 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
     } catch (_) {}
     try {
       final ctr = Get.find<AudioController>(tag: currentHeroTag!);
+      return ctr.playlist != null && ctr.playlist!.isNotEmpty;
+    } catch (_) {}
+    // 如果带 tag 找不到，尝试找最近的 AudioController（听视频模式）
+    try {
+      final ctr = Get.find<AudioController>();
       return ctr.playlist != null && ctr.playlist!.isNotEmpty;
     } catch (_) {}
     return false;
