@@ -4,6 +4,7 @@ import 'dart:ui' show PlatformDispatcher;
 import 'package:get/get.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';
 import 'package:PiliPlus/pages/video/introduction/pgc/controller.dart';
+import 'package:PiliPlus/pages/video/introduction/local/controller.dart';
 import 'package:PiliPlus/pages/audio/controller.dart';
 
 import 'package:PiliPlus/common/constants.dart';
@@ -56,15 +57,24 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
       await onSkipToNext?.call();
       return;
     }
-    if (currentHeroTag != null) {
-      try {
-        if (Get.isRegistered<UgcIntroController>(tag: currentHeroTag!)) {
-          Get.find<UgcIntroController>(tag: currentHeroTag!).nextPlay();
-        } else if (Get.isRegistered<PgcIntroController>(tag: currentHeroTag!)) {
-          Get.find<PgcIntroController>(tag: currentHeroTag!).nextPlay();
-        }
-      } catch (_) {}
-    }
+    if (currentHeroTag == null) return;
+    // 直接尝试 find，不检查 isRegistered
+    try {
+      Get.find<UgcIntroController>(tag: currentHeroTag!).nextPlay();
+      return;
+    } catch (_) {}
+    try {
+      Get.find<PgcIntroController>(tag: currentHeroTag!).nextPlay();
+      return;
+    } catch (_) {}
+    try {
+      Get.find<LocalIntroController>(tag: currentHeroTag!).nextPlay();
+      return;
+    } catch (_) {}
+    try {
+      Get.find<AudioController>(tag: currentHeroTag!).nextPlay();
+      return;
+    } catch (_) {}
   }
 
   @override
@@ -73,15 +83,24 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
       await onSkipToPrevious?.call();
       return;
     }
-    if (currentHeroTag != null) {
-      try {
-        if (Get.isRegistered<UgcIntroController>(tag: currentHeroTag!)) {
-          Get.find<UgcIntroController>(tag: currentHeroTag!).prevPlay();
-        } else if (Get.isRegistered<PgcIntroController>(tag: currentHeroTag!)) {
-          Get.find<PgcIntroController>(tag: currentHeroTag!).prevPlay();
-        }
-      } catch (_) {}
-    }
+    if (currentHeroTag == null) return;
+    // 直接尝试 find，不检查 isRegistered
+    try {
+      Get.find<UgcIntroController>(tag: currentHeroTag!).prevPlay();
+      return;
+    } catch (_) {}
+    try {
+      Get.find<PgcIntroController>(tag: currentHeroTag!).prevPlay();
+      return;
+    } catch (_) {}
+    try {
+      Get.find<LocalIntroController>(tag: currentHeroTag!).prevPlay();
+      return;
+    } catch (_) {}
+    try {
+      Get.find<AudioController>(tag: currentHeroTag!).prevPlay();
+      return;
+    } catch (_) {}
   }
 
   @override
@@ -124,19 +143,24 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
   bool _hasEpisodes() {
     if (currentHeroTag == null) return false;
     try {
-      if (Get.isRegistered<UgcIntroController>(tag: currentHeroTag!)) {
-        final ctr = Get.find<UgcIntroController>(tag: currentHeroTag!);
-        final videoDetail = ctr.videoDetail.value;
-        final isSeason = videoDetail.ugcSeason != null;
-        final isPart = videoDetail.pages != null && videoDetail.pages!.length > 1;
-        final isPlayAll = ctr.videoDetailCtr.isPlayAll;
-        return isSeason || isPart || isPlayAll;
-      } else if (Get.isRegistered<PgcIntroController>(tag: currentHeroTag!)) {
-        return true;
-      } else if (Get.isRegistered<AudioController>(tag: currentHeroTag!)) {
-        final ctr = Get.find<AudioController>(tag: currentHeroTag!);
-        return ctr.playlist != null && ctr.playlist!.isNotEmpty;
-      }
+      final ctr = Get.find<UgcIntroController>(tag: currentHeroTag!);
+      final videoDetail = ctr.videoDetail.value;
+      final isSeason = videoDetail.ugcSeason != null;
+      final isPart = videoDetail.pages != null && videoDetail.pages!.length > 1;
+      final isPlayAll = ctr.videoDetailCtr.isPlayAll;
+      return isSeason || isPart || isPlayAll;
+    } catch (_) {}
+    try {
+      Get.find<PgcIntroController>(tag: currentHeroTag!);
+      return true;
+    } catch (_) {}
+    try {
+      final ctr = Get.find<LocalIntroController>(tag: currentHeroTag!);
+      return ctr.list.length > 1;
+    } catch (_) {}
+    try {
+      final ctr = Get.find<AudioController>(tag: currentHeroTag!);
+      return ctr.playlist != null && ctr.playlist!.isNotEmpty;
     } catch (_) {}
     return false;
   }

@@ -465,6 +465,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   static PlayCallback? _playCallBack;
 
   static Future<void>? playIfExists() {
+    if (_instance != null && !(_instance!.playerStatus.isPlaying)) {
+      return _instance!.play();
+    }
     return _playCallBack?.call();
   }
 
