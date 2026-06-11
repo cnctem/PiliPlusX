@@ -4,6 +4,7 @@ import 'dart:ui' show PlatformDispatcher;
 import 'package:get/get.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';
 import 'package:PiliPlus/pages/video/introduction/pgc/controller.dart';
+import 'package:PiliPlus/pages/video/introduction/local/controller.dart';
 import 'package:PiliPlus/pages/audio/controller.dart';
 
 import 'package:PiliPlus/common/constants.dart';
@@ -97,17 +98,61 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
   }
 
   @override
-  Future<void> skipToNext() {
-    return Future.syncValue(
-      (onSkipToNext ?? _findIntroController()?.nextPlay)?.call(),
-    );
+  Future<void> skipToNext() async {
+    final callback = onSkipToNext;
+    if (callback != null) {
+      callback();
+      return;
+    }
+    if (currentHeroTag != null) {
+      // PiP 下 controller 仍可查找，但 isRegistered 可能为 false。
+      try {
+        Get.find<UgcIntroController>(tag: currentHeroTag!).nextPlay();
+        return;
+      } catch (_) {}
+      try {
+        Get.find<PgcIntroController>(tag: currentHeroTag!).nextPlay();
+        return;
+      } catch (_) {}
+      try {
+        Get.find<LocalIntroController>(tag: currentHeroTag!).nextPlay();
+        return;
+      } catch (_) {}
+      try {
+        Get.find<AudioController>(tag: currentHeroTag!).nextPlay();
+        return;
+      } catch (_) {}
+    }
+    _findIntroController()?.nextPlay();
   }
 
   @override
-  Future<void> skipToPrevious() {
-    return Future.syncValue(
-      (onSkipToPrevious ?? _findIntroController()?.prevPlay)?.call(),
-    );
+  Future<void> skipToPrevious() async {
+    final callback = onSkipToPrevious;
+    if (callback != null) {
+      callback();
+      return;
+    }
+    if (currentHeroTag != null) {
+      // PiP 下 controller 仍可查找，但 isRegistered 可能为 false。
+      try {
+        Get.find<UgcIntroController>(tag: currentHeroTag!).prevPlay();
+        return;
+      } catch (_) {}
+      try {
+        Get.find<PgcIntroController>(tag: currentHeroTag!).prevPlay();
+        return;
+      } catch (_) {}
+      try {
+        Get.find<LocalIntroController>(tag: currentHeroTag!).prevPlay();
+        return;
+      } catch (_) {}
+      try {
+        Get.find<AudioController>(tag: currentHeroTag!).prevPlay();
+        return;
+      } catch (_) {}
+    }
+    _findIntroController()?.prevPlay();
   }
 
   @override
@@ -134,19 +179,24 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
   bool _hasEpisodes() {
     if (currentHeroTag == null) return false;
     try {
-      if (Get.isRegistered<UgcIntroController>(tag: currentHeroTag!)) {
-        final ctr = Get.find<UgcIntroController>(tag: currentHeroTag!);
-        final videoDetail = ctr.videoDetail.value;
-        final isSeason = videoDetail.ugcSeason != null;
-        final isPart = videoDetail.pages != null && videoDetail.pages!.length > 1;
-        final isPlayAll = ctr.videoDetailCtr.isPlayAll;
-        return isSeason || isPart || isPlayAll;
-      } else if (Get.isRegistered<PgcIntroController>(tag: currentHeroTag!)) {
-        return true;
-      } else if (Get.isRegistered<AudioController>(tag: currentHeroTag!)) {
-        final ctr = Get.find<AudioController>(tag: currentHeroTag!);
-        return ctr.playlist != null && ctr.playlist!.isNotEmpty;
-      }
+      final ctr = Get.find<UgcIntroController>(tag: currentHeroTag!);
+      final videoDetail = ctr.videoDetail.value;
+      final isSeason = videoDetail.ugcSeason != null;
+      final isPart = videoDetail.pages != null && videoDetail.pages!.length > 1;
+      final isPlayAll = ctr.videoDetailCtr.isPlayAll;
+      return isSeason || isPart || isPlayAll;
+    } catch (_) {}
+    try {
+      Get.find<PgcIntroController>(tag: currentHeroTag!);
+      return true;
+    } catch (_) {}
+    try {
+      final ctr = Get.find<LocalIntroController>(tag: currentHeroTag!);
+      return ctr.list.length > 1;
+    } catch (_) {}
+    try {
+      final ctr = Get.find<AudioController>(tag: currentHeroTag!);
+      return ctr.playlist != null && ctr.playlist!.isNotEmpty;
     } catch (_) {}
     return false;
   }
