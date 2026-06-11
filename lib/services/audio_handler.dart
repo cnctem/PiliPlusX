@@ -93,6 +93,10 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
       Get.find<LocalIntroController>(tag: currentHeroTag!).nextPlay();
       return;
     } catch (_) {}
+    try {
+      Get.find<AudioController>(tag: currentHeroTag!).playNext();
+      return;
+    } catch (_) {}
   }
 
   @override
@@ -113,6 +117,10 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
     } catch (_) {}
     try {
       Get.find<LocalIntroController>(tag: currentHeroTag!).prevPlay();
+      return;
+    } catch (_) {}
+    try {
+      Get.find<AudioController>(tag: currentHeroTag!).playPrev();
       return;
     } catch (_) {}
   }
