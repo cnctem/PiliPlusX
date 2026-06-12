@@ -29,10 +29,10 @@ packages:
     dependency: "direct main"
     description:
       name: app_links
-      sha256: a350a5b37579b7227aaf9a59c07114617cd4283852e193f743b2b3d2d7483c18
+      sha256: "4ec328cd9fd51fd0e7eb8870a9612c1fde0f091901932238c4f4e60b5f7f1315"
       url: "https://pub.dev"
     source: hosted
-    version: "7.1.1"
+    version: "7.1.2"
   app_links_linux:
     dependency: transitive
     description:
@@ -45,10 +45,10 @@ packages:
     dependency: transitive
     description:
       name: app_links_platform_interface
-      sha256: "05f5379577c513b534a29ddea68176a4d4802c46180ee8e2e966257158772a3f"
+      sha256: "78a18580eecac98108d1eef52a7db668bc317714f5205e616973363326efe333"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.2"
+    version: "2.0.3"
   app_links_web:
     dependency: transitive
     description:
@@ -526,10 +526,10 @@ packages:
     description:
       path: "."
       ref: dev
-      resolved-ref: "1b1197493d734c45e178c15fe665c3dcab284cb8"
+      resolved-ref: "8a987e491225341839bafb3d3171c4b2d797ef73"
       url: "https://github.com/bggRGjQaUbCoE/flutter_file_picker.git"
     source: git
-    version: "12.0.0-beta.5"
+    version: "12.0.0-beta.6"
   file_selector_linux:
     dependency: transitive
     description:
@@ -993,7 +993,7 @@ packages:
     description:
       path: "pkgs/jnigen"
       ref: HEAD
-      resolved-ref: "5e2b3d1171cabe90bae969cd098c85182c1751b3"
+      resolved-ref: "496f2f0bbe583307a7d5ce4c33e81f0797cb65fe"
       url: "https://github.com/dart-lang/native.git"
     source: git
     version: "0.17.0-wip"
@@ -1571,10 +1571,10 @@ packages:
     dependency: transitive
     description:
       name: shared_preferences_android
-      sha256: a2c49fc1fed7140cadd892d765bd47edbe4ac0b9c7e7e3c493dcb58126f99cf0
+      sha256: "93ae5884a9df5d3bb696825bceb3a17590754548b5d740eba51500afc8d088f5"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.25"
+    version: "2.4.26"
   shared_preferences_foundation:
     dependency: transitive
     description:
