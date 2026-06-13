@@ -644,7 +644,7 @@ class VideoDetailController extends GetxController
     await Get.key.currentState!.push(
       PublishRoute(
         pageBuilder: (buildContext, animation, secondaryAnimation) {
-          return SendDanmakuPanel(
+          final child = SendDanmakuPanel(
             cid: cid.value,
             bvid: bvid,
             progress: plPlayerController.position.inMilliseconds,
@@ -654,10 +654,13 @@ class VideoDetailController extends GetxController
               savedDanmaku = null;
               plPlayerController.danmakuController?.addDanmaku(danmakuModel);
             },
-            darkVideoPage: plPlayerController.darkVideoPage,
             dmConfig: dmConfig,
             onSaveDmConfig: (dmConfig) => this.dmConfig = dmConfig,
           );
+          if (plPlayerController.darkVideoPage) {
+            return Theme(data: ThemeUtils.darkTheme, child: child);
+          }
+          return child;
         },
       ),
     );
@@ -1022,22 +1025,16 @@ class VideoDetailController extends GetxController
       );
     }
     if (plPlayerController.isFullScreen.value || showVideoSheet) {
+      final child = PostPanel(
+        enableSlide: false,
+        videoDetailController: this,
+        plPlayerController: plPlayerController,
+      );
       PageUtils.showVideoBottomSheet(
         context,
         child: plPlayerController.darkVideoPage
-            ? Theme(
-                data: ThemeUtils.darkTheme,
-                child: PostPanel(
-                  enableSlide: false,
-                  videoDetailController: this,
-                  plPlayerController: plPlayerController,
-                ),
-              )
-            : PostPanel(
-                enableSlide: false,
-                videoDetailController: this,
-                plPlayerController: plPlayerController,
-              ),
+            ? Theme(data: ThemeUtils.darkTheme, child: child)
+            : child,
       );
     } else {
       childKey.currentState?.showBottomSheet(
@@ -1349,26 +1346,18 @@ class VideoDetailController extends GetxController
       ).videoDetail.value.title;
     } catch (_) {}
     if (plPlayerController.isFullScreen.value || showVideoSheet) {
+      final child = NoteListPage(
+        oid: aid,
+        enableSlide: false,
+        heroTag: heroTag,
+        isStein: graphVersion != null,
+        title: title,
+      );
       PageUtils.showVideoBottomSheet(
         context,
         child: plPlayerController.darkVideoPage
-            ? Theme(
-                data: ThemeUtils.darkTheme,
-                child: NoteListPage(
-                  oid: aid,
-                  enableSlide: false,
-                  heroTag: heroTag,
-                  isStein: graphVersion != null,
-                  title: title,
-                ),
-              )
-            : NoteListPage(
-                oid: aid,
-                enableSlide: false,
-                heroTag: heroTag,
-                isStein: graphVersion != null,
-                title: title,
-              ),
+            ? Theme(data: ThemeUtils.darkTheme, child: child)
+            : child,
       );
     } else {
       childKey.currentState?.showBottomSheet(

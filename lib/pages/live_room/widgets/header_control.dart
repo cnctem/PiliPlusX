@@ -307,7 +307,6 @@ class _LiveHeaderControlState extends State<LiveHeaderControl>
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
-      clipBehavior: .hardEdge,
       isScrollControlled: true,
       constraints: BoxConstraints(
         maxWidth: math.min(640, context.mediaQueryShortestSide),
@@ -331,11 +330,7 @@ class _LiveHeaderControlState extends State<LiveHeaderControl>
             final currStyle = TextStyle(fontSize: 14, color: secondary);
             return Theme(
               data: theme.copyWith(dividerColor: Colors.transparent),
-              child: ListView(
-                controller: scrollController,
-                padding: .only(
-                  bottom: MediaQuery.viewPaddingOf(context).bottom + 100,
-                ),
+              child: Column(
                 children: [
                   InkWell(
                     onTap: Get.back,
@@ -354,90 +349,100 @@ class _LiveHeaderControlState extends State<LiveHeaderControl>
                       ),
                     ),
                   ),
-                  ...controller.stream.indexed.map((stream) {
-                    final isCurrStream = stream.$1 == controller.streamIndex;
-                    final streamColor = isCurrStream
-                        ? secondary
-                        : onSurfaceVariant;
-                    return _ExpansionTile(
-                      initiallyExpanded: isCurrStream,
-                      iconColor: streamColor,
-                      collapsedIconColor: streamColor,
-                      title: Text(
-                        stream.$2.protocolName ?? stream.$1.toString(),
-                        style: isCurrStream
-                            ? currStyle
-                            : const TextStyle(fontSize: 14),
+                  Expanded(
+                    child: ListView(
+                      controller: scrollController,
+                      padding: .only(
+                        bottom: MediaQuery.viewPaddingOf(context).bottom + 100,
                       ),
-                      children: stream.$2.format.indexed.map((format) {
-                        final isCurrFormat =
-                            isCurrStream && format.$1 == controller.formatIndex;
-                        final formatColor = isCurrFormat
+                      children: controller.stream.indexed.map((stream) {
+                        final isCurrStream =
+                            stream.$1 == controller.streamIndex;
+                        final streamColor = isCurrStream
                             ? secondary
                             : onSurfaceVariant;
                         return _ExpansionTile(
-                          initiallyExpanded: isCurrFormat,
-                          iconColor: formatColor,
-                          collapsedIconColor: formatColor,
+                          initiallyExpanded: isCurrStream,
+                          iconColor: streamColor,
+                          collapsedIconColor: streamColor,
                           title: Text(
-                            format.$2.formatName ?? format.$1.toString(),
-                            style: isCurrFormat
+                            stream.$2.protocolName ?? stream.$1.toString(),
+                            style: isCurrStream
                                 ? currStyle
                                 : const TextStyle(fontSize: 14),
                           ),
-                          children: format.$2.codec.indexed.map((codec) {
-                            final e = codec.$2;
-                            final isCurrCodec =
-                                isCurrFormat &&
-                                codec.$1 == controller.codecIndex;
-                            final codecColor = isCurrCodec
+                          children: stream.$2.format.indexed.map((format) {
+                            final isCurrFormat =
+                                isCurrStream &&
+                                format.$1 == controller.formatIndex;
+                            final formatColor = isCurrFormat
                                 ? secondary
                                 : onSurfaceVariant;
                             return _ExpansionTile(
-                              initiallyExpanded: isCurrCodec,
-                              iconColor: codecColor,
-                              collapsedIconColor: codecColor,
+                              initiallyExpanded: isCurrFormat,
+                              iconColor: formatColor,
+                              collapsedIconColor: formatColor,
                               title: Text(
-                                '${e.codecName ?? codec.$1.toString()} (${LiveQuality.fromCode(e.currentQn)?.desc ?? e.currentQn})',
-                                style: isCurrCodec
+                                format.$2.formatName ?? format.$1.toString(),
+                                style: isCurrFormat
                                     ? currStyle
                                     : const TextStyle(fontSize: 14),
                               ),
-                              children: e.urlInfo.indexed.map((url) {
-                                final isCurrUrl =
-                                    (isCurrCodec &&
-                                    url.$1 == controller.liveUrlIndex);
-                                return ListTile(
-                                  dense: true,
+                              children: format.$2.codec.indexed.map((codec) {
+                                final e = codec.$2;
+                                final isCurrCodec =
+                                    isCurrFormat &&
+                                    codec.$1 == controller.codecIndex;
+                                final codecColor = isCurrCodec
+                                    ? secondary
+                                    : onSurfaceVariant;
+                                return _ExpansionTile(
+                                  initiallyExpanded: isCurrCodec,
+                                  iconColor: codecColor,
+                                  collapsedIconColor: codecColor,
                                   title: Text(
-                                    '${url.$2.host}${e.baseUrl}...',
-                                    style: isCurrUrl
-                                        ? const TextStyle(fontSize: 14)
-                                        : TextStyle(
-                                            fontSize: 14,
-                                            color: onSurfaceVariant,
-                                          ),
+                                    '${e.codecName ?? codec.$1.toString()} (${LiveQuality.fromCode(e.currentQn)?.desc ?? e.currentQn})',
+                                    style: isCurrCodec
+                                        ? currStyle
+                                        : const TextStyle(fontSize: 14),
                                   ),
-                                  selected: isCurrUrl,
-                                  onTap: isCurrUrl
-                                      ? null
-                                      : () {
-                                          Get.back();
-                                          controller.initLiveUrl(
-                                            streamIndex: stream.$1,
-                                            formatIndex: format.$1,
-                                            codecIndex: codec.$1,
-                                            liveUrlIndex: url.$1,
-                                          );
-                                        },
+                                  children: e.urlInfo.indexed.map((url) {
+                                    final isCurrUrl =
+                                        (isCurrCodec &&
+                                        url.$1 == controller.liveUrlIndex);
+                                    return ListTile(
+                                      dense: true,
+                                      title: Text(
+                                        '${url.$2.host}${e.baseUrl}...',
+                                        style: isCurrUrl
+                                            ? const TextStyle(fontSize: 14)
+                                            : TextStyle(
+                                                fontSize: 14,
+                                                color: onSurfaceVariant,
+                                              ),
+                                      ),
+                                      selected: isCurrUrl,
+                                      onTap: isCurrUrl
+                                          ? null
+                                          : () {
+                                              Get.back();
+                                              controller.initLiveUrl(
+                                                streamIndex: stream.$1,
+                                                formatIndex: format.$1,
+                                                codecIndex: codec.$1,
+                                                liveUrlIndex: url.$1,
+                                              );
+                                            },
+                                    );
+                                  }).toList(),
                                 );
                               }).toList(),
                             );
                           }).toList(),
                         );
                       }).toList(),
-                    );
-                  }),
+                    ),
+                  ),
                 ],
               ),
             );
