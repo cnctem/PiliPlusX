@@ -1014,4 +1014,6 @@ abstract final class Pref {
 
   static double get maxVolume => // desktop
       _setting.get(SettingBoxKey.maxVolume, defaultValue: 2.0);
+
+  static List? get liveStream => _setting.get(SettingBoxKey.liveStream);
 }
