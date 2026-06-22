@@ -512,6 +512,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 resetAspectRatioEnabled: false,
                 aspectRatioPickerButtonHidden: true,
               ),
+              // 鸿蒙化image_croppper修复，只能使用WebUiSettings
+              WebUiSettings(
+                context: context,
+                presentStyle: WebPresentStyle.dialog,
+                size: const CropperSize(
+                  width: 520,
+                  height: 520,
+                ),
+              ),
             ],
           );
           File(imagePath).tryDel();

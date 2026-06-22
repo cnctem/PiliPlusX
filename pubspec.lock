@@ -305,9 +305,9 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/chat_bottom_container"
-      ref: main
+      ref: dba2bf10db4a6f89564d9be63ce17b18f0f7e3e5
       resolved-ref: dba2bf10db4a6f89564d9be63ce17b18f0f7e3e5
-      url: "https://github.com/bggRGjQaUbCoE/flutter_chat_packages.git"
+      url: "https://github.com/qinshah/flutter_chat_packages.git"
     source: git
     version: "0.3.2"
   checked_yaml:
@@ -964,26 +964,29 @@ packages:
   image_cropper:
     dependency: "direct main"
     description:
-      name: image_cropper
-      sha256: "46c8f9aae51c8350b2a2982462f85a129e77b04675d35b09db5499437d7a996b"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
+      path: image_cropper
+      ref: "br_v11.0.0_ohos"
+      resolved-ref: "795477e722d2268dbe36a7ac4e1ad0400c8269a7"
+      url: "https://gitcode.com/openharmony-sig/fluttertpc_image_cropper.git"
+    source: git
     version: "11.0.0"
   image_cropper_for_web:
     dependency: transitive
     description:
-      name: image_cropper_for_web
-      sha256: e09749714bc24c4e3b31fbafa2e5b7229b0ff23e8b14d4ba44bd723b77611a0f
-      url: "https://pub.flutter-io.cn"
-    source: hosted
+      path: image_cropper_for_web
+      ref: "795477e722d2268dbe36a7ac4e1ad0400c8269a7"
+      resolved-ref: "795477e722d2268dbe36a7ac4e1ad0400c8269a7"
+      url: "https://gitcode.com/openharmony-sig/fluttertpc_image_cropper.git"
+    source: git
     version: "7.0.0"
   image_cropper_platform_interface:
     dependency: transitive
     description:
-      name: image_cropper_platform_interface
-      sha256: "886a30ec199362cdcc2fbb053b8e53347fbfb9dbbdaa94f9ff85622609f5e7ff"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
+      path: image_cropper_platform_interface
+      ref: "795477e722d2268dbe36a7ac4e1ad0400c8269a7"
+      resolved-ref: "795477e722d2268dbe36a7ac4e1ad0400c8269a7"
+      url: "https://gitcode.com/openharmony-sig/fluttertpc_image_cropper.git"
+    source: git
     version: "8.0.0"
   image_picker:
     dependency: "direct main"

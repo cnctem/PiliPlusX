@@ -118,7 +118,7 @@ class _CreateFavPageState extends State<CreateFavPage> {
         source: ImageSource.gallery,
         imageQuality: 100,
       );
-      if (pickedFile != null && mounted) {
+      if (pickedFile != null && mounted && context.mounted) {
         String imgPath = pickedFile.path;
         if (PlatformUtils.isMobile) {
           final croppedFile = await ImageCropper.platform.cropImage(
@@ -141,6 +141,15 @@ class _CreateFavPageState extends State<CreateFavPage> {
                 // resetAspectRatioEnabled: false,
                 // aspectRatioPickerButtonHidden: true,
               ),
+              // 鸿蒙化image_croppper修复，只能使用WebUiSettings
+              WebUiSettings(
+                context: context,
+                presentStyle: WebPresentStyle.dialog,
+                size: const CropperSize(
+                  width: 520,
+                  height: 520,
+                ),
+              ),
             ],
           );
           if (croppedFile != null) {
@@ -148,18 +157,18 @@ class _CreateFavPageState extends State<CreateFavPage> {
             imgPath = croppedFile.path;
           }
         }
+        final currentContext = context;
         MsgHttp.uploadImage(
           path: imgPath,
           bucket: 'medialist',
           dir: 'cover',
         ).then((res) {
-          if (context.mounted) {
-            if (res case Success(:final response)) {
-              _cover = response['location'];
-              (context as Element).markNeedsBuild();
-            } else {
-              res.toast();
-            }
+          if (!currentContext.mounted) return;
+          if (res case Success(:final response)) {
+            _cover = response['location'];
+            (currentContext as Element).markNeedsBuild();
+          } else {
+            res.toast();
           }
           if (PlatformUtils.isMobile) {
             File(imgPath).tryDel();

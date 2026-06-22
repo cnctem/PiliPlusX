@@ -205,8 +205,8 @@ dependencies:
   # chat_bottom_container: ^0.2.0
   chat_bottom_container:
     git:
-      url: https://github.com/bggRGjQaUbCoE/flutter_chat_packages.git
-      ref: main
+      url: https://github.com/qinshah/flutter_chat_packages.git
+      ref: dba2bf10db4a6f89564d9be63ce17b18f0f7e3e5
       path: packages/chat_bottom_container
   image_picker: ^1.1.2
   intl: ^0.20.2
@@ -362,6 +362,12 @@ dependency_overrides:
       ref: br_image_picker-v1.1.2_ohos
   win32: 5.5.3
   js: 0.7.0
+  # image_cropper 鸿蒙化适配
+  image_cropper:
+    git: 
+      url: https://gitcode.com/openharmony-sig/fluttertpc_image_cropper.git
+      path: ./image_cropper
+      ref: br_v11.0.0_ohos
 
 dev_dependencies:
   flutter_test:
