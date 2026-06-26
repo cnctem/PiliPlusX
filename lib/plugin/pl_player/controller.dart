@@ -957,13 +957,13 @@ class PlPlayerController with BlockConfigMixin {
           }
 
           videoPlayerServiceHandler?.onPositionChange(position);
+
+          makeHeartBeat(posInSeconds);
         }
 
         for (final element in _positionListeners) {
           element(position);
         }
-
-        makeHeartBeat(posInSeconds);
       }),
       stream.duration.listen(updateDuration),
       stream.buffer.listen((Duration buffer) {
