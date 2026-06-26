@@ -144,7 +144,11 @@ class _ViewPointsPageState extends State<ViewPointsPage>
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              NetworkImgLayer(src: segment.url, width: 140.8, height: 88),
+              NetworkImgLayer(
+                src: segment.url,
+                width: 160,
+                height: 100,
+              ),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(

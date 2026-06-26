@@ -66,7 +66,7 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
       final index = res.response?.indexWhere((e) => e.bvid == _bvid) ?? -1;
       if (index != -1) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          _controller.scrollController.jumpTo(100.0 * index);
+          _controller.scrollController.jumpTo(112.0 * index);
         });
       }
     }
@@ -177,7 +177,7 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
       Loading() => SliverFixedExtentList.builder(
         itemCount: 10,
         itemBuilder: (_, _) => const VideoCardHSkeleton(),
-        itemExtent: 100,
+        itemExtent: 112,
       ),
       Success(:final response) =>
         response != null && response.isNotEmpty
@@ -209,7 +209,7 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
                       );
                     },
                     itemCount: response.length,
-                    itemExtent: 100,
+                    itemExtent: 112,
                   ),
                 ],
               )
