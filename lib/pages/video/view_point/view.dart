@@ -103,7 +103,7 @@ class _ViewPointsPageState extends State<ViewPointsPage>
         final segment = videoDetailController.viewPointList[index];
         if (currentIndex == -1 && segment.from != null && segment.to != null) {
           final positionSeconds =
-              videoDetailController.plPlayerController.positionSeconds.value;
+              videoDetailController.plPlayerController.position.value;
           if (positionSeconds >= segment.from! &&
               positionSeconds < segment.to!) {
             currentIndex = index;

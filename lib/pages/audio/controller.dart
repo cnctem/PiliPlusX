@@ -74,8 +74,8 @@ class AudioController extends GetxController
   late int cacheAudioQa;
 
   late bool isDragging = false;
-  final Rx<Duration> position = Duration.zero.obs;
-  final Rx<Duration> duration = Duration.zero.obs;
+  final RxInt position = RxInt(0);
+  final RxInt duration = RxInt(0);
 
   late final AnimationController animController;
 
@@ -291,7 +291,7 @@ class AudioController extends GetxController
         if (audios.isEmpty) {
           return;
         }
-        position.value = Duration.zero;
+        position.value = 0;
         final audio = audios.findClosestTarget(
           (e) => e.id <= cacheAudioQa,
           (a, b) => a.id > b.id ? a : b,
@@ -304,7 +304,7 @@ class AudioController extends GetxController
           return;
         }
         final durl = durls.first;
-        position.value = Duration.zero;
+        position.value = 0;
         _onOpenMedia(VideoUtils.getCdnUrl(durl.playUrls));
       }
     }
@@ -350,13 +350,16 @@ class AudioController extends GetxController
     _subscriptions = [
       stream.position.listen((position) {
         if (isDragging) return;
-        if (position.inSeconds != this.position.value.inSeconds) {
-          this.position.value = position;
+        final seconds = position.inSeconds;
+        if (seconds != this.position.value) {
+          this.position.value = seconds;
           _videoDetailController?.playedTime = position;
           videoPlayerServiceHandler?.onPositionChange(position);
         }
       }),
-      stream.duration.listen(duration.call),
+      stream.duration.listen((duration) {
+        this.duration.value = duration.inSeconds;
+      }),
       stream.playing.listen((playing) {
         final PlayerStatus playerStatus;
         if (playing) {
@@ -369,7 +372,7 @@ class AudioController extends GetxController
         videoPlayerServiceHandler?.onStatusChange(playerStatus, false, false);
       }),
       stream.completed.listen((completed) {
-        _videoDetailController?.playedTime = duration.value;
+        _videoDetailController?.playedTime = player!.state.duration;
         videoPlayerServiceHandler?.onStatusChange(
           PlayerStatus.completed,
           false,
@@ -626,14 +629,8 @@ class AudioController extends GetxController
     );
   }
 
-  void playOrPause() {
-    if (player case final player?) {
-      if ((duration.value - position.value).inMilliseconds < 50) {
-        player.seek(Duration.zero).whenComplete(player.play);
-      } else {
-        player.playOrPause();
-      }
-    }
+  Future<void>? playOrPause() {
+    return player?.playOrPause();
   }
 
   bool playPrev() {
@@ -747,14 +744,14 @@ class AudioController extends GetxController
   BlockConfigMixin get blockConfig => this;
 
   @override
-  int get currPosInMilliseconds => position.value.inMilliseconds;
+  int get currPosInMilliseconds => player?.state.position.inMilliseconds ?? 0;
+
+  @override
+  int? get timeLength => player?.state.duration.inMilliseconds ?? 0;
 
   @override
   Future<void>? seekTo(Duration duration, {required bool isSeek}) =>
       onSeek(duration);
-
-  @override
-  int? get timeLength => duration.value.inMilliseconds;
 
   @override
   bool get autoPlay => true;

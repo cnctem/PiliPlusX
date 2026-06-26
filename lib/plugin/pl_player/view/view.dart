@@ -447,10 +447,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       BottomControlType.time => Obx(
         () => _VideoTime(
           position: DurationUtils.formatDuration(
-            plPlayerController.positionSeconds.value,
+            plPlayerController.position.value,
           ),
           duration: DurationUtils.formatDuration(
-            plPlayerController.duration.value.inSeconds,
+            plPlayerController.duration.value,
           ),
         ),
       ),
@@ -961,6 +961,42 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     showRestoreScaleBtn.value = scale != 1.0;
   }
 
+  void _onHorizontalDragStart() {
+    plPlayerController.isSeeking.value = true;
+  }
+
+  void _onHorizontalDragUpdate(double dx) {
+    final curPos =
+        plPlayerController.seekToPos?.inMilliseconds ??
+        plPlayerController.position.value * 1000;
+    final posDelta = (plPlayerController.sliderScale * dx / maxWidth).round();
+    final newPos = (curPos + posDelta).clamp(
+      0,
+      plPlayerController.durationInMilliseconds,
+    );
+    final seconds = newPos ~/ 1000;
+    plPlayerController
+      ..seekToPos = Duration(milliseconds: newPos)
+      ..position.value = seconds;
+    if (!plPlayerController.isFileSource &&
+        plPlayerController.showSeekPreview) {
+      plPlayerController.updatePreviewIndex(seconds);
+    }
+  }
+
+  void _onHorizontalDragEnd() {
+    plPlayerController.onSeekEnd();
+    if (plPlayerController.seekToPos case final seekToPos?) {
+      plPlayerController
+        ..seekTo(seekToPos, isSeek: false)
+        ..seekToPos = null;
+    } else {
+      plPlayerController.position.value =
+          plPlayerController.videoPlayerController?.state.position.inSeconds ??
+          0;
+    }
+  }
+
   void _onPanUpdate(ScaleUpdateDetails details) {
     if (_gestureType == null) {
       final cumulativeDelta = details.localFocalPoint - _initialFocalPoint!;
@@ -968,6 +1004,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       final dx = cumulativeDelta.dx.abs();
       final dy = cumulativeDelta.dy.abs();
       if (dx > 3 * dy) {
+        _onHorizontalDragStart();
         _gestureType = .horizontal;
       } else if (dy > 3 * dx) {
         if (!plPlayerController.enableSlideVolumeBrightness &&
@@ -1010,22 +1047,17 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       // live模式下禁用
       if (plPlayerController.isLive) return;
 
-      final int curSliderPosition =
-          plPlayerController.sliderPosition.inMilliseconds;
-      final int newPos =
-          (curSliderPosition +
-                  (plPlayerController.sliderScale * delta.dx / maxWidth)
-                      .round())
-              .clamp(0, plPlayerController.duration.value.inMilliseconds);
-      final Duration result = Duration(milliseconds: newPos);
       final height = maxHeight * 0.125;
       if (details.localFocalPoint.dy <= height &&
           (details.localFocalPoint.dx >= maxWidth * 0.875 ||
               details.localFocalPoint.dx <= maxWidth * 0.125)) {
-        plPlayerController.cancelSeek = true;
-        plPlayerController.showPreview.value = false;
-        if (plPlayerController.hasToast != true) {
-          plPlayerController.hasToast = true;
+        if (!plPlayerController.hasToasted) {
+          plPlayerController
+            ..seekToPos = null
+            ..hasToasted = true;
+          if (plPlayerController.showSeekPreview) {
+            plPlayerController.showPreview.value = false;
+          }
           SmartDialog.showAttach(
             targetContext: context,
             alignment: Alignment.center,
@@ -1046,21 +1078,12 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             ),
           );
         }
-      } else {
-        if (plPlayerController.cancelSeek == true) {
-          plPlayerController
-            ..cancelSeek = null
-            ..hasToast = null;
-        }
+        return;
+      } else if (plPlayerController.hasToasted) {
+        plPlayerController.hasToasted = false;
       }
-      plPlayerController
-        ..onUpdatedSliderProgress(result)
-        ..onChangedSliderStart();
-      if (!plPlayerController.isFileSource &&
-          plPlayerController.showSeekPreview &&
-          plPlayerController.cancelSeek != true) {
-        plPlayerController.updatePreviewIndex(newPos ~/ 1000);
-      }
+
+      _onHorizontalDragUpdate(delta.dx);
     } else if (_gestureType == .left) {
       // 左边区域 👈
       final double level = maxHeight * 3;
@@ -1110,21 +1133,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   }
 
   void _onPanEnd(ScaleEndDetails details) {
-    if (plPlayerController.showSeekPreview) {
-      plPlayerController.showPreview.value = false;
-    }
-    if (plPlayerController.isSliderMoving.value) {
-      if (plPlayerController.cancelSeek == true) {
-        plPlayerController.onUpdatedSliderProgress(
-          plPlayerController.position,
-        );
-      } else {
-        plPlayerController.seekTo(
-          plPlayerController.sliderPosition,
-          isSeek: false,
-        );
-      }
-      plPlayerController.onChangedSliderEnd();
+    if (_gestureType == .horizontal) {
+      _onHorizontalDragEnd();
     }
     _initialFocalPoint = null;
     _gestureType = null;
@@ -1274,6 +1284,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       final dx = pan.dx.abs();
       final dy = pan.dy.abs();
       if (dx > 3 * dy) {
+        _onHorizontalDragStart();
         _gestureType = .horizontal;
       } else if (dy > 3 * dx) {
         _gestureType = .right;
@@ -1284,28 +1295,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     if (_gestureType == .horizontal) {
       if (plPlayerController.isLive) return;
 
-      final delta = event.localPanDelta;
-      final int curSliderPosition =
-          plPlayerController.sliderPosition.inMilliseconds;
-      final int newPos =
-          (curSliderPosition +
-                  (plPlayerController.sliderScale * delta.dx / maxWidth)
-                      .round())
-              .clamp(0, plPlayerController.duration.value.inMilliseconds);
-      final Duration result = Duration(milliseconds: newPos);
-      if (plPlayerController.cancelSeek == true) {
-        plPlayerController
-          ..cancelSeek = null
-          ..hasToast = null;
-      }
-      plPlayerController
-        ..onUpdatedSliderProgress(result)
-        ..onChangedSliderStart();
-      if (!plPlayerController.isFileSource &&
-          plPlayerController.showSeekPreview &&
-          plPlayerController.cancelSeek != true) {
-        plPlayerController.updatePreviewIndex(newPos ~/ 1000);
-      }
+      _onHorizontalDragUpdate(event.localPanDelta.dx);
     } else if (_gestureType == .right) {
       if (!plPlayerController.enableSlideVolumeBrightness) {
         return;
@@ -1328,11 +1318,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   }
 
   void _onPointerPanZoomEnd(PointerPanZoomEndEvent event) {
-    plPlayerController.showPreview.value = false;
-    if (plPlayerController.isSliderMoving.value) {
-      plPlayerController
-        ..seekTo(plPlayerController.sliderPosition, isSeek: false)
-        ..onChangedSliderEnd();
+    if (_gestureType == .horizontal) {
+      _onHorizontalDragEnd();
     }
     _gestureType = null;
   }
@@ -1455,9 +1442,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 child: Obx(
                   () => AnimatedOpacity(
                     curve: Curves.easeInOut,
-                    opacity: plPlayerController.isSliderMoving.value
-                        ? 1.0
-                        : 0.0,
+                    opacity: plPlayerController.isSeeking.value ? 1.0 : 0.0,
                     duration: const Duration(milliseconds: 150),
                     child: Container(
                       decoration: const BoxDecoration(
@@ -1473,27 +1458,22 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Obx(() {
-                            return Text(
+                          Obx(
+                            () => Text(
                               DurationUtils.formatDuration(
-                                plPlayerController
-                                    .sliderTempPosition
-                                    .value
-                                    .inSeconds,
+                                plPlayerController.position.value,
                               ),
                               style: textStyle,
-                            );
-                          }),
+                            ),
+                          ),
                           const Text('/', style: textStyle),
                           Obx(
-                            () {
-                              return Text(
-                                DurationUtils.formatDuration(
-                                  plPlayerController.duration.value.inSeconds,
-                                ),
-                                style: textStyle,
-                              );
-                            },
+                            () => Text(
+                              DurationUtils.formatDuration(
+                                plPlayerController.duration.value,
+                              ),
+                              style: textStyle,
+                            ),
                           ),
                         ],
                       ),
@@ -1727,20 +1707,18 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   case .alwaysShow:
                     offstage = showControls;
                   case .alwaysHide:
-                    if (!plPlayerController.isSliderMoving.value) {
+                    if (!plPlayerController.isSeeking.value) {
                       return const SizedBox.shrink();
                     }
                     offstage = showControls;
                   case .onlyShowFullScreen:
                     offstage =
                         showControls ||
-                        (!isFullScreen &&
-                            !plPlayerController.isSliderMoving.value);
+                        (!isFullScreen && !plPlayerController.isSeeking.value);
                   case .onlyHideFullScreen:
                     offstage =
                         showControls ||
-                        (isFullScreen &&
-                            !plPlayerController.isSliderMoving.value);
+                        (isFullScreen && !plPlayerController.isSeeking.value);
                 }
                 return Offstage(
                   offstage: offstage,
@@ -1748,17 +1726,11 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                     clipBehavior: Clip.none,
                     alignment: Alignment.bottomCenter,
                     children: [
-                      Obx(() {
-                        final int value =
-                            plPlayerController.sliderPositionSeconds.value;
-                        final int max =
-                            plPlayerController.duration.value.inSeconds;
-                        final int buffer =
-                            plPlayerController.bufferedSeconds.value;
-                        return ProgressBar(
-                          progress: Duration(seconds: value),
-                          buffered: Duration(seconds: buffer),
-                          total: Duration(seconds: max),
+                      Obx(
+                        () => ProgressBar(
+                          progress: plPlayerController.position.value,
+                          buffered: plPlayerController.buffered.value,
+                          total: plPlayerController.duration.value,
                           progressBarColor: primary,
                           baseBarColor: const Color(0x33FFFFFF),
                           bufferedBarColor: bufferedBarColor,
@@ -1766,8 +1738,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                           thumbGlowColor: thumbGlowColor,
                           barHeight: 3.5,
                           thumbRadius: 2.5,
-                        );
-                      }),
+                        ),
+                      ),
                       if (plPlayerController.enableBlock &&
                           videoDetailController.segmentProgressList.isNotEmpty)
                         Positioned(
@@ -1929,7 +1901,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                       ),
                       if (plPlayerController.isBuffering.value)
                         Obx(() {
-                          if (plPlayerController.bufferedSeconds.value == 0) {
+                          final buffered = plPlayerController.buffered.value;
+                          if (buffered == 0) {
                             return const Text(
                               '加载中...',
                               style: TextStyle(
@@ -1938,10 +1911,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                               ),
                             );
                           }
-                          String bufferStr = plPlayerController.buffered
-                              .toString();
                           return Text(
-                            bufferStr.substring(0, bufferStr.length - 3),
+                            DurationUtils.formatDuration(buffered),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
@@ -2087,11 +2058,6 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     );
   }
 
-  late final segment = Pair(
-    first: plPlayerController.position.inMilliseconds / 1000.0,
-    second: plPlayerController.position.inMilliseconds / 1000.0,
-  );
-
   Future<void> screenshotWebp() async {
     final videoInfo = videoDetailController.data;
     final ids = videoInfo.dash!.video!.map((i) => i.id!).toSet();
@@ -2103,8 +2069,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
     final ctr = plPlayerController;
     final theme = Theme.of(context);
-    final currentPos = ctr.position.inMilliseconds / 1000.0;
-    final duration = ctr.duration.value.inMilliseconds / 1000.0;
+    final currentPos = ctr.positionInMilliseconds / 1000.0;
+    final duration = ctr.durationInMilliseconds / 1000.0;
+    final segment = Pair(first: currentPos, second: currentPos);
     final model = PostSegmentModel(
       segment: segment,
       category: SegmentType.sponsor,
