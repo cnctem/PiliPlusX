@@ -219,11 +219,6 @@ dependency_overrides:
       url: https://github.com/My-Responsitories/media-kit.git
       path: media_kit_video
       ref: version_1.2.5
-  screen_brightness_android:
-    git:
-      url: https://github.com/bggRGjQaUbCoE/screen_brightness.git
-      path: screen_brightness_android
-      ref: main
   cached_network_image_ce:
     git:
       url: https://github.com/My-Responsitories/flutter_cached_network_image_ce.git
