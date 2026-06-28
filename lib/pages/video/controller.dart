@@ -54,6 +54,7 @@ import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/connectivity_utils.dart';
 import 'package:PiliPlus/utils/extension/context_ext.dart';
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
+import 'package:PiliPlus/utils/extension/nested_scroll_ext.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/size_ext.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
@@ -187,9 +188,7 @@ class VideoDetailController extends GetxController
       )..addListener(_animListener));
 
   void refreshPage() {
-    if (scrollKey.currentState?.mounted ?? false) {
-      (scrollKey.currentState!.context as Element).markNeedsBuild();
-    }
+    scrollKey.currentState?.refresh();
   }
 
   void _animListener() {
@@ -217,14 +216,7 @@ class VideoDetailController extends GetxController
   }
 
   void animToTop() {
-    final outerController = scrollKey.currentState!.outerController;
-    if (outerController.hasClients) {
-      outerController.animateTo(
-        outerController.offset,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
-    }
+    scrollKey.currentState?.animToTop();
   }
 
   bool _needAnimOnDimensionChanged(bool isVertical) {
