@@ -24,12 +24,19 @@ import 'package:PiliPlus/pages/dynamics_repost/view.dart';
 import 'package:PiliPlus/utils/extension/get_ext.dart';
 import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/num_utils.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
 import 'package:PiliPlus/utils/share_utils.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+
+const Set<TargetPlatform> _kDesktopPlatforms = <TargetPlatform>{
+  TargetPlatform.macOS,
+  TargetPlatform.windows,
+  TargetPlatform.linux,
+};
 
 class DynamicDetailPage extends StatefulWidget {
   const DynamicDetailPage({super.key});
@@ -306,12 +313,14 @@ class _DynamicDetailPageState
               if (postion.pixels >= postion.maxScrollExtent) {
                 postion.jumpTo(postion.pixels);
               }
-            }
-            switch (value) {
-              case 0:
-                _onRefresh(controller.onRefresh());
-              case 1:
-                _onRefresh(_reactController.onRefresh());
+              switch (value) {
+                case 0:
+                  _onRefresh(controller.onRefresh());
+                case 1:
+                  _onRefresh(_reactController.onRefresh());
+              }
+            } else if (positions.length > 1) {
+              positions.elementAt(1).jumpTo(0);
             }
           }
         },
@@ -346,56 +355,57 @@ class _DynamicDetailPageState
         Obx(() => replyList(controller.loadingState.value)),
       ],
     );
-    return Stack(
-      clipBehavior: .none,
+    final child = tabBarView(
+      controller: tabController,
       children: [
-        tabBarView(
-          controller: tabController,
-          children: [
-            isPortrait
-                ? reply
-                : refreshIndicator(
-                    onRefresh: controller.onRefresh,
-                    child: reply,
-                  ),
-            DynReactPage(
-              isPortrait: isPortrait,
-              id: controller.dynItem.idStr,
-              controller: _reactController,
-            ),
-          ],
+        isPortrait
+            ? reply
+            : refreshIndicator(onRefresh: controller.onRefresh, child: reply),
+        DynReactPage(
+          isPortrait: isPortrait,
+          id: controller.dynItem.idStr,
+          controller: _reactController,
         ),
-        Positioned(
-          left: 0,
-          right: 0,
-          top: displacement,
-          child: Obx(() {
-            final isRefreshing = _isRefreshing.value;
-            return AnimatedScale(
-              scale: isRefreshing ? 1 : 0,
-              duration: const Duration(milliseconds: 200),
-              child: Center(
-                child: SizedBox.fromSize(
-                  size: const .square(40),
-                  child: Material(
-                    type: .circle,
-                    color: theme.colorScheme.onSecondary,
-                    elevation: 2.0,
-                    child: Padding(
-                      padding: const .all(6),
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        controller: _refreshController,
+      ],
+    );
+    if (isPortrait) {
+      return Stack(
+        clipBehavior: .none,
+        children: [
+          child,
+          Positioned(
+            left: 0,
+            right: 0,
+            top: displacement,
+            child: Obx(() {
+              final isRefreshing = _isRefreshing.value;
+              return AnimatedScale(
+                scale: isRefreshing ? 1 : 0,
+                duration: const Duration(milliseconds: 200),
+                child: Center(
+                  child: SizedBox.fromSize(
+                    size: const .square(40),
+                    child: Material(
+                      type: .circle,
+                      color: theme.colorScheme.onSecondary,
+                      elevation: 2.0,
+                      child: Padding(
+                        padding: const .all(6),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          controller: _refreshController,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            );
-          }),
-        ),
-      ],
-    );
+              );
+            }),
+          ),
+        ],
+      );
+    }
+    return child;
   }
 
   Widget _buildPortrait(double padding) {
@@ -432,7 +442,7 @@ class _DynamicDetailPageState
     padding = padding / 4;
     final flex = controller.ratio[0].toInt();
     final flex1 = controller.ratio[1].toInt();
-    return Row(
+    final child = Row(
       children: [
         Expanded(
           flex: flex,
@@ -477,6 +487,14 @@ class _DynamicDetailPageState
         ),
       ],
     );
+    if (PlatformUtils.isDesktop) {
+      return PrimaryScrollController(
+        controller: PrimaryScrollController.of(context),
+        automaticallyInheritForPlatforms: _kDesktopPlatforms,
+        child: child,
+      );
+    }
+    return child;
   }
 
   Widget _buildBody() {
