@@ -1,27 +1,29 @@
-# 当前分支(ohos)说明
+# PiliPlus鸿蒙版分支
 
-这是一个适配鸿蒙的分支，目前大部分功能正常，主要问题是没有硬件解码
+大部分功能正常，media_kit由[ErBW_s](https://github.com/ErBWs)适配
 
-flutter哔哩交流群 1106472996
+- [issues看板](https://github.com/users/qinshah/projects/1)
+
+- 鸿蒙flutter应用交流群：1106472996
 
 > [!WARNING]
-> 需要知晓的是此分支只是将PiliPlus适配到鸿蒙
+> 此分支只是将PiliPlus适配到鸿蒙
 >
 > 几乎所有与鸿蒙平台无关的功能都是上游实现的
 >
 > 生活所迫没有太多时间能花在这个项目上，更新慢请见谅
 
-### 其它细节和问题：[issues 看板](https://github.com/users/qinshah/projects/1)
+## 提issue注意事项：
 
-## 需要提issue？
+- 请查看是否已存在类似issue并确保属于鸿蒙版特有问题
 
-先确认有无已存在的类似issue，再确认是不是鸿蒙版特有的移植问题
+- 此分支只做移植适配工作，一般情况下不增加新功能或更改特性
 
-因为这个分支只做移植适配工作，一般情况下不增加新功能或更改特性
+- issue可能回复慢，可加上方交流群讨论
 
 ## 编译运行
 
-- 1、配置鸿蒙flutter3.41.9环境，其余环境配置可参考[鸿蒙flutter3.41.9](https://gitcode.com/openharmony-tpc/flutter_flutter/tree/oh-3.41.9-dev#flutter-sdk--engine-%E4%BB%93%E5%BA%93)
+- 1、配置鸿蒙flutter3.41.9环境，参考[鸿蒙flutter3.41.9](https://gitcode.com/CPF-Flutter/flutter_flutter/tree/oh-3.41.9-dev)
 
 - 2、手动创建ohos/build-profile.json5文件，见[关于build-profile.json5](ohos/关于build-profile.json5)
 
@@ -31,15 +33,15 @@ flutter哔哩交流群 1106472996
 
 ## 感谢
 
-- 上游项目
+- [PiliPlus上游](https://github.com/bggRGjQaUbCoE/PiliPlus)
 
-- media_kit 适配者[ErBW_s](https://github.com/ErBWs)
+- media_kit适配者[ErBW_s](https://github.com/ErBWs)
 
 - 所有开发者和贡献者
 
 - ......
 
-# 以下是原上游项目 readme
+# 以下是原上游项目README
 
 <div align="center">
     <img width="200" height="200" src="assets/images/logo/logo.png">
