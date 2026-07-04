@@ -257,17 +257,20 @@ class OpusContent extends StatelessWidget {
                       .toList(),
                 );
               }
-            case 3 when (element.line?.pic != null):
-              final pic = element.line!.pic!;
-              final height = pic.height?.toDouble();
-              return CachedNetworkImage(
-                fit: .contain,
-                height: height,
-                width: maxWidth,
-                memCacheWidth: maxWidth.cacheSize(context),
-                imageUrl: ImageUtils.thumbnailUrl(pic.url!),
-                placeholder: (_, _) => const SizedBox.shrink(),
-              );
+            case 3:
+              if (element.line?.pic case final pic?) {
+                final height = pic.height?.toDouble();
+                return CachedNetworkImage(
+                  fit: .contain,
+                  height: height,
+                  width: maxWidth,
+                  memCacheWidth: maxWidth.cacheSize(context),
+                  imageUrl: ImageUtils.thumbnailUrl(pic.url!),
+                  placeholder: (_, _) => const SizedBox.shrink(),
+                );
+              } else {
+                return const Divider();
+              }
             case 5 when (element.list?.items?.isNotEmpty == true):
               return Text.rich(
                 TextSpan(
