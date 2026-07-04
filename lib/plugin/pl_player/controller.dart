@@ -810,6 +810,14 @@ class PlPlayerController with BlockConfigMixin {
           audioUri,
         );
       }
+    } else {
+      // 修复 Bug：从视频页返回直播间后，声音变成刚才视频的声音。
+      // 原因：当前版本改用 NativePlayer.setProperty 直接设置 audio-files，
+      // 该属性会持久化在复用的 Player 实例上；而 2.0.1 及之前版本是通过
+      // Media.extras 传入 audio-files，每次 player.open 都会随新 Media 重置。
+      // 当切换到无单独音频源的内容（如直播、关闭听视频）时，必须主动清空
+      // audio-files，否则旧视频的外部音轨会继续播放，导致画面与声音不一致。
+      player.platform!.maybeAsNativePlayer.setProperty('audio-files', '');
     }
 
     if (kDebugMode || Platform.isAndroid) {
@@ -877,6 +885,11 @@ class PlPlayerController with BlockConfigMixin {
         await (_videoPlayerController!.platform!).maybeAsNativePlayer
             .setProperty('audio-files', audioUri);
       }
+    } else {
+      // 与 _createVideoController 保持一致：直播等无外部音频源的场景下，
+      // 刷新播放源前必须清空残留的 audio-files，防止旧视频音频继续播放。
+      await (_videoPlayerController!.platform!).maybeAsNativePlayer
+          .setProperty('audio-files', '');
     }
     await _videoPlayerController!.open(
       Media(
