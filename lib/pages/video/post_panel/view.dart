@@ -262,7 +262,7 @@ class _PostPanelState extends State<PostPanel>
     );
     if (_isNested) {
       child = ExtendedVisibilityDetector(
-        uniqueKey: const Key('post-panel'),
+        uniqueKey: const ValueKey(PostPanel),
         child: child,
       );
     }

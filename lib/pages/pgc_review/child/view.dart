@@ -377,7 +377,7 @@ class _PgcReviewChildPageState extends State<PgcReviewChildPage>
     child: Padding(
       padding: const EdgeInsets.fromLTRB(12, 2.5, 6, 2.5),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: .spaceBetween,
         children: [
           Obx(
             () {

@@ -115,7 +115,7 @@ class _ViewPointsPageState extends State<ViewPointsPage>
     );
     if (_isNested) {
       return ExtendedVisibilityDetector(
-        uniqueKey: const Key('viewpoints'),
+        uniqueKey: const ValueKey(ViewPointsPage),
         child: child,
       );
     }

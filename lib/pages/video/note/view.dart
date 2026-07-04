@@ -123,7 +123,7 @@ class _NoteListPageState extends State<NoteListPage>
     );
     if (_isNested) {
       child = ExtendedVisibilityDetector(
-        uniqueKey: const Key('note-list'),
+        uniqueKey: const ValueKey(NoteListPage),
         child: child,
       );
     }

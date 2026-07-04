@@ -38,6 +38,7 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
         SingleTickerProviderStateMixin,
         BaseFabMixin,
         FabMixin {
+  late ColorScheme colorScheme;
   late VideoReplyController _videoReplyController;
 
   String get heroTag => widget.heroTag;
@@ -57,6 +58,7 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    colorScheme = ColorScheme.of(context);
     bottom = MediaQuery.viewPaddingOf(context).bottom;
   }
 
@@ -65,7 +67,6 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final theme = Theme.of(context);
     final child = NotificationListener<UserScrollNotification>(
       onNotification: (notification) {
         switch (notification.direction) {
@@ -81,7 +82,7 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
         onRefresh: _videoReplyController.onRefresh,
         isClampingScrollPhysics: widget.isNested,
         child: Stack(
-          clipBehavior: Clip.none,
+          clipBehavior: .none,
           children: [
             CustomScrollView(
               controller: widget.isNested
@@ -91,45 +92,41 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
               key: const PageStorageKey(_VideoReplyPanelState),
               slivers: [
                 SliverFloatingHeaderWidget(
-                  backgroundColor: theme.colorScheme.surface,
+                  backgroundColor: colorScheme.surface,
                   child: Padding(
                     padding: const .fromLTRB(12, 2.5, 6, 2.5),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Obx(
-                          () => Text(
-                            _videoReplyController.sortType.value.title,
+                    child: Obx(() {
+                      final sortType = _videoReplyController.sortType.value;
+                      return Row(
+                        mainAxisAlignment: .spaceBetween,
+                        children: [
+                          Text(
+                            sortType.title,
                             style: const TextStyle(fontSize: 13),
                           ),
-                        ),
-                        TextButton.icon(
-                          style: Style.buttonStyle,
-                          onPressed: _videoReplyController.queryBySort,
-                          icon: Icon(
-                            Icons.sort,
-                            size: 16,
-                            color: theme.colorScheme.secondary,
-                          ),
-                          label: Obx(
-                            () => Text(
-                              _videoReplyController.sortType.value.label,
+                          TextButton.icon(
+                            style: Style.buttonStyle,
+                            onPressed: _videoReplyController.queryBySort,
+                            icon: Icon(
+                              Icons.sort,
+                              size: 16,
+                              color: colorScheme.secondary,
+                            ),
+                            label: Text(
+                              sortType.label,
                               style: TextStyle(
                                 fontSize: 13,
-                                color: theme.colorScheme.secondary,
+                                color: colorScheme.secondary,
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      );
+                    }),
                   ),
                 ),
                 Obx(
-                  () => _buildBody(
-                    theme,
-                    _videoReplyController.loadingState.value,
-                  ),
+                  () => _buildBody(_videoReplyController.loadingState.value),
                 ),
               ],
             ),
@@ -165,17 +162,14 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
     );
     if (widget.isNested) {
       return ExtendedVisibilityDetector(
-        uniqueKey: const Key('reply-list'),
+        uniqueKey: const ValueKey(VideoReplyPanel),
         child: child,
       );
     }
     return child;
   }
 
-  Widget _buildBody(
-    ThemeData theme,
-    LoadingState<List<ReplyInfo>?> loadingState,
-  ) {
+  Widget _buildBody(LoadingState<List<ReplyInfo>?> loadingState) {
     return switch (loadingState) {
       Loading() => SliverList.builder(
         itemBuilder: (context, index) => const VideoReplySkeleton(),
@@ -189,14 +183,14 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
                     _videoReplyController.onLoadMore();
                     return Container(
                       height: 125,
-                      alignment: Alignment.center,
-                      margin: EdgeInsets.only(bottom: bottom),
+                      alignment: .center,
+                      margin: .only(bottom: bottom),
                       child: Text(
                         _videoReplyController.isEnd ? '没有更多了' : '加载中...',
-                        textAlign: TextAlign.center,
+                        textAlign: .center,
                         style: TextStyle(
                           fontSize: 12,
-                          color: theme.colorScheme.outline,
+                          color: colorScheme.outline,
                         ),
                       ),
                     );
