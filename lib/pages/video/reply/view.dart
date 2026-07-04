@@ -8,6 +8,7 @@ import 'package:PiliPlus/grpc/bilibili/main/community/reply/v1.pb.dart'
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/pages/common/fab_mixin.dart';
 import 'package:PiliPlus/pages/video/reply/controller.dart';
+import 'package:PiliPlus/pages/video/reply/vote/reply_vote_item.dart';
 import 'package:PiliPlus/pages/video/reply/widgets/reply_item_grpc.dart';
 import 'package:PiliPlus/pages/video/reply_reply/view.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
@@ -125,9 +126,7 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
                     }),
                   ),
                 ),
-                Obx(
-                  () => _buildBody(_videoReplyController.loadingState.value),
-                ),
+                Obx(() => _buildBody(_videoReplyController.loadingState.value)),
               ],
             ),
             Positioned(
@@ -170,62 +169,75 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
   }
 
   Widget _buildBody(LoadingState<List<ReplyInfo>?> loadingState) {
-    return switch (loadingState) {
-      Loading() => SliverList.builder(
-        itemBuilder: (context, index) => const VideoReplySkeleton(),
-        itemCount: 5,
-      ),
-      Success(:final response) =>
-        response != null && response.isNotEmpty
-            ? SliverList.builder(
-                itemBuilder: (context, index) {
-                  if (index == response.length) {
-                    _videoReplyController.onLoadMore();
-                    return Container(
-                      height: 125,
-                      alignment: .center,
-                      margin: .only(bottom: bottom),
-                      child: Text(
-                        _videoReplyController.isEnd ? '没有更多了' : '加载中...',
-                        textAlign: .center,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: colorScheme.outline,
-                        ),
-                      ),
-                    );
-                  } else {
-                    return ReplyItemGrpc(
-                      replyItem: response[index],
-                      replyLevel: widget.replyLevel,
-                      replyReply: replyReply,
-                      onReply: _videoReplyController.onReply,
-                      onDelete: (item, subIndex) =>
-                          _videoReplyController.onRemove(index, item, subIndex),
-                      upMid: _videoReplyController.upMid,
-                      getTag: () => heroTag,
-                      onCheckReply: (item) => _videoReplyController
-                          .onCheckReply(item, isManual: true),
-                      onToggleTop: (item) => _videoReplyController.onToggleTop(
-                        item,
-                        index,
-                        _videoReplyController.aid,
-                        _videoReplyController.videoType.replyType,
-                      ),
-                    );
-                  }
-                },
-                itemCount: response.length + 1,
-              )
-            : HttpError(
-                errMsg: '还没有评论',
-                onReload: _videoReplyController.onReload,
-              ),
-      Error(:final errMsg) => HttpError(
-        errMsg: errMsg,
-        onReload: _videoReplyController.onReload,
-      ),
-    };
+    switch (loadingState) {
+      case Loading():
+        return SliverList.builder(
+          itemBuilder: (context, index) => const VideoReplySkeleton(),
+          itemCount: 5,
+        );
+      case Success(:final response):
+        if (response != null && response.isNotEmpty) {
+          var count = response.length + 1;
+          final voteCard = _videoReplyController.voteCard;
+          final hasVote = voteCard != null;
+          if (hasVote) {
+            count++;
+          }
+          return SliverList.builder(
+            itemBuilder: (context, index) {
+              if (hasVote) {
+                if (index == 0) {
+                  return buildVoteCard(context, colorScheme, voteCard);
+                } else {
+                  index--;
+                }
+              }
+              if (index == response.length) {
+                _videoReplyController.onLoadMore();
+                return Container(
+                  height: 125,
+                  alignment: .center,
+                  margin: .only(bottom: bottom),
+                  child: Text(
+                    _videoReplyController.isEnd ? '没有更多了' : '加载中...',
+                    textAlign: .center,
+                    style: TextStyle(fontSize: 12, color: colorScheme.outline),
+                  ),
+                );
+              } else {
+                return ReplyItemGrpc(
+                  replyItem: response[index],
+                  replyLevel: widget.replyLevel,
+                  replyReply: replyReply,
+                  onReply: _videoReplyController.onReply,
+                  onDelete: (item, subIndex) =>
+                      _videoReplyController.onRemove(index, item, subIndex),
+                  upMid: _videoReplyController.upMid,
+                  getTag: () => heroTag,
+                  onCheckReply: (item) =>
+                      _videoReplyController.onCheckReply(item, isManual: true),
+                  onToggleTop: (item) => _videoReplyController.onToggleTop(
+                    item,
+                    index,
+                    _videoReplyController.aid,
+                    _videoReplyController.videoType.replyType,
+                  ),
+                );
+              }
+            },
+            itemCount: count,
+          );
+        }
+        return HttpError(
+          errMsg: '还没有评论',
+          onReload: _videoReplyController.onReload,
+        );
+      case Error(:final errMsg):
+        return HttpError(
+          errMsg: errMsg,
+          onReload: _videoReplyController.onReload,
+        );
+    }
   }
 
   // 展示二级回复
