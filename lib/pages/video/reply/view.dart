@@ -228,10 +228,22 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
             itemCount: count,
           );
         }
-        return HttpError(
+
+        final child = HttpError(
           errMsg: '还没有评论',
           onReload: _videoReplyController.onReload,
         );
+        if (_videoReplyController.voteCard case final voteCard?) {
+          return SliverMainAxisGroup(
+            slivers: [
+              SliverToBoxAdapter(
+                child: buildVoteCard(context, colorScheme, voteCard),
+              ),
+              child,
+            ],
+          );
+        }
+        return child;
       case Error(:final errMsg):
         return HttpError(
           errMsg: errMsg,

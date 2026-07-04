@@ -183,10 +183,22 @@ mixin CommonDynPageMixin<T extends StatefulWidget>
             },
           );
         }
-        return HttpError(
+
+        final child = HttpError(
           errMsg: '还没有评论',
           onReload: controller.onReload,
         );
+        if (controller.voteCard case final voteCard?) {
+          return SliverMainAxisGroup(
+            slivers: [
+              SliverToBoxAdapter(
+                child: buildVoteCard(context, theme.colorScheme, voteCard),
+              ),
+              child,
+            ],
+          );
+        }
+        return child;
       case Error(:final errMsg):
         return HttpError(
           errMsg: errMsg,

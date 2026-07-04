@@ -302,15 +302,15 @@ class ReplyItemGrpc extends StatelessWidget {
         children: [
           switch (voteOption.labelKind) {
             .RED => TextSpan(
-              text: '红队 ',
+              text: '红方  ',
               style: TextStyle(color: colorScheme.vipColor),
             ),
             .BLUE => TextSpan(
-              text: '蓝队 ',
+              text: '蓝方  ',
               style: TextStyle(color: colorScheme.blue),
             ),
             _ => TextSpan(
-              text: '投票 ',
+              text: '投票  ',
               style: TextStyle(color: colorScheme.outline),
             ),
           },
@@ -318,6 +318,7 @@ class ReplyItemGrpc extends StatelessWidget {
         ],
       ),
       style: TextStyle(
+        height: 1.75,
         fontSize: 12,
         color: colorScheme.onSurfaceVariant,
       ),
