@@ -53,6 +53,7 @@ import 'package:PiliPlus/utils/utils.dart';
 import 'package:archive/archive.dart' show getCrc32;
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:easy_debounce/easy_throttle.dart';
+import 'package:floating/floating.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show HapticFeedback, DeviceOrientation;
@@ -62,7 +63,6 @@ import 'package:get/get.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
-import 'package:floating/floating.dart';
 import 'package:os_type/os_type.dart';
 import 'package:path/path.dart' as path;
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
@@ -828,6 +828,14 @@ class PlPlayerController with BlockConfigMixin {
           audioUri,
         );
       }
+    } else {
+      // 修复 Bug：从视频页返回直播间后，声音变成刚才视频的声音。
+      // 原因：当前版本改用 NativePlayer.setProperty 直接设置 audio-files，
+      // 该属性会持久化在复用的 Player 实例上；而 2.0.1 及之前版本是通过
+      // Media.extras 传入 audio-files，每次 player.open 都会随新 Media 重置。
+      // 当切换到无单独音频源的内容（如直播、关闭听视频）时，必须主动清空
+      // audio-files，否则旧视频的外部音轨会继续播放，导致画面与声音不一致。
+      player.platform!.maybeAsNativePlayer.setProperty('audio-files', '');
       if (enableAudioNormalization) {
         final String audioNormalization;
         if (volume != null && volume.isNotEmpty) {
