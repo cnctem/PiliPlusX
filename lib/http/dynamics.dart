@@ -471,10 +471,35 @@ abstract final class DynamicsHttp {
       },
     );
     if (res.data['code'] == 0) {
-      TopicCardList? data = res.data['data']?['topic_card_list'] == null
-          ? null
-          : TopicCardList.fromJson(res.data['data']['topic_card_list']);
-      return Success(data);
+      final list = res.data['data']?['topic_card_list'];
+      if (list == null) {
+        return const Success(null);
+      } else {
+        return Success(TopicCardList.fromJson(list));
+      }
+    } else {
+      return Error(res.data['message']);
+    }
+  }
+
+  static Future<LoadingState<TopicCardList?>> topicFold({
+    required Object topicId,
+    required int sortBy,
+  }) async {
+    final res = await Request().get(
+      Api.topicFold,
+      queryParameters: {
+        'topic_id': topicId,
+        'sort_by': sortBy,
+      },
+    );
+    if (res.data['code'] == 0) {
+      final list = res.data['data']?['topic_card_list'];
+      if (list == null) {
+        return const Success(null);
+      } else {
+        return Success(TopicCardList.fromJson(list));
+      }
     } else {
       return Error(res.data['message']);
     }

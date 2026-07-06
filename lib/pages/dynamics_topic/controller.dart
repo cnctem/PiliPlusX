@@ -130,4 +130,16 @@ class DynTopicController
       res.toast();
     }
   }
+
+  Future<void> topicFold() async {
+    final res = await DynamicsHttp.topicFold(topicId: topicId, sortBy: sortBy);
+    if (res case Success(:final response)) {
+      if (response?.items case final items? when items.isNotEmpty) {
+        loadingState.value.data!
+          ..removeLast()
+          ..addAll(items);
+        loadingState.refresh();
+      }
+    }
+  }
 }
