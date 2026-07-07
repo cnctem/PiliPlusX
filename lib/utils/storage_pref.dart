@@ -676,6 +676,9 @@ abstract final class Pref {
     defaultValue: PlatformUtils.isMobile,
   );
 
+  static bool get hideStatusBar =>
+      _setting.get(SettingBoxKey.hideStatusBar, defaultValue: false);
+
   static BarHideType get barHideType =>
       BarHideType.values[_setting.get(
         SettingBoxKey.barHideType,
