@@ -119,6 +119,7 @@ abstract final class SearchHttp {
               .article => SearchArticleData.fromJson(dataData),
             } as R,
           );
+
         } catch (e, s) {
           return Error('$e\n\n$s');
         }
