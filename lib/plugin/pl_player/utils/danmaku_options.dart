@@ -1,3 +1,5 @@
+import 'package:PiliPlus/models/common/danmaku/danmaku_font_sync_mode.dart';
+import 'package:PiliPlus/models/common/danmaku/danmaku_font_sync_mode.dart';
 import 'package:PiliPlus/utils/extension/box_ext.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
@@ -24,6 +26,17 @@ abstract final class DanmakuOptions {
 
   static bool get sameFontScale => danmakuFontScale == danmakuFontScaleFS;
 
+  static String? get _fontFamily {
+    if (!Pref.enableCustomDanmakuFont ||
+        Pref.danmakuFontSyncMode == DanmakuFontSyncMode.system) {
+      return null;
+    }
+    if (Pref.danmakuFontSyncMode == DanmakuFontSyncMode.global) {
+      return Pref.appFont;
+    }
+    return Pref.customDanmakuFontFamily;
+  }
+
   static DanmakuOption get({
     required bool notFullscreen,
     double speed = 1.0,
@@ -31,7 +44,7 @@ abstract final class DanmakuOptions {
     return DanmakuOption(
       fontSize: 15 * (notFullscreen ? danmakuFontScale : danmakuFontScaleFS),
       fontWeight: danmakuFontWeight,
-      fontFamily: ThemeUtils.theme.textTheme.bodyMedium?.fontFamily,
+      fontFamily: _fontFamily,
       area: danmakuShowArea,
       duration: danmakuDuration / speed,
       staticDuration: danmakuStaticDuration / speed,
