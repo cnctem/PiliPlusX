@@ -5,6 +5,7 @@ import 'package:PiliPlus/common/widgets/gesture/horizontal_drag_gesture_recogniz
 import 'package:PiliPlus/common/widgets/pair.dart';
 import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/models/common/bar_hide_type.dart';
+import 'package:PiliPlus/models/common/danmaku/danmaku_font_sync_mode.dart';
 import 'package:PiliPlus/models/common/dynamic/dynamic_badge_mode.dart';
 import 'package:PiliPlus/models/common/dynamic/dynamics_type.dart';
 import 'package:PiliPlus/models/common/dynamic/up_panel_position.dart';
@@ -591,6 +592,36 @@ abstract final class Pref {
       return .normal;
     }
     return .values[val];
+  }
+
+  static DanmakuFontSyncMode get danmakuFontSyncMode =>
+      DanmakuFontSyncMode.values[_setting.get(
+        SettingBoxKey.danmakuFontSyncMode,
+        defaultValue: DanmakuFontSyncMode.global.index,
+      )];
+
+  static bool get enableCustomDanmakuFont => _setting.get(
+    SettingBoxKey.enableCustomDanmakuFont,
+    defaultValue: false,
+  );
+
+  static String? get customDanmakuFontPath =>
+      _setting.get(SettingBoxKey.customDanmakuFontPath);
+
+  static String? get customDanmakuFontFamily {
+    final value = _setting.get(
+      SettingBoxKey.customDanmakuFontFamily,
+      defaultValue: '',
+    );
+    return value is String && value.isNotEmpty ? value : null;
+  }
+
+  static String? get customDanmakuFontName {
+    final value = _setting.get(
+      SettingBoxKey.customDanmakuFontName,
+      defaultValue: '',
+    );
+    return value is String && value.isNotEmpty ? value : null;
   }
 
   static bool get enableDragSubtitle =>
