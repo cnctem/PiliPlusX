@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
@@ -38,16 +37,14 @@ abstract final class AppFont {
   }
 
   static Future<bool> pickAndApply() async {
-    final result = await FilePicker.platform.pickFiles(
+    final picked = await FilePicker.pickFile(
       type: FileType.custom,
       allowedExtensions: allowedExtensions,
-      withData: true,
     );
-    if (result == null || result.files.isEmpty) {
+    if (picked == null) {
       return false;
     }
 
-    final picked = result.files.single;
     final extension = path
         .extension(picked.path ?? picked.name)
         .replaceFirst('.', '')
@@ -62,14 +59,15 @@ abstract final class AppFont {
     }
 
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final targetPath = path.join(fontDir.path, 'custom_font_$timestamp.$extension');
+    final targetPath = path.join(
+      fontDir.path,
+      'custom_font_$timestamp.$extension',
+    );
     final targetFile = File(targetPath);
     if (picked.path case final String sourcePath) {
       await File(sourcePath).copy(targetPath);
-    } else if (picked.bytes case final Uint8List bytes) {
-      await targetFile.writeAsBytes(bytes, flush: true);
     } else {
-      throw StateError('missing font bytes');
+      await targetFile.writeAsBytes(await picked.readAsBytes(), flush: true);
     }
 
     final fontFamily = 'custom_font_$timestamp';
@@ -124,9 +122,9 @@ abstract final class AppFont {
     required String fontFamily,
   }) async {
     final bytes = await File(fontPath).readAsBytes();
-    final loader = FontLoader(fontFamily);
-    loader.addFont(Future.value(ByteData.sublistView(bytes)));
-    await loader.load();
+    await (FontLoader(
+      fontFamily,
+    )..addFont(Future.value(ByteData.sublistView(bytes)))).load();
   }
 
   static Future<void> _cleanupFontDir({String? excludePath}) async {
@@ -142,7 +140,10 @@ abstract final class AppFont {
       if (excludePath != null && path.equals(entity.path, excludePath)) {
         continue;
       }
-      final extension = path.extension(entity.path).replaceFirst('.', '').toLowerCase();
+      final extension = path
+          .extension(entity.path)
+          .replaceFirst('.', '')
+          .toLowerCase();
       if (!allowedExtensions.contains(extension)) {
         continue;
       }
