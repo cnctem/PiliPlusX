@@ -4,22 +4,20 @@ import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:dio/dio.dart';
 
 class HkApiRetryInterceptor extends Interceptor {
-
   @override
-  void onResponse(Response response, ResponseInterceptorHandler handler) async {
-    String apiHKUrl = Pref.apiHKUrl;
+  Future<void> onResponse(
+    Response response,
+    ResponseInterceptorHandler handler,
+  ) async {
+    final apiHKUrl = Pref.apiHKUrl;
     final originalOptions = response.requestOptions;
-    if ((originalOptions.method == 'GET') && (apiHKUrl.isNotEmpty)) {
+    if (originalOptions.method == 'GET' && apiHKUrl.isNotEmpty) {
       final data = response.data;
-      if (data is Map &&
-          ((data['code'] == -404) || (data['code'] == -10403))) {
+      if (data is Map && (data['code'] == -404 || data['code'] == -10403)) {
         try {
-
           String newUrl;
-
           if (originalOptions.path.startsWith('http')) {
             final originalUri = Uri.parse(originalOptions.path);
-
             if (originalUri.host != HttpString.apiBaseUrl) {
               return handler.next(response);
             }
@@ -28,11 +26,14 @@ class HkApiRetryInterceptor extends Interceptor {
             if (originalUri.query.isNotEmpty) {
               newUrl += '?${originalUri.query}';
             }
-          }else {
-            newUrl = apiHKUrl+originalOptions.path;
+          } else {
+            newUrl = apiHKUrl + originalOptions.path;
           }
 
-          final newResponse = await _retryWithNewDomain(originalOptions,newUrl);
+          final newResponse = await _retryWithNewDomain(
+            originalOptions,
+            newUrl,
+          );
           return handler.resolve(newResponse);
         } catch (e) {
           return handler.next(response);
@@ -43,7 +44,10 @@ class HkApiRetryInterceptor extends Interceptor {
     return handler.next(response);
   }
 
-  Future<Response> _retryWithNewDomain(RequestOptions originalOptions,String newUrl) async {
+  Future<Response> _retryWithNewDomain(
+    RequestOptions originalOptions,
+    String newUrl,
+  ) {
     final newOptions = Options(
       method: originalOptions.method,
       sendTimeout: originalOptions.sendTimeout,
@@ -61,7 +65,7 @@ class HkApiRetryInterceptor extends Interceptor {
       listFormat: originalOptions.listFormat,
     );
 
-    return await Request.dio.request(
+    return Request.dio.request(
       newUrl,
       data: originalOptions.data,
       queryParameters: originalOptions.queryParameters,
