@@ -170,7 +170,7 @@ Commit Hash: ${BuildConfig.commitHash}''',
             color: theme.colorScheme.outlineVariant,
           ),
           ListTile(
-            onTap: () => PageUtils.launchURL(Constants.sourceCodeUrl),
+            onTap: () => PageUtils.launchURL(Constants.upstreamCodeUrl),
             leading: const Icon(Icons.code),
             title: const Text('上游仓库 Code'),
             subtitle: Text(Constants.upstreamCodeUrl, style: subTitleStyle),

@@ -4,6 +4,8 @@ import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:dio/dio.dart';
 
 class HkApiRetryInterceptor extends Interceptor {
+  static final _apiBaseHost = Uri.parse(HttpString.apiBaseUrl).host;
+
   @override
   Future<void> onResponse(
     Response response,
@@ -18,7 +20,7 @@ class HkApiRetryInterceptor extends Interceptor {
           String newUrl;
           if (originalOptions.path.startsWith('http')) {
             final originalUri = Uri.parse(originalOptions.path);
-            if (originalUri.host != HttpString.apiBaseUrl) {
+            if (originalUri.host != _apiBaseHost) {
               return handler.next(response);
             }
 
