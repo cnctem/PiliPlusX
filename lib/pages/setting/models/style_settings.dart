@@ -8,6 +8,7 @@ import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/scale_app.dart';
 import 'package:PiliPlus/common/widgets/stateful_builder.dart';
 import 'package:PiliPlus/models/common/bar_hide_type.dart';
+import 'package:PiliPlus/models/common/danmaku/danmaku_font_sync_mode.dart';
 import 'package:PiliPlus/models/common/dynamic/dynamic_badge_mode.dart';
 import 'package:PiliPlus/models/common/dynamic/up_panel_position.dart';
 import 'package:PiliPlus/models/common/home_tab_type.dart';
@@ -25,6 +26,7 @@ import 'package:PiliPlus/pages/setting/widgets/select_dialog.dart';
 import 'package:PiliPlus/pages/setting/widgets/slider_dialog.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/utils/app_font.dart';
+import 'package:PiliPlus/utils/danmaku_font.dart';
 import 'package:PiliPlus/utils/extension/file_ext.dart';
 import 'package:PiliPlus/utils/extension/get_ext.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
@@ -101,6 +103,22 @@ List<SettingsModel> get styleSettings => [
     leading: const Icon(Icons.font_download_outlined),
     getSubtitle: () => AppFont.currentFontName ?? '系统字体',
     onTap: _showCustomFontDialog,
+  ),
+  SwitchModel(
+    title: '自定义弹幕字体',
+    leading: const Icon(Icons.text_format),
+    setKey: SettingBoxKey.enableCustomDanmakuFont,
+    defaultVal: false,
+    onChanged: (value) {
+      GStorage.setting.put(
+        SettingBoxKey.danmakuFontSyncMode,
+        (value ? DanmakuFontSyncMode.global : DanmakuFontSyncMode.system).index,
+      );
+      if (!value) {
+        DanmakuFont.clear();
+      }
+    },
+    onTap: _showDanmakuFontDialog,
   ),
   NormalModel(
     title: '界面缩放',
@@ -452,6 +470,67 @@ Future<void> _showCustomFontDialog(
                 setState();
                 Get.forceAppUpdate();
                 SmartDialog.showToast('自定义字体已应用');
+              }
+            } catch (e) {
+              SmartDialog.showToast('字体加载失败: $e');
+            }
+          },
+          child: const Text('选择字体'),
+        ),
+      ],
+    ),
+  );
+}
+
+Future<void> _showDanmakuFontDialog(BuildContext context) async {
+  await showDialog<void>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('自定义弹幕字体'),
+      content: Text(
+        switch (Pref.danmakuFontSyncMode) {
+          DanmakuFontSyncMode.global => '当前跟随应用界面字体。',
+          DanmakuFontSyncMode.system => '当前使用系统字体。',
+          DanmakuFontSyncMode.custom =>
+            '当前使用独立弹幕字体：${DanmakuFont.currentFontName}',
+        },
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('取消'),
+        ),
+        TextButton(
+          onPressed: () async {
+            Navigator.of(context).pop();
+            await GStorage.setting.put(
+              SettingBoxKey.danmakuFontSyncMode,
+              DanmakuFontSyncMode.global.index,
+            );
+            await GStorage.setting.put(
+              SettingBoxKey.enableCustomDanmakuFont,
+              true,
+            );
+            await DanmakuFont.clear();
+            SmartDialog.showToast('已跟随应用界面字体');
+          },
+          child: const Text('跟随应用界面'),
+        ),
+        FilledButton(
+          onPressed: () async {
+            Navigator.of(context).pop();
+            try {
+              final changed = await DanmakuFont.pickAndApply();
+              if (changed) {
+                await GStorage.setting.put(
+                  SettingBoxKey.danmakuFontSyncMode,
+                  DanmakuFontSyncMode.custom.index,
+                );
+                await GStorage.setting.put(
+                  SettingBoxKey.enableCustomDanmakuFont,
+                  true,
+                );
+                SmartDialog.showToast('弹幕自定义字体已应用');
               }
             } catch (e) {
               SmartDialog.showToast('字体加载失败: $e');
