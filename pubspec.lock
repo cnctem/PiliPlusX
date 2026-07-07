@@ -460,10 +460,10 @@ packages:
     dependency: transitive
     description:
       name: equatable
-      sha256: "3e0141505477fd8ad55d6eb4e7776d3fe8430be8e497ccb1521370c3f21a3e2b"
+      sha256: "3bce007a596ff8b3119c45d68aaef631272537c03d30e5d4534dd24bf4c5eaa2"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.8"
+    version: "2.1.0"
   expandable:
     dependency: "direct main"
     description:
@@ -993,7 +993,7 @@ packages:
     description:
       path: "pkgs/jnigen"
       ref: HEAD
-      resolved-ref: "213cd7cf5fb2764cca5b35a40710a1e71e6d2cc9"
+      resolved-ref: "55520836d363aac7f1ebae47387d03a30302be7b"
       url: "https://github.com/dart-lang/native.git"
     source: git
     version: "0.17.0-wip"
@@ -1954,10 +1954,10 @@ packages:
     description:
       path: "packages/window_manager"
       ref: main
-      resolved-ref: "974ab0a71d37cfca9d9bd5b295d7bd1df80b790b"
+      resolved-ref: ac535d09a5850279e6591a9bdd285f9a3edeebf8
       url: "https://github.com/bggRGjQaUbCoE/window_manager.git"
     source: git
-    version: "0.5.1"
+    version: "0.5.2"
   xdg_directories:
     dependency: transitive
     description:
