@@ -99,7 +99,7 @@ jobs:
         continue-on-error: true
 
       - name: Package ohos build output
-        run: cp ./ohos/entry/build/default/outputs/default/entry-default-unsigned.hap PiliPlus_ohos_${{ env.tag }}_unsigned.hap
+        run: cp ./ohos/entry/build/default/outputs/default/entry-default-unsigned.hap PiliPlusX_ohos_${{ env.tag }}_unsigned.hap
         shell: bash
 
       - name: Create release
@@ -107,4 +107,4 @@ jobs:
         with:
           name: ${{ env.tag }}
           draft: true
-          files: PiliPlus_ohos_*.hap
+          files: PiliPlusX_ohos_*.hap
