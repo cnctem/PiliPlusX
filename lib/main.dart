@@ -384,6 +384,14 @@ class MyApp extends StatelessWidget {
         child: child!,
       );
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if ((PlatformUtils.isMobile || OS.isHarmony) && Pref.hideStatusBar) {
+        SystemChrome.setEnabledSystemUIMode(
+          SystemUiMode.manual,
+          overlays: [SystemUiOverlay.bottom],
+        );
+      }
+    });
     if (PlatformUtils.isDesktop) {
       return BackDetector(
         onBack: _onBack,
