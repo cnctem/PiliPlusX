@@ -30,7 +30,7 @@ jobs:
         run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
         shell: bash
       - name: Echo build progress
-        run: echo "PiliPlus_ohos_${{ env.tag }}_unsigned.hap build progress"
+        run: echo "PiliPlusX_ohos_${{ env.tag }}_unsigned.hap build progress"
         shell: bash
       - name: Install dependencies
         run: |
@@ -73,11 +73,11 @@ jobs:
         shell: bash
         continue-on-error: true
       - name: Package ohos build output
-        run: cp ./ohos/entry/build/default/outputs/default/entry-default-unsigned.hap PiliPlus_ohos_${{ env.tag }}_unsigned.hap
+        run: cp ./ohos/entry/build/default/outputs/default/entry-default-unsigned.hap PiliPlusX_ohos_${{ env.tag }}_unsigned.hap
         shell: bash
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
           name: ${{ env.tag }}
           draft: true
-          files: PiliPlus_ohos_*.hap
+          files: PiliPlusX_ohos_*.hap
