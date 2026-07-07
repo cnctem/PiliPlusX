@@ -615,16 +615,16 @@ List<SettingsModel> get extraSettings => [
       }
     },
   ),
-  SettingsModel(
-    settingsType: SettingsType.normal,
+  NormalModel(
     title: '设置港澳台代理',
     getSubtitle: () {
       final url = Pref.apiHKUrl;
-      return '当前港澳台代理: 「${url == '' ? '不代理' : Pref.apiHKUrl}」';
+      return '当前港澳台代理: 「${url.isEmpty ? '不代理' : url}」';
     },
-    onTap: (setState) {
+    leading: const Icon(Icons.sailing_rounded),
+    onTap: (context, setState) {
       showDialog(
-        context: Get.context!,
+        context: context,
         builder: (context) {
           String valueStr = '';
           return AlertDialog(
@@ -642,32 +642,26 @@ List<SettingsModel> get extraSettings => [
                 onPressed: Get.back,
                 child: Text(
                   '取消',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
+                  style: TextStyle(color: ColorScheme.of(context).outline),
                 ),
               ),
               TextButton(
                 onPressed: () async {
-                  if (!valueStr.isNotEmpty) {
-                    Get.snackbar('格式错误', '代理链接不能为空');
+                  if (valueStr.isEmpty) {
+                    SmartDialog.showToast('代理链接不能为空');
                     return;
                   }
                   if (!valueStr.toLowerCase().startsWith('http')) {
-                    Get.snackbar('格式错误', '代理链接格式错误');
+                    SmartDialog.showToast('代理链接格式错误');
                     return;
                   }
-
-                  if (valueStr.toLowerCase().endsWith('/')) {
-                    Get.snackbar('格式错误', '末尾不能有/');
+                  if (valueStr.endsWith('/')) {
+                    SmartDialog.showToast('末尾不能有/');
                     return;
                   }
 
                   Get.back();
-                  await GStorage.setting.put(
-                    SettingBoxKey.apiHKUrl,
-                    valueStr,
-                  );
+                  await GStorage.setting.put(SettingBoxKey.apiHKUrl, valueStr);
                   setState();
                 },
                 child: const Text('确定'),
@@ -677,7 +671,6 @@ List<SettingsModel> get extraSettings => [
         },
       );
     },
-    leading: const Icon(Icons.sailing_rounded),
   ),
 ];
 
