@@ -65,6 +65,7 @@ abstract final class SettingBoxKey {
       showDynInteraction = 'showDynInteraction',
       enableHotKey = 'enableHotKey',
       defaultShowWatchLater = 'defaultShowWatchLater',
+      defaultAddWatchLater = 'defaultAddWatchLater',
       enableSearchRcmd = 'enableSearchRcmd',
       searchTypeSort = 'searchTypeSort',
       enableQuickFav = 'enableQuickFav',
