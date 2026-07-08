@@ -103,8 +103,9 @@ class ShortcutHandler {
   static void handleHomeShortcutAction() {
     final plCtr = PlPlayerController.instance;
     if (plCtr != null) {
-      plCtr.onCloseAll();
-      return;
+      plCtr
+        ..isCloseAll = true
+        ..dispose();
     }
     Get.until((route) => route.isFirst);
   }
