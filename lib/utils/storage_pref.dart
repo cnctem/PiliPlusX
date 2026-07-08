@@ -1092,4 +1092,17 @@ abstract final class Pref {
 
   static bool get enableEmoteTooltip =>
       _setting.get(SettingBoxKey.enableEmoteTooltip, defaultValue: false);
+
+  static Map<String, String> get customAppFont => Map<String, String>.from(
+    _setting.get(
+      SettingBoxKey.customAppFont,
+      defaultValue: const <String, String>{},
+    ),
+  );
+
+  static bool get enableLandscapeAutoFullscreen =>
+      _setting.get(
+        SettingBoxKey.enableLandscapeAutoFullscreen,
+        defaultValue: false,
+      );
 }
