@@ -36,10 +36,14 @@ class _SearchResultPageState extends State<SearchResultPage>
       tag: _tag,
     );
 
+    var initIndex = Get.arguments?['initIndex'] ?? 0;
+    if (initIndex >= SearchType.activeValues.length) {
+      initIndex = 0;
+    }
     _tabController = TabController(
       vsync: this,
-      initialIndex: Get.arguments?['initIndex'] ?? 0,
-      length: SearchType.values.length,
+      initialIndex: initIndex,
+      length: SearchType.activeValues.length,
     );
 
     if (_isFromSearch) {
@@ -67,6 +71,7 @@ class _SearchResultPageState extends State<SearchResultPage>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final activeValues = SearchType.activeValues;
     return SimpleScaffold(
       appBar: AppBar(
         shape: Border(
@@ -106,7 +111,7 @@ class _SearchResultPageState extends State<SearchResultPage>
               splashFactory: NoSplash.splashFactory,
               padding: const EdgeInsets.only(top: 4, left: 8, right: 8),
               controller: _tabController,
-              tabs: SearchType.values
+              tabs: activeValues
                   .map(
                     (item) => Obx(
                       () {
@@ -142,10 +147,11 @@ class _SearchResultPageState extends State<SearchResultPage>
               tabAlignment: TabAlignment.start,
               onTap: (index) {
                 if (!_tabController.indexIsChanging) {
-                  if (_searchResultController.toTopIndex.value == index) {
+                  final typeIndex = activeValues[index].index;
+                  if (_searchResultController.toTopIndex.value == typeIndex) {
                     _searchResultController.toTopIndex.refresh();
                   } else {
-                    _searchResultController.toTopIndex.value = index;
+                    _searchResultController.toTopIndex.value = typeIndex;
                   }
                 }
               },
@@ -153,7 +159,7 @@ class _SearchResultPageState extends State<SearchResultPage>
             Expanded(
               child: tabBarView(
                 controller: _tabController,
-                children: SearchType.values
+                children: activeValues
                     .map(
                       (item) => switch (item) {
                         .all => SearchAllPanel(
