@@ -1638,8 +1638,8 @@ class PlPlayerController with BlockConfigMixin {
   /// 读取fit
   var _prefFit = VideoFitType.values[Pref.cacheVideoFit];
   void _initVideoFit() {
-    if (_prefFit == .fill && _isVertical) {
-      videoFit.value = .contain;
+    if (_prefFit == VideoFitType.fill && _isVertical) {
+      videoFit.value = VideoFitType.contain;
     } else {
       videoFit.value = _prefFit;
     }
