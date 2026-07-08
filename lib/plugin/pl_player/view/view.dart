@@ -320,7 +320,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     late final player = plPlayerController.videoPlayerController;
-    if(player == null) return;
+    if (player == null) return;
     if (!plPlayerController.continuePlayInBackground.value) {
       if (const [
         AppLifecycleState.paused,
@@ -988,11 +988,11 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     return PlayerBar(
       children: [
         Row(
-          mainAxisSize: .min,
+          mainAxisSize: MainAxisSize.min,
           children: userSpecifyItemLeft.map(progressWidget).toList(),
         ),
         Row(
-          mainAxisSize: .min,
+          mainAxisSize: MainAxisSize.min,
           children: [
             if (isFullScreen)
               SizedBox(
@@ -1927,7 +1927,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                               videoDetailController.viewPointList.isNotEmpty &&
                               videoDetailController.showVP.value)
                             Padding(
-                              padding: const .only(bottom: 4.25),
+                              padding: const EdgeInsets.only(bottom: 4.25),
                               child: ViewPointSegmentProgressBar(
                                 segments: videoDetailController.viewPointList,
                                 onSeek: PlatformUtils.isMobile
@@ -2158,6 +2158,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                                 ),
                               ),
                           ],
+                        ),
                       )
                     : const SizedBox.shrink();
               }),

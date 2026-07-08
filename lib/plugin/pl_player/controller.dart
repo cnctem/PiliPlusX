@@ -744,7 +744,7 @@ class PlPlayerController with BlockConfigMixin {
         bufferSize: Pref.expandBuffer
             ? (isLive ? 64 * 1024 * 1024 : 32 * 1024 * 1024)
             : (isLive ? 16 * 1024 * 1024 : 4 * 1024 * 1024),
-        logLevel: kDebugMode ? .warn : .error,
+        logLevel: kDebugMode ? MPVLogLevel.warn : MPVLogLevel.error,
       ),
     );
 
@@ -893,8 +893,10 @@ class PlPlayerController with BlockConfigMixin {
     } else {
       // 与 _createVideoController 保持一致：直播等无外部音频源的场景下，
       // 刷新播放源前必须清空残留的 audio-files，防止旧视频音频继续播放。
-      await (_videoPlayerController!.platform!).maybeAsNativePlayer
-          .setProperty('audio-files', '');
+      await (_videoPlayerController!.platform!).maybeAsNativePlayer.setProperty(
+        'audio-files',
+        '',
+      );
     }
     await _videoPlayerController!.open(
       Media(
@@ -1304,8 +1306,8 @@ class PlPlayerController with BlockConfigMixin {
   /// 读取fit
   var _prefFit = VideoFitType.values[Pref.cacheVideoFit];
   void _initVideoFit() {
-    if (_prefFit == .fill && _isVertical) {
-      videoFit.value = .contain;
+    if (_prefFit == VideoFitType.fill && _isVertical) {
+      videoFit.value = VideoFitType.contain;
     } else {
       videoFit.value = _prefFit;
     }

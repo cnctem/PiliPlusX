@@ -431,7 +431,7 @@ void _showUiScaleDialog(
           mainAxisSize: MainAxisSize.min,
           children: [
             Slider(
-              padding: .zero,
+              padding: EdgeInsets.zero,
               value: uiScale,
               min: minUiScale,
               max: maxUiScale,
@@ -547,13 +547,13 @@ void _showSpringDialog(BuildContext context, _) {
     context: context,
     builder: (context) => AlertDialog(
       title: Row(
-        mainAxisAlignment: .spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Text('弹簧参数'),
           TextButton(
             style: TextButton.styleFrom(
-              visualDensity: .compact,
-              tapTargetSize: .shrinkWrap,
+              visualDensity: VisualDensity.compact,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             onPressed: () {
               try {
@@ -574,13 +574,13 @@ void _showSpringDialog(BuildContext context, _) {
       ),
       content: Column(
         key: ValueKey(physicalMode),
-        mainAxisSize: .min,
+        mainAxisSize: MainAxisSize.min,
         children: List.generate(
           physicalMode ? 3 : 2,
           (index) => TextFormField(
             autofocus: index == 0,
             initialValue: springDescription[index],
-            keyboardType: .numberWithOptions(
+            keyboardType: TextInputType.numberWithOptions(
               signed: !physicalMode && index == 1,
               decimal: true,
             ),
@@ -947,7 +947,7 @@ NormalModel _useSSDModel() {
     getTrailing: (theme) => Builder(
       builder: (context) => Transform.scale(
         scale: 0.8,
-        alignment: .centerRight,
+        alignment: Alignment.centerRight,
         child: Switch(
           value: file.existsSync(),
           onChanged: (_) =>

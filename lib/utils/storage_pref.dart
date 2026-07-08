@@ -993,9 +993,8 @@ abstract final class Pref {
   static bool get saveReply =>
       _setting.get(SettingBoxKey.saveReply, defaultValue: true);
 
-  static bool get enableLandscapeAutoFullscreen =>
-      _setting.get(
-        SettingBoxKey.enableLandscapeAutoFullscreen,
-        defaultValue: false,
-      );
+  static bool get enableLandscapeAutoFullscreen => _setting.get(
+    SettingBoxKey.enableLandscapeAutoFullscreen,
+    defaultValue: false,
+  );
 }

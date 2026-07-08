@@ -4,6 +4,7 @@ import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/grpc/dyn.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/msg.dart';
+import 'package:PiliPlus/models/common/bar_hide_type.dart';
 import 'package:PiliPlus/models/common/dynamic/dynamic_badge_mode.dart';
 import 'package:PiliPlus/models/common/msg/msg_unread_type.dart';
 import 'package:PiliPlus/models/common/nav_bar_config.dart';
@@ -95,9 +96,9 @@ class MainController extends GetxController
         !useSideBar && navigationBars.length > 1 && Pref.hideBottomBar;
     if (hideBottomBar) {
       switch (barHideType) {
-        case .instant:
+        case BarHideType.instant:
           showBottomBar = RxBool(true);
-        case .sync:
+        case BarHideType.sync:
           barOffset ??= RxDouble(0.0);
       }
     }
