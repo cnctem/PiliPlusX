@@ -386,6 +386,8 @@ class PlPlayerController with BlockConfigMixin {
   late final bool autoExitFullscreen = Pref.autoExitFullscreen;
   late final bool autoPlayEnable = Pref.autoPlayEnable;
   late final bool enableVerticalExpand = Pref.enableVerticalExpand;
+  late final bool enableLandscapeAutoFullscreen =
+      Pref.enableLandscapeAutoFullscreen;
   late final bool pipNoDanmaku = Pref.pipNoDanmaku;
 
   late final bool tempPlayerConf = Pref.tempPlayerConf;

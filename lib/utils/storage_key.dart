@@ -155,7 +155,8 @@ abstract final class SettingBoxKey {
       followOrderType = 'followOrderType',
       enableImgMenu = 'enableImgMenu',
       showDynDispute = 'showDynDispute',
-      touchSlopH = 'touchSlopH';
+      touchSlopH = 'touchSlopH',
+      enableLandscapeAutoFullscreen = 'enableLandscapeAutoFullscreen';
 
   static const String minimizeOnExit = 'minimizeOnExit',
       windowSize = 'windowSize',
