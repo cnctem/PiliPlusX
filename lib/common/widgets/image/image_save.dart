@@ -6,6 +6,7 @@ import 'package:PiliPlus/http/user.dart';
 import 'package:PiliPlus/pages/common/publish/publish_route.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
@@ -18,7 +19,18 @@ void imageSaveDialog({
   required String? cover,
   dynamic aid,
   String? bvid,
+  bool autoAddToWatchLater = false,
 }) {
+  // 如果设置了自动添加到稍后再看且有aid或bvid，则直接添加
+  if ((Pref.defaultAddWatchLater || autoAddToWatchLater) &&
+      (aid != null || bvid != null)) {
+    UserHttp.toViewLater(aid: aid, bvid: bvid);
+    // 如果是自动添加，则不显示对话框
+    if (Pref.defaultAddWatchLater) {
+      return;
+    }
+  }
+
   Get.key.currentState!.push(
     PublishRoute(
       transitionDuration: const Duration(milliseconds: 200),
