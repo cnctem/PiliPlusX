@@ -6,6 +6,7 @@ import 'package:PiliPlus/models/common/video/subtitle_pref_type.dart';
 import 'package:PiliPlus/pages/main/controller.dart';
 import 'package:PiliPlus/pages/setting/models/model.dart';
 import 'package:PiliPlus/pages/setting/widgets/select_dialog.dart';
+import 'package:PiliPlus/pages/setting/widgets/shortcut_keys_dialog.dart';
 import 'package:PiliPlus/plugin/pl_player/models/bottom_progress_behavior.dart';
 import 'package:PiliPlus/plugin/pl_player/models/fullscreen_mode.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
@@ -142,6 +143,18 @@ List<SettingsModel> get playSettings => [
     leading: Icon(Icons.keyboard_alt_outlined),
     setKey: SettingBoxKey.keyboardControl,
     defaultVal: true,
+  ),
+  NormalModel(
+    title: '查看快捷键',
+    leading: const Icon(Icons.info_outline),
+    onTap: (context, setState) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return const ShortcutKeysDialog();
+        },
+      );
+    },
   ),
   NormalModel(
     title: 'SuperChat (醒目留言) 显示类型',
