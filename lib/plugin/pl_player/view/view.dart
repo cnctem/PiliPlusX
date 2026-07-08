@@ -1007,7 +1007,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     return PlayerBar(
       children: [
         Row(
-          mainAxisSize: .min,
+          mainAxisSize: MainAxisSize.min,
           children: userSpecifyItemLeft.map(progressWidget).toList(),
         ),
         Row(
@@ -1888,7 +1888,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                           videoDetailController.viewPointList.isNotEmpty &&
                           videoDetailController.showVP.value)
                         Padding(
-                          padding: const .only(bottom: 4.25),
+                          padding: const EdgeInsets.only(bottom: 4.25),
                           child: ViewPointSegmentProgressBar(
                             segments: videoDetailController.viewPointList,
                             fontFamily: Theme.of(
