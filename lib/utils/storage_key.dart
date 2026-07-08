@@ -131,6 +131,7 @@ abstract final class SettingBoxKey {
       liveQualityCellular = 'liveQualityCellular',
       appFontWeight = 'appFontWeight',
       fastForBackwardDuration = 'fastForBackwardDuration',
+      fastForBackwardDuration_ = 'fastForBackwardDuration_',
       recordSearchHistory = 'recordSearchHistory',
       clipboardSearchIncognito = 'clipboardSearchIncognito',
       showClipboardSearch = 'showClipboardSearch',

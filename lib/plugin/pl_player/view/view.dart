@@ -2091,7 +2091,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                                   ),
                                   child: BackwardSeekIndicator(
                                     duration: plPlayerController
-                                        .fastForBackwardDuration,
+                                        .fastForBackwardDuration_,
                                     onSubmitted: (Duration value) {
                                       plPlayerController
                                         ..mountSeekBackwardButton.value = false
@@ -2122,7 +2122,6 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                                 ),
                               ),
                           ],
-                        ),
                       )
                     : const SizedBox.shrink();
               }),

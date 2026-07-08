@@ -98,9 +98,17 @@ List<SettingsModel> get playSettings => [
     defaultVal: true,
   ),
   getVideoFilterSelectModel(
-    title: '双击快进/快退时长',
+    title: '双击快进时长',
     suffix: 's',
     key: SettingBoxKey.fastForBackwardDuration,
+    values: [5, 10, 15],
+    defaultValue: 10,
+    isFilter: false,
+  ),
+  getVideoFilterSelectModel(
+    title: '双击快退时长',
+    suffix: 's',
+    key: SettingBoxKey.fastForBackwardDuration_,
     values: [5, 10, 15],
     defaultValue: 10,
     isFilter: false,
