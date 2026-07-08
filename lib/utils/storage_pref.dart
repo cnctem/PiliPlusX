@@ -1100,4 +1100,10 @@ abstract final class Pref {
       defaultValue: const <String, String>{},
     ),
   );
+
+  static bool get enableLandscapeAutoFullscreen =>
+      _setting.get(
+        SettingBoxKey.enableLandscapeAutoFullscreen,
+        defaultValue: false,
+      );
 }

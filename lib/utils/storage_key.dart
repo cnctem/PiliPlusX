@@ -159,7 +159,8 @@ abstract final class SettingBoxKey {
       removeSafeArea = 'removeSafeArea',
       angleDegrees = 'angleDegrees',
       liveStream = 'liveStream',
-      enableDocProvider = 'enableDocProvider';
+      enableDocProvider = 'enableDocProvider',
+      enableLandscapeAutoFullscreen = 'enableLandscapeAutoFullscreen';
 
   static const String minimizeOnExit = 'minimizeOnExit',
       windowSize = 'windowSize',
