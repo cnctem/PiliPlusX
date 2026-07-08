@@ -1948,7 +1948,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                               ),
                               child: BackwardSeekIndicator(
                                 duration:
-                                    plPlayerController.fastForBackwardDuration,
+                                    plPlayerController.fastForBackwardDuration_,
                                 onSubmitted: (Duration value) {
                                   plPlayerController
                                     ..mountSeekBackwardButton.value = false
