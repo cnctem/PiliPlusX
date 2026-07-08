@@ -952,7 +952,15 @@ class PlPlayerController with BlockConfigMixin {
           }
           playerStatus.value = PlayerStatus.playing;
         } else {
-          _disableAutoEnterPip();
+          // 鸿蒙：退后台引发的暂停不取消自动画中画，否则该取消操作会与系统
+          // 自动小窗的启动赛跑，导致自动小窗时灵时不灵（Android 的 PiP
+          // auto-enter 与离开手势原子执行，无此问题）。仅在应用处于前台
+          // （用户主动暂停）时才取消。
+          if (!OS.isHarmony ||
+              WidgetsBinding.instance.lifecycleState ==
+                  AppLifecycleState.resumed) {
+            _disableAutoEnterPip();
+          }
           playerStatus.value = PlayerStatus.paused;
         }
         videoPlayerServiceHandler?.onStatusChange(
@@ -1760,7 +1768,7 @@ class PlPlayerController with BlockConfigMixin {
   }
 
   bool onPopInvokedWithResult(bool didPop, Object? result) {
-    if (Platform.isAndroid && didPop) {
+    if ((Platform.isAndroid || OS.isHarmony) && didPop) {
       _disableAutoEnterPipIfNeeded();
     }
     if (controlsLock.value) {
