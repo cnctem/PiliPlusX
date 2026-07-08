@@ -24,6 +24,7 @@ import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/json_file_handler.dart';
 import 'package:PiliPlus/utils/max_screen_size.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
+import 'package:PiliPlus/utils/platform_shortcuts.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
@@ -324,9 +325,40 @@ class MyApp extends StatelessWidget {
       );
     }
     if (PlatformUtils.isDesktop) {
-      return BackDetector(
-        onBack: _onBack,
-        child: child,
+      return Focus(
+        canRequestFocus: false,
+        onKeyEvent: (_, event) {
+          if (!Pref.keyboardControl) {
+            return KeyEventResult.ignored;
+          }
+
+          if (Platform.isMacOS) {
+            final quitResult = ShortcutHandler.handleQuitKey(event);
+            if (quitResult != null) {
+              return quitResult;
+            }
+          }
+
+          final refreshResult = ShortcutHandler.handleRefreshKey(event);
+          if (refreshResult != null) {
+            return refreshResult;
+          }
+
+          final settingsResult = ShortcutHandler.handleSettingsKey(event);
+          if (settingsResult != null) {
+            return settingsResult;
+          }
+
+          final homeResult = ShortcutHandler.handleHomeShortcut(event);
+          if (homeResult != null) {
+            return homeResult;
+          }
+          return KeyEventResult.ignored;
+        },
+        child: BackDetector(
+          onBack: _onBack,
+          child: child,
+        ),
       );
     }
     return child;
