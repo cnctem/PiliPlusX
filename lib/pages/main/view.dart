@@ -323,10 +323,12 @@ class _MainAppState extends PopScopeState<MainApp>
     await trayManager.setContextMenu(trayMenu);
   }
 
-  @pragma('vm:prefer-inline')
-  static void _onBack() {
-    if (OS.isHarmony) SystemNavigator.pop();
-    if (Platform.isAndroid) {
+  void _onBack() {
+    if (OS.isHarmony) {
+      SystemNavigator.pop();
+    } else if (PlatformUtils.isDesktop) {
+      onWindowClose();
+    } else if (Platform.isAndroid) {
       PiliAndroidHelper.back();
     }
   }
