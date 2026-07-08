@@ -132,6 +132,8 @@ abstract final class SettingBoxKey {
       appFontWeight = 'appFontWeight',
       fastForBackwardDuration = 'fastForBackwardDuration',
       recordSearchHistory = 'recordSearchHistory',
+      clipboardSearchIncognito = 'clipboardSearchIncognito',
+      showClipboardSearch = 'showClipboardSearch',
       showPgcTimeline = 'showPgcTimeline',
       pageTransition = 'pageTransition',
       optTabletNav = 'optTabletNav',
