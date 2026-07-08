@@ -926,6 +926,9 @@ abstract final class Pref {
   static bool get enableTrending =>
       _setting.get(SettingBoxKey.enableHotKey, defaultValue: true);
 
+  static bool get defaultShowWatchLater =>
+      _setting.get(SettingBoxKey.defaultShowWatchLater, defaultValue: false);
+
   static bool get enableSearchRcmd =>
       _setting.get(SettingBoxKey.enableSearchRcmd, defaultValue: true);
 
