@@ -59,7 +59,7 @@ List<SettingsModel> get playSettings => [
     subtitle: '进入详情页自动播放',
     leading: Icon(Icons.motion_photos_auto_outlined),
     setKey: SettingBoxKey.autoPlayEnable,
-    defaultVal: false,
+    defaultVal: true,
   ),
   const SwitchModel(
     title: '全屏显示锁定按钮',
@@ -84,7 +84,7 @@ List<SettingsModel> get playSettings => [
     subtitle: '左侧双击快退/右侧双击快进，关闭则双击均为暂停/播放',
     leading: Icon(Icons.touch_app_outlined),
     setKey: SettingBoxKey.enableQuickDouble,
-    defaultVal: true,
+    defaultVal: false,
   ),
   const SwitchModel(
     title: '左右侧滑动调节亮度/音量',
@@ -120,7 +120,7 @@ List<SettingsModel> get playSettings => [
       onTap: _showMaxVolumeDialog,
     ),
   getVideoFilterSelectModel(
-    title: '双击快进时长',
+    title: '右方向键/双击快进时长',
     suffix: 's',
     key: SettingBoxKey.fastForBackwardDuration,
     values: [5, 10, 15],
@@ -128,7 +128,7 @@ List<SettingsModel> get playSettings => [
     isFilter: false,
   ),
   getVideoFilterSelectModel(
-    title: '双击快退时长',
+    title: '左方向键/双击快退时长',
     suffix: 's',
     key: SettingBoxKey.fastForBackwardDuration_,
     values: [5, 10, 15],
