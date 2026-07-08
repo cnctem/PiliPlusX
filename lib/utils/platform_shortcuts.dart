@@ -21,6 +21,7 @@ bool get isPrimaryModifierPressed {
     case TargetPlatform.android:
     case TargetPlatform.iOS:
     case TargetPlatform.fuchsia:
+    default:
       return HardwareKeyboard.instance.isControlPressed;
   }
 }
