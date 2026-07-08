@@ -5,6 +5,7 @@ import 'package:PiliPlus/common/widgets/selection_text.dart';
 import 'package:PiliPlus/http/user.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:material_ui/material_ui.dart';
@@ -16,7 +17,18 @@ void imageSaveDialog({
   required String? cover,
   dynamic aid,
   String? bvid,
+  bool autoAddToWatchLater = false,
 }) {
+  // 如果设置了自动添加到稍后再看且有aid或bvid，则直接添加
+  if ((Pref.defaultAddWatchLater || autoAddToWatchLater) &&
+      (aid != null || bvid != null)) {
+    UserHttp.toViewLater(aid: aid, bvid: bvid);
+    // 如果是自动添加，则不显示对话框
+    if (Pref.defaultAddWatchLater) {
+      return;
+    }
+  }
+
   SmartDialog.show(
     animationType: .centerScale_otherSlide,
     builder: (context) {
