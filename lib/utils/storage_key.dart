@@ -170,6 +170,8 @@ abstract final class SettingBoxKey {
       angleDegrees = 'angleDegrees',
       // 全屏方向旧默认值（平板 + 横屏适配 → 不改变当前方向）的一次性迁移标记
       fullScreenModeMigrated = 'fullScreenModeMigrated',
+      allowRotateScreen = 'allowRotateScreen',
+      enableLandscapeAutoFullscreen = 'enableLandscapeAutoFullscreen',
       liveStream = 'liveStream',
       enableDocProvider = 'enableDocProvider';
 
