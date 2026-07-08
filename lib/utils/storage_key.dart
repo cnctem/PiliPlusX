@@ -139,6 +139,8 @@ abstract final class SettingBoxKey {
       liveQualityCellular = 'liveQualityCellular',
       fastForBackwardDuration = 'fastForBackwardDuration',
       recordSearchHistory = 'recordSearchHistory',
+      clipboardSearchIncognito = 'clipboardSearchIncognito',
+      showClipboardSearch = 'showClipboardSearch',
       showPgcTimeline = 'showPgcTimeline',
       pageTransition = 'pageTransition',
       optTabletNav = 'optTabletNav',
