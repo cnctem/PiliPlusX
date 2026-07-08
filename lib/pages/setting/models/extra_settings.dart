@@ -571,6 +571,13 @@ List<SettingsModel> get extraSettings => [
     defaultVal: false,
   ),
   const SwitchModel(
+    title: '长按展示视频卡片替换为加入稍后再看',
+    subtitle: '开启后不再展示长按弹窗',
+    leading: Icon(Icons.watch_later_outlined),
+    setKey: SettingBoxKey.defaultAddWatchLater,
+    defaultVal: false,
+  ),
+  const SwitchModel(
     title: '"我的"页默认打开稍后再看',
     leading: Icon(Icons.watch_later_outlined),
     setKey: SettingBoxKey.defaultShowWatchLater,
