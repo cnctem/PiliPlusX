@@ -1679,7 +1679,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
               final time = DurationUtils.formatDuration(
                 positionInMilliseconds / 1000,
               ).replaceAll(':', '-');
-              ImageUtils.saveByteImg(
+              ImageUtils.saveScreenShot(
                 bytes: bytes.buffer.asUint8List(),
                 fileName: 'screenshot_${cid}_$time',
               );
