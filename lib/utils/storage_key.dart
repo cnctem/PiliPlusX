@@ -166,6 +166,7 @@ abstract final class SettingBoxKey {
       setSystemBrightness = 'setSystemBrightness',
       downloadPath = 'downloadPath',
       imageSavePath = 'imageSavePath',
+      saveScreenshotPath = 'saveScreenshotPath',
       followOrderType = 'followOrderType',
       enableImgMenu = 'enableImgMenu',
       showDynDispute = 'showDynDispute',

@@ -2243,7 +2243,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       builder: (context) => GestureDetector(
         onTap: () {
           Get.back();
-          ImageUtils.saveByteImg(
+          ImageUtils.saveScreenShot(
             bytes: bytes,
             fileName: 'screenshot_${cid}_$time',
           );
