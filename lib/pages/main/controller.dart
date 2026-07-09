@@ -233,8 +233,7 @@ class MainController extends GetxController
           .toList();
     }
     this.navigationBars = navigationBars;
-    final defPage = Pref.defaultHomePage;
-    selectedIndex.value = navigationBars.indexOf(defPage);
+    selectedIndex.value = Pref.defaultHomePageIndex;
   }
 
   void checkDefaultSearch([bool shouldCheck = false]) {
@@ -301,11 +300,6 @@ class MainController extends GetxController
         checkUnread();
       } else if (currentNav == NavigationBarType.dynamics) {
         setDynCount();
-      } else if (currentNav == NavigationBarType.mine) {
-        // 检查是否默认打开稍后再看
-        if (Pref.defaultShowWatchLater && accountService.isLogin.value) {
-          Get.toNamed('/later');
-        }
       }
     } else {
       int now = DateTime.now().millisecondsSinceEpoch;
@@ -318,15 +312,6 @@ class MainController extends GetxController
               homeController.onRefresh();
             } else if (currentNav == NavigationBarType.dynamics) {
               dynamicController.onRefresh();
-            } else if (currentNav == NavigationBarType.mine) {
-              // 二次点击"我的"
-              if (Pref.defaultShowWatchLater) {
-                // 打开稍后再看
-                Get.toNamed('/later');
-              } else {
-                // 打开账号选择器
-                LoginPageController.switchAccountDialog(Get.context!);
-              }
             }
           },
         );
@@ -335,6 +320,13 @@ class MainController extends GetxController
           homeController.toTopOrRefresh();
         } else if (currentNav == NavigationBarType.dynamics) {
           dynamicController.toTopOrRefresh();
+        } else if (currentNav == NavigationBarType.mine) {
+          // 二次点击"我的" 打开稍后再看 或 打开账号选择器
+          if (Pref.defaultShowWatchLater) {
+            Get.toNamed('/later');
+          } else {
+            LoginPageController.switchAccountDialog(Get.context!);
+          }
         }
       }
       _lastSelectTime = now;
