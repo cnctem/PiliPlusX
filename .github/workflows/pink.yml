@@ -14,8 +14,6 @@ jobs:
     android:
         name: Release Android Pink
         runs-on: ubuntu-latest
-        permissions: write-all
-
         steps:
             - name: 代码迁出
               uses: actions/checkout@v7
@@ -86,16 +84,16 @@ jobs:
 
             - name: Rename
               run: |
-                  tag_name=${{ github.event.inputs.tag != '' && github.event.inputs.tag || inputs.tag }}
+                  tag_name=${{ github.event_name == 'push' && github.ref_name || github.event.inputs.tag }}
                   mv build/app/outputs/flutter-apk/app-release.apk "PiliPlus_android_${tag_name}_pink.apk"
               shell: bash
 
             - name: Release
-              if: ${{ github.event.inputs.tag != '' && !contains(github.event.inputs.tag, 'test') }}
+              if: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.tag != '' && !contains(github.event.inputs.tag, 'test')) || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && !contains(github.ref_name, 'test')) }}
               uses: softprops/action-gh-release@v3
               with:
-                  tag_name: ${{ github.event.inputs.tag }}
-                  name: ${{ github.event.inputs.tag }}
+                  tag_name: ${{ github.event_name == 'push' && github.ref_name || github.event.inputs.tag }}
+                  name: ${{ github.event_name == 'push' && github.ref_name || github.event.inputs.tag }}
                   draft: true
                   prerelease: true
                   files: |
