@@ -89,6 +89,15 @@ Future<void> hideStatusBar() async {
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 }
 
+Future<void> hideStatusBarKeepNav() async {
+  _showStatusBar = false;
+  StatusBar.i.hidden = true;
+  await SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.manual,
+    overlays: [SystemUiOverlay.bottom],
+  );
+}
+
 //退出全屏显示
 Future<void> showStatusBar() async {
   if (_showStatusBar) {
