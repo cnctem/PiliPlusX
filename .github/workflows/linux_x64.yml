@@ -214,11 +214,13 @@ jobs:
         shell: bash
 
       - name: Release
-        if: ${{ github.event.inputs.tag != '' }}
+        if: ${{ github.event.inputs.tag != '' && !contains(github.event.inputs.tag, 'test') }}
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ github.event.inputs.tag }}
           name: ${{ github.event.inputs.tag }}
+          draft: true
+          prerelease: true
           files: |
             PiliPlus_linux_*.tar.gz
             PiliPlus_linux_*.deb
