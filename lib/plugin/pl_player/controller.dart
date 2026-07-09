@@ -1683,7 +1683,7 @@ class PlPlayerController with BlockConfigMixin {
           onTap: () async {
             final bytes = await image.toByteData(format: .png);
             if (bytes != null) {
-              ImageUtils.saveByteImg(
+              ImageUtils.saveScreenShot(
                 bytes: bytes.buffer.asUint8List(),
                 fileName: 'screenshot_${cid}_$time',
               );
