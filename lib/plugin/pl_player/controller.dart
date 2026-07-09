@@ -1491,11 +1491,7 @@ class PlPlayerController with BlockConfigMixin {
         }
       } else {
         if (PlatformUtils.isMobile) {
-          if (!Pref.hideStatusBar) {
-            showStatusBar();
-          } else {
-            hideStatusBarKeepNav();
-          }
+          showStatusBar();
           if (mode == FullScreenMode.none) {
             return;
           }
