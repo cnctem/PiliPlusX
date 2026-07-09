@@ -149,6 +149,7 @@ abstract final class SettingBoxKey {
       showPgcTimeline = 'showPgcTimeline',
       pageTransition = 'pageTransition',
       enablePredictiveBack = 'enablePredictiveBack',
+      hideStatusBar = 'hideStatusBar',
       optTabletNav = 'optTabletNav',
       banWordForDyn = 'banWordForDyn',
       enableLog = 'enableLog',

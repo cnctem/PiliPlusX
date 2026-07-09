@@ -105,10 +105,7 @@ Future<void>? harmonyForcePortrait() {
 
 bool _showSystemBar = true;
 bool get showSystemBar_ => _showSystemBar;
-Future<void>? hideSystemBar() {
-  if (!_showSystemBar) {
-    return null;
-  }
+Future<void> hideSystemBar() {
   _showSystemBar = false;
   if (OS.isHarmony) {
     // 只切换系统栏显隐，不改窗口布局，避免 Flutter 视口尺寸变化导致画面跳动。
@@ -117,11 +114,16 @@ Future<void>? hideSystemBar() {
   return SystemChrome.setEnabledSystemUIMode(.immersiveSticky);
 }
 
+Future<void> hideSystemBarKeepNav() {
+  _showSystemBar = false;
+  return SystemChrome.setEnabledSystemUIMode(
+    .manual,
+    overlays: [SystemUiOverlay.bottom],
+  );
+}
+
 //退出全屏显示
-Future<void>? showSystemBar() {
-  if (_showSystemBar) {
-    return null;
-  }
+Future<void> showSystemBar() {
   _showSystemBar = true;
   if (OS.isHarmony) {
     return HarmonyChannel.setFullScreenBars(false);

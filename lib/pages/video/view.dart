@@ -515,7 +515,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       }
     }
 
-    if (!videoDetailController.removeSafeArea) {
+    if (!videoDetailController.removeSafeArea && !Pref.hideStatusBar) {
       showSystemBar();
     }
 
