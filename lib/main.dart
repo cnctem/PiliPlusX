@@ -149,6 +149,9 @@ void main() async {
         systemNavigationBarContrastEnforced: false,
       ),
     );
+    if (PlatformUtils.isMobile && Pref.hideStatusBar) {
+      await hideSystemBar();
+    }
     if (Platform.isAndroid) {
       FlutterDisplayMode.supported.then((mode) {
         final String? storageDisplay = GStorage.setting.get(
@@ -324,6 +327,11 @@ class MyApp extends StatelessWidget {
         child: child!,
       );
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (PlatformUtils.isMobile && Pref.hideStatusBar) {
+        hideSystemBarKeepNav();
+      }
+    });
     if (PlatformUtils.isDesktop) {
       return Focus(
         canRequestFocus: false,
