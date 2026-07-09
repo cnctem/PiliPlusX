@@ -64,21 +64,19 @@ Future<void>? fullMode() {
 
 bool _showSystemBar = true;
 bool get showSystemBar_ => _showSystemBar;
-Future<void> hideSystemBar() {
+Future<void>? hideSystemBar() {
+  if (!_showSystemBar) {
+    return null;
+  }
   _showSystemBar = false;
   return SystemChrome.setEnabledSystemUIMode(.immersiveSticky);
 }
 
-Future<void> hideSystemBarKeepNav() {
-  _showSystemBar = false;
-  return SystemChrome.setEnabledSystemUIMode(
-    .manual,
-    overlays: [SystemUiOverlay.bottom],
-  );
-}
-
 //退出全屏显示
-Future<void> showSystemBar() {
+Future<void>? showSystemBar() {
+  if (_showSystemBar) {
+    return null;
+  }
   _showSystemBar = true;
   return SystemChrome.setEnabledSystemUIMode(
     Platform.isAndroid && DeviceUtils.sdkInt < 29 ? .manual : .edgeToEdge,
