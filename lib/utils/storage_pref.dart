@@ -828,6 +828,9 @@ abstract final class Pref {
   static bool get enablePredictiveBack =>
       _setting.get(SettingBoxKey.enablePredictiveBack, defaultValue: false);
 
+  static bool get hideStatusBar =>
+      _setting.get(SettingBoxKey.hideStatusBar, defaultValue: false);
+
   static bool get enableQuickDouble =>
       _setting.get(SettingBoxKey.enableQuickDouble, defaultValue: false);
 
