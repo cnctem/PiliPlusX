@@ -1,4 +1,4 @@
-package com.gucooing.piliplus
+package com.example.piliplusx
 
 import android.content.res.Configuration
 import android.os.Build

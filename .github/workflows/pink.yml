@@ -24,13 +24,15 @@ jobs:
               run: |
                 export LC_ALL=C
                 sed -i 's/androidInfo\.supportedAbis\.first/"pink"/g' lib/utils/update.dart
-                sed -i 's/com\.gucooing\.piliplus/tv\.danmaku\.bili/g' \
+                sed -i 's/com\.example\.piliplusx/tv\.danmaku\.bili/g' \
                   android/app/build.gradle.kts \
                   android/app/src/profile/AndroidManifest.xml \
                   android/app/src/main/AndroidManifest.xml \
-                  android/app/src/main/kotlin/com/example/piliplus/MainActivity.kt \
+                  android/app/src/main/kotlin/com/example/piliplusx/MainActivity.kt \
                   android/app/src/main/kotlin/com/example/piliplusx/Utils.kt \
                   android/app/src/main/kotlin/com/example/piliplusx/BiliDocumentsProvider.kt \
+                  android/app/src/main/java/com/example/piliplusx/AndroidHelper.java \
+                  android/app/src/main/java/com/example/piliplusx/MediaHelper.java \
                   android/app/src/main/res/xml-v25/shortcuts.xml \
                   lib/services/audio_handler.dart
                 sed -i 's|com/example/piliplusx|tv/danmaku/bili|g' lib/utils/android/bindings.g.dart
@@ -89,7 +91,7 @@ jobs:
             - name: Rename
               run: |
                   tag_name=${{ github.event_name == 'push' && github.ref_name || github.event.inputs.tag }}
-                  mv build/app/outputs/flutter-apk/app-release.apk "PiliPlus_android_${tag_name}_pink.apk"
+                  mv build/app/outputs/flutter-apk/app-release.apk "PiliPlusX_android_${tag_name}_pink.apk"
               shell: bash
 
             - name: Release
@@ -101,11 +103,11 @@ jobs:
                   draft: true
                   prerelease: true
                   files: |
-                      PiliPlus_android_*_pink.apk
+                      PiliPlusX_android_*_pink.apk
 
             - name: Upload Pink release
               uses: actions/upload-artifact@v7
               with:
                   archive: false
                   name: Android_Pink
-                  path: PiliPlus_android_*_pink.apk
+                  path: PiliPlusX_android_*_pink.apk
