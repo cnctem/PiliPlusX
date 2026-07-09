@@ -140,8 +140,6 @@ abstract final class SettingBoxKey {
       showClipboardSearch = 'showClipboardSearch',
       showPgcTimeline = 'showPgcTimeline',
       pageTransition = 'pageTransition',
-      enablePredictiveBack = 'enablePredictiveBack',
-      hideStatusBar = 'hideStatusBar',
       optTabletNav = 'optTabletNav',
       banWordForDyn = 'banWordForDyn',
       enableLog = 'enableLog',
