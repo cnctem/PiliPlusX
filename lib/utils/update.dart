@@ -22,19 +22,23 @@ abstract final class Update {
     SmartDialog.dismiss();
     try {
       final res = await Request().get(
-        Api.latestApp,
+        '${Api.latestApp}/latest',
         options: Options(
           headers: {'user-agent': BrowserUa.mob},
           extra: {'account': const NoAccount()},
         ),
       );
-      if (res.data is Map || res.data.isEmpty) {
+      final List<dynamic> releases = [res.data];
+      if (releases.isEmpty ||
+          (releases.length == 1 &&
+              releases[0] is Map &&
+              (releases[0] as Map).isEmpty)) {
         if (!isAuto) {
           SmartDialog.showToast('检查更新失败，GitHub接口未返回数据，请检查网络');
         }
         return;
       }
-      final data = res.data[0];
+      final data = releases[0];
       final int latest =
           DateTime.parse(data['created_at']).millisecondsSinceEpoch ~/ 1000;
       if (BuildConfig.buildTime >= latest) {
