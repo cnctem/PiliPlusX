@@ -6,5 +6,5 @@ Comment[zh_CN]=使用 Flutter 开发的 BiliBili 第三方客户端
 Exec=piliplus
 Icon=piliplus
 Terminal=false
-StartupWMClass=com.example.piliplus
+StartupWMClass=com.example.piliplusx
 Categories=Video;AudioVideo;Player;

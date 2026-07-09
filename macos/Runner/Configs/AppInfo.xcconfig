@@ -8,7 +8,7 @@
 PRODUCT_NAME = PiliPlus
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.gucooing.piliplus
+PRODUCT_BUNDLE_IDENTIFIER = com.example.piliplusx
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2023 com.example. All rights reserved.
