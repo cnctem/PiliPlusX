@@ -13,4 +13,8 @@ abstract final class BuildConfig {
     'pili.hash',
     defaultValue: 'N/A',
   );
+  static const String versionTag = String.fromEnvironment(
+    'pili.tag',
+    defaultValue: 'N/A',
+  );
 }

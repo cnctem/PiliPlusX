@@ -12,9 +12,6 @@ try {
     $updatedContent = foreach ($line in (Get-Content -Path 'pubspec.yaml' -Encoding UTF8)) {
         if ($line -match '^\s*version:\s*([\d\.]+)') {
             $versionName = $matches[1]
-            if ($Arg -eq 'android') {
-                $versionName += '-' + $commitHash.Substring(0, 9)
-            }
             "version: $versionName+$versionCode"
         }
         else {
@@ -30,11 +27,20 @@ try {
 
     $buildTime = [int]([DateTimeOffset]::Now.ToUnixTimeSeconds())
 
+    $tag = $env:GITHUB_REF_NAME
+    if ($null -eq $tag) {
+        $tag = $env:GITHUB_EVENT_INPUTS_TAG
+    }
+    if ($null -eq $tag -or $tag -eq '') {
+        $tag = 'N/A'
+    }
+
     $data = @{
         'pili.name' = $versionName
         'pili.code' = $versionCode
         'pili.hash' = $commitHash
         'pili.time' = $buildTime
+        'pili.tag'  = $tag
     }
 
     $data | ConvertTo-Json -Compress | Out-File 'pili_release.json' -Encoding UTF8
