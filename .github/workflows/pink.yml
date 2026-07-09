@@ -24,11 +24,11 @@ jobs:
               run: |
                 export LC_ALL=C
                 sed -i 's/androidInfo\.supportedAbis\.first/"pink"/g' lib/utils/update.dart
-                sed -i 's/com\.gucooing\.piliplus/tv\.danmaku\.bili/g' \
+                sed -i 's/com\.example\.piliplusx/tv\.danmaku\.bili/g' \
                   android/app/build.gradle.kts \
                   android/app/src/profile/AndroidManifest.xml \
                   android/app/src/main/AndroidManifest.xml \
-                  android/app/src/main/kotlin/com/example/piliplus/MainActivity.kt \
+                  android/app/src/main/kotlin/com/example/piliplusx/MainActivity.kt \
                   lib/services/audio_handler.dart
                 grep -n '"pink"' lib/utils/update.dart || echo "update.dart 替换失败"
                 grep -n 'tv\.danmaku\.bili' android/app/build.gradle.kts | head -2 || echo "build.gradle.kts 替换失败"
