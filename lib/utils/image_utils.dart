@@ -30,6 +30,26 @@ abstract final class ImageUtils {
       ? 'Pictures/${Constants.appName}'
       : Constants.appName;
 
+  static String get _imgAlbumPath {
+    if (Platform.isAndroid) {
+      final saveImgPath = Pref.saveImgPath;
+      if (saveImgPath != null && saveImgPath.isNotEmpty) {
+        return saveImgPath;
+      }
+    }
+    return _albumPath;
+  }
+
+  static String get _screenshotAlbumPath {
+    if (Platform.isAndroid) {
+      final saveScreenshotPath = Pref.saveScreenshotPath;
+      if (saveScreenshotPath != null && saveScreenshotPath.isNotEmpty) {
+        return saveScreenshotPath;
+      }
+    }
+    return _albumPath;
+  }
+
   // 图片分享
   static Future<void> onShareImg(String url) async {
     try {
@@ -174,7 +194,7 @@ abstract final class ImageUtils {
               SaveFileData(
                 filePath: i.filePath,
                 fileName: i.name,
-                albumPath: _albumPath,
+                albumPath: _imgAlbumPath,
               ),
             );
           } else {
@@ -259,7 +279,46 @@ abstract final class ImageUtils {
       res = await SaverGallery.saveImage(
         bytes,
         fileName: fileName,
-        albumPath: _albumPath,
+        albumPath: _imgAlbumPath,
+        skipIfExists: false,
+      );
+      SmartDialog.dismiss();
+      if (res.isSuccess) {
+        SmartDialog.showToast(' 已保存 ');
+      } else {
+        SmartDialog.showToast('保存失败，${res.errorMessage}');
+      }
+    } else {
+      SmartDialog.dismiss();
+      final savePath = await FilePicker.saveFile(
+        type: FileType.image,
+        fileName: fileName,
+        bytes: Uint8List(0),
+      );
+      if (savePath == null) {
+        SmartDialog.showToast("取消保存");
+        return null;
+      }
+      await File(savePath).writeAsBytes(bytes);
+      SmartDialog.showToast(' 已保存 ');
+      res = SaveResult(true, null);
+    }
+    return res;
+  }
+
+  static Future<SaveResult?> saveScreenShot({
+    required Uint8List bytes,
+    required String fileName,
+    String ext = 'png',
+  }) async {
+    SaveResult? res;
+    fileName += '.$ext';
+    if (PlatformUtils.isMobile) {
+      SmartDialog.showLoading(msg: '正在保存');
+      res = await SaverGallery.saveImage(
+        bytes,
+        fileName: fileName,
+        albumPath: _screenshotAlbumPath,
         skipIfExists: false,
       );
       SmartDialog.dismiss();
@@ -302,7 +361,7 @@ abstract final class ImageUtils {
       res = await SaverGallery.saveFile(
         filePath: filePath,
         fileName: fileName,
-        albumPath: _albumPath,
+        albumPath: _imgAlbumPath,
         skipIfExists: false,
       );
     } else {
