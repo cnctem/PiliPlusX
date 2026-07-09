@@ -75,7 +75,7 @@ jobs:
           printf "复制文件...\n"
           cp -r ../build/linux/x64/release/bundle/* opt/PiliPlus
           cp -r ../assets/linux/DEBIAN .
-          cp ../assets/linux/com.example.piliplus.desktop usr/share/applications
+          cp ../assets/linux/com.example.piliplusx.desktop usr/share/applications
           cp ../assets/images/logo/logo.png usr/share/icons/hicolor/512x512/apps/piliplus.png
 
           printf "修改控制文件...\n"
@@ -117,7 +117,7 @@ jobs:
           SRC_DIR="$PWD/piliplus-${{ env.version }}"
           mkdir -p "$SRC_DIR/bundle" "$SRC_DIR/assets"
           cp -r build/linux/x64/release/bundle/* "$SRC_DIR/bundle/"
-          cp assets/linux/com.example.piliplus.desktop "$SRC_DIR/assets/com.example.piliplus.desktop"
+          cp assets/linux/com.example.piliplusx.desktop "$SRC_DIR/assets/com.example.piliplusx.desktop"
           cp assets/images/logo/logo.png "$SRC_DIR/assets/piliplus.png"
           tar -zcvf "$RPM_BUILD_ROOT/SOURCES/piliplus-${{ env.version }}.tar.gz" -C "$PWD" "piliplus-${{ env.version }}"
 
@@ -150,7 +150,7 @@ jobs:
 
           # 桌面集成
           mkdir -p %{buildroot}/usr/share/applications
-          install -m 644 assets/com.example.piliplus.desktop %{buildroot}/usr/share/applications/com.example.piliplus.desktop
+          install -m 644 assets/com.example.piliplusx.desktop %{buildroot}/usr/share/applications/com.example.piliplusx.desktop
 
           mkdir -p %{buildroot}/usr/share/icons/hicolor/512x512/apps
           install -m 644 assets/piliplus.png %{buildroot}/usr/share/icons/hicolor/512x512/apps/piliplus.png
@@ -166,7 +166,7 @@ jobs:
           %files
           /opt/PiliPlus
           /usr/bin/piliplus
-          /usr/share/applications/com.example.piliplus.desktop
+          /usr/share/applications/com.example.piliplusx.desktop
           /usr/share/icons/hicolor/512x512/apps/piliplus.png
 
           %changelog
@@ -202,8 +202,8 @@ jobs:
           cp -r build/linux/x64/release/bundle/* "$APPDIR/usr/bin/"
 
           printf "复制桌面文件和图标...\n"
-          cp assets/linux/com.example.piliplus.desktop "$APPDIR/com.example.piliplus.desktop"
-          cp assets/linux/com.example.piliplus.desktop "$APPDIR/usr/share/applications/com.example.piliplus.desktop"
+          cp assets/linux/com.example.piliplusx.desktop "$APPDIR/com.example.piliplusx.desktop"
+          cp assets/linux/com.example.piliplusx.desktop "$APPDIR/usr/share/applications/com.example.piliplusx.desktop"
           cp assets/images/logo/logo.png "$APPDIR/piliplus.png"
           cp assets/images/logo/logo.png "$APPDIR/usr/share/icons/hicolor/512x512/apps/piliplus.png"
 
@@ -219,8 +219,8 @@ jobs:
           chmod +x "$APPDIR/AppRun"
 
           printf "修改桌面文件中的 Exec 路径...\n"
-          sed -i 's|Exec=piliplus|Exec=piliplus|g' "$APPDIR/com.example.piliplus.desktop"
-          sed -i 's|Icon=piliplus|Icon=piliplus|g' "$APPDIR/com.example.piliplus.desktop"
+          sed -i 's|Exec=piliplus|Exec=piliplus|g' "$APPDIR/com.example.piliplusx.desktop"
+          sed -i 's|Icon=piliplus|Icon=piliplus|g' "$APPDIR/com.example.piliplusx.desktop"
 
           printf "打包 AppImage...\n"
           ARCH=x86_64 ./appimagetool-x86_64.AppImage "$APPDIR" "PiliPlus_linux_${{ env.version }}_amd64.AppImage"
