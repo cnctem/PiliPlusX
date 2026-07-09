@@ -1429,7 +1429,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       } else {
         if (PlatformUtils.isMobile) {
           if (!removeSafeArea) {
-            showSystemBar();
+            if (!Pref.hideStatusBar) {
+              showSystemBar();
+            } else {
+              hideSystemBarKeepNav();
+            }
           }
           if (orientation == null && mode == .none) {
             return;
