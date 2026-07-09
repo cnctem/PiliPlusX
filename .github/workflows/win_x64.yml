@@ -26,6 +26,7 @@ jobs:
           channel: stable
           flutter-version-file: pubspec.yaml
 
+
       - name: Add fastforge and Inno Setup
         run: |
           dart pub global activate fastforge
@@ -43,6 +44,7 @@ jobs:
       - name: Apply Patch
         shell: pwsh
         run: lib/scripts/patch.ps1 windows
+        continue-on-error: true
 
       - name: Build Windows
         run: |
@@ -53,7 +55,7 @@ jobs:
           mkdir -p Release/PiliPlus-Win
           mkdir -p PiliPlus-Win-Setup
           mv build/windows/x64/runner/Release/* Release/PiliPlus-Win/
-          mv dist/**/*.exe PiliPlus-Win-Setup/PiliPlus_windows_${{env.version}}_x64_setup.exe
+          mv dist/**/*.exe PiliPlus-Win-Setup/PiliPlus_windows_${{ inputs.tag }}_x64_setup.exe
 
       - name: Compress
         run: |
@@ -61,11 +63,11 @@ jobs:
         shell: pwsh
 
       - name: Release
-        if: ${{ github.event.inputs.tag != '' && !contains(github.event.inputs.tag, 'test') }}
+        if: ${{ inputs.tag != '' && !contains(inputs.tag, 'test') }}
         uses: softprops/action-gh-release@v3
         with:
-          tag_name: ${{ github.event.inputs.tag }}
-          name: ${{ github.event.inputs.tag }}
+          tag_name: ${{ inputs.tag }}
+          name: ${{ inputs.tag }}
           draft: true
           prerelease: true
           files: |
