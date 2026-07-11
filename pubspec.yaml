@@ -49,7 +49,7 @@ dependencies:
       ref: 81b8a71982f89b46fa868b315cd71ff6a6ddf895
 
   # 网络
-  dio: ^5.9.1
+  dio: 5.9.1
   cookie_jar: ^4.0.8
   connectivity_plus: ^5.0.2
   connectivity_plus_ohos: ^0.0.3
