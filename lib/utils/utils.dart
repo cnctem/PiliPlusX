@@ -80,8 +80,10 @@ abstract final class Utils {
     }
   }
 
-  static Color parseColor(String color) =>
-      Color(int.parse(color.replaceFirst('#', 'FF'), radix: 16));
+  static int parseColorInt(String color) =>
+      0xFF000000 | int.parse(color.substring(1), radix: 16);
+
+  static Color parseColor(String color) => Color(parseColorInt(color));
 
   static int? _sdkInt;
   static Future<int> get sdkInt async {

@@ -1,6 +1,7 @@
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/models/dynamics/result.dart';
 import 'package:PiliPlus/models/dynamics/vote_model.dart';
+import 'package:PiliPlus/utils/utils.dart';
 
 class ArticleContentModel {
   int? align;
@@ -124,14 +125,14 @@ class Word {
 
   Word.fromJson(Map<String, dynamic> json) {
     words = json['words'];
-    fontSize = (json['font_size'] as num?)?.toDouble();
+    if (json['font_size'] case final num rawSize when rawSize != 0) {
+      fontSize = rawSize.toDouble();
+    }
     style = json['style'] == null ? null : Style.fromJson(json['style']);
-    color = json['color'] == null
-        ? null
-        : int.tryParse(
-            'FF${(json['color'] as String).substring(1)}',
-            radix: 16,
-          );
+    if (json['color'] case final String rawColor
+        when rawColor.startsWith('#')) {
+      color = Utils.parseColorInt(json['color']);
+    }
     fontLevel = json['font_level'];
   }
 }
@@ -268,7 +269,7 @@ class Music {
 
   Music.fromJson(Map<String, dynamic> json) {
     cover = json['cover'];
-    id = json['id'];
+    id = Utils.safeToInt(json['id']);
     jumpUrl = json['jump_url'];
     label = json['label'];
     title = json['title'];
@@ -284,12 +285,12 @@ class Opus {
   int? statView;
 
   Opus.fromJson(Map<String, dynamic> json) {
-    authorMid = json['author']?['mid'];
+    authorMid = Utils.safeToInt(json['author']?['mid']);
     authorName = json['author']?['name'];
     cover = json['cover'];
     jumpUrl = json['jump_url'];
     title = json['title'];
-    statView = json['stat']?['view'];
+    statView = Utils.safeToInt(json['stat']?['view']);
   }
 }
 
@@ -310,9 +311,9 @@ class Live {
     descSecond = json['desc_second'];
     title = json['title'];
     jumpUrl = json['jump_url'];
-    id = json['id'];
-    liveState = json['live_state'];
-    reserveType = json['reserve_type'];
+    id = Utils.safeToInt(json['id']);
+    liveState = Utils.safeToInt(json['live_state']);
+    reserveType = Utils.safeToInt(json['reserve_type']);
     badgeText = json['badge']?['text'];
   }
 }

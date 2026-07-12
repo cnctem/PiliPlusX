@@ -260,7 +260,7 @@ class OpusContent extends StatelessWidget {
                       .toList(),
                 );
               }
-            case 3 when (element.line != null):
+            case 3 when (element.line?.pic != null):
               final height = element.line!.pic!.height?.toDouble();
               return CachedNetworkImage(
                 fit: BoxFit.contain,
@@ -374,12 +374,14 @@ class OpusContent extends StatelessWidget {
                               children: [
                                 Text(element.linkCard!.card!.ugc!.title!),
                                 Text(
-                                  element.linkCard!.card!.ugc!.descSecond!,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: colorScheme.outline,
-                                  ),
-                                ),
+                              element.linkCard!.card!.ugc!.descSecond!,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: colorScheme.outline,
+                              ),
+                            ),
                               ],
                             ),
                           ),
@@ -427,6 +429,8 @@ class OpusContent extends StatelessWidget {
                                     null)
                                   Text(
                                     element.linkCard!.card!.common!.desc2!,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       fontSize: 13,
                                       color: colorScheme.outline,
@@ -466,6 +470,8 @@ class OpusContent extends StatelessWidget {
                                     null)
                                   Text(
                                     element.linkCard!.card!.live!.descSecond!,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       fontSize: 13,
                                       color: colorScheme.outline,
@@ -559,6 +565,8 @@ class OpusContent extends StatelessWidget {
                                     null)
                                   Text(
                                     element.linkCard!.card!.music!.label!,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       fontSize: 13,
                                       color: colorScheme.outline,
@@ -693,9 +701,9 @@ class OpusContent extends StatelessWidget {
                 ),
               );
           }
-        } catch (e) {
+        } catch (e, s) {
           return SelectableText(
-            '错误的类型 $e',
+            '错误的类型 $e${kDebugMode ? '\n$s' : ''}',
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.red,

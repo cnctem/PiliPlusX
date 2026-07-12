@@ -1,4 +1,5 @@
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
+import 'package:PiliPlus/utils/utils.dart';
 
 class SimpleVoteInfo {
   int? choiceCnt;
@@ -22,14 +23,14 @@ class SimpleVoteInfo {
   });
 
   SimpleVoteInfo.fromJson(Map<String, dynamic> json) {
-    choiceCnt = json['choice_cnt'];
-    defaultShare = json['default_share'];
+    choiceCnt = Utils.safeToInt(json['choice_cnt']);
+    defaultShare = Utils.safeToInt(json['default_share']);
     desc = json['desc'];
-    endTime = json['end_time'];
-    status = json['status'];
-    uid = json['uid'];
-    voteId = json['vote_id'];
-    joinNum = json['join_num'] ?? 0;
+    endTime = Utils.safeToInt(json['end_time']);
+    status = Utils.safeToInt(json['status']);
+    uid = Utils.safeToInt(json['uid']);
+    voteId = Utils.safeToInt(json['vote_id']);
+    joinNum = Utils.safeToInt(json['join_num']) ?? 0;
   }
 }
 
