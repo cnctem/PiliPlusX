@@ -3,7 +3,7 @@ import 'dart:io';
 
 void main() async {
   // 手动指定 versionName
-  const versionName = '2.0.1-ohos-2';
+  const versionName = '2.0.1-ohos-3';
 
   // 通过 git 命令获取 hash 和 code
   final versionCode = await _getGitCommitCount();

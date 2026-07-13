@@ -17,7 +17,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
 # update when release
-version: 2.0.1+5058
+version: 2.0.1+5079
 
 environment:
   sdk: ">=3.11.1"
@@ -178,7 +178,8 @@ dependencies:
   floating:
     git:
       url: https://github.com/qinshah/floating.git
-      ref: harmony
+      ref: 8aef0f9762fbe9077ca9573e531a11afaad86d13
+      
     # html解析
   html: ^0.15.4
   # html渲染

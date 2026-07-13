@@ -637,8 +637,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: harmony
-      resolved-ref: "5913ef28c5c02e71bbc142e8c7e563b4d85b02fb"
+      ref: "8aef0f9762fbe9077ca9573e531a11afaad86d13"
+      resolved-ref: "8aef0f9762fbe9077ca9573e531a11afaad86d13"
       url: "https://github.com/qinshah/floating.git"
     source: git
     version: "3.0.0"
