@@ -1976,11 +1976,6 @@ class HeaderControlState extends State<HeaderControl>
                     tooltip: '画中画',
                     style: btnStyle,
                     onPressed: () async {
-                      if (!kDebugMode && OS.isHarmony) {
-                        // TODO
-                        SmartDialog.showToast('鸿蒙待适配');
-                        return;
-                      }
                       if (PlatformUtils.isDesktop) {
                         plPlayerController.toggleDesktopPip();
                         return;

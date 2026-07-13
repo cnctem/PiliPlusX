@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:os_type/os_type.dart';
 
 class LiveHeaderControl extends StatefulWidget {
   const LiveHeaderControl({
@@ -153,7 +154,9 @@ class _LiveHeaderControlState extends State<LiveHeaderControl>
               ),
               onTap: widget.onSendDanmaku,
             ),
-          if (Platform.isAndroid || (PlatformUtils.isDesktop && !isFullScreen))
+          if (Platform.isAndroid ||
+              OS.isHarmony ||
+              (PlatformUtils.isDesktop && !isFullScreen))
             ComBtn(
               height: 30,
               tooltip: '画中画',

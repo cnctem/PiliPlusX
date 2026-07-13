@@ -171,6 +171,14 @@ class PlPlayerController with BlockConfigMixin {
   Timer? _timer;
   StreamSubscription<Duration>? _subForSeek;
 
+  // 鸿蒙：mpv 的 ohaudio 音频输出感知不到系统音频打断（如其他 app 抢占焦点），
+  // 被打断后 mpv 仍自认为在播放，进度停滞、UI 按钮状态错误且无法点击恢复。
+  // 用位置停滞检测兜底：播放中且非缓冲时位置连续数秒不前进，视为被系统打断。
+  Timer? _stallWatchdog;
+  Duration? _stallLastPosition;
+  int _stallTicks = 0;
+  bool _audioInterrupted = false;
+
   Box setting = GStorage.setting;
 
   // final Durations durations;
@@ -938,6 +946,10 @@ class PlPlayerController with BlockConfigMixin {
   /// 播放事件监听
   void _startListeners(NativePlayer player) {
     assert(_subscriptions == null);
+    if (OS.isHarmony) {
+      _startStallWatchdog();
+      Floating().onPipAction = _onPipAction;
+    }
     final stream = player.stream;
     _subscriptions = [
       stream.playing.listen((event) {
@@ -952,8 +964,20 @@ class PlPlayerController with BlockConfigMixin {
           }
           playerStatus.value = PlayerStatus.playing;
         } else {
-          _disableAutoEnterPip();
+          // 鸿蒙：退后台引发的暂停不取消自动画中画，否则该取消操作会与系统
+          // 自动小窗的启动赛跑，导致自动小窗时灵时不灵（Android 的 PiP
+          // auto-enter 与离开手势原子执行，无此问题）。仅在应用处于前台
+          // （用户主动暂停）时才取消。
+          if (!OS.isHarmony ||
+              WidgetsBinding.instance.lifecycleState ==
+                  AppLifecycleState.resumed) {
+            _disableAutoEnterPip();
+          }
           playerStatus.value = PlayerStatus.paused;
+        }
+        if (OS.isHarmony) {
+          // 同步鸿蒙小窗控制面板的播放/暂停图标
+          Floating().updatePipControlStatus(playing: event);
         }
         videoPlayerServiceHandler?.onStatusChange(
           playerStatus.value,
@@ -1095,9 +1119,57 @@ class PlPlayerController with BlockConfigMixin {
 
   /// 移除事件监听
   void _removeListeners() {
+    _stallWatchdog?.cancel();
+    _stallWatchdog = null;
+    if (Floating().onPipAction == _onPipAction) {
+      Floating().onPipAction = null;
+    }
     _subscriptions?.forEach((e) => e.cancel());
     _subscriptions?.clear();
     _subscriptions = null;
+  }
+
+  /// 鸿蒙小窗控制面板按钮回调（floating 插件转发 controlPanelActionEvent）
+  void _onPipAction(String event, int? status) {
+    if (event == 'playbackStateChanged') {
+      // status: 1=请求播放，0=请求暂停；缺省时按当前状态取反
+      final wantPlay = status == null ? !playerStatus.isPlaying : status == 1;
+      if (wantPlay) {
+        play();
+      } else {
+        pause();
+      }
+    }
+  }
+
+  /// 鸿蒙音频打断兜底检测（见 _stallWatchdog 字段注释）
+  void _startStallWatchdog() {
+    _stallWatchdog?.cancel();
+    _stallLastPosition = null;
+    _stallTicks = 0;
+    _stallWatchdog = Timer.periodic(const Duration(milliseconds: 1200), (_) {
+      if (!playerStatus.isPlaying ||
+          isBuffering.value ||
+          position == Duration.zero) {
+        _stallTicks = 0;
+        _stallLastPosition = null;
+        return;
+      }
+      if (position == _stallLastPosition) {
+        _stallTicks++;
+        // 连续约 2.4s 声称播放中却毫无进展：音频输出已被系统暂停。
+        // 同步为暂停态，让按钮显示"播放"，恢复逻辑见 play()。
+        if (_stallTicks >= 2) {
+          _stallTicks = 0;
+          _stallLastPosition = null;
+          _audioInterrupted = true;
+          pause(isInterrupt: true);
+        }
+      } else {
+        _stallTicks = 0;
+        _stallLastPosition = position;
+      }
+    });
   }
 
   void _cancelSubForSeek() {
@@ -1188,6 +1260,21 @@ class PlPlayerController with BlockConfigMixin {
     if (repeat) {
       // await seekTo(Duration.zero);
       await seekTo(Duration.zero, isSeek: false);
+    }
+
+    // 鸿蒙：被系统打断后 mpv 的音频渲染器已被暂停且 mpv 自身无感知，
+    // 单纯解除暂停不会恢复。先重新激活音频会话抢回焦点（暂停其他 app 的
+    // 音频），再用 ao-reload 重建音频输出，让新渲染器以新焦点启动。
+    if (_audioInterrupted) {
+      _audioInterrupted = false;
+      try {
+        await audioSessionHandler?.setActive(true);
+      } catch (_) {}
+      try {
+        await _videoPlayerController?.platform?.maybeAsNativePlayer.command(
+          const ['ao-reload'],
+        );
+      } catch (_) {}
     }
 
     await _videoPlayerController?.play();
@@ -1760,7 +1847,7 @@ class PlPlayerController with BlockConfigMixin {
   }
 
   bool onPopInvokedWithResult(bool didPop, Object? result) {
-    if (Platform.isAndroid && didPop) {
+    if ((Platform.isAndroid || OS.isHarmony) && didPop) {
       _disableAutoEnterPipIfNeeded();
     }
     if (controlsLock.value) {
