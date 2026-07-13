@@ -30,6 +30,7 @@ import 'package:PiliPlus/utils/utils.dart';
 import 'package:catcher_2/catcher_2.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart' show DeviceGestureSettings;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
@@ -325,6 +326,14 @@ class MyApp extends StatelessWidget {
     final uiScale = ScaledWidgetsFlutterBinding.instance.scaleFactor;
     final mediaQuery = MediaQuery.of(context);
     final textScaler = TextScaler.linear(Pref.defaultTextScale);
+    // 鸿蒙 embedding（FlutterPage/FlutterView）把 ArkUI PanGesture 默认的
+    // 5(vp) 当 physicalTouchSlop 下发，框架除以 DPR 后竖向滚动的触发阈值
+    // 只有 ~1.5 逻辑像素（Android 约为 8）。竖向手势几乎瞬间赢得竞技场，
+    // 横向滑动（如简介/评论切换）无论怎么放宽都抢不到。此处恢复为
+    // Android 水平，使横竖手势能按主导方向公平竞争。
+    final gestureSettings = OS.isHarmony
+        ? const DeviceGestureSettings(touchSlop: 8)
+        : mediaQuery.gestureSettings;
     if (uiScale != 1.0) {
       child = MediaQuery(
         data: mediaQuery.copyWith(
@@ -334,12 +343,16 @@ class MyApp extends StatelessWidget {
           viewInsets: mediaQuery.viewInsets / uiScale,
           viewPadding: mediaQuery.viewPadding / uiScale,
           devicePixelRatio: mediaQuery.devicePixelRatio * uiScale,
+          gestureSettings: gestureSettings,
         ),
         child: child!,
       );
     } else {
       child = MediaQuery(
-        data: mediaQuery.copyWith(textScaler: textScaler),
+        data: mediaQuery.copyWith(
+          textScaler: textScaler,
+          gestureSettings: gestureSettings,
+        ),
         child: child!,
       );
     }
