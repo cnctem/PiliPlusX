@@ -967,8 +967,10 @@ abstract final class Pref {
   static bool get showDynDispute =>
       _setting.get(SettingBoxKey.showDynDispute, defaultValue: false);
 
+  // 竖向滚动 slop 已在 main._builder 统一为 8 逻辑像素（鸿蒙），横向取 12
+  // 时约 34° 以内的滑动可赢得竞技场，横竖手势按主导方向竞争。
   static double get touchSlopH =>
-      _setting.get(SettingBoxKey.touchSlopH, defaultValue: 24.0);
+      _setting.get(SettingBoxKey.touchSlopH, defaultValue: 12.0);
 
   static bool get saveReply =>
       _setting.get(SettingBoxKey.saveReply, defaultValue: true);

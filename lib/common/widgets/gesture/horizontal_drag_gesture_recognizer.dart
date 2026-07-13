@@ -62,5 +62,7 @@ bool _computeHitSlop(
 
 bool _calc(Offset initialPosition, Offset lastPosition) {
   final offset = lastPosition - initialPosition;
-  return offset.dx.abs() > offset.dy.abs() * 3;
+  // 判定：只要水平位移 > 垂直位移即算横滑（原为 dx > 3·dy，过于苛刻）。
+  // 约 45° 以内的滑动都会被判定为横向，让简介/评论区左右切换更容易触发。
+  return offset.dx.abs() > offset.dy.abs();
 }
