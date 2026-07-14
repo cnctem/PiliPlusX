@@ -11,6 +11,7 @@ import 'package:PiliPlus/common/widgets/gesture/horizontal_drag_gesture_recogniz
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/keep_alive_wrapper.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/models/common/image_type.dart';
 import 'package:PiliPlus/models/common/live/live_contribution_rank_type.dart';
 import 'package:PiliPlus/models_new/live/live_room_info_h5/data.dart';
@@ -73,6 +74,9 @@ class _LiveRoomPageState extends State<LiveRoomPage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // 页面顶部是深色播放器：自由多窗的装饰栏按钮切浅色风格，否则浅色
+    // 模式下深色按钮不可见
+    HarmonyChannel.holdDecorDark(this);
     _liveRoomController = Get.put(
       LiveRoomController(heroTag),
       tag: heroTag,
@@ -104,6 +108,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
   @override
   Future<void> didPopNext() async {
     WidgetsBinding.instance.addObserver(this);
+    HarmonyChannel.holdDecorDark(this);
     plPlayerController
       ..isLive = true
       ..danmakuController = _liveRoomController.danmakuController;
@@ -131,6 +136,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
   @override
   void didPushNext() {
     WidgetsBinding.instance.removeObserver(this);
+    HarmonyChannel.releaseDecorDark(this);
     plPlayerController.removeStatusLister(playerListener);
     _liveRoomController
       ..danmakuController?.clear()
@@ -159,6 +165,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
   void dispose() {
     _pipModeWorker?.dispose();
     videoPlayerServiceHandler?.onVideoDetailDispose(heroTag);
+    HarmonyChannel.releaseDecorDark(this);
     WidgetsBinding.instance.removeObserver(this);
     if ((Platform.isAndroid || OS.isHarmony) && !plPlayerController.setSystemBrightness) {
       ScreenBrightnessPlatform.instance.resetApplicationScreenBrightness();

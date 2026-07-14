@@ -10,6 +10,7 @@ import 'package:PiliPlus/common/widgets/image_viewer/hero_dialog_route.dart';
 import 'package:PiliPlus/common/widgets/keep_alive_wrapper.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart';
 import 'package:PiliPlus/common/widgets/sliver/sliver_pinned_dynamic_header.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/main.dart';
 import 'package:PiliPlus/models/common/episode_panel_type.dart';
@@ -138,6 +139,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
     PlPlayerController.setPlayCallBack(playCallBack);
     videoDetailController = Get.put(VideoDetailController(), tag: heroTag);
+    // 页面顶部是黑色播放器：自由多窗的装饰栏按钮切浅色风格，否则浅色
+    // 模式下深色按钮不可见
+    HarmonyChannel.holdDecorDark(this);
     // 画中画状态翻转时强制重建：PiP 结束时若窗口尺寸恰好没变（如画中画
     // 期间从智慧多窗应用栏以小窗打开 app），没有视口变化触发重建，页面
     // 会滞留在画中画布局（黑边+播控被状态栏遮挡）。
@@ -339,6 +343,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   @override
   void dispose() {
     _pipModeWorker?.dispose();
+    HarmonyChannel.releaseDecorDark(this);
     plPlayerController
       ?..removeStatusLister(playerListener)
       ..removePositionListener(positionListener);
@@ -393,6 +398,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       return;
     }
 
+    HarmonyChannel.releaseDecorDark(this);
     WidgetsBinding.instance.removeObserver(this);
 
     if ((Platform.isAndroid || OS.isHarmony) && !videoDetailController.setSystemBrightness) {
@@ -429,6 +435,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       return;
     }
 
+    HarmonyChannel.holdDecorDark(this);
     WidgetsBinding.instance.addObserver(this);
 
     plPlayerController?.isLive = false;
@@ -555,8 +562,13 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       }
     }
     if (PlatformUtils.isMobile) {
+      // 鸿蒙自由小窗（悬浮窗/全景多窗）内窗口宽高比不代表设备方向：横屏
+      // 小窗退出全屏时窗口尚未恢复竖屏尺寸，此处若按"非竖屏"自动重进
+      // 全屏会形成退不出去的回环。
+      final aspectIsOrientation = !OS.isHarmony || !HarmonyChannel.isMiniWindow;
       if (!isPortrait &&
           !isFullScreen &&
+          aspectIsOrientation &&
           plPlayerController != null &&
           videoDetailController.autoPlay) {
         WidgetsBinding.instance.addPostFrameCallback((_) {

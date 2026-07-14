@@ -1,3 +1,4 @@
+import ConfigurationConstant from "@ohos.app.ability.ConfigurationConstant";
 import window from "@ohos.window";
 import {
   FlutterPlugin,
@@ -51,6 +52,12 @@ export default class HarmonyChannel implements FlutterPlugin {
         await this.autoRotateLandscape();
         result.success(true);
         break;
+      case "setDecorButtonDark": {
+        const dark: boolean = call.argument("dark") ?? false;
+        await this.setDecorButtonDark(dark);
+        result.success(true);
+        break;
+      }
       // case 'setWindowLayoutFullScreen': {
       //   this.lastWindow ??= await window.getLastWindow(getContext())
       //   this.lastWindow.setWindowLayoutFullScreen(call.argument('fullScreen'));
@@ -79,5 +86,23 @@ export default class HarmonyChannel implements FlutterPlugin {
   async autoRotateLandscape() {
     this.lastWindow ??= await window.getLastWindow(getContext());
     this.lastWindow.setPreferredOrientation(window.Orientation.AUTO_ROTATION_LANDSCAPE)
+  }
+
+  /**
+   * 自由多窗装饰栏按钮颜色：dark=true 时按深色模式渲染（浅色按钮，适配
+   * 深色内容顶部），false 恢复跟随系统颜色模式。仅装饰栏可见（自由窗口）
+   * 时有视觉效果，其余窗口形态下为无害空操作。
+   */
+  private async setDecorButtonDark(dark: boolean) {
+    this.lastWindow ??= await window.getLastWindow(getContext());
+    try {
+      this.lastWindow.setDecorButtonStyle({
+        colorMode: dark
+          ? ConfigurationConstant.ColorMode.COLOR_MODE_DARK
+          : ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET,
+      });
+    } catch (err) {
+      console.error("HarmonyChannel", `setDecorButtonStyle failed: ${err}`);
+    }
   }
 }

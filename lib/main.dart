@@ -322,6 +322,17 @@ class MyApp extends StatelessWidget {
   }
 
   static Widget _builder(BuildContext context, Widget? child) {
+    // scaleFactor 变化不会改变根 View 的 MediaQuery 数据（physicalSize/dpr
+    // 均来自引擎），本方法不会因此重建，下面的缩放校正会失效、页面布局与
+    // 渲染画布脱节（如平板全景多窗内点全屏后内容只占 75%、右/下露白底）。
+    // 必须显式监听缩放变化触发重建。
+    return ListenableBuilder(
+      listenable: ScaledWidgetsFlutterBinding.instance.scaleFactorNotifier,
+      builder: (context, _) => _scaledBuilder(context, child),
+    );
+  }
+
+  static Widget _scaledBuilder(BuildContext context, Widget? child) {
     // 鸿蒙小窗横屏临时缩小时需要获取真正的缩放比例
     final uiScale = ScaledWidgetsFlutterBinding.instance.scaleFactor;
     final mediaQuery = MediaQuery.of(context);

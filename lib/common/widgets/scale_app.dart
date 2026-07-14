@@ -19,11 +19,19 @@ class ScaledWidgetsFlutterBinding extends WidgetsFlutterBinding {
 
   double get scaleFactor => _scaleFactor;
 
+  /// scaleFactor 的可监听镜像。缩放变化只影响 RenderView 配置（画布逻辑
+  /// 尺寸），根 View 的 MediaQuery 数据（physicalSize/dpr 来自引擎）并不会
+  /// 变，依赖 MediaQuery 的整棵子树（包括 _builder 里的缩放校正）不会自动
+  /// 重建——布局仍按旧逻辑尺寸进行，与画布脱节（画面只占 scale 比例、
+  /// 露出白底）。消费方必须监听它来触发重建。
+  final ValueNotifier<double> scaleFactorNotifier = ValueNotifier(1.0);
+
   /// Update scaleFactor callback, then rebuild layout
   set scaleFactor(double scaleFactor) {
     if (_scaleFactor == scaleFactor) return;
     _scaleFactor = scaleFactor;
     handleMetricsChanged();
+    scaleFactorNotifier.value = scaleFactor;
   }
 
   double devicePixelRatioScaled = 0;
