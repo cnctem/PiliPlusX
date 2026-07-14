@@ -67,6 +67,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
   late final GlobalKey chatKey = GlobalKey();
   late final GlobalKey scKey = GlobalKey();
   late final GlobalKey playerKey = GlobalKey();
+  Worker? _pipModeWorker;
 
   @override
   void initState() {
@@ -79,6 +80,11 @@ class _LiveRoomPageState extends State<LiveRoomPage>
     plPlayerController = _liveRoomController.plPlayerController
       ..addStatusLister(playerListener);
     PlPlayerController.setPlayCallBack(plPlayerController.play);
+    // 画中画状态翻转时强制重建，防止 PiP 结束时无视口变化导致页面滞留在
+    // 画中画布局（参见视频页同名逻辑）。
+    _pipModeWorker = ever(plPlayerController.pipModeRx, (_) {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
@@ -151,6 +157,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
 
   @override
   void dispose() {
+    _pipModeWorker?.dispose();
     videoPlayerServiceHandler?.onVideoDetailDispose(heroTag);
     WidgetsBinding.instance.removeObserver(this);
     if ((Platform.isAndroid || OS.isHarmony) && !plPlayerController.setSystemBrightness) {

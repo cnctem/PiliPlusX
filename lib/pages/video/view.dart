@@ -130,12 +130,23 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   final videoRelatedKey = GlobalKey();
   final videoIntroKey = GlobalKey();
 
+  Worker? _pipModeWorker;
+
   @override
   void initState() {
     super.initState();
 
     PlPlayerController.setPlayCallBack(playCallBack);
     videoDetailController = Get.put(VideoDetailController(), tag: heroTag);
+    // 画中画状态翻转时强制重建：PiP 结束时若窗口尺寸恰好没变（如画中画
+    // 期间从智慧多窗应用栏以小窗打开 app），没有视口变化触发重建，页面
+    // 会滞留在画中画布局（黑边+播控被状态栏遮挡）。
+    _pipModeWorker = ever(
+      videoDetailController.plPlayerController.pipModeRx,
+      (_) {
+        if (mounted) setState(() {});
+      },
+    );
 
     if (videoDetailController.showReply) {
       _videoReplyController = Get.put(
@@ -327,6 +338,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   @override
   void dispose() {
+    _pipModeWorker?.dispose();
     plPlayerController
       ?..removeStatusLister(playerListener)
       ..removePositionListener(positionListener);
