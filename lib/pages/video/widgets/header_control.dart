@@ -2056,7 +2056,12 @@ class HeaderControlState extends State<HeaderControl>
                           await Future.delayed(const Duration(seconds: 3));
                         }
                         if (!context.mounted) return;
-                        plPlayerController.enterPip();
+                        final status = await plPlayerController.enterPip();
+                        if (OS.isHarmony &&
+                            status == PiPStatus.unavailable) {
+                          // 系统小窗（自由窗口）内画中画无法启动，插件会拒绝
+                          SmartDialog.showToast('当前处于系统小窗，无法进入画中画');
+                        }
                       }
                     },
                     icon: const Icon(

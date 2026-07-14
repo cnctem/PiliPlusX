@@ -222,6 +222,11 @@ class PlPlayerController with BlockConfigMixin {
   bool get isPipMode =>
       ((Platform.isAndroid || OS.isHarmony) && Floating().isPipMode) ||
       (PlatformUtils.isDesktop && isDesktopPip);
+
+  /// [isPipMode] 的响应式镜像（仅鸿蒙由 onPipModeChanged 驱动）。页面布局
+  /// 依赖 isPipMode 时应同时监听它触发重建，否则 PiP 结束时若无视口变化
+  /// 页面会滞留在画中画布局。
+  final RxBool pipModeRx = false.obs;
   late bool isDesktopPip = false;
   late Rect _lastWindowBounds;
 
@@ -304,16 +309,17 @@ class PlPlayerController with BlockConfigMixin {
         previousRoute.startsWith('/liveRoom');
   }
 
-  void enterPip({bool isAuto = false}) {
+  Future<PiPStatus> enterPip({bool isAuto = false}) {
     if (videoPlayerController != null) {
       controls = false;
       final state = videoPlayerController!.state;
-      PageUtils.enterPip(
+      return PageUtils.enterPip(
         isAuto: isAuto,
         width: state.width == 0 ? width : state.width,
         height: state.height == 0 ? height : state.height,
       );
     }
+    return Future.value(PiPStatus.unavailable);
   }
 
   void _disableAutoEnterPipIfNeeded() {
@@ -949,6 +955,11 @@ class PlPlayerController with BlockConfigMixin {
     if (OS.isHarmony) {
       _startStallWatchdog();
       Floating().onPipAction = _onPipAction;
+      // isPipMode 是普通 bool，build 读它不产生依赖；PiP 结束时若窗口尺寸
+      // 恰好没变（如画中画期间从应用栏以小窗打开 app），没有任何重建时机，
+      // 页面会冻结在画中画布局。用回调驱动 pipModeRx，页面据此重建。
+      Floating().onPipModeChanged = (v) => pipModeRx.value = v;
+      pipModeRx.value = Floating().isPipMode;
     }
     final stream = player.stream;
     _subscriptions = [
@@ -974,6 +985,18 @@ class PlPlayerController with BlockConfigMixin {
             _disableAutoEnterPip();
           }
           playerStatus.value = PlayerStatus.paused;
+          // 鸿蒙：进入画中画的退后台过程中，系统会直接把 mpv 置为暂停
+          //（应用层无任何 pause 调用，插桩证实；auto-start 武装与否均如此）。
+          // 画中画窗口可见即应继续播放，且普通 play() 即可恢复（等效于
+          // 用户按面板播放键），这里自动补上。_pauseRequestedByApp 排除
+          // 用户/业务暂停，频率闸防止与系统拉锯。
+          if (OS.isHarmony &&
+              !_pauseRequestedByApp &&
+              isPipMode &&
+              !(videoPlayerController?.state.completed ?? false) &&
+              _pipAutoResumeAllowed()) {
+            play();
+          }
         }
         if (OS.isHarmony) {
           // 同步鸿蒙小窗控制面板的播放/暂停图标
@@ -1254,6 +1277,7 @@ class PlPlayerController with BlockConfigMixin {
   /// 播放视频
   Future<void> play({bool repeat = false, bool hideControls = true}) async {
     if (_playerCount == 0) return;
+    _pauseRequestedByApp = false;
     // 播放时自动隐藏控制条
     controls = !hideControls;
     // repeat为true，将从头播放
@@ -1286,7 +1310,42 @@ class PlPlayerController with BlockConfigMixin {
   }
 
   /// 暂停播放
+  /// 应用层是否主动发起了当前这次暂停。用于区分"系统在进入画中画的退后台
+  /// 过程中直接把 mpv 置为暂停"（Dart 层无任何 pause 调用，需要自动恢复）
+  /// 与用户/业务发起的正常暂停。
+  bool _pauseRequestedByApp = false;
+  int _pipAutoResumeCount = 0;
+  DateTime? _pipAutoResumeWindowStart;
+
+  /// 生命周期回调的补偿入口：处于画中画且播放被系统静默暂停（而非应用
+  /// 主动暂停）时自动续播。覆盖"系统暂停发生在 isPipMode 置位之前"的
+  /// 时序——彼时 stream.playing 监听里的自动续播不满足条件，只能靠随后
+  /// 到达的生命周期事件（floating 插件会在 PiP 启动后补发 inactive）触发。
+  void autoResumeInPipIfNeeded() {
+    if (OS.isHarmony &&
+        !_pauseRequestedByApp &&
+        isPipMode &&
+        !playerStatus.isPlaying &&
+        !(videoPlayerController?.state.completed ?? false) &&
+        _pipAutoResumeAllowed()) {
+      play();
+    }
+  }
+
+  /// 限制画中画内自动续播的频率，防止与系统的强制暂停陷入拉锯。
+  bool _pipAutoResumeAllowed() {
+    final now = DateTime.now();
+    if (_pipAutoResumeWindowStart == null ||
+        now.difference(_pipAutoResumeWindowStart!) >
+            const Duration(seconds: 10)) {
+      _pipAutoResumeWindowStart = now;
+      _pipAutoResumeCount = 0;
+    }
+    return ++_pipAutoResumeCount <= 3;
+  }
+
   Future<void> pause({bool notify = true, bool isInterrupt = false}) async {
+    _pauseRequestedByApp = true;
     await _videoPlayerController?.pause();
     playerStatus.value = PlayerStatus.paused;
 
