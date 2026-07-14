@@ -637,8 +637,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "8aef0f9762fbe9077ca9573e531a11afaad86d13"
-      resolved-ref: "8aef0f9762fbe9077ca9573e531a11afaad86d13"
+      ref: cd53ec36b91e0d346678ce9c1942a2b6ab4a11ab
+      resolved-ref: cd53ec36b91e0d346678ce9c1942a2b6ab4a11ab
       url: "https://github.com/qinshah/floating.git"
     source: git
     version: "3.0.0"

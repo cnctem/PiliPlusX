@@ -321,11 +321,19 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     late final player = plPlayerController.videoPlayerController;
     if(player == null) return;
+    if (state != AppLifecycleState.paused &&
+        state != AppLifecycleState.detached) {
+      plPlayerController.autoResumeInPipIfNeeded();
+    }
     if (!plPlayerController.continuePlayInBackground.value) {
       if (const [
         AppLifecycleState.paused,
         AppLifecycleState.detached,
       ].contains(state)) {
+        // 画中画中收到的 paused 来自进入 PiP 时的退后台（鸿蒙），视频仍然
+        // 可见，不算后台，不应暂停。PiP 关闭且留在后台时，插件先推
+        // isPipMode=false 再补发 paused，此处仍会正常暂停。
+        if (plPlayerController.isPipMode) return;
         if (player.state.playing) {
           _pauseDueToPauseUponEnteringBackgroundMode = true;
           player.pause();

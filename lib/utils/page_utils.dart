@@ -187,7 +187,11 @@ abstract final class PageUtils {
     );
   }
 
-  static void enterPip({int? width, int? height, bool isAuto = false}) {
+  static Future<PiPStatus> enterPip({
+    int? width,
+    int? height,
+    bool isAuto = false,
+  }) {
     if (width != null && height != null) {
       Rational aspectRatio = Rational(width, height);
       aspectRatio = aspectRatio.fitsInAndroidRequirements
@@ -195,13 +199,15 @@ abstract final class PageUtils {
           : height > width
           ? const Rational.vertical()
           : const Rational.landscape();
-      Floating().enable(
+      return Floating().enable(
         isAuto
             ? AutoEnable(aspectRatio: aspectRatio)
             : EnableManual(aspectRatio: aspectRatio),
       );
     } else {
-      Floating().enable(isAuto ? const AutoEnable() : const EnableManual());
+      return Floating().enable(
+        isAuto ? const AutoEnable() : const EnableManual(),
+      );
     }
   }
 

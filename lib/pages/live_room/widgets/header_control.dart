@@ -10,6 +10,7 @@ import 'package:PiliPlus/services/shutdown_timer_service.dart'
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:floating/floating.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
@@ -166,7 +167,11 @@ class _LiveHeaderControlState extends State<LiveHeaderControl>
                   return;
                 }
                 if (await Floating().isPipAvailable) {
-                  plPlayerController.enterPip();
+                  final status = await plPlayerController.enterPip();
+                  if (OS.isHarmony && status == PiPStatus.unavailable) {
+                    // 系统小窗（自由窗口）内画中画无法启动，插件会拒绝
+                    SmartDialog.showToast('当前处于系统小窗，无法进入画中画');
+                  }
                 }
               },
               icon: const Icon(
