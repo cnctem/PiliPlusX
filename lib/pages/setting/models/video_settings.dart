@@ -92,9 +92,21 @@ List<SettingsModel> get videoSettings => [
       getSubtitle: () {
         final qa = Pref.defaultVideoQaHalfScreen;
         if (qa == null) {
-          return '跟随全屏默认画质（${VideoQuality.fromCode(Pref.defaultVideoQa).desc}）';
+          return '跟随全屏画质'
+              '（WiFi ${VideoQuality.fromCode(Pref.defaultVideoQa).desc}'
+              '｜蜂窝 ${VideoQuality.fromCode(Pref.defaultVideoQaCellular).desc}）';
         }
-        return '当前画质：${VideoQuality.fromCode(qa).desc}';
+        // 半屏实际画质 = min(半屏设置, 当前网络的全屏画质)，被夹持时提示实际值
+        final clamped = [
+          if (Pref.defaultVideoQa < qa)
+            'WiFi 下实际 ${VideoQuality.fromCode(Pref.defaultVideoQa).desc}',
+          if (Pref.defaultVideoQaCellular < qa)
+            '蜂窝下实际 ${VideoQuality.fromCode(Pref.defaultVideoQaCellular).desc}',
+        ];
+        final desc = VideoQuality.fromCode(qa).desc;
+        return clamped.isEmpty
+            ? '当前画质：$desc'
+            : '当前画质：$desc（${clamped.join('｜')}）';
       },
       onTap: _showVideoQaHalfScreenDialog,
     ),
@@ -309,7 +321,7 @@ Future<void> _showVideoQaHalfScreenDialog(
       title: '半屏默认画质',
       value: currentQa ?? -1,
       values: [
-        (-1, '跟随全屏默认画质'),
+        (-1, '跟随全屏画质'),
         ...VideoQuality.values.map((e) => (e.code, e.desc)),
       ],
     ),
