@@ -951,7 +951,7 @@ class HeaderControlState extends State<HeaderControl>
                     final isCurr = currentVideoQa.code == item.quality;
                     return ListTile(
                       dense: true,
-                      onTap: () async {
+                      onTap: () {
                         if (isCurr) {
                           return;
                         }
@@ -966,14 +966,7 @@ class HeaderControlState extends State<HeaderControl>
                         SmartDialog.showToast("画质已变为：${newQa.desc}");
 
                         // update
-                        if (!plPlayerController.tempPlayerConf) {
-                          setting.put(
-                            await ConnectivityUtils.isWiFi
-                                ? SettingBoxKey.defaultVideoQa
-                                : SettingBoxKey.defaultVideoQaCellular,
-                            quality,
-                          );
-                        }
+                        videoDetailCtr.persistVideoQa(quality);
                       },
                       // 可能包含会员解锁画质
                       enabled: availableQa.contains(item.quality),
