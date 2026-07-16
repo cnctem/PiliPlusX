@@ -1182,14 +1182,20 @@ class PlPlayerController with BlockConfigMixin {
 
   /// 鸿蒙小窗控制面板按钮回调（floating 插件转发 controlPanelActionEvent）
   void _onPipAction(String event, int? status) {
-    if (event == 'playbackStateChanged') {
-      // status: 1=请求播放，0=请求暂停；缺省时按当前状态取反
-      final wantPlay = status == null ? !playerStatus.isPlaying : status == 1;
-      if (wantPlay) {
-        play();
-      } else {
-        pause();
-      }
+    switch (event) {
+      case 'playbackStateChanged':
+        // status: 1=请求播放，0=请求暂停；缺省时按当前状态取反
+        final wantPlay =
+            status == null ? !playerStatus.isPlaying : status == 1;
+        if (wantPlay) {
+          play();
+        } else {
+          pause();
+        }
+      case 'fastForward':
+        onForward(fastForBackwardDuration);
+      case 'fastBackward':
+        onBackward(fastForBackwardDuration);
     }
   }
 

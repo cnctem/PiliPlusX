@@ -178,7 +178,7 @@ dependencies:
   floating:
     git:
       url: https://github.com/qinshah/floating.git
-      ref: cd53ec36b91e0d346678ce9c1942a2b6ab4a11ab
+      ref: 3eefccb759c4ea8114e722f1511fe1dbce70dc9f
       
     # html解析
   html: ^0.15.4
