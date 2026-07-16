@@ -61,6 +61,7 @@ import 'package:PiliPlus/utils/extension/size_ext.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
+import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/theme_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
@@ -380,12 +381,40 @@ class VideoDetailController extends GetxController
           (a, b) => a > b ? a : b,
         );
       }
+      // 只升不降：目标 ≤ 当前则跳过切换，保留（可能是手动选择的）当前画质，
+      // 避免进全屏降档重载闪屏。半屏/全屏预设回落到同一可用画质时也走此分支。
+      final curQa = currentVideoQa.value?.code;
+      if (curQa != null && targetQa <= curQa) {
+        plPlayerController.cacheVideoQa = curQa;
+        return;
+      }
       if (plPlayerController.cacheVideoQa != targetQa) {
         plPlayerController.cacheVideoQa = targetQa;
         currentVideoQa.value = VideoQuality.fromCode(targetQa);
         updatePlayer();
       }
     };
+  }
+
+  /// 播放器内手动切换画质的持久化路由：在哪个场景改就写哪个场景的设置
+  /// （docs/adr/0002）。桌面端无半屏/蜂窝概念，固定写全屏默认画质；
+  /// 半屏为「跟随」时与全屏同值，写当前网络的全屏画质。
+  Future<void> persistVideoQa(int quality) async {
+    if (plPlayerController.tempPlayerConf) {
+      return;
+    }
+    final String key;
+    if (!PlatformUtils.isMobile) {
+      key = SettingBoxKey.defaultVideoQa;
+    } else if (!plPlayerController.isFullScreen.value &&
+        Pref.defaultVideoQaHalfScreen != null) {
+      key = SettingBoxKey.defaultVideoQaHalfScreen;
+    } else {
+      key = await ConnectivityUtils.isWiFi
+          ? SettingBoxKey.defaultVideoQa
+          : SettingBoxKey.defaultVideoQaCellular;
+    }
+    GStorage.setting.put(key, quality);
   }
 
   @override
@@ -880,14 +909,14 @@ class VideoDetailController extends GetxController
     }
     if (plPlayerController.cacheVideoQa == null) {
       final isWiFi = await ConnectivityUtils.isWiFi;
+      final fsQa = isWiFi ? Pref.defaultVideoQa : Pref.defaultVideoQaCellular;
       final halfScreenQa = Pref.defaultVideoQaHalfScreen;
       plPlayerController
+        // 半屏与蜂窝是两个正交的画质上限，同时命中取较低者（docs/adr/0002）
         ..cacheVideoQa = !plPlayerController.isFullScreen.value &&
                 halfScreenQa != null
-            ? halfScreenQa
-            : isWiFi
-                ? Pref.defaultVideoQa
-                : Pref.defaultVideoQaCellular
+            ? min(halfScreenQa, fsQa)
+            : fsQa
         ..cacheAudioQa = isWiFi
             ? Pref.defaultAudioQa
             : Pref.defaultAudioQaCellular;
