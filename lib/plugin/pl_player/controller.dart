@@ -185,6 +185,27 @@ class PlPlayerController with BlockConfigMixin {
 
   String get bvid => _bvid!;
 
+  /// 当前播放视频的标识、进度与播放状态快照，用于鸿蒙跨设备接续；
+  /// 直播（由 LiveRoomController 提供快照）或无视频时为 null
+  Map<String, dynamic>? get playSnapshot {
+    if (isLive || _bvid == null || cid == null) {
+      return null;
+    }
+    return {
+      'type': 'video',
+      'aid': _aid,
+      'bvid': _bvid,
+      'cid': cid,
+      'epid': _epid,
+      'seasonId': _seasonId,
+      'pgcType': _pgcType,
+      'videoType': _videoType.name,
+      'progress': position.inMilliseconds,
+      'playing': playerStatus.isPlaying,
+      'onlyPlayAudio': onlyPlayAudio.value,
+    };
+  }
+
   /// 视频播放速度
   double get playbackSpeed => _playbackSpeed.value;
 
@@ -626,6 +647,11 @@ class PlPlayerController with BlockConfigMixin {
       _epid = epid;
       _seasonId = seasonId;
       _pgcType = pgcType;
+      if (!isLive && bvid != null && cid != null) {
+        HarmonyChannel.holdContinuation(this);
+      } else {
+        HarmonyChannel.releaseContinuation(this);
+      }
 
       if (showSeekPreview) {
         _clearPreview();
@@ -902,8 +928,10 @@ class PlPlayerController with BlockConfigMixin {
     } else {
       // 与 _createVideoController 保持一致：直播等无外部音频源的场景下，
       // 刷新播放源前必须清空残留的 audio-files，防止旧视频音频继续播放。
-      await (_videoPlayerController!.platform!).maybeAsNativePlayer
-          .setProperty('audio-files', '');
+      await (_videoPlayerController!.platform!).maybeAsNativePlayer.setProperty(
+        'audio-files',
+        '',
+      );
     }
     await _videoPlayerController!.open(
       Media(
@@ -1797,6 +1825,7 @@ class PlPlayerController with BlockConfigMixin {
     _videoController = null;
     _instance = null;
     videoPlayerServiceHandler?.clear();
+    HarmonyChannel.releaseContinuation(this);
   }
 
   static void updatePlayCount() {

@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/http/dynamics.dart';
 import 'package:PiliPlus/http/fav.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -51,6 +52,7 @@ class ArticleController extends CommonDynController {
     final params = Get.parameters;
     id = params['id']!;
     type = params['type']!;
+    HarmonyChannel.holdContinuation(this);
 
     // to opus
     if (type == 'read') {
@@ -224,6 +226,12 @@ class ArticleController extends CommonDynController {
       return Future.value(null);
     }
     return super.onReload();
+  }
+
+  @override
+  void onClose() {
+    HarmonyChannel.releaseContinuation(this);
+    super.onClose();
   }
 }
 

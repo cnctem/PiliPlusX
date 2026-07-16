@@ -1,4 +1,4 @@
-import { common } from "@kit.AbilityKit";
+import { abilityAccessCtrl, common } from "@kit.AbilityKit";
 import { BusinessError } from "@kit.BasicServicesKit";
 import { fileIo, fileUri, picker } from "@kit.CoreFileKit";
 import AbilityConstant from "@ohos.app.ability.AbilityConstant";
@@ -7,6 +7,9 @@ import window from "@ohos.window";
 import { FlutterAbility, FlutterEngine } from "@ohos/flutter_ohos";
 import { GeneratedPluginRegistrant } from "../plugins/GeneratedPluginRegistrant";
 import HarmonyChannel from "../plugins/HarmonyChannel";
+
+/// 跨设备接续数据在 want.parameters 中的键
+const CONTINUATION_KEY = "pili_continuation";
 
 export default class EntryAbility extends FlutterAbility {
   harmonyChannel: HarmonyChannel = new HarmonyChannel();
@@ -20,10 +23,73 @@ export default class EntryAbility extends FlutterAbility {
 
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam) {
     super.onCreate(want, launchParam);
+    // 默认不可接续，播放器持有视频时才由 Dart 侧置为 ACTIVE，
+    // 避免无播放时对端出现接续入口、点击后提示接续失败
+    this.context
+      .setMissionContinueState(AbilityConstant.ContinueState.INACTIVE)
+      .catch((err: BusinessError) => {
+        console.error(`setMissionContinueState failed: ${err.code} ${err.message}`);
+      });
+    if (this.handleContinuation(want, launchParam)) {
+      // 接续冷启动时系统在 onCreate 后触发 onWindowStageRestore 而非
+      // onWindowStageCreate，必须调用 restoreWindowStage 才会加载窗口内容
+      this.context.restoreWindowStage(new LocalStorage());
+    }
+  }
+
+  onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam) {
+    super.onNewWant(want, launchParam);
+    // 热启动时窗口与 Flutter 引擎均已就绪，不走 restoreWindowStage，
+    // 由 setPendingContinuation 推送通知 Dart 直接跳转
+    this.handleContinuation(want, launchParam);
+  }
+
+  /**
+   * 接续冷启动的窗口恢复回调。FlutterAbility 未实现此回调（不使用
+   * ArkUI 页面栈），按正常创建流程初始化 Flutter 视图并加载页面。
+   */
+  onWindowStageRestore(windowStage: window.WindowStage): void {
+    this.onWindowStageCreate(windowStage);
+  }
+
+  /**
+   * 对端（接收方）：由接续拉起/唤醒时，从 want 中取出源端保存的播放状态，
+   * 暂存后由 Dart 侧拉取并跳转视频页。返回是否为接续启动。
+   */
+  private handleContinuation(want: Want, launchParam: AbilityConstant.LaunchParam): boolean {
+    if (launchParam.launchReason !== AbilityConstant.LaunchReason.CONTINUATION) {
+      return false;
+    }
+    const data = want.parameters?.[CONTINUATION_KEY];
+    if (typeof data === "string" && data.length > 0) {
+      this.harmonyChannel.setPendingContinuation(data);
+    }
+    return true;
+  }
+
+  /**
+   * 源端（发起方）：系统发起接续时收集当前播放状态写入 wantParam。
+   * 无正在播放的视频时拒绝本次接续。
+   */
+  async onContinue(wantParam: Record<string, Object>): Promise<AbilityConstant.OnContinueResult> {
+    const state = await this.harmonyChannel.getContinuationState();
+    if (state == null) {
+      return AbilityConstant.OnContinueResult.REJECT;
+    }
+    wantParam[CONTINUATION_KEY] = state;
+    return AbilityConstant.OnContinueResult.AGREE;
   }
 
   async onWindowStageCreate(windowStage: window.WindowStage): Promise<void> {
     super.onWindowStageCreate(windowStage);
+    // 跨设备接续要求两端均授予多设备协同权限（user_grant，需弹窗授权；
+    // 已授权或已被拒绝时系统不再弹窗）
+    abilityAccessCtrl
+      .createAtManager()
+      .requestPermissionsFromUser(this.context, ["ohos.permission.DISTRIBUTED_DATASYNC"])
+      .catch((err: BusinessError) => {
+        console.error(`request DISTRIBUTED_DATASYNC failed: ${err.code} ${err.message}`);
+      });
     let w = windowStage.getMainWindowSync();
     w.on("windowStatusChange", (type) => {
       if (type == window.WindowStatusType.FLOATING && !this.wasFloatingWindow) {

@@ -328,6 +328,14 @@ class VideoDetailController extends GetxController
     heroTag = args['heroTag'];
     cover = RxString(args['cover'] ?? '');
 
+    // 跨设备接续等场景显式指定初始播放/听视频状态，优先于本机设置
+    if (args['autoPlay'] case final bool autoPlay) {
+      _autoPlay.value = autoPlay;
+    }
+    if (args['onlyPlayAudio'] == true) {
+      plPlayerController.onlyPlayAudio.value = true;
+    }
+
     sourceType = args['sourceType'] ?? SourceType.normal;
     isFileSource = sourceType == SourceType.file;
     isPlayAll = sourceType != SourceType.normal && !isFileSource;

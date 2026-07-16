@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:PiliPlus/common/widgets/dialog/report.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/http/live.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/video.dart';
@@ -184,7 +185,15 @@ class LiveRoomController extends GetxController {
     final account = Accounts.main;
     isLogin = account.isLogin;
     mid = account.mid;
-    queryLiveUrl(autoFullScreenFlag: true);
+    HarmonyChannel.holdContinuation(this);
+    // 跨设备接续等场景显式指定初始状态（听直播/暂停），优先于默认行为
+    if (Get.parameters['onlyAudio'] == 'true') {
+      plPlayerController.onlyPlayAudio.value = true;
+    }
+    queryLiveUrl(
+      autoplay: Get.parameters['autoplay'] != 'false',
+      autoFullScreenFlag: true,
+    );
     queryLiveInfoH5();
     if (Accounts.heartbeat.isLogin && !Pref.historyPause) {
       VideoHttp.roomEntryAction(roomId: roomId);
@@ -210,7 +219,10 @@ class LiveRoomController extends GetxController {
     );
   }
 
-  Future<void> queryLiveUrl({bool autoFullScreenFlag = false}) async {
+  Future<void> queryLiveUrl({
+    bool autoplay = true,
+    bool autoFullScreenFlag = false,
+  }) async {
     currentQn ??= await Utils.isWiFi
         ? Pref.liveQuality
         : Pref.liveQualityCellular;
@@ -249,7 +261,10 @@ class LiveRoomController extends GetxController {
       currentQnDesc.value =
           LiveQuality.fromCode(currentQn)?.desc ?? currentQn.toString();
       videoUrl = VideoUtils.getLiveCdnUrl(item);
-      await playerInit(autoFullScreenFlag: autoFullScreenFlag);
+      await playerInit(
+        autoplay: autoplay,
+        autoFullScreenFlag: autoFullScreenFlag,
+      );
       isLoaded.value = true;
     } else {
       _showDialog(res.toString());
@@ -385,6 +400,7 @@ class LiveRoomController extends GetxController {
 
   @override
   void onClose() {
+    HarmonyChannel.releaseContinuation(this);
     closeLiveMsg();
     cancelLikeTimer();
     cancelLiveTimer();
