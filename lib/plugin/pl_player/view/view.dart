@@ -41,6 +41,7 @@ import 'package:PiliPlus/plugin/pl_player/models/data_status.dart';
 import 'package:PiliPlus/plugin/pl_player/models/double_tap_type.dart';
 import 'package:PiliPlus/plugin/pl_player/models/fullscreen_mode.dart';
 import 'package:PiliPlus/plugin/pl_player/models/gesture_type.dart';
+import 'package:PiliPlus/plugin/pl_player/models/speed_lock_hint.dart';
 import 'package:PiliPlus/plugin/pl_player/models/video_fit_type.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/app_bar_ani.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/backward_seek.dart';
@@ -49,6 +50,7 @@ import 'package:PiliPlus/plugin/pl_player/widgets/common_btn.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/forward_seek.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/mpv_convert_webp.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/play_pause_btn.dart';
+import 'package:PiliPlus/plugin/pl_player/widgets/speed_lock_arrows.dart';
 import 'package:PiliPlus/utils/android/bindings.g.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
 import 'package:PiliPlus/utils/connectivity_utils.dart';
@@ -802,7 +804,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                     height: 35,
                     padding: const EdgeInsets.only(left: 30),
                     value: speed,
-                    onTap: () => plPlayerController.setPlaybackSpeed(speed),
+                    onTap: () =>
+                        plPlayerController.setManualPlaybackSpeed(speed),
                     child: Text(
                       "${speed}X",
                       style: const TextStyle(color: Colors.white, fontSize: 13),
@@ -1250,6 +1253,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     }
   }
 
+  /// 淡出动画期间保留最后展示的锁定提示内容
+  SpeedLockHint _lastSpeedLockHint = SpeedLockHint.none;
+
   LongPressGestureRecognizer? _longPressRecognizer;
   LongPressGestureRecognizer get longPressRecognizer => _longPressRecognizer ??=
       LongPressGestureRecognizer(
@@ -1259,9 +1265,11 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         )
         ..onLongPressStart = ((_) =>
             plPlayerController.setLongPressStatus(true))
+        ..onLongPressMoveUpdate = ((details) =>
+            plPlayerController.onLongPressMove(details.offsetFromOrigin.dy))
         ..onLongPressEnd = ((_) => plPlayerController.setLongPressStatus(false))
         ..onLongPressCancel = (() =>
-            plPlayerController.setLongPressStatus(false));
+            plPlayerController.setLongPressStatus(false, isCancel: true));
   late final ImmediateTapGestureRecognizer _tapGestureRecognizer;
   late final DoubleTapGestureRecognizer _doubleTapGestureRecognizer;
   late final PlayerScaleGestureRecognizer _scaleGestureRecognizer;
@@ -1529,29 +1537,81 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                     ? const Offset(0.0, 1.2)
                     : const Offset(0.0, 0.8),
                 child: Obx(
-                  () => AnimatedOpacity(
-                    curve: Curves.easeInOut,
-                    opacity: plPlayerController.longPressStatus.value
-                        ? 1.0
-                        : 0.0,
-                    duration: const Duration(milliseconds: 150),
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: const BoxDecoration(
-                        color: Color(0x88000000),
-                        borderRadius: BorderRadius.all(Radius.circular(16)),
+                  () {
+                    final hint = plPlayerController.speedLockHint.value;
+                    // 淡出期间沿用最后一次非空提示的内容
+                    if (!hint.isNone) {
+                      _lastSpeedLockHint = hint;
+                    }
+                    final display = hint.isNone ? _lastSpeedLockHint : hint;
+                    final speedText =
+                        '${plPlayerController.playbackSpeed}x播放';
+                    final (Widget? icon, String text) = switch (display) {
+                      SpeedLockHint.swipeUpToLock => (
+                        const SpeedLockArrows(),
+                        '上滑锁定$speedText',
                       ),
-                      child: Obx(
-                        () => Text(
-                          '${plPlayerController.enableAutoLongPressSpeed ? (plPlayerController.longPressStatus.value ? plPlayerController.lastPlaybackSpeed : plPlayerController.playbackSpeed) * 2 : plPlayerController.longPressSpeed}倍速中',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 13,
-                          ),
+                      SpeedLockHint.releaseToLock => (
+                        const Icon(
+                          Icons.lock_rounded,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                        '松手锁定$speedText',
+                      ),
+                      SpeedLockHint.lockedConfirm => (
+                        null,
+                        '已经锁定$speedText',
+                      ),
+                      SpeedLockHint.swipeDownToUnlock => (
+                        const SpeedLockArrows(down: true),
+                        '下滑退出$speedText',
+                      ),
+                      SpeedLockHint.releaseToUnlock => (
+                        const Icon(
+                          Icons.lock_open_rounded,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                        '松手退出$speedText',
+                      ),
+                      SpeedLockHint.unlockedConfirm => (
+                        null,
+                        '已经恢复$speedText',
+                      ),
+                      SpeedLockHint.none => (null, ''),
+                    };
+                    return AnimatedOpacity(
+                      curve: Curves.easeInOut,
+                      opacity: hint.isNone ? 0.0 : 1.0,
+                      duration: const Duration(milliseconds: 150),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: const BoxDecoration(
+                          color: Color(0x88000000),
+                          borderRadius: BorderRadius.all(Radius.circular(16)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          spacing: 6,
+                          children: [
+                            if (icon != null)
+                              TickerMode(enabled: !hint.isNone, child: icon),
+                            Text(
+                              text,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
               ),
             ),
