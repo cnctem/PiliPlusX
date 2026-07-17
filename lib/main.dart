@@ -27,6 +27,7 @@ import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/theme_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:auto_orientation/auto_orientation.dart';
 import 'package:catcher_2/catcher_2.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
@@ -121,6 +122,12 @@ void main() async {
         ],
       ),
     ]);
+    // 鸿蒙embedder将 portraitUp+landscapeLeft+landscapeRight 组合映射为
+    // window.Orientation.LOCKED(锁定启动时的方向),导致平板无法自动旋转,
+    // 需再设为 AUTO_ROTATION_UNSPECIFIED 才能与安卓一致跟随传感器旋转
+    if (OS.isHarmony && Pref.horizontalScreen) {
+      await AutoOrientation.setScreenOrientationUser();
+    }
   }
 
   if (PlatformUtils.isMobile || OS.isHarmony) {
