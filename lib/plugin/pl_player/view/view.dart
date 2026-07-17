@@ -1252,8 +1252,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     }
   }
 
-  /// 淡出动画期间保留最后展示的锁定提示内容
-  SpeedLockHint _lastSpeedLockHint = SpeedLockHint.none;
+  /// 淡出动画期间冻结的锁定提示内容（图标 + 文案）
+  (Widget?, String) _speedLockToastContent = (null, '');
 
   LongPressGestureRecognizer? _longPressRecognizer;
   LongPressGestureRecognizer get longPressRecognizer => _longPressRecognizer ??=
@@ -1538,48 +1538,48 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 child: Obx(
                   () {
                     final hint = plPlayerController.speedLockHint.value;
-                    // 淡出期间沿用最后一次非空提示的内容
+                    // 内容只在提示可见时计算并缓存；淡出期间直接复用成品，
+                    // 避免恢复速度时文案里的数字被实时刷新
                     if (!hint.isNone) {
-                      _lastSpeedLockHint = hint;
+                      final speedText =
+                          '${plPlayerController.playbackSpeed}x播放';
+                      _speedLockToastContent = switch (hint) {
+                        SpeedLockHint.swipeUpToLock => (
+                          const SpeedLockArrows(),
+                          '上滑锁定$speedText',
+                        ),
+                        SpeedLockHint.releaseToLock => (
+                          const Icon(
+                            Icons.lock_rounded,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                          '松手锁定$speedText',
+                        ),
+                        SpeedLockHint.lockedConfirm => (
+                          null,
+                          '已经锁定$speedText',
+                        ),
+                        SpeedLockHint.swipeDownToUnlock => (
+                          const SpeedLockArrows(down: true),
+                          '下滑退出$speedText',
+                        ),
+                        SpeedLockHint.releaseToUnlock => (
+                          const Icon(
+                            Icons.lock_open_rounded,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                          '松手退出$speedText',
+                        ),
+                        SpeedLockHint.unlockedConfirm => (
+                          null,
+                          '已经恢复$speedText',
+                        ),
+                        SpeedLockHint.none => (null, ''),
+                      };
                     }
-                    final display = hint.isNone ? _lastSpeedLockHint : hint;
-                    final speedText =
-                        '${plPlayerController.playbackSpeed}x播放';
-                    final (Widget? icon, String text) = switch (display) {
-                      SpeedLockHint.swipeUpToLock => (
-                        const SpeedLockArrows(),
-                        '上滑锁定$speedText',
-                      ),
-                      SpeedLockHint.releaseToLock => (
-                        const Icon(
-                          Icons.lock_rounded,
-                          size: 16,
-                          color: Colors.white,
-                        ),
-                        '松手锁定$speedText',
-                      ),
-                      SpeedLockHint.lockedConfirm => (
-                        null,
-                        '已经锁定$speedText',
-                      ),
-                      SpeedLockHint.swipeDownToUnlock => (
-                        const SpeedLockArrows(down: true),
-                        '下滑退出$speedText',
-                      ),
-                      SpeedLockHint.releaseToUnlock => (
-                        const Icon(
-                          Icons.lock_open_rounded,
-                          size: 16,
-                          color: Colors.white,
-                        ),
-                        '松手退出$speedText',
-                      ),
-                      SpeedLockHint.unlockedConfirm => (
-                        null,
-                        '已经恢复$speedText',
-                      ),
-                      SpeedLockHint.none => (null, ''),
-                    };
+                    final (icon, text) = _speedLockToastContent;
                     return AnimatedOpacity(
                       curve: Curves.easeInOut,
                       opacity: hint.isNone ? 0.0 : 1.0,
@@ -1593,20 +1593,24 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                           color: Color(0x88000000),
                           borderRadius: BorderRadius.all(Radius.circular(16)),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          spacing: 6,
-                          children: [
-                            if (icon != null)
-                              TickerMode(enabled: !hint.isNone, child: icon),
-                            Text(
-                              text,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 13,
+                        // 定高内容行：各状态胶囊等高，位置不随内容跳变
+                        child: SizedBox(
+                          height: 22,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            spacing: 6,
+                            children: [
+                              if (icon != null)
+                                TickerMode(enabled: !hint.isNone, child: icon),
+                              Text(
+                                text,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     );
