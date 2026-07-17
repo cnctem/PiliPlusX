@@ -28,6 +28,7 @@ import 'package:PiliPlus/plugin/pl_player/models/fullscreen_mode.dart';
 import 'package:PiliPlus/plugin/pl_player/models/heart_beat_type.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
+import 'package:PiliPlus/plugin/pl_player/models/speed_lock_hint.dart';
 import 'package:PiliPlus/plugin/pl_player/models/video_fit_type.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/services/service_locator.dart';
@@ -126,6 +127,16 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   final RxBool showBrightnessStatus = false.obs;
 
   final RxBool longPressStatus = false.obs;
+
+  /// 长按倍速锁定（仅当次播放生效，不持久化）
+  bool speedLocked = false;
+
+  /// 长按倍速锁定提示（六态，驱动播放器顶部 toast）
+  final Rx<SpeedLockHint> speedLockHint = SpeedLockHint.none.obs;
+
+  /// 长按中滑动越线后的预备态：松手才提交锁定/解锁
+  bool _speedLockArmed = false;
+  Timer? _speedLockHintTimer;
 
   final RxBool controlsLock = false.obs;
 
@@ -628,6 +639,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   }) async {
     try {
       _processing = true;
+      // 换视频/换P：解除倍速锁定并恢复锁定前速度。
+      await releaseSpeedLock();
       this.isLive = isLive;
       _videoType = videoType ?? VideoType.ugc;
       this.width = width;
@@ -1364,7 +1377,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   }
 
   /// 设置长按倍速状态 live模式下禁用
-  Future<void> setLongPressStatus(bool val) async {
+  Future<void> setLongPressStatus(bool val, {bool isCancel = false}) async {
     if (isLive) {
       return;
     }
@@ -1376,17 +1389,124 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     }
     if (val) {
       if (playerStatus.isPlaying) {
+        _speedLockArmed = false;
+        _cancelSpeedLockHintTimer();
         longPressStatus.value = val;
         HapticFeedback.lightImpact();
-        await setPlaybackSpeed(
-          enableAutoLongPressSpeed ? playbackSpeed * 2 : longPressSpeed,
-        );
+        if (speedLocked) {
+          // 锁定态：速度已固化为锁定值，不得再调速——setPlaybackSpeed 会
+          // 覆盖 lastPlaybackSpeed（锁定前速度），动态倍速下还会二次翻倍
+          speedLockHint.value = SpeedLockHint.swipeDownToUnlock;
+        } else {
+          await setPlaybackSpeed(
+            enableAutoLongPressSpeed ? playbackSpeed * 2 : longPressSpeed,
+          );
+          if (longPressStatus.value) {
+            speedLockHint.value = SpeedLockHint.swipeUpToLock;
+          }
+        }
       }
     } else {
-      // if (kDebugMode) debugPrint('$playbackSpeed');
+      // 预备态在松手时提交；系统打断（cancel）一律不提交
+      final bool commit = _speedLockArmed && !isCancel;
+      _speedLockArmed = false;
       longPressStatus.value = val;
+      if (speedLocked) {
+        if (commit) {
+          speedLocked = false;
+          HapticFeedback.mediumImpact();
+          await setPlaybackSpeed(lastPlaybackSpeed);
+          _showTransientSpeedLockHint(SpeedLockHint.unlockedConfirm);
+        } else {
+          speedLockHint.value = SpeedLockHint.none;
+        }
+      } else {
+        if (commit) {
+          speedLocked = true;
+          HapticFeedback.mediumImpact();
+          _showTransientSpeedLockHint(SpeedLockHint.lockedConfirm);
+        } else {
+          speedLockHint.value = SpeedLockHint.none;
+          await setPlaybackSpeed(lastPlaybackSpeed);
+        }
+      }
+    }
+  }
+
+  // 长按倍速锁定：预备阈值（逻辑像素），全屏/半屏区分，迟滞防抖
+  static const double _speedLockThresholdFull = 60;
+  static const double _speedLockThresholdHalf = 32;
+  static const double _speedLockHysteresis = 10;
+
+  /// 长按中手指移动，dy 为相对长按起点的纵向偏移（上滑为负）。
+  /// 越线进入预备态、滑回取消预备，均可反复，提交只发生在松手
+  void onLongPressMove(double dy) {
+    if (!longPressStatus.value) {
+      return;
+    }
+    final double threshold = isFullScreen.value
+        ? _speedLockThresholdFull
+        : _speedLockThresholdHalf;
+    if (speedLocked) {
+      // 下滑预备退出
+      if (!_speedLockArmed && dy >= threshold) {
+        _speedLockArmed = true;
+        HapticFeedback.lightImpact();
+        speedLockHint.value = SpeedLockHint.releaseToUnlock;
+      } else if (_speedLockArmed && dy <= threshold - _speedLockHysteresis) {
+        _speedLockArmed = false;
+        HapticFeedback.lightImpact();
+        speedLockHint.value = SpeedLockHint.swipeDownToUnlock;
+      }
+    } else {
+      // 上滑预备锁定
+      if (!_speedLockArmed && dy <= -threshold) {
+        _speedLockArmed = true;
+        HapticFeedback.lightImpact();
+        speedLockHint.value = SpeedLockHint.releaseToLock;
+      } else if (_speedLockArmed && dy >= -(threshold - _speedLockHysteresis)) {
+        _speedLockArmed = false;
+        HapticFeedback.lightImpact();
+        speedLockHint.value = SpeedLockHint.swipeUpToLock;
+      }
+    }
+  }
+
+  /// 手动调速（倍速菜单/快捷键）：锁定态下先解除锁定再应用所选速度
+  Future<void> setManualPlaybackSpeed(double speed) async {
+    if (speedLocked) {
+      await releaseSpeedLock(restoreSpeed: false);
+    }
+    await setPlaybackSpeed(speed);
+  }
+
+  /// 解除倍速锁定；[restoreSpeed] 为 true 时恢复锁定前速度
+  Future<void> releaseSpeedLock({bool restoreSpeed = true}) async {
+    if (!speedLocked) {
+      return;
+    }
+    speedLocked = false;
+    _speedLockArmed = false;
+    _cancelSpeedLockHintTimer();
+    speedLockHint.value = SpeedLockHint.none;
+    if (restoreSpeed) {
       await setPlaybackSpeed(lastPlaybackSpeed);
     }
+  }
+
+  void _showTransientSpeedLockHint(SpeedLockHint hint) {
+    speedLockHint.value = hint;
+    _speedLockHintTimer?.cancel();
+    _speedLockHintTimer = Timer(const Duration(seconds: 2), () {
+      if (speedLockHint.value == hint) {
+        speedLockHint.value = SpeedLockHint.none;
+      }
+    });
+  }
+
+  void _cancelSpeedLockHintTimer() {
+    _speedLockHintTimer?.cancel();
+    _speedLockHintTimer = null;
   }
 
   bool get isCompleted =>
@@ -1657,6 +1777,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     // 每次减1，最后销毁
     resetScreenRotation();
     cancelLongPressTimer();
+    _cancelSpeedLockHintTimer();
+    speedLocked = false;
+    _speedLockArmed = false;
+    speedLockHint.value = SpeedLockHint.none;
     _cancelSubForSeek();
     if (!_isCloseAll && _playerCount > 1) {
       _playerCount -= 1;
