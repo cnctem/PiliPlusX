@@ -52,9 +52,11 @@ class _SpeedLockArrowsState extends State<SpeedLockArrows>
     // 高亮流动方向与箭头指向一致
     final double topPhase = down ? 0.0 : 0.5;
     final double bottomPhase = down ? 0.5 : 0.0;
+    // 布局盒固定为 size×size（与普通图标同档，保证 toast 各状态等高），
+    // 两个 chevron 上下向外溢出绘制
     return SizedBox(
       width: size,
-      height: size * 1.4,
+      height: size,
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {
@@ -63,11 +65,11 @@ class _SpeedLockArrowsState extends State<SpeedLockArrows>
             clipBehavior: Clip.none,
             children: [
               Positioned(
-                top: 0,
+                top: -size * 0.2,
                 child: Opacity(opacity: _glow(t, topPhase), child: icon),
               ),
               Positioned(
-                top: size * 0.4,
+                top: size * 0.2,
                 child: Opacity(opacity: _glow(t, bottomPhase), child: icon),
               ),
             ],
