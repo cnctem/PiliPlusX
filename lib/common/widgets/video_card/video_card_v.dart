@@ -108,57 +108,58 @@ class VideoCardV extends StatelessWidget {
                           ),
                         ),
                         videoStat(context, theme),
-                      Row(
-                        spacing: 2,
-                        children: [
-                          if (videoItem.goto == 'bangumi')
-                            PBadge(
-                              text: videoItem.pgcBadge,
-                              isStack: false,
-                              size: PBadgeSize.small,
-                              type: PBadgeType.line_primary,
-                              fontSize: 9,
-                            ),
-                          if (videoItem.rcmdReason != null)
-                            PBadge(
-                              text: videoItem.rcmdReason,
-                              isStack: false,
-                              size: PBadgeSize.small,
-                              type: PBadgeType.secondary,
-                            ),
-                          if (videoItem.goto == 'picture')
-                            const PBadge(
-                              text: '动态',
-                              isStack: false,
-                              size: PBadgeSize.small,
-                              type: PBadgeType.line_primary,
-                              fontSize: 9,
-                            ),
-                          if (videoItem.isFollowed)
-                            const PBadge(
-                              text: '已关注',
-                              isStack: false,
-                              size: PBadgeSize.small,
-                              type: PBadgeType.secondary,
-                            ),
-                          Expanded(
-                            flex: 1,
-                            child: Text(
-                              videoItem.owner.name.toString(),
-                              maxLines: 1,
-                              overflow: TextOverflow.clip,
-                              semanticsLabel: 'UP：${videoItem.owner.name}',
-                              style: TextStyle(
-                                height: 1.5,
-                                fontSize: theme.textTheme.labelMedium!.fontSize,
-                                color: theme.colorScheme.outline,
+                        Row(
+                          spacing: 2,
+                          children: [
+                            if (videoItem.goto == 'bangumi')
+                              PBadge(
+                                text: videoItem.pgcBadge,
+                                isStack: false,
+                                size: PBadgeSize.small,
+                                type: PBadgeType.line_primary,
+                                fontSize: 9,
+                              ),
+                            if (videoItem.rcmdReason != null)
+                              PBadge(
+                                text: videoItem.rcmdReason,
+                                isStack: false,
+                                size: PBadgeSize.small,
+                                type: PBadgeType.secondary,
+                              ),
+                            if (videoItem.goto == 'picture')
+                              const PBadge(
+                                text: '动态',
+                                isStack: false,
+                                size: PBadgeSize.small,
+                                type: PBadgeType.line_primary,
+                                fontSize: 9,
+                              ),
+                            if (videoItem.isFollowed)
+                              const PBadge(
+                                text: '已关注',
+                                isStack: false,
+                                size: PBadgeSize.small,
+                                type: PBadgeType.secondary,
+                              ),
+                            Expanded(
+                              flex: 1,
+                              child: Text(
+                                videoItem.owner.name.toString(),
+                                maxLines: 1,
+                                overflow: TextOverflow.clip,
+                                semanticsLabel: 'UP：${videoItem.owner.name}',
+                                style: TextStyle(
+                                  height: 1.5,
+                                  fontSize: theme.textTheme.labelMedium!.fontSize,
+                                  color: theme.colorScheme.outline,
+                                ),
                               ),
                             ),
-                          ),
-                          if (videoItem.goto == 'av') const SizedBox(width: 10),
-                        ],
-                      ),
-                    ],
+                            if (videoItem.goto == 'av') const SizedBox(width: 10),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
