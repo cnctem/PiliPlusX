@@ -1,6 +1,6 @@
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
-import 'package:PiliPlus/common/widgets/flutter/layout_builder.dart';
+import 'package:PiliPlus/common/widgets/cached_layout_builder.dart';
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/models_new/space/space_fav/list.dart';
@@ -65,7 +65,7 @@ class MemberFavItem extends StatelessWidget {
                 children: [
                   AspectRatio(
                     aspectRatio: StyleString.aspectRatio,
-                    child: LayoutBuilder(
+                    child: CachedLayoutBuilder(
                       builder: (context, constraints) => NetworkImgLayer(
                         src: item.cover,
                         width: constraints.maxWidth,
