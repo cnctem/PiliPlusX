@@ -1,4 +1,4 @@
-import 'package:PiliPlus/common/widgets/flutter/layout_builder.dart';
+import 'package:PiliPlus/common/widgets/cached_layout_builder.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/stat/stat.dart';
 import 'package:PiliPlus/models/common/image_type.dart';
@@ -32,7 +32,7 @@ class SpaceOpusItem extends StatelessWidget {
             if (hasPic)
               Stack(
                 children: [
-                  LayoutBuilder(
+                  CachedLayoutBuilder(
                     builder: (context, constraints) => NetworkImgLayer(
                       width: constraints.maxWidth,
                       height: constraints.maxWidth * item.cover!.ratio,
