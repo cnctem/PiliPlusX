@@ -64,7 +64,7 @@ class NetworkImgLayer extends StatelessWidget {
     required bool isAvatar
   }) {
     int? memCacheWidth, memCacheHeight;
-    if (cacheWidth ?? width <= height) {
+    if (cacheWidth ?? (width <= height)) {
       memCacheWidth = width.cacheSize(context);
     } else {
       memCacheHeight = height.cacheSize(context);
