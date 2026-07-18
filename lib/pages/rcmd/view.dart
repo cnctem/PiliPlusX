@@ -23,6 +23,26 @@ class _RcmdPageState extends State<RcmdPage>
   final RcmdController controller = Get.put(RcmdController());
 
   @override
+  void initState() {
+    super.initState();
+    controller.scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (!controller.scrollController.hasClients || controller.isLoading) return;
+    final position = controller.scrollController.position;
+    if (position.pixels >= position.maxScrollExtent - 1000) {
+      controller.onLoadMore();
+    }
+  }
+
+  @override
+  void dispose() {
+    controller.scrollController.removeListener(_onScroll);
+    super.dispose();
+  }
+
+  @override
   bool get wantKeepAlive => true;
 
   @override
@@ -64,9 +84,6 @@ class _RcmdPageState extends State<RcmdPage>
             ? SliverGrid.builder(
                 gridDelegate: gridDelegate,
                 itemBuilder: (context, index) {
-                  if (index == response.length - 1) {
-                    controller.onLoadMore();
-                  }
                   if (controller.lastRefreshAt != null) {
                     if (controller.lastRefreshAt == index) {
                       return GestureDetector(
