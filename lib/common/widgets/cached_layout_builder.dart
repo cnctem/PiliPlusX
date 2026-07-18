@@ -1,5 +1,5 @@
 import 'package:PiliPlus/common/widgets/flutter/layout_builder.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide LayoutBuilder;
 import 'package:flutter/widgets.dart' hide LayoutBuilder;
 
 /// 带缓存的 LayoutBuilder，避免父组件 rebuild 时产生不必要的子树重建。
