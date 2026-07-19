@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:PiliPlus/common/utils/status_bar_tap.dart';
 import 'package:PiliPlus/http/dynamics.dart';
 import 'package:PiliPlus/http/follow.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -22,12 +21,6 @@ class DynamicsController extends GetxController
     with GetSingleTickerProviderStateMixin, ScrollOrRefreshMixin, AccountMixin {
   @override
   final ScrollController scrollController = ScrollController();
-
-  late final StatusBarTapObserver statusBarTap = StatusBarTapObserver(
-    scrollController: scrollController,
-    animateToTop: animateToTop,
-  )..register();
-
   late final TabController tabController;
 
   late final RxInt mid = (-1).obs;
@@ -61,9 +54,6 @@ class DynamicsController extends GetxController
   @override
   void onInit() {
     super.onInit();
-    statusBarTap
-      ..routeName = Get.currentRoute
-      ..register();
     tabController = TabController(
       length: DynamicsTabType.values.length,
       vsync: this,
@@ -243,7 +233,6 @@ class DynamicsController extends GetxController
 
   @override
   void onClose() {
-    statusBarTap.dispose();
     tabController.dispose();
     scrollController.dispose();
     super.onClose();
