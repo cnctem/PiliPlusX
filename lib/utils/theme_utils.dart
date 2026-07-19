@@ -22,6 +22,7 @@ abstract final class ThemeUtils {
     ThemeData themeData = ThemeData(
       colorScheme: colorScheme,
       useMaterial3: true,
+      fontFamily: "HarmonyOS_Sans",
       textTheme: fontWeight == null
           ? null
           : TextTheme(

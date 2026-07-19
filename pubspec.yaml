@@ -444,9 +444,20 @@ flutter:
   #   - family: Jura-Bold
   #     fonts:
   #       - asset: assets/fonts/Jura-Bold.ttf
-  # - family: HarmonyOS
-  #   fonts:
-  #     - asset: assets/fonts/HarmonyOS_Sans_SC_Regular.ttf
+    - family: HarmonyOS_Sans
+      fonts:
+        - asset: assets/fonts/HarmonyOS_Sans_SC_w300.ttf
+          weight: 300
+        - asset: assets/fonts/HarmonyOS_Sans_SC_w400.ttf
+          weight: 400
+        - asset: assets/fonts/HarmonyOS_Sans_SC_w500.ttf
+          weight: 500
+        - asset: assets/fonts/HarmonyOS_Sans_SC_w600.ttf
+          weight: 600
+        - asset: assets/fonts/HarmonyOS_Sans_SC_w700.ttf
+          weight: 700
+        - asset: assets/fonts/HarmonyOS_Sans_SC_w800.ttf
+          weight: 800
 
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
