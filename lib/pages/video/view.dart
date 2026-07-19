@@ -222,14 +222,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     }
   }
 
-  @override
-  void handleStatusBarTap() {
-    if (!isShowing) return;
-    if (videoDetailController.scrollCtr.hasClients) {
-      videoDetailController.animToTop();
-    }
-  }
-  
   Future<void>? playCallBack() {
     return plPlayerController?.play();
   }

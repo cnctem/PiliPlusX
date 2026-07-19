@@ -2,7 +2,6 @@ import 'dart:math' show pi;
 
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/skeleton/video_reply.dart';
-import 'package:PiliPlus/common/utils/status_bar_tap.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/sliver/sliver_pinned_header.dart';
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
@@ -22,6 +21,7 @@ import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
+
 abstract class CommonDynPageState<T extends StatefulWidget> extends State<T>
     with SingleTickerProviderStateMixin {
   CommonDynController get controller;
@@ -44,8 +44,6 @@ abstract class CommonDynPageState<T extends StatefulWidget> extends State<T>
   late final AnimationController _fabAnimationCtr;
   late final Animation<Offset> fabAnim;
 
-  late final StatusBarTapObserver _statusBarTap;
-
   @override
   void initState() {
     super.initState();
@@ -60,21 +58,6 @@ abstract class CommonDynPageState<T extends StatefulWidget> extends State<T>
       ).chain(CurveTween(curve: Curves.easeInOut)),
     );
     scrollController = ScrollController()..addListener(listener);
-    _statusBarTap = StatusBarTapObserver(
-      scrollController: scrollController,
-      animateToTop: _animateToTop,
-    )..routeName = Get.currentRoute
-     ..register();
-  }
-
-  void _animateToTop() {
-    if (scrollController.hasClients) {
-      scrollController.animateTo(
-        0,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeOutCirc,
-      );
-    }
   }
 
   void listener() {
@@ -113,7 +96,6 @@ abstract class CommonDynPageState<T extends StatefulWidget> extends State<T>
 
   @override
   void dispose() {
-    _statusBarTap.dispose();
     scrollController
       ..removeListener(listener)
       ..dispose();
