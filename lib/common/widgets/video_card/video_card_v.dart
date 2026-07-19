@@ -21,7 +21,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:intl/intl.dart';
 
 // 视频卡片 - 垂直布局
-class VideoCardV extends StatefulWidget {
+class VideoCardV extends StatelessWidget {
   final BaseRecVideoItemModel videoItem;
   final VoidCallback? onRemove;
 
@@ -31,106 +31,142 @@ class VideoCardV extends StatefulWidget {
     this.onRemove,
   });
 
-  @override
-  State<VideoCardV> createState() => _VideoCardVState();
-
-  static final shortFormat = DateFormat('M-d');
-  static final longFormat = DateFormat('yy-M-d');
-}
-
-class _VideoCardVState extends State<VideoCardV> with AutomaticKeepAliveClientMixin  {
   Future<void> onPushDetail(String heroTag) async {
-    String? goto = widget.videoItem.goto;
+    String? goto = videoItem.goto;
     switch (goto) {
       case 'bangumi':
-        PageUtils.viewPgc(epId: widget.videoItem.param!);
+        PageUtils.viewPgc(epId: videoItem.param!);
         break;
       case 'av':
-        String bvid = widget.videoItem.bvid ?? IdUtils.av2bv(widget.videoItem.aid!);
+        String bvid = videoItem.bvid ?? IdUtils.av2bv(videoItem.aid!);
         int? cid =
-            widget.videoItem.cid ??
-            await SearchHttp.ab2c(aid: widget.videoItem.aid, bvid: bvid);
+            videoItem.cid ??
+            await SearchHttp.ab2c(aid: videoItem.aid, bvid: bvid);
         if (cid != null) {
           PageUtils.toVideoPage(
-            aid: widget.videoItem.aid,
+            aid: videoItem.aid,
             bvid: bvid,
             cid: cid,
-            cover: widget.videoItem.cover,
-            title: widget.videoItem.title,
+            cover: videoItem.cover,
+            title: videoItem.title,
           );
         }
         break;
       // 动态
       case 'picture':
         try {
-          PiliScheme.routePushFromUrl(widget.videoItem.uri!);
+          PiliScheme.routePushFromUrl(videoItem.uri!);
         } catch (err) {
           SmartDialog.showToast(err.toString());
         }
         break;
       default:
-        if (widget.videoItem.uri?.isNotEmpty == true) {
-          PiliScheme.routePushFromUrl(widget.videoItem.uri!);
+        if (videoItem.uri?.isNotEmpty == true) {
+          PiliScheme.routePushFromUrl(videoItem.uri!);
         }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     void onLongPress() => imageSaveDialog(
-      title: widget.videoItem.title,
-      cover: widget.videoItem.cover,
-      bvid: widget.videoItem.bvid,
+      title: videoItem.title,
+      cover: videoItem.cover,
+      bvid: videoItem.bvid,
     );
+    final theme = Theme.of(context);
     return Stack(
       clipBehavior: Clip.none,
       children: [
         Card(
           clipBehavior: Clip.hardEdge,
           child: InkWell(
-            onTap: () => onPushDetail(Utils.makeHeroTag(widget.videoItem.aid)),
+            onTap: () => onPushDetail(Utils.makeHeroTag(videoItem.aid)),
             onLongPress: onLongPress,
             onSecondaryTap: PlatformUtils.isMobile ? null : onLongPress,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AspectRatio(
-                  aspectRatio: StyleString.aspectRatio,
-                  child: LayoutBuilder(
-                    builder: (context, boxConstraints) {
-                      double maxWidth = boxConstraints.maxWidth;
-                      double maxHeight = boxConstraints.maxHeight;
-                      return Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          NetworkImgLayer(
-                            src: widget.videoItem.cover,
-                            width: maxWidth,
-                            height: maxHeight,
-                            borderRadius: BorderRadius.zero, // 此处应为非表情类型，且默认不需要圆角
+                _CoverBuilder(
+                  cover: videoItem.cover,
+                  duration: videoItem.duration,
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(6, 5, 6, 5),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            videoItem.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              height: 1.38,
+                            ),
                           ),
-                          if (widget.videoItem.duration > 0)
-                            PBadge(
-                              bottom: 6,
-                              right: 7,
-                              size: PBadgeSize.small,
-                              type: PBadgeType.gray,
-                              text: DurationUtils.formatDuration(
-                                widget.videoItem.duration,
+                        ),
+                        videoStat(context, theme),
+                        Row(
+                          spacing: 2,
+                          children: [
+                            if (videoItem.goto == 'bangumi')
+                              PBadge(
+                                text: videoItem.pgcBadge,
+                                isStack: false,
+                                size: PBadgeSize.small,
+                                type: PBadgeType.line_primary,
+                                fontSize: 9,
+                              ),
+                            if (videoItem.rcmdReason != null)
+                              PBadge(
+                                text: videoItem.rcmdReason,
+                                isStack: false,
+                                size: PBadgeSize.small,
+                                type: PBadgeType.secondary,
+                              ),
+                            if (videoItem.goto == 'picture')
+                              const PBadge(
+                                text: '动态',
+                                isStack: false,
+                                size: PBadgeSize.small,
+                                type: PBadgeType.line_primary,
+                                fontSize: 9,
+                              ),
+                            if (videoItem.isFollowed)
+                              const PBadge(
+                                text: '已关注',
+                                isStack: false,
+                                size: PBadgeSize.small,
+                                type: PBadgeType.secondary,
+                              ),
+                            Expanded(
+                              flex: 1,
+                              child: Text(
+                                videoItem.owner.name.toString(),
+                                maxLines: 1,
+                                overflow: TextOverflow.clip,
+                                semanticsLabel: 'UP：${videoItem.owner.name}',
+                                style: TextStyle(
+                                  height: 1.5,
+                                  fontSize: theme.textTheme.labelMedium!.fontSize,
+                                  color: theme.colorScheme.outline,
+                                ),
                               ),
                             ),
-                        ],
-                      );
-                    },
+                            if (videoItem.goto == 'av') const SizedBox(width: 10),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                content(context),
               ],
             ),
           ),
         ),
-        if (widget.videoItem.goto == 'av')
+        if (videoItem.goto == 'av')
           Positioned(
             right: -5,
             bottom: -2,
@@ -138,117 +174,44 @@ class _VideoCardVState extends State<VideoCardV> with AutomaticKeepAliveClientMi
             height: 29,
             child: VideoPopupMenu(
               iconSize: 17,
-              videoItem: widget.videoItem,
-              onRemove: widget.onRemove,
+              videoItem: videoItem,
+              onRemove: onRemove,
             ),
           ),
       ],
     );
   }
 
-  Widget content(BuildContext context) {
-    final theme = Theme.of(context);
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(6, 5, 6, 5),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Text(
-                "${widget.videoItem.title}\n",
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  height: 1.38,
-                ),
-              ),
-            ),
-            videoStat(context, theme),
-            Row(
-              spacing: 2,
-              children: [
-                if (widget.videoItem.goto == 'bangumi')
-                  PBadge(
-                    text: widget.videoItem.pgcBadge,
-                    isStack: false,
-                    size: PBadgeSize.small,
-                    type: PBadgeType.line_primary,
-                    fontSize: 9,
-                  ),
-                if (widget.videoItem.rcmdReason != null)
-                  PBadge(
-                    text: widget.videoItem.rcmdReason,
-                    isStack: false,
-                    size: PBadgeSize.small,
-                    type: PBadgeType.secondary,
-                  ),
-                if (widget.videoItem.goto == 'picture')
-                  const PBadge(
-                    text: '动态',
-                    isStack: false,
-                    size: PBadgeSize.small,
-                    type: PBadgeType.line_primary,
-                    fontSize: 9,
-                  ),
-                if (widget.videoItem.isFollowed)
-                  const PBadge(
-                    text: '已关注',
-                    isStack: false,
-                    size: PBadgeSize.small,
-                    type: PBadgeType.secondary,
-                  ),
-                Expanded(
-                  flex: 1,
-                  child: Text(
-                    widget.videoItem.owner.name.toString(),
-                    maxLines: 1,
-                    overflow: TextOverflow.clip,
-                    semanticsLabel: 'UP：${widget.videoItem.owner.name}',
-                    style: TextStyle(
-                      height: 1.5,
-                      fontSize: theme.textTheme.labelMedium!.fontSize,
-                      color: theme.colorScheme.outline,
-                    ),
-                  ),
-                ),
-                if (widget.videoItem.goto == 'av') const SizedBox(width: 10),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  static final shortFormat = DateFormat('M-d');
+  static final longFormat = DateFormat('yy-M-d');
 
   Widget videoStat(BuildContext context, ThemeData theme) {
     return Row(
       children: [
         StatWidget(
           type: StatType.play,
-          value: widget.videoItem.stat.view,
+          value: videoItem.stat.view,
         ),
-        if (widget.videoItem.goto != 'picture') ...[
+        if (videoItem.goto != 'picture') ...[
           const SizedBox(width: 4),
           StatWidget(
             type: StatType.danmaku,
-            value: widget.videoItem.stat.danmu,
+            value: videoItem.stat.danmu,
           ),
         ],
-        if (widget.videoItem is RecVideoItemModel) ...[
+        if (videoItem is RecVideoItemModel) ...[
           const Spacer(),
-          Text.rich(
+          Text(
+            DateFormatUtils.dateFormat(
+              videoItem.pubdate,
+              short: shortFormat,
+              long: longFormat,
+            ),
             maxLines: 1,
-            TextSpan(
-              style: TextStyle(
-                fontSize: theme.textTheme.labelSmall!.fontSize,
-                color: theme.colorScheme.outline.withValues(alpha: 0.8),
-              ),
-              text: DateFormatUtils.dateFormat(
-                widget.videoItem.pubdate,
-                short: VideoCardV.shortFormat,
-                long: VideoCardV.longFormat,
-              ),
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: theme.textTheme.labelSmall!.fontSize,
+              color: theme.colorScheme.outline.withValues(alpha: 0.8),
             ),
           ),
           const SizedBox(width: 2),
@@ -273,7 +236,106 @@ class _VideoCardVState extends State<VideoCardV> with AutomaticKeepAliveClientMi
       ],
     );
   }
-  
+}
+
+class _CoverBuilder extends StatelessWidget {
+  const _CoverBuilder({
+    required this.cover,
+    required this.duration,
+  });
+
+  final String? cover;
+  final int duration;
+
+  // 缓存 builder 闭包，避免每次 rebuild 产生新实例触发 scheduleLayoutCallback
+  static Widget _buildCover(
+    BuildContext context,
+    BoxConstraints constraints,
+    String? cover,
+    int duration,
+  ) {
+    final double maxWidth = constraints.maxWidth;
+    final double maxHeight = constraints.maxHeight;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        NetworkImgLayer(
+          src: cover,
+          width: maxWidth,
+          height: maxHeight,
+          borderRadius: BorderRadius.zero,
+        ),
+        if (duration > 0)
+          PBadge(
+            bottom: 6,
+            right: 7,
+            size: PBadgeSize.small,
+            type: PBadgeType.gray,
+            text: DurationUtils.formatDuration(duration),
+          ),
+      ],
+    );
+  }
+
   @override
-  bool get wantKeepAlive => true;
+  Widget build(BuildContext context) {
+    return _CachedLayoutBuilder(
+      cover: cover,
+      duration: duration,
+    );
+  }
+}
+
+class _CachedLayoutBuilder extends StatefulWidget {
+  const _CachedLayoutBuilder({
+    required this.cover,
+    required this.duration,
+  });
+
+  final String? cover;
+  final int duration;
+
+  @override
+  State<_CachedLayoutBuilder> createState() => _CachedLayoutBuilderState();
+}
+
+class _CachedLayoutBuilderState extends State<_CachedLayoutBuilder> {
+  BoxConstraints? _previousConstraints;
+  Widget? _cachedChild;
+
+  // 稳定的闭包实例，不会因父 rebuild 而改变
+  late final Widget Function(BuildContext, BoxConstraints) _builder = _build;
+
+  Widget _build(BuildContext context, BoxConstraints constraints) {
+    // 约束未变时直接返回缓存，跳过子树重建
+    if (_cachedChild != null && constraints == _previousConstraints) {
+      return _cachedChild!;
+    }
+    _previousConstraints = constraints;
+    _cachedChild = _CoverBuilder._buildCover(
+      context,
+      constraints,
+      widget.cover,
+      widget.duration,
+    );
+    return _cachedChild!;
+  }
+
+  @override
+  void didUpdateWidget(_CachedLayoutBuilder oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 数据源变化时清除缓存，强制下次重建
+    if (oldWidget.cover != widget.cover ||
+        oldWidget.duration != widget.duration) {
+      _cachedChild = null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AspectRatio(
+      aspectRatio: StyleString.aspectRatio,
+      child: LayoutBuilder(builder: _builder),
+    );
+  }
 }

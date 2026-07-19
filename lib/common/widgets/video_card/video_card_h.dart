@@ -128,67 +128,14 @@ class VideoCardH extends StatelessWidget {
                 children: <Widget>[
                   AspectRatio(
                     aspectRatio: StyleString.aspectRatio,
-                    child: LayoutBuilder(
-                      builder: (context, boxConstraints) {
-                        final double maxWidth = boxConstraints.maxWidth;
-                        final double maxHeight = boxConstraints.maxHeight;
-                        num? progress;
-                        if (videoItem case final HotVideoItemModel item) {
-                          progress = item.progress;
-                        }
-
-                        return Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            NetworkImgLayer(
-                              src: videoItem.cover,
-                              width: maxWidth,
-                              height: maxHeight,
-                            ),
-                            if (badge != null)
-                              PBadge(
-                                text: badge,
-                                top: 6.0,
-                                right: 6.0,
-                                type: switch (badge) {
-                                  '充电专属' => PBadgeType.error,
-                                  _ => PBadgeType.primary,
-                                },
-                              ),
-                            if (progress != null && progress != 0) ...[
-                              PBadge(
-                                text: progress == -1
-                                    ? '已看完'
-                                    : '${DurationUtils.formatDuration(progress)}/${DurationUtils.formatDuration(videoItem.duration)}',
-                                right: 6,
-                                bottom: 8,
-                                type: PBadgeType.gray,
-                              ),
-                              Positioned(
-                                left: 0,
-                                bottom: 0,
-                                right: 0,
-                                child: VideoProgressIndicator(
-                                  color: colorScheme.primary,
-                                  backgroundColor:
-                                      colorScheme.secondaryContainer,
-                                  progress: progress == -1
-                                      ? 1
-                                      : progress / videoItem.duration,
-                                ),
-                              ),
-                            ] else if (videoItem.duration > 0)
-                              PBadge(
-                                text: DurationUtils.formatDuration(
-                                  videoItem.duration,
-                                ),
-                                right: 6.0,
-                                bottom: 6.0,
-                                type: PBadgeType.gray,
-                              ),
-                          ],
-                        );
-                      },
+                    child: _CoverBuilderH(
+                      cover: videoItem.cover,
+                      badge: badge,
+                      duration: videoItem.duration,
+                      progress: videoItem is HotVideoItemModel
+                          ? (videoItem as HotVideoItemModel).progress
+                          : null,
+                      colorScheme: colorScheme,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -287,5 +234,105 @@ class VideoCardH extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _CoverBuilderH extends StatefulWidget {
+  const _CoverBuilderH({
+    required this.cover,
+    required this.badge,
+    required this.duration,
+    this.progress,
+    required this.colorScheme,
+  });
+
+  final String? cover;
+  final String? badge;
+  final int duration;
+  final num? progress;
+  final ColorScheme colorScheme;
+
+  @override
+  State<_CoverBuilderH> createState() => _CoverBuilderHState();
+}
+
+class _CoverBuilderHState extends State<_CoverBuilderH> {
+  BoxConstraints? _previousConstraints;
+  Widget? _cachedChild;
+
+  late final Widget Function(BuildContext, BoxConstraints) _builder = _build;
+
+  Widget _build(BuildContext context, BoxConstraints constraints) {
+    if (_cachedChild != null && constraints == _previousConstraints) {
+      return _cachedChild!;
+    }
+    _previousConstraints = constraints;
+    final double maxWidth = constraints.maxWidth;
+    final double maxHeight = constraints.maxHeight;
+    _cachedChild = Stack(
+      clipBehavior: Clip.none,
+      children: [
+        NetworkImgLayer(
+          src: widget.cover,
+          width: maxWidth,
+          height: maxHeight,
+        ),
+        if (widget.badge != null)
+          PBadge(
+            text: widget.badge,
+            top: 6.0,
+            right: 6.0,
+            type: switch (widget.badge!) {
+              '充电专属' => PBadgeType.error,
+              _ => PBadgeType.primary,
+            },
+          ),
+        if (widget.progress != null && widget.progress != 0) ...[
+          PBadge(
+            text: widget.progress == -1
+                ? '已看完'
+                : '${DurationUtils.formatDuration(widget.progress!)}/${DurationUtils.formatDuration(widget.duration)}',
+            right: 6,
+            bottom: 8,
+            type: PBadgeType.gray,
+          ),
+          Positioned(
+            left: 0,
+            bottom: 0,
+            right: 0,
+            child: VideoProgressIndicator(
+              color: widget.colorScheme.primary,
+              backgroundColor: widget.colorScheme.secondaryContainer,
+              progress: widget.progress == -1
+                  ? 1
+                  : widget.progress! / widget.duration,
+            ),
+          ),
+        ] else if (widget.duration > 0)
+          PBadge(
+            text: DurationUtils.formatDuration(widget.duration),
+            right: 6.0,
+            bottom: 6.0,
+            type: PBadgeType.gray,
+          ),
+      ],
+    );
+    return _cachedChild!;
+  }
+
+  @override
+  void didUpdateWidget(_CoverBuilderH oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.cover != widget.cover ||
+        oldWidget.badge != widget.badge ||
+        oldWidget.duration != widget.duration ||
+        oldWidget.progress != widget.progress) {
+      _cachedChild = null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: _builder);
   }
 }

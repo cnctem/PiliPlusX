@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/widgets/appbar/appbar.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
+import 'package:PiliPlus/common/widgets/cached_layout_builder.dart';
 import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
-import 'package:PiliPlus/common/widgets/flutter/layout_builder.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/select_mask.dart';
@@ -374,7 +374,7 @@ class _DownloadPageState extends State<DownloadPage> {
                 children: [
                   AspectRatio(
                     aspectRatio: StyleString.aspectRatio,
-                    child: LayoutBuilder(
+                    child: CachedLayoutBuilder(
                       builder: (context, constraints) => NetworkImgLayer(
                         src: pageInfo.cover,
                         width: constraints.maxWidth,
