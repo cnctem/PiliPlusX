@@ -637,6 +637,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             ),
           ),
           body: ExtendedNestedScrollView(
+            scrollBehavior: NoOverscrollBehavior(),
             key: videoDetailController.scrollKey,
             controller: videoDetailController.scrollCtr,
             onlyOneScrollInBody: true,
@@ -2227,5 +2228,16 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         );
       },
     );
+  }
+}
+
+class NoOverscrollBehavior extends MaterialScrollBehavior {
+  @override
+  Widget buildOverscrollIndicator(
+      BuildContext context,
+      Widget child,
+      ScrollableDetails details,
+  ) {
+    return child;
   }
 }

@@ -14,7 +14,7 @@ abstract final class CacheManager {
     try {
       final Directory tempDirectory = await getTemporaryDirectory();
       if (PlatformUtils.isDesktop) {
-        final dir = Directory('${tempDirectory.path}/libCachedImageData');
+        final dir = Directory('${tempDirectory.path}/cached_network_image_ce');
         if (dir.existsSync()) {
           return await getTotalSizeOfFilesInDir(dir, maxSize);
         }
@@ -62,7 +62,7 @@ abstract final class CacheManager {
     try {
       final Directory tempDirectory = await getTemporaryDirectory();
       if (PlatformUtils.isDesktop) {
-        final dir = Directory('${tempDirectory.path}/libCachedImageData');
+        final dir = Directory('${tempDirectory.path}/cached_network_image_ce');
         if (dir.existsSync()) {
           await dir.delete(recursive: true);
         }
