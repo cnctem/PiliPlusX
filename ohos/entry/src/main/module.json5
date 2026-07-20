@@ -18,6 +18,7 @@
         startWindowIcon: "$media:icon_startwindow",
         startWindowBackground: "$color:start_window_background",
         exported: true,
+        continuable: true,
         backgroundModes: ["audioPlayback"],
         orientation: "auto_rotation_unspecified",
         preferMultiWindowOrientation: "landscape_auto",
@@ -67,6 +68,14 @@
       },
       {
         name: "ohos.permission.VIBRATE",
+        usedScene: {
+          abilities: ["EntryAbility"],
+          when: "inuse",
+        },
+      },
+      {
+        name: "ohos.permission.DISTRIBUTED_DATASYNC",
+        reason: "$string:perm_distributed_datasync_reason",
         usedScene: {
           abilities: ["EntryAbility"],
           when: "inuse",

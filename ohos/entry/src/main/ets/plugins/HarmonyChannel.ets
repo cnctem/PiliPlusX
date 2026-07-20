@@ -1,6 +1,9 @@
+import { common } from "@kit.AbilityKit";
+import AbilityConstant from "@ohos.app.ability.AbilityConstant";
 import ConfigurationConstant from "@ohos.app.ability.ConfigurationConstant";
 import window from "@ohos.window";
 import {
+  Any,
   FlutterPlugin,
   FlutterPluginBinding,
   MethodCall,
@@ -13,6 +16,11 @@ import {
 export default class HarmonyChannel implements FlutterPlugin {
   private channel: MethodChannel | null = null;
   private lastWindow: window.Window | null = null;
+
+  /// 跨设备接续：对端 onCreate/onNewWant 收到的接续数据暂存于此，
+  /// 由 Dart 侧就绪后主动拉取（getPendingContinuation），规避冷启动时
+  /// Dart handler 尚未注册导致推送丢失的问题。
+  private pendingContinuation: string | null = null;
 
   getUniqueClassName(): string {
     return "HarmonyChannel";
@@ -58,6 +66,18 @@ export default class HarmonyChannel implements FlutterPlugin {
         result.success(true);
         break;
       }
+      case "getPendingContinuation": {
+        const data = this.pendingContinuation;
+        this.pendingContinuation = null;
+        result.success(data);
+        break;
+      }
+      case "setContinuationActive": {
+        const active: boolean = call.argument("active") ?? false;
+        this.setMissionContinueState(active);
+        result.success(true);
+        break;
+      }
       // case 'setWindowLayoutFullScreen': {
       //   this.lastWindow ??= await window.getLastWindow(getContext())
       //   this.lastWindow.setWindowLayoutFullScreen(call.argument('fullScreen'));
@@ -72,6 +92,57 @@ export default class HarmonyChannel implements FlutterPlugin {
 
   public onFloatingWindowChange(isFloatingWindow: boolean) {
     this.channel?.invokeMethod("onFloatingWindowChange", { isFloatingWindow: isFloatingWindow });
+  }
+
+  /**
+   * 源端 onContinue 时向 Dart 拉取当前播放状态（JSON 字符串），
+   * 无播放或超时返回 null。onContinue 有系统时限，超时兜底避免卡死接续流程。
+   */
+  public getContinuationState(): Promise<string | null> {
+    if (this.channel == null) {
+      return Promise.resolve(null);
+    }
+    return new Promise<string | null>((resolve) => {
+      const timer = setTimeout(() => resolve(null), 1500);
+      const callback: MethodResult = {
+        success: (result: Any) => {
+          clearTimeout(timer);
+          resolve(typeof result === "string" ? result : null);
+        },
+        error: (_code: string, _msg: string, _details: Any) => {
+          clearTimeout(timer);
+          resolve(null);
+        },
+        notImplemented: () => {
+          clearTimeout(timer);
+          resolve(null);
+        },
+      };
+      this.channel!.invokeMethod("getContinuationState", null, callback);
+    });
+  }
+
+  /**
+   * 对端收到接续数据：暂存并通知 Dart。冷启动时 Dart 尚未就绪，
+   * 通知会丢失，但 Dart 首帧后会主动拉取暂存数据。
+   */
+  public setPendingContinuation(data: string) {
+    this.pendingContinuation = data;
+    this.channel?.invokeMethod("onContinuationRestore", null);
+  }
+
+  /**
+   * 动态控制本应用在对端设备是否显示为“可接续”：仅播放器持有视频时激活，
+   * 避免用户在无播放时发起接续而失败。
+   */
+  private setMissionContinueState(active: boolean) {
+    const context = getContext() as common.UIAbilityContext;
+    const state = active
+      ? AbilityConstant.ContinueState.ACTIVE
+      : AbilityConstant.ContinueState.INACTIVE;
+    context.setMissionContinueState(state).catch((err: Object) => {
+      console.error("HarmonyChannel", `setMissionContinueState failed: ${err}`);
+    });
   }
 
   private async setMiniWindowLandscape(landscape: boolean) {

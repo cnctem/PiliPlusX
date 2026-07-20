@@ -1,4 +1,5 @@
 import 'package:PiliPlus/common/widgets/scale_app.dart';
+import 'package:PiliPlus/harmony_adapt/continuation.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/services.dart';
 import 'package:os_type/os_type.dart';
@@ -7,14 +8,61 @@ abstract class HarmonyChannel {
   static final MethodChannel _channel = const MethodChannel('harmonyChannel')
     ..setMethodCallHandler(handler);
 
-  static Future<void> handler(MethodCall call) async {
+  static Future<dynamic> handler(MethodCall call) async {
     switch (call.method) {
       case 'onFloatingWindowChange':
         onLandscapeOrMiniWindowChange(null, call.arguments['isFloatingWindow']);
         break;
+      // 源端 onContinue 拉取当前播放状态
+      case 'getContinuationState':
+        return HarmonyContinuation.currentState();
+      // 对端应用已在运行时被接续唤醒
+      case 'onContinuationRestore':
+        checkPendingContinuation();
+        break;
       default:
         break;
     }
+  }
+
+  /// 取走 ETS 侧暂存的接续数据并跳转视频页。冷启动在首帧后调用，
+  /// 热启动由 onContinuationRestore 推送触发；数据取走即清除，不会重复跳转。
+  static Future<void> checkPendingContinuation() async {
+    try {
+      final data = await _channel.invokeMethod<String>(
+        'getPendingContinuation',
+      );
+      HarmonyContinuation.restore(data);
+    } on PlatformException catch (_) {}
+  }
+
+  /// “可接续”状态按持有者管理：视频播放器/直播间/音频页/专栏页在存续期间
+  /// 持有，任一持有者存在时系统显示接续入口，全部释放后置为不可接续。
+  /// 列表保持持有顺序（最新在尾部），接续时从最近的持有者生成快照。
+  static final List<Object> _continuationOwners = [];
+
+  static List<Object> get continuationOwners => _continuationOwners;
+
+  static void holdContinuation(Object owner) {
+    if (!OS.isHarmony) return;
+    final wasEmpty = _continuationOwners.isEmpty;
+    _continuationOwners
+      ..remove(owner)
+      ..add(owner);
+    if (wasEmpty) {
+      _setContinuationActive(true);
+    }
+  }
+
+  static void releaseContinuation(Object owner) {
+    if (!OS.isHarmony) return;
+    if (_continuationOwners.remove(owner) && _continuationOwners.isEmpty) {
+      _setContinuationActive(false);
+    }
+  }
+
+  static void _setContinuationActive(bool active) {
+    _channel.invokeMethod('setContinuationActive', {'active': active});
   }
 
   /// 测试用，ai生成信息请忽略这部分更改
