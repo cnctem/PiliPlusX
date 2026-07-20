@@ -17,6 +17,7 @@ import 'package:PiliPlus/utils/num_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:super_sliver_list/super_sliver_list.dart';
@@ -298,7 +299,9 @@ class _VideoReplyReplyPanelState extends State<VideoReplyReplyPanel>
         listController: _controller.listController,
         itemBuilder: (context, index) {
           if (index == response.length) {
-            _controller.onLoadMore();
+            SchedulerBinding.instance.addPostFrameCallback(
+              (_) => _controller.onLoadMore(),
+            );
             return Container(
               height: 125,
               alignment: Alignment.center,

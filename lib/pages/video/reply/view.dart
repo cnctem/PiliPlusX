@@ -14,6 +14,7 @@ import 'package:easy_debounce/easy_throttle.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 
 class VideoReplyPanel extends StatefulWidget {
@@ -175,7 +176,9 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
             ? SliverList.builder(
                 itemBuilder: (context, index) {
                   if (index == response.length) {
-                    _videoReplyController.onLoadMore();
+                    SchedulerBinding.instance.addPostFrameCallback(
+                      (_) => _videoReplyController.onLoadMore(),
+                    );
                     return Container(
                       height: 125,
                       alignment: Alignment.center,
