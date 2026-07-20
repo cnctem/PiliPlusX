@@ -1,10 +1,9 @@
 ﻿import 'dart:async';
-import 'dart:math';
 
 import 'package:PiliPlus/common/widgets/avatars.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
+import 'package:PiliPlus/common/widgets/cached_layout_builder.dart';
 import 'package:PiliPlus/common/widgets/dialog/report.dart';
-import 'package:PiliPlus/common/widgets/flutter/layout_builder.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/http/dynamics.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -335,7 +334,7 @@ class _VotePanelState extends State<VotePanel> {
                   children: [
                     AspectRatio(
                       aspectRatio: 1,
-                      child: LayoutBuilder(
+                      child: CachedLayoutBuilder(
                         builder: (context, constraints) => NetworkImgLayer(
                           src: opt.imgUrl,
                           width: constraints.maxWidth,

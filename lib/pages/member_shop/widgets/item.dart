@@ -1,5 +1,5 @@
 import 'package:PiliPlus/common/widgets/badge.dart';
-import 'package:PiliPlus/common/widgets/flutter/layout_builder.dart';
+import 'package:PiliPlus/common/widgets/cached_layout_builder.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/models/common/badge_type.dart';
 import 'package:PiliPlus/models_new/space/space_shop/item.dart';
@@ -33,7 +33,7 @@ class MemberShopItem extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            LayoutBuilder(
+            CachedLayoutBuilder(
               builder: (context, constraints) => NetworkImgLayer(
                 type: .emote,
                 src: item.cover?.url,

@@ -8,6 +8,7 @@ import 'package:PiliPlus/pages/rcmd/controller.dart';
 import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:os_type/os_type.dart';
 
@@ -21,6 +22,28 @@ class RcmdPage extends StatefulWidget {
 class _RcmdPageState extends State<RcmdPage>
     with AutomaticKeepAliveClientMixin {
   final RcmdController controller = Get.put(RcmdController());
+
+  @override
+  void initState() {
+    super.initState();
+    controller.scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (!controller.scrollController.hasClients || controller.isLoading) return;
+    final position = controller.scrollController.position;
+    if (position.pixels >= position.maxScrollExtent - 1000) {
+      SchedulerBinding.instance.addPostFrameCallback(
+        (_) => controller.onLoadMore(),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    controller.scrollController.removeListener(_onScroll);
+    super.dispose();
+  }
 
   @override
   bool get wantKeepAlive => true;
@@ -37,6 +60,7 @@ class _RcmdPageState extends State<RcmdPage>
         child: CustomScrollView(
           controller: controller.scrollController,
           physics: const AlwaysScrollableScrollPhysics(),
+          cacheExtent: 800,
           slivers: [
             SliverPadding(
               padding: const .only(top: StyleString.cardSpace, bottom: 100),
@@ -64,9 +88,6 @@ class _RcmdPageState extends State<RcmdPage>
             ? SliverGrid.builder(
                 gridDelegate: gridDelegate,
                 itemBuilder: (context, index) {
-                  if (index == response.length - 1) {
-                    controller.onLoadMore();
-                  }
                   if (controller.lastRefreshAt != null) {
                     if (controller.lastRefreshAt == index) {
                       return GestureDetector(
@@ -93,8 +114,12 @@ class _RcmdPageState extends State<RcmdPage>
                     final actualIndex = index > controller.lastRefreshAt!
                         ? index - 1
                         : index;
+                    final item = response[actualIndex];
                     return VideoCardV(
-                      videoItem: response[actualIndex],
+                      key: ValueKey(
+                        '${item.goto}_${item.bvid ?? item.param ?? item.uri}',
+                      ),
+                      videoItem: item,
                       onRemove: () {
                         if (controller.lastRefreshAt != null &&
                             actualIndex < controller.lastRefreshAt!) {
@@ -102,15 +127,19 @@ class _RcmdPageState extends State<RcmdPage>
                               controller.lastRefreshAt! - 1;
                         }
                         controller.loadingState
-                          ..value.data!.removeAt(actualIndex)
+                          ..value.data!.remove(item)
                           ..refresh();
                       },
                     );
                   } else {
+                    final item = response[index];
                     return VideoCardV(
-                      videoItem: response[index],
+                      key: ValueKey(
+                        '${item.goto}_${item.bvid ?? item.param ?? item.uri}',
+                      ),
+                      videoItem: item,
                       onRemove: () => controller.loadingState
-                        ..value.data!.removeAt(index)
+                        ..value.data!.remove(item)
                         ..refresh(),
                     );
                   }
