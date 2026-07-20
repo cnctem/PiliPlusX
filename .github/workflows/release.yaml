@@ -24,8 +24,6 @@ jobs:
     steps:
       - name: Maximize build disk space
         uses: easimon/maximize-build-space@v10
-        with:
-          remove-dotnet: 'true'
       - name: Clone repository
         uses: actions/checkout@v4
         with:
