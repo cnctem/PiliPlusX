@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/grpc/audio.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/grpc/bilibili/app/listener/v1.pb.dart'
     show
         DetailItem,
@@ -62,6 +63,8 @@ class AudioController extends GetxController
   final audioItem = Rxn<DetailItem>();
 
   bool _hasInit = false;
+  // 首次拉起媒体是否自动播放（跨设备接续恢复暂停状态时为 false）
+  bool _autoplayOnOpen = true;
   @override
   Player? player;
   late int cacheAudioQa;
@@ -112,6 +115,8 @@ class AudioController extends GetxController
         _videoDetailController = Get.find<VideoDetailController>(tag: heroTag);
       } catch (_) {}
     }
+    _autoplayOnOpen = args['autoplay'] ?? true;
+    HarmonyChannel.holdContinuation(this);
 
     _queryPlayList(isInit: true);
 
@@ -289,7 +294,9 @@ class AudioController extends GetxController
           'referer': ?referer,
         },
       ),
+      play: _autoplayOnOpen,
     );
+    _autoplayOnOpen = true;
     _start = null;
   }
 
@@ -768,6 +775,7 @@ class AudioController extends GetxController
 
   @override
   void onClose() {
+    HarmonyChannel.releaseContinuation(this);
     shutdownTimerService
       ..onPause = null
       ..isPlaying = null

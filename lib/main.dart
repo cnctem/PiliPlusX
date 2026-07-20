@@ -6,6 +6,7 @@ import 'package:PiliPlus/common/widgets/back_detector.dart';
 import 'package:PiliPlus/common/widgets/custom_toast.dart';
 import 'package:PiliPlus/common/widgets/scale_app.dart';
 import 'package:PiliPlus/common/widgets/scroll_behavior.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/models/common/theme/theme_color_type.dart';
 import 'package:PiliPlus/router/app_pages.dart';
@@ -236,6 +237,14 @@ void main() async {
     );
   } else {
     runApp(const MyApp());
+  }
+
+  if (OS.isHarmony) {
+    // 本次启动若由跨设备接续拉起，首帧后取回接续数据并跳转视频页；
+    // 顺带注册 method channel handler，保证热启动接续推送可达
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      HarmonyChannel.checkPendingContinuation();
+    });
   }
 }
 
