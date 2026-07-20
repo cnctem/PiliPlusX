@@ -27,7 +27,7 @@ abstract final class StyleString {
 
 abstract final class Constants {
   static const appName = 'PiliPlus';
-  static const sourceCodeUrl = 'https://github.com/qinshah/PiliPlus';
+  static const sourceCodeUrl = 'https://github.com/dev4harmony/PiliPlus';
 
   // 27eb53fc9058f8c3  移动端 Android
   // 4409e2ce8ffd12b8  HD版

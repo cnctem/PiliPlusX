@@ -10,7 +10,7 @@ body:
       options:
         - label: 这是此鸿蒙版上出现的Bug，上游(如安卓版本)无此Bug
           required: true
-        - label: 搜索了 [历史 issue](https://github.com/qinshah/PiliPlus/issues?q=is%3Aissue) ，并未发现相同问题
+        - label: 搜索了 [历史 issue](https://github.com/dev4harmony/PiliPlus/issues?q=is%3Aissue) ，并未发现相同问题
           required: true
         - label: 正在使用最新版本。
           required: true
