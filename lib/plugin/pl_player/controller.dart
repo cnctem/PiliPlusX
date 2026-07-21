@@ -4,10 +4,8 @@ import 'dart:io' show Platform;
 import 'dart:math' show max, min;
 import 'dart:ui' as ui;
 
-import 'package:PiliPlus/common/constants.dart';
+import 'package:PiliPlus/common/assets.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
-import 'package:PiliPlus/http/browser_ua.dart';
-import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/video.dart';
 import 'package:PiliPlus/media_kit_adapt/media_kit_adapt.dart';
@@ -36,6 +34,7 @@ import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/asset_utils.dart';
 import 'package:PiliPlus/utils/extension/box_ext.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
+import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
@@ -850,51 +849,38 @@ class PlPlayerController with BlockConfigMixin {
           audioUri,
         );
       }
-    } else {
-      // 修复 Bug：从视频页返回直播间后，声音变成刚才视频的声音。
-      // 原因：当前版本改用 NativePlayer.setProperty 直接设置 audio-files，
-      // 该属性会持久化在复用的 Player 实例上；而 2.0.1 及之前版本是通过
-      // Media.extras 传入 audio-files，每次 player.open 都会随新 Media 重置。
-      // 当切换到无单独音频源的内容（如直播、关闭听视频）时，必须主动清空
-      // audio-files，否则旧视频的外部音轨会继续播放，导致画面与声音不一致。
-      player.platform!.maybeAsNativePlayer.setProperty('audio-files', '');
+      if (kDebugMode || Platform.isAndroid) {
+        String audioNormalization = AudioNormalization.getParamFromConfig(
+          Pref.audioNormalization,
+        );
+        if (volume != null && volume.isNotEmpty) {
+          audioNormalization = audioNormalization.replaceFirstMapped(
+            loudnormRegExp,
+            (i) =>
+                'loudnorm=${volume.format(
+                  Map.fromEntries(
+                    i.group(1)!.split(':').map((item) {
+                      final parts = item.split('=');
+                      return MapEntry(parts[0].toLowerCase(), num.parse(parts[1]));
+                    }),
+                  ),
+                )}',
+          );
+        } else {
+          audioNormalization = audioNormalization.replaceFirst(
+            loudnormRegExp,
+            AudioNormalization.getParamFromConfig(Pref.fallbackNormalization),
+          );
+        }
+        if (audioNormalization.isNotEmpty) {
+          extras['lavfi-complex'] = '"[aid1] $audioNormalization [ao]"';
+        }
+      }
     }
 
-    if (kDebugMode || Platform.isAndroid) {
-      String audioNormalization = AudioNormalization.getParamFromConfig(
-        Pref.audioNormalization,
-      );
-      if (volume != null && volume.isNotEmpty) {
-        audioNormalization = audioNormalization.replaceFirstMapped(
-          loudnormRegExp,
-          (i) =>
-              'loudnorm=${volume.format(
-                Map.fromEntries(
-                  i.group(1)!.split(':').map((item) {
-                    final parts = item.split('=');
-                    return MapEntry(parts[0].toLowerCase(), num.parse(parts[1]));
-                  }),
-                ),
-              )}',
-        );
-      } else {
-        audioNormalization = audioNormalization.replaceFirst(
-          loudnormRegExp,
-          AudioNormalization.getParamFromConfig(Pref.fallbackNormalization),
-        );
-      }
-      if (audioNormalization.isNotEmpty) {
-        extras['lavfi-complex'] = '"[aid1] $audioNormalization [ao]"';
-      }
-    }
-    if (dataSource is FileSource) video = 'file://$video';
     await player.open(
       Media(
         video,
-        httpHeaders: {
-          'user-agent': BrowserUa.pc,
-          'referer': HttpString.baseUrl,
-        },
         start: seekTo,
         extras: extras.isEmpty ? null : extras,
       ),
@@ -902,7 +888,7 @@ class PlPlayerController with BlockConfigMixin {
     );
   }
 
-  Future<void>? refreshPlayer() {
+  Future<bool?> refreshPlayer() async {
     if (dataSource is FileSource) {
       return null;
     }

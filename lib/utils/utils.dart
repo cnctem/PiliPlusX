@@ -84,6 +84,10 @@ abstract final class Utils {
       0xFF000000 | int.parse(color.substring(1), radix: 16);
 
   static Color parseColor(String color) => Color(parseColorInt(color));
+  
+  static Color parseMedalColor(String color) => Color(
+    int.parse('${color.substring(7)}${color.substring(1, 7)}', radix: 16),
+  );
 
   static int? _sdkInt;
   static Future<int> get sdkInt async {
