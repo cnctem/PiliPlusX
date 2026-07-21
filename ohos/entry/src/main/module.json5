@@ -27,6 +27,45 @@
             entities: ["entity.system.home"],
             actions: ["action.system.home"],
           },
+          {
+            actions: ["ohos.want.action.viewData"],
+            entities: ["entity.system.default"],
+            uris: [
+              {
+                scheme: "bilibili",
+              },
+            ],
+          },
+          {
+            actions: ["ohos.want.action.viewData"],
+            entities: ["entity.system.default"],
+            uris: [
+              {
+                scheme: "https",
+                host: "bilibili.com",
+              },
+              {
+                scheme: "https",
+                host: "www.bilibili.com",
+              },
+              {
+                scheme: "https",
+                host: "b23.tv",
+              },
+              {
+                scheme: "http",
+                host: "bilibili.com",
+              },
+              {
+                scheme: "http",
+                host: "www.bilibili.com",
+              },
+              {
+                scheme: "http",
+                host: "b23.tv",
+              },
+            ],
+          },
         ],
       },
     ],
