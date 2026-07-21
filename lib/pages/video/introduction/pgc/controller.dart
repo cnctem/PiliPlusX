@@ -63,6 +63,10 @@ class PgcIntroController extends CommonIntroController {
 
     super.onInit();
 
+    // 注册播控中心上一集/下一集回调
+    videoPlayerServiceHandler?.onSkipToPrevious = () async => prevPlay();
+    videoPlayerServiceHandler?.onSkipToNext = () async => nextPlay();
+
     if (isPgc) {
       if (isLogin) {
         queryIsFollowed();
