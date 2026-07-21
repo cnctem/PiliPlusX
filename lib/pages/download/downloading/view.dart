@@ -1,5 +1,6 @@
 import 'package:PiliPlus/common/widgets/appbar/appbar.dart';
 import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
+import 'package:PiliPlus/common/widgets/flutter/pop_scope.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/view_sliver_safe_area.dart';
 import 'package:PiliPlus/models_new/download/bili_download_entry_info.dart';
@@ -33,7 +34,7 @@ class _DownloadingPageState extends State<DownloadingPage>
   Widget build(BuildContext context) {
     return Obx(() {
       final enableMultiSelect = this.enableMultiSelect.value;
-      return PopScope(
+      return popScope(
         canPop: !enableMultiSelect,
         onPopInvokedWithResult: (didPop, result) {
           if (enableMultiSelect) {
@@ -108,7 +109,7 @@ class _DownloadingPageState extends State<DownloadingPage>
   void onRemove() {
     showConfirmDialog(
       context: context,
-      title: '确定删除选中视频？',
+      title: const Text('确定删除选中视频？'),
       onConfirm: () async {
         SmartDialog.showLoading();
         final allChecked = this.allChecked.toSet();

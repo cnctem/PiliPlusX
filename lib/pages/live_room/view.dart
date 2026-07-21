@@ -2,14 +2,17 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:PiliPlus/common/constants.dart';
+import 'package:PiliPlus/common/assets.dart';
+import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/button/icon_button.dart';
 import 'package:PiliPlus/common/widgets/custom_icon.dart';
 import 'package:PiliPlus/common/widgets/flutter/page/page_view.dart';
+import 'package:PiliPlus/common/widgets/flutter/pop_scope.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
 import 'package:PiliPlus/common/widgets/gesture/horizontal_drag_gesture_recognizer.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/keep_alive_wrapper.dart';
+import 'package:PiliPlus/common/widgets/route_aware_mixin.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/models/common/image_type.dart';
@@ -35,6 +38,7 @@ import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/size_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
+import 'package:PiliPlus/utils/mobile_observer.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
@@ -58,7 +62,7 @@ class LiveRoomPage extends StatefulWidget {
 }
 
 class _LiveRoomPageState extends State<LiveRoomPage>
-    with WidgetsBindingObserver, RouteAware {
+    with WidgetsBindingObserver, RouteAware, RouteAwareMixin {
   final String heroTag = Utils.generateRandomString(6);
   late final LiveRoomController _liveRoomController;
   late final PlPlayerController plPlayerController;
@@ -94,10 +98,6 @@ class _LiveRoomPageState extends State<LiveRoomPage>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    PageUtils.routeObserver.subscribe(
-      this,
-      ModalRoute.of(context)! as PageRoute,
-    );
     padding = MediaQuery.viewPaddingOf(context);
     final size = MediaQuery.sizeOf(context);
     maxWidth = size.width;
@@ -163,7 +163,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
 
   @override
   void dispose() {
-    _pipModeWorker?.dispose();
+    removeObserverMobile(this);
     videoPlayerServiceHandler?.onVideoDetailDispose(heroTag);
     HarmonyChannel.releaseDecorDark(this);
     WidgetsBinding.instance.removeObserver(this);
@@ -174,7 +174,6 @@ class _LiveRoomPageState extends State<LiveRoomPage>
     plPlayerController
       ..removeStatusLister(playerListener)
       ..dispose();
-    PageUtils.routeObserver.unsubscribe(this);
     for (final e in LiveContributionRankType.values) {
       Get.delete<ContributionRankController>(
         tag: '${_liveRoomController.roomId}${e.name}',
@@ -367,7 +366,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
         ],
       );
     }
-    return PopScope(
+    return popScope(
       canPop: !isFullScreen && !plPlayerController.isDesktopPip,
       onPopInvokedWithResult: plPlayerController.onPopInvokedWithResult,
       child: player,
@@ -401,7 +400,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
                   );
                 } else {
                   child = Image.asset(
-                    'assets/images/live/default_bg.webp',
+                    Assets.livingBackground,
                     fit: BoxFit.cover,
                     width: maxWidth,
                     height: maxHeight,
@@ -434,7 +433,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
   }
 
   Widget _buildPH(bool isFullScreen) {
-    final height = maxWidth / StyleString.aspectRatio16x9;
+    final height = maxWidth / Style.aspectRatio16x9;
     final videoHeight = isFullScreen ? maxHeight - padding.top : height;
     final bottomHeight = maxHeight - padding.top - height - kToolbarHeight;
     return Column(
@@ -746,7 +745,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
               horizontalDragGestureRecognizer:
                   CustomHorizontalDragGestureRecognizer.new,
               children: [
-                KeepAliveWrapper(builder: (context) => chat()),
+                KeepAliveWrapper(child: chat()),
                 SuperChatPanel(
                   key: scKey,
                   controller: _liveRoomController,
