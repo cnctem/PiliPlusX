@@ -127,7 +127,7 @@ class VideoCardH extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   AspectRatio(
-                    aspectRatio: StyleString.aspectRatio,
+                    aspectRatio: Style.aspectRatio,
                     child: _CoverBuilderH(
                       cover: videoItem.cover,
                       badge: badge,

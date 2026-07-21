@@ -64,7 +64,7 @@ class MemberFavItem extends StatelessWidget {
                 clipBehavior: Clip.none,
                 children: [
                   AspectRatio(
-                    aspectRatio: StyleString.aspectRatio,
+                    aspectRatio: Style.aspectRatio,
                     child: CachedLayoutBuilder(
                       builder: (context, constraints) => NetworkImgLayer(
                         src: item.cover,

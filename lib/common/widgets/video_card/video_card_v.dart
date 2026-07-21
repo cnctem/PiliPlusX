@@ -334,7 +334,7 @@ class _CachedLayoutBuilderState extends State<_CachedLayoutBuilder> {
   @override
   Widget build(BuildContext context) {
     return AspectRatio(
-      aspectRatio: StyleString.aspectRatio,
+      aspectRatio: Style.aspectRatio,
       child: LayoutBuilder(builder: _builder),
     );
   }

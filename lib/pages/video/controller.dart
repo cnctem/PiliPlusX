@@ -269,6 +269,8 @@ class VideoDetailController extends GetxController
     }
   }
 
+  bool imageview = false;
+  
   final isLoginVideo = Accounts.get(AccountType.video).isLogin;
 
   late final watchProgress = GStorage.watchProgress;
