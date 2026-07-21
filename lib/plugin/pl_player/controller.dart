@@ -4,7 +4,7 @@ import 'dart:io' show Platform;
 import 'dart:math' show max, min;
 import 'dart:ui' as ui;
 
-import 'package:PiliPlus/common/constants.dart';
+import 'package:PiliPlus/common/assets.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/http/browser_ua.dart';
 import 'package:PiliPlus/http/constants.dart';
@@ -56,7 +56,7 @@ import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:flutter_volume_controller/flutter_volume_controller.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:os_type/os_type.dart';
@@ -414,7 +414,7 @@ class PlPlayerController with BlockConfigMixin {
   late final showFsLockBtn = Pref.showFsLockBtn;
   late final keyboardControl = Pref.keyboardControl;
 
-  late final bool _autoEnterFullScreen = Pref.autoEnterFullScreen;
+  late final bool autoEnterFullScreen = Pref.autoEnterFullScreen;
   late final bool autoExitFullscreen = Pref.autoExitFullscreen;
   late final bool autoPlayEnable = Pref.autoPlayEnable;
   late final bool enableVerticalExpand = Pref.enableVerticalExpand;
@@ -685,7 +685,7 @@ class PlPlayerController with BlockConfigMixin {
       // 数据加载完成
       dataStatus.value = DataStatus.loaded;
 
-      if (autoFullScreenFlag && _autoEnterFullScreen) {
+      if (autoFullScreenFlag && autoEnterFullScreen) {
         triggerFullScreen(status: true);
       }
 
@@ -710,7 +710,7 @@ class PlPlayerController with BlockConfigMixin {
 
     return shadersDirPath = await AssetUtils.getOrCopy(
       'assets/shaders',
-      Constants.mpvAnime4KShaders.followedBy(Constants.mpvAnime4KShadersLite),
+      Assets.mpvAnime4KShaders.followedBy(Assets.mpvAnime4KShadersLite),
       path.join(appSupportDirPath, 'anime_shaders'),
     );
   }
@@ -740,7 +740,7 @@ class PlPlayerController with BlockConfigMixin {
           'set',
           PathUtils.buildShadersAbsolutePath(
             await copyShadersToExternalDirectory,
-            Constants.mpvAnime4KShadersLite,
+            Assets.mpvAnime4KShadersLite,
           ),
         ]);
       case SuperResolutionType.quality:
@@ -750,7 +750,7 @@ class PlPlayerController with BlockConfigMixin {
           'set',
           PathUtils.buildShadersAbsolutePath(
             await copyShadersToExternalDirectory,
-            Constants.mpvAnime4KShaders,
+            Assets.mpvAnime4KShaders,
           ),
         ]);
     }
@@ -830,9 +830,10 @@ class PlPlayerController with BlockConfigMixin {
         return;
       }
       _videoPlayerController = player;
+      if (isAnim && superResolutionType.value != .disable) {
+        await setShader();
+      }
     }
-
-    if (isAnim) await setShader();
 
     final Map<String, String> extras = {};
 
@@ -850,44 +851,35 @@ class PlPlayerController with BlockConfigMixin {
           audioUri,
         );
       }
-    } else {
-      // 修复 Bug：从视频页返回直播间后，声音变成刚才视频的声音。
-      // 原因：当前版本改用 NativePlayer.setProperty 直接设置 audio-files，
-      // 该属性会持久化在复用的 Player 实例上；而 2.0.1 及之前版本是通过
-      // Media.extras 传入 audio-files，每次 player.open 都会随新 Media 重置。
-      // 当切换到无单独音频源的内容（如直播、关闭听视频）时，必须主动清空
-      // audio-files，否则旧视频的外部音轨会继续播放，导致画面与声音不一致。
-      player.platform!.maybeAsNativePlayer.setProperty('audio-files', '');
+      if (kDebugMode || Platform.isAndroid) {
+        String audioNormalization = AudioNormalization.getParamFromConfig(
+          Pref.audioNormalization,
+        );
+        if (volume != null && volume.isNotEmpty) {
+          audioNormalization = audioNormalization.replaceFirstMapped(
+            loudnormRegExp,
+            (i) =>
+                'loudnorm=${volume.format(
+                  Map.fromEntries(
+                    i.group(1)!.split(':').map((item) {
+                      final parts = item.split('=');
+                      return MapEntry(parts[0].toLowerCase(), num.parse(parts[1]));
+                    }),
+                  ),
+                )}',
+          );
+        } else {
+          audioNormalization = audioNormalization.replaceFirst(
+            loudnormRegExp,
+            AudioNormalization.getParamFromConfig(Pref.fallbackNormalization),
+          );
+        }
+        if (audioNormalization.isNotEmpty) {
+          extras['lavfi-complex'] = '"[aid1] $audioNormalization [ao]"';
+        }
+      }
     }
 
-    if (kDebugMode || Platform.isAndroid) {
-      String audioNormalization = AudioNormalization.getParamFromConfig(
-        Pref.audioNormalization,
-      );
-      if (volume != null && volume.isNotEmpty) {
-        audioNormalization = audioNormalization.replaceFirstMapped(
-          loudnormRegExp,
-          (i) =>
-              'loudnorm=${volume.format(
-                Map.fromEntries(
-                  i.group(1)!.split(':').map((item) {
-                    final parts = item.split('=');
-                    return MapEntry(parts[0].toLowerCase(), num.parse(parts[1]));
-                  }),
-                ),
-              )}',
-        );
-      } else {
-        audioNormalization = audioNormalization.replaceFirst(
-          loudnormRegExp,
-          AudioNormalization.getParamFromConfig(Pref.fallbackNormalization),
-        );
-      }
-      if (audioNormalization.isNotEmpty) {
-        extras['lavfi-complex'] = '"[aid1] $audioNormalization [ao]"';
-      }
-    }
-    if (dataSource is FileSource) video = 'file://$video';
     await player.open(
       Media(
         video,
@@ -902,9 +894,9 @@ class PlPlayerController with BlockConfigMixin {
     );
   }
 
-  Future<bool> refreshPlayer() async {
+  Future<bool?> refreshPlayer() async {
     if (dataSource is FileSource) {
-      return true;
+      return null;
     }
     if (_videoPlayerController == null) {
       // SmartDialog.showToast('视频播放器为空，请重新进入本页面');
@@ -1116,7 +1108,7 @@ class PlPlayerController with BlockConfigMixin {
             'controllerStream.error.listen',
             const Duration(milliseconds: 10000),
             () {
-              Future.delayed(const Duration(milliseconds: 3000), () async {
+              Future.delayed(const Duration(milliseconds: 3000), () {
                 // if (kDebugMode) {
                 //   debugPrint("isBuffering.value: ${isBuffering.value}");
                 // }
@@ -1128,9 +1120,7 @@ class PlPlayerController with BlockConfigMixin {
                     '视频链接打开失败，重试中',
                     displayTime: const Duration(milliseconds: 500),
                   );
-                  if (!await refreshPlayer()) {
-                    if (kDebugMode) debugPrint("failed");
-                  }
+                  refreshPlayer();
                 }
               });
             },
@@ -1144,7 +1134,8 @@ class PlPlayerController with BlockConfigMixin {
               event.startsWith("Can not open")) {
             return;
           }
-          SmartDialog.showToast('视频加载错误, $event');
+          Utils.reportError(event);
+          // SmartDialog.showToast('视频加载错误, $event');
         }
       }),
       // controllerStream.volume.listen((event) {

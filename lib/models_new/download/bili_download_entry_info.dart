@@ -13,7 +13,7 @@ import 'package:share_plus/share_plus.dart';
 
 class BiliDownloadEntryInfo with MultiSelectData {
   int mediaType;
-  final bool hasDashAudio;
+  bool hasDashAudio;
   bool isCompleted;
   int totalBytes;
   int downloadedBytes;

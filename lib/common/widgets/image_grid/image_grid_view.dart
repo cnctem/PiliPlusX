@@ -17,7 +17,8 @@
 
 import 'dart:io' show Platform;
 
-import 'package:PiliPlus/common/constants.dart';
+import 'package:PiliPlus/common/assets.dart';
+import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/image_grid/image_grid_builder.dart';
@@ -33,7 +34,7 @@ import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/get_navigation.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 
 class ImageModel {
   ImageModel({
@@ -53,8 +54,7 @@ class ImageModel {
   bool? _isLongPic;
   bool? _isLivePhoto;
 
-  bool get isLongPic =>
-      _isLongPic ??= (height / width) > StyleString.imgMaxRatio;
+  bool get isLongPic => _isLongPic ??= (height / width) > Style.imgMaxRatio;
   bool get isLivePhoto =>
       _isLivePhoto ??= enableLivePhoto && liveUrl?.isNotEmpty == true;
 
@@ -74,14 +74,14 @@ class ImageGridView extends StatelessWidget {
   final bool fullScreen;
 
   static bool horizontalPreview = Pref.horizontalPreview;
-  static const _routes = ['/videoV', '/dynamicDetail'];
+  static final _regex = RegExp(r'/videoV|/dynamicDetail$|/articlePage');
 
   void _onTap(BuildContext context, int index) {
     final imgList = picArr.map(
       (item) {
         bool isLive = item.isLivePhoto;
         return SourceModel(
-          sourceType: isLive ? SourceType.livePhoto : SourceType.networkImage,
+          sourceType: isLive ? .livePhoto : .networkImage,
           url: item.url,
           liveUrl: isLive ? item.liveUrl : null,
           width: isLive ? item.width.toInt() : null,
@@ -92,7 +92,7 @@ class ImageGridView extends StatelessWidget {
     ).toList();
     if (horizontalPreview &&
         !fullScreen &&
-        _routes.contains(Get.currentRoute) &&
+        Get.currentRoute.startsWith(_regex) &&
         !context.mediaQuerySize.isPortrait) {
       final scaffoldState = Scaffold.maybeOf(context);
       if (scaffoldState != null) {
@@ -108,6 +108,7 @@ class ImageGridView extends StatelessWidget {
     PageUtils.imageView(
       initialPage: index,
       imgList: imgList,
+      tag: hashCode.toString(),
     );
   }
 
@@ -115,9 +116,9 @@ class ImageGridView extends StatelessWidget {
     int col,
     int length,
     int index, {
-    Radius r = StyleString.imgRadius,
+    Radius r = Style.imgRadius,
   }) {
-    if (length == 1) return StyleString.mdRadius;
+    if (length == 1) return Style.mdRadius;
 
     final bool hasUp = index - col >= 0;
     final bool hasDown = index + col < length;
@@ -212,7 +213,7 @@ class ImageGridView extends StatelessWidget {
               ).colorScheme.onInverseSurface.withValues(alpha: 0.4),
             ),
             child: Image.asset(
-              'assets/images/loading.png',
+              Assets.loading,
               width: width,
               height: height,
               cacheWidth: width.cacheSize(context),
@@ -255,7 +256,7 @@ class ImageGridView extends StatelessWidget {
             );
             if (!item.isLongPic) {
               child = Hero(
-                tag: item.url,
+                tag: '${item.url}$hashCode',
                 child: child,
               );
             }
