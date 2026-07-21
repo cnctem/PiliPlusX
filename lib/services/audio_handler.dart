@@ -46,6 +46,8 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
   Future<void>? Function()? onPlay;
   Future<void>? Function()? onPause;
   Future<void>? Function(Duration position)? onSeek;
+  Future<bool>? Function()? onSkipToNext;
+  Future<bool>? Function()? onSkipToPrevious;
 
   @override
   Future<void> play() {
@@ -71,6 +73,16 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
     return (onSeek?.call(position) ??
         PlPlayerController.seekToIfExists(position, isSeek: false));
     // await player.seekTo(position);
+  }
+
+  @override
+  Future<void> skipToNext() async {
+    await onSkipToNext?.call();
+  }
+
+  @override
+  Future<void> skipToPrevious() async {
+    await onSkipToPrevious?.call();
   }
 
   void setMediaItem(MediaItem newMediaItem) {
@@ -115,7 +127,15 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
             MediaControl.rewind.copyWith(
               androidIcon: 'drawable/ic_baseline_replay_10_24',
             ),
+          if (!isLive)
+            MediaControl.skipToPrevious.copyWith(
+              androidIcon: 'drawable/ic_skip_previous',
+            ),
           if (playing) MediaControl.pause else MediaControl.play,
+          if (!isLive)
+            MediaControl.skipToNext.copyWith(
+              androidIcon: 'drawable/ic_skip_next',
+            ),
           if (!isLive)
             MediaControl.fastForward.copyWith(
               androidIcon: 'drawable/ic_baseline_forward_10_24',
@@ -124,6 +144,8 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
         playing: playing,
         systemActions: const {
           MediaAction.seek,
+          MediaAction.skipToNext,
+          MediaAction.skipToPrevious,
         },
       ),
     );
