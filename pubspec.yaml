@@ -249,21 +249,21 @@ dependencies:
   battery_plus_ohos: "0.0.3"
   material_new_shapes: ^1.0.0
 
-  vector_math: "2.2.0"
-  fixnum: "1.1.1"
-  json_annotation: "4.12.0"
-  stream_transform: "2.1.1"
-  screen_brightness: "2.1.11"
-  screen_brightness_platform_interface: "2.1.2"
-  mime: "2.0.0"
-  path: "1.9.1"
-  collection: "1.19.1"
-  material_color_utilities: "0.13.0"
-  flutter_cache_manager: "3.4.1"
-  http2: "2.3.1"
-  screen_retriever: "0.2.1"
-  characters: "1.4.1"
-  cached_network_image_ce: "4.6.4"
+  vector_math: any
+  fixnum: any
+  json_annotation: any
+  stream_transform: any
+  screen_brightness: ^2.1.7
+  screen_brightness_platform_interface: ^2.1.0
+  mime: any
+  path: any
+  collection: any
+  material_color_utilities: any
+  flutter_cache_manager: any
+  http2: any
+  screen_retriever: any
+  characters: any
+  cached_network_image_ce: any
 
 dependency_overrides:
   meta: "1.18.3" # 兼容液态玻璃
@@ -348,16 +348,6 @@ dependency_overrides:
       url: https://github.com/My-Responsitories/media-kit.git
       path: libs/windows/media_kit_libs_windows_video
       ref: version_1.2.5
-  media_kit_libs_ios_video:
-    git:
-      url: https://github.com/bggRGjQaUbCoE/media-kit.git
-      path: libs/ios/media_kit_libs_ios_video
-      ref: dev
-  media_kit_libs_macos_video:
-    git:
-      url: https://github.com/bggRGjQaUbCoE/media-kit.git
-      path: libs/macos/media_kit_libs_macos_video
-      ref: dev
   font_awesome_flutter: 10.9.0
   image_picker:
     git:
