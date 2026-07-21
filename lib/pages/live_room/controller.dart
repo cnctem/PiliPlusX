@@ -13,6 +13,7 @@ import 'package:PiliPlus/models/model_owner.dart';
 import 'package:PiliPlus/models_new/live/live_danmaku/danmaku_msg.dart';
 import 'package:PiliPlus/models_new/live/live_danmaku/live_emote.dart';
 import 'package:PiliPlus/models_new/live/live_dm_info/data.dart';
+import 'package:PiliPlus/models_new/live/live_medal_wall/uinfo_medal.dart';
 import 'package:PiliPlus/models_new/live/live_room_info_h5/data.dart';
 import 'package:PiliPlus/models_new/live/live_room_play_info/codec.dart';
 import 'package:PiliPlus/models_new/live/live_superchat/item.dart';
@@ -31,6 +32,7 @@ import 'package:PiliPlus/utils/danmaku_utils.dart';
 import 'package:PiliPlus/utils/duration_utils.dart';
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/extension/size_ext.dart';
+import 'package:PiliPlus/utils/global_data.dart';
 import 'package:PiliPlus/utils/num_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
@@ -38,8 +40,8 @@ import 'package:PiliPlus/utils/utils.dart';
 import 'package:PiliPlus/utils/video_utils.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:easy_debounce/easy_throttle.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
@@ -351,6 +353,10 @@ class LiveRoomController extends GetxController {
         messages.addAll(response);
         scrollToBottom();
       }
+    } else {
+      if (kDebugMode) {
+        Utils.reportError(res.toString());
+      }
     }
   }
 
@@ -388,9 +394,9 @@ class LiveRoomController extends GetxController {
 
   void listener() {
     final userScrollDirection = scrollController.position.userScrollDirection;
-    if (userScrollDirection == ScrollDirection.forward) {
+    if (userScrollDirection == .forward) {
       disableAutoScroll.value = true;
-    } else if (userScrollDirection == ScrollDirection.reverse) {
+    } else if (userScrollDirection == .reverse) {
       final pos = scrollController.position;
       if (pos.maxScrollExtent - pos.pixels <= 100) {
         disableAutoScroll.value = false;
@@ -507,6 +513,9 @@ class LiveRoomController extends GetxController {
               uemote: uemote,
               extra: liveExtra,
               reply: reply,
+              medalInfo: !GlobalData().showMedal || user['medal'] == null
+                  ? null
+                  : UinfoMedal.fromJson(user['medal']),
             ),
             DanmakuContentItem(
               msg,
@@ -530,27 +539,27 @@ class LiveRoomController extends GetxController {
           }
           addDm(item);
           break;
-        case 'SUPER_CHAT_MESSAGE_DELETE' when showSuperChat:
-          if (obj['roomid'] == roomId) {
-            final ids = obj['data']?['ids'] as List?;
-            if (ids != null && ids.isNotEmpty) {
-              if (superChatType == SuperChatType.valid) {
-                superChatMsg.removeWhere((e) => ids.contains(e.id));
-              } else {
-                bool? refresh;
-                for (final id in ids) {
-                  if (superChatMsg.firstWhereOrNull((e) => e.id == id)
-                      case final item?) {
-                    item.deleted = true;
-                    refresh ??= true;
-                  }
-                }
-                if (refresh ?? false) {
-                  superChatMsg.refresh();
-                }
-              }
-            }
-          }
+        // case 'SUPER_CHAT_MESSAGE_DELETE' when showSuperChat:
+        //   if (obj['roomid'] == roomId) {
+        //     final ids = obj['data']?['ids'] as List?;
+        //     if (ids != null && ids.isNotEmpty) {
+        //       if (superChatType == .valid) {
+        //         superChatMsg.removeWhere((e) => ids.contains(e.id));
+        //       } else {
+        //         bool? refresh;
+        //         for (final id in ids) {
+        //           if (superChatMsg.firstWhereOrNull((e) => e.id == id)
+        //               case final item?) {
+        //             item.deleted = true;
+        //             refresh ??= true;
+        //           }
+        //         }
+        //         if (refresh ?? false) {
+        //           superChatMsg.refresh();
+        //         }
+        //       }
+        //     }
+        //   }
         case 'WATCHED_CHANGE':
           watchedShow.value = obj['data']['text_large'];
           break;
@@ -561,7 +570,11 @@ class LiveRoomController extends GetxController {
           title.value = obj['data']['title'];
           break;
       }
-    } catch (_) {}
+    } catch (e, s) {
+      if (kDebugMode) {
+        Utils.reportError(e, s);
+      }
+    }
   }
 
   final RxInt likeClickTime = 0.obs;

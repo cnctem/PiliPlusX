@@ -3,7 +3,7 @@ class BaseEmote {
   late String emoticonUnique;
   late double width;
   late double height;
-  late final isUpower = emoticonUnique.startsWith('upower_');
+  late final isOfficial = emoticonUnique.startsWith('official_');
 
   BaseEmote.fromJson(Map<String, dynamic> json) {
     url = json['url'];

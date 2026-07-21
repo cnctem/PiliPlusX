@@ -17,7 +17,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
 # update when release
-version: 2.0.2+5205
+version: 2.0.2+1
 
 environment:
   sdk: ">=3.11.1"
@@ -31,14 +31,14 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   os_type: ^0.2.2
-  liquid_glass_widgets: ^0.8.2 # 液态玻璃
+  liquid_glass_widgets: ^0.8.4 # 液态玻璃
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.8
+  cupertino_icons: ^1.0.9
   # 动态取色
   dynamic_color: ^1.8.1
 
@@ -50,10 +50,10 @@ dependencies:
 
   # 网络
   dio: 5.9.2
-  cookie_jar: ^4.0.8
+  cookie_jar: ^4.0.9
   connectivity_plus: ^5.0.2
   connectivity_plus_ohos: ^0.0.3
-  dio_http2_adapter: ^2.5.3
+  dio_http2_adapter: ^2.7.1
 
   # 图片
   cached_network_image: ^3.4.1
@@ -62,18 +62,18 @@ dependencies:
 
   # QRCode
   # qr_flutter: ^4.1.0
-  pretty_qr_code: ^3.3.0
+  pretty_qr_code: ^3.6.0
 
   # 存储
   path_provider: ^2.1.5
-  hive: ^2.2.3
+  hive_ce: ^2.2.3
   hive_flutter: ^1.1.0
 
   # 设备信息
   device_info_plus: ^10.1.0
   # 权限
   # permission_handler: ^12.0.0+1
-  permission_handler_apple: ^9.4.7
+  permission_handler_apple: ^9.4.10
   permission_handler_android: ^13.0.1
   permission_handler_platform_interface: ^4.3.0
   permission_handler_ohos: ^0.0.8
@@ -89,7 +89,7 @@ dependencies:
   extended_nested_scroll_view:
     git:
       url: https://github.com/bggRGjQaUbCoE/extended_nested_scroll_view.git
-      ref: mod
+      ref: 161cd202c20bf0ba2394e3a86381d58864dc9e4e
   # 上拉加载
   # loading_more_list: ^7.1.0
   # 下拉刷新
@@ -110,7 +110,7 @@ dependencies:
   # dismissible_page: ^1.0.2
   # custom_sliding_segmented_control: ^1.8.4
   # 加密
-  crypto: ^3.0.6
+  crypto: ^3.0.7
   encrypt: ^5.0.3
 
   # 视频播放器
@@ -158,7 +158,7 @@ dependencies:
   # 高帧率
   flutter_displaymode: ^0.7.0
   # scheme跳转
-  app_links: ^6.4.0
+  app_links: ^6.4.1
   app_links_ohos: ^0.2.0
   # 弹幕
   # ns_danmaku:
@@ -181,18 +181,18 @@ dependencies:
       ref: 3eefccb759c4ea8114e722f1511fe1dbce70dc9f
       
     # html解析
-  html: ^0.15.4
+  html: ^0.15.6
   # html渲染
-  flutter_html: ^3.0.0-beta.2
+  flutter_html: ^3.0.0
   # 极验
-  gt3_flutter_plugin: ^0.1.0
-  uuid: ^4.5.1
+  gt3_flutter_plugin: ^0.1.1
+  uuid: ^4.5.3
   # scrollable_positioned_list: ^0.3.8
   # nil: ^1.1.1
-  catcher_2: ^2.1.0
-  logger: ^2.5.0
+  catcher_2: ^2.1.9
+  logger: ^2.7.0
   #瀑布流
-  waterfall_flow: ^3.1.0
+  waterfall_flow: ^3.1.1
   #跑马灯
   # marquee: ^2.3.0
   #富文本
@@ -205,8 +205,8 @@ dependencies:
       path: packages/chat_bottom_container
   image_picker: ^1.1.2
   intl: ^0.20.2
-  archive: ^4.0.0
-  flutter_svg: ^2.0.14
+  archive: ^4.0.9
+  flutter_svg: ^2.3.0
   image_cropper: ^11.0.0
   #解压直播消息
   brotli: ^0.6.0
@@ -214,7 +214,7 @@ dependencies:
   flex_seed_scheme: ^3.6.1
   live_photo_maker: ^0.0.6
   fl_chart: ^1.0.0
-  synchronized: ^3.3.0
+  synchronized: ^3.4.0+1
   # document_file_save_plus: ^2.0.0
   # webdav_client: ^1.2.2
   webdav_client:
@@ -234,7 +234,7 @@ dependencies:
       url: https://github.com/bggRGjQaUbCoE/window_manager.git
       path: packages/window_manager
       ref: main
-  tray_manager: ^0.5.1
+  tray_manager: ^0.5.3
   # file_picker: ^10.3.3
   file_picker:
     git:
@@ -244,9 +244,10 @@ dependencies:
     git:
       url: https://github.com/bggRGjQaUbCoE/super_sliver_list.git
       ref: mod
-  dlna_dart: ^0.1.0
+  dlna_dart: ^0.1.1
   battery_plus: ^7.0.0
   battery_plus_ohos: ^0.0.3
+  material_new_shapes: ^1.0.0
 
   vector_math: any
   fixnum: any
@@ -265,7 +266,7 @@ dependencies:
   cached_network_image_ce: any
 
 dependency_overrides:
-  meta: ^1.16.0 # 兼容液态玻璃
+  meta: ^1.18.3 # 兼容液态玻璃
   device_info_plus:
     git:
       url: https://gitcode.com/CPF-Flutter/flutter_plus_plugins.git
@@ -274,7 +275,7 @@ dependency_overrides:
     git:
       url: "https://gitcode.com/CPF-Flutter/flutter_inappwebview.git"
       path: "flutter_inappwebview"
-      ref: br_v6.1.5_ohos
+      ref: br_v6.1.5_ohos_dev
   flutter_inappwebview_platform_interface:
     git:
       url: "https://gitcode.com/CPF-Flutter/flutter_inappwebview.git"
@@ -374,7 +375,7 @@ dev_dependencies:
   flutter_lints: ^2.0.0
   flutter_launcher_icons: ^0.14.4
   # hive_generator: ^2.0.1
-  build_runner: ^2.10.3
+  build_runner: 2.4.13
   flutter_native_splash: ^2.4.6
 
 flutter_launcher_icons:

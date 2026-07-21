@@ -1,4 +1,4 @@
-import 'package:PiliPlus/common/constants.dart';
+import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/main.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
@@ -143,7 +143,7 @@ abstract final class ThemeUtils {
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: colorScheme.surface,
         shape: const RoundedRectangleBorder(
-          borderRadius: StyleString.bottomSheetRadius,
+          borderRadius: Style.bottomSheetRadius,
         ),
       ),
       // ignore: deprecated_member_use
