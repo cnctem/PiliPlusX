@@ -17,7 +17,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
 # update when release
-version: 2.0.1+5121
+version: 2.0.2+1
 
 environment:
   sdk: ">=3.11.1"
@@ -66,8 +66,7 @@ dependencies:
 
   # 存储
   path_provider: ^2.1.5
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
+  hive_ce: ^2.19.3
 
   # 设备信息
   device_info_plus: ^10.1.0
@@ -207,7 +206,7 @@ dependencies:
   intl: ^0.20.2
   archive: ^4.0.0
   flutter_svg: ^2.0.14
-  image_cropper: ^11.0.0
+  image_cropper: ^12.0.0
   #解压直播消息
   brotli: ^0.6.0
   expandable: ^5.0.1
@@ -247,6 +246,7 @@ dependencies:
   dlna_dart: ^0.1.0
   battery_plus: ^7.0.0
   battery_plus_ohos: ^0.0.3
+  material_new_shapes: ^1.0.0
 
   vector_math: any
   fixnum: any
@@ -347,6 +347,16 @@ dependency_overrides:
       url: https://github.com/My-Responsitories/media-kit.git
       path: libs/windows/media_kit_libs_windows_video
       ref: version_1.2.5
+  media_kit_libs_ios_video:
+    git:
+      url: https://github.com/bggRGjQaUbCoE/media-kit.git
+      path: libs/ios/media_kit_libs_ios_video
+      ref: dev
+  media_kit_libs_macos_video:
+    git:
+      url: https://github.com/bggRGjQaUbCoE/media-kit.git
+      path: libs/macos/media_kit_libs_macos_video
+      ref: dev
   font_awesome_flutter: 10.9.0
   image_picker:
     git:

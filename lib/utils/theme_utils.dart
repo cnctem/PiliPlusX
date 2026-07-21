@@ -143,7 +143,7 @@ abstract final class ThemeUtils {
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: colorScheme.surface,
         shape: const RoundedRectangleBorder(
-          borderRadius: StyleString.bottomSheetRadius,
+          borderRadius: Style.bottomSheetRadius,
         ),
       ),
       // ignore: deprecated_member_use

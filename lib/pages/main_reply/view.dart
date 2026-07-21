@@ -1,5 +1,5 @@
-import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/skeleton/video_reply.dart';
+import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/sliver/sliver_floating_header.dart';
@@ -7,6 +7,7 @@ import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/grpc/bilibili/main/community/reply/v1.pb.dart'
     show ReplyInfo;
 import 'package:PiliPlus/http/loading_state.dart';
+import 'package:PiliPlus/pages/common/fab_mixin.dart';
 import 'package:PiliPlus/pages/main_reply/controller.dart';
 import 'package:PiliPlus/pages/video/reply/widgets/reply_item_grpc.dart';
 import 'package:PiliPlus/pages/video/reply_reply/view.dart';
@@ -38,7 +39,8 @@ class MainReplyPage extends StatefulWidget {
   }
 }
 
-class _MainReplyPageState extends State<MainReplyPage> {
+class _MainReplyPageState extends State<MainReplyPage>
+    with SingleTickerProviderStateMixin, FabMixin {
   final _controller = Get.put(
     MainReplyController(),
     tag: Utils.generateRandomString(8),
@@ -62,9 +64,9 @@ class _MainReplyPageState extends State<MainReplyPage> {
         onNotification: (notification) {
           final direction = notification.direction;
           if (direction == .forward) {
-            _controller.showFab();
+            showFab();
           } else if (direction == .reverse) {
-            _controller.hideFab();
+            hideFab();
           }
           return false;
         },
@@ -87,22 +89,26 @@ class _MainReplyPageState extends State<MainReplyPage> {
           ),
         ).constraintWidth(),
       ),
+      floatingActionButtonLocation: const NoBottomPaddingFabLocation(),
       floatingActionButton: SlideTransition(
-        position: _controller.fabAnim,
-        child: FloatingActionButton(
-          heroTag: null,
-          onPressed: () {
-            try {
-              feedBack();
-              _controller.onReply(
-                null,
-                oid: _controller.oid,
-                replyType: _controller.replyType,
-              );
-            } catch (_) {}
-          },
-          tooltip: '评论',
-          child: const Icon(Icons.reply),
+        position: fabAnimation,
+        child: Padding(
+          padding: .only(bottom: padding.bottom + kFloatingActionButtonMargin),
+          child: FloatingActionButton(
+            heroTag: null,
+            onPressed: () {
+              try {
+                feedBack();
+                _controller.onReply(
+                  null,
+                  oid: _controller.oid,
+                  replyType: _controller.replyType,
+                );
+              } catch (_) {}
+            },
+            tooltip: '评论',
+            child: const Icon(Icons.reply),
+          ),
         ),
       ),
     );
@@ -188,7 +194,7 @@ class _MainReplyPageState extends State<MainReplyPage> {
               },
             ),
             TextButton.icon(
-              style: StyleString.buttonStyle,
+              style: Style.buttonStyle,
               onPressed: _controller.queryBySort,
               icon: Icon(Icons.sort, size: 16, color: secondary),
               label: Obx(
@@ -233,6 +239,7 @@ class _MainReplyPageState extends State<MainReplyPage> {
               isVideoDetail: false,
               replyType: _controller.replyType,
               firstFloor: replyItem,
+              upMid: _controller.upMid,
             ),
           ).constraintWidth(),
         ),

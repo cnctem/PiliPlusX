@@ -15,10 +15,10 @@
  * along with PiliPlus.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'dart:io' show Platform;
 import 'dart:math' show pi;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart' show SemanticsConfiguration;
 
 ///
 /// created by dom on 2026/02/14
@@ -74,6 +74,7 @@ class RenderLoadingIndicator extends RenderBox {
     if (_progress == value) return;
     _progress = value;
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   @override
@@ -95,53 +96,39 @@ class RenderLoadingIndicator extends RenderBox {
     final radius = size.width / 2 - strokeWidth;
     final center = size.center(.zero);
 
-    // TODO: remove
-    // https://github.com/flutter/flutter/issues/182708
-    // https://github.com/flutter/flutter/issues/183083
-    if (Platform.isIOS) {
-      context.canvas
-        ..drawCircle(
-          center,
-          radius,
-          paint..color = Colors.white,
-        )
-        ..drawCircle(
-          center,
-          radius - strokeWidth,
-          paint..color = const Color(0x80000000),
-        )
-        ..drawArc(
-          Rect.fromCircle(center: center, radius: radius - padding),
-          startAngle,
-          progress * 2 * pi,
-          true,
-          paint..color = Colors.white,
-        );
-    } else {
-      context.canvas
-        ..drawCircle(
-          center,
-          radius,
-          paint
-            ..style = .fill
-            ..color = const Color(0x80000000),
-        )
-        ..drawCircle(
-          center,
-          radius,
-          paint
-            ..style = .stroke
-            ..strokeWidth = strokeWidth
-            ..color = Colors.white,
-        )
-        ..drawArc(
-          Rect.fromCircle(center: center, radius: radius - padding),
-          startAngle,
-          progress * 2 * pi,
-          true,
-          paint..style = .fill,
-        );
-    }
+    context.canvas
+      ..drawCircle(
+        center,
+        radius,
+        paint
+          ..style = .fill
+          ..color = const Color(0x80000000),
+      )
+      ..drawCircle(
+        center,
+        radius,
+        paint
+          ..style = .stroke
+          ..strokeWidth = strokeWidth
+          ..color = Colors.white,
+      )
+      ..drawArc(
+        Rect.fromCircle(center: center, radius: radius - padding),
+        startAngle,
+        progress * 2 * pi,
+        true,
+        paint..style = .fill,
+      );
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config
+      ..role = .progressBar
+      ..minValue = '0'
+      ..maxValue = '100'
+      ..value = (_progress * 100).round().toString();
   }
 
   @override

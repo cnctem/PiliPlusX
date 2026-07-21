@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:PiliPlus/common/constants.dart';
+import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/appbar/appbar.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/cached_layout_builder.dart';
@@ -83,7 +83,7 @@ class _DownloadPageState extends State<DownloadPage> {
     final padding = MediaQuery.viewPaddingOf(context);
     return Obx(() {
       final enableMultiSelect = _controller.enableMultiSelect.value;
-      return PopScope(
+      return popScope(
         canPop: !enableMultiSelect,
         onPopInvokedWithResult: (didPop, result) {
           if (enableMultiSelect) {
@@ -298,7 +298,7 @@ class _DownloadPageState extends State<DownloadPage> {
                       Get.back();
                       showConfirmDialog(
                         context: context,
-                        title: '确定删除？',
+                        title: const Text('确定删除？'),
                         onConfirm: () async {
                           await GStorage.watchProgress.deleteAll(
                             pageInfo.entries.map((e) => e.cid.toString()),
@@ -363,7 +363,7 @@ class _DownloadPageState extends State<DownloadPage> {
         onSecondaryTap: PlatformUtils.isMobile ? null : onLongPress,
         child: Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: StyleString.safeSpace,
+            horizontal: Style.safeSpace,
             vertical: 5,
           ),
           child: Row(

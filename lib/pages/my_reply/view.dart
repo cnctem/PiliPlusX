@@ -37,10 +37,9 @@ class _MyReplyState extends State<MyReply> with DynMixin {
   }
 
   void _initReply() {
-    _replies.assignAll(
-      GStorage.reply!.values.map(ReplyInfo.fromBuffer).toList()
-        ..sort((a, b) => b.ctime.compareTo(a.ctime)), // rpid not aligned
-    );
+    _replies
+      ..assignAll(GStorage.reply!.values.map(ReplyInfo.fromBuffer))
+      ..sort((a, b) => b.ctime.compareTo(a.ctime)); // rpid not aligned;
   }
 
   @override
@@ -54,7 +53,7 @@ class _MyReplyState extends State<MyReply> with DynMixin {
               tooltip: 'Clear',
               onPressed: () => showConfirmDialog(
                 context: context,
-                title: 'Clear Local Storage?',
+                title: const Text('Clear Local Storage?'),
                 onConfirm: () {
                   GStorage.reply!.clear();
                   _replies.clear();

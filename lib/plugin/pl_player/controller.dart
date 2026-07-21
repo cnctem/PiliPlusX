@@ -36,7 +36,6 @@ import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/asset_utils.dart';
 import 'package:PiliPlus/utils/extension/box_ext.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
-import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
@@ -56,7 +55,7 @@ import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:flutter_volume_controller/flutter_volume_controller.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:os_type/os_type.dart';
@@ -414,7 +413,7 @@ class PlPlayerController with BlockConfigMixin {
   late final showFsLockBtn = Pref.showFsLockBtn;
   late final keyboardControl = Pref.keyboardControl;
 
-  late final bool _autoEnterFullScreen = Pref.autoEnterFullScreen;
+  late final bool autoEnterFullScreen = Pref.autoEnterFullScreen;
   late final bool autoExitFullscreen = Pref.autoExitFullscreen;
   late final bool autoPlayEnable = Pref.autoPlayEnable;
   late final bool enableVerticalExpand = Pref.enableVerticalExpand;
@@ -685,7 +684,7 @@ class PlPlayerController with BlockConfigMixin {
       // 数据加载完成
       dataStatus.value = DataStatus.loaded;
 
-      if (autoFullScreenFlag && _autoEnterFullScreen) {
+      if (autoFullScreenFlag && autoEnterFullScreen) {
         triggerFullScreen(status: true);
       }
 
@@ -710,7 +709,7 @@ class PlPlayerController with BlockConfigMixin {
 
     return shadersDirPath = await AssetUtils.getOrCopy(
       'assets/shaders',
-      Constants.mpvAnime4KShaders.followedBy(Constants.mpvAnime4KShadersLite),
+      Assets.mpvAnime4KShaders.followedBy(Assets.mpvAnime4KShadersLite),
       path.join(appSupportDirPath, 'anime_shaders'),
     );
   }
@@ -740,7 +739,7 @@ class PlPlayerController with BlockConfigMixin {
           'set',
           PathUtils.buildShadersAbsolutePath(
             await copyShadersToExternalDirectory,
-            Constants.mpvAnime4KShadersLite,
+            Assets.mpvAnime4KShadersLite,
           ),
         ]);
       case SuperResolutionType.quality:
@@ -750,7 +749,7 @@ class PlPlayerController with BlockConfigMixin {
           'set',
           PathUtils.buildShadersAbsolutePath(
             await copyShadersToExternalDirectory,
-            Constants.mpvAnime4KShaders,
+            Assets.mpvAnime4KShaders,
           ),
         ]);
     }
@@ -830,9 +829,10 @@ class PlPlayerController with BlockConfigMixin {
         return;
       }
       _videoPlayerController = player;
+      if (isAnim && superResolutionType.value != .disable) {
+        await setShader();
+      }
     }
-
-    if (isAnim) await setShader();
 
     final Map<String, String> extras = {};
 
@@ -902,9 +902,9 @@ class PlPlayerController with BlockConfigMixin {
     );
   }
 
-  Future<bool> refreshPlayer() async {
+  Future<void>? refreshPlayer() {
     if (dataSource is FileSource) {
-      return true;
+      return null;
     }
     if (_videoPlayerController == null) {
       // SmartDialog.showToast('视频播放器为空，请重新进入本页面');
@@ -1116,7 +1116,7 @@ class PlPlayerController with BlockConfigMixin {
             'controllerStream.error.listen',
             const Duration(milliseconds: 10000),
             () {
-              Future.delayed(const Duration(milliseconds: 3000), () async {
+              Future.delayed(const Duration(milliseconds: 3000), () {
                 // if (kDebugMode) {
                 //   debugPrint("isBuffering.value: ${isBuffering.value}");
                 // }
@@ -1128,9 +1128,7 @@ class PlPlayerController with BlockConfigMixin {
                     '视频链接打开失败，重试中',
                     displayTime: const Duration(milliseconds: 500),
                   );
-                  if (!await refreshPlayer()) {
-                    if (kDebugMode) debugPrint("failed");
-                  }
+                  refreshPlayer();
                 }
               });
             },
@@ -1144,7 +1142,8 @@ class PlPlayerController with BlockConfigMixin {
               event.startsWith("Can not open")) {
             return;
           }
-          SmartDialog.showToast('视频加载错误, $event');
+          Utils.reportError(event);
+          // SmartDialog.showToast('视频加载错误, $event');
         }
       }),
       // controllerStream.volume.listen((event) {
