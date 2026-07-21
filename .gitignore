@@ -151,3 +151,6 @@ dist
 test*.dart
 
 ohos/build-profile.json5
+
+.agents
+skills-lock.json
