@@ -92,6 +92,8 @@ class AudioController extends GetxController
   String? _prev;
   String? _next;
   bool get reachStart => _prev == null;
+  Future<bool>? Function()? _savedOnSkipToPrevious;
+  Future<bool>? Function()? _savedOnSkipToNext;
 
   ListOrder order = ListOrder.ORDER_NORMAL;
 
@@ -137,6 +139,8 @@ class AudioController extends GetxController
       handler.onPlay = onPlay;
       handler.onPause = onPause;
       handler.onSeek = onSeek;
+      _savedOnSkipToPrevious = handler.onSkipToPrevious;
+      _savedOnSkipToNext = handler.onSkipToNext;
       handler.onSkipToPrevious = () async => playPrev();
       handler.onSkipToNext = () async => playNext();
     }
@@ -790,8 +794,8 @@ class AudioController extends GetxController
       handler.onPlay = null;
       handler.onPause = null;
       handler.onSeek = null;
-      handler.onSkipToPrevious = null;
-      handler.onSkipToNext = null;
+      handler.onSkipToPrevious = _savedOnSkipToPrevious;
+      handler.onSkipToNext = _savedOnSkipToNext;
     }
     _subscriptions?.forEach((e) => e.cancel());
     _subscriptions?.clear();
