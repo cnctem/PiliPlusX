@@ -1265,8 +1265,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         )
         ..onLongPressStart = ((_) =>
             plPlayerController.setLongPressStatus(true))
-        ..onLongPressMoveUpdate = ((details) =>
-            plPlayerController.onLongPressMove(details.offsetFromOrigin.dy))
+        ..onLongPressMoveUpdate = ((details) => plPlayerController
+            .onLongPressMove(details.offsetFromOrigin.dy, maxHeight))
         ..onLongPressEnd = ((_) => plPlayerController.setLongPressStatus(false))
         ..onLongPressCancel = (() =>
             plPlayerController.setLongPressStatus(false, isCancel: true));
