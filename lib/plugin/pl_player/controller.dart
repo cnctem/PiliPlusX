@@ -56,7 +56,7 @@ import 'package:archive/archive.dart' show getCrc32;
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:floating/floating.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:flutter/foundation.dart' show clampDouble, kDebugMode;
 import 'package:flutter/services.dart' show HapticFeedback, DeviceOrientation;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:flutter_volume_controller/flutter_volume_controller.dart';
@@ -1898,20 +1898,26 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     }
   }
 
-  // 长按倍速锁定：预备阈值（逻辑像素），全屏/半屏区分，迟滞防抖
-  static const double _speedLockThresholdFull = 96;
-  static const double _speedLockThresholdHalf = 48;
+  // 长按倍速锁定：预备阈值 = 播放器实高 × 比例，clamp 到人体工学区间。
+  // 比例由实测锚点反推（横屏半屏 48/231≈0.21、横屏全屏 96/411≈0.23），
+  // 下限保小窗/小播放器手感，上限≈2.7cm 为拇指第一指节舒适推程封顶
+  static const double _speedLockThresholdRatio = 0.22;
+  static const double _speedLockThresholdMin = 48;
+  static const double _speedLockThresholdMax = 112;
   static const double _speedLockHysteresis = 10;
 
-  /// 长按中手指移动，dy 为相对长按起点的纵向偏移（上滑为负）。
+  /// 长按中手指移动，dy 为相对长按起点的纵向偏移（上滑为负），
+  /// [playerHeight] 为播放器组件实高（决定阈值）。
   /// 越线进入预备态、滑回取消预备，均可反复，提交只发生在松手
-  void onLongPressMove(double dy) {
+  void onLongPressMove(double dy, double playerHeight) {
     if (!longPressStatus.value) {
       return;
     }
-    final double threshold = isFullScreen.value
-        ? _speedLockThresholdFull
-        : _speedLockThresholdHalf;
+    final double threshold = clampDouble(
+      playerHeight * _speedLockThresholdRatio,
+      _speedLockThresholdMin,
+      _speedLockThresholdMax,
+    );
     if (speedLocked) {
       // 下滑预备退出
       if (!_speedLockArmed && dy >= threshold) {
