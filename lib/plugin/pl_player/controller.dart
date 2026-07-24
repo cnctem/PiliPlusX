@@ -1899,8 +1899,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   }
 
   // 长按倍速锁定：预备阈值（逻辑像素），全屏/半屏区分，迟滞防抖
-  static const double _speedLockThresholdFull = 60;
-  static const double _speedLockThresholdHalf = 32;
+  static const double _speedLockThresholdFull = 96;
+  static const double _speedLockThresholdHalf = 48;
   static const double _speedLockHysteresis = 10;
 
   /// 长按中手指移动，dy 为相对长按起点的纵向偏移（上滑为负）。
