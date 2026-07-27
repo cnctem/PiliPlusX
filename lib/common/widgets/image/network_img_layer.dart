@@ -71,33 +71,31 @@ class NetworkImgLayer extends StatelessWidget {
       memCacheHeight = height.cacheSize(context);
     }
 
-    return RepaintBoundary(
-      child: CachedNetworkImage(
-        imageUrl: (isEmote)
-            ? ImageUtils.thumbnailUrl(src, quality)
-            : ImageUtils.thumbnailUrlWithSize(
-                src,
-                memCacheWidth,
-                memCacheHeight,
-                quality,
-              ),
-        width: width,
-        height: height,
-        memCacheWidth: memCacheWidth,
-        memCacheHeight: memCacheHeight,
-        fit: fit,
-        alignment: alignment,
-        fadeOutDuration: fadeOutDuration,
-        fadeInDuration: fadeInDuration,
-        filterQuality: FilterQuality.low,
-        placeholder: (_, _) =>
-            getPlaceHolder?.call() ??
-            _placeholder(context, isEmote: isEmote, isAvatar: isAvatar),
-        errorBuilder: (_, _, _) =>
-            _placeholder(context, isEmote: isEmote, isAvatar: isAvatar),
-        colorBlendMode: reduce ? BlendMode.modulate : null,
-        color: reduce ? reduceLuxColor : null,
-      ),
+    return CachedNetworkImage(
+      imageUrl: (isEmote)
+          ? ImageUtils.thumbnailUrl(src, quality)
+          : ImageUtils.thumbnailUrlWithSize(
+              src,
+              memCacheWidth,
+              memCacheHeight,
+              quality,
+            ),
+      width: width,
+      height: height,
+      memCacheWidth: memCacheWidth,
+      memCacheHeight: memCacheHeight,
+      fit: fit,
+      alignment: alignment,
+      fadeOutDuration: fadeOutDuration,
+      fadeInDuration: fadeInDuration,
+      filterQuality: FilterQuality.low,
+      placeholder: (_, _) =>
+          getPlaceHolder?.call() ??
+          _placeholder(context, isEmote: isEmote, isAvatar: isAvatar),
+      errorBuilder: (_, _, _) =>
+          _placeholder(context, isEmote: isEmote, isAvatar: isAvatar),
+      colorBlendMode: reduce ? BlendMode.modulate : null,
+      color: reduce ? reduceLuxColor : null,
     );
   }
 
