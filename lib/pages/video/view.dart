@@ -63,6 +63,7 @@ import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:auto_orientation/auto_orientation.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
 import 'package:floating/floating.dart';
@@ -139,6 +140,14 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   final videoIntroKey = GlobalKey();
 
   Worker? _pipModeWorker;
+
+  /// 当前应用生命周期状态
+  AppLifecycleState _lifecycleState = AppLifecycleState.resumed;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _lifecycleState = state;
+  }
 
   @override
   void initState() {
@@ -231,7 +240,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   @override
   void handleStatusBarTap() {
+    if (!Pref.enableStatusBarTapToTop) return;
     if (!isShowing) return;
+    // 仅在应用处于前台（resumed）时触发
+    if (_lifecycleState != AppLifecycleState.resumed) return;
     if (videoDetailController.scrollCtr.hasClients) {
       videoDetailController.animToTop();
     }

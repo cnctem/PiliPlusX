@@ -19,6 +19,9 @@ class StatusBarTapObserver with WidgetsBindingObserver {
   /// 当前页面的路由名，用于判断是否在前台。
   String? routeName;
 
+  /// 当前应用生命周期状态
+  AppLifecycleState _lifecycleState = AppLifecycleState.resumed;
+
   StatusBarTapObserver register() {
     WidgetsBinding.instance.addObserver(this);
     return this;
@@ -33,8 +36,15 @@ class StatusBarTapObserver with WidgetsBindingObserver {
     if (!Pref.enableStatusBarTapToTop) return;
     if (routeName == null) return;
     if (Get.currentRoute != routeName) return;
+    // 仅在应用处于前台（resumed）时触发
+    if (_lifecycleState != AppLifecycleState.resumed) return;
     if (scrollController.hasClients) {
       animateToTop();
     }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _lifecycleState = state;
   }
 }
