@@ -145,11 +145,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   AppLifecycleState _lifecycleState = AppLifecycleState.resumed;
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    _lifecycleState = state;
-  }
-
-  @override
   void initState() {
     super.initState();
 
@@ -210,6 +205,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    _lifecycleState = state;
     late final ctr = videoDetailController.plPlayerController;
     if (state == AppLifecycleState.resumed) {
       if (!ctr.showDanmaku) {
