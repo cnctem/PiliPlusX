@@ -404,7 +404,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       videoPlayerServiceHandler?.onVideoDetailDispose(heroTag);
       if (plPlayerController != null) {
         videoDetailController.makeHeartBeat();
-        plPlayerController!.dispose();
+        unawaited(plPlayerController!.dispose());
       } else {
         PlPlayerController.updatePlayCount();
       }
@@ -745,10 +745,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                                                     .onSurface,
                                               ),
                                               onPressed: () {
-                                                videoDetailController
-                                                    .plPlayerController
-                                                  ..isCloseAll = true
-                                                  ..dispose();
+                                                final plCtr = videoDetailController
+                                                    .plPlayerController;
+                                                plCtr.isCloseAll = true;
+                                                unawaited(plCtr.dispose());
                                                 Get.until(
                                                   (route) => route.isFirst,
                                                 );
@@ -1283,9 +1283,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                         ],
                       ),
                       onPressed: () {
-                        videoDetailController.plPlayerController
-                          ..isCloseAll = true
-                          ..dispose();
+                        final plCtr = videoDetailController.plPlayerController;
+                        plCtr.isCloseAll = true;
+                        unawaited(plCtr.dispose());
                         Get.until((route) => route.isFirst);
                       },
                     ),
