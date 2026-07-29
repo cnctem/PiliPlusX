@@ -9,7 +9,7 @@ List<SettingsModel> experimentalSettings = [
     subtitle: '使用鸿蒙的悬浮页签栏与沉浸光感\n仅在鸿蒙6.1以上支持，不支持的平台会回退到传统底栏',
     leading: const Icon(Icons.water_drop_outlined),
     setKey: SettingBoxKey.enableHdsBar,
-    defaultVal: true,
+    defaultVal: false,
     onChanged: (_) => SmartDialog.showToast("重启生效"),
   ),
   const SwitchModel(

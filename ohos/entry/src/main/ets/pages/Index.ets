@@ -192,7 +192,7 @@ struct Index {
       barBottomMargin: this.bottomAvoidAreaHeight,
       systemMaterialEffect: {
         materialType: hdsMaterial.MaterialType.IMMERSIVE,
-        materialLevel: hdsMaterial.MaterialLevel.ADAPTIVE
+        materialLevel: hdsMaterial.MaterialLevel.EXQUISITE
       }
     })
   }
