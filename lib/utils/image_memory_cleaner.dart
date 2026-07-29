@@ -1,10 +1,14 @@
-  import 'package:flutter/widgets.dart';
+import 'dart:async';
 
-/// 监听应用生命周期，进入后台后清理 Flutter 内存图片缓存
+import 'package:flutter/widgets.dart';
+
+/// 监听应用生命周期，进入后台后延迟 20 秒清理 Flutter 内存图片缓存
 class ImageMemoryCleaner with WidgetsBindingObserver {
   ImageMemoryCleaner._internal();
 
   static final ImageMemoryCleaner instance = ImageMemoryCleaner._internal();
+
+  Timer? _timer;
 
   void register() {
     WidgetsBinding.instance.addObserver(this);
@@ -12,6 +16,8 @@ class ImageMemoryCleaner with WidgetsBindingObserver {
 
   void unregister() {
     WidgetsBinding.instance.removeObserver(this);
+    _timer?.cancel();
+    _timer = null;
   }
 
   void clearImageCache() {
@@ -25,8 +31,14 @@ class ImageMemoryCleaner with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
-        debugPrint('ImageMemoryCleaner: clear image cache in background');
+      _timer?.cancel();
+      _timer = Timer(const Duration(seconds: 20), () {
+        debugPrint('ImageMemoryCleaner: clear image cache after 20s in background');
         clearImageCache();
+      });
+    } else if (state == AppLifecycleState.resumed || state == AppLifecycleState.inactive) {
+      _timer?.cancel();
+      _timer = null;
     }
   }
 }
