@@ -46,6 +46,8 @@ class _MainAppState extends PopScopeState<MainApp>
   final _mainController = Get.put(MainController());
   late final _setting = GStorage.setting;
   late EdgeInsets _padding;
+  /// 缓存当前主题主色值，供 ever 回调读取
+  int _primaryColorValue = 0;
 
   @override
   bool get initCanPop => false;
@@ -54,6 +56,14 @@ class _MainAppState extends PopScopeState<MainApp>
   void initState() {
     super.initState();
     addObserverMobile(this);
+    // 监听 useNativeTabs 异步赋值（_initHdsBar 完成时触发）
+    ever(_mainController.useNativeTabs, (_) {
+      if (_mainController.useNativeTabs.value && _primaryColorValue != 0) {
+        HarmonyChannel.setTabSelectedColor(
+          '#${_primaryColorValue.toRadixString(16).padLeft(8, '0').substring(2)}',
+        );
+      }
+    });
     if (PlatformUtils.isDesktop) {
       windowManager
         ..addListener(this)
@@ -81,11 +91,12 @@ class _MainAppState extends PopScopeState<MainApp>
     if (!_mainController.useSideBar) {
       _mainController.useBottomNav = MediaQuery.sizeOf(context).isPortrait;
     }
+    // 缓存主题主色，供 ever 回调在 useNativeTabs 异步就绪后补发
+    _primaryColorValue = Theme.of(context).colorScheme.primary.value;
     // 同步主题色到 ArkTS HdsTabs 底栏
     if (_mainController.useNativeTabs.value) {
-      final primary = Theme.of(context).colorScheme.primary;
       HarmonyChannel.setTabSelectedColor(
-        '#${primary.value.toRadixString(16).padLeft(8, '0').substring(2)}',
+        '#${_primaryColorValue.toRadixString(16).padLeft(8, '0').substring(2)}',
       );
     }
   }
