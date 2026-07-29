@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/models/dynamics/result.dart';
 import 'package:PiliPlus/pages/dynamics_repost/view.dart';
 import 'package:PiliPlus/utils/num_utils.dart';
@@ -34,21 +35,29 @@ class ActionPanel extends StatelessWidget {
           child: Builder(
             builder: (context) {
               return TextButton.icon(
-                onPressed: () => showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  useSafeArea: true,
-                  builder: (_) => RepostPanel(
-                    item: item,
-                    onSuccess: () {
-                      int count = forward.count ?? 0;
-                      forward.count = count + 1;
-                      if (context.mounted) {
-                        (context as Element?)?.markNeedsBuild();
-                      }
-                    },
-                  ),
-                ),
+                onPressed: () {
+                  final wasVisible = HarmonyChannel.hdsBarVisible;
+                  HarmonyChannel.setShellBarsHidden(true);
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    useSafeArea: true,
+                    builder: (_) => RepostPanel(
+                      item: item,
+                      onSuccess: () {
+                        int count = forward.count ?? 0;
+                        forward.count = count + 1;
+                        if (context.mounted) {
+                          (context as Element?)?.markNeedsBuild();
+                        }
+                      },
+                    ),
+                  ).then((_) {
+                    if (wasVisible) {
+                      HarmonyChannel.setShellBarsHidden(false);
+                    }
+                  });
+                },
                 icon: Icon(
                   FontAwesomeIcons.shareFromSquare,
                   size: 16,

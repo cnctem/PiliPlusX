@@ -5,6 +5,7 @@ import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/dialog/report.dart';
 import 'package:PiliPlus/common/widgets/extra_hit_test_widget.dart';
 import 'package:PiliPlus/common/widgets/pendant_avatar.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/reply.dart';
@@ -254,6 +255,8 @@ class AuthorPanel extends StatelessWidget {
       }
     } catch (_) {}
 
+    final wasVisible = HarmonyChannel.hdsBarVisible;
+    HarmonyChannel.setShellBarsHidden(true);
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
@@ -647,6 +650,8 @@ class AuthorPanel extends StatelessWidget {
           ),
         );
       },
-    );
+    ).then((_) {
+      if (wasVisible) HarmonyChannel.setShellBarsHidden(false);
+    });
   }
 }

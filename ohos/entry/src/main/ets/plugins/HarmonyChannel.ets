@@ -1,6 +1,7 @@
 import { common } from "@kit.AbilityKit";
 import AbilityConstant from "@ohos.app.ability.AbilityConstant";
 import ConfigurationConstant from "@ohos.app.ability.ConfigurationConstant";
+import deviceInfo from "@ohos.deviceInfo";
 import window from "@ohos.window";
 import {
   Any,
@@ -86,6 +87,45 @@ export default class HarmonyChannel implements FlutterPlugin {
         result.success(true);
         break;
       }
+      case "getDeviceInfo": {
+        result.success({ sdkApiVersion: deviceInfo.sdkApiVersion });
+        break;
+      }
+      case "setShellBars": {
+        const useNativeTabs: boolean = call.argument('useNativeTabs') ?? false;
+        console.log(`is use native tabs: ${useNativeTabs}`);
+        AppStorage.setOrCreate('useNativeTabs', useNativeTabs);
+        result.success(true);
+        break;
+      }
+      case "setShellBarsHidden": {
+        const hidden: boolean = call.argument('hidden') ?? false;
+        console.log(`is set tabs hidden: ${hidden}`);
+        AppStorage.setOrCreate('shellBarsHidden', hidden);
+        result.success(true);
+        break;
+      }
+      case "setShellBarsScrollHidden": {
+        const hidden: boolean = call.argument('hidden') ?? false;
+        console.log(`is set tabs scroll hidden: ${hidden}`);
+        if (AppStorage.get('__scrollHidden') != hidden) {
+          AppStorage.setOrCreate('__scrollHidden', hidden);
+        }
+        result.success(true);
+        break;
+      }
+      case "changeTabIndex": {
+        const index: number = call.argument('index') ?? 0;
+        this.changeTabIndex(index);
+        result.success(true);
+        break;
+      }
+      case "setTabSelectedColor": {
+        const color: string = call.argument('color') ?? '#3367D6';
+        AppStorage.setOrCreate('tabSelectedColor', color);
+        result.success(true);
+        break;
+      }
       // case 'setWindowLayoutFullScreen': {
       //   this.lastWindow ??= await window.getLastWindow(getContext())
       //   this.lastWindow.setWindowLayoutFullScreen(call.argument('fullScreen'));
@@ -97,7 +137,10 @@ export default class HarmonyChannel implements FlutterPlugin {
         break;
     }
   }
-
+  public changeTabIndex(index: number): void {
+    const context = getContext() as common.UIAbilityContext;
+    context.eventHub.emit('EVENT_CHANGE_TAB', index);
+  }
   public onFloatingWindowChange(isFloatingWindow: boolean) {
     this.channel?.invokeMethod("onFloatingWindowChange", { isFloatingWindow: isFloatingWindow });
   }

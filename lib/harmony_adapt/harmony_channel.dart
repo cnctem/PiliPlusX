@@ -33,10 +33,101 @@ abstract class HarmonyChannel {
       case 'onContinuationRestore':
         checkPendingContinuation();
         break;
+      // 原生底栏切换页签
+      case 'showHome':
+        _onShellTabSwitch?.call(0);
+        break;
+      case 'showDynamics':
+        _onShellTabSwitch?.call(1);
+        break;
+      case 'showMine':
+        _onShellTabSwitch?.call(2);
+        break;
       default:
         break;
     }
   }
+
+  /// Shell 页签切换回调：由 MainController 注册
+  static void Function(int index)? _onShellTabSwitch;
+
+  static set onShellTabSwitch(void Function(int)? callback) =>
+      _onShellTabSwitch = callback;
+
+  /// 主动向原生拉取设备信息（API 版本等），并缓存结果
+  static Future<int?> getDeviceInfo() async {
+    if (!OS.isHarmony) return null;
+    for (int i = 0; i < 8; i++) {
+      try {
+        final Object? args =
+            await _channel.invokeMethod<Object?>('getDeviceInfo');
+        if (args is Map) {
+          _sdkApiVersion = args['sdkApiVersion'] as int?;
+          return _sdkApiVersion;
+        }
+      } catch (_) {}
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+    }
+    return null;
+  }
+
+  /// 向原生发送 shell 配置（Flutter 侧计算后通知 ArkTS）
+  static Future<void> setShellBars({required bool useNativeTabs}) async {
+    if (!OS.isHarmony) return;
+    try {
+      _channel.invokeMethod('setShellBars', {'useNativeTabs': useNativeTabs});
+    } on PlatformException catch (_) {}
+  }
+
+  /// HDS 底栏当前是否为显示状态
+  static bool _hiddenByPage = false;
+  static bool get hdsBarVisible => !_hiddenByPage;
+
+  /// 控制原生 HDS 底栏的显隐（弹窗、全屏页等场景，即时无动画）
+  static Future<void> setShellBarsHidden(bool hidden, {bool retry = false}) async {
+    if (!OS.isHarmony) return;
+    _hiddenByPage = hidden;
+    final int total = retry ? 8 : 1;
+    for (int i = 0; i < total; i++) {
+      try {
+        _channel.invokeMethod('setShellBarsHidden', {'hidden': hidden});
+        return;
+      } catch (_) {
+        if (i == total - 1) return;
+        await Future<void>.delayed(const Duration(milliseconds: 120));
+      }
+    }
+  }
+
+  /// 同步主题色到 ArkTS HdsTabs 底栏
+  static Future<void> setTabSelectedColor(String hexColor) async {
+    if (!OS.isHarmony) return;
+    try {
+      _channel.invokeMethod('setTabSelectedColor', {'color': hexColor});
+    } on PlatformException catch (_) {}
+  }
+
+  /// 同步 Flutter 页签切换到 ArkTS HdsTabs
+  static Future<void> changeTabIndex(int index) async {
+    if (!OS.isHarmony) return;
+    try {
+      _channel.invokeMethod('changeTabIndex', {'index': index});
+    } on PlatformException catch (_) {}
+  }
+
+  /// 控制原生 HDS 底栏的滚动显隐（带动画）
+  static Future<void> setShellBarsScrollHidden(bool hidden) async {
+    if (!OS.isHarmony) return;
+    try {
+      _channel.invokeMethod('setShellBarsScrollHidden', {'hidden': hidden});
+    } on PlatformException catch (_) {}
+  }
+
+  /// 缓存从 ArkTS 获取的 API 版本
+  static int? _sdkApiVersion;
+
+  /// 获取缓存的 API 版本（仅在 getDeviceInfo 调用后可用）
+  static int? get sdkApiVersion => _sdkApiVersion;
 
   /// 取走 ETS 侧暂存的接续数据并跳转视频页。冷启动在首帧后调用，
   /// 热启动由 onContinuationRestore 推送触发；数据取走即清除，不会重复跳转。

@@ -1,6 +1,8 @@
 import 'package:PiliPlus/common/style.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/pages/home/controller.dart';
 import 'package:PiliPlus/pages/main/controller.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -46,9 +48,15 @@ abstract class CommonPageState<T extends StatefulWidget> extends State<T> {
       case .forward:
         _showTopBar?.value = true;
         _showBottomBar?.value = true;
+        if (_mainController.useNativeTabs && Pref.hideBottomBar) {
+          HarmonyChannel.setShellBarsScrollHidden(false);
+        }
       case .reverse:
         _showTopBar?.value = false;
         _showBottomBar?.value = false;
+        if (_mainController.useNativeTabs && Pref.hideBottomBar) {
+          HarmonyChannel.setShellBarsScrollHidden(true);
+        }
       case _:
     }
     return false;
@@ -73,6 +81,12 @@ abstract class CommonPageState<T extends StatefulWidget> extends State<T> {
       final pixel = metrics.pixels;
       final scrollDelta = notification.scrollDelta ?? 0;
       if (pixel < 0.0 && scrollDelta > 0) return false;
+      // 同步原生 HDS 底栏滚动显隐
+      if (_mainController.useNativeTabs && Pref.hideBottomBar) {
+        HarmonyChannel.setShellBarsScrollHidden(
+          _barOffset!.value > Style.topBarHeight / 2,
+        );
+      }
       if (needsCorrection) {
         final value = _barOffset!.value;
         final newValue = clampDouble(

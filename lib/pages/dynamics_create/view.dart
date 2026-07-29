@@ -10,6 +10,7 @@ import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/text_field.dart';
 import 'package:PiliPlus/common/widgets/pair.dart';
 import 'package:PiliPlus/common/widgets/time_picker.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/http/dynamics.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models/common/publish_panel_type.dart';
@@ -74,30 +75,36 @@ class CreateDynPanel extends CommonRichTextPubPage {
     Pair<int, String>? topic,
     ({Object dynId, Object? repostDynId})? editConfig,
     VoidCallback? onSuccess,
-  }) => showModalBottomSheet(
-    context: context,
-    useSafeArea: true,
-    isScrollControlled: true,
-    builder: (context) => dyn_sheet.DraggableScrollableSheet(
-      snap: true,
-      expand: false,
-      initialChildSize: 1,
-      minChildSize: 0,
-      maxChildSize: 1,
-      snapSizes: const [1],
-      builder: (context, scrollController) => CreateDynPanel(
-        scrollController: scrollController,
-        title: title,
-        items: items,
-        pics: pics,
-        topic: topic,
-        isPrivate: isPrivate,
-        editConfig: editConfig,
-        replyOption: replyOption,
-        onSuccess: onSuccess,
+  }) {
+    final wasVisible = HarmonyChannel.hdsBarVisible;
+    HarmonyChannel.setShellBarsHidden(true);
+    showModalBottomSheet(
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      builder: (context) => dyn_sheet.DraggableScrollableSheet(
+        snap: true,
+        expand: false,
+        initialChildSize: 1,
+        minChildSize: 0,
+        maxChildSize: 1,
+        snapSizes: const [1],
+        builder: (context, scrollController) => CreateDynPanel(
+          scrollController: scrollController,
+          title: title,
+          items: items,
+          pics: pics,
+          topic: topic,
+          isPrivate: isPrivate,
+          editConfig: editConfig,
+          replyOption: replyOption,
+          onSuccess: onSuccess,
+        ),
       ),
-    ),
-  );
+    ).then((_) {
+      if (wasVisible) HarmonyChannel.setShellBarsHidden(false);
+    });
+  }
 }
 
 class _CreateDynPanelState extends CommonRichTextPubPageState<CreateDynPanel> {
