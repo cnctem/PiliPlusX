@@ -67,9 +67,9 @@ class RenderSliverFixedWrap extends RenderSliverMultiBoxAdaptor {
     required double mainAxisExtent,
     double spacing = 0.0,
     double runSpacing = 0.0,
-  }) : _mainAxisExtent = mainAxisExtent,
-       _spacing = spacing,
-       _runSpacing = runSpacing {
+  }) : _spacing = spacing,
+       _runSpacing = runSpacing,
+       _mainAxisExtent = mainAxisExtent {
     assert(mainAxisExtent > 0.0 && mainAxisExtent.isFinite);
   }
 

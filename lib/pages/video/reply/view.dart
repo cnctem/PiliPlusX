@@ -8,6 +8,7 @@ import 'package:PiliPlus/grpc/bilibili/main/community/reply/v1.pb.dart'
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/pages/common/fab_mixin.dart';
 import 'package:PiliPlus/pages/video/reply/controller.dart';
+import 'package:PiliPlus/pages/video/reply/vote/reply_vote_item.dart';
 import 'package:PiliPlus/pages/video/reply/widgets/reply_item_grpc.dart';
 import 'package:PiliPlus/pages/video/reply_reply/view.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
@@ -15,7 +16,6 @@ import 'package:easy_debounce/easy_throttle.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 
 class VideoReplyPanel extends StatefulWidget {
@@ -38,7 +38,9 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
     with
         AutomaticKeepAliveClientMixin,
         SingleTickerProviderStateMixin,
+        BaseFabMixin,
         FabMixin {
+  late ColorScheme colorScheme;
   late VideoReplyController _videoReplyController;
 
   String get heroTag => widget.heroTag;
@@ -58,6 +60,7 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    colorScheme = ColorScheme.of(context);
     bottom = MediaQuery.viewPaddingOf(context).bottom;
   }
 
@@ -66,7 +69,6 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final theme = Theme.of(context);
     final child = NotificationListener<UserScrollNotification>(
       onNotification: (notification) {
         switch (notification.direction) {
@@ -82,7 +84,7 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
         onRefresh: _videoReplyController.onRefresh,
         isClampingScrollPhysics: widget.isNested,
         child: Stack(
-          clipBehavior: Clip.none,
+          clipBehavior: .none,
           children: [
             CustomScrollView(
               controller: widget.isNested
@@ -92,46 +94,40 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
               key: const PageStorageKey(_VideoReplyPanelState),
               slivers: [
                 SliverFloatingHeaderWidget(
-                  backgroundColor: theme.colorScheme.surface,
+                  backgroundColor: colorScheme.surface,
                   child: Padding(
                     padding: const .fromLTRB(12, 2.5, 6, 2.5),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Obx(
-                          () => Text(
-                            _videoReplyController.sortType.value.title,
+                    child: Obx(() {
+                      final sortType = _videoReplyController.sortType.value;
+                      return Row(
+                        mainAxisAlignment: .spaceBetween,
+                        children: [
+                          Text(
+                            sortType.title,
                             style: const TextStyle(fontSize: 13),
                           ),
-                        ),
-                        TextButton.icon(
-                          style: Style.buttonStyle,
-                          onPressed: _videoReplyController.queryBySort,
-                          icon: Icon(
-                            Icons.sort,
-                            size: 16,
-                            color: theme.colorScheme.secondary,
-                          ),
-                          label: Obx(
-                            () => Text(
-                              _videoReplyController.sortType.value.label,
+                          TextButton.icon(
+                            style: Style.buttonStyle,
+                            onPressed: _videoReplyController.queryBySort,
+                            icon: Icon(
+                              Icons.sort,
+                              size: 16,
+                              color: colorScheme.secondary,
+                            ),
+                            label: Text(
+                              sortType.label,
                               style: TextStyle(
                                 fontSize: 13,
-                                color: theme.colorScheme.secondary,
+                                color: colorScheme.secondary,
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      );
+                    }),
                   ),
                 ),
-                Obx(
-                  () => _buildBody(
-                    theme,
-                    _videoReplyController.loadingState.value,
-                  ),
-                ),
+                Obx(() => _buildBody(_videoReplyController.loadingState.value)),
               ],
             ),
             Positioned(
@@ -166,75 +162,95 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
     );
     if (widget.isNested) {
       return ExtendedVisibilityDetector(
-        uniqueKey: const Key('reply-list'),
+        uniqueKey: const ValueKey(VideoReplyPanel),
         child: child,
       );
     }
     return child;
   }
 
-  Widget _buildBody(
-    ThemeData theme,
-    LoadingState<List<ReplyInfo>?> loadingState,
-  ) {
-    return switch (loadingState) {
-      Loading() => SliverList.builder(
-        itemBuilder: (context, index) => const VideoReplySkeleton(),
-        itemCount: 5,
-      ),
-      Success(:final response) =>
-        response != null && response.isNotEmpty
-            ? SliverList.builder(
-                itemBuilder: (context, index) {
-                  if (index == response.length) {
-                    SchedulerBinding.instance.addPostFrameCallback(
-                      (_) => _videoReplyController.onLoadMore(),
-                    );
-                    return Container(
-                      height: 125,
-                      alignment: Alignment.center,
-                      margin: EdgeInsets.only(bottom: bottom),
-                      child: Text(
-                        _videoReplyController.isEnd ? '没有更多了' : '加载中...',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: theme.colorScheme.outline,
-                        ),
-                      ),
-                    );
-                  } else {
-                    return ReplyItemGrpc(
-                      replyItem: response[index],
-                      replyLevel: widget.replyLevel,
-                      replyReply: replyReply,
-                      onReply: _videoReplyController.onReply,
-                      onDelete: (item, subIndex) =>
-                          _videoReplyController.onRemove(index, item, subIndex),
-                      upMid: _videoReplyController.upMid,
-                      getTag: () => heroTag,
-                      onCheckReply: (item) => _videoReplyController
-                          .onCheckReply(item, isManual: true),
-                      onToggleTop: (item) => _videoReplyController.onToggleTop(
-                        item,
-                        index,
-                        _videoReplyController.aid,
-                        _videoReplyController.videoType.replyType,
-                      ),
-                    );
-                  }
-                },
-                itemCount: response.length + 1,
-              )
-            : HttpError(
-                errMsg: '还没有评论',
-                onReload: _videoReplyController.onReload,
+  Widget _buildBody(LoadingState<List<ReplyInfo>?> loadingState) {
+    switch (loadingState) {
+      case Loading():
+        return SliverList.builder(
+          itemBuilder: (context, index) => const VideoReplySkeleton(),
+          itemCount: 5,
+        );
+      case Success(:final response):
+        if (response != null && response.isNotEmpty) {
+          var count = response.length + 1;
+          final voteCard = _videoReplyController.voteCard;
+          final hasVote = voteCard != null;
+          if (hasVote) {
+            count++;
+          }
+          return SliverList.builder(
+            itemBuilder: (context, index) {
+              if (hasVote) {
+                if (index == 0) {
+                  return buildVoteCard(context, colorScheme, voteCard);
+                } else {
+                  index--;
+                }
+              }
+              if (index == response.length) {
+                _videoReplyController.onLoadMore();
+                return Container(
+                  height: 125,
+                  alignment: .center,
+                  margin: .only(bottom: bottom),
+                  child: Text(
+                    _videoReplyController.isEnd ? '没有更多了' : '加载中...',
+                    textAlign: .center,
+                    style: TextStyle(fontSize: 12, color: colorScheme.outline),
+                  ),
+                );
+              } else {
+                return ReplyItemGrpc(
+                  replyItem: response[index],
+                  replyLevel: widget.replyLevel,
+                  replyReply: replyReply,
+                  onReply: _videoReplyController.onReply,
+                  onDelete: (item, subIndex) =>
+                      _videoReplyController.onRemove(index, item, subIndex),
+                  upMid: _videoReplyController.upMid,
+                  getTag: () => heroTag,
+                  onCheckReply: (item) =>
+                      _videoReplyController.onCheckReply(item, isManual: true),
+                  onToggleTop: (item) => _videoReplyController.onToggleTop(
+                    item,
+                    index,
+                    _videoReplyController.aid,
+                    _videoReplyController.videoType.replyType,
+                  ),
+                );
+              }
+            },
+            itemCount: count,
+          );
+        }
+
+        final child = HttpError(
+          errMsg: '还没有评论',
+          onReload: _videoReplyController.onReload,
+        );
+        if (_videoReplyController.voteCard case final voteCard?) {
+          return SliverMainAxisGroup(
+            slivers: [
+              SliverToBoxAdapter(
+                child: buildVoteCard(context, colorScheme, voteCard),
               ),
-      Error(:final errMsg) => HttpError(
-        errMsg: errMsg,
-        onReload: _videoReplyController.onReload,
-      ),
-    };
+              child,
+            ],
+          );
+        }
+        return child;
+      case Error(:final errMsg):
+        return HttpError(
+          errMsg: errMsg,
+          onReload: _videoReplyController.onReload,
+        );
+    }
   }
 
   // 展示二级回复
@@ -242,11 +258,10 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
     EasyThrottle.throttle('replyReply', const Duration(milliseconds: 500), () {
       int oid = replyItem.oid.toInt();
       int rpid = replyItem.id.toInt();
-      showBottomSheet(
-        context: context,
+      Scaffold.of(context).showBottomSheet(
         backgroundColor: Colors.transparent,
         constraints: const BoxConstraints(),
-        builder: (context) => VideoReplyReplyPanel(
+        (context) => VideoReplyReplyPanel(
           id: id,
           oid: oid,
           rpid: rpid,

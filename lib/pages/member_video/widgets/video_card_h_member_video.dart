@@ -1,6 +1,5 @@
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
-import 'package:PiliPlus/common/widgets/flutter/layout_builder.dart';
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/progress_bar/video_progress_indicator.dart';
@@ -11,10 +10,10 @@ import 'package:PiliPlus/models/common/stat_type.dart';
 import 'package:PiliPlus/models_new/space/space_archive/item.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/duration_utils.dart';
+import 'package:PiliPlus/utils/extension/dimension_ext.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:flutter/material.dart' hide LayoutBuilder;
-import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:flutter/material.dart';
 
 // 视频卡片 - 水平布局
 class VideoCardHMemberVideo extends StatelessWidget {
@@ -62,16 +61,17 @@ class VideoCardHMemberVideo extends StatelessWidget {
                   if (videoItem.bvid == null || videoItem.cid == null) {
                     return;
                   }
-                  try {
-                    PageUtils.toVideoPage(
-                      bvid: videoItem.bvid,
-                      cid: videoItem.cid!,
-                      cover: videoItem.cover,
-                      title: videoItem.title,
-                    );
-                  } catch (err) {
-                    SmartDialog.showToast(err.toString());
+                  bool isVertical = false;
+                  if (videoItem.uri case final uri?) {
+                    isVertical = uri.isVerticalFromUri;
                   }
+                  PageUtils.toVideoPage(
+                    bvid: videoItem.bvid,
+                    cid: videoItem.cid!,
+                    cover: videoItem.cover,
+                    title: videoItem.title,
+                    isVertical: isVertical,
+                  );
                 },
             child: Padding(
               padding: const EdgeInsets.symmetric(

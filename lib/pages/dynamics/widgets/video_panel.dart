@@ -1,14 +1,13 @@
 // 视频or合集
-import 'package:PiliPlus/common/assets.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/cached_layout_builder.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
+import 'package:PiliPlus/common/widgets/svg/play_icon.dart';
 import 'package:PiliPlus/models/common/badge_type.dart';
 import 'package:PiliPlus/models/dynamics/result.dart';
-import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/num_utils.dart';
-import 'package:flutter/material.dart' hide LayoutBuilder;
+import 'package:flutter/material.dart';
 
 Widget videoSeasonWidget(
   BuildContext context, {
@@ -88,9 +87,7 @@ Widget videoSeasonWidget(
                         Colors.black54,
                       ],
                     ),
-                    borderRadius: BorderRadius.vertical(
-                      bottom: Style.imgRadius,
-                    ),
+                    borderRadius: .vertical(bottom: Style.imgRadius),
                   ),
                   child: DefaultTextStyle.merge(
                     style: TextStyle(
@@ -104,30 +101,19 @@ Widget videoSeasonWidget(
                           DecoratedBox(
                             decoration: const BoxDecoration(
                               color: Colors.black45,
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(4),
-                              ),
+                              borderRadius: .all(.circular(4)),
                             ),
                             child: Text(' $durationText '),
                           ),
                           const SizedBox(width: 6),
                         ],
                         if (video.stat case final stat?) ...[
-                          Text(
-                            '${NumUtils.numFormat(stat.play)}播放',
-                          ),
+                          Text('${NumUtils.numFormat(stat.play)}播放'),
                           const SizedBox(width: 6),
-                          Text(
-                            '${NumUtils.numFormat(stat.danmu)}弹幕',
-                          ),
+                          Text('${NumUtils.numFormat(stat.danmu)}弹幕'),
                         ],
                         const Spacer(),
-                        Image.asset(
-                          Assets.play,
-                          width: 50,
-                          height: 50,
-                          cacheHeight: 50.cacheSize(context),
-                        ),
+                        const PlayIcon(size: 50),
                       ],
                     ),
                   ),

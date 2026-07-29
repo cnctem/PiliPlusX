@@ -1,12 +1,11 @@
 import 'package:PiliPlus/common/style.dart';
-import 'package:PiliPlus/common/widgets/flutter/layout_builder.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/select_mask.dart';
 import 'package:PiliPlus/models_new/fav/fav_note/list.dart';
 import 'package:PiliPlus/pages/fav/note/controller.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:flutter/material.dart' hide LayoutBuilder;
+import 'package:flutter/material.dart';
 
 class FavNoteItem extends StatelessWidget {
   const FavNoteItem({
@@ -29,7 +28,7 @@ class FavNoteItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colorScheme = ColorScheme.of(context);
     return Material(
       type: MaterialType.transparency,
       child: InkWell(
@@ -71,7 +70,7 @@ class FavNoteItem extends StatelessWidget {
                           ),
                           Positioned.fill(
                             child: selectMask(
-                              theme,
+                              colorScheme,
                               item.checked,
                             ),
                           ),
@@ -100,7 +99,7 @@ class FavNoteItem extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         height: 1,
-                        color: theme.colorScheme.outline,
+                        color: colorScheme.outline,
                       ),
                     ),
                     const Spacer(),
@@ -110,7 +109,7 @@ class FavNoteItem extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 13,
                         height: 1,
-                        color: theme.colorScheme.outline,
+                        color: colorScheme.outline,
                       ),
                     ),
                   ],

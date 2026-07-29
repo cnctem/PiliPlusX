@@ -40,7 +40,7 @@ class MainReplyPage extends StatefulWidget {
 }
 
 class _MainReplyPageState extends State<MainReplyPage>
-    with SingleTickerProviderStateMixin, FabMixin {
+    with SingleTickerProviderStateMixin, BaseFabMixin, FabMixin {
   final _controller = Get.put(
     MainReplyController(),
     tag: Utils.generateRandomString(8),
@@ -183,7 +183,7 @@ class _MainReplyPageState extends State<MainReplyPage>
       child: Padding(
         padding: const .fromLTRB(12, 2.5, 6, 2.5),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: .spaceBetween,
           children: [
             Obx(
               () {

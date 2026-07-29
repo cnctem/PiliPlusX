@@ -14,6 +14,7 @@ import 'package:PiliPlus/models_new/emote/emote.dart' as e;
 import 'package:PiliPlus/models_new/live/live_emote/emoticon.dart';
 import 'package:PiliPlus/pages/common/publish/common_publish_page.dart';
 import 'package:PiliPlus/pages/dynamics_mention/view.dart';
+import 'package:PiliPlus/utils/cache_manager.dart';
 import 'package:PiliPlus/utils/cache_manager_ext.dart';
 import 'package:PiliPlus/utils/extension/file_ext.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
@@ -23,7 +24,8 @@ import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:cached_network_image_ce/cached_network_image.dart';
+import 'package:cached_network_image_ce/cached_network_image.dart'
+    hide CacheManager;
 import 'package:dio/dio.dart' show CancelToken;
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
@@ -195,11 +197,10 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
         path = e.path;
       case OpusPicModel e:
         SmartDialog.showLoading();
-        final file = (await DefaultCacheManager().getSingleFile(
+        path = (await CacheManager.manager.getSingleFile(
           e.url.http2https,
-        ));
+        )).path;
         await SmartDialog.dismiss();
-        path = file.path;
     }
     if (!mounted || path.isEmpty) return;
     late final colorScheme = ColorScheme.of(context);
@@ -215,13 +216,13 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
         IOSUiSettings(title: '裁剪'),
         // 鸿蒙化image_croppper修复，只能使用WebUiSettings
         WebUiSettings(
-            context: context,
-            presentStyle: WebPresentStyle.dialog,
-            size: const CropperSize(
-              width: 520,
-              height: 520,
-            ),
+          context: context,
+          presentStyle: WebPresentStyle.dialog,
+          size: const CropperSize(
+            width: 520,
+            height: 520,
           ),
+        ),
       ],
     );
     if (croppedFile != null) {
@@ -238,9 +239,10 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
       const Duration(milliseconds: 500),
       () async {
         try {
-          List<XFile> pickedFiles = await imagePicker.pickMultiImage(
+          final pickedFiles = await imagePicker.pickMultiImage(
             limit: limit,
             imageQuality: 100,
+            requestFullMetadata: false,
           );
           if (pickedFiles.isNotEmpty) {
             for (int i = 0; i < pickedFiles.length; i++) {
@@ -337,6 +339,7 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
 
   late double _mentionOffset = 0;
   Future<void>? onMention([bool fromClick = false]) async {
+    // 鸿蒙适配：@面板期间冻结聊天面板，避免面板高度被重置
     controller.keepChatPanel();
     final res = await DynMentionPanel.onDynMention(
       context,
@@ -348,8 +351,8 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
         _onInsertUser(res, fromClick);
       } else if (res is Set<MentionItem>) {
         for (final e in res) {
-          e.checked = false;
-          _onInsertUser(e, fromClick);
+          _onInsertUser(e..checked = false, fromClick);
+          fromClick = true;
         }
         res.clear();
       }
@@ -559,6 +562,6 @@ abstract class CommonRichTextPubPageState<T extends CommonRichTextPubPage>
         return;
       }
     }
-    onCustomPublish(pictures: pictures);
+    return onCustomPublish(pictures: pictures);
   }
 }

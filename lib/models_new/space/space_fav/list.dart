@@ -14,7 +14,6 @@ class SpaceFavItemModel extends SubItemModel {
     super.fid,
     super.mid,
     super.attr,
-    super.attrDesc,
     super.title,
     super.cover,
     super.upper,
@@ -26,13 +25,7 @@ class SpaceFavItemModel extends SubItemModel {
     super.favState,
     super.mediaCount,
     super.viewCount,
-    super.vt,
-    super.isTop,
-    super.recentFav,
-    super.playSwitch,
     super.type,
-    super.link,
-    super.bvid,
   });
 
   factory SpaceFavItemModel.fromJson(Map<String, dynamic> json) =>
@@ -44,7 +37,6 @@ class SpaceFavItemModel extends SubItemModel {
         fid: json['fid'] as int?,
         mid: json['mid'] as int?,
         attr: json['attr'] as int?,
-        attrDesc: json['attr_desc'] as String?,
         title: json['title'] as String?,
         cover: json['cover'] as String?,
         upper: json['upper'] == null
@@ -58,12 +50,6 @@ class SpaceFavItemModel extends SubItemModel {
         favState: json['fav_state'] as int?,
         mediaCount: json['media_count'] as int?,
         viewCount: json['view_count'] as int?,
-        vt: json['vt'] as int?,
-        isTop: json['is_top'] as bool?,
-        recentFav: json['recent_fav'] as dynamic,
-        playSwitch: json['play_switch'] as int?,
         type: json['type'] as int?,
-        link: json['link'] as String?,
-        bvid: json['bvid'] as String?,
       );
 }

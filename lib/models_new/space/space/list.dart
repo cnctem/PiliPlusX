@@ -4,7 +4,6 @@ class ListItem {
   int? trendType;
   String? message;
   int? mid;
-  dynamic vipInfo;
   String? uname;
   String? avatar;
 
@@ -14,7 +13,6 @@ class ListItem {
     this.trendType,
     this.message,
     this.mid,
-    this.vipInfo,
     this.uname,
     this.avatar,
   });
@@ -25,7 +23,6 @@ class ListItem {
     trendType: json['trend_type'] as int?,
     message: json['message'] as String?,
     mid: json['mid'] as int?,
-    vipInfo: json['vip_info'] as dynamic,
     uname: json['uname'] as String?,
     avatar: json['avatar'] as String?,
   );

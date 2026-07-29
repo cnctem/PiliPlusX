@@ -5,16 +5,12 @@ class MedalWallData {
   int? count;
   String? name;
   String? icon;
-  int? uid;
-  int? level;
 
   MedalWallData({
     this.list,
     this.count,
     this.name,
     this.icon,
-    this.uid,
-    this.level,
   });
 
   factory MedalWallData.fromJson(Map<String, dynamic> json) => MedalWallData(
@@ -24,7 +20,5 @@ class MedalWallData {
     count: json['count'] as int?,
     name: json['name'] as String?,
     icon: json['icon'] as String?,
-    uid: json['uid'] as int?,
-    level: json['level'] as int?,
   );
 }

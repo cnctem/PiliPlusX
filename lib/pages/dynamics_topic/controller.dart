@@ -17,14 +17,14 @@ class DynTopicController
   String topicName = Get.parameters['name'] ?? '';
 
   int sortBy = 0;
-  String offset = '';
-  Rx<TopicSortByConf?> topicSortByConf = Rx<TopicSortByConf?>(null);
+  String? offset;
+  final topicSortByConf = Rxn<TopicSortByConf>();
 
   double? appbarOffset;
 
   // top
-  Rx<bool?> isFav = Rx<bool?>(null);
-  Rx<bool?> isLike = Rx<bool?>(null);
+  final isFav = false.obs;
+  final isLike = false.obs;
   Rx<LoadingState<TopDetails?>> topState =
       LoadingState<TopDetails?>.loading().obs;
 
@@ -42,20 +42,23 @@ class DynTopicController
     if (topState.value case Success(:final response)) {
       final topicItem = response!.topicItem!;
       topicName = topicItem.name;
-      isFav.value = topicItem.isFav;
-      isLike.value = topicItem.isLike;
+      isFav.value = topicItem.isFav ?? false;
+      isLike.value = topicItem.isLike ?? false;
     }
   }
 
   @override
   List<TopicCardItem>? getDataList(TopicCardList? response) {
-    offset = response?.offset ?? '';
-    topicSortByConf.value = response?.topicSortByConf;
-    sortBy = response?.topicSortByConf?.showSortBy ?? 0;
-    if (response?.hasMore == false) {
-      isEnd = true;
+    if (response != null) {
+      offset = response.offset;
+      topicSortByConf.value = response.topicSortByConf;
+      sortBy = response.topicSortByConf?.showSortBy ?? 0;
+      if (response.hasMore == false) {
+        isEnd = true;
+      }
+      return response.items;
     }
-    return response?.items;
+    return null;
   }
 
   @override
@@ -96,7 +99,7 @@ class DynTopicController
       SmartDialog.showToast('账号未登录');
       return;
     }
-    bool isFav = this.isFav.value ?? false;
+    final isFav = this.isFav.value;
     final res = isFav
         ? await FavHttp.delFavTopic(topicId)
         : await FavHttp.addFavTopic(topicId);
@@ -117,7 +120,7 @@ class DynTopicController
       SmartDialog.showToast('账号未登录');
       return;
     }
-    bool isLike = this.isLike.value ?? false;
+    final isLike = this.isLike.value;
     final res = await FavHttp.likeTopic(topicId, isLike);
     if (res.isSuccess) {
       if (isLike) {
@@ -128,6 +131,18 @@ class DynTopicController
       this.isLike.value = !isLike;
     } else {
       res.toast();
+    }
+  }
+
+  Future<void> topicFold() async {
+    final res = await DynamicsHttp.topicFold(topicId: topicId, sortBy: sortBy);
+    if (res case Success(:final response)) {
+      if (response?.items case final items? when items.isNotEmpty) {
+        loadingState.value.data!
+          ..removeLast()
+          ..addAll(items);
+        loadingState.refresh();
+      }
     }
   }
 }

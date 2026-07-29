@@ -1,21 +1,18 @@
-import 'package:PiliPlus/models_new/space/space/item.dart';
+import 'package:PiliPlus/models/model_owner.dart';
 
 class Guard {
   String? uri;
-  String? desc;
-  String? highLight;
-  List<Item>? item;
-  String? buttonMsg;
+  Object? count;
+  List<Owner>? item;
 
-  Guard({this.uri, this.desc, this.highLight, this.item, this.buttonMsg});
-
-  factory Guard.fromJson(Map<String, dynamic> json) => Guard(
-    uri: json['uri'] as String?,
-    desc: json['desc'] as String?,
-    highLight: json['high_light'] as String?,
-    item: (json['item'] as List<dynamic>?)
-        ?.map((e) => Item.fromJson(e as Map<String, dynamic>))
-        .toList(),
-    buttonMsg: json['button_msg'] as String?,
-  );
+  Guard.fromJson(Map<String, dynamic> json) {
+    uri = json['uri'] as String?;
+    item = (json['item'] as List<dynamic>?)
+        ?.map((e) => Owner.fromJson(e as Map<String, dynamic>))
+        .toList();
+    final String? desc = json['desc'];
+    if (desc != null) {
+      count = RegExp(r'^(\d+)').firstMatch(desc)?.group(1);
+    }
+  }
 }

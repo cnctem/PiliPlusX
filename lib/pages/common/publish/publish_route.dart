@@ -2,21 +2,20 @@ import 'package:flutter/material.dart';
 
 class PublishRoute<T> extends PopupRoute<T> {
   PublishRoute({
-    required RoutePageBuilder pageBuilder,
+    required this.pageBuilder,
     bool barrierDismissible = true,
     String? barrierLabel,
     Color barrierColor = const Color(0x80000000),
     Duration transitionDuration = const Duration(milliseconds: 500),
     RouteTransitionsBuilder? transitionBuilder,
     super.settings,
-  }) : widget = pageBuilder,
-       _barrierDismissible = barrierDismissible,
+  }) : _barrierDismissible = barrierDismissible,
        _barrierLabel = barrierLabel,
        _barrierColor = barrierColor,
        _transitionDuration = transitionDuration,
        _transitionBuilder = transitionBuilder;
 
-  final RoutePageBuilder widget;
+  final RoutePageBuilder pageBuilder;
 
   @override
   bool get barrierDismissible => _barrierDismissible;
@@ -45,7 +44,7 @@ class PublishRoute<T> extends PopupRoute<T> {
     return Semantics(
       scopesRoute: true,
       explicitChildNodes: true,
-      child: widget(context, animation, secondaryAnimation),
+      child: pageBuilder(context, animation, secondaryAnimation),
     );
   }
 

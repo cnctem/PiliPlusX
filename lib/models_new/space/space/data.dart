@@ -1,34 +1,28 @@
 import 'package:PiliPlus/models_new/space/space/archive.dart';
 import 'package:PiliPlus/models_new/space/space/article.dart';
-import 'package:PiliPlus/models_new/space/space/attention_tip.dart';
 import 'package:PiliPlus/models_new/space/space/audios.dart';
 import 'package:PiliPlus/models_new/space/space/card.dart';
 import 'package:PiliPlus/models_new/space/space/cheese.dart';
 import 'package:PiliPlus/models_new/space/space/coin_archive.dart';
 import 'package:PiliPlus/models_new/space/space/comic.dart';
 import 'package:PiliPlus/models_new/space/space/elec.dart';
-import 'package:PiliPlus/models_new/space/space/entry.dart';
 import 'package:PiliPlus/models_new/space/space/favourite2.dart';
 import 'package:PiliPlus/models_new/space/space/guard.dart';
 import 'package:PiliPlus/models_new/space/space/images.dart';
 import 'package:PiliPlus/models_new/space/space/like_archive.dart';
 import 'package:PiliPlus/models_new/space/space/live.dart';
-import 'package:PiliPlus/models_new/space/space/nft_show_module.dart';
-import 'package:PiliPlus/models_new/space/space/play_game.dart';
+import 'package:PiliPlus/models_new/space/space/reservation_card_list.dart';
 import 'package:PiliPlus/models_new/space/space/season.dart';
 import 'package:PiliPlus/models_new/space/space/series.dart';
 import 'package:PiliPlus/models_new/space/space/setting.dart';
-import 'package:PiliPlus/models_new/space/space/space_button_list.dart';
 import 'package:PiliPlus/models_new/space/space/tab.dart';
 import 'package:PiliPlus/models_new/space/space/tab2.dart';
 import 'package:PiliPlus/models_new/space/space/ugc_season.dart';
 
 class SpaceData {
   int? relation;
-  int? guestRelation;
   int? medal;
   String? defaultTab;
-  bool? isParams;
   SpaceSetting? setting;
   SpaceTab? tab;
   SpaceCard? card;
@@ -37,7 +31,6 @@ class SpaceData {
   Elec? elec;
   Archive? archive;
   SpaceSeries? series;
-  PlayGame? playGame;
   Article? article;
   SpaceSeason? season;
   CoinArchive? coinArchive;
@@ -46,26 +39,17 @@ class SpaceData {
   Favourite2? favourite2;
   Comic? comic;
   UgcSeason? ugcSeason;
-  int? adShopType;
-  String? adContainerPath;
   Cheese? cheese;
   Guard? guard;
-  AttentionTip? attentionTip;
-  NftShowModule? nftShowModule;
   List<SpaceTab2>? tab2;
-  dynamic nftFaceButton;
-  dynamic digitalButton;
-  List<Entry>? entry;
-  List<SpaceButtonList>? spaceButtonList;
   int? relSpecial;
   bool? hasItem;
+  List<ReservationCardItem>? reservationCardList;
 
   SpaceData({
     this.relation,
-    this.guestRelation,
     this.medal,
     this.defaultTab,
-    this.isParams,
     this.setting,
     this.tab,
     this.card,
@@ -74,7 +58,6 @@ class SpaceData {
     this.elec,
     this.archive,
     this.series,
-    this.playGame,
     this.article,
     this.season,
     this.coinArchive,
@@ -85,22 +68,15 @@ class SpaceData {
     this.ugcSeason,
     this.cheese,
     this.guard,
-    this.attentionTip,
-    this.nftShowModule,
     this.tab2,
-    this.nftFaceButton,
-    this.digitalButton,
-    this.entry,
-    this.spaceButtonList,
     this.relSpecial,
+    this.reservationCardList,
   });
 
   SpaceData.fromJson(Map<String, dynamic> json) {
     relation = json['relation'] as int?;
-    guestRelation = json['guest_relation'] as int?;
     medal = json['medal'] as int?;
     defaultTab = json['default_tab'] as String?;
-    isParams = json['is_params'] as bool?;
     setting = json['setting'] == null
         ? null
         : SpaceSetting.fromJson(json['setting'] as Map<String, dynamic>);
@@ -125,9 +101,6 @@ class SpaceData {
     series = json['series'] == null
         ? null
         : SpaceSeries.fromJson(json['series'] as Map<String, dynamic>);
-    playGame = json['play_game'] == null
-        ? null
-        : PlayGame.fromJson(json['play_game'] as Map<String, dynamic>);
     article = json['article'] == null
         ? null
         : Article.fromJson(json['article'] as Map<String, dynamic>);
@@ -158,26 +131,13 @@ class SpaceData {
     guard = json['guard'] == null
         ? null
         : Guard.fromJson(json['guard'] as Map<String, dynamic>);
-    attentionTip = json['attention_tip'] == null
-        ? null
-        : AttentionTip.fromJson(json['attention_tip'] as Map<String, dynamic>);
-    nftShowModule = json['nft_show_module'] == null
-        ? null
-        : NftShowModule.fromJson(
-            json['nft_show_module'] as Map<String, dynamic>,
-          );
     tab2 = (json['tab2'] as List<dynamic>?)
         ?.map((e) => SpaceTab2.fromJson(e as Map<String, dynamic>))
         .toList();
-    nftFaceButton = json['nft_face_button'] as dynamic;
-    digitalButton = json['digital_button'] as dynamic;
-    entry = (json['entry'] as List<dynamic>?)
-        ?.map((e) => Entry.fromJson(e as Map<String, dynamic>))
-        .toList();
-    spaceButtonList = (json['space_button_list'] as List<dynamic>?)
-        ?.map((e) => SpaceButtonList.fromJson(e as Map<String, dynamic>))
-        .toList();
     relSpecial = (json['rel_special'] as num?)?.toInt();
+    reservationCardList = (json['reservation_card_list'] as List<dynamic>?)
+        ?.map((e) => ReservationCardItem.fromJson(e))
+        .toList();
     hasItem =
         archive?.item?.isNotEmpty == true ||
         favourite2?.item?.isNotEmpty == true ||

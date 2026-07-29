@@ -8,13 +8,15 @@ import 'package:get/get.dart';
 
 class UpowerRankController
     extends CommonListController<UpowerRankData, UpowerRankInfo> {
-  UpowerRankController({this.privilegeType, required this.upMid});
-  int? privilegeType;
+  UpowerRankController({
+    this.privilegeType,
+    required this.upMid,
+  });
 
   final String upMid;
-  final Rx<String?> name = Rx<String?>(null);
-  final Rx<List<LevelInfo>?> tabs = Rx<List<LevelInfo>?>(null);
-  int? memberTotal;
+  final int? privilegeType;
+
+  late final Rx<List<LevelInfo>?> tabs = Rx<List<LevelInfo>?>(null);
 
   @override
   void onInit() {
@@ -25,11 +27,11 @@ class UpowerRankController
   @override
   List<UpowerRankInfo>? getDataList(UpowerRankData response) {
     isEnd = true;
-    memberTotal = response.memberTotal ?? 0;
-    if (response.levelInfo != null && response.levelInfo!.length > 1) {
+    if (privilegeType == null &&
+        response.levelInfo != null &&
+        response.levelInfo!.length > 1) {
       tabs.value = response.levelInfo;
     }
-    name.value = response.upInfo!.nickname;
     return response.rankInfo;
   }
 

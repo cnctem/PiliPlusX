@@ -1,0 +1,13 @@
+diff --git a/packages/flutter/lib/src/material/navigation_drawer.dart b/packages/flutter/lib/src/material/navigation_drawer.dart
+index 8a16764cb0c..6b8545c3781 100644
+--- a/packages/flutter/lib/src/material/navigation_drawer.dart
++++ b/packages/flutter/lib/src/material/navigation_drawer.dart
+@@ -410,7 +410,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
+       child: _NavigationDestinationSemantics(
+         child: SizedBox(
+           height: navigationDrawerTheme.tileHeight ?? defaults.tileHeight,
+-          child: inkWell,
++          child: Material(type: MaterialType.transparency, child: inkWell),
+         ),
+       ),
+     );

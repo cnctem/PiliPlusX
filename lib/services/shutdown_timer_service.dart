@@ -13,7 +13,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 enum _ShutdownType with EnumWithLabel {
   pause('暂停视频'),
-  exit('退出APP')
+  exit('退出APP'),
   ;
 
   @override
@@ -90,7 +90,7 @@ class ShutdownTimerService {
             return;
           }
         }
-        exit(0);
+        _syncProgressAndExit();
     }
   }
 
@@ -101,8 +101,23 @@ class ShutdownTimerService {
         _durationInMinutes = 0;
         SmartDialog.showToast('定时时间已到，已暂停');
       case _ShutdownType.exit:
-        exit(0);
+        _syncProgressAndExit();
     }
+  }
+
+  void _syncProgressAndExit() {
+    if (PlPlayerController.instance case final player?) {
+      final res = player.makeHeartBeat(
+        player.position.value,
+        type: .completed,
+        isManual: true,
+      );
+      if (res != null) {
+        res.whenComplete(() => exit(0));
+        return;
+      }
+    }
+    exit(0);
   }
 
   static (int hour, int minute) _parseMinutes(int minutes) =>
@@ -132,7 +147,7 @@ class ShutdownTimerService {
     }
     PageUtils.showVideoBottomSheet(
       context,
-      isFullScreen: () => isFullScreen,
+      maxWidth: 512,
       child: StatefulBuilder(
         builder: (_, setState) {
           final ThemeData theme = Theme.of(context);
@@ -150,7 +165,7 @@ class ShutdownTimerService {
                     const Center(child: Text('定时关闭', style: titleStyle)),
                     const SizedBox(height: 10),
                     ...{...scheduleTimeMinutes, _durationInMinutes}
-                        .sorted((a, b) => a.compareTo(b))
+                        .sorted(Comparable.compare)
                         .map(
                           (minutes) => ListTile(
                             dense: true,

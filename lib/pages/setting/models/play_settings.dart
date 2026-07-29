@@ -1,17 +1,19 @@
-import 'dart:io';
+import 'dart:io' show Platform;
 
 import 'package:PiliPlus/common/widgets/custom_icon.dart';
 import 'package:PiliPlus/models/common/super_chat_type.dart';
 import 'package:PiliPlus/models/common/video/subtitle_pref_type.dart';
 import 'package:PiliPlus/pages/main/controller.dart';
 import 'package:PiliPlus/pages/setting/models/model.dart';
+import 'package:PiliPlus/pages/setting/pages/fullscreen_sc_size.dart';
 import 'package:PiliPlus/pages/setting/widgets/select_dialog.dart';
+import 'package:PiliPlus/pages/setting/widgets/slider_dialog.dart';
 import 'package:PiliPlus/plugin/pl_player/models/bottom_progress_behavior.dart';
+import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/plugin/pl_player/models/fullscreen_mode.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
-import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart'
-    show allowRotateScreen;
 import 'package:PiliPlus/services/service_locator.dart';
+import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
@@ -45,6 +47,13 @@ List<SettingsModel> get playSettings => [
     title: '倍速设置',
     subtitle: '设置视频播放速度',
   ),
+  if (Platform.isAndroid)
+    NormalModel(
+      onTap: _showAngleDegreesDialog,
+      leading: const Icon(MdiIcons.angleAcute),
+      title: '倾斜角度阈值',
+      getSubtitle: () => '当前:「${Pref.angleDegrees}°」',
+    ),
   const SwitchModel(
     title: '自动播放',
     subtitle: '进入详情页自动播放',
@@ -96,6 +105,20 @@ List<SettingsModel> get playSettings => [
     setKey: SettingBoxKey.enableSlideFS,
     defaultVal: true,
   ),
+  if (PlatformUtils.isMobile)
+    NormalModel(
+      title: '播放器音量',
+      leading: const Icon(Icons.volume_up),
+      getSubtitle: () => '当前:「${Pref.playerVolume.toStringAsFixed(0)}%」',
+      onTap: showPlayerVolumeDialog,
+    )
+  else
+    NormalModel(
+      title: '最高音量',
+      leading: const Icon(Icons.volume_up),
+      getSubtitle: () => '当前:「${(Pref.maxVolume * 100).toStringAsFixed(0)}%」',
+      onTap: _showMaxVolumeDialog,
+    ),
   getVideoFilterSelectModel(
     title: '双击快进/快退时长',
     suffix: 's',
@@ -149,6 +172,12 @@ List<SettingsModel> get playSettings => [
     getSubtitle: () => '当前:「${Pref.superChatType.title}」',
     onTap: _showSuperChatDialog,
   ),
+  NormalModel(
+    title: '全屏 SC 大小',
+    subtitle: 'SuperChat (醒目留言) 大小设置',
+    leading: const Icon(Icons.open_in_full),
+    onTap: (_, _) => Get.to(const FullScreenScSize()),
+  ),
   const SwitchModel(
     title: '竖屏扩大展示',
     subtitle: '小屏竖屏视频宽高比由16:9扩大至1:1（不支持收起）；横屏适配时，扩大至9:16',
@@ -185,13 +214,14 @@ List<SettingsModel> get playSettings => [
     defaultVal: true,
     onChanged: (value) => allowRotateScreen = value,
   ),
-  const SwitchModel(
-    title: '后台播放',
-    subtitle: '进入后台时继续播放',
-    leading: Icon(Icons.motion_photos_pause_outlined),
-    setKey: SettingBoxKey.continuePlayInBackground,
-    defaultVal: false,
-  ),
+  if (PlatformUtils.isMobile)
+    const SwitchModel(
+      title: '后台播放',
+      subtitle: '进入后台时继续播放',
+      leading: Icon(Icons.motion_photos_pause_outlined),
+      setKey: SettingBoxKey.continuePlayInBackground,
+      defaultVal: false,
+    ),
   if (Platform.isAndroid || OS.isHarmony) ...[
     SwitchModel(
       title: '后台画中画',
@@ -348,5 +378,91 @@ Future<void> _showProgressBehaviorDialog(
       res.index,
     );
     setState();
+  }
+}
+
+Future<void> _showAngleDegreesDialog(
+  BuildContext context,
+  VoidCallback setState,
+) async {
+  final res = await showDialog<double>(
+    context: context,
+    builder: (context) => SliderDialog(
+      title: const Text('倾斜角度阈值'),
+      min: 10.0,
+      max: 90.0,
+      divisions: 90,
+      precise: 0,
+      value: Pref.angleDegrees.toDouble(),
+      suffix: '°',
+    ),
+  );
+  if (res != null) {
+    await GStorage.setting.put(SettingBoxKey.angleDegrees, res.toInt());
+    setState();
+  }
+}
+
+Future<void> showPlayerVolumeDialog(
+  BuildContext context,
+  VoidCallback setState, {
+  ValueChanged<double>? onChanged,
+}) {
+  return showVolumeDialog(
+    context,
+    title: const Text('播放器音量'),
+    value: Pref.playerVolume,
+    onChanged: (value) => GStorage.setting
+        .put(SettingBoxKey.playerVolume, value)
+        .whenComplete(() {
+          setState();
+          onChanged?.call(value);
+        }),
+  );
+}
+
+Future<void> _showMaxVolumeDialog(
+  BuildContext context,
+  VoidCallback setState,
+) {
+  return showVolumeDialog(
+    context,
+    title: const Text('最高音量'),
+    value: Pref.maxVolume * 100,
+    onChanged: (rawValue) {
+      final maxVolume = (rawValue / 100).toPrecision(2);
+      if (Pref.desktopVolume > maxVolume) {
+        GStorage.setting.put(SettingBoxKey.desktopVolume, maxVolume);
+      }
+      GStorage.setting
+          .put(SettingBoxKey.maxVolume, maxVolume)
+          .whenComplete(setState);
+    },
+  );
+}
+
+const kMinVolume = 100.0;
+const kMaxVolume = 300.0;
+
+Future<void> showVolumeDialog(
+  BuildContext context, {
+  required Widget title,
+  required double value,
+  required ValueChanged<double> onChanged,
+}) async {
+  final res = await showDialog<double>(
+    context: context,
+    builder: (context) => SliderDialog(
+      title: title,
+      min: kMinVolume,
+      max: kMaxVolume,
+      divisions: 40,
+      precise: 0,
+      value: value,
+      suffix: '%',
+    ),
+  );
+  if (res != null) {
+    onChanged(res);
   }
 }

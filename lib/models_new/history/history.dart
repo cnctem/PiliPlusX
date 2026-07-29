@@ -4,7 +4,6 @@ class History {
   String? bvid;
   int? page;
   int? cid;
-  String? part;
   String? business;
 
   History({
@@ -13,7 +12,6 @@ class History {
     this.bvid,
     this.page,
     this.cid,
-    this.part,
     this.business,
   });
 
@@ -23,7 +21,6 @@ class History {
     bvid: json['bvid'],
     page: json['page'],
     cid: json['cid'] == 0 ? null : json['cid'],
-    part: json['part'],
     business: json['business'],
   );
 }

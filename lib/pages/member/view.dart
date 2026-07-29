@@ -1,13 +1,18 @@
 import 'dart:io' show Platform;
+import 'dart:math' as math;
 
+import 'package:PiliPlus/common/style.dart';
+import 'package:PiliPlus/common/widgets/button/icon_button.dart';
 import 'package:PiliPlus/common/widgets/dialog/report_member.dart';
 import 'package:PiliPlus/common/widgets/dynamic_sliver_app_bar/dynamic_sliver_app_bar.dart';
+import 'package:PiliPlus/common/widgets/gesture/tap_gesture_recognizer.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/loading_widget.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart';
 import 'package:PiliPlus/http/live.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/user.dart';
 import 'package:PiliPlus/models_new/live/live_medal_wall/data.dart';
+import 'package:PiliPlus/models_new/space/space/reservation_card_list.dart';
 import 'package:PiliPlus/pages/coin_log/controller.dart';
 import 'package:PiliPlus/pages/exp_log/controller.dart';
 import 'package:PiliPlus/pages/log_table/view.dart';
@@ -15,6 +20,7 @@ import 'package:PiliPlus/pages/login_devices/view.dart';
 import 'package:PiliPlus/pages/login_log/controller.dart';
 import 'package:PiliPlus/pages/member/controller.dart';
 import 'package:PiliPlus/pages/member/widget/medal_wall.dart';
+import 'package:PiliPlus/pages/member/widget/reserve_button.dart';
 import 'package:PiliPlus/pages/member/widget/user_info_card.dart';
 import 'package:PiliPlus/pages/member_cheese/view.dart';
 import 'package:PiliPlus/pages/member_contribute/controller.dart';
@@ -26,12 +32,18 @@ import 'package:PiliPlus/pages/member_pgc/view.dart';
 import 'package:PiliPlus/pages/member_shop/view.dart';
 import 'package:PiliPlus/pages/member_video_web/archive/view.dart';
 import 'package:PiliPlus/pages/member_video_web/season_series/view.dart';
+import 'package:PiliPlus/utils/android/android_helper.dart';
+import 'package:PiliPlus/utils/cache_manager.dart';
+import 'package:PiliPlus/utils/cache_manager_ext.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
+import 'package:PiliPlus/utils/extension/context_ext.dart';
+import 'package:PiliPlus/utils/extension/string_ext.dart';
+import 'package:PiliPlus/utils/num_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -89,7 +101,7 @@ class _MemberPageState extends State<MemberPage> with WidgetsBindingObserver {
     if (Get.currentRoute != _routeName) return;
     // 仅在应用处于前台（resumed）时触发
     if (_lifecycleState != AppLifecycleState.resumed) return;
-    final outerCtr = _userController.key.currentState?.outerController;
+    final outerCtr = _userController.scrollKey.currentState?.outerController;
     if (outerCtr?.hasClients == true) {
       outerCtr!.animateTo(
         0,
@@ -109,7 +121,7 @@ class _MemberPageState extends State<MemberPage> with WidgetsBindingObserver {
         () => switch (_userController.loadingState.value) {
           Loading() => m3eLoading,
           Success(:final response) => ExtendedNestedScrollView(
-            key: _userController.key,
+            key: _userController.scrollKey,
             onlyOneScrollInBody: true,
             pinnedHeaderSliverHeightBuilder: () =>
                 kToolbarHeight + MediaQuery.viewPaddingOf(context).top,
@@ -131,6 +143,10 @@ class _MemberPageState extends State<MemberPage> with WidgetsBindingObserver {
                         silence: _userController.silence,
                         headerControllerBuilder: getHeaderController,
                         showLiveMedalWall: _showLiveMedalWall,
+                        charges: _userController.charges,
+                        chargeCount: _userController.chargeCount,
+                        guards: _userController.guards,
+                        guardCount: _userController.guardCount,
                       ),
                     ),
                   ),
@@ -180,7 +196,171 @@ class _MemberPageState extends State<MemberPage> with WidgetsBindingObserver {
     );
   }
 
+  Widget _reserveBtn(List<ReservationCardItem> list, ColorScheme theme) {
+    return IconButton(
+      tooltip: '预约',
+      onPressed: () => _showReserveList(list),
+      icon: ReserveButton(
+        count: list.length,
+        color: theme.onSurfaceVariant,
+        child: const Icon(Icons.notifications_none),
+      ),
+    );
+  }
+
+  void _showReserveList(List<ReservationCardItem> list) {
+    showModalBottomSheet(
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      constraints: BoxConstraints(
+        maxWidth: math.min(640, context.mediaQueryShortestSide),
+      ),
+      builder: (context) {
+        final scheme = ColorScheme.of(context);
+        return Padding(
+          padding: .only(bottom: MediaQuery.viewPaddingOf(context).bottom + 30),
+          child: Column(
+            mainAxisSize: .min,
+            children: [
+              InkWell(
+                onTap: Get.back,
+                borderRadius: Style.bottomSheetRadius,
+                child: SizedBox(
+                  height: 35,
+                  child: Center(
+                    child: Container(
+                      width: 32,
+                      height: 3,
+                      decoration: BoxDecoration(
+                        color: scheme.outline,
+                        borderRadius: const .all(.circular(1.5)),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              ...list.map((e) {
+                return Builder(
+                  builder: (context) {
+                    Widget trailing = FilledButton.tonal(
+                      onPressed: () async {
+                        final isFollow = e.isFollow;
+                        final res = await UserHttp.spaceReserve(
+                          sid: e.sid!,
+                          isFollow: isFollow,
+                        );
+                        if (res.isSuccess) {
+                          e
+                            ..total += isFollow ? -1 : 1
+                            ..isFollow = !isFollow;
+                          if (!context.mounted) return;
+                          (context as Element).markNeedsBuild();
+                        } else {
+                          res.toast();
+                        }
+                      },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: e.isFollow
+                            ? scheme.onInverseSurface
+                            : null,
+                        foregroundColor: e.isFollow ? scheme.outline : null,
+                        tapTargetSize: .shrinkWrap,
+                        minimumSize: const Size(68, 40),
+                        padding: const .symmetric(horizontal: 10),
+                        visualDensity: const .new(horizontal: -2, vertical: -3),
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: .all(.circular(6)),
+                        ),
+                      ),
+                      child: Text(
+                        '${e.isFollow ? '已' : ''}预约',
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                    );
+                    if (e.dynamicId?.isNotEmpty ?? false) {
+                      trailing = Row(
+                        spacing: 8,
+                        mainAxisSize: .min,
+                        children: [
+                          iconButton(
+                            tooltip: '预约动态',
+                            size: 32,
+                            iconSize: 20,
+                            iconColor: scheme.outline,
+                            icon: const Icon(Icons.open_in_browser),
+                            onPressed: () => PageUtils.pushDynFromId(
+                              id: e.dynamicId,
+                            ),
+                          ),
+                          trailing,
+                        ],
+                      );
+                    }
+                    return ListTile(
+                      dense: true,
+                      title: Text(
+                        e.name!,
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                      subtitle: Padding(
+                        padding: const .only(top: 2.0),
+                        child: Text.rich(
+                          style: TextStyle(fontSize: 12, color: scheme.outline),
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text:
+                                    '${e.descText1 == null ? '' : '${e.descText1}  '}'
+                                    '${NumUtils.numFormat(e.total)}人预约',
+                              ),
+                              if (e.lotteryPrizeInfo case final lottery?) ...[
+                                const TextSpan(text: '\n'),
+                                WidgetSpan(
+                                  alignment: .middle,
+                                  child: Icon(
+                                    size: 15,
+                                    Icons.card_giftcard,
+                                    color: scheme.primary,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: ' ${lottery.text}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: scheme.primary,
+                                  ),
+                                  recognizer:
+                                      lottery.jumpUrl?.isNotEmpty == true
+                                      ? (NoDeadlineTapGestureRecognizer()
+                                          ..onTap = () => Get.toNamed(
+                                            '/webview',
+                                            parameters: {
+                                              'url': lottery.jumpUrl!,
+                                            },
+                                          ))
+                                      : null,
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                      trailing: trailing,
+                    );
+                  },
+                );
+              }),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   List<Widget> _actions(ColorScheme theme) => [
+    if (_userController.reserves?.isNotEmpty ?? false)
+      _reserveBtn(_userController.reserves!, theme),
     IconButton(
       tooltip: '搜索',
       onPressed: () => Get.toNamed(
@@ -232,11 +412,9 @@ class _MemberPageState extends State<MemberPage> with WidgetsBindingObserver {
             ],
           ),
         ),
-        if (kDebugMode || Platform.isIOS)
+        if (PlatformUtils.isMobile)
           PopupMenuItem(
-            onTap: () => PageUtils.launchURL(
-              'https://www.bilibili.com/blackboard/disablelink/go-to-up-space.html?mid=$_mid',
-            ),
+            onTap: _createShortcut,
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -246,23 +424,38 @@ class _MemberPageState extends State<MemberPage> with WidgetsBindingObserver {
               ],
             ),
           ),
-        if (_userController.hasCharge)
-          PopupMenuItem(
-            onTap: () => Get.toNamed(
-              '/upowerRank',
-              parameters: {
-                'mid': _userController.mid.toString(),
-              },
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.electric_bolt, size: 19),
-                SizedBox(width: 10),
-                Text('充电排行榜'),
-              ],
-            ),
-          ),
+        // if (_userController.hasCharge)
+        //   PopupMenuItem(
+        //     onTap: () => UpowerRankPage.toUpowerRank(
+        //       mid: _userController.mid,
+        //       name: _userController.username ?? '',
+        //       count: _userController.chargeCount,
+        //     ),
+        //     child: const Row(
+        //       mainAxisSize: MainAxisSize.min,
+        //       children: [
+        //         Icon(Icons.electric_bolt, size: 19),
+        //         SizedBox(width: 10),
+        //         Text('充电排行榜'),
+        //       ],
+        //     ),
+        //   ),
+        // if (_userController.hasGuard)
+        //   PopupMenuItem(
+        //     onTap: () => MemberGuard.toMemberGuard(
+        //       mid: _userController.mid,
+        //       name: _userController.username ?? '',
+        //       count: _userController.guardCount,
+        //     ),
+        //     child: const Row(
+        //       mainAxisSize: MainAxisSize.min,
+        //       children: [
+        //         Icon(Icons.anchor, size: 19),
+        //         SizedBox(width: 10),
+        //         Text('大航海舰队'),
+        //       ],
+        //     ),
+        //   ),
         if (Get.isRegistered<MemberContributeCtr>(tag: _heroTag))
           PopupMenuItem(
             onTap: _toWebArchive,
@@ -520,6 +713,34 @@ class _MemberPageState extends State<MemberPage> with WidgetsBindingObserver {
       MemberVideoWeb.toMemberVideoWeb(
         mid: _mid,
         name: _userController.username ?? '',
+      );
+    } catch (e) {
+      SmartDialog.showToast(e.toString());
+    }
+  }
+
+  void _createShortcut() {
+    if (Platform.isIOS) {
+      PageUtils.launchURL(
+        'https://www.bilibili.com/blackboard/disablelink/go-to-up-space.html?mid=$_mid',
+      );
+    } else if (Platform.isAndroid) {
+      _createShortcutAndroid();
+    }
+  }
+
+  Future<void> _createShortcutAndroid() async {
+    try {
+      SmartDialog.showLoading();
+      final file = (await CacheManager.manager.getSingleFile(
+        '${_userController.userAvatar!}@200w_200h.webp'.http2https,
+      ));
+      SmartDialog.dismiss();
+      PiliAndroidHelper.createShortcut(
+        _userController.mid.toString(),
+        'bilibili://space/${_userController.mid}',
+        _userController.username!,
+        file.path,
       );
     } catch (e) {
       SmartDialog.showToast(e.toString());

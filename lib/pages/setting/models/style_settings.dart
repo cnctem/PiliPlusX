@@ -8,7 +8,6 @@ import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/scale_app.dart';
 import 'package:PiliPlus/common/widgets/stateful_builder.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
-import 'package:PiliPlus/main.dart';
 import 'package:PiliPlus/models/common/bar_hide_type.dart';
 import 'package:PiliPlus/models/common/dynamic/dynamic_badge_mode.dart';
 import 'package:PiliPlus/models/common/dynamic/up_panel_position.dart';
@@ -36,7 +35,7 @@ import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
-import 'package:auto_orientation/auto_orientation.dart';
+import 'package:PiliPlus/utils/theme_utils.dart';
 import 'package:flutter/material.dart' hide StatefulBuilder;
 import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -70,9 +69,9 @@ List<SettingsModel> get styleSettings => [
     defaultVal: Pref.horizontalScreen,
     onChanged: (value) {
       if (value) {
-        autoScreen();
+        fullMode();
       } else {
-        AutoOrientation.portraitUpMode();
+        portraitUpMode();
       }
     },
   ),
@@ -84,14 +83,18 @@ List<SettingsModel> get styleSettings => [
     defaultVal: false,
     needReboot: true,
   ),
-  SwitchModel(
-    title: 'App字体字重',
-    subtitle: '点击设置',
-    setKey: SettingBoxKey.appFontWeight,
-    defaultVal: false,
-    leading: const Icon(Icons.text_fields),
-    onChanged: (_) => Get.updateMyAppTheme(),
-    onTap: _showFontWeightDialog,
+  SplitModel(
+    normalModel: const NormalModel.split(
+      title: 'App字体字重',
+      subtitle: '点击设置',
+      leading: Icon(Icons.text_fields),
+    ),
+    switchModel: SwitchModel.split(
+      defaultVal: false,
+      setKey: SettingBoxKey.appFontWeight,
+      onChanged: (_) => Get.updateMyAppTheme(),
+      onTap: _showFontWeightDialog,
+    ),
   ),
   NormalModel(
     title: '界面缩放',
@@ -107,7 +110,7 @@ List<SettingsModel> get styleSettings => [
   ),
   const SwitchModel(
     title: '优化平板导航栏',
-    leading: Icon(MdiIcons.soundbar),
+    leading: Icon(Icons.auto_fix_high),
     setKey: SettingBoxKey.optTabletNav,
     defaultVal: true,
     needReboot: true,
@@ -120,6 +123,13 @@ List<SettingsModel> get styleSettings => [
     defaultVal: true,
     needReboot: true,
   ),
+  const SwitchModel(
+    title: '悬浮底栏',
+    leading: Icon(MdiIcons.soundbar),
+    setKey: SettingBoxKey.floatingNavBar,
+    defaultVal: false,
+    needReboot: true,
+  ),
   NormalModel(
     leading: const Icon(Icons.calendar_view_week_outlined),
     title: '列表宽度（dp）限制',
@@ -127,23 +137,24 @@ List<SettingsModel> get styleSettings => [
         '当前: 主页${Pref.recommendCardWidth.toInt()}dp 其他${Pref.smallCardWidth.toInt()}dp，屏幕宽度:${DoubleExt(MediaQuery.widthOf(Get.context!)).toPrecision(2)}dp。宽度越小列数越多。',
     onTap: _showCardWidthDialog,
   ),
-  SwitchModel(
-    title: '视频播放页使用深色主题',
-    leading: const Icon(Icons.dark_mode_outlined),
-    setKey: SettingBoxKey.darkVideoPage,
+  const SwitchModel(
+    title: '播放页移除安全边距',
+    leading: Icon(Icons.fit_screen_outlined),
+    setKey: SettingBoxKey.removeSafeArea,
     defaultVal: false,
-    onChanged: (value) {
-      if (value && MyApp.darkThemeData == null) {
-        Get.updateMyAppTheme();
-      }
-    },
   ),
   const SwitchModel(
+    title: '视频播放页使用深色主题',
+    leading: Icon(Icons.dark_mode_outlined),
+    setKey: SettingBoxKey.darkVideoPage,
+    defaultVal: false,
+  ),
+  SwitchModel(
     title: '动态页启用瀑布流',
     subtitle: '关闭会显示为单列',
-    leading: Icon(Icons.view_array_outlined),
+    leading: const Icon(Icons.view_array_outlined),
     setKey: SettingBoxKey.dynamicsWaterfallFlow,
-    defaultVal: true,
+    defaultVal: Pref.horizontalScreen,
     needReboot: true,
   ),
   NormalModel(
@@ -215,7 +226,7 @@ List<SettingsModel> get styleSettings => [
   NormalModel(
     onTap: (context, setState) => _showQualityDialog(
       context: context,
-      title: '图片质量',
+      title: const Text('图片质量'),
       initValue: Pref.picQuality,
       onChanged: (picQuality) async {
         GlobalData().imgQuality = picQuality;
@@ -234,7 +245,7 @@ List<SettingsModel> get styleSettings => [
   NormalModel(
     onTap: (context, setState) => _showQualityDialog(
       context: context,
-      title: '查看大图质量',
+      title: const Text('查看大图质量'),
       initValue: Pref.previewQ,
       onChanged: (picQuality) async {
         await GStorage.setting.put(SettingBoxKey.previewQuality, picQuality);
@@ -285,7 +296,7 @@ List<SettingsModel> get styleSettings => [
     setKey: SettingBoxKey.isPureBlackTheme,
     defaultVal: false,
     onChanged: (value) {
-      if (Get.isDarkMode || Pref.darkVideoPage) {
+      if (ThemeUtils.isDarkMode || Pref.darkVideoPage) {
         Get.updateMyAppTheme();
       }
     },
@@ -376,7 +387,7 @@ List<SettingsModel> get styleSettings => [
 
 void _showQualityDialog({
   required BuildContext context,
-  required String title,
+  required Widget title,
   required int initValue,
   required ValueChanged<int> onChanged,
 }) {
@@ -437,9 +448,7 @@ void _showUiScaleDialog(
             ),
             TextFormField(
               controller: textController,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
+              keyboardType: const .numberWithOptions(decimal: true),
               inputFormatters: [
                 LengthLimitingTextInputFormatter(4),
                 FilteringTextInputFormatter.allow(RegExp(r'[\d.]+')),
@@ -632,7 +641,7 @@ Future<void> _showFontWeightDialog(BuildContext context) async {
   final res = await showDialog<double>(
     context: context,
     builder: (context) => SliderDialog(
-      title: 'App字体字重',
+      title: const Text('App字体字重'),
       value: Pref.appFontWeight.toDouble() + 1,
       min: 1,
       max: FontWeight.values.length.toDouble(),
@@ -658,8 +667,8 @@ Future<void> _showTransitionDialog(
     ),
   );
   if (res != null) {
+    Get.rootController.defaultTransition = res;
     await GStorage.setting.put(SettingBoxKey.pageTransition, res.index);
-    SmartDialog.showToast('重启生效');
     setState();
   }
 }
@@ -671,11 +680,11 @@ Future<void> _showCardWidthDialog(
   final res = await showDialog<(double, double)>(
     context: context,
     builder: (context) => DualSliderDialog(
-      title: '列表最大列宽度（默认240dp）',
+      title: const Text('列表最大列宽度（默认240dp）'),
       value1: Pref.recommendCardWidth,
       value2: Pref.smallCardWidth,
-      description1: '主页推荐流',
-      description2: '其他',
+      description1: const Text('主页推荐流'),
+      description2: const Text('其他'),
       min: 150.0,
       max: 500.0,
       divisions: 35,
@@ -848,7 +857,7 @@ Future<void> _showToastDialog(
   final res = await showDialog<double>(
     context: context,
     builder: (context) => SliderDialog(
-      title: 'Toast不透明度',
+      title: const Text('Toast不透明度'),
       value: CustomToast.toastOpacity,
       min: 0.0,
       max: 1.0,
@@ -880,7 +889,7 @@ Future<void> _showThemeTypeDialog(
       Get.find<MineController>().themeType.value = res;
     } catch (_) {}
     GStorage.setting.put(SettingBoxKey.themeMode, res.index);
-    Get.changeThemeMode(res.toThemeMode);
+    Get.changeThemeMode(ThemeUtils.themeMode = res.toThemeMode);
     setState();
   }
 }

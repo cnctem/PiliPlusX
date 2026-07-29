@@ -1,6 +1,4 @@
-import 'package:PiliPlus/common/widgets/flutter/layout_builder.dart';
-import 'package:flutter/material.dart' hide LayoutBuilder;
-import 'package:flutter/widgets.dart' hide LayoutBuilder;
+import 'package:flutter/widgets.dart';
 
 /// 带缓存的 LayoutBuilder，避免父组件 rebuild 时产生不必要的子树重建。
 ///
@@ -14,7 +12,7 @@ class CachedLayoutBuilder extends StatefulWidget {
   });
 
   final Widget Function(BuildContext context, BoxConstraints constraints)
-      builder;
+  builder;
 
   @override
   State<CachedLayoutBuilder> createState() => _CachedLayoutBuilderState();

@@ -1,6 +1,5 @@
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
-import 'package:PiliPlus/common/widgets/flutter/layout_builder.dart';
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/stat/stat.dart';
@@ -12,7 +11,7 @@ import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/duration_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:flutter/material.dart' hide LayoutBuilder;
+import 'package:flutter/material.dart';
 
 // 收藏视频卡片 - 水平布局
 class SubVideoCardH extends StatelessWidget {
@@ -36,13 +35,15 @@ class SubVideoCardH extends StatelessWidget {
       type: MaterialType.transparency,
       child: InkWell(
         onTap: () async {
-          int? cid = await SearchHttp.ab2c(bvid: videoItem.bvid);
+          final res = await SearchHttp.ab2cWithDimension(bvid: videoItem.bvid);
+          final cid = res?.cid;
           if (cid != null) {
             PageUtils.toVideoPage(
               bvid: videoItem.bvid,
               cid: cid,
               cover: videoItem.cover,
               title: videoItem.title,
+              dimension: res!.dimension,
             );
           }
         },

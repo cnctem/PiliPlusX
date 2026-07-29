@@ -11,6 +11,7 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
+Package.resolved
 
 # IntelliJ related
 *.iml
@@ -148,7 +149,7 @@ pili_release.json
 
 dist
 
-test*.dart
+test*
 
 ohos/build-profile.json5
 
