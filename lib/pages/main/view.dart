@@ -52,6 +52,8 @@ class _MainAppState extends PopScopeState<MainApp>
   int _primaryColorValue = 0;
   late ThemeData theme;
   Brightness? _brightness;
+  /// 上一次的 useBottomNav 值，用于检测横竖屏切换以同步原生 HDS 底栏显隐
+  bool _lastUseBottomNav = false;
 
   @override
   bool get initCanPop => false;
@@ -98,6 +100,13 @@ class _MainAppState extends PopScopeState<MainApp>
     }
     if (!_mainController.useSideBar) {
       _mainController.useBottomNav = MediaQuery.sizeOf(context).isPortrait;
+    }
+    // 横竖屏切换时同步原生 HDS 沉浸底栏显隐
+    if (_lastUseBottomNav != _mainController.useBottomNav) {
+      _lastUseBottomNav = _mainController.useBottomNav;
+      if (_mainController.useNativeTabs.value) {
+        HarmonyChannel.setShellBarsHidden(!_mainController.useBottomNav);
+      }
     }
     // 缓存主题主色，供 ever 回调在 useNativeTabs 异步就绪后补发
     _primaryColorValue = Theme.of(context).colorScheme.primary.value;
@@ -307,92 +316,94 @@ class _MainAppState extends PopScopeState<MainApp>
     if (_mainController.navigationBars.length <= 1) {
       return const SizedBox.shrink();
     }
+    // 横屏侧栏布局下不显示底栏
+    if (!_mainController.useBottomNav) {
+      return const SizedBox.shrink();
+    }
     // 开启鸿蒙沉浸光感后需返回空组件
     if (_mainController.useNativeTabs.value) {
       return const SizedBox.shrink();
     }
-    return Obx(() {
-      final Widget bottomNav;
-      if (_mainController.floatingNavBar) {
-        bottomNav = Obx(
-          () => FloatingNavigationBar(
-            onDestinationSelected: _mainController.setIndex,
-            selectedIndex: _mainController.selectedIndex.value,
-            destinations: _mainController.navigationBars
-                .map(
-                  (e) => FloatingNavigationDestination(
-                    label: e.label,
-                    icon: _buildIcon(type: e),
-                    selectedIcon: _buildIcon(type: e, selected: true),
-                  ),
-                )
-                .toList(),
-          ),
-        );
-      } else if (_mainController.enableMYBar) {
-        bottomNav = Obx(
-          () => NavigationBar(
-            maintainBottomViewPadding: true,
-            onDestinationSelected: _mainController.setIndex,
-            selectedIndex: _mainController.selectedIndex.value,
-            destinations: _mainController.navigationBars
-                .map(
-                  (e) => NavigationDestination(
-                    label: e.label,
-                    icon: _buildIcon(type: e),
-                    selectedIcon: _buildIcon(type: e, selected: true),
-                  ),
-                )
-                .toList(),
-          ),
-        );
-      } else {
-        bottomNav = Obx(
-          () => BottomNavigationBar(
-            currentIndex: _mainController.selectedIndex.value,
-            onTap: _mainController.setIndex,
-            iconSize: 16,
-            selectedFontSize: 12,
-            unselectedFontSize: 12,
-            type: .fixed,
-            items: _mainController.navigationBars
-                .map(
-                  (e) => BottomNavigationBarItem(
-                    label: e.label,
-                    icon: _buildIcon(type: e),
-                    activeIcon: _buildIcon(type: e, selected: true),
-                  ),
-                )
-                .toList(),
-          ),
-        );
-      }
+    final Widget bottomNav;
+    if (_mainController.floatingNavBar) {
+      bottomNav = Obx(
+        () => FloatingNavigationBar(
+          onDestinationSelected: _mainController.setIndex,
+          selectedIndex: _mainController.selectedIndex.value,
+          destinations: _mainController.navigationBars
+              .map(
+                (e) => FloatingNavigationDestination(
+                  label: e.label,
+                  icon: _buildIcon(type: e),
+                  selectedIcon: _buildIcon(type: e, selected: true),
+                ),
+              )
+              .toList(),
+        ),
+      );
+    } else if (_mainController.enableMYBar) {
+      bottomNav = Obx(
+        () => NavigationBar(
+          maintainBottomViewPadding: true,
+          onDestinationSelected: _mainController.setIndex,
+          selectedIndex: _mainController.selectedIndex.value,
+          destinations: _mainController.navigationBars
+              .map(
+                (e) => NavigationDestination(
+                  label: e.label,
+                  icon: _buildIcon(type: e),
+                  selectedIcon: _buildIcon(type: e, selected: true),
+                ),
+              )
+              .toList(),
+        ),
+      );
+    } else {
+      bottomNav = Obx(
+        () => BottomNavigationBar(
+          currentIndex: _mainController.selectedIndex.value,
+          onTap: _mainController.setIndex,
+          iconSize: 16,
+          selectedFontSize: 12,
+          unselectedFontSize: 12,
+          type: .fixed,
+          items: _mainController.navigationBars
+              .map(
+                (e) => BottomNavigationBarItem(
+                  label: e.label,
+                  icon: _buildIcon(type: e),
+                  activeIcon: _buildIcon(type: e, selected: true),
+                ),
+              )
+              .toList(),
+        ),
+      );
+    }
 
-      if (_mainController.hideBottomBar) {
-        if (_mainController.barOffset case final barOffset?) {
-          return Obx(
-            () => FractionalTranslation(
-              translation: Offset(
-                0.0,
-                barOffset.value / Style.topBarHeight,
-              ),
-              child: bottomNav,
+    if (_mainController.hideBottomBar) {
+      if (_mainController.barOffset case final barOffset?) {
+        return Obx(
+          () => FractionalTranslation(
+            translation: Offset(
+              0.0,
+              barOffset.value / Style.topBarHeight,
             ),
-          );
-        }
-        if (_mainController.showBottomBar case final showBottomBar?) {
-          return Obx(
-            () => AnimatedSlide(
-              curve: Curves.easeInOutCubicEmphasized,
-              duration: const Duration(milliseconds: 500),
-              offset: Offset(0, showBottomBar.value ? 0 : 1),
-              child: bottomNav,
-            ),
-          );
-        }
+            child: bottomNav,
+          ),
+        );
       }
-      return bottomNav;
-    });
+      if (_mainController.showBottomBar case final showBottomBar?) {
+        return Obx(
+          () => AnimatedSlide(
+            curve: Curves.easeInOutCubicEmphasized,
+            duration: const Duration(milliseconds: 500),
+            offset: Offset(0, showBottomBar.value ? 0 : 1),
+            child: bottomNav,
+          ),
+        );
+      }
+    }
+    return bottomNav;
   }
 
   Widget _sideBar(ThemeData theme) {
@@ -507,7 +518,7 @@ class _MainAppState extends PopScopeState<MainApp>
         ),
         child: child,
       ),
-      bottomNavigationBar: Obx(() => _bottomNav),
+      bottomNavigationBar: _bottomNav,
     );
 
     if (PlatformUtils.isMobile) {
