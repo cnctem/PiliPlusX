@@ -62,6 +62,7 @@ import 'package:PiliPlus/utils/num_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/theme_utils.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
@@ -136,6 +137,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   Worker? _pipModeWorker;
 
+  /// 当前应用生命周期状态
+  AppLifecycleState _lifecycleState = AppLifecycleState.resumed;
+
   @override
   void initState() {
     super.initState();
@@ -200,6 +204,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    _lifecycleState = state;
     final isResume = state == .resumed;
     final ctr = videoDetailController.plPlayerController..visible = isResume;
     if (isResume) {
@@ -215,7 +220,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   @override
   void handleStatusBarTap() {
+    if (!Pref.enableStatusBarTapToTop) return;
     if (!isShowing) return;
+    // 仅在应用处于前台（resumed）时触发
+    if (_lifecycleState != AppLifecycleState.resumed) return;
     if (videoDetailController.scrollCtr.hasClients) {
       videoDetailController.animToTop();
     }
@@ -386,7 +394,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       videoPlayerServiceHandler?.onVideoDetailDispose(heroTag);
       if (plPlayerController != null) {
         videoDetailController.makeHeartBeat();
-        plPlayerController!.dispose();
+        unawaited(plPlayerController!.dispose());
       } else {
         PlPlayerController.updatePlayCount();
       }

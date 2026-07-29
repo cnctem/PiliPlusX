@@ -7,7 +7,8 @@ import 'package:path_provider/path_provider.dart';
 
 /// 鸿蒙分支使用 pub.dev 上的 cached_network_image_ce，它没有上游 fork 的
 /// `DefaultCacheManager.init` / `getTotalLength` / `cacheDir` / `getSingleFile`，
-/// 因此这里保留 ohos 原本基于临时目录统计的实现，并补一个 [getSingleFile] 扩展
+/// 因此这里保留 ohos 原本基于临时目录统计的实现；getSingleFile 由
+/// utils/cache_manager_ext.dart 提供
 /// 以便调用点与上游保持一致。
 abstract final class CacheManager {
   static late final DefaultCacheManager manager;
@@ -86,19 +87,5 @@ abstract final class CacheManager {
         }
       }
     } catch (_) {}
-  }
-}
-
-/// 补齐上游 fork 才有的 `getSingleFile`，基于 4.9.0 的 [getFileStream] 实现。
-extension DefaultCacheManagerExt on DefaultCacheManager {
-  Future<File> getSingleFile(
-    String url, {
-    String? key,
-    Map<String, String>? headers,
-  }) async {
-    await for (final res in getFileStream(url, key: key, headers: headers)) {
-      if (res is FileInfo) return res.file;
-    }
-    throw StateError('failed to fetch file: $url');
   }
 }

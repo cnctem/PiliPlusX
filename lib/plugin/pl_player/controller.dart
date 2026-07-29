@@ -1,4 +1,4 @@
-import 'dart:async' show StreamSubscription, Timer;
+import 'dart:async' show StreamSubscription, Timer, unawaited;
 import 'dart:convert' show ascii;
 import 'dart:io' show Platform;
 import 'dart:math' show max, min;
@@ -642,7 +642,7 @@ class PlPlayerController with BlockConfigMixin {
 
       if (_playerCount == 0) {
         _removeListeners();
-        _videoPlayerController?.dispose();
+        await _videoPlayerController?.dispose();
         _videoPlayerController = null;
         _videoController = null;
         return;
@@ -791,7 +791,7 @@ class PlPlayerController with BlockConfigMixin {
       player = await _initPlayer();
       if (_playerCount == 0) {
         _removeListeners();
-        player.dispose();
+        await player.dispose();
         player = null;
         _videoController = null;
         return;
@@ -1722,8 +1722,8 @@ class PlPlayerController with BlockConfigMixin {
     });
   }
 
-  bool _isCloseAll = false;
-  bool get isCloseAll => _isCloseAll;
+  // isCloseAll 由外部页面直接置位（新 ohos 提交的写法），故为公开字段
+  bool isCloseAll = false;
 
   Future<void>? resetScreenRotation() {
     if (horizontalScreen) {
@@ -1734,17 +1734,18 @@ class PlPlayerController with BlockConfigMixin {
   }
 
   void onCloseAll() {
-    _isCloseAll = true;
-    dispose();
+    isCloseAll = true;
+    // dispose 已改为异步（退后台清内存），这里不阻塞路由返回
+    unawaited(dispose());
     Get.until((route) => route.isFirst);
   }
 
-  void dispose() {
+  Future<void> dispose() async {
     // 每次减1，最后销毁
     resetScreenRotation();
     cancelLongPressTimer();
     _cancelSubForSeek();
-    if (!_isCloseAll && _playerCount > 1) {
+    if (!isCloseAll && _playerCount > 1) {
       _playerCount -= 1;
       _heartDuration = 0;
       return;
@@ -1793,7 +1794,7 @@ class PlPlayerController with BlockConfigMixin {
     if (kDebugMode) {
       debugPrint('dispose player');
     }
-    _videoPlayerController?.dispose();
+    await _videoPlayerController?.dispose();
     _videoPlayerController = null;
     _videoController = null;
     _instance = null;
@@ -1801,9 +1802,9 @@ class PlPlayerController with BlockConfigMixin {
     HarmonyChannel.releaseContinuation(this);
   }
 
-  static void updatePlayCount() {
+  static Future<void> updatePlayCount() async {
     if (_instance?._playerCount == 1) {
-      _instance?.dispose();
+      await _instance?.dispose();
     } else {
       _instance?._playerCount -= 1;
     }

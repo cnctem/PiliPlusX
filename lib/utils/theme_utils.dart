@@ -68,12 +68,10 @@ abstract final class ThemeUtils {
         fontWeight = FontWeight.w500;
       } else if (systemScale <= 1.3) {
         fontWeight = FontWeight.w600;
-      } else if (systemScale <= 1.35) {
-        fontWeight = FontWeight.w700;
       } else if (systemScale <= 1.45) {
-        fontWeight = FontWeight.w800;
+        fontWeight = FontWeight.w700;
       } else {
-        fontWeight = FontWeight.w900;
+        fontWeight = FontWeight.w800;
       }
     } else {
       fontWeight = FontWeight.values[appFontWeight];

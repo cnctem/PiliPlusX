@@ -17,7 +17,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
 # update when release
-version: 2.1.0+5218
+version: 2.1.0+5514
 
 environment:
   sdk: ">=3.11.1"
@@ -56,7 +56,6 @@ dependencies:
   dio_http2_adapter: ^2.7.1
 
   # 图片
-  cached_network_image: ^3.4.1
   # extended_image: ^9.0.7
   saver_gallery: ^4.1.0 # 已适配鸿蒙
 
@@ -117,11 +116,13 @@ dependencies:
   media_kit: # overridden
   media_kit_video:
     git:
-      url: https://github.com/Predidit/media-kit.git
+      url: https://github.com/cnoim/media-kit.git
+      ref: feat-ohos
       path: ./media_kit_video
   media_kit_libs_video:
     git:
-      url: https://github.com/Predidit/media-kit.git
+      url: https://github.com/cnoim/media-kit.git
+      ref: feat-ohos
       path: ./libs/universal/media_kit_libs_video
 
   # 媒体通知
@@ -259,7 +260,6 @@ dependencies:
   path: any
   collection: any
   material_color_utilities: any
-  flutter_cache_manager: any
   http2: any
   screen_retriever: any
   characters: any
@@ -305,31 +305,36 @@ dependency_overrides:
   rxdart: ^0.28.0
   media_kit:
     git:
-      url: https://github.com/Predidit/media-kit.git
+      url: https://github.com/cnoim/media-kit.git
+      ref: feat-ohos
       path: ./media_kit
   media_kit_libs_linux:
     git:
-      url: https://github.com/Predidit/media-kit.git
+      url: https://github.com/cnoim/media-kit.git
+      ref: feat-ohos
       path: ./libs/linux/media_kit_libs_linux
   media_kit_libs_ios_video:
     git:
-      url: https://github.com/Predidit/media-kit.git
+      url: https://github.com/cnoim/media-kit.git
+      ref: feat-ohos
       path: ./libs/ios/media_kit_libs_ios_video
   media_kit_libs_macos_video:
     git:
-      url: https://github.com/Predidit/media-kit.git
+      url: https://github.com/cnoim/media-kit.git
+      ref: feat-ohos
       path: ./libs/macos/media_kit_libs_macos_video
   media_kit_libs_ohos:
     git:
-      url: https://github.com/Predidit/media-kit.git
+      url: https://github.com/cnoim/media-kit.git
+      ref: feat-ohos
       path: ./libs/ohos/media_kit_libs_ohos
   # media_kit_libs_android_video:
   #   git:
-  #     url: https://github.com/Predidit/media-kit.git
+  #     url: https://github.com/cnoim/media-kit.git
   #     path: ./libs/android/media_kit_libs_android_video
   # media_kit_libs_windows_video:
   #   git:
-  #     url: https://github.com/Predidit/media-kit.git
+  #     url: https://github.com/cnoim/media-kit.git
   #     path: ./libs/windows/media_kit_libs_windows_video
 
   # 上游指定的media_kit
