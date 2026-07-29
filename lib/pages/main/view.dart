@@ -9,6 +9,7 @@ import 'package:PiliPlus/common/widgets/flutter/tabs.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/route_aware_mixin.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
+import 'package:PiliPlus/main.dart';
 import 'package:PiliPlus/models/common/nav_bar_config.dart';
 import 'package:PiliPlus/pages/home/view.dart';
 import 'package:PiliPlus/pages/main/controller.dart';
@@ -52,8 +53,6 @@ class _MainAppState extends PopScopeState<MainApp>
   int _primaryColorValue = 0;
   late ThemeData theme;
   Brightness? _brightness;
-  /// 上一次的 useBottomNav 值，用于检测横竖屏切换以同步原生 HDS 底栏显隐
-  bool _lastUseBottomNav = false;
 
   @override
   bool get initCanPop => false;
@@ -102,11 +101,9 @@ class _MainAppState extends PopScopeState<MainApp>
       _mainController.useBottomNav = MediaQuery.sizeOf(context).isPortrait;
     }
     // 横竖屏切换时同步原生 HDS 沉浸底栏显隐
-    if (_lastUseBottomNav != _mainController.useBottomNav) {
-      _lastUseBottomNav = _mainController.useBottomNav;
-      if (_mainController.useNativeTabs.value) {
-        HarmonyChannel.setShellBarsHidden(!_mainController.useBottomNav);
-      }
+    // 由 ShellBarsObserver 统一管理，避免与路由观察者冲突
+    if (_mainController.useNativeTabs.value) {
+      MyApp.shellBarsObserver.onOrientationChanged(_mainController.useBottomNav);
     }
     // 缓存主题主色，供 ever 回调在 useNativeTabs 异步就绪后补发
     _primaryColorValue = Theme.of(context).colorScheme.primary.value;

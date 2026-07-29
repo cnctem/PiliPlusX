@@ -274,7 +274,7 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   static ColorScheme? _light, _dark;
-  static final _shellBarsObserver = ShellBarsObserver();
+  static final shellBarsObserver = ShellBarsObserver();
 
   static void _onBack() {
     if (SmartDialog.checkExist()) {
@@ -347,7 +347,7 @@ class MyApp extends StatelessWidget {
       navigatorObservers: [
         routeObserver,
         FlutterSmartDialog.observer,
-        _shellBarsObserver,
+        shellBarsObserver,
       ],
       scrollBehavior: PlatformUtils.isDesktop
           ? const CustomScrollBehavior(desktopDragDevices)
