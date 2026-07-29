@@ -248,10 +248,10 @@ packages:
     dependency: "direct main"
     description:
       name: cached_network_image_ce
-      sha256: "9c61372fecd5f6ac6aaa66fa6808b4c303b8574875e853a0916116bf2fae6840"
+      sha256: "2d76205eb8cbe8acd8d000357017231bc2d3a056ccec5201d72a589808d9861b"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "4.9.0"
+    version: "4.9.1"
   cached_network_image_platform_interface_ce:
     dependency: transitive
     description:
@@ -264,10 +264,10 @@ packages:
     dependency: transitive
     description:
       name: cached_network_image_web_ce
-      sha256: "6bcd8608d4ace7c35625f09d971ce68c7a6581a4631b0fb6ceb2909b2c2e17a8"
+      sha256: "22cdf044cd013ff8d6eb06ce148bfe3f1106388ca2af244e2358739debb4459c"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "2.1.1"
+    version: "2.1.2"
   canvas_danmaku:
     dependency: "direct main"
     description:
@@ -467,18 +467,18 @@ packages:
     dependency: "direct main"
     description:
       name: dio_http2_adapter
-      sha256: c56522c50bb3bab7e3ca77c153b0f03ae672a87d8c32e46be8f2868693ec9f0a
+      sha256: c48daafd9cded83368ba0b7d731db6bc9d0413fe21727abf1575780b7c8a74a1
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "2.7.1"
+    version: "2.8.0"
   dio_web_adapter:
     dependency: transitive
     description:
       name: dio_web_adapter
-      sha256: dd58dc3861eb36edb13b217efc006a1c21e5bbc341de8c229b85634fa5e362e4
+      sha256: "0786d0b7295a373de356fc0af4f6f1d0ab2844ed31b19dfc5e7556b70e24212c"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "2.2.0"
+    version: "2.2.1"
   dlna_dart:
     dependency: "direct main"
     description:
@@ -568,15 +568,15 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "7.0.1"
-  file_picker:
+  file_picker_ohos:
     dependency: "direct main"
     description:
       path: "."
-      ref: "br_v10.2.0_ohos"
-      resolved-ref: aae2f8828ea4d631362d6252e78d2773412747ff
-      url: "https://gitcode.com/CPF-Flutter/fluttertpc_file_picker.git"
+      ref: "br_v10.3.8_ohos"
+      resolved-ref: "04eec7fdbff232c4d05c3de92156e41eaed29ff5"
+      url: "https://gitcode.com/hellozeronick/fluttertpc_file_picker.git"
     source: git
-    version: "8.0.6"
+    version: "10.3.8"
   file_selector_linux:
     dependency: transitive
     description:
@@ -651,10 +651,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_cache_manager
-      sha256: "400b6592f16a4409a7f2bb929a9a7e38c72cceb8ffb99ee57bbf2cb2cecf8386"
+      sha256: "1de7849213b4c73c85aca7e0ac687a9a5d82ccdb594366b9dcc26cb6a2189cd2"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "3.4.1"
+    version: "3.4.2"
   flutter_displaymode:
     dependency: "direct main"
     description:
@@ -676,7 +676,7 @@ packages:
     description:
       path: flutter_inappwebview
       ref: "br_v6.1.5_ohos_dev"
-      resolved-ref: cafd2a41316be804b133ec48b68ddc75ca718a37
+      resolved-ref: b596ae059e388cbc8f710a6c26c5370a0527a03a
       url: "https://gitcode.com/CPF-Flutter/flutter_inappwebview.git"
     source: git
     version: "6.1.5"
@@ -684,8 +684,8 @@ packages:
     dependency: transitive
     description:
       path: flutter_inappwebview_android
-      ref: cafd2a41316be804b133ec48b68ddc75ca718a37
-      resolved-ref: cafd2a41316be804b133ec48b68ddc75ca718a37
+      ref: b596ae059e388cbc8f710a6c26c5370a0527a03a
+      resolved-ref: b596ae059e388cbc8f710a6c26c5370a0527a03a
       url: "https://gitcode.com/CPF-Flutter/flutter_inappwebview.git"
     source: git
     version: "1.1.3"
@@ -702,8 +702,8 @@ packages:
     dependency: transitive
     description:
       path: flutter_inappwebview_ios
-      ref: cafd2a41316be804b133ec48b68ddc75ca718a37
-      resolved-ref: cafd2a41316be804b133ec48b68ddc75ca718a37
+      ref: b596ae059e388cbc8f710a6c26c5370a0527a03a
+      resolved-ref: b596ae059e388cbc8f710a6c26c5370a0527a03a
       url: "https://gitcode.com/CPF-Flutter/flutter_inappwebview.git"
     source: git
     version: "1.1.2"
@@ -711,8 +711,8 @@ packages:
     dependency: transitive
     description:
       path: flutter_inappwebview_macos
-      ref: cafd2a41316be804b133ec48b68ddc75ca718a37
-      resolved-ref: cafd2a41316be804b133ec48b68ddc75ca718a37
+      ref: b596ae059e388cbc8f710a6c26c5370a0527a03a
+      resolved-ref: b596ae059e388cbc8f710a6c26c5370a0527a03a
       url: "https://gitcode.com/CPF-Flutter/flutter_inappwebview.git"
     source: git
     version: "1.1.2"
@@ -720,8 +720,8 @@ packages:
     dependency: transitive
     description:
       path: flutter_inappwebview_ohos
-      ref: cafd2a41316be804b133ec48b68ddc75ca718a37
-      resolved-ref: cafd2a41316be804b133ec48b68ddc75ca718a37
+      ref: b596ae059e388cbc8f710a6c26c5370a0527a03a
+      resolved-ref: b596ae059e388cbc8f710a6c26c5370a0527a03a
       url: "https://gitcode.com/CPF-Flutter/flutter_inappwebview.git"
     source: git
     version: "1.1.3"
@@ -738,8 +738,8 @@ packages:
     dependency: transitive
     description:
       path: flutter_inappwebview_web
-      ref: cafd2a41316be804b133ec48b68ddc75ca718a37
-      resolved-ref: cafd2a41316be804b133ec48b68ddc75ca718a37
+      ref: b596ae059e388cbc8f710a6c26c5370a0527a03a
+      resolved-ref: b596ae059e388cbc8f710a6c26c5370a0527a03a
       url: "https://gitcode.com/CPF-Flutter/flutter_inappwebview.git"
     source: git
     version: "1.1.2"
@@ -1114,18 +1114,26 @@ packages:
     dependency: transitive
     description:
       name: jni
-      sha256: c2230682d5bc2362c1c9e8d3c7f406d9cbba23ab3f2e203a025dd47e0fb2e68f
+      sha256: "5bc9a9daac5ccfbd6a758377600b9f7fdce13d93f26e8012a8941014a5d978d1"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.2"
   jni_flutter:
     dependency: transitive
     description:
       name: jni_flutter
-      sha256: "8b59e590786050b1cd866677dddaf76b1ade5e7bc751abe04b86e84d379d3ba6"
+      sha256: "7b717011ea40d04fd47c2731d3d1d36eb99eba3435c2753d62489e8c3c9991d5"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "1.0.1"
+    version: "1.0.2"
+  jni_util:
+    dependency: transitive
+    description:
+      name: jni_util
+      sha256: "1ba86da04a5f2bf18fde2edb235587e70c5b0fc5bd4ba955f46b00942c3fc35f"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.0.0"
   js:
     dependency: "direct overridden"
     description:
@@ -1218,10 +1226,10 @@ packages:
     dependency: transitive
     description:
       name: mailer
-      sha256: "7b8691b080809ea1b2fa2f1b0d49c7c089fb328bd23e68aa5818b9cf5f4b420d"
+      sha256: "9f7213f57272c2a047f13ae89e68652d492f929d84ded9a618424b38da328f97"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "7.1.0"
+    version: "7.2.0"
   matcher:
     dependency: transitive
     description:
@@ -1381,10 +1389,10 @@ packages:
     dependency: transitive
     description:
       name: objective_c
-      sha256: "6cb691c686fa2838c6deb34980d426145c2a5d537491cb83d463c33cdbc726ed"
+      sha256: b7fb95a6d9a4f009edd63dc5ac69f07420b23a16161c6dd8660290b59c602e8e
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "9.4.1"
+    version: "9.5.0"
   octo_image:
     dependency: transitive
     description:
@@ -1584,10 +1592,10 @@ packages:
     dependency: transitive
     description:
       name: posix
-      sha256: "185ef7606574f789b40f289c233efa52e96dead518aed988e040a10737febb07"
+      sha256: bc1bad54ad2b735816e31f8d4600cfde6c7839975085ddfbca48b6c9f7c4044e
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "6.5.0"
+    version: "6.5.2"
   pretty_qr_code:
     dependency: "direct main"
     description:
@@ -1624,10 +1632,10 @@ packages:
     dependency: transitive
     description:
       name: punycoder
-      sha256: aed79c05986a18782caa9bad649a4a786e840e1baaf6a2e1aa3a25d143d28e6e
+      sha256: "982734df864d9588eb13e28ac1c5a46b57e22117b3696032ac58739966cec190"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "0.2.2"
+    version: "0.3.0"
   qr:
     dependency: transitive
     description:
@@ -1776,10 +1784,10 @@ packages:
     dependency: transitive
     description:
       name: sentry
-      sha256: "09c573f98ff6c5e98d527f351f037eb8ea9ff684a6e9e84b2e91357144016254"
+      sha256: a84bf3a83b3ce1c89fce28b9f97659e3826df14a73a256952465aac2c5efdf5a
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "9.24.0"
+    version: "9.25.0"
   share_plus:
     dependency: "direct main"
     description:
@@ -2162,10 +2170,10 @@ packages:
     dependency: transitive
     description:
       name: vector_graphics_compiler
-      sha256: "142a9146f447d15b10bdc00e21d5f4d83e5b32bb5f8f8f5a04c75311344923a3"
+      sha256: "4dca4feb77dc3ec7f6e27e49c53241eb8217f55e4f9b12599a27f8903bca5682"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "1.2.6"
+    version: "1.3.0"
   vector_math:
     dependency: "direct main"
     description:
@@ -2260,10 +2268,10 @@ packages:
     dependency: transitive
     description:
       name: wakelock_plus_platform_interface
-      sha256: b13f99e992e7ae6a152e16c5559d3c07ff445b13330192662494e614ca3e7d7b
+      sha256: "0618d1799f0b28bcf98255b4ee8313e6fc4d38589dc4ee5fe5840d57d1aff6da"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "1.5.1"
+    version: "1.6.0"
   watcher:
     dependency: transitive
     description:

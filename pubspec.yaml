@@ -17,7 +17,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
 # update when release
-version: 2.1.0+5514
+version: 2.1.0+5526
 
 environment:
   sdk: ">=3.11.1"
@@ -180,7 +180,7 @@ dependencies:
     git:
       url: https://github.com/qinshah/floating.git
       ref: 3eefccb759c4ea8114e722f1511fe1dbce70dc9f
-      
+
     # html解析
   html: ^0.15.6
   # html渲染
@@ -237,10 +237,10 @@ dependencies:
       ref: main
   tray_manager: ^0.5.3
   # file_picker: ^10.3.3
-  file_picker:
+  file_picker_ohos:
     git:
-      url: https://gitcode.com/CPF-Flutter/fluttertpc_file_picker.git
-      ref: br_v10.2.0_ohos
+      url: https://gitcode.com/hellozeronick/fluttertpc_file_picker.git
+      ref: br_v10.3.8_ohos
   super_sliver_list:
     git:
       url: https://github.com/bggRGjQaUbCoE/super_sliver_list.git
@@ -363,7 +363,7 @@ dependency_overrides:
   js: 0.7.0
   # image_cropper 鸿蒙化适配
   image_cropper:
-    git: 
+    git:
       url: https://gitcode.com/CPF-Flutter/fluttertpc_image_cropper.git
       path: ./image_cropper
       ref: br_v11.0.0_ohos
