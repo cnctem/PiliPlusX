@@ -63,6 +63,7 @@ import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:auto_orientation/auto_orientation.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
 import 'package:floating/floating.dart';
@@ -140,6 +141,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   Worker? _pipModeWorker;
 
+  /// 当前应用生命周期状态
+  AppLifecycleState _lifecycleState = AppLifecycleState.resumed;
+
   @override
   void initState() {
     super.initState();
@@ -201,6 +205,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    _lifecycleState = state;
     late final ctr = videoDetailController.plPlayerController;
     if (state == AppLifecycleState.resumed) {
       if (!ctr.showDanmaku) {
@@ -231,7 +236,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   @override
   void handleStatusBarTap() {
+    if (!Pref.enableStatusBarTapToTop) return;
     if (!isShowing) return;
+    // 仅在应用处于前台（resumed）时触发
+    if (_lifecycleState != AppLifecycleState.resumed) return;
     if (videoDetailController.scrollCtr.hasClients) {
       videoDetailController.animToTop();
     }
@@ -396,7 +404,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       videoPlayerServiceHandler?.onVideoDetailDispose(heroTag);
       if (plPlayerController != null) {
         videoDetailController.makeHeartBeat();
-        plPlayerController!.dispose();
+        unawaited(plPlayerController!.dispose());
       } else {
         PlPlayerController.updatePlayCount();
       }
@@ -737,10 +745,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                                                     .onSurface,
                                               ),
                                               onPressed: () {
-                                                videoDetailController
-                                                    .plPlayerController
-                                                  ..isCloseAll = true
-                                                  ..dispose();
+                                                final plCtr = videoDetailController
+                                                    .plPlayerController;
+                                                plCtr.isCloseAll = true;
+                                                unawaited(plCtr.dispose());
                                                 Get.until(
                                                   (route) => route.isFirst,
                                                 );
@@ -1275,9 +1283,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                         ],
                       ),
                       onPressed: () {
-                        videoDetailController.plPlayerController
-                          ..isCloseAll = true
-                          ..dispose();
+                        final plCtr = videoDetailController.plPlayerController;
+                        plCtr.isCloseAll = true;
+                        unawaited(plCtr.dispose());
                         Get.until((route) => route.isFirst);
                       },
                     ),

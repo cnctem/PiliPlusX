@@ -19,6 +19,7 @@ import 'package:PiliPlus/utils/calc_window_position.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
+import 'package:PiliPlus/utils/image_memory_cleaner.dart';
 import 'package:PiliPlus/utils/json_file_handler.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
@@ -247,6 +248,8 @@ void main() async {
   } else {
     runApp(const MyApp());
   }
+
+  ImageMemoryCleaner.instance.register();
 
   if (OS.isHarmony) {
     // 本次启动若由跨设备接续拉起，首帧后取回接续数据并跳转视频页；

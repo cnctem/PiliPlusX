@@ -1792,9 +1792,9 @@ class HeaderControlState extends State<HeaderControl>
                       color: Colors.white,
                     ),
                     onPressed: () {
-                      videoDetailCtr.plPlayerController
-                        ..isCloseAll = true
-                        ..dispose();
+                      final plCtr = videoDetailCtr.plPlayerController;
+                      plCtr.isCloseAll = true;
+                      unawaited(plCtr.dispose());
                       Get.until((route) => route.isFirst);
                     },
                   ),

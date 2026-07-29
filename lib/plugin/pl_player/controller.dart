@@ -670,7 +670,7 @@ class PlPlayerController with BlockConfigMixin {
 
       if (_playerCount == 0) {
         _removeListeners();
-        _videoPlayerController?.dispose();
+        await _videoPlayerController?.dispose();
         _videoPlayerController = null;
         _videoController = null;
         return;
@@ -824,7 +824,7 @@ class PlPlayerController with BlockConfigMixin {
       player = await _initPlayer();
       if (_playerCount == 0) {
         _removeListeners();
-        player.dispose();
+        await player.dispose();
         player = null;
         _videoController = null;
         return;
@@ -1768,7 +1768,7 @@ class PlPlayerController with BlockConfigMixin {
   }
 
   bool isCloseAll = false;
-  void dispose() {
+  Future<void> dispose() async {
     // 每次减1，最后销毁
     cancelLongPressTimer();
     _cancelSubForSeek();
@@ -1817,7 +1817,7 @@ class PlPlayerController with BlockConfigMixin {
     if (kDebugMode) {
       debugPrint('dispose player');
     }
-    _videoPlayerController?.dispose();
+    await _videoPlayerController?.dispose();
     _videoPlayerController = null;
     _videoController = null;
     _instance = null;
@@ -1825,9 +1825,9 @@ class PlPlayerController with BlockConfigMixin {
     HarmonyChannel.releaseContinuation(this);
   }
 
-  static void updatePlayCount() {
+  static Future<void> updatePlayCount() async {
     if (_instance?._playerCount == 1) {
-      _instance?.dispose();
+      await _instance?.dispose();
     } else {
       _instance?._playerCount -= 1;
     }
