@@ -1,17 +1,16 @@
-import 'package:PiliPlus/pages/main/controller.dart';
 import 'package:PiliPlus/pages/setting/models/model.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 List<SettingsModel> experimentalSettings = [
   SwitchModel(
-    title: '液态玻璃导航栏',
-    subtitle: '启用液态玻璃底部导航栏\n没空适配鸿蒙导航栏\n可能有bug，将就用',
-    leading: const Icon(Icons.science_outlined),
-    setKey: SettingBoxKey.enableLGBar,
+    title: '鸿蒙沉浸光感导航栏',
+    subtitle: '使用鸿蒙的悬浮页签栏与沉浸光感\n仅在鸿蒙6.1以上支持，不支持的平台会回退到传统底栏',
+    leading: const Icon(Icons.water_drop_outlined),
+    setKey: SettingBoxKey.enableHdsBar,
     defaultVal: false,
-    onChanged: (_) => Get.find<MainController>().updateEnableLGBar(),
+    onChanged: (_) => SmartDialog.showToast("重启生效"),
   ),
   const SwitchModel(
     title: '显示实际百分比音量',

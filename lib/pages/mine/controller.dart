@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/http/fav.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/user.dart';
@@ -155,6 +156,7 @@ class MineController extends CommonDataController<FavFolderData, FavFolderData>
     }
     final newVal = !anonymity.value;
     anonymity.value = newVal;
+    HarmonyChannel.setShellBarsHidden(true);
     if (newVal) {
       SmartDialog.dismiss();
       SmartDialog.show<bool>(
@@ -162,6 +164,9 @@ class MineController extends CommonDataController<FavFolderData, FavFolderData>
         usePenetrate: true,
         displayTime: const Duration(seconds: 2),
         alignment: Alignment.bottomCenter,
+        onDismiss: () {
+          HarmonyChannel.setShellBarsHidden(false);
+        },
         builder: (context) {
           final theme = Theme.of(context);
           final style = TextStyle(
@@ -237,6 +242,9 @@ class MineController extends CommonDataController<FavFolderData, FavFolderData>
         usePenetrate: true,
         displayTime: const Duration(seconds: 1),
         alignment: Alignment.bottomCenter,
+        onDismiss: () {
+          HarmonyChannel.setShellBarsHidden(false);
+        },
         builder: (context) {
           final theme = Theme.of(context);
           return ColoredBox(

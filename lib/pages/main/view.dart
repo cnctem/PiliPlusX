@@ -7,6 +7,7 @@ import 'package:PiliPlus/common/widgets/flutter/pop_scope.dart';
 import 'package:PiliPlus/common/widgets/flutter/tabs.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/route_aware_mixin.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/models/common/nav_bar_config.dart';
 import 'package:PiliPlus/pages/home/view.dart';
 import 'package:PiliPlus/pages/main/controller.dart';
@@ -24,7 +25,6 @@ import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import 'package:os_type/os_type.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
@@ -46,6 +46,8 @@ class _MainAppState extends PopScopeState<MainApp>
   final _mainController = Get.put(MainController());
   late final _setting = GStorage.setting;
   late EdgeInsets _padding;
+  /// 缓存当前主题主色值，供 ever 回调读取
+  int _primaryColorValue = 0;
 
   @override
   bool get initCanPop => false;
@@ -54,6 +56,14 @@ class _MainAppState extends PopScopeState<MainApp>
   void initState() {
     super.initState();
     addObserverMobile(this);
+    // 监听 useNativeTabs 异步赋值（_initHdsBar 完成时触发）
+    ever(_mainController.useNativeTabs, (_) {
+      if (_mainController.useNativeTabs.value && _primaryColorValue != 0) {
+        HarmonyChannel.setTabSelectedColor(
+          '#${_primaryColorValue.toRadixString(16).padLeft(8, '0').substring(2)}',
+        );
+      }
+    });
     if (PlatformUtils.isDesktop) {
       windowManager
         ..addListener(this)
@@ -80,6 +90,14 @@ class _MainAppState extends PopScopeState<MainApp>
     }
     if (!_mainController.useSideBar) {
       _mainController.useBottomNav = MediaQuery.sizeOf(context).isPortrait;
+    }
+    // 缓存主题主色，供 ever 回调在 useNativeTabs 异步就绪后补发
+    _primaryColorValue = Theme.of(context).colorScheme.primary.value;
+    // 同步主题色到 ArkTS HdsTabs 底栏
+    if (_mainController.useNativeTabs.value) {
+      HarmonyChannel.setTabSelectedColor(
+        '#${_primaryColorValue.toRadixString(16).padLeft(8, '0').substring(2)}',
+      );
     }
   }
 
@@ -272,58 +290,14 @@ class _MainAppState extends PopScopeState<MainApp>
     }
   }
 
-  Widget? get _bottomNav {
-    Widget? bottomNav = _mainController.navigationBars.length > 1
-        ? _mainController.enableLGBar.value
-              ? Obx(
-                  () {
-                    final theme = Theme.of(context);
-                    final primary = theme.colorScheme.primary;
-                    return Align(
-                      alignment: Alignment.bottomCenter,
-                      child: SizedBox(
-                        width: 488,
-                        child: GlassBottomBar(
-                          quality: GlassQuality.premium,
-                          selectedIconColor: theme.colorScheme.primary,
-                          unselectedIconColor: theme.hintColor,
-                          indicatorColor: primary.withValues(alpha: 0.1),
-                          magnification: 1.2,
-                          indicatorSettings: LiquidGlassSettings(
-                            blur: 0,
-                            glassColor: primary.withValues(alpha: 0.2),
-                            saturation: 1.2,
-                            ambientStrength: 0.5,
-                            thickness: 30,
-                          ),
-                          glassSettings: const LiquidGlassSettings(
-                            blur: 30,
-                            glassColor: Color.fromRGBO(255, 255, 255, 0.15),
-                            ambientStrength: 0.5,
-                            saturation: 1.2,
-                          ),
-                          verticalPadding: 16,
-                          barHeight: 56,
-                          selectedIndex: _mainController.selectedIndex.value,
-                          onTabSelected: _mainController.setIndex,
-                          tabs: _mainController.navigationBars
-                              .map(
-                                (e) => GlassBottomBarTab(
-                                  label: e.label,
-                                  icon: _buildIcon(type: e),
-                                  activeIcon: _buildIcon(
-                                    type: e,
-                                    selected: true,
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      ),
-                    );
-                  },
-                )
-              : _mainController.enableMYBar
+  Widget get _bottomNav {
+    // 响应式读取：useNativeTabs 由 _initHdsBar 异步赋值，
+    // Obx 仅包裹底栏部分，避免包裹 Scaffold 导致无限重建
+    if (_mainController.useNativeTabs.value) {
+      return const SizedBox.shrink();
+    }
+    final Widget bottomNav = _mainController.navigationBars.length > 1
+        ? _mainController.enableMYBar
               ? Obx(
                   () => NavigationBar(
                     maintainBottomViewPadding: true,
@@ -359,8 +333,8 @@ class _MainAppState extends PopScopeState<MainApp>
                         .toList(),
                   ),
                 )
-        : null;
-    if (bottomNav != null && _mainController.hideBottomBar) {
+        : const SizedBox.shrink();
+    if (_mainController.hideBottomBar) {
       if (_mainController.barOffset case final barOffset?) {
         return Obx(
           () => FractionalTranslation(
@@ -472,9 +446,7 @@ class _MainAppState extends PopScopeState<MainApp>
       );
     }
 
-    Widget? bottomNav;
     if (_mainController.useBottomNav) {
-      bottomNav = _bottomNav;
       child = Row(children: [Expanded(child: child)]);
     } else {
       child = Row(
@@ -501,7 +473,7 @@ class _MainAppState extends PopScopeState<MainApp>
         ),
         child: child,
       ),
-      bottomNavigationBar: bottomNav,
+      bottomNavigationBar: Obx(() => _bottomNav),
     );
 
     if (PlatformUtils.isMobile) {

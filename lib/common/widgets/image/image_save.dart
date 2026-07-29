@@ -1,6 +1,7 @@
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/button/icon_button.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/http/user.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
@@ -15,8 +16,13 @@ void imageSaveDialog({
   String? bvid,
 }) {
   final double imgWidth = MediaQuery.sizeOf(Get.context!).shortestSide - 16;
+  final wasVisible = HarmonyChannel.hdsBarVisible;
+  HarmonyChannel.setShellBarsHidden(true);
   SmartDialog.show(
     animationType: SmartAnimationType.centerScale_otherSlide,
+    onDismiss: () {
+      if (wasVisible) HarmonyChannel.setShellBarsHidden(false);
+    },
     builder: (context) {
       const iconSize = 20.0;
       final theme = Theme.of(context);

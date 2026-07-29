@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:PiliPlus/common/widgets/custom_icon.dart';
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/common/widgets/pair.dart';
 import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/http/dynamics.dart';
@@ -401,23 +402,31 @@ class _DynamicDetailPageState extends CommonDynPageState<DynamicDetailPage> {
                         icon: FontAwesomeIcons.shareFromSquare,
                         text: '转发',
                         stat: forward,
-                        onPressed: (_) => showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          useSafeArea: true,
-                          builder: (context) => RepostPanel(
-                            item: controller.dynItem,
-                            onSuccess: () {
-                              if (forward != null) {
-                                int count = forward.count ?? 0;
-                                forward.count = count + 1;
-                                if (btnContext.mounted) {
-                                  (btnContext as Element).markNeedsBuild();
+                        onPressed: (_) {
+                          final wasVisible = HarmonyChannel.hdsBarVisible;
+                          HarmonyChannel.setShellBarsHidden(true);
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            useSafeArea: true,
+                            builder: (context) => RepostPanel(
+                              item: controller.dynItem,
+                              onSuccess: () {
+                                if (forward != null) {
+                                  int count = forward.count ?? 0;
+                                  forward.count = count + 1;
+                                  if (btnContext.mounted) {
+                                    (btnContext as Element).markNeedsBuild();
+                                  }
                                 }
-                              }
-                            },
-                          ),
-                        ),
+                              },
+                            ),
+                          ).then((_) {
+                            if (wasVisible) {
+                              HarmonyChannel.setShellBarsHidden(false);
+                            }
+                          });
+                        },
                       );
                     },
                   ),

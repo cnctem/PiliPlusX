@@ -7,6 +7,7 @@ import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/scale_app.dart';
 import 'package:PiliPlus/common/widgets/stateful_builder.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/main.dart';
 import 'package:PiliPlus/models/common/bar_hide_type.dart';
 import 'package:PiliPlus/models/common/dynamic/dynamic_badge_mode.dart';
@@ -205,6 +206,11 @@ List<SettingsModel> get styleSettings => [
     setKey: SettingBoxKey.hideBottomBar,
     defaultVal: PlatformUtils.isMobile,
     needReboot: true,
+    onChanged: (value) {
+      if (!value) {
+        HarmonyChannel.setShellBarsScrollHidden(false);
+      }
+    },
   ),
   NormalModel(
     onTap: (context, setState) => _showQualityDialog(

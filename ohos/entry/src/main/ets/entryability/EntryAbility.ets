@@ -11,6 +11,11 @@ import HarmonyChannel from "../plugins/HarmonyChannel";
 /// 跨设备接续数据在 want.parameters 中的键
 const CONTINUATION_KEY = "pili_continuation";
 
+/// 底栏相关事件，与 Index.ets 保持一致
+const EVENT_TAB_HOME = 'EVENT_TAB_HOME';
+const EVENT_TAB_DYNAMICS = 'EVENT_TAB_DYNAMICS';
+const EVENT_TAB_MINE = 'EVENT_TAB_MINE';
+
 export default class EntryAbility extends FlutterAbility {
   harmonyChannel: HarmonyChannel = new HarmonyChannel();
   wasFloatingWindow: boolean = false;
@@ -23,6 +28,20 @@ export default class EntryAbility extends FlutterAbility {
     flutterEngine.getPlugins()?.add(this.harmonyChannel);
     this.flutterChannel = this.harmonyChannel.getChannel();
     this.initFontWeightListener();
+    this.initShellEventListeners();
+  }
+
+  /// 监听 Index.ets eventHub 的底栏切换事件，转发给 Flutter
+  private initShellEventListeners(): void {
+    this.context.eventHub.on(EVENT_TAB_HOME, () => {
+      this.flutterChannel?.invokeMethod('showHome', null);
+    });
+    this.context.eventHub.on(EVENT_TAB_DYNAMICS, () => {
+      this.flutterChannel?.invokeMethod('showDynamics', null);
+    });
+    this.context.eventHub.on(EVENT_TAB_MINE, () => {
+      this.flutterChannel?.invokeMethod('showMine', null);
+    });
   }
 
   private initFontWeightListener(): void {
@@ -44,6 +63,9 @@ export default class EntryAbility extends FlutterAbility {
   }
 
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam) {
+    AppStorage.setOrCreate('shellBarsHidden', false);
+    AppStorage.setOrCreate('__scrollHidden', false);
+
     super.onCreate(want, launchParam);
     // 默认不可接续，播放器持有视频时才由 Dart 侧置为 ACTIVE，
     // 避免无播放时对端出现接续入口、点击后提示接续失败
