@@ -62,7 +62,7 @@ class MainController extends GetxController
 
   /// 鸿蒙原生 HDS 底栏（API >= 23 时由原生渲染液态玻璃页签栏）
   /// 修改设置后需重启应用生效
-  bool useNativeTabs = false;
+  final RxBool useNativeTabs = false.obs;
 
   final useSideBar = Pref.useSideBar;
   final mainTabBarView = Pref.mainTabBarView;
@@ -142,7 +142,7 @@ class MainController extends GetxController
     final apiVersion = await HarmonyChannel.getDeviceInfo();
     final enableHdsBar = Pref.enableHdsBar;
     final useNative = apiVersion != null && apiVersion >= 23 && enableHdsBar;
-    useNativeTabs = useNative;
+    useNativeTabs.value = useNative;
     HarmonyChannel.setShellBars(useNativeTabs: useNative);
   }
 

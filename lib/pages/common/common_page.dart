@@ -48,13 +48,13 @@ abstract class CommonPageState<T extends StatefulWidget> extends State<T> {
       case .forward:
         _showTopBar?.value = true;
         _showBottomBar?.value = true;
-        if (_mainController.useNativeTabs && Pref.hideBottomBar) {
+        if (_mainController.useNativeTabs.value && Pref.hideBottomBar) {
           HarmonyChannel.setShellBarsScrollHidden(false);
         }
       case .reverse:
         _showTopBar?.value = false;
         _showBottomBar?.value = false;
-        if (_mainController.useNativeTabs && Pref.hideBottomBar) {
+        if (_mainController.useNativeTabs.value && Pref.hideBottomBar) {
           HarmonyChannel.setShellBarsScrollHidden(true);
         }
       case _:
@@ -82,7 +82,7 @@ abstract class CommonPageState<T extends StatefulWidget> extends State<T> {
       final scrollDelta = notification.scrollDelta ?? 0;
       if (pixel < 0.0 && scrollDelta > 0) return false;
       // 同步原生 HDS 底栏滚动显隐
-      if (_mainController.useNativeTabs && Pref.hideBottomBar) {
+      if (_mainController.useNativeTabs.value && Pref.hideBottomBar) {
         HarmonyChannel.setShellBarsScrollHidden(
           _barOffset!.value > Style.topBarHeight / 2,
         );

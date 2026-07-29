@@ -82,7 +82,7 @@ class _MainAppState extends PopScopeState<MainApp>
       _mainController.useBottomNav = MediaQuery.sizeOf(context).isPortrait;
     }
     // 同步主题色到 ArkTS HdsTabs 底栏
-    if (_mainController.useNativeTabs) {
+    if (_mainController.useNativeTabs.value) {
       final primary = Theme.of(context).colorScheme.primary;
       HarmonyChannel.setTabSelectedColor(
         '#${primary.value.toRadixString(16).padLeft(8, '0').substring(2)}',
@@ -279,13 +279,13 @@ class _MainAppState extends PopScopeState<MainApp>
     }
   }
 
-  Widget? get _bottomNav {
-    // 非响应式读取：useNativeTabs 仅在冷启动时由 _initHdsBar 设置，
-    // 修改设置后需重启生效，避免 Obx 包裹 Scaffold 导致无限重建
-    if (_mainController.useNativeTabs) {
-      return null;
+  Widget get _bottomNav {
+    // 响应式读取：useNativeTabs 由 _initHdsBar 异步赋值，
+    // Obx 仅包裹底栏部分，避免包裹 Scaffold 导致无限重建
+    if (_mainController.useNativeTabs.value) {
+      return const SizedBox.shrink();
     }
-    Widget? bottomNav = _mainController.navigationBars.length > 1
+    final Widget bottomNav = _mainController.navigationBars.length > 1
         ? _mainController.enableMYBar
               ? Obx(
                   () => NavigationBar(
@@ -322,8 +322,8 @@ class _MainAppState extends PopScopeState<MainApp>
                         .toList(),
                   ),
                 )
-        : null;
-    if (bottomNav != null && _mainController.hideBottomBar) {
+        : const SizedBox.shrink();
+    if (_mainController.hideBottomBar) {
       if (_mainController.barOffset case final barOffset?) {
         return Obx(
           () => FractionalTranslation(
@@ -462,7 +462,7 @@ class _MainAppState extends PopScopeState<MainApp>
         ),
         child: child,
       ),
-      bottomNavigationBar: _bottomNav,
+      bottomNavigationBar: Obx(() => _bottomNav),
     );
 
     if (PlatformUtils.isMobile) {
