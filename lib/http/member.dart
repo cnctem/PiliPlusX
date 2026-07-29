@@ -21,6 +21,7 @@ import 'package:PiliPlus/models_new/member/coin_like_arc/data.dart';
 import 'package:PiliPlus/models_new/member/search_archive/data.dart';
 import 'package:PiliPlus/models_new/member/season_web/data.dart';
 import 'package:PiliPlus/models_new/member_card_info/data.dart';
+import 'package:PiliPlus/models_new/member_guard/data.dart';
 import 'package:PiliPlus/models_new/space/space/data.dart';
 import 'package:PiliPlus/models_new/space/space_archive/data.dart';
 import 'package:PiliPlus/models_new/space/space_article/data.dart';
@@ -470,7 +471,7 @@ abstract final class MemberHttp {
       try {
         DynamicsDataModel data = DynamicsDataModel.fromJson(res.data['data']);
         if (data.loadNext == true) {
-          return memberDynamic(offset: data.offset, mid: mid);
+          return await memberDynamic(offset: data.offset, mid: mid);
         }
         return Success(data);
       } catch (e, s) {
@@ -592,7 +593,7 @@ abstract final class MemberHttp {
     }
   }
 
-  static Future<LoadingState<void>> createFollowTag(Object tagName) async {
+  static Future<LoadingState<int>> createFollowTag(String tagName) async {
     final res = await Request().post(
       Api.createFollowTag,
       queryParameters: {
@@ -606,7 +607,7 @@ abstract final class MemberHttp {
       options: Options(contentType: Headers.formUrlEncodedContentType),
     );
     if (res.data['code'] == 0) {
-      return const Success(null);
+      return Success(res.data['data']['tagid']);
     } else {
       return Error(res.data['message']);
     }
@@ -826,6 +827,25 @@ abstract final class MemberHttp {
     );
     if (res.data['code'] == 0) {
       return Success(SpaceShopData.fromJson(res.data['data']));
+    } else {
+      return Error(res.data['message']);
+    }
+  }
+
+  static Future<LoadingState<MemberGuardData>> memberGuard({
+    required Object ruid,
+    required int page,
+  }) async {
+    final res = await Request().get(
+      Api.memberGuard,
+      queryParameters: {
+        'page': page,
+        'page_size': 20,
+        'ruid': ruid,
+      },
+    );
+    if (res.data['code'] == 0) {
+      return Success(MemberGuardData.fromJson(res.data['data']));
     } else {
       return Error(res.data['message']);
     }

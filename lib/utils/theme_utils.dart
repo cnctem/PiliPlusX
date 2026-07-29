@@ -1,13 +1,33 @@
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
-import 'package:PiliPlus/main.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart' show CupertinoThemeData;
+import 'package:flutter/foundation.dart' show PlatformDispatcher;
 import 'package:flutter/material.dart';
 import 'package:os_type/os_type.dart';
 
 abstract final class ThemeUtils {
+  static late ThemeData lightTheme;
+
+  static late ThemeData darkTheme;
+
+  static late ThemeMode themeMode;
+
+  static ThemeData get theme {
+    if (themeMode == .dark ||
+        (themeMode == .system &&
+            PlatformDispatcher.instance.platformBrightness == .dark)) {
+      return darkTheme;
+    }
+    return lightTheme;
+  }
+
+  static bool get isDarkMode => theme.isDark;
+
+  static String themeUrl(bool isDark) =>
+      'native.theme=${isDark ? 2 : 1}&night=${isDark ? 1 : 0}';
+
   static ThemeData getThemeData({
     required ColorScheme colorScheme,
     required bool isDynamic,
@@ -173,9 +193,6 @@ abstract final class ThemeUtils {
     if (isDark) {
       if (Pref.isPureBlackTheme) {
         themeData = darkenTheme(themeData);
-      }
-      if (Pref.darkVideoPage) {
-        MyApp.darkThemeData = themeData;
       }
     }
     return themeData;

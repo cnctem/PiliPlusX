@@ -3,6 +3,7 @@ import 'package:PiliPlus/http/dynamics.dart';
 import 'package:PiliPlus/http/fav.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/video.dart';
+import 'package:PiliPlus/models/common/image_preview_type.dart';
 import 'package:PiliPlus/models/dynamics/article_content_model.dart'
     show ArticleContentModel;
 import 'package:PiliPlus/models/dynamics/result.dart';
@@ -39,10 +40,16 @@ class ArticleController extends CommonDynController {
   final RxBool isLoaded = false.obs;
   DynamicItemModel? opusData; // 标题信息从summary获取, 动态没有favorite
   ArticleViewData? articleData;
-  final Rx<ModuleStatModel?> stats = Rx<ModuleStatModel?>(null);
+  final stats = Rxn<ModuleStatModel>();
 
   List<ArticleContentModel>? get opus =>
       opusData?.modules.moduleContent ?? articleData?.opus?.content;
+
+  List<SourceModel>? _images;
+  List<SourceModel> images() => _images ??= opus!
+      .where((e) => e.paraType == 2 && e.pic != null)
+      .map((e) => SourceModel(url: e.pic!.pics!.first.url!))
+      .toList();
 
   @override
   void onInit() {

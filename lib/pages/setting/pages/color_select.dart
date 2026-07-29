@@ -1,5 +1,6 @@
 import 'dart:io' show Platform;
 
+import 'package:PiliPlus/common/widgets/animated_height.dart';
 import 'package:PiliPlus/common/widgets/color_palette.dart';
 import 'package:PiliPlus/main.dart' show MyApp;
 import 'package:PiliPlus/models/common/nav_bar_config.dart';
@@ -14,6 +15,8 @@ import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:PiliPlus/utils/theme_utils.dart';
+import 'package:collection/collection.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -85,7 +88,7 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
                 } catch (_) {}
                 ctr.themeType.value = result;
                 GStorage.setting.put(SettingBoxKey.themeMode, result.index);
-                Get.changeThemeMode(result.toThemeMode);
+                Get.changeThemeMode(ThemeUtils.themeMode = result.toThemeMode);
               }
             },
             leading: const Icon(Icons.flashlight_on_outlined),
@@ -133,58 +136,50 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
               ),
             ),
           Padding(
-            padding: padding,
-            child: AnimatedSize(
-              curve: Curves.easeInOut,
-              alignment: Alignment.topCenter,
-              duration: const Duration(milliseconds: 200),
-              child: Obx(
-                () => ctr.dynamicColor.value
-                    ? const SizedBox.shrink()
-                    : Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Wrap(
-                          alignment: WrapAlignment.center,
-                          spacing: 22,
-                          runSpacing: 18,
-                          children: colorThemeTypes.indexed.map(
-                            (e) {
-                              final index = e.$1;
-                              final item = e.$2;
-                              return GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap: () {
-                                  ctr.currentColor.value = index;
-                                  GStorage.setting
-                                      .put(SettingBoxKey.customColor, index)
-                                      .whenComplete(Get.updateMyAppTheme);
-                                },
-                                child: Column(
-                                  spacing: 3,
-                                  children: [
-                                    ColorPalette(
-                                      colorScheme: item.color.asColorSchemeSeed(
-                                        _dynamicSchemeVariant,
-                                        theme.brightness,
-                                      ),
-                                      selected: ctr.currentColor.value == index,
-                                    ),
-                                    Text(
-                                      item.label,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: ctr.currentColor.value != index
-                                            ? theme.colorScheme.outline
-                                            : null,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ).toList(),
+            padding: padding + const .all(12),
+            child: Obx(
+              () => AnimatedHeight(
+                expand: ctr.dynamicColor.value,
+                duration: const Duration(milliseconds: 200),
+                child: Wrap(
+                  alignment: .center,
+                  spacing: 22,
+                  runSpacing: 18,
+                  children: colorThemeTypes.mapIndexed(
+                    (i, e) {
+                      return GestureDetector(
+                        behavior: .opaque,
+                        onTap: () {
+                          ctr.currentColor.value = i;
+                          GStorage.setting
+                              .put(SettingBoxKey.customColor, i)
+                              .whenComplete(Get.updateMyAppTheme);
+                        },
+                        child: Column(
+                          spacing: 3,
+                          children: [
+                            ColorPalette(
+                              colorScheme: e.color.asColorSchemeSeed(
+                                _dynamicSchemeVariant,
+                                theme.brightness,
+                              ),
+                              selected: ctr.currentColor.value == i,
+                            ),
+                            Text(
+                              e.label,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: ctr.currentColor.value != i
+                                    ? theme.colorScheme.outline
+                                    : null,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
+                      );
+                    },
+                  ).toList(),
+                ),
               ),
             ),
           ),

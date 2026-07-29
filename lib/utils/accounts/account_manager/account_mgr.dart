@@ -78,7 +78,7 @@ class AccountManager extends Interceptor {
         if (!account.accessKey.isNullOrEmpty) {
           dataPtr['access_key'] = account.accessKey!;
         }
-        AppSign.appSign(dataPtr);
+        AppSign.appSign(dataPtr..remove('sign'));
         // if (kDebugMode) debugPrint(dataPtr.toString());
       }
       return handler.next(options);
@@ -239,21 +239,21 @@ class AccountManager extends Interceptor {
 
   static Future<String> dioError(DioException error) async {
     switch (error.type) {
-      case DioExceptionType.badCertificate:
+      case .badCertificate:
         return '证书有误！';
-      case DioExceptionType.badResponse:
+      case .badResponse:
         return '服务器异常，请稍后重试！';
-      case DioExceptionType.cancel:
+      case .cancel:
         return '请求已被取消，请重新请求';
-      case DioExceptionType.connectionError:
+      case .connectionError:
         return '连接错误，请检查网络设置';
-      case DioExceptionType.connectionTimeout:
+      case .connectionTimeout:
         return '网络连接超时，请检查网络设置';
-      case DioExceptionType.receiveTimeout:
+      case .receiveTimeout:
         return '响应超时，请稍后重试！';
-      case DioExceptionType.sendTimeout:
+      case .sendTimeout:
         return '发送请求超时，请检查网络设置';
-      case DioExceptionType.unknown:
+      case .unknown:
         String desc;
         try {
           // TODO 鸿蒙待适配 Connectivity Checks the connection status of the device.

@@ -1,5 +1,3 @@
-import 'package:PiliPlus/models_new/space/space/badge.dart';
-
 class Item {
   String? title;
   String? subtitle;
@@ -24,7 +22,6 @@ class Item {
   int? danmaku;
   int? ctime;
   int? ugcPay;
-  List<Badge>? badges;
   String? author;
   bool? state;
   String? bvid;
@@ -58,7 +55,6 @@ class Item {
     this.danmaku,
     this.ctime,
     this.ugcPay,
-    this.badges,
     this.author,
     this.state,
     this.bvid,
@@ -93,9 +89,6 @@ class Item {
     danmaku: json['danmaku'] as int?,
     ctime: json['ctime'] as int?,
     ugcPay: json['ugc_pay'] as int?,
-    badges: (json['badges'] as List<dynamic>?)
-        ?.map((e) => Badge.fromJson(e as Map<String, dynamic>))
-        .toList(),
     author: json['author'] as String?,
     state: json['state'] as bool?,
     bvid: json['bvid'] as String?,

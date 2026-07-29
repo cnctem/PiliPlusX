@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math' show max;
 
 import 'package:PiliPlus/common/widgets/button/toolbar_icon_button.dart';
+import 'package:PiliPlus/common/widgets/custom_icon.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart'
     show RichTextType;
 import 'package:PiliPlus/common/widgets/flutter/text_field/text_field.dart';
@@ -11,7 +12,6 @@ import 'package:PiliPlus/grpc/bilibili/main/community/reply/v1.pb.dart'
     show ReplyInfo;
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/video.dart';
-import 'package:PiliPlus/main.dart';
 import 'package:PiliPlus/models/common/publish_panel_type.dart';
 import 'package:PiliPlus/models/dynamics/result.dart' show FilePicModel;
 import 'package:PiliPlus/pages/common/publish/common_rich_text_pub_page.dart';
@@ -25,6 +25,7 @@ import 'package:PiliPlus/utils/extension/context_ext.dart';
 import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:PiliPlus/utils/theme_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart' hide TextField;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -72,13 +73,11 @@ class _ReplyPageState extends CommonRichTextPubPageState<ReplyPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    themeData = darkVideoPage
-        ? MyApp.darkThemeData ?? Theme.of(context)
-        : Theme.of(context);
+    themeData = darkVideoPage ? ThemeUtils.darkTheme : Theme.of(context);
   }
 
   late final darkVideoPage =
-      Get.currentRoute.startsWith('/video') && Pref.darkVideoPage;
+      Get.currentRoute == '/videoV' && Pref.darkVideoPage;
   late ThemeData themeData;
 
   @override
@@ -196,49 +195,22 @@ class _ReplyPageState extends CommonRichTextPubPageState<ReplyPage> {
             atBtn,
             const SizedBox(width: 8),
             moreBtn,
-            Expanded(
-              child: Center(
-                child: Obx(
-                  () {
-                    final syncToDynamic = _syncToDynamic.value;
-                    return TextButton(
-                      style: TextButton.styleFrom(
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        padding: const EdgeInsets.all(13),
-                        visualDensity: VisualDensity.compact,
-                        foregroundColor: syncToDynamic
-                            ? themeData.colorScheme.secondary
-                            : themeData.colorScheme.outline,
-                      ),
-                      onPressed: () => _syncToDynamic.value = !syncToDynamic,
-                      child: Row(
-                        spacing: 4,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            syncToDynamic
-                                ? Icons.check_box
-                                : Icons.check_box_outline_blank,
-                            size: 22,
-                          ),
-                          const Flexible(
-                            child: Text(
-                              '转到动态',
-                              maxLines: 1,
-                              style: TextStyle(height: 1),
-                              strutStyle: StrutStyle(leading: 0, height: 1),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+            const SizedBox(width: 8),
+            Obx(
+              () => ToolbarIconButton(
+                tooltip: '转到动态',
+                onPressed: _syncToDynamic.toggle,
+                icon: const Icon(
+                  CustomIcons.repeat_rounded_rotate_90,
+                  size: 22,
                 ),
+                selected: _syncToDynamic.value,
               ),
             ),
+            const Spacer(),
             Obx(
               () => FilledButton.tonal(
-                onPressed: enablePublish.value ? onPublish : null,
+                onPressed: enablePublish.value ? onPublishThrottle : null,
                 style: FilledButton.styleFrom(
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   padding: const EdgeInsets.symmetric(
@@ -318,6 +290,7 @@ class _ReplyPageState extends CommonRichTextPubPageState<ReplyPage> {
         children: [
           item(
             onTap: () async {
+              // 鸿蒙适配：跳转搜索页期间冻结聊天面板，避免面板高度被重置
               controller.keepChatPanel();
               final ({String title, String url})? res = await Get.to(
                 ReplySearchPage(type: widget.replyType, oid: widget.oid),
@@ -382,6 +355,7 @@ class _ReplyPageState extends CommonRichTextPubPageState<ReplyPage> {
                         .videoPlayerController
                         ?.screenshot(format: 'image/png');
                     if (res != null) {
+                      // 鸿蒙 fork 的 screenshot 直接返回 png 字节
                       final path =
                           '$tmpDirPath/${Utils.generateRandomString(8)}.png';
                       await File(path).writeAsBytes(res);

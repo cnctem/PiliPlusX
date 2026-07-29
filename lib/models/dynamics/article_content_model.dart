@@ -1,7 +1,8 @@
 import 'package:PiliPlus/common/style.dart' as common_style;
 import 'package:PiliPlus/models/dynamics/result.dart';
 import 'package:PiliPlus/models/dynamics/vote_model.dart';
-import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/utils/color_utils.dart';
+import 'package:PiliPlus/utils/parse_int.dart';
 
 class ArticleContentModel {
   int? align;
@@ -131,10 +132,17 @@ class Word {
     style = json['style'] == null ? null : Style.fromJson(json['style']);
     if (json['color'] case final String rawColor
         when rawColor.startsWith('#')) {
-      color = Utils.parseColorInt(json['color']);
+      color = ColourUtils.parse2Int(rawColor);
     }
     fontLevel = json['font_level'];
   }
+
+  // font_level 映射处理：
+  //   "small"   → 13px
+  //   "regular" → 16px（与旧版 HTML 专栏基准一致）
+  //   其余/null → 同 regular
+  double get effectiveFontSize =>
+      fontSize ?? (fontLevel == 'small' ? 13.0 : 16.0);
 }
 
 class Style {
@@ -269,7 +277,7 @@ class Music {
 
   Music.fromJson(Map<String, dynamic> json) {
     cover = json['cover'];
-    id = Utils.safeToInt(json['id']);
+    id = safeToInt(json['id']);
     jumpUrl = json['jump_url'];
     label = json['label'];
     title = json['title'];
@@ -285,12 +293,12 @@ class Opus {
   int? statView;
 
   Opus.fromJson(Map<String, dynamic> json) {
-    authorMid = Utils.safeToInt(json['author']?['mid']);
+    authorMid = safeToInt(json['author']?['mid']);
     authorName = json['author']?['name'];
     cover = json['cover'];
     jumpUrl = json['jump_url'];
     title = json['title'];
-    statView = Utils.safeToInt(json['stat']?['view']);
+    statView = safeToInt(json['stat']?['view']);
   }
 }
 
@@ -311,9 +319,9 @@ class Live {
     descSecond = json['desc_second'];
     title = json['title'];
     jumpUrl = json['jump_url'];
-    id = Utils.safeToInt(json['id']);
-    liveState = Utils.safeToInt(json['live_state']);
-    reserveType = Utils.safeToInt(json['reserve_type']);
+    id = safeToInt(json['id']);
+    liveState = safeToInt(json['live_state']);
+    reserveType = safeToInt(json['reserve_type']);
     badgeText = json['badge']?['text'];
   }
 }

@@ -20,7 +20,7 @@ abstract class ReplyController<R> extends CommonListController<R, ReplyInfo> {
   final RxInt count = (-1).obs;
 
   late final Rx<ReplySortType> sortType;
-  late final Rx<Mode> mode;
+  late Mode mode;
 
   final savedReplies = <Object, List<RichTextItem>?>{};
 
@@ -45,8 +45,7 @@ abstract class ReplyController<R> extends CommonListController<R, ReplyInfo> {
     super.onInit();
     final cacheSortType = Pref.replySortType;
     sortType = cacheSortType.obs;
-    mode =
-        (cacheSortType == ReplySortType.time ? Mode.MAIN_LIST_TIME : Mode.MAIN_LIST_HOT).obs;
+    mode = cacheSortType == .time ? Mode.MAIN_LIST_TIME : Mode.MAIN_LIST_HOT;
   }
 
   @override
@@ -58,16 +57,15 @@ abstract class ReplyController<R> extends CommonListController<R, ReplyInfo> {
   }
 
   @override
-  bool customHandleResponse(bool isRefresh, Success response) {
-    MainListReply data = response.response;
+  bool customHandleResponse(bool isRefresh, Success<R> response) {
+    final data = response.response as MainListReply;
     cursorNext = data.cursor.next;
     paginationReply = data.paginationReply;
     count.value = data.subjectControl.count.toInt();
     if (isRefresh) {
       subjectControl = data.subjectControl;
       upMid ??= data.subjectControl.upMid;
-      hasUpTop = data.hasUpTop();
-      if (data.hasUpTop()) {
+      if (hasUpTop = data.hasUpTop()) {
         data.replies.insert(0, data.upTop);
       }
       if (subjectControl?.title == ReplySortType.select.title) {
@@ -92,11 +90,11 @@ abstract class ReplyController<R> extends CommonListController<R, ReplyInfo> {
     switch (sortType.value) {
       case ReplySortType.time:
         sortType.value = ReplySortType.hot;
-        mode.value = Mode.MAIN_LIST_HOT;
+        mode = Mode.MAIN_LIST_HOT;
         break;
       case ReplySortType.hot:
         sortType.value = ReplySortType.time;
-        mode.value = Mode.MAIN_LIST_TIME;
+        mode = Mode.MAIN_LIST_TIME;
         break;
       case ReplySortType.select:
         return;

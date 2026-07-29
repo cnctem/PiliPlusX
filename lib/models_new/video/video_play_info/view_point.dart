@@ -4,9 +4,6 @@ class ViewPoint {
   int? to;
   String? content;
   String? imgUrl;
-  String? logoUrl;
-  String? teamType;
-  String? teamName;
 
   ViewPoint({
     this.type,
@@ -14,9 +11,6 @@ class ViewPoint {
     this.to,
     this.content,
     this.imgUrl,
-    this.logoUrl,
-    this.teamType,
-    this.teamName,
   });
 
   factory ViewPoint.fromJson(Map<String, dynamic> json) => ViewPoint(
@@ -25,8 +19,5 @@ class ViewPoint {
     to: json["to"],
     content: json["content"],
     imgUrl: json["imgUrl"],
-    logoUrl: json["logoUrl"],
-    teamType: json["team_type"],
-    teamName: json["team_name"],
   );
 }

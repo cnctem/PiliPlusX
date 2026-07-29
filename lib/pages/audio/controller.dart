@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:PiliPlus/common/constants.dart';
+import 'package:PiliPlus/common/widgets/dialog/simple_dialog_option.dart';
 import 'package:PiliPlus/grpc/audio.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/grpc/bilibili/app/listener/v1.pb.dart'
@@ -23,18 +24,22 @@ import 'package:PiliPlus/pages/main_reply/view.dart';
 import 'package:PiliPlus/pages/sponsor_block/block_mixin.dart';
 import 'package:PiliPlus/pages/video/controller.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/widgets/triple_mixin.dart';
-import 'package:PiliPlus/pages/video/pay_coins/view.dart';
+import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/services/shutdown_timer_service.dart';
 import 'package:PiliPlus/utils/accounts.dart';
+import 'package:PiliPlus/utils/connectivity_utils.dart';
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/global_data.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
+import 'package:PiliPlus/utils/share_utils.dart';
+import 'package:PiliPlus/utils/storage.dart';
+import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:PiliPlus/utils/video_utils.dart';
@@ -70,8 +75,8 @@ class AudioController extends GetxController
   late int cacheAudioQa;
 
   late bool isDragging = false;
-  final Rx<Duration> position = Duration.zero.obs;
-  final Rx<Duration> duration = Duration.zero.obs;
+  final RxInt position = RxInt(0);
+  final RxInt duration = RxInt(0);
 
   late final AnimationController animController;
 
@@ -84,6 +89,7 @@ class AudioController extends GetxController
 
   late final Rx<PlayRepeat> playMode = Pref.audioPlayMode.obs;
 
+  @override
   late final isLogin = Accounts.main.isLogin;
 
   Duration? _start;
@@ -96,6 +102,34 @@ class AudioController extends GetxController
   Future<bool>? Function()? _savedOnSkipToNext;
 
   ListOrder order = ListOrder.ORDER_NORMAL;
+
+  double? _lastVolume;
+  late final RxDouble desktopVolume = RxDouble(Pref.desktopVolume);
+
+  void toggleVolume() {
+    if (_lastVolume == null) {
+      _lastVolume = desktopVolume.value;
+      setVolume(0, clearLastVolme: false);
+    } else {
+      setVolume(_lastVolume!);
+    }
+  }
+
+  void setVolume(double volume, {bool clearLastVolme = true}) {
+    if (clearLastVolme) {
+      _lastVolume = null;
+    }
+    desktopVolume.value = volume;
+    player?.setVolume(volume * 100);
+  }
+
+  void syncVolume([_]) {
+    final volume = desktopVolume.value;
+    PlPlayerController.instance
+      ?..volume.value = volume
+      ..videoPlayerController?.setVolume(volume * 100);
+    GStorage.setting.put(SettingBoxKey.desktopVolume, volume.toPrecision(3));
+  }
 
   @override
   void onInit() {
@@ -128,7 +162,7 @@ class AudioController extends GetxController
       _querySponsorBlock();
       _onOpenMedia(audioUrl, ua: BrowserUa.pc, referer: HttpString.baseUrl);
     }
-    Utils.isWiFi.then((isWiFi) {
+    ConnectivityUtils.isWiFi.then((isWiFi) {
       cacheAudioQa = isWiFi ? Pref.defaultAudioQa : Pref.defaultAudioQaCellular;
       if (!hasAudioUrl) {
         _queryPlayUrl();
@@ -268,7 +302,7 @@ class AudioController extends GetxController
         if (audios.isEmpty) {
           return;
         }
-        position.value = Duration.zero;
+        position.value = 0;
         final audio = audios.findClosestTarget(
           (e) => e.id <= cacheAudioQa,
           (a, b) => a.id > b.id ? a : b,
@@ -281,7 +315,7 @@ class AudioController extends GetxController
           return;
         }
         final durl = durls.first;
-        position.value = Duration.zero;
+        position.value = 0;
         _onOpenMedia(VideoUtils.getCdnUrl(durl.playUrls));
       }
     }
@@ -322,13 +356,16 @@ class AudioController extends GetxController
     _subscriptions = [
       stream.position.listen((position) {
         if (isDragging) return;
-        if (position.inSeconds != this.position.value.inSeconds) {
-          this.position.value = position;
+        final seconds = position.inSeconds;
+        if (seconds != this.position.value) {
+          this.position.value = seconds;
           _videoDetailController?.playedTime = position;
           videoPlayerServiceHandler?.onPositionChange(position);
         }
       }),
-      stream.duration.listen(duration.call),
+      stream.duration.listen((duration) {
+        this.duration.value = duration.inSeconds;
+      }),
       stream.playing.listen((playing) {
         final PlayerStatus playerStatus;
         if (playing) {
@@ -341,7 +378,7 @@ class AudioController extends GetxController
         videoPlayerServiceHandler?.onStatusChange(playerStatus, false, false);
       }),
       stream.completed.listen((completed) {
-        _videoDetailController?.playedTime = duration.value;
+        _videoDetailController?.playedTime = player!.state.duration;
         videoPlayerServiceHandler?.onStatusChange(
           PlayerStatus.completed,
           false,
@@ -441,36 +478,11 @@ class AudioController extends GetxController
     }
   }
 
-  void actionCoinVideo() {
-    final audioItem = this.audioItem.value;
-    if (audioItem == null) {
-      return;
-    }
+  @override
+  int get copyright => audioItem.value?.arc.copyright ?? 1;
 
-    if (!isLogin) {
-      SmartDialog.showToast('账号未登录');
-      return;
-    }
-
-    final int copyright = audioItem.arc.copyright;
-    if ((copyright != 1 && coinNum.value >= 1) || coinNum.value >= 2) {
-      SmartDialog.showToast('达到投币上限啦~');
-      return;
-    }
-
-    if (GlobalData().coins != null && GlobalData().coins! < 1) {
-      SmartDialog.showToast('硬币不足');
-      // return;
-    }
-
-    PayCoinsPage.toPayCoinsPage(
-      onPayCoin: _onPayCoin,
-      hasCoin: coinNum.value == 1,
-      copyright: copyright,
-    );
-  }
-
-  Future<void> _onPayCoin(int coin, bool coinWithLike) async {
+  @override
+  Future<void> onPayCoin(int coin, bool coinWithLike) async {
     final res = await AudioGrpc.audioCoinAdd(
       oid: oid,
       subId: subId,
@@ -531,62 +543,45 @@ class AudioController extends GetxController
         : '${HttpString.baseUrl}/audio/au$oid';
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (_) => SimpleDialog(
         clipBehavior: Clip.hardEdge,
         contentPadding: const EdgeInsets.symmetric(vertical: 12),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              dense: true,
-              title: const Text(
-                '复制链接',
-                style: TextStyle(fontSize: 14),
-              ),
-              onTap: () {
+        children: [
+          DialogOption(
+            child: const Text('复制链接', style: TextStyle(fontSize: 14)),
+            onPressed: () {
+              Get.back();
+              Utils.copyText(audioUrl);
+            },
+          ),
+          DialogOption(
+            child: const Text('其它app打开', style: TextStyle(fontSize: 14)),
+            onPressed: () {
+              Get.back();
+              PageUtils.launchURL(audioUrl);
+            },
+          ),
+          if (PlatformUtils.isMobile)
+            DialogOption(
+              child: const Text('分享视频', style: TextStyle(fontSize: 14)),
+              onPressed: () {
                 Get.back();
-                Utils.copyText(audioUrl);
+                if (audioItem.value case DetailItem(
+                  :final arc,
+                  :final owner,
+                )) {
+                  ShareUtils.shareText(
+                    '${arc.title} '
+                    'UP主: ${owner.name}'
+                    ' - $audioUrl',
+                  );
+                }
               },
             ),
-            ListTile(
-              dense: true,
-              title: const Text(
-                '其它app打开',
-                style: TextStyle(fontSize: 14),
-              ),
-              onTap: () {
-                Get.back();
-                PageUtils.launchURL(audioUrl);
-              },
-            ),
-            if (PlatformUtils.isMobile)
-              ListTile(
-                dense: true,
-                title: const Text(
-                  '分享视频',
-                  style: TextStyle(fontSize: 14),
-                ),
-                onTap: () {
-                  Get.back();
-                  if (audioItem.value case DetailItem(
-                    :final arc,
-                    :final owner,
-                  )) {
-                    Utils.shareText(
-                      '${arc.title} '
-                      'UP主: ${owner.name}'
-                      ' - $audioUrl',
-                    );
-                  }
-                },
-              ),
-            ListTile(
-              dense: true,
-              title: const Text(
-                '分享至动态',
-                style: TextStyle(fontSize: 14),
-              ),
-              onTap: () {
+          if (isLogin)
+            DialogOption(
+              child: const Text('分享至动态', style: TextStyle(fontSize: 14)),
+              onPressed: () {
                 Get.back();
                 if (audioItem.value case DetailItem(
                   :final arc,
@@ -607,52 +602,41 @@ class AudioController extends GetxController
                 }
               },
             ),
-            if (isUgc)
-              ListTile(
-                dense: true,
-                title: const Text(
-                  '分享至消息',
-                  style: TextStyle(fontSize: 14),
-                ),
-                onTap: () {
-                  Get.back();
-                  if (audioItem.value case DetailItem(
-                    :final arc,
-                    :final owner,
-                  )) {
-                    try {
-                      PageUtils.pmShare(
-                        context,
-                        content: {
-                          "id": oid.toString(),
-                          "title": arc.title,
-                          "headline": arc.title,
-                          "source": 5,
-                          "thumb": arc.cover,
-                          "author": owner.name,
-                          "author_id": owner.mid.toString(),
-                        },
-                      );
-                    } catch (e) {
-                      SmartDialog.showToast(e.toString());
-                    }
+          if (isUgc && isLogin)
+            DialogOption(
+              child: const Text('分享至消息', style: TextStyle(fontSize: 14)),
+              onPressed: () {
+                Get.back();
+                if (audioItem.value case DetailItem(
+                  :final arc,
+                  :final owner,
+                )) {
+                  try {
+                    PageUtils.pmShare(
+                      context,
+                      content: {
+                        "id": oid.toString(),
+                        "title": arc.title,
+                        "headline": arc.title,
+                        "source": 5,
+                        "thumb": arc.cover,
+                        "author": owner.name,
+                        "author_id": owner.mid.toString(),
+                      },
+                    );
+                  } catch (e) {
+                    SmartDialog.showToast(e.toString());
                   }
-                },
-              ),
-          ],
-        ),
+                }
+              },
+            ),
+        ],
       ),
     );
   }
 
-  void playOrPause() {
-    if (player case final player?) {
-      if ((duration.value - position.value).inMilliseconds < 50) {
-        player.seek(Duration.zero).whenComplete(player.play);
-      } else {
-        player.playOrPause();
-      }
-    }
+  Future<void>? playOrPause() {
+    return player?.playOrPause();
   }
 
   bool playPrev() {
@@ -766,14 +750,14 @@ class AudioController extends GetxController
   BlockConfigMixin get blockConfig => this;
 
   @override
-  int get currPosInMilliseconds => position.value.inMilliseconds;
+  int get currPosInMilliseconds => player?.state.position.inMilliseconds ?? 0;
+
+  @override
+  int? get timeLength => player?.state.duration.inMilliseconds ?? 0;
 
   @override
   Future<void>? seekTo(Duration duration, {required bool isSeek}) =>
       onSeek(duration);
-
-  @override
-  int? get timeLength => duration.value.inMilliseconds;
 
   @override
   bool get autoPlay => true;

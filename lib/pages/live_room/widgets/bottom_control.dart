@@ -7,6 +7,7 @@ import 'package:PiliPlus/plugin/pl_player/widgets/common_btn.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/play_pause_btn.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
+import 'package:PiliPlus/utils/theme_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
@@ -36,6 +37,8 @@ class _BottomControlState extends State<BottomControl> with HeaderMixin {
   late final LiveRoomController liveRoomCtr = widget.liveRoomCtr;
   @override
   late final PlPlayerController plPlayerController = widget.plPlayerController;
+  @override
+  ThemeData get theme => ThemeUtils.darkTheme;
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +88,7 @@ class _BottomControlState extends State<BottomControl> with HeaderMixin {
           Obx(
             () {
               final enableShowLiveDanmaku =
-                  plPlayerController.enableShowDanmaku.value;
+                  plPlayerController.enableShowLiveDanmaku.value;
               return ComBtn(
                 height: 30,
                 tooltip: "${enableShowLiveDanmaku ? '关闭' : '开启'}弹幕",
@@ -102,7 +105,7 @@ class _BottomControlState extends State<BottomControl> with HeaderMixin {
                       ),
                 onTap: () {
                   final newVal = !enableShowLiveDanmaku;
-                  plPlayerController.enableShowDanmaku.value = newVal;
+                  plPlayerController.enableShowLiveDanmaku.value = newVal;
                   if (!plPlayerController.tempPlayerConf) {
                     GStorage.setting.put(
                       SettingBoxKey.enableShowLiveDanmaku,

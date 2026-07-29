@@ -4,7 +4,6 @@ class LiveContributionRankItem {
   int? uid;
   String? name;
   String? face;
-  int? rank;
   int? score;
   UinfoMedal? uinfoMedal;
 
@@ -12,7 +11,6 @@ class LiveContributionRankItem {
     this.uid,
     this.name,
     this.face,
-    this.rank,
     this.score,
     this.uinfoMedal,
   });
@@ -22,7 +20,6 @@ class LiveContributionRankItem {
         uid: json['uid'] as int?,
         name: json['name'] as String?,
         face: json['face'] as String?,
-        rank: json['rank'] as int?,
         score: json['score'] as int?,
         uinfoMedal: json['uinfo']?['medal'] == null
             ? null

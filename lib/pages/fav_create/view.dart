@@ -1,13 +1,14 @@
 ﻿import 'dart:io' show File;
 
+import 'package:PiliPlus/common/widgets/dialog/simple_dialog_option.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/loading_widget.dart';
 import 'package:PiliPlus/http/fav.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/msg.dart';
+import 'package:PiliPlus/utils/bili_utils.dart';
 import 'package:PiliPlus/utils/extension/file_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
-import 'package:PiliPlus/utils/fav_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +52,7 @@ class _CreateFavPageState extends State<CreateFavPage> {
       if (res case Success(:final response)) {
         _titleController.text = response.title;
         _introController.text = response.intro ?? '';
-        _isPublic = FavUtils.isPublicFav(response.attr);
+        _isPublic = BiliUtils.isPublicFav(response.attr);
         _cover = response.cover;
         _attr = response.attr;
       } else {
@@ -90,8 +91,10 @@ class _CreateFavPageState extends State<CreateFavPage> {
                 intro: _introController.text,
               ).then((res) {
                 if (res case Success(:final response)) {
-                  Get.back(result: response);
                   SmartDialog.showToast('${_mediaId != null ? '编辑' : '创建'}成功');
+                  if (mounted) {
+                    Get.back(result: response);
+                  }
                 } else {
                   res.toast();
                 }
@@ -114,9 +117,10 @@ class _CreateFavPageState extends State<CreateFavPage> {
 
   Future<void> _pickImg(BuildContext context, ThemeData theme) async {
     try {
-      XFile? pickedFile = await _imagePicker.pickImage(
+      final pickedFile = await _imagePicker.pickImage(
         source: ImageSource.gallery,
         imageQuality: 100,
+        requestFullMetadata: false,
       );
       if (pickedFile != null && mounted && context.mounted) {
         String imgPath = pickedFile.path;
@@ -128,7 +132,7 @@ class _CreateFavPageState extends State<CreateFavPage> {
                 toolbarTitle: '裁剪',
                 toolbarColor: theme.colorScheme.secondaryContainer,
                 toolbarWidgetColor: theme.colorScheme.onSecondaryContainer,
-                statusBarLight: theme.colorScheme.isLight,
+                statusBarLight: theme.isLight,
                 aspectRatioPresets: [CropAspectRatioPreset.ratio16x9],
                 lockAspectRatio: true,
                 hideBottomControls: true,
@@ -187,7 +191,7 @@ class _CreateFavPageState extends State<CreateFavPage> {
     child: Column(
       spacing: 12,
       children: [
-        if (_attr == null || !FavUtils.isDefaultFav(_attr!))
+        if (_attr == null || !BiliUtils.isDefaultFav(_attr!))
           Builder(
             builder: (context) {
               return ListTile(
@@ -201,37 +205,32 @@ class _CreateFavPageState extends State<CreateFavPage> {
                       if (_cover?.isNotEmpty == true) {
                         showDialog(
                           context: context,
-                          builder: (_) => AlertDialog(
+                          builder: (_) => SimpleDialog(
                             clipBehavior: Clip.hardEdge,
                             contentPadding: const .symmetric(vertical: 12),
-                            content: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                ListTile(
-                                  dense: true,
-                                  onTap: () {
-                                    Get.back();
-                                    _pickImg(context, theme);
-                                  },
-                                  title: const Text(
-                                    '替换封面',
-                                    style: TextStyle(fontSize: 14),
-                                  ),
+                            children: [
+                              DialogOption(
+                                onPressed: () {
+                                  Get.back();
+                                  _pickImg(context, theme);
+                                },
+                                child: const Text(
+                                  '替换封面',
+                                  style: TextStyle(fontSize: 14),
                                 ),
-                                ListTile(
-                                  dense: true,
-                                  onTap: () {
-                                    Get.back();
-                                    _cover = null;
-                                    (context as Element).markNeedsBuild();
-                                  },
-                                  title: const Text(
-                                    '移除封面',
-                                    style: TextStyle(fontSize: 14),
-                                  ),
+                              ),
+                              DialogOption(
+                                onPressed: () {
+                                  Get.back();
+                                  _cover = null;
+                                  (context as Element).markNeedsBuild();
+                                },
+                                child: const Text(
+                                  '移除封面',
+                                  style: TextStyle(fontSize: 14),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         );
                       } else {
@@ -296,11 +295,11 @@ class _CreateFavPageState extends State<CreateFavPage> {
               Expanded(
                 child: TextField(
                   autofocus: true,
-                  readOnly: _attr != null && FavUtils.isDefaultFav(_attr!),
+                  readOnly: _attr != null && BiliUtils.isDefaultFav(_attr!),
                   controller: _titleController,
                   style: TextStyle(
                     fontSize: 14,
-                    color: _attr != null && FavUtils.isDefaultFav(_attr!)
+                    color: _attr != null && BiliUtils.isDefaultFav(_attr!)
                         ? theme.colorScheme.outline
                         : null,
                   ),
@@ -325,7 +324,7 @@ class _CreateFavPageState extends State<CreateFavPage> {
             ],
           ),
         ),
-        if (_attr == null || !FavUtils.isDefaultFav(_attr!))
+        if (_attr == null || !BiliUtils.isDefaultFav(_attr!))
           ListTile(
             tileColor: theme.colorScheme.onInverseSurface,
             title: Row(

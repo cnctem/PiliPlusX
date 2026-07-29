@@ -9,7 +9,6 @@ class Author {
   Vip? vipInfo;
   Pendant? pendant;
   BaseOfficialVerify? official;
-  int? follower;
 
   Author({
     this.mid,
@@ -20,7 +19,6 @@ class Author {
     this.vipInfo,
     this.pendant,
     this.official,
-    this.follower,
   });
 
   factory Author.fromJson(Map<String, dynamic> json) => Author(
@@ -38,6 +36,5 @@ class Author {
     official: json['official'] == null
         ? null
         : BaseOfficialVerify.fromJson(json['official'] as Map<String, dynamic>),
-    follower: json['follower'] as int?,
   );
 }

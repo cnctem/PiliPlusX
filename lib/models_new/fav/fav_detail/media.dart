@@ -10,19 +10,14 @@ class FavDetailItemModel with MultiSelectData {
   String? title;
   String? cover;
   String? intro;
-  int? page;
   int? duration;
   Owner? upper;
   int? attr;
   CntInfo? cntInfo;
-  String? link;
-  int? ctime;
-  int? pubtime;
   int? favTime;
   String? bvid;
   Ogv? ogv;
   Ugc? ugc;
-  String? mediaListLink;
 
   FavDetailItemModel({
     this.id,
@@ -30,19 +25,14 @@ class FavDetailItemModel with MultiSelectData {
     this.title,
     this.cover,
     this.intro,
-    this.page,
     this.duration,
     this.upper,
     this.attr,
     this.cntInfo,
-    this.link,
-    this.ctime,
-    this.pubtime,
     this.favTime,
     this.bvid,
     this.ogv,
     this.ugc,
-    this.mediaListLink,
   });
 
   factory FavDetailItemModel.fromJson(Map<String, dynamic> json) =>
@@ -52,7 +42,6 @@ class FavDetailItemModel with MultiSelectData {
         title: json['title'] as String?,
         cover: json['cover'] as String?,
         intro: json['intro'] as String?,
-        page: json['page'] as int?,
         duration: json['duration'] as int?,
         upper: json['upper'] == null
             ? null
@@ -61,15 +50,11 @@ class FavDetailItemModel with MultiSelectData {
         cntInfo: json['cnt_info'] == null
             ? null
             : CntInfo.fromJson(json['cnt_info'] as Map<String, dynamic>),
-        link: json['link'] as String?,
-        ctime: json['ctime'] as int?,
-        pubtime: json['pubtime'] as int?,
         favTime: json['fav_time'] as int?,
         bvid: json['bvid'] ?? json['bv_id'],
         ogv: json['ogv'] == null ? null : Ogv.fromJson(json['ogv']),
         ugc: json['ugc'] == null
             ? null
             : Ugc.fromJson(json['ugc'] as Map<String, dynamic>),
-        mediaListLink: json['media_list_link'] as String?,
       );
 }

@@ -10,39 +10,58 @@ import 'package:PiliPlus/models/common/image_type.dart';
 import 'package:PiliPlus/models_new/upower_rank/rank_info.dart';
 import 'package:PiliPlus/pages/member_upower_rank/controller.dart';
 import 'package:PiliPlus/utils/extension/widget_ext.dart';
-import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart' hide ListTile;
 import 'package:get/get.dart';
 
 class UpowerRankPage extends StatefulWidget {
-  const UpowerRankPage({super.key, this.upMid, this.tag, this.privilegeType});
+  const UpowerRankPage({
+    super.key,
+    this.privilegeType,
+  });
 
-  final String? upMid;
-  final String? tag;
   final int? privilegeType;
 
   @override
   State<UpowerRankPage> createState() => _UpowerRankPageState();
+
+  static Future<void>? toUpowerRank({
+    required Object mid,
+    required String name,
+    required Object? count,
+  }) {
+    return Get.toNamed(
+      '/upowerRank',
+      arguments: {
+        'mid': mid,
+        'name': name,
+        'count': count,
+      },
+    );
+  }
 }
 
 class _UpowerRankPageState extends State<UpowerRankPage>
     with AutomaticKeepAliveClientMixin {
-  late final _upMid = Get.parameters['mid']!;
-  late final String _tag;
+  String? _name;
+  Object? _count;
+  late final String _upMid;
   late final UpowerRankController _controller;
 
   @override
   void initState() {
     super.initState();
-    _tag = widget.privilegeType == null
-        ? Utils.generateRandomString(8)
-        : '${widget.tag}${widget.privilegeType}';
+    final params = Get.arguments;
+    _upMid = params['mid']!.toString();
+    if (widget.privilegeType == null) {
+      _name = params['name'];
+      _count = params['count'];
+    }
     _controller = Get.put(
       UpowerRankController(
         privilegeType: widget.privilegeType,
-        upMid: widget.upMid ?? _upMid,
+        upMid: _upMid,
       ),
-      tag: _tag,
+      tag: '$_upMid${widget.privilegeType}',
     );
   }
 
@@ -70,14 +89,7 @@ class _UpowerRankPageState extends State<UpowerRankPage>
       return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: Obx(() {
-            final name = _controller.name.value;
-            return name == null
-                ? const SizedBox.shrink()
-                : Text(
-                    '$name 充电排行榜${_controller.memberTotal == 0 ? '' : '(${_controller.memberTotal})'}',
-                  );
-          }),
+          title: Text('$_name的充电排行榜${_count == null ? '' : '($_count)'}'),
           actions: [
             TextButton(
               onPressed: () => Get.toNamed(
@@ -126,7 +138,7 @@ class _UpowerRankPageState extends State<UpowerRankPage>
                                       } else {
                                         Get.find<UpowerRankController>(
                                           tag:
-                                              '$_tag${tabs[index].privilegeType}',
+                                              '$_upMid${tabs[index].privilegeType}',
                                         ).animateToTop();
                                       }
                                     } catch (_) {}
@@ -141,8 +153,6 @@ class _UpowerRankPageState extends State<UpowerRankPage>
                                         .skip(1)
                                         .map(
                                           (e) => UpowerRankPage(
-                                            upMid: _upMid,
-                                            tag: _tag,
                                             privilegeType: e.privilegeType,
                                           ),
                                         ),
@@ -170,7 +180,7 @@ class _UpowerRankPageState extends State<UpowerRankPage>
   ) {
     late final width = MediaQuery.textScalerOf(context).scale(32);
     return switch (loadingState) {
-      Loading() => linearLoading,
+      Loading() => const SliverFillRemaining(child: m3eLoading),
       Success<List<UpowerRankInfo>?>(:final response) =>
         response != null && response.isNotEmpty
             ? SliverList.builder(

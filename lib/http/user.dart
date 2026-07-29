@@ -431,7 +431,9 @@ abstract final class UserHttp {
     }
   }
 
-  static Future<LoadingState<void>> spaceSettingMod(Map data) async {
+  static Future<LoadingState<void>> spaceSettingMod(
+    Map<String, dynamic> data,
+  ) async {
     final res = await Request().post(
       Api.spaceSettingMod,
       queryParameters: {
@@ -565,6 +567,25 @@ abstract final class UserHttp {
     );
     if (res.data['code'] == 0) {
       return Success(FollowData.fromJson(res.data['data']));
+    } else {
+      return Error(res.data['message']);
+    }
+  }
+
+  static Future<LoadingState<void>> spaceReserve({
+    required Object sid,
+    required bool isFollow,
+  }) async {
+    final res = await Request().post(
+      isFollow ? Api.spaceReserveCancel : Api.spaceReserve,
+      data: {
+        'sid': sid,
+        'csrf': Accounts.main.csrf,
+      },
+      options: Options(contentType: Headers.formUrlEncodedContentType),
+    );
+    if (res.data['code'] == 0) {
+      return const Success(null);
     } else {
       return Error(res.data['message']);
     }

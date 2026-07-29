@@ -19,7 +19,8 @@ class LaterSearchPage extends StatefulWidget {
 }
 
 class _LaterSearchPageState
-    extends CommonSearchPageState<LaterSearchPage, LaterData, LaterItemModel> {
+    extends CommonSearchPageState<LaterSearchPage, LaterData, LaterItemModel>
+    with GridMixin {
   @override
   final LaterSearchController controller = Get.put(
     LaterSearchController(),
@@ -58,8 +59,6 @@ class _LaterSearchPageState
     ];
   }
 
-  late final gridDelegate = Grid.videoCardHDelegate(context, minHeight: 110);
-
   @override
   Widget buildList(List<LaterItemModel> list) {
     return SliverGrid.builder(
@@ -79,6 +78,7 @@ class _LaterSearchPageState
               cid: cid,
               cover: item.pic,
               title: item.title,
+              dimension: item.dimension,
               extraArguments: {
                 'oid': item.aid,
                 'sourceType': SourceType.watchLater,

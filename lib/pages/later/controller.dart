@@ -148,7 +148,7 @@ class LaterController extends MultiSelectController<LaterData, LaterItemModel>
               Get.find<LaterController>(tag: item.type.toString()).onReload();
             } catch (_) {}
           }
-          SmartDialog.showToast('操作成功');
+          SmartDialog.showToast('已清空');
         } else {
           res.toast();
         }
@@ -170,6 +170,7 @@ class LaterController extends MultiSelectController<LaterData, LaterItemModel>
             cid: item.cid!,
             cover: item.pic,
             title: item.title,
+            dimension: item.dimension,
             extraArguments: {
               'sourceType': SourceType.watchLater,
               'count': baseCtr.counts[LaterViewType.all.index],

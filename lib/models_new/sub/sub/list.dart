@@ -6,7 +6,6 @@ class SubItemModel {
   int? fid;
   int? mid;
   int? attr;
-  String? attrDesc;
   String? title;
   String? cover;
   Owner? upper;
@@ -18,13 +17,7 @@ class SubItemModel {
   int? favState;
   int? mediaCount;
   int? viewCount;
-  int? vt;
-  bool? isTop;
-  dynamic recentFav;
-  int? playSwitch;
   int? type;
-  String? link;
-  String? bvid;
   CntInfo? cntInfo;
 
   SubItemModel({
@@ -32,7 +25,6 @@ class SubItemModel {
     this.fid,
     this.mid,
     this.attr,
-    this.attrDesc,
     this.title,
     this.cover,
     this.upper,
@@ -44,13 +36,7 @@ class SubItemModel {
     this.favState,
     this.mediaCount,
     this.viewCount,
-    this.vt,
-    this.isTop,
-    this.recentFav,
-    this.playSwitch,
     this.type,
-    this.link,
-    this.bvid,
     this.cntInfo,
   });
 
@@ -59,7 +45,6 @@ class SubItemModel {
     fid: json['fid'] as int?,
     mid: json['mid'] as int?,
     attr: json['attr'] as int?,
-    attrDesc: json['attr_desc'] as String?,
     title: json['title'] as String?,
     cover: json['cover'] as String?,
     upper: json['upper'] == null
@@ -73,13 +58,7 @@ class SubItemModel {
     favState: json['fav_state'] as int?,
     mediaCount: json['media_count'] as int?,
     viewCount: json['view_count'] as int?,
-    vt: json['vt'] as int?,
-    isTop: json['is_top'] as bool?,
-    recentFav: json['recent_fav'] as dynamic,
-    playSwitch: json['play_switch'] as int?,
     type: json['type'] as int?,
-    link: json['link'] as String?,
-    bvid: json['bvid'] as String?,
     cntInfo: json['cnt_info'] == null
         ? null
         : CntInfo.fromJson(json['cnt_info']),

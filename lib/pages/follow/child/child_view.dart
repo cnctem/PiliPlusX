@@ -7,6 +7,7 @@ import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models/common/follow_order_type.dart';
 import 'package:PiliPlus/models_new/follow/list.dart';
+import 'package:PiliPlus/pages/common/fab_mixin.dart';
 import 'package:PiliPlus/pages/follow/child/child_controller.dart';
 import 'package:PiliPlus/pages/follow/controller.dart';
 import 'package:PiliPlus/pages/follow/widgets/follow_item.dart';
@@ -37,16 +38,43 @@ class FollowChildPage extends StatefulWidget {
 }
 
 class _FollowChildPageState extends State<FollowChildPage>
-    with AutomaticKeepAliveClientMixin {
-  late final FollowChildController _followController;
+    with
+        AutomaticKeepAliveClientMixin,
+        SingleTickerProviderStateMixin,
+        BaseFabMixin,
+        LazyFabMixin {
+  late String _tag;
+  late FollowChildController _followController;
+
+  String get _newTag =>
+      '${widget.tag ?? Utils.generateRandomString(8)}${widget.tagid}';
 
   @override
   void initState() {
     super.initState();
+    _initController();
+  }
+
+  void _initController() {
+    _tag = _newTag;
     _followController = Get.put(
       FollowChildController(widget.controller, widget.mid, widget.tagid),
-      tag: '${widget.tag ?? Utils.generateRandomString(8)}${widget.tagid}',
+      tag: _tag,
     );
+  }
+
+  @override
+  void didUpdateWidget(FollowChildPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.tagid != widget.tagid) {
+      final newTag = _newTag;
+      if (Get.isRegistered<FollowChildController>(tag: newTag)) {
+        _followController = Get.find<FollowChildController>(tag: newTag);
+      } else {
+        Get.delete<FollowChildController>(tag: _tag);
+        _initController();
+      }
+    }
   }
 
   @override
@@ -84,20 +112,41 @@ class _FollowChildPageState extends State<FollowChildPage>
       return Stack(
         clipBehavior: Clip.none,
         children: [
-          child,
+          NotificationListener<UserScrollNotification>(
+            onNotification: (notification) {
+              final direction = notification.direction;
+              if (direction == .forward) {
+                showFab();
+              } else if (direction == .reverse) {
+                hideFab();
+              }
+              return false;
+            },
+            child: child,
+          ),
           Positioned(
             right: kFloatingActionButtonMargin + padding.right,
-            bottom: kFloatingActionButtonMargin + padding.bottom,
-            child: FloatingActionButton.extended(
-              onPressed: () => _followController
-                ..setOrderType(
-                  _followController.orderType.value == FollowOrderType.def
-                      ? FollowOrderType.attention
-                      : FollowOrderType.def,
-                )
-                ..onReload(),
-              icon: const Icon(Icons.format_list_bulleted, size: 20),
-              label: Obx(() => Text(_followController.orderType.value.title)),
+            bottom: 0,
+            child: SlideTransition(
+              position: fabAnimation,
+              child: Padding(
+                padding: .only(
+                  bottom: kFloatingActionButtonMargin + padding.bottom,
+                ),
+                child: FloatingActionButton.extended(
+                  onPressed: () => _followController
+                    ..setOrderType(
+                      _followController.orderType.value == FollowOrderType.def
+                          ? FollowOrderType.attention
+                          : FollowOrderType.def,
+                    )
+                    ..onReload(),
+                  icon: const Icon(Icons.format_list_bulleted, size: 20),
+                  label: Obx(
+                    () => Text(_followController.orderType.value.title),
+                  ),
+                ),
+              ),
             ),
           ),
         ],

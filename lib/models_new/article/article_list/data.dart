@@ -1,21 +1,16 @@
 import 'package:PiliPlus/models/model_owner.dart';
 import 'package:PiliPlus/models_new/article/article_list/article.dart';
-import 'package:PiliPlus/models_new/article/article_list/last.dart';
 import 'package:PiliPlus/models_new/article/article_list/list.dart';
 
 class ArticleListData {
   ArticleListInfo? list;
   List<ArticleListItemModel>? articles;
   Owner? author;
-  Last? last;
-  bool? attention;
 
   ArticleListData({
     this.list,
     this.articles,
     this.author,
-    this.last,
-    this.attention,
   });
 
   factory ArticleListData.fromJson(Map<String, dynamic> json) =>
@@ -31,9 +26,5 @@ class ArticleListData {
         author: json['author'] == null
             ? null
             : Owner.fromJson(json['author'] as Map<String, dynamic>),
-        last: json['last'] == null
-            ? null
-            : Last.fromJson(json['last'] as Map<String, dynamic>),
-        attention: json['attention'] as bool?,
       );
 }

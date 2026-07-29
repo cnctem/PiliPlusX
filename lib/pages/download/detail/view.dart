@@ -11,9 +11,9 @@ import 'package:PiliPlus/pages/common/multi_select/base.dart'
 import 'package:PiliPlus/pages/download/controller.dart';
 import 'package:PiliPlus/pages/download/detail/widgets/item.dart';
 import 'package:PiliPlus/services/download/download_service.dart';
-import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/storage.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart'
     hide SliverGridDelegateWithMaxCrossAxisExtent;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -36,7 +36,7 @@ class DownloadDetailPage extends StatefulWidget {
 }
 
 class _DownloadDetailPageState extends State<DownloadDetailPage>
-    with BaseMultiSelectMixin<BiliDownloadEntryInfo> {
+    with BaseMultiSelectMixin<BiliDownloadEntryInfo>, GridMixin {
   StreamSubscription? _sub;
   final _downloadItems = RxList<BiliDownloadEntryInfo>();
   final _controller = Get.find<DownloadPageController>();
@@ -103,16 +103,16 @@ class _DownloadDetailPageState extends State<DownloadDetailPage>
                   visualDensity: VisualDensity.compact,
                 ),
                 onPressed: () async {
-                  final allChecked = this.allChecked.toSet();
+                  final futures = allChecked
+                      .map(
+                        (e) => _downloadService.downloadDanmaku(
+                          entry: e,
+                          isUpdate: true,
+                        ),
+                      )
+                      .toList();
                   handleSelect();
-                  final res = await Future.wait(
-                    allChecked.map(
-                      (e) => _downloadService.downloadDanmaku(
-                        entry: e,
-                        isUpdate: true,
-                      ),
-                    ),
-                  );
+                  final res = await Future.wait(futures);
                   if (res.every((e) => e)) {
                     SmartDialog.showToast('更新成功');
                   } else {
@@ -149,11 +149,7 @@ class _DownloadDetailPageState extends State<DownloadDetailPage>
                 sliver: Obx(() {
                   if (_downloadItems.isNotEmpty) {
                     return SliverGrid.builder(
-                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                        mainAxisSpacing: 2,
-                        mainAxisExtent: 100,
-                        maxCrossAxisExtent: Grid.smallCardWidth * 2,
-                      ),
+                      gridDelegate: gridDelegate,
                       itemBuilder: (context, index) {
                         final entry = _downloadItems[index];
                         return DetailItem(
@@ -201,22 +197,20 @@ class _DownloadDetailPageState extends State<DownloadDetailPage>
       title: const Text('确定删除选中视频？'),
       onConfirm: () async {
         SmartDialog.showLoading();
-        final watchProgress = GStorage.watchProgress;
-        final allChecked = this.allChecked.toSet();
+        final allChecked = this.allChecked.toList();
         final isDeleteAll = allChecked.length == _downloadItems.length;
-        if (isDeleteAll) {
-          await _closeSub();
-        }
-        for (final entry in allChecked) {
-          await watchProgress.deleteAll(
+        await Future.wait([
+          if (isDeleteAll) _closeSub(),
+          GStorage.watchProgress.deleteAll(
             allChecked.map((e) => e.cid.toString()),
-          );
-          await _downloadService.deleteDownload(
-            entry: entry,
-            removeList: true,
-            refresh: false,
-          );
-        }
+          ),
+          for (final entry in allChecked)
+            _downloadService.deleteDownload(
+              entry: entry,
+              removeList: true,
+              refresh: false,
+            ),
+        ]);
         _downloadService.flagNotifier.refresh();
         if (isDeleteAll) {
           SmartDialog.dismiss();

@@ -5,9 +5,8 @@ class FavDetailData {
   FavFolderInfo? info;
   List<FavDetailItemModel>? medias;
   bool? hasMore;
-  int? ttl;
 
-  FavDetailData({this.info, this.medias, this.hasMore, this.ttl});
+  FavDetailData({this.info, this.medias, this.hasMore});
 
   factory FavDetailData.fromJson(Map<String, dynamic> json) => FavDetailData(
     info: json['info'] == null
@@ -17,6 +16,5 @@ class FavDetailData {
         ?.map((e) => FavDetailItemModel.fromJson(e as Map<String, dynamic>))
         .toList(),
     hasMore: json['has_more'] as bool?,
-    ttl: json['ttl'] as int?,
   );
 }

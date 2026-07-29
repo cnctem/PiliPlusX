@@ -22,9 +22,9 @@ class PlayUrlModel {
     this.seekType,
     this.dash,
     this.supportFormats,
-    this.lastPlayTime,
+    int lastPlayTime = 0,
     this.lastPlayCid,
-  });
+  }) : _lastPlayTime = lastPlayTime;
 
   String? from;
   String? result;
@@ -42,7 +42,17 @@ class PlayUrlModel {
   List<Durl>? durl;
   List<FormatItem>? supportFormats;
   Volume? volume;
-  int? lastPlayTime;
+
+  late int _lastPlayTime;
+  int get lastPlayTime => _lastPlayTime;
+  set lastPlayTime(int? value) {
+    if (value != null && value > 0) {
+      _lastPlayTime = value;
+    } else {
+      _lastPlayTime = 0;
+    }
+  }
+
   int? lastPlayCid;
   String? curLanguage;
   Language? language;
