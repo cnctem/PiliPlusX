@@ -29,7 +29,8 @@ class _DownloadSearchPageState
           DownloadSearchPage,
           List<BiliDownloadEntryInfo>,
           BiliDownloadEntryInfo
-        > {
+        >
+    with GridMixin {
   @override
   DownloadSearchController controller = Get.put(DownloadSearchController());
   final _downloadService = Get.find<DownloadService>();
@@ -57,16 +58,16 @@ class _DownloadSearchPageState
     TextButton(
       style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
       onPressed: () async {
-        final allChecked = controller.allChecked.toSet();
+        final future = controller.allChecked
+            .map(
+              (e) => _downloadService.downloadDanmaku(
+                entry: e,
+                isUpdate: true,
+              ),
+            )
+            .toList();
         controller.handleSelect();
-        final res = await Future.wait(
-          allChecked.map(
-            (e) => _downloadService.downloadDanmaku(
-              entry: e,
-              isUpdate: true,
-            ),
-          ),
-        );
+        final res = await Future.wait(future);
         if (res.every((e) => e)) {
           SmartDialog.showToast('更新成功');
         } else {
@@ -75,7 +76,7 @@ class _DownloadSearchPageState
       },
       child: Text(
         '更新',
-        style: TextStyle(color: Get.theme.colorScheme.onSurface),
+        style: TextStyle(color: ColorScheme.of(context).onSurface),
       ),
     ),
   ];
@@ -84,11 +85,7 @@ class _DownloadSearchPageState
   Widget buildList(List<BiliDownloadEntryInfo> list) {
     if (list.isNotEmpty) {
       return SliverGrid.builder(
-        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-          mainAxisSpacing: 2,
-          mainAxisExtent: 100,
-          maxCrossAxisExtent: Grid.smallCardWidth * 2,
-        ),
+        gridDelegate: gridDelegate,
         itemBuilder: (context, index) {
           final entry = list[index];
           return DetailItem(

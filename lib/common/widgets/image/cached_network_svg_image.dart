@@ -2,19 +2,19 @@
 
 import 'dart:developer';
 
+import 'package:PiliPlus/utils/cache_manager.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class CachedNetworkSVGImage extends StatefulWidget {
   CachedNetworkSVGImage(
-    String url, {
+    this._url, {
     Key? key,
     String? cacheKey,
     Widget? placeholder,
-    Widget? errorWidget,
+    WidgetBuilder? errorBuilder,
     double? width,
     double? height,
     Map<String, String>? headers,
@@ -27,11 +27,9 @@ class CachedNetworkSVGImage extends StatefulWidget {
     SvgTheme theme = const SvgTheme(),
     ColorFilter? colorFilter,
     WidgetBuilder? placeholderBuilder,
-    BaseCacheManager? cacheManager,
-  }) : _url = url,
-       _cacheKey = cacheKey,
+  }) : _cacheKey = cacheKey,
        _placeholder = placeholder,
-       _errorWidget = errorWidget,
+       _errorBuilder = errorBuilder,
        _width = width,
        _height = height,
        _headers = headers,
@@ -44,13 +42,12 @@ class CachedNetworkSVGImage extends StatefulWidget {
        _theme = theme,
        _colorFilter = colorFilter,
        _placeholderBuilder = placeholderBuilder,
-       _cacheManager = cacheManager ?? DefaultCacheManager(),
-       super(key: key ?? ValueKey(cacheKey ?? url));
+       super(key: key ?? ValueKey(cacheKey ?? _url));
 
   final String _url;
   final String? _cacheKey;
   final Widget? _placeholder;
-  final Widget? _errorWidget;
+  final WidgetBuilder? _errorBuilder;
   final double? _width;
   final double? _height;
   final Map<String, String>? _headers;
@@ -63,7 +60,6 @@ class CachedNetworkSVGImage extends StatefulWidget {
   final SvgTheme _theme;
   final ColorFilter? _colorFilter;
   final WidgetBuilder? _placeholderBuilder;
-  final BaseCacheManager _cacheManager;
 
   @override
   State<CachedNetworkSVGImage> createState() => _CachedNetworkSVGImageState();
@@ -79,9 +75,7 @@ class _CachedNetworkSVGImageState extends State<CachedNetworkSVGImage> {
   double? height;
   late TextScaler textScaler;
 
-  static final _sizeRegExp = RegExp(
-    r'height="([\d\.]+)([c-x]{2})?"',
-  );
+  static final _sizeRegExp = RegExp(r'height="([\d\.]+)([c-x]{2})?"');
 
   @override
   void initState() {
@@ -100,7 +94,7 @@ class _CachedNetworkSVGImageState extends State<CachedNetworkSVGImage> {
 
   Future<void> _loadImage() async {
     try {
-      final file = await widget._cacheManager.getSingleFile(
+      final file = await CacheManager.manager.getSingleFile(
         widget._url,
         key: _cacheKey,
         headers: widget._headers ?? const {},
@@ -172,7 +166,8 @@ class _CachedNetworkSVGImageState extends State<CachedNetworkSVGImage> {
 
   Widget _buildPlaceholderWidget() => Center(child: widget._placeholder);
 
-  Widget _buildErrorWidget() => Center(child: widget._errorWidget);
+  Widget _buildErrorWidget() =>
+      Center(child: widget._errorBuilder?.call(context));
 
   Widget? _buildSVGImage() {
     if (_svgString == null) {

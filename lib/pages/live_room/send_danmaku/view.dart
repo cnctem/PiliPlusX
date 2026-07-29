@@ -136,7 +136,7 @@ class _ReplyPageState extends CommonRichTextPubPageState<LiveSendDmPanel> {
             emojiBtn,
             Obx(
               () => FilledButton.tonal(
-                onPressed: enablePublish.value ? onPublish : null,
+                onPressed: enablePublish.value ? onPublishThrottle : null,
                 style: FilledButton.styleFrom(
                   visualDensity: VisualDensity.compact,
                   padding: const EdgeInsets.symmetric(

@@ -6,5 +6,4 @@ abstract class StatDetail {
   int? reply;
   int? share;
   int? view;
-  int? vt;
 }

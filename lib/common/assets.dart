@@ -6,14 +6,14 @@ abstract final class Assets {
   static const logoIco = 'assets/images/logo/ico/app_icon.ico';
   static const logoLarge = 'assets/images/logo/desktop/logo_large.png';
 
-  static const vipIcon = 'assets/images/big-vip.png';
+  static const vipIcon = 'assets/images/big-vip.svg';
   static const avatarPlaceHolder = 'assets/images/noface.jpeg';
   static const loading = 'assets/images/loading.png';
   static const buffering = 'assets/images/loading.webp';
-  static const play = 'assets/images/play.png';
   static const topicHeader = 'assets/images/topic-header-bg.png';
   static const trendingBanner = 'assets/images/trending_banner.png';
   static const ai = 'assets/images/ai.png';
+  static const error = 'assets/images/error.svg';
 
   static const livingChart = 'assets/images/live.gif';
   static const livingStatic = 'assets/images/live.png';

@@ -17,7 +17,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
 # update when release
-version: 2.0.2+1
+version: 2.1.0+5218
 
 environment:
   sdk: ">=3.11.1"
@@ -414,14 +414,12 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - path: assets/images/
-    - path: assets/images/lv/
     - path: assets/images/logo/
     - path: assets/images/logo/ico/
       platforms: [windows]
     - path: assets/images/logo/desktop/
       platforms: [linux, macos]
     - path: assets/images/live/
-    - path: assets/images/video/
     - path: assets/images/paycoins/
     - path: assets/shaders/
   # An image asset can refer to one or more resolution-specific "variants", see

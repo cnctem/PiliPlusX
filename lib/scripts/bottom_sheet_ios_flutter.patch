@@ -1,0 +1,172 @@
+diff --git a/packages/flutter/lib/src/cupertino/route.dart b/packages/flutter/lib/src/cupertino/route.dart
+index b6786d2611f..c36901a40bf 100644
+--- a/packages/flutter/lib/src/cupertino/route.dart
++++ b/packages/flutter/lib/src/cupertino/route.dart
+@@ -201,7 +201,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
+   // gesture is detected. The returned controller handles all of the subsequent
+   // drag events.
+   static _CupertinoBackGestureController<T> _startPopGesture<T>(PageRoute<T> route) {
+-    assert(route.popGestureEnabled);
++    assert(route.popGestureEnabled || route.popGestureEnabled_);
+ 
+     return _CupertinoBackGestureController<T>(
+       navigator: route.navigator!,
+@@ -252,6 +252,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
+         linearTransition: linearTransition,
+         child: _CupertinoBackGestureDetector<T>(
+           enabledCallback: () => route.popGestureEnabled,
++          popGestureEnabled_: () => route.popGestureEnabled_,
+           onStartPopGesture: () => _startPopGesture<T>(route),
+           child: child,
+         ),
+@@ -698,6 +699,7 @@ class _CupertinoBackGestureDetector<T> extends StatefulWidget {
+   const _CupertinoBackGestureDetector({
+     super.key,
+     required this.enabledCallback,
++    required this.popGestureEnabled_,
+     required this.onStartPopGesture,
+     required this.child,
+   });
+@@ -706,6 +708,8 @@ class _CupertinoBackGestureDetector<T> extends StatefulWidget {
+ 
+   final ValueGetter<bool> enabledCallback;
+ 
++  final ValueGetter<bool> popGestureEnabled_;
++
+   final ValueGetter<_CupertinoBackGestureController<T>> onStartPopGesture;
+ 
+   @override
+@@ -720,7 +724,7 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
+   @override
+   void initState() {
+     super.initState();
+-    _recognizer = HorizontalDragGestureRecognizer(debugOwner: this)
++    _recognizer = _HorizontalDragGestureRecognizer(debugOwner: this)
+       ..onStart = _handleDragStart
+       ..onUpdate = _handleDragUpdate
+       ..onEnd = _handleDragEnd
+@@ -776,7 +780,13 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
+ 
+   void _handlePointerDown(PointerDownEvent event) {
+     if (widget.enabledCallback()) {
+-      _recognizer.addPointer(event);
++      _recognizer
++        ..gestureSettings = null
++        ..addPointer(event);
++    } else if (widget.popGestureEnabled_()) {
++      _recognizer
++        ..gestureSettings = const DeviceGestureSettings(touchSlop: 28)
++        ..addPointer(event);
+     }
+   }
+ 
+@@ -883,7 +893,7 @@ class _CupertinoBackGestureController<T> {
+     } else {
+       if (isCurrent) {
+         // This route is destined to pop at this point. Reuse navigator's pop.
+-        navigator.pop();
++        navigator.pop(gesturePop);
+       }
+ 
+       // The popping may have finished inline if already at the target destination.
+@@ -1549,6 +1559,20 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
+   static final Tween<double> _dialogScaleTween = Tween<double>(begin: 1.3, end: 1.0);
+ }
+ 
++class _HorizontalDragGestureRecognizer extends HorizontalDragGestureRecognizer {
++  _HorizontalDragGestureRecognizer({
++    super.debugOwner,
++    super.supportedDevices,
++    super.allowedButtonsFilter,
++  });
++
++  @override
++  void didStopTrackingLastPointer(int pointer) {
++    gestureSettings = null;
++    super.didStopTrackingLastPointer(pointer);
++  }
++}
++
+ /// A [PageTransitionsBuilder] that provides an iOS-style page transition
+ /// animation.
+ ///
+diff --git a/packages/flutter/lib/src/material/scaffold.dart b/packages/flutter/lib/src/material/scaffold.dart
+index 0233bd1da39..a1ce131c786 100644
+--- a/packages/flutter/lib/src/material/scaffold.dart
++++ b/packages/flutter/lib/src/material/scaffold.dart
+@@ -2519,6 +2519,7 @@ class ScaffoldState extends State<Scaffold>
+     final LocalHistoryEntry? entry = isPersistent
+         ? null
+         : LocalHistoryEntry(
++            popGestureEnabled: true,
+             onRemove: () {
+               if (!removedEntry && _currentBottomSheet?._widget == bottomSheet && !doingDispose) {
+                 removeCurrentBottomSheet();
+diff --git a/packages/flutter/lib/src/widgets/routes.dart b/packages/flutter/lib/src/widgets/routes.dart
+index 6d42beb65c0..44c3da72895 100644
+--- a/packages/flutter/lib/src/widgets/routes.dart
++++ b/packages/flutter/lib/src/widgets/routes.dart
+@@ -709,7 +709,11 @@ class LocalHistoryEntry {
+   /// Creates an entry in the history of a [LocalHistoryRoute].
+   ///
+   /// The [impliesAppBarDismissal] defaults to true if not provided.
+-  LocalHistoryEntry({this.onRemove, this.impliesAppBarDismissal = true});
++  LocalHistoryEntry({
++    this.onRemove,
++    this.impliesAppBarDismissal = true,
++    this.popGestureEnabled = false,
++  });
+ 
+   /// Called when this entry is removed from the history of its associated [LocalHistoryRoute].
+   final VoidCallback? onRemove;
+@@ -722,6 +726,8 @@ class LocalHistoryEntry {
+   /// Defaults to true.
+   final bool impliesAppBarDismissal;
+ 
++  final bool popGestureEnabled;
++
+   /// Remove this entry from the history of its associated [LocalHistoryRoute].
+   void remove() {
+     _owner?.removeLocalHistoryEntry(this);
+@@ -949,6 +955,14 @@ mixin LocalHistoryRoute<T> on Route<T> {
+   @override
+   bool didPop(T? result) {
+     if (_localHistory != null && _localHistory!.isNotEmpty) {
++      if (result == gesturePop) {
++        for (var e in _localHistory!) {
++          e._owner = null;
++        }
++        _localHistory!.clear();
++        _localHistory = null;
++        return super.didPop(result);
++      }
+       final LocalHistoryEntry entry = _localHistory!.removeLast();
+       assert(entry._owner == this);
+       entry._owner = null;
+@@ -970,6 +984,13 @@ mixin LocalHistoryRoute<T> on Route<T> {
+   bool get willHandlePopInternally {
+     return _localHistory != null && _localHistory!.isNotEmpty;
+   }
++
++  bool get popGestureEnabled_ {
++    if (popDisposition == RoutePopDisposition.doNotPop) {
++      return false;
++    }
++    return _localHistory?.lastOrNull?.popGestureEnabled ?? false;
++  }
+ }
+ 
+ class _DismissModalAction extends DismissAction {
+@@ -989,6 +1010,12 @@ class _DismissModalAction extends DismissAction {
+   }
+ }
+ 
++class _GesturePop {
++  const _GesturePop();
++}
++
++const Object gesturePop = _GesturePop();
++
+ enum _ModalRouteAspect {
+   /// Specifies the aspect corresponding to [ModalRoute.isCurrent].
+   isCurrent,

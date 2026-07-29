@@ -15,33 +15,35 @@ import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+typedef OnPayCoin = Function(int coin, bool coinWithLike);
+
 class PayCoinsPage extends StatefulWidget {
   const PayCoinsPage({
     super.key,
     required this.onPayCoin,
-    int copyright = 1,
-    this.hasCoin = false,
-  }) : hasCopyright = copyright == 1;
+    required this.hasCoin,
+    required this.hasCopyright,
+  });
 
-  final Function(int coin, bool coinWithLike) onPayCoin;
-  final bool hasCopyright;
+  final OnPayCoin onPayCoin;
   final bool hasCoin;
+  final bool hasCopyright;
 
   @override
   State<PayCoinsPage> createState() => _PayCoinsPageState();
 
   static void toPayCoinsPage({
-    required Function(int coin, bool coinWithLike) onPayCoin,
-    int copyright = 1,
-    bool hasCoin = false,
+    required OnPayCoin onPayCoin,
+    required bool hasCoin,
+    required bool hasCopyright,
   }) {
     Get.key.currentState!.push(
       PublishRoute(
         pageBuilder: (buildContext, animation, secondaryAnimation) {
           return PayCoinsPage(
             onPayCoin: onPayCoin,
-            copyright: copyright,
             hasCoin: hasCoin,
+            hasCopyright: hasCopyright,
           );
         },
         transitionDuration: const Duration(milliseconds: 225),
@@ -105,8 +107,8 @@ class _PayCoinsPageState extends State<PayCoinsPage>
     return index == 0 ? Assets.mario : Assets.gunSister;
   }
 
-  late final color = Colors.black.withValues(alpha: 0.4);
-  Color _getPayFilter(int index) => _canPay(index) ? Colors.transparent : color;
+  Color _getPayFilter(int index) =>
+      _canPay(index) ? Colors.transparent : const Color(0x66000000);
 
   @override
   void initState() {
@@ -199,38 +201,39 @@ class _PayCoinsPageState extends State<PayCoinsPage>
   }
 
   Widget _buildCoinWidget(int index, double factor) {
-    return Center(
-      child: SizedBox(
-        height: 70 + (factor * 30),
-        width: 70 + (factor * 30),
-        child: ColorFiltered(
-          colorFilter: ColorFilter.mode(
-            _getPayFilter(index),
-            BlendMode.srcATop,
-          ),
-          child: Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.center,
-            children: [
-              SlideTransition(
-                position: _boxAnim,
-                child: Image.asset(Assets.payBox),
-              ),
-              SlideTransition(
-                position: _coinSlideAnim,
-                child: FadeTransition(
-                  opacity: _coinFadeAnim,
-                  child: Image.asset(
-                    height: 35 + (factor * 15),
-                    width: 35 + (factor * 15),
-                    index == 0 ? Assets.coinsOne : Assets.coinsTwo,
-                  ),
-                ),
-              ),
-            ],
+    final filter = _getPayFilter(index);
+    final boxSize = 70 + (factor * 30);
+    final coinSize = 35 + (factor * 15);
+    return Stack(
+      alignment: .center,
+      clipBehavior: .none,
+      children: [
+        SlideTransition(
+          position: _boxAnim,
+          child: Image.asset(
+            Assets.payBox,
+            color: filter,
+            width: boxSize,
+            height: boxSize,
+            cacheWidth: 100.cacheSize(context),
+            colorBlendMode: .srcATop,
           ),
         ),
-      ),
+        SlideTransition(
+          position: _coinSlideAnim,
+          child: FadeTransition(
+            opacity: _coinFadeAnim,
+            child: Image.asset(
+              height: coinSize,
+              width: coinSize,
+              cacheWidth: 50.cacheSize(context),
+              color: filter,
+              colorBlendMode: .srcATop,
+              index == 0 ? Assets.coinsOne : Assets.coinsTwo,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -384,8 +387,13 @@ class _PayCoinsPageState extends State<PayCoinsPage>
                   ],
                 )
               else
-                SizedBox(height: 100, child: _buildCoinWidget(0, 1)),
-              SizedBox(height: isV ? 25 : 10),
+                Center(
+                  child: SizedBox(height: 100, child: _buildCoinWidget(0, 1)),
+                ),
+              if (isV)
+                const SizedBox(height: 25)
+              else
+                const SizedBox(height: 10),
               if (_hasCopyright)
                 GestureDetector(
                   behavior: HitTestBehavior.opaque,

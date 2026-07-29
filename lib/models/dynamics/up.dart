@@ -1,41 +1,43 @@
-import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/models_new/follow/list.dart';
+import 'package:PiliPlus/utils/parse_int.dart';
 
 class FollowUpModel {
-  FollowUpModel({
-    this.liveUsers,
-    required this.upList,
-  });
-
   LiveUsers? liveUsers;
-  late List<UpItem> upList;
-  bool? hasMore;
-  String? offset;
-
-  FollowUpModel.fromJson(Map<String, dynamic> json) {
-    liveUsers = json['live_users'] != null
-        ? LiveUsers.fromJson(json['live_users'])
-        : null;
-    upList =
-        (json['up_list']?['items'] as List?)
-            ?.map<UpItem>((e) => UpItem.fromJson(e))
-            .toList() ??
-        <UpItem>[];
-    hasMore = json['up_list']?['has_more'];
-    offset = json['up_list']?['offset'];
-  }
-}
-
-class DynUpList {
   List<UpItem>? upList;
   bool? hasMore;
   String? offset;
 
-  DynUpList.fromJson(Map<String, dynamic> json) {
-    upList = (json['items'] as List?)
-        ?.map<UpItem>((e) => UpItem.fromJson(e))
+  void addAllUpList(List<UpItem> newList) {
+    if (upList != null) {
+      upList!.addAll(newList);
+    } else {
+      upList = newList;
+    }
+  }
+
+  factory FollowUpModel.fromJson(Map<String, dynamic> json) {
+    final model = FollowUpModel.fromUpList(json['up_list']);
+    final liveUsers = json['live_users'];
+    if (liveUsers != null) {
+      model.liveUsers = LiveUsers.fromJson(liveUsers);
+    }
+    return model;
+  }
+
+  FollowUpModel.fromUpList(Map<String, dynamic>? json) {
+    if (json != null) {
+      upList = (json['items'] as List?)
+          ?.map((e) => UpItem.fromJson(e))
+          .toList();
+      hasMore = json['has_more'];
+      offset = json['offset'];
+    }
+  }
+
+  FollowUpModel.fromFollowList(Map<String, dynamic> json) {
+    upList = (json['list'] as List?)
+        ?.map((e) => FollowItemModel.fromJson(e))
         .toList();
-    hasMore = json['has_more'];
-    offset = json['offset'];
   }
 }
 
@@ -51,7 +53,7 @@ class LiveUsers {
   List<LiveUserItem>? items;
 
   LiveUsers.fromJson(Map<String, dynamic> json) {
-    count = Utils.safeToInt(json['count']) ?? 0;
+    count = safeToInt(json['count']) ?? 0;
     group = json['group'];
     items = (json['items'] as List?)
         ?.map<LiveUserItem>((e) => LiveUserItem.fromJson(e))
@@ -68,7 +70,7 @@ class LiveUserItem extends UpItem {
   LiveUserItem.fromJson(Map<String, dynamic> json) : super.fromJson(json) {
     isReserveRecall = json['is_reserve_recall'];
     jumpUrl = json['jump_url'];
-    roomId = Utils.safeToInt(json['room_id']);
+    roomId = safeToInt(json['room_id']);
     title = json['title'];
   }
 }
@@ -89,7 +91,7 @@ class UpItem {
   UpItem.fromJson(Map<String, dynamic> json) {
     face = json['face'];
     hasUpdate = json['has_update'];
-    mid = Utils.safeToInt(json['mid']) ?? 0;
+    mid = safeToInt(json['mid']) ?? 0;
     uname = json['uname'];
   }
 

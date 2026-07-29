@@ -1,129 +1,19 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
+import 'dart:convert' show JsonEncoder, base64;
 import 'dart:math' show Random;
 
-import 'package:PiliPlus/common/constants.dart';
-import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:catcher_2/catcher_2.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:device_info_plus/device_info_plus.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:flutter/services.dart';
+import 'package:PiliPlus/common/constants.dart';
+import 'package:flutter/services.dart'
+    show Clipboard, ClipboardData, MethodChannel;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:get/get.dart';
-import 'package:share_plus/share_plus.dart';
 
 abstract final class Utils {
-  static final random = Random();
-
+  // 鸿蒙/安卓原生通道（上游已改用 JNI，这里保留给 ohos 适配层）
   static const channel = MethodChannel(Constants.appName);
 
+  static final random = Random();
+
   static const jsonEncoder = JsonEncoder.withIndent('    ');
-
-  static String levelName(
-    Object level, {
-    bool isSeniorMember = false,
-  }) => 'assets/images/lv/lv${isSeniorMember ? '6_s' : level}.png';
-
-  static Color index2Color(int index, Color color) => switch (index) {
-    0 => const Color(0xFFfdad13),
-    1 => const Color(0xFF8aace1),
-    2 => const Color(0xFFdfa777),
-    _ => color,
-  };
-
-  static String themeUrl(bool isDark) =>
-      'native.theme=${isDark ? 2 : 1}&night=${isDark ? 1 : 0}';
-
-  static Future<void> saveBytes2File({
-    required String name,
-    required Uint8List bytes,
-    required List<String> allowedExtensions,
-    FileType type = FileType.custom,
-  }) async {
-    try {
-      final path = await FilePicker.platform.saveFile(
-        allowedExtensions: allowedExtensions,
-        type: type,
-        fileName: name,
-        bytes: PlatformUtils.isDesktop ? null : bytes,
-      );
-      if (path == null) {
-        SmartDialog.showToast("取消保存");
-        return;
-      }
-      if (PlatformUtils.isDesktop) {
-        await File(path).writeAsBytes(bytes);
-      }
-      SmartDialog.showToast("已保存");
-    } catch (e) {
-      SmartDialog.showToast("保存失败: $e");
-    }
-  }
-
-  static int? safeToInt(dynamic value) => switch (value) {
-    int e => e,
-    String e => int.tryParse(e),
-    num e => e.toInt(),
-    _ => null,
-  };
-
-  static Future<bool> get isWiFi async {
-    // TODO 鸿蒙未适配 判断是否为wifi
-    // 这里做了catch，就先让鸿蒙返回true
-    try {
-      return PlatformUtils.isMobile &&
-          (await Connectivity().checkConnectivity()) == ConnectivityResult.wifi;
-    } catch (_) {
-      return true;
-    }
-  }
-
-  static int parseColorInt(String color) =>
-      0xFF000000 | int.parse(color.substring(1), radix: 16);
-
-  static Color parseColor(String color) => Color(parseColorInt(color));
-  
-  static Color parseMedalColor(String color) => Color(
-    int.parse('${color.substring(7)}${color.substring(1, 7)}', radix: 16),
-  );
-
-  static int? _sdkInt;
-  static Future<int> get sdkInt async {
-    return _sdkInt ??= (await DeviceInfoPlugin().androidInfo).version.sdkInt;
-  }
-
-  static bool? _isIpad;
-  static Future<bool> get isIpad async {
-    if (!Platform.isIOS) return false;
-    return _isIpad ??= (await DeviceInfoPlugin().iosInfo).model
-        .toLowerCase()
-        .contains('ipad');
-  }
-
-  static Future<Rect?> get sharePositionOrigin async {
-    if (await isIpad) {
-      final size = Get.size;
-      return Rect.fromLTRB(0, 0, size.width, size.height / 2);
-    }
-    return null;
-  }
-
-  static Future<void> shareText(String text) async {
-    if (PlatformUtils.isDesktop) {
-      copyText(text);
-      return;
-    }
-    try {
-      await Share.share(
-        text,
-        sharePositionOrigin: await sharePositionOrigin,
-      );
-    } catch (e) {
-      SmartDialog.showToast(e.toString());
-    }
-  }
 
   static final numericRegex = RegExp(r'^[\d\.]+$');
   static bool isStringNumeric(String str) {

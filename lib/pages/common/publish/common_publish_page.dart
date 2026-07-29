@@ -27,7 +27,8 @@ abstract class CommonPublishPage<T> extends StatefulWidget {
 abstract class CommonPublishPageState<T extends CommonPublishPage>
     extends State<T>
     with WidgetsBindingObserver {
-  late final FocusNode focusNode;
+  late bool _paused = false;
+  final FocusNode focusNode = FocusNode();
   late final controller = ChatBottomPanelContainerController<PanelType>(
     uiScale: Pref.uiScale,
   );
@@ -37,26 +38,24 @@ abstract class CommonPublishPageState<T extends CommonPublishPage>
   late final RxBool readOnly = false.obs;
   late final RxBool enablePublish = false.obs;
 
+  bool isPublishing = false;
+
   bool hasPub = false;
   void initPubState();
+
+  bool get handleKeyboard => Platform.isAndroid && widget.autofocus;
 
   @override
   void initState() {
     super.initState();
-    if (Platform.isAndroid) {
+    if (handleKeyboard) {
       WidgetsBinding.instance.addObserver(this);
     }
-
-    focusNode = FocusNode();
 
     initPubState();
 
     if (widget.autofocus) {
-      Future.delayed(const Duration(milliseconds: 300), () {
-        if (mounted) {
-          focusNode.requestFocus();
-        }
-      });
+      _requestFocus(duration: const Duration(milliseconds: 300));
     }
   }
 
@@ -67,34 +66,44 @@ abstract class CommonPublishPageState<T extends CommonPublishPage>
     }
     focusNode.dispose();
     editController.dispose();
-    if (Platform.isAndroid) {
+    if (handleKeyboard) {
       WidgetsBinding.instance.removeObserver(this);
     }
     super.dispose();
   }
 
-  void _requestFocus() {
-    Future.delayed(const Duration(microseconds: 200), focusNode.requestFocus);
+  void _safeRequestFocus() {
+    if (mounted) {
+      focusNode.requestFocus();
+    }
+  }
+
+  void _requestFocus({Duration duration = const Duration(microseconds: 200)}) {
+    Future.delayed(duration, _safeRequestFocus);
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      if (mounted &&
-          widget.autofocus &&
-          (panelType.value == PanelType.keyboard ||
-              panelType.value == PanelType.none)) {
-        controller.restoreChatPanel();
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (focusNode.hasFocus) {
-            focusNode.unfocus();
-            _requestFocus();
-          } else {
-            _requestFocus();
-          }
-        });
+    if (state == .resumed) {
+      if (_paused) {
+        _paused = false;
+        final panelType = this.panelType.value;
+        if (panelType == .keyboard || panelType == .none) {
+          // 鸿蒙适配：恢复被 keepChatPanel 冻结的面板高度，避免回前台后面板错位
+          controller.restoreChatPanel();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (focusNode.hasFocus) {
+              focusNode.unfocus();
+              _requestFocus();
+            } else {
+              _requestFocus();
+            }
+          });
+        }
       }
-    } else if (state == AppLifecycleState.paused) {
+    } else if (state == .paused) {
+      _paused = true;
+      // 鸿蒙适配：退到后台时冻结面板，避免键盘收起导致面板高度被重置
       controller.keepChatPanel();
       if (focusNode.hasFocus) {
         focusNode.unfocus();
@@ -208,8 +217,14 @@ abstract class CommonPublishPageState<T extends CommonPublishPage>
 
   void onSubmitted(String value) {
     if (enablePublish.value) {
-      onPublish();
+      onPublishThrottle();
     }
+  }
+
+  void onPublishThrottle() {
+    if (isPublishing) return;
+    isPublishing = true;
+    onPublish().whenComplete(() => isPublishing = false);
   }
 
   Future<void> onPublish();

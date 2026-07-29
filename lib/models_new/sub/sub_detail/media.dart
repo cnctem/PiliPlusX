@@ -1,4 +1,3 @@
-import 'package:PiliPlus/models/model_owner.dart';
 import 'package:PiliPlus/models_new/fav/fav_detail/cnt_info.dart';
 
 class SubDetailItemModel {
@@ -8,11 +7,7 @@ class SubDetailItemModel {
   int? duration;
   int? pubtime;
   String? bvid;
-  Owner? upper;
   CntInfo? cntInfo;
-  int? enableVt;
-  String? vtDisplay;
-  bool? isSelfView;
 
   SubDetailItemModel({
     this.id,
@@ -21,11 +16,7 @@ class SubDetailItemModel {
     this.duration,
     this.pubtime,
     this.bvid,
-    this.upper,
     this.cntInfo,
-    this.enableVt,
-    this.vtDisplay,
-    this.isSelfView,
   });
 
   factory SubDetailItemModel.fromJson(Map<String, dynamic> json) =>
@@ -36,14 +27,8 @@ class SubDetailItemModel {
         duration: json['duration'] as int?,
         pubtime: json['pubtime'] as int?,
         bvid: json['bvid'] as String?,
-        upper: json['upper'] == null
-            ? null
-            : Owner.fromJson(json['upper'] as Map<String, dynamic>),
         cntInfo: json['cnt_info'] == null
             ? null
             : CntInfo.fromJson(json['cnt_info'] as Map<String, dynamic>),
-        enableVt: json['enable_vt'] as int?,
-        vtDisplay: json['vt_display'] as String?,
-        isSelfView: json['is_self_view'] as bool?,
       );
 }

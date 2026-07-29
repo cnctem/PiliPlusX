@@ -1,9 +1,10 @@
 import 'dart:async' show FutureOr;
 import 'dart:convert' show utf8, jsonDecode;
-import 'dart:io' show File;
 
 import 'package:PiliPlus/common/style.dart';
-import 'package:PiliPlus/utils/extension/context_ext.dart';
+import 'package:PiliPlus/common/widgets/dialog/simple_dialog_option.dart';
+import 'package:PiliPlus/utils/extension/theme_ext.dart';
+import 'package:PiliPlus/utils/storage_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +29,7 @@ void exportToLocalFile({
   required ValueGetter<String> localFileName,
 }) {
   final res = utf8.encode(onExport());
-  Utils.saveBytes2File(
+  StorageUtils.saveBytes2File(
     name:
         'piliplus_${localFileName()}_'
         '${DateFormat('yyyyMMddHHmmss').format(DateTime.now())}.json',
@@ -45,99 +46,96 @@ Future<void> importFromClipBoard<T>(
   bool showConfirmDialog = true,
 }) async {
   final data = await Clipboard.getData('text/plain');
-  if (data?.text?.isNotEmpty != true) {
-    SmartDialog.showToast('剪贴板无数据');
-    return;
-  }
-  if (!context.mounted) return;
-  final text = data!.text!;
-  late final T json;
-  late final String formatText;
-  try {
-    json = jsonDecode(text);
-    formatText = Utils.jsonEncoder.convert(json);
-  } catch (e) {
-    SmartDialog.showToast('解析json失败：$e');
-    return;
-  }
-  bool? executeImport;
-  if (showConfirmDialog) {
-    final highlight = Highlight()..registerLanguage('json', langJson);
-    final result = highlight.highlight(
-      code: formatText,
-      language: 'json',
-    );
-    late TextSpanRenderer renderer;
-    bool? isDarkMode;
-    executeImport = await showDialog(
-      context: context,
-      builder: (context) {
-        final isDark = context.isDarkMode;
-        if (isDark != isDarkMode) {
-          isDarkMode = isDark;
-          renderer = TextSpanRenderer(
-            const TextStyle(),
-            isDark ? githubDarkTheme : githubTheme,
-          );
-          result.render(renderer);
-        }
-        return AlertDialog(
-          title: Text('是否导入如下$title？'),
-          content: SingleChildScrollView(
-            child: Text.rich(renderer.span!),
-          ),
-          actions: [
-            TextButton(
-              onPressed: Get.back,
-              child: Text(
-                '取消',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () => Get.back(result: true),
-              child: const Text('确定'),
-            ),
-          ],
-        );
-      },
-    );
-  } else {
-    executeImport = true;
-  }
-  if (executeImport ?? false) {
+  if (data?.text case final text? when (text.isNotEmpty)) {
+    if (!context.mounted) return;
+    final T json;
+    final String formatText;
     try {
-      await onImport(json);
-      SmartDialog.showToast('导入成功');
+      json = jsonDecode(text);
+      formatText = Utils.jsonEncoder.convert(json);
     } catch (e) {
-      SmartDialog.showToast('导入失败：$e');
+      SmartDialog.showToast('解析json失败：$e');
+      return;
     }
-  }
-}
-
-Future<void> importFromLocalFile<T>({
-  required FutureOr<void> Function(T json) onImport,
-}) async {
-  final result = await FilePicker.platform.pickFiles();
-  if (result != null) {
-    final path = result.files.first.path;
-    if (path != null) {
-      final data = await File(path).readAsString();
-      late final T json;
-      try {
-        json = jsonDecode(data);
-      } catch (e) {
-        SmartDialog.showToast('解析json失败：$e');
-        return;
-      }
+    bool? executeImport;
+    if (showConfirmDialog) {
+      final highlight = Highlight()..registerLanguage('json', langJson);
+      final result = highlight.highlight(
+        code: formatText,
+        language: 'json',
+      );
+      late TextSpanRenderer renderer;
+      bool? isDarkMode;
+      executeImport = await showDialog<bool>(
+        context: context,
+        builder: (context) {
+          final colorScheme = ColorScheme.of(context);
+          final isDark = colorScheme.isDark;
+          if (isDark != isDarkMode) {
+            isDarkMode = isDark;
+            renderer = TextSpanRenderer(
+              null,
+              isDark ? githubDarkTheme : githubTheme,
+            );
+            result.render(renderer);
+          }
+          return AlertDialog(
+            title: Text('是否导入如下$title？'),
+            content: SingleChildScrollView(
+              child: Text.rich(renderer.span!),
+            ),
+            actions: [
+              TextButton(
+                onPressed: Get.back,
+                child: Text('取消', style: TextStyle(color: colorScheme.outline)),
+              ),
+              TextButton(
+                onPressed: () => Get.back(result: true),
+                child: const Text('确定'),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      executeImport = true;
+    }
+    if (executeImport ?? false) {
       try {
         await onImport(json);
         SmartDialog.showToast('导入成功');
       } catch (e) {
         SmartDialog.showToast('导入失败：$e');
       }
+    }
+  } else {
+    SmartDialog.showToast('剪贴板无数据');
+    return;
+  }
+}
+
+Future<void> importFromLocalFile<T>({
+  required FutureOr<void> Function(T json) onImport,
+}) async {
+  // 鸿蒙适配 fork 仅提供 FilePicker.platform 实例方法
+  final result = await FilePicker.platform.pickFiles(
+    type: FileType.custom,
+    allowedExtensions: const ['json', 'txt'],
+  );
+  if (result?.files.firstOrNull case final file?) {
+    final data = await file.xFile.readAsString();
+    final T json;
+    try {
+      json = jsonDecode(data);
+    } catch (e) {
+      SmartDialog.showToast('解析json失败：$e');
+      return;
+    }
+    try {
+      await onImport(json);
+      SmartDialog.showToast('导入成功');
+    } catch (e) {
+      SmartDialog.showToast('导入失败：$e');
     }
   }
 }
@@ -171,7 +169,6 @@ void importFromInput<T>(
             json = jsonDecode(value!) as T;
             return null;
           } catch (e) {
-            if (e is FormatException) {}
             return '解析json失败：$e';
           }
         },
@@ -182,7 +179,7 @@ void importFromInput<T>(
           child: Text(
             '取消',
             style: TextStyle(
-              color: Theme.of(context).colorScheme.outline,
+              color: ColorScheme.of(context).outline,
             ),
           ),
         ),
@@ -219,21 +216,19 @@ Future<void> showImportExportDialog<T>(
   builder: (context) {
     const style = TextStyle(fontSize: 15);
     return SimpleDialog(
-      clipBehavior: Clip.hardEdge,
+      clipBehavior: .hardEdge,
       title: Text('导入/导出$title'),
       children: [
-        ListTile(
-          dense: true,
-          title: const Text('导出至剪贴板', style: style),
-          onTap: () {
+        DialogOption(
+          child: const Text('导出至剪贴板', style: style),
+          onPressed: () {
             Get.back();
             exportToClipBoard(onExport: onExport);
           },
         ),
-        ListTile(
-          dense: true,
-          title: const Text('导出文件至本地', style: style),
-          onTap: () {
+        DialogOption(
+          child: const Text('导出文件至本地', style: style),
+          onPressed: () {
             Get.back();
             exportToLocalFile(onExport: onExport, localFileName: localFileName);
           },
@@ -242,18 +237,16 @@ Future<void> showImportExportDialog<T>(
           height: 1,
           color: ColorScheme.of(context).outline.withValues(alpha: 0.1),
         ),
-        ListTile(
-          dense: true,
-          title: const Text('输入', style: style),
-          onTap: () {
+        DialogOption(
+          child: const Text('输入', style: style),
+          onPressed: () {
             Get.back();
             importFromInput<T>(context, title: title, onImport: onImport);
           },
         ),
-        ListTile(
-          dense: true,
-          title: const Text('从剪贴板导入', style: style),
-          onTap: () {
+        DialogOption(
+          child: const Text('从剪贴板导入', style: style),
+          onPressed: () {
             Get.back();
             importFromClipBoard<T>(
               context,
@@ -263,10 +256,9 @@ Future<void> showImportExportDialog<T>(
             );
           },
         ),
-        ListTile(
-          dense: true,
-          title: const Text('从本地文件导入', style: style),
-          onTap: () {
+        DialogOption(
+          child: const Text('从本地文件导入', style: style),
+          onPressed: () {
             Get.back();
             importFromLocalFile<T>(onImport: onImport);
           },

@@ -4,8 +4,7 @@ import 'package:PiliPlus/utils/accounts/account.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kDebugMode, debugPrint;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 abstract final class UrlUtils {
@@ -49,12 +48,14 @@ abstract final class UrlUtils {
       final aid = matchRes.av;
       String? bvid = matchRes.bv;
       bvid ??= IdUtils.av2bv(aid!);
-      final int? cid = await SearchHttp.ab2c(aid: aid, bvid: bvid);
+      final res = await SearchHttp.ab2cWithDimension(aid: aid, bvid: bvid);
+      final cid = res?.cid;
       if (cid != null) {
         PageUtils.toVideoPage(
           aid: aid,
           bvid: bvid,
           cid: cid,
+          dimension: res!.dimension,
         );
       }
     } else {

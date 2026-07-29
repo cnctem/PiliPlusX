@@ -1,11 +1,10 @@
 import 'package:PiliPlus/common/style.dart';
-import 'package:PiliPlus/common/widgets/flutter/layout_builder.dart';
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/models_new/live/live_feed_index/card_data_list_item.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:flutter/material.dart' hide LayoutBuilder;
+import 'package:flutter/material.dart';
 
 // 视频卡片 - 垂直布局
 class LiveCardVApp extends StatelessWidget {
@@ -22,7 +21,7 @@ class LiveCardVApp extends StatelessWidget {
   Widget build(BuildContext context) {
     void onLongPress() => imageSaveDialog(
       title: item.title,
-      cover: item.cover,
+      cover: showFirstFrame ? item.systemCover : item.cover,
     );
     return Card(
       clipBehavior: Clip.hardEdge,

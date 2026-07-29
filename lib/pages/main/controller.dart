@@ -60,6 +60,7 @@ class MainController extends GetxController
     enableLGBar.value = Pref.enableLGBar;
   }
 
+  final floatingNavBar = Pref.floatingNavBar;
   final useSideBar = Pref.useSideBar;
   final mainTabBarView = Pref.mainTabBarView;
   late final optTabletNav = Pref.optTabletNav;
@@ -236,7 +237,8 @@ class MainController extends GetxController
           .toList();
     }
     this.navigationBars = navigationBars;
-    selectedIndex.value = Pref.defaultHomePageIndex;
+    final defPage = Pref.defaultHomePage;
+    selectedIndex.value = navigationBars.indexOf(defPage);
   }
 
   void checkDefaultSearch([bool shouldCheck = false]) {

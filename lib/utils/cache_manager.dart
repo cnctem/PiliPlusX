@@ -1,11 +1,23 @@
-import 'dart:async';
-import 'dart:io';
+import 'dart:io' show Directory, File;
 
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:path_provider/path_provider.dart';
 
+/// 鸿蒙分支使用 pub.dev 上的 cached_network_image_ce，它没有上游 fork 的
+/// `DefaultCacheManager.init` / `getTotalLength` / `cacheDir` / `getSingleFile`，
+/// 因此这里保留 ohos 原本基于临时目录统计的实现，并补一个 [getSingleFile] 扩展
+/// 以便调用点与上游保持一致。
 abstract final class CacheManager {
+  static late final DefaultCacheManager manager;
+
+  static Future<void> ensureInitialized() async {
+    manager = DefaultCacheManager(
+      maxNrOfCacheObjects: Pref.maxCacheSize.toInt(),
+    );
+  }
+
   // 获取缓存目录
   @pragma('vm:notify-debugger-on-exception')
   static Future<int> loadApplicationCache([
@@ -20,7 +32,6 @@ abstract final class CacheManager {
         }
         return 0;
       }
-
       if (tempDirectory.existsSync()) {
         return await getTotalSizeOfFilesInDir(tempDirectory, maxSize);
       }
@@ -34,12 +45,11 @@ abstract final class CacheManager {
     final Directory file, [
     final num maxSize = double.infinity,
   ]) async {
-    final children = file.list(recursive: true);
     int total = 0;
-    await for (final child in children) {
+    await for (final child in file.list(recursive: true)) {
       if (child is File) {
         total += await child.length();
-        if (total >= maxSize) break;
+        if (total >= maxSize) return total;
       }
     }
     return total;
@@ -58,9 +68,11 @@ abstract final class CacheManager {
   }
 
   // 清除 Library/Caches 目录及文件缓存
+  @pragma('vm:notify-debugger-on-exception')
   static Future<void> clearLibraryCache() async {
     try {
-      final Directory tempDirectory = await getTemporaryDirectory();
+      await manager.emptyCache();
+      final tempDirectory = await getTemporaryDirectory();
       if (PlatformUtils.isDesktop) {
         final dir = Directory('${tempDirectory.path}/cached_network_image_ce');
         if (dir.existsSync()) {
@@ -69,25 +81,24 @@ abstract final class CacheManager {
         return;
       }
       if (tempDirectory.existsSync()) {
-        final children = tempDirectory.list(recursive: false);
-        await for (final file in children) {
+        await for (final file in tempDirectory.list(recursive: false)) {
           await file.delete(recursive: true);
         }
       }
     } catch (_) {}
   }
+}
 
-  static Future<void> autoClearCache() async {
-    if (Pref.autoClearCache) {
-      await clearLibraryCache();
-    } else {
-      final maxCacheSize = Pref.maxCacheSize;
-      if (maxCacheSize != 0) {
-        final currCache = await loadApplicationCache(maxCacheSize);
-        if (currCache >= maxCacheSize) {
-          await clearLibraryCache();
-        }
-      }
+/// 补齐上游 fork 才有的 `getSingleFile`，基于 4.9.0 的 [getFileStream] 实现。
+extension DefaultCacheManagerExt on DefaultCacheManager {
+  Future<File> getSingleFile(
+    String url, {
+    String? key,
+    Map<String, String>? headers,
+  }) async {
+    await for (final res in getFileStream(url, key: key, headers: headers)) {
+      if (res is FileInfo) return res.file;
     }
+    throw StateError('failed to fetch file: $url');
   }
 }

@@ -50,7 +50,7 @@ abstract class HarmonyContinuation {
     'itemType': c.itemType,
     'from': c.from.value,
     'extraId': c.extraId?.toInt(),
-    'progress': c.position.value.inMilliseconds,
+    'progress': c.position.value,
     'playing': c.isPlaying(),
   };
 

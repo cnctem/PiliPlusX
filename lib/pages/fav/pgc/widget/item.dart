@@ -1,7 +1,6 @@
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/button/icon_button.dart';
-import 'package:PiliPlus/common/widgets/flutter/layout_builder.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/select_mask.dart';
 import 'package:PiliPlus/models/common/badge_type.dart';
@@ -9,7 +8,7 @@ import 'package:PiliPlus/models_new/fav/fav_pgc/list.dart';
 import 'package:PiliPlus/pages/common/multi_select/base.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:flutter/material.dart' hide LayoutBuilder;
+import 'package:flutter/material.dart';
 
 class FavPgcItem extends StatelessWidget {
   const FavPgcItem({
@@ -34,7 +33,7 @@ class FavPgcItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colorScheme = ColorScheme.of(context);
     return Material(
       type: MaterialType.transparency,
       child: Stack(
@@ -86,7 +85,7 @@ class FavPgcItem extends StatelessWidget {
                             ),
                             Positioned.fill(
                               child: selectMask(
-                                theme,
+                                colorScheme,
                                 item.checked,
                                 borderRadius: const BorderRadius.all(
                                   Radius.circular(4),
@@ -111,7 +110,7 @@ class FavPgcItem extends StatelessWidget {
                             '${item.newEp!.indexShow}${item.isFinish == 0 && item.renewalTime?.isNotEmpty == true ? '，${item.renewalTime}' : ''}',
                             style: TextStyle(
                               fontSize: 13,
-                              color: theme.colorScheme.onSurfaceVariant,
+                              color: colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -123,7 +122,7 @@ class FavPgcItem extends StatelessWidget {
                             item.progress!,
                             style: TextStyle(
                               fontSize: 13,
-                              color: theme.colorScheme.onSurfaceVariant,
+                              color: colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -141,7 +140,7 @@ class FavPgcItem extends StatelessWidget {
               iconSize: 18,
               onPressed: onUpdateStatus,
               icon: const Icon(Icons.more_vert),
-              iconColor: theme.colorScheme.outline,
+              iconColor: colorScheme.outline,
             ),
           ),
         ],

@@ -17,9 +17,9 @@ import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
 import 'package:PiliPlus/utils/calc_window_position.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
-import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/json_file_handler.dart';
+import 'package:PiliPlus/utils/max_screen_size.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
@@ -30,6 +30,7 @@ import 'package:PiliPlus/utils/theme_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:auto_orientation/auto_orientation.dart';
 import 'package:catcher_2/catcher_2.dart';
+import 'package:collection/collection.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DeviceGestureSettings;
@@ -44,9 +45,12 @@ import 'package:media_kit/media_kit.dart';
 import 'package:os_type/os_type.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
 import 'package:window_manager/window_manager.dart' hide calcWindowPosition;
 
 WebViewEnvironment? webViewEnvironment;
+
+EdgeInsets? tmpPadding;
 
 Future<void> _initDownPath() async {
   if (PlatformUtils.isDesktop) {
@@ -101,7 +105,11 @@ void main() async {
     exit(0);
   }
   ScaledWidgetsFlutterBinding.instance.scaleFactor = Pref.uiScale;
-  await Future.wait([_initDownPath(), _initTmpPath()]);
+  await Future.wait([
+    _initDownPath(),
+    _initTmpPath(),
+    CacheManager.ensureInitialized(),
+  ]);
   Get
     ..lazyPut(AccountService.new)
     ..lazyPut(DownloadService.new);
@@ -109,9 +117,8 @@ void main() async {
   // 配置网络请求
   HttpOverrides.global = _CustomHttpOverrides();
 
-  CacheManager.autoClearCache();
-
   if (PlatformUtils.isMobile) {
+    if (Platform.isAndroid) MaxScreenSize.init();
     await Future.wait([
       SystemChrome.setPreferredOrientations(
         [
@@ -122,6 +129,7 @@ void main() async {
           ],
         ],
       ),
+      setupServiceLocator(),
     ]);
     // 鸿蒙embedder将 portraitUp+landscapeLeft+landscapeRight 组合映射为
     // window.Orientation.LOCKED(锁定启动时的方向),导致平板无法自动旋转,
@@ -129,13 +137,11 @@ void main() async {
     if (OS.isHarmony && Pref.horizontalScreen) {
       await AutoOrientation.setScreenOrientationUser();
     }
-  }
-
-  if (PlatformUtils.isMobile || OS.isHarmony) {
+  } else if (OS.isHarmony) {
+    // 鸿蒙 2in1 设备 isPCOS 为 true（isMobile 为 false），但同样需要媒体服务，
+    // 否则后台播放与系统播控失效
     await setupServiceLocator();
-  }
-
-  if (Platform.isWindows) {
+  } else if (Platform.isWindows) {
     if (await WebViewEnvironment.getAvailableVersion() != null) {
       webViewEnvironment = await WebViewEnvironment.create(
         settings: WebViewEnvironmentSettings(
@@ -154,12 +160,10 @@ void main() async {
   Request.setCookie();
   RequestUtils.syncHistoryStatus();
 
-  SmartDialog.config.toast = SmartConfigToast(
-    displayType: SmartToastType.onlyRefresh,
-  );
+  SmartDialog.config.toast = SmartConfigToast(displayType: .onlyRefresh);
 
   if (PlatformUtils.isMobile) {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setEnabledSystemUIMode(.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         systemNavigationBarColor: Colors.transparent,
@@ -181,6 +185,8 @@ void main() async {
         }
         FlutterDisplayMode.setPreferredMode(displayMode ?? DisplayMode.auto);
       });
+    } else {
+      ScreenBrightnessPlatform.instance.setAutoReset(false);
     }
   } else if (PlatformUtils.isDesktop && !OS.isHarmony) {
     await windowManager.ensureInitialized();
@@ -211,6 +217,7 @@ void main() async {
   // TODO: 鸿蒙待适配 异常捕获
   if (Pref.enableLog && !OS.isHarmony) {
     // 异常捕获 logo记录
+    // catcher_2 保持 ohos 使用的 pub 版本 API（上游用的是其 fork）
     final customParameters = {
       'BuildConfig':
           '\nBuild Time: ${DateFormatUtils.format(BuildConfig.buildTime, format: DateFormatUtils.longFormatDs)}\n'
@@ -264,8 +271,6 @@ class MyApp extends StatelessWidget {
 
   static ColorScheme? _light, _dark;
 
-  static ThemeData? darkThemeData;
-
   static void _onBack() {
     if (SmartDialog.checkExist()) {
       SmartDialog.dismiss();
@@ -291,13 +296,13 @@ class MyApp extends StatelessWidget {
     late final brandColor = colorThemeTypes[Pref.customColor].color;
     late final variant = Pref.schemeVariant;
     return (
-      ThemeUtils.getThemeData(
+      ThemeUtils.lightTheme = ThemeUtils.getThemeData(
         colorScheme: dynamicColor
             ? _light!
             : brandColor.asColorSchemeSeed(variant, Brightness.light),
         isDynamic: dynamicColor,
       ),
-      ThemeUtils.getThemeData(
+      ThemeUtils.darkTheme = ThemeUtils.getThemeData(
         isDark: true,
         colorScheme: dynamicColor
             ? _dark!
@@ -314,7 +319,7 @@ class MyApp extends StatelessWidget {
       title: Constants.appName,
       theme: light,
       darkTheme: dark,
-      themeMode: Pref.themeMode,
+      themeMode: ThemeUtils.themeMode = Pref.themeMode,
       localizationsDelegates: const [
         GlobalCupertinoLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -327,8 +332,11 @@ class MyApp extends StatelessWidget {
       getPages: Routes.getPages,
       defaultTransition: Pref.pageTransition,
       builder: FlutterSmartDialog.init(
-        toastBuilder: (msg) => CustomToast(msg: msg),
-        loadingBuilder: (msg) => LoadingWidget(msg: msg),
+        toastBuilder: CustomToast.new,
+        loadingBuilder: LoadingWidget.new,
+        notifyStyle: const FlutterSmartNotifyStyle(
+          warningBuilder: NotifyWarning.new,
+        ),
         builder: _builder,
       ),
       navigatorObservers: [
@@ -370,9 +378,9 @@ class MyApp extends StatelessWidget {
         data: mediaQuery.copyWith(
           textScaler: textScaler,
           size: mediaQuery.size / uiScale,
-          padding: mediaQuery.padding / uiScale,
+          padding: tmpPadding ?? mediaQuery.padding / uiScale,
           viewInsets: mediaQuery.viewInsets / uiScale,
-          viewPadding: mediaQuery.viewPadding / uiScale,
+          viewPadding: tmpPadding ?? mediaQuery.viewPadding / uiScale,
           devicePixelRatio: mediaQuery.devicePixelRatio * uiScale,
           gestureSettings: gestureSettings,
         ),
@@ -380,10 +388,7 @@ class MyApp extends StatelessWidget {
       );
     } else {
       child = MediaQuery(
-        data: mediaQuery.copyWith(
-          textScaler: textScaler,
-          gestureSettings: gestureSettings,
-        ),
+        data: mediaQuery.copyWith(textScaler: textScaler),
         child: child!,
       );
     }

@@ -1,12 +1,13 @@
 import 'package:PiliPlus/common/assets.dart';
 import 'package:PiliPlus/common/style.dart';
+import 'package:PiliPlus/common/widgets/extra_hittest_stack.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/models/common/avatar_badge_type.dart';
 import 'package:PiliPlus/models/common/image_type.dart';
-import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 class PendantAvatar extends StatelessWidget {
   const PendantAvatar(
@@ -60,7 +61,7 @@ class PendantAvatar extends StatelessWidget {
         top: -0.375 * size + pendentOffset / 2,
         child: IgnorePointer(
           child: NetworkImgLayer(
-            type: ImageType .emote,
+            type: ImageType.emote,
             width: pendantSize,
             height: pendantSize,
             src: pendantImage,
@@ -82,7 +83,7 @@ class PendantAvatar extends StatelessWidget {
         child: avatar,
       );
     }
-    Widget child = Stack(
+    Widget child = ExtraHitTestStack(
       clipBehavior: .none,
       alignment: .center,
       children: [
@@ -141,12 +142,11 @@ class PendantAvatar extends StatelessWidget {
 
   Widget _buildBadge(BuildContext context, ColorScheme colorScheme) {
     final child = switch (badgeType) {
-      .vip => Image.asset(
+      .vip => SvgPicture.asset(
         Assets.vipIcon,
         width: badgeSize,
         height: badgeSize,
-        cacheWidth: badgeSize.cacheSize(context),
-        semanticLabel: badgeType.desc,
+        semanticsLabel: badgeType.desc,
       ),
       _ => Icon(
         Icons.offline_bolt,

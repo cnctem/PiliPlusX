@@ -1,8 +1,7 @@
 ﻿import 'dart:async';
 import 'dart:math';
 
-import 'package:PiliPlus/common/widgets/flutter/draggable_sheet/draggable_scrollable_sheet_topic.dart'
-    as topic_sheet;
+import 'package:PiliPlus/common/widgets/flutter/draggable_scrollable_sheet.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/loading_widget.dart';
 import 'package:PiliPlus/common/widgets/sliver/sliver_pinned_header.dart';
@@ -39,7 +38,7 @@ class DynMentionPanel extends StatefulWidget {
       constraints: BoxConstraints(
         maxWidth: min(600, ContextExtensions(context).mediaQueryShortestSide),
       ),
-      builder: (context) => topic_sheet.DraggableScrollableSheet(
+      builder: (context) => TopicDraggableScrollableSheet(
         expand: false,
         snap: true,
         minChildSize: 0,
@@ -124,10 +123,7 @@ class _DynMentionPanelState
                 padding: EdgeInsets.only(left: 12, right: 4),
                 child: Icon(Icons.search, size: 20),
               ),
-              prefixIconConstraints: const BoxConstraints(
-                minHeight: 0,
-                minWidth: 0,
-              ),
+              prefixIconConstraints: const .new(minHeight: 0, minWidth: 0),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 6,

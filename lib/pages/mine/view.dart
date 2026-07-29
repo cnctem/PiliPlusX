@@ -14,6 +14,7 @@ import 'package:PiliPlus/pages/login/controller.dart';
 import 'package:PiliPlus/pages/main/controller.dart';
 import 'package:PiliPlus/pages/mine/controller.dart';
 import 'package:PiliPlus/pages/mine/widgets/item.dart';
+import 'package:PiliPlus/utils/bili_utils.dart';
 import 'package:PiliPlus/utils/extension/get_ext.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
@@ -21,6 +22,7 @@ import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter/material.dart' hide ListTile;
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
@@ -117,7 +119,7 @@ class _MediaPageState extends CommonPageState<MinePage>
                       mainAxisSize: .min,
                       mainAxisAlignment: .center,
                       children: [
-                        Icon(size: e.size, e.icon, color: primary),
+                        Icon(e.icon, color: primary),
                         Text(
                           e.title,
                           style: const TextStyle(fontSize: 13),
@@ -190,7 +192,7 @@ class _MediaPageState extends CommonPageState<MinePage>
           iconSize: iconSize,
           padding: padding,
           style: style,
-          tooltip: '设置账号模式',
+          tooltip: '切换账号',
           onPressed: () => LoginPageController.switchAccountDialog(context),
           icon: const Icon(Icons.switch_account_outlined),
         ),
@@ -273,11 +275,10 @@ class _MediaPageState extends CommonPageState<MinePage>
                             Positioned(
                               right: -1,
                               bottom: -2,
-                              child: Image.asset(
+                              child: SvgPicture.asset(
                                 Assets.vipIcon,
                                 height: 19,
-                                cacheHeight: 19.cacheSize(context),
-                                semanticLabel: "大会员",
+                                semanticsLabel: "大会员",
                               ),
                             ),
                         ],
@@ -314,13 +315,10 @@ class _MediaPageState extends CommonPageState<MinePage>
                               overflow: .ellipsis,
                             ),
                           ),
-                          Image.asset(
-                            Utils.levelName(
-                              levelInfo?.currentLevel ?? 0,
-                              isSeniorMember: userInfo.isSeniorMember == 1,
-                            ),
+                          BiliUtils.levelPicture(
+                            levelInfo?.currentLevel ?? 0,
+                            isSeniorMember: userInfo.isSeniorMember == 1,
                             height: 10,
-                            cacheHeight: 10.cacheSize(context),
                           ),
                         ],
                       ),

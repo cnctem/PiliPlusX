@@ -4,9 +4,8 @@ class SpaceFavData {
   int? id;
   String? name;
   MediaListResponse? mediaListResponse;
-  String? uri;
 
-  SpaceFavData({this.id, this.name, this.mediaListResponse, this.uri});
+  SpaceFavData({this.id, this.name, this.mediaListResponse});
 
   factory SpaceFavData.fromJson(Map<String, dynamic> json) => SpaceFavData(
     id: json['id'] as int?,
@@ -16,6 +15,5 @@ class SpaceFavData {
         : MediaListResponse.fromJson(
             json['mediaListResponse'] as Map<String, dynamic>,
           ),
-    uri: json['uri'] as String?,
   );
 }

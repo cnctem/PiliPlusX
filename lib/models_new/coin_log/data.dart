@@ -1,15 +1,13 @@
 import 'package:PiliPlus/models_new/coin_log/list.dart';
 
 class CoinLogData {
-  List<CoinLogItem>? list;
-  int? count;
+  CoinLogData({this.list});
 
-  CoinLogData({this.list, this.count});
+  List<CoinLogItem>? list;
 
   factory CoinLogData.fromJson(Map<String, dynamic> json) => CoinLogData(
     list: (json['list'] as List<dynamic>?)
         ?.map((e) => CoinLogItem.fromJson(e as Map<String, dynamic>))
         .toList(),
-    count: json['count'] as int?,
   );
 }

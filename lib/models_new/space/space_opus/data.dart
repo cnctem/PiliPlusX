@@ -4,9 +4,8 @@ class SpaceOpusData {
   bool? hasMore;
   List<SpaceOpusItemModel>? items;
   String? offset;
-  int? updateNum;
 
-  SpaceOpusData({this.hasMore, this.items, this.offset, this.updateNum});
+  SpaceOpusData({this.hasMore, this.items, this.offset});
 
   factory SpaceOpusData.fromJson(Map<String, dynamic> json) => SpaceOpusData(
     hasMore: json['has_more'] as bool?,
@@ -14,6 +13,5 @@ class SpaceOpusData {
         ?.map((e) => SpaceOpusItemModel.fromJson(e as Map<String, dynamic>))
         .toList(),
     offset: json['offset'] as String?,
-    updateNum: json['update_num'] as int?,
   );
 }

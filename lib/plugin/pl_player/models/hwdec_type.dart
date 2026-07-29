@@ -31,10 +31,15 @@ enum HwDecType {
   amf('amf', 'AMF (AMD独占)'),
   amfCopy('amf-copy', 'AMF (AMD独占) (非直通)'),
   qsv('qsv', 'Quick Sync Video (Intel独占)'),
-  qsvCopy('qsv-copy', 'Quick Sync Video (Intel独占) (非直通)')
+  qsvCopy('qsv-copy', 'Quick Sync Video (Intel独占) (非直通)'),
   ;
 
   final String hwdec;
   final String desc;
   const HwDecType(this.hwdec, this.desc);
+
+  static final String androidDefault = [
+    HwDecType.mediacodec.hwdec,
+    HwDecType.autoSafe.hwdec,
+  ].join(',');
 }

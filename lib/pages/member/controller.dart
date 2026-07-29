@@ -5,15 +5,19 @@ import 'package:PiliPlus/http/member.dart';
 import 'package:PiliPlus/http/user.dart';
 import 'package:PiliPlus/http/video.dart';
 import 'package:PiliPlus/models/common/member/tab_type.dart';
+import 'package:PiliPlus/models/model_owner.dart';
 import 'package:PiliPlus/models_new/space/space/data.dart';
+import 'package:PiliPlus/models_new/space/space/elec.dart';
 import 'package:PiliPlus/models_new/space/space/live.dart';
+import 'package:PiliPlus/models_new/space/space/reservation_card_list.dart';
 import 'package:PiliPlus/models_new/space/space/setting.dart';
 import 'package:PiliPlus/models_new/space/space/tab2.dart';
 import 'package:PiliPlus/pages/common/common_data_controller.dart';
 import 'package:PiliPlus/utils/accounts.dart';
+import 'package:PiliPlus/utils/extension/nested_scroll_ext.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
+import 'package:PiliPlus/utils/share_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
-import 'package:PiliPlus/utils/utils.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart'
     show ExtendedNestedScrollViewState;
 import 'package:flutter/material.dart';
@@ -25,6 +29,7 @@ class MemberController extends CommonDataController<SpaceData, SpaceData?>
   MemberController({required this.mid});
   int mid;
   String? username;
+  String? userAvatar;
 
   late final account = Accounts.main;
 
@@ -43,11 +48,19 @@ class MemberController extends CommonDataController<SpaceData, SpaceData?>
 
   bool? hasSeasonOrSeries;
 
-  late bool hasCharge = false;
+  List<ElecItem>? charges;
+  int? chargeCount;
+  bool get hasCharge => chargeCount != null && chargeCount! > 0;
+
+  List<Owner>? guards;
+  Object? guardCount;
+  bool get hasGuard => guards?.isNotEmpty ?? false;
+
+  List<ReservationCardItem>? reserves;
 
   final fromViewAid = Get.parameters['from_view_aid'];
 
-  final key = GlobalKey<ExtendedNestedScrollViewState>();
+  final scrollKey = GlobalKey<ExtendedNestedScrollViewState>();
 
   @override
   void onInit() {
@@ -58,21 +71,35 @@ class MemberController extends CommonDataController<SpaceData, SpaceData?>
   @override
   bool customHandleResponse(bool isRefresh, Success<SpaceData> response) {
     final data = response.response;
-    username = data.card?.name ?? '';
-    isFollowed = data.card?.relation?.isFollowed;
-    hasCharge = (data.elec?.total ?? 0) > 0;
+    final card = data.card;
+    username = card?.name ?? '';
+    userAvatar = card?.face;
+
+    isFollowed = card?.relation?.isFollowed;
+
+    // charge
+    final elec = data.elec;
+    charges = elec?.list;
+    chargeCount = elec?.total;
+    // guard
+    final guard = data.guard;
+    guards = guard?.item;
+    guardCount = guard?.count;
+
+    reserves = data.reservationCardList;
+
     if (data.relation == -1) {
       relation.value = 128;
     } else {
-      relation.value = data.card?.relation?.isFollow == 1
+      relation.value = card?.relation?.isFollow == 1
           ? data.relSpecial == 1
                 ? -10
-                : data.card?.relation?.status ?? 2
+                : card?.relation?.status ?? 2
           : 0;
     }
     tab2 = data.tab2;
     live = data.live;
-    silence = data.card?.silence;
+    silence = card?.silence;
     if ((data.ugcSeason?.count != null && data.ugcSeason?.count != 0) ||
         data.series?.item?.isNotEmpty == true) {
       hasSeasonOrSeries = true;
@@ -175,7 +202,7 @@ class MemberController extends CommonDataController<SpaceData, SpaceData?>
   }
 
   void shareUser() {
-    Utils.shareText('https://space.bilibili.com/$mid');
+    ShareUtils.shareText('https://space.bilibili.com/$mid');
   }
 
   Future<void> _onBlock() async {
@@ -229,13 +256,8 @@ class MemberController extends CommonDataController<SpaceData, SpaceData?>
   }
 
   void onTapTab(int value) {
-    if (tabController?.indexIsChanging == false &&
-        key.currentState?.outerController.hasClients == true) {
-      key.currentState!.outerController.animateTo(
-        key.currentState!.outerController.offset,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
+    if (tabController?.indexIsChanging == false) {
+      scrollKey.currentState?.animToTop();
     }
   }
 

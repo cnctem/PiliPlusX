@@ -1,3 +1,4 @@
+import 'package:PiliPlus/common/widgets/reorder_mixin.dart';
 import 'package:PiliPlus/http/fav.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models_new/fav/fav_folder/list.dart';
@@ -16,10 +17,10 @@ class FavFolderSortPage extends StatefulWidget {
   State<FavFolderSortPage> createState() => _FavFolderSortPageState();
 }
 
-class _FavFolderSortPageState extends State<FavFolderSortPage> {
+class _FavFolderSortPageState extends State<FavFolderSortPage>
+    with ReorderMixin {
   FavController get _favController => widget.favController;
 
-  final GlobalKey _key = GlobalKey();
   late List<FavFolderInfo> sortList = List<FavFolderInfo>.from(
     _favController.loadingState.value.data!,
   );
@@ -39,7 +40,9 @@ class _FavFolderSortPageState extends State<FavFolderSortPage> {
               if (res.isSuccess) {
                 SmartDialog.showToast('排序完成');
                 _favController.loadingState.value = Success(sortList);
-                Get.back();
+                if (mounted) {
+                  Get.back();
+                }
               } else {
                 res.toast();
               }
@@ -54,25 +57,22 @@ class _FavFolderSortPageState extends State<FavFolderSortPage> {
   }
 
   void onReorder(int oldIndex, int newIndex) {
+    // Flutter 3.41 的 onReorder 回调需自行修正 newIndex
+    if (newIndex > oldIndex) newIndex -= 1;
     if (oldIndex == 0 || newIndex == 0) {
       SmartDialog.showToast('默认收藏夹不支持排序');
       return;
     }
 
-    if (newIndex > oldIndex) {
-      newIndex -= 1;
-    }
-
-    final tabsItem = sortList.removeAt(oldIndex);
-    sortList.insert(newIndex, tabsItem);
+    sortList.insert(newIndex, sortList.removeAt(oldIndex));
 
     setState(() {});
   }
 
   Widget get _buildBody {
     return ReorderableListView.builder(
-      key: _key,
       onReorder: onReorder,
+      proxyDecorator: proxyDecorator,
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: sortList.length,
       padding:
@@ -83,7 +83,7 @@ class _FavFolderSortPageState extends State<FavFolderSortPage> {
         final key = item.id.toString();
         return SizedBox(
           key: Key(key),
-          height: 98,
+          height: 110,
           child: FavVideoItem(
             heroTag: key,
             item: item,

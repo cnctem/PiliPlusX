@@ -3,14 +3,12 @@ import 'package:PiliPlus/models_new/space/space_opus/stat.dart';
 
 class SpaceOpusItemModel {
   String? content;
-  String? jumpUrl;
   String? opusId;
   Stat? stat;
   Cover? cover;
 
   SpaceOpusItemModel({
     this.content,
-    this.jumpUrl,
     this.opusId,
     this.stat,
     this.cover,
@@ -19,7 +17,6 @@ class SpaceOpusItemModel {
   factory SpaceOpusItemModel.fromJson(Map<String, dynamic> json) =>
       SpaceOpusItemModel(
         content: json['content'] as String?,
-        jumpUrl: json['jump_url'] as String?,
         opusId: json['opus_id'] as String?,
         stat: json['stat'] == null
             ? null

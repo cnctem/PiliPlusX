@@ -1,4 +1,5 @@
-import 'dart:convert';
+import 'dart:convert' show jsonDecode, jsonEncode;
+import 'dart:io' show Platform;
 
 import 'package:PiliPlus/http/browser_ua.dart';
 import 'package:PiliPlus/http/init.dart';
@@ -10,14 +11,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
 
-class GeetestWebviewDialog extends StatelessWidget {
+class GeetestWebviewDialog extends StatefulWidget {
   const GeetestWebviewDialog(this.gt, this.challenge, {super.key});
 
   final String gt;
   final String challenge;
 
+  @override
+  State<GeetestWebviewDialog> createState() => _GeetestWebviewDialogState();
+
+  static Future geetest(String gt, String challenge) {
+    return showDialog(
+      context: Get.context!,
+      builder: (context) => GeetestWebviewDialog(gt, challenge),
+    );
+  }
+}
+
+class _GeetestWebviewDialogState extends State<GeetestWebviewDialog> {
   static const _geetestJsUri =
       'https://static.geetest.com/static/js/fullpage.0.0.0.js';
+
+  late final Future<LoadingState<String>> _future;
+
+  static String _showJs(String response) =>
+      't=Geetest($response).onSuccess(()=>R("success",t.getValidate())).onError(o=>R("error",o)).onClose(o=>R("close",o));t.onReady(()=>t.verify())';
+
+  @override
+  void initState() {
+    super.initState();
+    _future = _getConfig(widget.gt, widget.challenge);
+  }
 
   static Future<LoadingState<String>> _getConfig(
     String gt,
@@ -63,14 +87,15 @@ class GeetestWebviewDialog extends StatelessWidget {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final future = _getConfig(gt, challenge);
-    return AlertDialog(
-      title: const Text('验证码'),
-      content: SizedBox(
-        width: 300,
-        height: 400,
-        child: InAppWebView(
+    return Stack(
+      children: [
+        InAppWebView(
           webViewEnvironment: webViewEnvironment,
           initialSettings: InAppWebViewSettings(
             clearCache: true,
@@ -80,7 +105,29 @@ class GeetestWebviewDialog extends StatelessWidget {
             algorithmicDarkeningAllowed: true,
             useShouldOverrideUrlLoading: true,
             userAgent: BrowserUa.mob,
-            mixedContentMode: MixedContentMode.MIXED_CONTENT_ALWAYS_ALLOW,
+            mixedContentMode: .MIXED_CONTENT_ALWAYS_ALLOW,
+
+            incognito: true,
+            allowFileAccess: false,
+            allowsLinkPreview: false,
+            allowContentAccess: false,
+            useOnDownloadStart: false,
+            geolocationEnabled: false,
+            thirdPartyCookiesEnabled: false,
+            enterpriseAuthenticationAppLinkPolicyEnabled: false,
+            saveFormData: false,
+            safeBrowsingEnabled: false,
+            isFraudulentWebsiteWarningEnabled: false,
+            domStorageEnabled: false,
+            databaseEnabled: false,
+            cacheEnabled: false,
+            cacheMode: .LOAD_NO_CACHE,
+
+            horizontalScrollBarEnabled: false,
+            verticalScrollBarEnabled: false,
+            overScrollMode: .NEVER,
+
+            pageZoom: Platform.isIOS ? 3 : 1,
           ),
           initialData: InAppWebViewInitialData(
             data:
@@ -142,28 +189,30 @@ class GeetestWebviewDialog extends StatelessWidget {
                 callback: (args) {
                   debugPrint('geetest error: $args');
                 },
+              )
+              ..addJavaScriptHandler(
+                handlerName: 'close',
+                callback: (args) => Get.back(),
               );
           },
           onLoadStop: (ctr, _) async {
-            final config = await future;
+            final config = await _future;
+            if (!mounted) return;
             if (config case Success(:final response)) {
-              ctr.evaluateJavascript(
-                source:
-                    'let t=Geetest($response).onSuccess(()=>R("success",t.getValidate())).onError((o)=>R("error",o));t.onReady(()=>t.verify());',
-              );
+              ctr.evaluateJavascript(source: _showJs(response));
             } else {
               config.toast();
               Get.back();
             }
           },
         ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: Get.back,
-          child: Text(
-            '取消',
-            style: TextStyle(color: ColorScheme.of(context).outline),
+        Positioned(
+          left: 8,
+          top: 8,
+          child: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: Get.back,
+            tooltip: '关闭',
           ),
         ),
       ],
