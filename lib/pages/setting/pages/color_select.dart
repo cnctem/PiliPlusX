@@ -1,6 +1,5 @@
 import 'dart:io' show Platform;
 
-import 'package:PiliPlus/common/widgets/animated_height.dart';
 import 'package:PiliPlus/common/widgets/color_palette.dart';
 import 'package:PiliPlus/main.dart' show MyApp;
 import 'package:PiliPlus/models/common/nav_bar_config.dart';
@@ -21,6 +20,7 @@ import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:os_type/os_type.dart';
 
 class ColorSelectPage extends StatefulWidget {
   const ColorSelectPage({super.key});
@@ -120,7 +120,7 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
               },
             ),
           ),
-          if (!Platform.isIOS)
+          if (!(Platform.isIOS||OS.isHarmony))
             Obx(
               () => ListTile(
                 title: const Text('动态取色'),
@@ -136,50 +136,56 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
               ),
             ),
           Padding(
-            padding: padding + const .all(12),
-            child: Obx(
-              () => AnimatedHeight(
-                expand: ctr.dynamicColor.value,
-                duration: const Duration(milliseconds: 200),
-                child: Wrap(
-                  alignment: .center,
-                  spacing: 22,
-                  runSpacing: 18,
-                  children: colorThemeTypes.mapIndexed(
-                    (i, e) {
-                      return GestureDetector(
-                        behavior: .opaque,
-                        onTap: () {
-                          ctr.currentColor.value = i;
-                          GStorage.setting
-                              .put(SettingBoxKey.customColor, i)
-                              .whenComplete(Get.updateMyAppTheme);
-                        },
-                        child: Column(
-                          spacing: 3,
-                          children: [
-                            ColorPalette(
-                              colorScheme: e.color.asColorSchemeSeed(
-                                _dynamicSchemeVariant,
-                                theme.brightness,
-                              ),
-                              selected: ctr.currentColor.value == i,
-                            ),
-                            Text(
-                              e.label,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: ctr.currentColor.value != i
-                                    ? theme.colorScheme.outline
-                                    : null,
-                              ),
-                            ),
-                          ],
+            padding: padding,
+            child: AnimatedSize(
+              curve: Curves.easeInOut,
+              alignment: Alignment.topCenter,
+              duration: const Duration(milliseconds: 200),
+              child: Obx(
+                () => ctr.dynamicColor.value
+                    ? const SizedBox.shrink()
+                    : Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: 22,
+                          runSpacing: 18,
+                          children: colorThemeTypes.mapIndexed(
+                            (index, item) {
+                              return GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () {
+                                  ctr.currentColor.value = index;
+                                  GStorage.setting
+                                      .put(SettingBoxKey.customColor, index)
+                                      .whenComplete(Get.updateMyAppTheme);
+                                },
+                                child: Column(
+                                  spacing: 3,
+                                  children: [
+                                    ColorPalette(
+                                      colorScheme: item.color.asColorSchemeSeed(
+                                        _dynamicSchemeVariant,
+                                        theme.brightness,
+                                      ),
+                                      selected: ctr.currentColor.value == index,
+                                    ),
+                                    Text(
+                                      item.label,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: ctr.currentColor.value != index
+                                            ? theme.colorScheme.outline
+                                            : null,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ).toList(),
                         ),
-                      );
-                    },
-                  ).toList(),
-                ),
+                      ),
               ),
             ),
           ),
