@@ -53,6 +53,7 @@ class _MainAppState extends PopScopeState<MainApp>
   int _primaryColorValue = 0;
   late ThemeData theme;
   Brightness? _brightness;
+  Worker? _nativeTabsWorker;
 
   @override
   bool get initCanPop => false;
@@ -61,9 +62,19 @@ class _MainAppState extends PopScopeState<MainApp>
   void initState() {
     super.initState();
     addObserverMobile(this);
-    // 监听 useNativeTabs 异步赋值（_initHdsBar 完成时触发）
-    ever(_mainController.useNativeTabs, (_) {
-      if (_mainController.useNativeTabs.value && _primaryColorValue != 0) {
+    // 监听 useNativeTabs 异步赋值（_initHdsBar 完成时触发）。
+    // 首帧是按 false 构建的，此时 Flutter 底栏已经建出来了，而 _bottomNav 中
+    // 的提前返回分支不读任何 Rx（不能用 Obx 包裹，否则抛 ObxError），所以必须
+    // 在这里主动重建把它移除，否则会与原生 HDS 底栏重叠显示。
+    _nativeTabsWorker = ever(_mainController.useNativeTabs, (useNativeTabs) {
+      if (!mounted || !useNativeTabs) return;
+      setState(() {});
+      // 补发首帧时因 useNativeTabs 未就绪而跳过的原生底栏状态同步：
+      // 横屏（侧栏布局）或已有子页面覆盖主页时，原生底栏不应显示
+      MyApp.shellBarsObserver.onOrientationChanged(
+        _mainController.useBottomNav,
+      );
+      if (_primaryColorValue != 0) {
         HarmonyChannel.setTabSelectedColor(
           '#${_primaryColorValue.toRadixString(16).padLeft(8, '0').substring(2)}',
         );
@@ -103,7 +114,9 @@ class _MainAppState extends PopScopeState<MainApp>
     // 横竖屏切换时同步原生 HDS 沉浸底栏显隐
     // 由 ShellBarsObserver 统一管理，避免与路由观察者冲突
     if (_mainController.useNativeTabs.value) {
-      MyApp.shellBarsObserver.onOrientationChanged(_mainController.useBottomNav);
+      MyApp.shellBarsObserver.onOrientationChanged(
+        _mainController.useBottomNav,
+      );
     }
     // 缓存主题主色，供 ever 回调在 useNativeTabs 异步就绪后补发
     _primaryColorValue = Theme.of(context).colorScheme.primary.value;
@@ -143,6 +156,7 @@ class _MainAppState extends PopScopeState<MainApp>
 
   @override
   void dispose() {
+    _nativeTabsWorker?.dispose();
     if (PlatformUtils.isDesktop) {
       trayManager.removeListener(this);
       windowManager.removeListener(this);
@@ -317,7 +331,9 @@ class _MainAppState extends PopScopeState<MainApp>
     if (!_mainController.useBottomNav) {
       return const SizedBox.shrink();
     }
-    // 开启鸿蒙沉浸光感后需返回空组件
+    // 开启鸿蒙沉浸光感后需返回空组件（底栏由原生 HDS 渲染）。
+    // 这里是非响应式读取，异步就绪后的重建由 initState 中的 _nativeTabsWorker
+    // 触发；上面的提前返回分支不读 Rx，不能改成 Obx 包裹（会抛 ObxError）
     if (_mainController.useNativeTabs.value) {
       return const SizedBox.shrink();
     }
