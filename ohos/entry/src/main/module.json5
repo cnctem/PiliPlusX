@@ -8,10 +8,16 @@
     deliveryWithInstall: true,
     installationFree: false,
     pages: "$profile:main_pages",
+    "metadata": [{
+      "name": "ohos.arkui.UIMaterial.state",
+      "value": "enable"
+    }],
     abilities: [
       {
         name: "EntryAbility",
         srcEntry: "./ets/entryability/EntryAbility.ets",
+        icon: "$media:app_layered_image",
+        label: "$string:app_name",
         description: "$string:EntryAbility_desc",
         startWindowIcon: "$media:icon_startwindow",
         startWindowBackground: "$color:start_window_background",
@@ -24,16 +30,16 @@
         skills: [
           {
             entities: ["entity.system.home"],
-            actions: ["action.system.home"],
+            actions: ["action.system.home"]
           },
           {
             actions: ["ohos.want.action.viewData"],
             entities: ["entity.system.default"],
             uris: [
               {
-                scheme: "bilibili",
-              },
-            ],
+                scheme: "bilibili"
+              }
+            ]
           },
           {
             actions: ["ohos.want.action.viewData"],
@@ -41,43 +47,43 @@
             uris: [
               {
                 scheme: "https",
-                host: "bilibili.com",
+                host: "bilibili.com"
               },
               {
                 scheme: "https",
-                host: "www.bilibili.com",
+                host: "www.bilibili.com"
               },
               {
                 scheme: "https",
-                host: "b23.tv",
+                host: "b23.tv"
               },
               {
                 scheme: "http",
-                host: "bilibili.com",
+                host: "bilibili.com"
               },
               {
                 scheme: "http",
-                host: "www.bilibili.com",
+                host: "www.bilibili.com"
               },
               {
                 scheme: "http",
-                host: "b23.tv",
-              },
-            ],
-          },
-        ],
-      },
+                host: "b23.tv"
+              }
+            ]
+          }
+        ]
+      }
     ],
     requestPermissions: [
       {
-        name: "ohos.permission.INTERNET",
+        name: "ohos.permission.INTERNET"
       },
       {
         name: "ohos.permission.READ_PASTEBOARD",
         reason: "$string:read_pasteboard_reason",
         usedScene: {
           abilities: ["EntryAbility"],
-          when: "always",
+          when: "always"
         }
       },
       {
@@ -85,32 +91,32 @@
         reason: "$string:perm_get_network_info_reason",
         usedScene: {
           abilities: ["EntryAbility"],
-          when: "inuse",
-        },
+          when: "inuse"
+        }
       },
       {
         name: "ohos.permission.GET_WIFI_INFO",
         reason: "$string:perm_get_wifi_info_reason",
         usedScene: {
           abilities: ["EntryAbility"],
-          when: "inuse",
-        },
+          when: "inuse"
+        }
       },
       {
         name: "ohos.permission.KEEP_BACKGROUND_RUNNING",
         reason: "$string:keep_background_running_reason",
         usedScene: {
           abilities: ["EntryAbility"],
-          when: "inuse",
-        },
+          when: "inuse"
+        }
       },
       {
         name: "ohos.permission.VIBRATE",
         usedScene: {
           abilities: ["EntryAbility"],
-          when: "inuse",
-        },
-      },
-    ],
+          when: "inuse"
+        }
+      }
+    ]
   },
 }
