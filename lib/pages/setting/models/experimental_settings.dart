@@ -6,7 +6,7 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 List<SettingsModel> experimentalSettings = [
   SwitchModel(
     title: '鸿蒙沉浸光感导航栏',
-    subtitle: '使用鸿蒙的悬浮页签栏与沉浸光感\n仅在鸿蒙6.1及以上支持，不支持的平台会回退到传统底栏',
+    subtitle: '使用鸿蒙的悬浮页签栏与沉浸光感\n仅在鸿蒙6.1及以上支持，不支持的平台会回退到传统底栏\n开启平板适配后在横屏模式下不显示',
     leading: const Icon(Icons.water_drop_outlined),
     setKey: SettingBoxKey.enableHdsBar,
     defaultVal: false,

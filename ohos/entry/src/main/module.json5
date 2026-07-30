@@ -13,8 +13,6 @@
         name: "EntryAbility",
         srcEntry: "./ets/entryability/EntryAbility.ets",
         description: "$string:EntryAbility_desc",
-        icon: "$media:icon",
-        label: "$string:EntryAbility_label",
         startWindowIcon: "$media:icon_startwindow",
         startWindowBackground: "$color:start_window_background",
         startWindow: "$profile:start_window",

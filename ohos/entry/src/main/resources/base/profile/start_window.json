@@ -1,5 +1,5 @@
 {
   "startWindowBackgroundColor": "$color:start_window_background",
-  "startWindowBackgroundImage": "$media:bgImage",
-  "startWindowBackgroundImageFit": "Cover"
+  "startWindowBackgroundImage": "$media:icon_startwindow",
+  "startWindowBackgroundImageFit": "None"
 }
