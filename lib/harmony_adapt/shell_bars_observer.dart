@@ -16,19 +16,12 @@ class ShellBarsObserver extends NavigatorObserver {
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
     _activeRoutes.remove(route);
-    // 回到主页时清除方向隐藏标记，由 _sync 决定最终状态
-    if (_activeRoutes.length <= 1) {
-      _orientationHidden = false;
-    }
     _sync();
   }
 
   @override
   void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
     _activeRoutes.remove(route);
-    if (_activeRoutes.length <= 1) {
-      _orientationHidden = false;
-    }
     _sync();
   }
 
@@ -39,10 +32,10 @@ class ShellBarsObserver extends NavigatorObserver {
     _sync();
   }
 
-  /// 由 didChangeDependencies 调用：横屏时隐藏底栏（仅在主页时生效）
-  void onOrientationChanged(bool isPortrait) {
-    if (_activeRoutes.length > 1) return; // 有子页面时由路由控制
-    _orientationHidden = !isPortrait;
+  /// 由 MainApp.didChangeDependencies 调用：非竖屏底栏布局（横屏侧栏）时隐藏底栏。
+  /// 子页面覆盖期间也照常记录，避免返回主页后用的是过期方向。
+  void onOrientationChanged(bool useBottomNav) {
+    _orientationHidden = !useBottomNav;
     _sync();
   }
 
