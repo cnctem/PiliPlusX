@@ -174,7 +174,7 @@ struct Index {
         unselectedColor: NAV_UNSELECTED
       }))
     }
-    .onChange((index: number) => {
+    .onTabBarClick((index: number) => {
       // 通知 EntryAbility 切换 Flutter 页面
       if (index === 0) {
         this.context.eventHub.emit(EVENT_TAB_HOME);
