@@ -328,7 +328,6 @@ class MainController extends GetxController
       if (!_fromArkTS) {
         HarmonyChannel.changeTabIndex(value);
       }
-      _fromArkTS = false;
       if (currentNav == NavigationBarType.home) {
         checkDefaultSearch();
         checkUnread();
@@ -358,6 +357,7 @@ class MainController extends GetxController
       }
       _lastSelectTime = now;
     }
+    _fromArkTS = false;
   }
 
   void setSearchBar() {

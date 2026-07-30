@@ -37,6 +37,10 @@
       "value": "用于读取剪贴板内容。"
     },
     {
+      "name": "gesture_reason",
+      "value": "智感握姿需要根据握持手势调整界面布局"
+    },
+    {
       "name": "no_matter",
       "value": "no matter"
     }

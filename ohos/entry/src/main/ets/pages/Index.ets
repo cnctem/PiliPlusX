@@ -190,6 +190,7 @@ struct Index {
     .vertical(false)
     .barFloatingStyle({
       barBottomMargin: this.bottomAvoidAreaHeight,
+      adaptToHandedness: true,
       systemMaterialEffect: {
         materialType: hdsMaterial.MaterialType.IMMERSIVE,
         materialLevel: hdsMaterial.MaterialLevel.EXQUISITE

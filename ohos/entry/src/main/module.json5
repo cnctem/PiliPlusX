@@ -4,7 +4,7 @@
     type: "entry",
     description: "$string:module_desc",
     mainElement: "EntryAbility",
-    deviceTypes: ["phone", "2in1", "tablet"],
+    deviceTypes: ["phone", "2in1", "tablet", "car"],
     deliveryWithInstall: true,
     installationFree: false,
     pages: "$profile:main_pages",
@@ -115,6 +115,14 @@
         usedScene: {
           abilities: ["EntryAbility"],
           when: "inuse"
+        }
+      },
+      {
+        "name": "ohos.permission.DETECT_GESTURE",
+        "reason": "$string:gesture_reason",
+        "usedScene": {
+          "abilities": ["EntryAbility"],
+          "when": "inuse"
         }
       }
     ]

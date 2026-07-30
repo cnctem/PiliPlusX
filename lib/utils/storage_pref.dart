@@ -269,6 +269,7 @@ abstract final class Pref {
     if (codecs is List) {
       return codecs.map((i) => VideoDecodeFormatType.values.byName(i)).toList();
     }
+    if (OS.isHarmony) return const <VideoDecodeFormatType>[.HEVC, .AVC];
     return const <VideoDecodeFormatType>[.AVC, .AV1];
   }
 
