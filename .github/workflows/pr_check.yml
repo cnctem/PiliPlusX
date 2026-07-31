@@ -30,7 +30,7 @@ jobs:
         shell: bash
 
       - name: Get dependencies
-        run: flutter pub get
+        run: dart pub get
         env:
           GIT_LFS_SKIP_SMUDGE: 1
 
