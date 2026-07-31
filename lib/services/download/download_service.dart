@@ -3,6 +3,7 @@ import 'dart:convert' show jsonDecode, jsonEncode;
 import 'dart:io' show Directory, File;
 
 import 'package:PiliPlus/grpc/dm.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/http/download.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -24,6 +25,7 @@ import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:os_type/os_type.dart';
 import 'package:path/path.dart' as path;
 import 'package:synchronized/synchronized.dart';
 
@@ -432,6 +434,7 @@ class DownloadService extends GetxService {
         default:
           break;
       }
+      _startBackgroundTask();
     } catch (e) {
       _updateCurStatus(DownloadStatus.failPlayUrl);
       if (kDebugMode) {
@@ -443,6 +446,18 @@ class DownloadService extends GetxService {
   Future<void> _updateBiliDownloadEntryJson(BiliDownloadEntryInfo entry) {
     final entryJsonFile = File(path.join(entry.entryDirPath, _entryFile));
     return entryJsonFile.writeAsString(jsonEncode(entry.toJson()));
+  }
+
+  /// 启动鸿蒙长时任务，用于后台下载
+  void _startBackgroundTask() {
+    if (!OS.isHarmony) return;
+    HarmonyChannel.startBackgroundTask();
+  }
+
+  /// 停止鸿蒙长时任务
+  void _stopBackgroundTask() {
+    if (!OS.isHarmony) return;
+    HarmonyChannel.stopBackgroundTask();
   }
 
   void _onReceive(int progress, int total) {
@@ -511,6 +526,7 @@ class DownloadService extends GetxService {
     curDownload.value = null;
     _downloadManager = null;
     _audioDownloadManager = null;
+    _stopBackgroundTask();
     nextDownload();
   }
 
@@ -586,6 +602,7 @@ class DownloadService extends GetxService {
     } else {
       _updateCurStatus(DownloadStatus.pause);
     }
+    _stopBackgroundTask();
     if (downloadNext) {
       nextDownload();
     }
