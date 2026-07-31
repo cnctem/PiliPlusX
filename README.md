@@ -23,7 +23,10 @@
 
 ## 编译运行
 
-- 1、配置鸿蒙flutter3.41.9环境，参考[鸿蒙flutter3.41.9](https://gitcode.com/CPF-Flutter/flutter_flutter/tree/oh-3.41.9-release)
+> [!TIP]
+> 当前项目编译API已经提升到了26.0.0，请在华为官网下载最新的配套IDE和SDK使用，防止编译异常
+
+- 1、配置鸿蒙flutter3.41.9环境，参考[鸿蒙flutter3.41.9](https://gitcode.com/CPF-Flutter/flutter_flutter/tree/oh-3.41.9-dev)
 
 - 2、手动创建ohos/build-profile.json5文件，见[关于build-profile.json5](ohos/关于build-profile.json5)
 

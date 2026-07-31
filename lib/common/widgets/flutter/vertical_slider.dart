@@ -14,6 +14,7 @@ import 'package:flutter/material.dart' hide Slider;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/services.dart';
+import 'package:os_type/os_type.dart';
 
 enum _SliderType { material, adaptive }
 
@@ -797,9 +798,9 @@ class _VerticalSliderState extends State<VerticalSlider>
 
       case _SliderType.adaptive:
         {
+          if (OS.isHarmony) return _buildMaterialSlider(context);
           final ThemeData theme = Theme.of(context);
           switch (theme.platform) {
-            case TargetPlatform.ohos:
             case TargetPlatform.android:
             case TargetPlatform.fuchsia:
             case TargetPlatform.linux:
@@ -807,6 +808,7 @@ class _VerticalSliderState extends State<VerticalSlider>
               return _buildMaterialSlider(context);
             case TargetPlatform.iOS:
             case TargetPlatform.macOS:
+            default:
               return _buildCupertinoSlider(context);
           }
         }
@@ -964,13 +966,6 @@ class _VerticalSliderState extends State<VerticalSlider>
 
     VoidCallback? handleDidGainAccessibilityFocus;
     switch (theme.platform) {
-      case TargetPlatform.ohos:
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-        break;
       case TargetPlatform.windows:
         handleDidGainAccessibilityFocus = () {
           // Automatically activate the slider when it receives a11y focus.
@@ -978,6 +973,13 @@ class _VerticalSliderState extends State<VerticalSlider>
             focusNode.requestFocus();
           }
         };
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      default:
+        break;
     }
 
     final Map<ShortcutActivator, Intent> shortcutMap =
@@ -1546,16 +1548,17 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       };
 
   double get _adjustmentUnit {
+    if (OS.isHarmony) return 0.05;
     switch (_platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         // Matches iOS implementation of material slider.
         return 0.1;
-      case TargetPlatform.ohos:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
+      default:
         // Matches Android implementation of material slider.
         return 0.05;
     }
