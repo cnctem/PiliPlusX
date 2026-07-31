@@ -22,15 +22,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup flutter-ohos
-        run: |
-          git clone -b oh-3.41.9-release https://gitcode.com/CPF-Flutter/flutter_flutter.git $GITHUB_WORKSPACE/../flutter
-          echo "$GITHUB_WORKSPACE/../flutter/bin" >> $GITHUB_PATH
-          $GITHUB_WORKSPACE/../flutter/bin/flutter --version
-        shell: bash
+      - name: Setup flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: "3.41.9"
+          cache: true
 
-      - name: Get dependencies
-        run: dart pub get
+      - name: Get Flutter dependencies
+        run: flutter pub get
         env:
           GIT_LFS_SKIP_SMUDGE: 1
 
