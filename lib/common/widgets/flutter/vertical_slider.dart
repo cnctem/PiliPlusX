@@ -808,6 +808,7 @@ class _VerticalSliderState extends State<VerticalSlider>
               return _buildMaterialSlider(context);
             case TargetPlatform.iOS:
             case TargetPlatform.macOS:
+            default:
               return _buildCupertinoSlider(context);
           }
         }
@@ -965,12 +966,6 @@ class _VerticalSliderState extends State<VerticalSlider>
 
     VoidCallback? handleDidGainAccessibilityFocus;
     switch (theme.platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-        break;
       case TargetPlatform.windows:
         handleDidGainAccessibilityFocus = () {
           // Automatically activate the slider when it receives a11y focus.
@@ -978,6 +973,13 @@ class _VerticalSliderState extends State<VerticalSlider>
             focusNode.requestFocus();
           }
         };
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      default:
+        break;
     }
 
     final Map<ShortcutActivator, Intent> shortcutMap =
@@ -1556,6 +1558,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
+      default:
         // Matches Android implementation of material slider.
         return 0.05;
     }
