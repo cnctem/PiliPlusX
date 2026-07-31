@@ -200,10 +200,10 @@ packages:
     dependency: transitive
     description:
       name: build_daemon
-      sha256: "8c0535c3b2f625619f4dd1036ef1127f2e77bfedf89ed2eb2676ef076e0b6712"
+      sha256: fd754058c342243718d5171a95f352cfc9fcf0cba8cfa26df67cb13a5836db78
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "4.1.3"
+    version: "4.1.2"
   build_resolvers:
     dependency: transitive
     description:
@@ -248,10 +248,10 @@ packages:
     dependency: "direct main"
     description:
       name: cached_network_image_ce
-      sha256: "974594da61403c25849107ce6df0a31034f8a660612dc89c582b70caa03e6e98"
+      sha256: "9c61372fecd5f6ac6aaa66fa6808b4c303b8574875e853a0916116bf2fae6840"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "4.10.0"
+    version: "4.9.0"
   cached_network_image_platform_interface_ce:
     dependency: transitive
     description:
@@ -264,10 +264,10 @@ packages:
     dependency: transitive
     description:
       name: cached_network_image_web_ce
-      sha256: "22cdf044cd013ff8d6eb06ce148bfe3f1106388ca2af244e2358739debb4459c"
+      sha256: "6bcd8608d4ace7c35625f09d971ce68c7a6581a4631b0fb6ceb2909b2c2e17a8"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "2.1.2"
+    version: "2.1.1"
   canvas_danmaku:
     dependency: "direct main"
     description:
@@ -467,18 +467,18 @@ packages:
     dependency: "direct main"
     description:
       name: dio_http2_adapter
-      sha256: c48daafd9cded83368ba0b7d731db6bc9d0413fe21727abf1575780b7c8a74a1
+      sha256: c56522c50bb3bab7e3ca77c153b0f03ae672a87d8c32e46be8f2868693ec9f0a
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "2.8.0"
+    version: "2.7.1"
   dio_web_adapter:
     dependency: transitive
     description:
       name: dio_web_adapter
-      sha256: "0786d0b7295a373de356fc0af4f6f1d0ab2844ed31b19dfc5e7556b70e24212c"
+      sha256: dd58dc3861eb36edb13b217efc006a1c21e5bbc341de8c229b85634fa5e362e4
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "2.2.1"
+    version: "2.2.0"
   dlna_dart:
     dependency: "direct main"
     description:
@@ -675,8 +675,8 @@ packages:
     dependency: "direct main"
     description:
       path: flutter_inappwebview
-      ref: "br_v6.1.5_ohos_dev"
-      resolved-ref: "710ee6558387ffa184ba3d0315ecdd196bc2afd0"
+      ref: b596ae059e388cbc8f710a6c26c5370a0527a03a
+      resolved-ref: b596ae059e388cbc8f710a6c26c5370a0527a03a
       url: "https://gitcode.com/CPF-Flutter/flutter_inappwebview.git"
     source: git
     version: "6.1.5"
@@ -684,8 +684,8 @@ packages:
     dependency: transitive
     description:
       path: flutter_inappwebview_android
-      ref: "710ee6558387ffa184ba3d0315ecdd196bc2afd0"
-      resolved-ref: "710ee6558387ffa184ba3d0315ecdd196bc2afd0"
+      ref: b596ae059e388cbc8f710a6c26c5370a0527a03a
+      resolved-ref: b596ae059e388cbc8f710a6c26c5370a0527a03a
       url: "https://gitcode.com/CPF-Flutter/flutter_inappwebview.git"
     source: git
     version: "1.1.3"
@@ -702,8 +702,8 @@ packages:
     dependency: transitive
     description:
       path: flutter_inappwebview_ios
-      ref: "710ee6558387ffa184ba3d0315ecdd196bc2afd0"
-      resolved-ref: "710ee6558387ffa184ba3d0315ecdd196bc2afd0"
+      ref: b596ae059e388cbc8f710a6c26c5370a0527a03a
+      resolved-ref: b596ae059e388cbc8f710a6c26c5370a0527a03a
       url: "https://gitcode.com/CPF-Flutter/flutter_inappwebview.git"
     source: git
     version: "1.1.2"
@@ -711,8 +711,8 @@ packages:
     dependency: transitive
     description:
       path: flutter_inappwebview_macos
-      ref: "710ee6558387ffa184ba3d0315ecdd196bc2afd0"
-      resolved-ref: "710ee6558387ffa184ba3d0315ecdd196bc2afd0"
+      ref: b596ae059e388cbc8f710a6c26c5370a0527a03a
+      resolved-ref: b596ae059e388cbc8f710a6c26c5370a0527a03a
       url: "https://gitcode.com/CPF-Flutter/flutter_inappwebview.git"
     source: git
     version: "1.1.2"
@@ -720,8 +720,8 @@ packages:
     dependency: transitive
     description:
       path: flutter_inappwebview_ohos
-      ref: "710ee6558387ffa184ba3d0315ecdd196bc2afd0"
-      resolved-ref: "710ee6558387ffa184ba3d0315ecdd196bc2afd0"
+      ref: b596ae059e388cbc8f710a6c26c5370a0527a03a
+      resolved-ref: b596ae059e388cbc8f710a6c26c5370a0527a03a
       url: "https://gitcode.com/CPF-Flutter/flutter_inappwebview.git"
     source: git
     version: "1.1.3"
@@ -738,8 +738,8 @@ packages:
     dependency: transitive
     description:
       path: flutter_inappwebview_web
-      ref: "710ee6558387ffa184ba3d0315ecdd196bc2afd0"
-      resolved-ref: "710ee6558387ffa184ba3d0315ecdd196bc2afd0"
+      ref: b596ae059e388cbc8f710a6c26c5370a0527a03a
+      resolved-ref: b596ae059e388cbc8f710a6c26c5370a0527a03a
       url: "https://gitcode.com/CPF-Flutter/flutter_inappwebview.git"
     source: git
     version: "1.1.2"
@@ -1009,7 +1009,7 @@ packages:
     description:
       path: "packages/image_picker/image_picker"
       ref: "br_image_picker-v1.1.2_ohos"
-      resolved-ref: "57dbefb489a3db11a95295f8eb77b7de6761f67d"
+      resolved-ref: a2d978536b96d347e3732f86b3c7d4ed4fd77182
       url: "https://gitcode.com/CPF-Flutter/flutter_packages.git"
     source: git
     version: "1.1.2"
@@ -1058,7 +1058,7 @@ packages:
     description:
       path: "packages/image_picker/image_picker_ohos"
       ref: "br_image_picker-v1.1.2_ohos"
-      resolved-ref: "57dbefb489a3db11a95295f8eb77b7de6761f67d"
+      resolved-ref: a2d978536b96d347e3732f86b3c7d4ed4fd77182
       url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
     source: git
     version: "0.8.7+4"
@@ -1106,26 +1106,18 @@ packages:
     dependency: transitive
     description:
       name: jni
-      sha256: f038e58b4dc2c9037f50e233175086337e0b305e356d28211bf55f21c504cbd3
+      sha256: c2230682d5bc2362c1c9e8d3c7f406d9cbba23ab3f2e203a025dd47e0fb2e68f
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "1.0.3"
+    version: "1.0.0"
   jni_flutter:
     dependency: transitive
     description:
       name: jni_flutter
-      sha256: "7b717011ea40d04fd47c2731d3d1d36eb99eba3435c2753d62489e8c3c9991d5"
+      sha256: "8b59e590786050b1cd866677dddaf76b1ade5e7bc751abe04b86e84d379d3ba6"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "1.0.2"
-  jni_util:
-    dependency: transitive
-    description:
-      name: jni_util
-      sha256: "1ba86da04a5f2bf18fde2edb235587e70c5b0fc5bd4ba955f46b00942c3fc35f"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "1.0.0"
+    version: "1.0.1"
   js:
     dependency: "direct overridden"
     description:
@@ -1252,7 +1244,7 @@ packages:
     description:
       path: media_kit
       ref: feat-ohos
-      resolved-ref: eb2376f87153ae66ca037be0b84918b41068634e
+      resolved-ref: "30705cfcb605d1e911d0d15635216b7285464214"
       url: "https://github.com/cnoim/media-kit.git"
     source: git
     version: "1.2.3"
@@ -1270,7 +1262,7 @@ packages:
     description:
       path: "libs/ios/media_kit_libs_ios_video"
       ref: feat-ohos
-      resolved-ref: eb2376f87153ae66ca037be0b84918b41068634e
+      resolved-ref: "30705cfcb605d1e911d0d15635216b7285464214"
       url: "https://github.com/cnoim/media-kit.git"
     source: git
     version: "1.1.4"
@@ -1279,7 +1271,7 @@ packages:
     description:
       path: "libs/linux/media_kit_libs_linux"
       ref: feat-ohos
-      resolved-ref: eb2376f87153ae66ca037be0b84918b41068634e
+      resolved-ref: "30705cfcb605d1e911d0d15635216b7285464214"
       url: "https://github.com/cnoim/media-kit.git"
     source: git
     version: "1.2.1"
@@ -1288,7 +1280,7 @@ packages:
     description:
       path: "libs/macos/media_kit_libs_macos_video"
       ref: feat-ohos
-      resolved-ref: eb2376f87153ae66ca037be0b84918b41068634e
+      resolved-ref: "30705cfcb605d1e911d0d15635216b7285464214"
       url: "https://github.com/cnoim/media-kit.git"
     source: git
     version: "1.1.4"
@@ -1297,7 +1289,7 @@ packages:
     description:
       path: "libs/ohos/media_kit_libs_ohos"
       ref: feat-ohos
-      resolved-ref: eb2376f87153ae66ca037be0b84918b41068634e
+      resolved-ref: "30705cfcb605d1e911d0d15635216b7285464214"
       url: "https://github.com/cnoim/media-kit.git"
     source: git
     version: "1.0.0"
@@ -1306,7 +1298,7 @@ packages:
     description:
       path: "libs/universal/media_kit_libs_video"
       ref: feat-ohos
-      resolved-ref: eb2376f87153ae66ca037be0b84918b41068634e
+      resolved-ref: "30705cfcb605d1e911d0d15635216b7285464214"
       url: "https://github.com/cnoim/media-kit.git"
     source: git
     version: "1.0.7"
@@ -1333,7 +1325,7 @@ packages:
     description:
       path: media_kit_video
       ref: feat-ohos
-      resolved-ref: eb2376f87153ae66ca037be0b84918b41068634e
+      resolved-ref: "30705cfcb605d1e911d0d15635216b7285464214"
       url: "https://github.com/cnoim/media-kit.git"
     source: git
     version: "2.0.1"
@@ -1373,10 +1365,10 @@ packages:
     dependency: transitive
     description:
       name: objective_c
-      sha256: b7fb95a6d9a4f009edd63dc5ac69f07420b23a16161c6dd8660290b59c602e8e
+      sha256: "6cb691c686fa2838c6deb34980d426145c2a5d537491cb83d463c33cdbc726ed"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "9.5.0"
+    version: "9.4.1"
   octo_image:
     dependency: transitive
     description:
@@ -1438,7 +1430,7 @@ packages:
     description:
       path: "packages/path_provider/path_provider"
       ref: HEAD
-      resolved-ref: "6eb46773055380721b292d377c02bdc5e0abf127"
+      resolved-ref: "5c69f5f65ac32631846a6a3ae682f1f91c710cc3"
       url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
     source: git
     version: "2.1.0"
@@ -1471,7 +1463,7 @@ packages:
     description:
       path: "packages/path_provider/path_provider_ohos"
       ref: HEAD
-      resolved-ref: "6eb46773055380721b292d377c02bdc5e0abf127"
+      resolved-ref: "5c69f5f65ac32631846a6a3ae682f1f91c710cc3"
       url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
     source: git
     version: "2.2.1"
@@ -1535,8 +1527,8 @@ packages:
     dependency: transitive
     description:
       path: "packages/pigeon"
-      ref: e4242e67536b76345ae483a123d21fee7a2b87d7
-      resolved-ref: e4242e67536b76345ae483a123d21fee7a2b87d7
+      ref: "81b4f65df86624a1530c56625d1361b451ead6fc"
+      resolved-ref: "81b4f65df86624a1530c56625d1361b451ead6fc"
       url: "https://gitcode.com/openharmony-sig/flutter_packages.git"
     source: git
     version: "22.4.1"
@@ -1576,10 +1568,10 @@ packages:
     dependency: transitive
     description:
       name: posix
-      sha256: bc1bad54ad2b735816e31f8d4600cfde6c7839975085ddfbca48b6c9f7c4044e
+      sha256: "185ef7606574f789b40f289c233efa52e96dead518aed988e040a10737febb07"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "6.5.2"
+    version: "6.5.0"
   pretty_qr_code:
     dependency: "direct main"
     description:
@@ -1768,10 +1760,10 @@ packages:
     dependency: transitive
     description:
       name: sentry
-      sha256: "330a341076e16b87aa8a4f97b0bd48c085737d087e81ef337aee2b4c3e8896f9"
+      sha256: a84bf3a83b3ce1c89fce28b9f97659e3826df14a73a256952465aac2c5efdf5a
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "9.26.0"
+    version: "9.25.0"
   share_plus:
     dependency: "direct main"
     description:
@@ -2057,7 +2049,7 @@ packages:
     description:
       path: "packages/url_launcher/url_launcher"
       ref: "br_url_launcher_v6.3.1_ohos"
-      resolved-ref: "9702c8f0c9625542eaf284463e2334b849af7f7f"
+      resolved-ref: "3cbdcb35cf5d8e4b4dc18bd9081c98c0c1c97df0"
       url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
     source: git
     version: "6.1.12"
@@ -2098,7 +2090,7 @@ packages:
     description:
       path: "packages/url_launcher/url_launcher_ohos"
       ref: "br_url_launcher_v6.3.1_ohos"
-      resolved-ref: "9702c8f0c9625542eaf284463e2334b849af7f7f"
+      resolved-ref: "3cbdcb35cf5d8e4b4dc18bd9081c98c0c1c97df0"
       url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
     source: git
     version: "6.0.38"
@@ -2154,10 +2146,10 @@ packages:
     dependency: transitive
     description:
       name: vector_graphics_compiler
-      sha256: "4dca4feb77dc3ec7f6e27e49c53241eb8217f55e4f9b12599a27f8903bca5682"
+      sha256: "142a9146f447d15b10bdc00e21d5f4d83e5b32bb5f8f8f5a04c75311344923a3"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "1.3.0"
+    version: "1.2.6"
   vector_math:
     dependency: "direct main"
     description:
@@ -2171,7 +2163,7 @@ packages:
     description:
       path: "packages/video_player/video_player"
       ref: "br_video_player-v2.9.2_ohos"
-      resolved-ref: e4242e67536b76345ae483a123d21fee7a2b87d7
+      resolved-ref: "81b4f65df86624a1530c56625d1361b451ead6fc"
       url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
     source: git
     version: "2.9.2"
@@ -2196,7 +2188,7 @@ packages:
     description:
       path: "packages/video_player/video_player_ohos"
       ref: "br_video_player-v2.9.2_ohos"
-      resolved-ref: e4242e67536b76345ae483a123d21fee7a2b87d7
+      resolved-ref: "81b4f65df86624a1530c56625d1361b451ead6fc"
       url: "https://gitcode.com/openharmony-sig/flutter_packages.git"
     source: git
     version: "1.0.0+1"

@@ -17,7 +17,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
 # update when release
-version: 2.1.0+5567
+version: 2.1.0+5570
 
 environment:
   sdk: ">=3.11.1"
@@ -262,7 +262,7 @@ dependencies:
   http2: any
   screen_retriever: any
   characters: any
-  cached_network_image_ce: any
+  cached_network_image_ce: 4.9.0
 
 dependency_overrides:
   meta: ^1.18.3 # 兼容液态玻璃
@@ -274,7 +274,7 @@ dependency_overrides:
     git:
       url: "https://gitcode.com/CPF-Flutter/flutter_inappwebview.git"
       path: "flutter_inappwebview"
-      ref: br_v6.1.5_ohos_dev
+      ref: b596ae059e388cbc8f710a6c26c5370a0527a03a
   flutter_inappwebview_platform_interface:
     git:
       url: "https://gitcode.com/CPF-Flutter/flutter_inappwebview.git"
