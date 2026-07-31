@@ -1,7 +1,10 @@
-import { common } from "@kit.AbilityKit";
+﻿import { common, wantAgent, WantAgent } from "@kit.AbilityKit";
+import { BusinessError } from "@kit.BasicServicesKit";
 import AbilityConstant from "@ohos.app.ability.AbilityConstant";
+import Want from "@ohos.app.ability.Want";
 import ConfigurationConstant from "@ohos.app.ability.ConfigurationConstant";
 import deviceInfo from "@ohos.deviceInfo";
+import { backgroundTaskManager } from "@kit.BackgroundTasksKit";
 import window from "@ohos.window";
 import {
   Any,
@@ -17,6 +20,9 @@ import {
 export default class HarmonyChannel implements FlutterPlugin {
   private channel: MethodChannel | null = null;
   private lastWindow: window.Window | null = null;
+  private bgTaskPromise: Promise<void> = Promise.resolve();
+  private isBackgroundTaskRunning: boolean = false;
+  private bgTaskWanted: boolean = false;
 
   /// 跨设备接续：对端 onCreate/onNewWant 收到的接续数据暂存于此，
   /// 由 Dart 侧就绪后主动拉取（getPendingContinuation），规避冷启动时
@@ -98,6 +104,16 @@ export default class HarmonyChannel implements FlutterPlugin {
         result.success(true);
         break;
       }
+      case "startBackgroundTask": {
+        this.startBackgroundTaskInner();
+        result.success(true);
+        break;
+      }
+      case "stopBackgroundTask": {
+        this.stopBackgroundTaskInner();
+        result.success(true);
+        break;
+      }
       case "setShellBarsHidden": {
         const hidden: boolean = call.argument('hidden') ?? false;
         console.log(`is set tabs hidden: ${hidden}`);
@@ -137,6 +153,68 @@ export default class HarmonyChannel implements FlutterPlugin {
         break;
     }
   }
+
+  private startBackgroundTaskInner(): void {
+    this.enqueueBgTask(true);
+  }
+
+  private stopBackgroundTaskInner(): void {
+    this.enqueueBgTask(false);
+  }
+
+  /**
+   * Promise 链式队列：将所有 start/stop 请求排队执行，
+   * 只根据最终期望状态 (bgTaskWanted) 决定实际操作，消除竞态条件。
+   */
+  private enqueueBgTask(wanted: boolean): void {
+    this.bgTaskWanted = wanted;
+    this.bgTaskPromise = this.bgTaskPromise.then(async (): Promise<void> => {
+      if (this.bgTaskWanted) {
+        // 期望启动；若实际未运行则执行启动
+        if (this.isBackgroundTaskRunning) {
+          return;
+        }
+        try {
+          const context: common.UIAbilityContext = getContext() as common.UIAbilityContext;
+          const wantAgentInfo: wantAgent.WantAgentInfo = {
+            wants: [
+              {
+                bundleName: context.abilityInfo.bundleName,
+                abilityName: context.abilityInfo.name,
+              } as Want,
+            ],
+            actionType: wantAgent.OperationType.START_ABILITY,
+            requestCode: 0,
+            actionFlags: [wantAgent.WantAgentFlags.UPDATE_PRESENT_FLAG] as Array<wantAgent.WantAgentFlags>,
+          };
+          const wantAgentObj: WantAgent = await wantAgent.getWantAgent(wantAgentInfo);
+          const list: Array<string> = ["dataTransfer"];
+          await backgroundTaskManager.startBackgroundRunning(
+            context, list, wantAgentObj,
+          );
+          this.isBackgroundTaskRunning = true;
+          console.info("HarmonyChannel", "Background task started (dataTransfer)");
+        } catch (error) {
+          console.error("HarmonyChannel",
+            `startBackgroundTask failed, code: ${(error as BusinessError).code}, msg: ${(error as BusinessError).message}`);
+        }
+      } else {
+        // 期望停止；若实际在运行则执行停止
+        if (!this.isBackgroundTaskRunning) {
+          return;
+        }
+        try {
+          await backgroundTaskManager.stopBackgroundRunning(getContext());
+          this.isBackgroundTaskRunning = false;
+          console.info("HarmonyChannel", "Background task stopped");
+        } catch (error) {
+          console.error("HarmonyChannel",
+            `stopBackgroundTask failed, code: ${(error as BusinessError).code}, msg: ${(error as BusinessError).message}`);
+        }
+      }
+    });
+  }
+
   public changeTabIndex(index: number): void {
     const context = getContext() as common.UIAbilityContext;
     context.eventHub.emit('EVENT_CHANGE_TAB', index);

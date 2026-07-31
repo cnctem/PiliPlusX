@@ -369,16 +369,23 @@ class MyApp extends StatelessWidget {
   static Widget _scaledBuilder(BuildContext context, Widget? child) {
     // 鸿蒙小窗横屏临时缩小时需要获取真正的缩放比例
     final uiScale = ScaledWidgetsFlutterBinding.instance.scaleFactor;
-    final mediaQuery = MediaQuery.of(context);
+    var mediaQuery = MediaQuery.of(context);
     final textScaler = TextScaler.linear(Pref.defaultTextScale);
     // 鸿蒙 embedding（FlutterPage/FlutterView）把 ArkUI PanGesture 默认的
     // 5(vp) 当 physicalTouchSlop 下发，框架除以 DPR 后竖向滚动的触发阈值
     // 只有 ~1.5 逻辑像素（Android 约为 8）。竖向手势几乎瞬间赢得竞技场，
     // 横向滑动（如简介/评论切换）无论怎么放宽都抢不到。此处恢复为
     // Android 水平，使横竖手势能按主导方向公平竞争。
-    final gestureSettings = OS.isHarmony
-        ? const DeviceGestureSettings(touchSlop: 8)
-        : mediaQuery.gestureSettings;
+    //
+    // 注意：必须在这里覆盖 mediaQuery 本身，而不是往下面某个 copyWith 里加
+    // 参数——gestureSettings 与 uiScale 无关，两条分支都得生效。之前写在
+    // copyWith 参数里，跟进上游 2.1.0 时 uiScale == 1.0 的分支被整体覆盖，
+    // 覆盖参数被静默丢掉，手机上（uiScale 恒为 1.0）该修复完全失效。
+    if (OS.isHarmony) {
+      mediaQuery = mediaQuery.copyWith(
+        gestureSettings: const DeviceGestureSettings(touchSlop: 8),
+      );
+    }
     if (uiScale != 1.0) {
       child = MediaQuery(
         data: mediaQuery.copyWith(
@@ -388,7 +395,6 @@ class MyApp extends StatelessWidget {
           viewInsets: mediaQuery.viewInsets / uiScale,
           viewPadding: tmpPadding ?? mediaQuery.viewPadding / uiScale,
           devicePixelRatio: mediaQuery.devicePixelRatio * uiScale,
-          gestureSettings: gestureSettings,
         ),
         child: child!,
       );

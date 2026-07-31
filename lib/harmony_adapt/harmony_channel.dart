@@ -123,6 +123,22 @@ abstract class HarmonyChannel {
     } on PlatformException catch (_) {}
   }
 
+  /// 启动长时任务，用于下载
+  static Future<void> startBackgroundTask() async {
+    if (!OS.isHarmony) return;
+    try {
+      await _channel.invokeMethod('startBackgroundTask');
+    } on PlatformException catch (_) {}
+  }
+
+  /// 停止长时任务
+  static Future<void> stopBackgroundTask() async {
+    if (!OS.isHarmony) return;
+    try {
+      await _channel.invokeMethod('stopBackgroundTask');
+    } on PlatformException catch (_) {}
+  }
+
   /// 缓存从 ArkTS 获取的 API 版本
   static int? _sdkApiVersion;
 

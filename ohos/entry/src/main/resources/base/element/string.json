@@ -30,7 +30,7 @@
     },
     {
       "name": "keep_background_running_reason",
-      "value": "用于在后台继续播放音频"
+      "value": "用于在后台继续播放音频及下载视频"
     },
     {
       "name": "read_pasteboard_reason",

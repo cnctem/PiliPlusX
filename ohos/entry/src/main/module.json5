@@ -24,7 +24,7 @@
         startWindow: "$profile:start_window",
         exported: true,
         continuable: true,
-        backgroundModes: ["audioPlayback"],
+        backgroundModes: ["audioPlayback", "dataTransfer"],
         orientation: "auto_rotation_unspecified",
         preferMultiWindowOrientation: "landscape_auto",
         skills: [
