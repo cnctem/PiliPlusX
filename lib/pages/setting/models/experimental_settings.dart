@@ -27,4 +27,40 @@ List<SettingsModel> experimentalSettings = [
     setKey: SettingBoxKey.enableStatusBarTapToTop,
     defaultVal: false,
   ),
+  NormalModel(
+    title: '应用接续',
+    subtitle: '相同华为用户播放视频时可在另一个设备的Dock栏中快速流转，无缝衔接上一个设备的视频。（始终开启）',
+    leading: const Icon(Icons.devices_other),
+    getTrailing: (theme) => IgnorePointer(
+      child: Transform.scale(
+        scale: 0.8,
+        alignment: Alignment.centerRight,
+        child: Switch(
+          value: true,
+          onChanged: (_) {},
+          thumbIcon: WidgetStateProperty.all(
+            const Icon(Icons.lock_outline_rounded),
+          ),
+        ),
+      ),
+    ),
+  ),
+    NormalModel(
+    title: '后台下载离线缓存视频',
+    subtitle: '接入鸿蒙后台任务，切换至后台不中断离线缓存视频下载（始终开启）',
+    leading: const Icon(Icons.downloading),
+    getTrailing: (theme) => IgnorePointer(
+      child: Transform.scale(
+        scale: 0.8,
+        alignment: Alignment.centerRight,
+        child: Switch(
+          value: true,
+          onChanged: (_) {},
+          thumbIcon: WidgetStateProperty.all(
+            const Icon(Icons.lock_outline_rounded),
+          ),
+        ),
+      ),
+    ),
+  ),
 ];

@@ -73,12 +73,13 @@ class _SettingPageState extends State<SettingPage> {
       icon: Icon(Icons.extension_outlined),
     ),
     _SettingsModel(
-      type: SettingType.webdavSetting,
-      icon: Icon(MdiIcons.databaseCogOutline),
+      type: SettingType.experimentalSetting,
+      subtitle: '沉浸光感导航栏、状态栏回顶、接续、后台下载等',
+      icon: Icon(Icons.science_outlined),
     ),
     _SettingsModel(
-      type: SettingType.experimentalSetting,
-      icon: Icon(Icons.science_outlined),
+      type: SettingType.webdavSetting,
+      icon: Icon(MdiIcons.databaseCogOutline),
     ),
     _SettingsModel(
       type: SettingType.about,
