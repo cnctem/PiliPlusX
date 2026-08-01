@@ -18,7 +18,6 @@ import 'package:PiliPlus/common/widgets/player_bar.dart';
 import 'package:PiliPlus/common/widgets/progress_bar/audio_video_progress_bar.dart';
 import 'package:PiliPlus/common/widgets/progress_bar/segment_progress_bar.dart';
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
-import 'package:PiliPlus/harmony_adapt/status_bar.dart';
 import 'package:PiliPlus/models/common/sponsor_block/action_type.dart';
 import 'package:PiliPlus/models/common/sponsor_block/post_segment_model.dart';
 import 'package:PiliPlus/models/common/sponsor_block/segment_type.dart';
@@ -44,6 +43,7 @@ import 'package:PiliPlus/plugin/pl_player/models/fullscreen_mode.dart';
 import 'package:PiliPlus/plugin/pl_player/models/gesture_type.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/plugin/pl_player/models/video_fit_type.dart';
+import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/app_bar_ani.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/backward_seek.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/bottom_control.dart';
@@ -72,8 +72,6 @@ import 'package:easy_debounce/easy_throttle.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:os_type/os_type.dart';
-import 'package:screen_brightness_platform_interface/constant/plugin_channel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart'
     show RenderProxyBox, SemanticsConfiguration;
@@ -84,6 +82,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:os_type/os_type.dart';
+import 'package:screen_brightness_platform_interface/constant/plugin_channel.dart';
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -971,16 +971,16 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           mainAxisSize: .min,
           children: [
             if (isFullScreen)
-              SizedBox(
+              const SizedBox(
                 width: 42,
                 height: 34,
                 child: IconButton(
                   tooltip: '切换状态栏隐藏',
-                  style: const ButtonStyle(
+                  style: ButtonStyle(
                     padding: WidgetStatePropertyAll(EdgeInsets.zero),
                   ),
-                  onPressed: StatusBar.i.toggleHide,
-                  icon: const Icon(
+                  onPressed: toggleSystemBar,
+                  icon: Icon(
                     Icons.ad_units,
                     size: 19,
                     color: Colors.white,
