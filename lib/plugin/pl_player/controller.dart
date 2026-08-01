@@ -1627,7 +1627,7 @@ class PlPlayerController with BlockConfigMixin {
       } else {
         if (PlatformUtils.isMobile) {
           if (!removeSafeArea) {
-            showSystemBar();
+            showSystemBar('controller_fullscreen_exit');
           }
           if (orientation == null && mode == .none) {
             return;
@@ -1761,7 +1761,7 @@ class PlPlayerController with BlockConfigMixin {
 
     _playerCount = 0;
     if (removeSafeArea) {
-      showSystemBar();
+      showSystemBar('controller_dispose');
     }
     danmakuController = null;
     _stopOrientationListener();

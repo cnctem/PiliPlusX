@@ -410,6 +410,17 @@ class MyApp extends StatelessWidget {
         child: child,
       );
     }
+    // child = Stack(
+    //   children: [
+    //     child,
+    //      const Center(
+    //       child: ElevatedButton(
+    //         onPressed: toggleSystemBar,
+    //         child: Text('测试'),
+    //       ),
+    //     ),
+    //   ],
+    // );
     return child;
   }
 

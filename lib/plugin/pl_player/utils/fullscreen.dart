@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
-import 'package:PiliPlus/harmony_adapt/status_bar.dart';
 import 'package:PiliPlus/utils/device_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:auto_orientation/auto_orientation.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter/services.dart'
     show SystemChrome, MethodChannel, SystemUiOverlay, DeviceOrientation;
 import 'package:os_type/os_type.dart';
@@ -113,19 +113,25 @@ Future<void>? hideSystemBar() {
     return null;
   }
   _showSystemBar = false;
-  StatusBar.i.hidden = true; // 鸿蒙状态栏由原生侧控制
   return SystemChrome.setEnabledSystemUIMode(.immersiveSticky);
 }
 
 //退出全屏显示
-Future<void>? showSystemBar() {
+Future<void>? showSystemBar(String reason) {
   if (_showSystemBar) {
     return null;
   }
   _showSystemBar = true;
-  StatusBar.i.hidden = false; // 鸿蒙状态栏由原生侧控制
+  debugPrint('showSystemBar: $reason');
   return SystemChrome.setEnabledSystemUIMode(
     Platform.isAndroid && DeviceUtils.sdkInt < 29 ? .manual : .edgeToEdge,
     overlays: SystemUiOverlay.values,
+  );
+}
+
+Future<void> toggleSystemBar() {
+  _showSystemBar = !_showSystemBar;
+  return SystemChrome.setEnabledSystemUIMode(
+    _showSystemBar ? .edgeToEdge : .immersiveSticky,
   );
 }

@@ -303,7 +303,7 @@ class _GalleryViewerState extends State<GalleryViewer>
     Future.delayed(const Duration(milliseconds: 200), _currIndex.close);
     super.dispose();
     if (_hideSystemBar) {
-      showSystemBar();
+      showSystemBar('gallery_dispose');
     }
   }
 
