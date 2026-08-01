@@ -4,7 +4,8 @@ abstract final class SettingBoxKey {
   static const String enableLGBar = 'enableLGBar',
       enableStatusBarTapToTop = 'enableStatusBarTapToTop',
       showActualVolume = 'showActualVolume',
-      enableHdsBar = 'enableHdsBar';
+      enableHdsBar = 'enableHdsBar',
+      useBuiltInFont = 'useBuiltInFont';
 
   static const String btmProgressBehavior = 'btmProgressBehavior',
       defaultVideoQa = 'defaultVideoQa',

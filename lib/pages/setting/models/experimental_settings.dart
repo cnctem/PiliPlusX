@@ -1,7 +1,9 @@
 import 'package:PiliPlus/pages/setting/models/model.dart';
+import 'package:PiliPlus/utils/extension/get_ext.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:get/get.dart';
 
 List<SettingsModel> experimentalSettings = [
   SwitchModel(
@@ -26,6 +28,14 @@ List<SettingsModel> experimentalSettings = [
     leading: Icon(Icons.vertical_align_top_outlined),
     setKey: SettingBoxKey.enableStatusBarTapToTop,
     defaultVal: false,
+  ),
+  SwitchModel(
+    title: '使用内置字体',
+    subtitle: '使用内置HarmonyOS Sans字体，与系统默认字体相同\n关闭后用系统字体，可能卡顿，未修改系统字体不建议关闭',
+    leading: const Icon(Icons.font_download_outlined),
+    setKey: SettingBoxKey.useBuiltInFont,
+    defaultVal: true,
+    onChanged: (_) => Get.updateMyAppTheme(),
   ),
   NormalModel(
     title: '应用接续',

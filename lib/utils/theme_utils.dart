@@ -77,14 +77,15 @@ abstract final class ThemeUtils {
       fontWeight = FontWeight.values[appFontWeight];
     }
 
+    late final fontFamily = Pref.useBuiltInFont ? "HarmonyOS_Sans" : "HarmonyOS Sans";
     late final textStyle = TextStyle(
       fontWeight: fontWeight,
-      fontFamily: "HarmonyOS_Sans",
+      fontFamily: fontFamily,
     );
     ThemeData themeData = ThemeData(
       colorScheme: colorScheme,
       useMaterial3: true,
-      fontFamily: "HarmonyOS_Sans",
+      fontFamily: fontFamily,
       textTheme: fontWeight == null
           ? null
           : TextTheme(
@@ -117,7 +118,7 @@ abstract final class ThemeUtils {
           fontSize: 16,
           color: colorScheme.onSurface,
           fontWeight: fontWeight,
-          fontFamily: "HarmonyOS_Sans",
+          fontFamily: fontFamily,
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
@@ -153,7 +154,7 @@ abstract final class ThemeUtils {
           fontSize: 18,
           color: colorScheme.onSurface,
           fontWeight: fontWeight,
-          fontFamily: "HarmonyOS_Sans",
+          fontFamily: fontFamily,
         ),
         backgroundColor: colorScheme.surface,
         constraints: const BoxConstraints(minWidth: 280, maxWidth: 420),

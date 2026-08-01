@@ -2,6 +2,7 @@ import 'package:PiliPlus/utils/extension/box_ext.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:PiliPlus/utils/theme_utils.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 
 abstract final class DanmakuOptions {
@@ -30,7 +31,7 @@ abstract final class DanmakuOptions {
     return DanmakuOption(
       fontSize: 15 * (notFullscreen ? danmakuFontScale : danmakuFontScaleFS),
       fontWeight: danmakuFontWeight,
-      fontFamily: "HarmonyOS_Sans",
+      fontFamily: ThemeUtils.theme.textTheme.bodyMedium?.fontFamily,
       area: danmakuShowArea,
       duration: danmakuDuration / speed,
       staticDuration: danmakuStaticDuration / speed,
