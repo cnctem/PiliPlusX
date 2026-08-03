@@ -530,7 +530,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   Widget get childWhenDisabled {
     if (PlatformUtils.isMobile && mounted && isShowing && !isFullScreen) {
-      if (videoDetailController.horizontalScreen || videoDetailController.removeSafeArea) {
+      if (videoDetailController.removeSafeArea) {
         hideSystemBar();
       }
     }
