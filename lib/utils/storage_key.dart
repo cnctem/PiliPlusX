@@ -152,6 +152,7 @@ abstract final class SettingBoxKey {
       quickShareId = 'quickShareId',
       showFsScreenshotBtn = 'showFsScreenshotBtn',
       showFsLockBtn = 'showFsLockBtn',
+      showFsLockBtnRight = 'showFsLockBtnRight',
       silentDownImg = 'silentDownImg',
       showMemberShop = 'showMemberShop',
       enablePlayAll = 'enablePlayAll',
