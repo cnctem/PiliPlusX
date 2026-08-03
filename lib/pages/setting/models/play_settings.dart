@@ -67,6 +67,13 @@ List<SettingsModel> get playSettings => [
     defaultVal: true,
   ),
   const SwitchModel(
+    title: '锁定按钮显示在右侧',
+    subtitle: '开启后锁定按钮移至右侧，与截图按钮一同垂直居中排列',
+    leading: Icon(Icons.keyboard_double_arrow_right),
+    setKey: SettingBoxKey.showFsLockBtnRight,
+    defaultVal: false,
+  ),
+  const SwitchModel(
     title: '全屏显示截图按钮',
     leading: Icon(Icons.photo_camera_outlined),
     setKey: SettingBoxKey.showFsScreenshotBtn,

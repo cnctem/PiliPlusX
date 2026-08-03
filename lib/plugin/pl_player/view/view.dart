@@ -1399,6 +1399,55 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     }
   }
 
+  Widget _buildLockBtn() {
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: Color(0x45000000),
+        borderRadius: BorderRadius.all(Radius.circular(8)),
+      ),
+      child: Obx(() {
+        final controlsLock = plPlayerController.controlsLock.value;
+        return ComBtn(
+          tooltip: controlsLock ? '解锁' : '锁定',
+          icon: controlsLock
+              ? const Icon(
+                  FontAwesomeIcons.lock,
+                  size: 15,
+                  color: Colors.white,
+                )
+              : const Icon(
+                  FontAwesomeIcons.lockOpen,
+                  size: 15,
+                  color: Colors.white,
+                ),
+          onTap: () => plPlayerController.onLockControl(!controlsLock),
+        );
+      }),
+    );
+  }
+
+  Widget _buildScreenshotBtn() {
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: Color(0x45000000),
+        borderRadius: BorderRadius.all(Radius.circular(8)),
+      ),
+      child: ComBtn(
+        tooltip: '截图',
+        icon: const Icon(
+          Icons.photo_camera,
+          size: 20,
+          color: Colors.white,
+        ),
+        onLongPress: (Platform.isAndroid || kDebugMode) &&
+                !plPlayerController.isLive
+            ? screenshotWebp
+            : null,
+        onTap: plPlayerController.takeScreenshot,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     maxWidth = widget.maxWidth;
@@ -1414,6 +1463,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       fontSize: 12,
     );
     final isLive = plPlayerController.isLive;
+    // 锁定按钮显示在右侧：与截图按钮同组垂直居中
+    final lockBtnOnRight =
+        plPlayerController.showFsLockBtnRight && plPlayerController.showFsLockBtn;
 
     final child = Stack(
       fit: StackFit.passthrough,
@@ -1855,8 +1907,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           ),
 
         if (isFullScreen || plPlayerController.isDesktopPip) ...[
-          // 锁
-          if (plPlayerController.showFsLockBtn)
+          // 锁（左侧）
+          if (plPlayerController.showFsLockBtn && !lockBtnOnRight)
             ViewSafeArea(
               right: false,
               left: !plPlayerController.removeSafeArea,
@@ -1867,40 +1919,15 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   child: Obx(
                     () => Offstage(
                       offstage: !plPlayerController.showControls.value,
-                      child: DecoratedBox(
-                        decoration: const BoxDecoration(
-                          color: Color(0x45000000),
-                          borderRadius: BorderRadius.all(Radius.circular(8)),
-                        ),
-                        child: Obx(() {
-                          final controlsLock =
-                              plPlayerController.controlsLock.value;
-                          return ComBtn(
-                            tooltip: controlsLock ? '解锁' : '锁定',
-                            icon: controlsLock
-                                ? const Icon(
-                                    FontAwesomeIcons.lock,
-                                    size: 15,
-                                    color: Colors.white,
-                                  )
-                                : const Icon(
-                                    FontAwesomeIcons.lockOpen,
-                                    size: 15,
-                                    color: Colors.white,
-                                  ),
-                            onTap: () =>
-                                plPlayerController.onLockControl(!controlsLock),
-                          );
-                        }),
-                      ),
+                      child: _buildLockBtn(),
                     ),
                   ),
                 ),
               ),
             ),
 
-          // 截图
-          if (plPlayerController.showFsScreenshotBtn)
+          // 截图 / 锁定（右侧）
+          if (plPlayerController.showFsScreenshotBtn || lockBtnOnRight)
             ViewSafeArea(
               left: false,
               right: !plPlayerController.removeSafeArea,
@@ -1908,28 +1935,21 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 () => Align(
                   alignment: Alignment.centerRight,
                   child: FractionalTranslation(
-                    translation: const Offset(-1, -0.4),
+                    translation: Offset(-1, lockBtnOnRight ? 0 : -0.4),
                     child: Offstage(
                       offstage: !plPlayerController.showControls.value,
-                      child: DecoratedBox(
-                        decoration: const BoxDecoration(
-                          color: Color(0x45000000),
-                          borderRadius: BorderRadius.all(Radius.circular(8)),
-                        ),
-                        child: ComBtn(
-                          tooltip: '截图',
-                          icon: const Icon(
-                            Icons.photo_camera,
-                            size: 20,
-                            color: Colors.white,
-                          ),
-                          onLongPress:
-                              (Platform.isAndroid || kDebugMode) && !isLive
-                              ? screenshotWebp
-                              : null,
-                          onTap: plPlayerController.takeScreenshot,
-                        ),
-                      ),
+                      child: lockBtnOnRight
+                          ? Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (plPlayerController.showFsScreenshotBtn) ...[
+                                  _buildScreenshotBtn(),
+                                  const SizedBox(height: 20),
+                                ],
+                                _buildLockBtn(),
+                              ],
+                            )
+                          : _buildScreenshotBtn(),
                     ),
                   ),
                 ),
