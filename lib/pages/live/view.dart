@@ -1,4 +1,5 @@
 import 'package:PiliPlus/common/skeleton/video_card_v.dart';
+import 'package:PiliPlus/common/widgets/native_top_spacer.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/button/icon_button.dart';
 import 'package:PiliPlus/common/widgets/button/more_btn.dart';
@@ -60,6 +61,8 @@ class _LivePageState extends State<LivePage>
           controller: controller.scrollController,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
+            // 原生顶栏启用时顶部的可滚动留白（内容可滑入顶栏下方重合）
+            const NativeTopSpacer(),
             SliverPadding(
               padding: const EdgeInsets.only(
                 top: Style.cardSpace,

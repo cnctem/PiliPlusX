@@ -43,10 +43,44 @@ abstract class HarmonyChannel {
       case 'showMine':
         _onShellTabSwitch?.call(2);
         break;
+      // ArkTS 顶栏搜索框点击 → Flutter 跳转搜索页
+      case 'onTopSearchTap':
+        _onTopSearchTap?.call();
+        break;
+      // ArkTS 顶栏私信点击 → Flutter 跳转私信页
+      case 'onTopMsgTap':
+        _onTopMsgTap?.call();
+        break;
+      // ArkTS 顶栏头像点击 → Flutter 跳个人页
+      case 'onTopMineTap':
+        _onTopMineTap?.call();
+        break;
+      // ArkTS 分类栏切换 → Flutter 切换首页 TabController
+      case 'onHomeTabChange':
+        _onHomeTabChange?.call(call.arguments['index'] as int? ?? 0);
+        break;
       default:
         break;
     }
   }
+
+  /// 顶栏搜索点击回调：由 HomePage 注册
+  static void Function()? _onTopSearchTap;
+  static set onTopSearchTap(void Function()? callback) =>
+      _onTopSearchTap = callback;
+
+  /// 顶栏私信点击回调
+  static void Function()? _onTopMsgTap;
+  static set onTopMsgTap(void Function()? callback) => _onTopMsgTap = callback;
+
+  /// 顶栏头像点击回调
+  static void Function()? _onTopMineTap;
+  static set onTopMineTap(void Function()? callback) => _onTopMineTap = callback;
+
+  /// 分类切换回调：由 HomeController 注册
+  static void Function(int index)? _onHomeTabChange;
+  static set onHomeTabChange(void Function(int)? callback) =>
+      _onHomeTabChange = callback;
 
   /// Shell 页签切换回调：由 MainController 注册
   static void Function(int index)? _onShellTabSwitch;
@@ -71,19 +105,23 @@ abstract class HarmonyChannel {
     return null;
   }
 
-  /// 向原生发送 shell 配置（Flutter 侧计算后通知 ArkTS）
-  static Future<void> setShellBars({required bool useNativeTabs}) async {
+  /// 向原生发送壳配置的公共辅助：非鸿蒙直接跳过，静默失败。
+  static Future<void> _invoke(String method, [Map<String, Object?>? args]) async {
     if (!OS.isHarmony) return;
     try {
-      _channel.invokeMethod('setShellBars', {'useNativeTabs': useNativeTabs});
+      await _channel.invokeMethod(method, args);
     } on PlatformException catch (_) {}
   }
+
+  /// 向原生发送 shell 配置（Flutter 侧计算后通知 ArkTS）
+  static Future<void> setShellBars({required bool useNativeTabs}) =>
+      _invoke('setShellBars', {'useNativeTabs': useNativeTabs});
 
   /// HDS 底栏当前是否为显示状态
   static bool _hiddenByPage = false;
   static bool get hdsBarVisible => !_hiddenByPage;
 
-  /// 控制原生 HDS 底栏的显隐（弹窗、全屏页等场景，即时无动画）
+  /// 控制原生 HDS 底栏/顶栏的显隐（弹窗、全屏页等场景）
   static Future<void> setShellBarsHidden(bool hidden, {bool retry = false}) async {
     if (!OS.isHarmony) return;
     _hiddenByPage = hidden;
@@ -100,44 +138,88 @@ abstract class HarmonyChannel {
   }
 
   /// 同步主题色到 ArkTS HdsTabs 底栏
-  static Future<void> setTabSelectedColor(String hexColor) async {
+  static Future<void> setTabSelectedColor(String hexColor) =>
+      _invoke('setTabSelectedColor', {'color': hexColor});
+
+  /// 向原生发送顶栏配置（Flutter 侧计算后通知 ArkTS）
+  static Future<void> setShellTopBar({required bool useNativeTopBar}) =>
+      _invoke('setShellTopBar', {'useNativeTopBar': useNativeTopBar});
+
+  /// 批量同步首页顶部数据到 ArkTS 原生顶栏
+  static Future<void> setHomeTopBarData({
+    required List<String> tabs,
+    required bool hideTopBar,
+    required int activeIndex,
+  }) =>
+      _invoke('setHomeTopBarData', {
+        'tabs': tabs,
+        'hideTopBar': hideTopBar,
+        'activeIndex': activeIndex,
+      });
+
+  /// 同步搜索默认词到 ArkTS Search 组件
+  static Future<void> setHomeSearchText(String text) =>
+      _invoke('setHomeSearchText', {'text': text});
+
+  /// 同步私信未读数到 ArkTS 红点
+  static Future<void> setHomeUnreadCount(String count) =>
+      _invoke('setHomeUnreadCount', {'count': count});
+
+  /// 同步头像到 ArkTS
+  static Future<void> setHomeFaceUrl(String url) =>
+      _invoke('setHomeFaceUrl', {'url': url});
+
+  /// Flutter 切分类时同步高亮到 ArkTS Tabs
+  static Future<void> setHomeTabIndex(int index) =>
+      _invoke('setHomeTabIndex', {'index': index});
+
+  /// 下滑收起/展开顶部大搜索栏
+  static Future<void> setTopBarCollapsed(bool collapsed) =>
+      _invoke('setTopBarCollapsed', {'collapsed': collapsed});
+
+  /// 同步当前底部页签是否为首页到 ArkTS（顶栏 dialog 分流判断用）
+  static Future<void> setTopBarIsHome(bool isHome) =>
+      _invoke('setTopBarIsHome', {'isHome': isHome});
+
+  /// 顶栏隐藏状态合并：路由/横屏 or 非首页页签
+  static bool _topBarHiddenByRoute = false;
+  static bool _topBarHiddenByTab = false;
+
+  /// 路由/横屏切换时整体隐藏顶栏（与底栏联动）
+  static Future<void> setTopBarHidden(bool hidden) async {
     if (!OS.isHarmony) return;
+    _topBarHiddenByRoute = hidden;
     try {
-      _channel.invokeMethod('setTabSelectedColor', {'color': hexColor});
+      _channel.invokeMethod('setTopBarHidden', {
+        'hidden': _topBarHiddenByRoute || _topBarHiddenByTab,
+      });
+    } on PlatformException catch (_) {}
+  }
+
+  /// 非首页页签（动态/我的）时隐藏顶栏（仅首页显示）
+  static Future<void> setTopBarTabHidden(bool hidden) async {
+    if (!OS.isHarmony) return;
+    _topBarHiddenByTab = hidden;
+    try {
+      _channel.invokeMethod('setTopBarHidden', {
+        'hidden': _topBarHiddenByRoute || _topBarHiddenByTab,
+      });
     } on PlatformException catch (_) {}
   }
 
   /// 同步 Flutter 页签切换到 ArkTS HdsTabs
-  static Future<void> changeTabIndex(int index) async {
-    if (!OS.isHarmony) return;
-    try {
-      _channel.invokeMethod('changeTabIndex', {'index': index});
-    } on PlatformException catch (_) {}
-  }
+  static Future<void> changeTabIndex(int index) =>
+      _invoke('changeTabIndex', {'index': index});
 
   /// 控制原生 HDS 底栏的滚动显隐（带动画）
-  static Future<void> setShellBarsScrollHidden(bool hidden) async {
-    if (!OS.isHarmony) return;
-    try {
-      _channel.invokeMethod('setShellBarsScrollHidden', {'hidden': hidden});
-    } on PlatformException catch (_) {}
-  }
+  static Future<void> setShellBarsScrollHidden(bool hidden) =>
+      _invoke('setShellBarsScrollHidden', {'hidden': hidden});
 
   /// 启动长时任务，用于下载
-  static Future<void> startBackgroundTask() async {
-    if (!OS.isHarmony) return;
-    try {
-      await _channel.invokeMethod('startBackgroundTask');
-    } on PlatformException catch (_) {}
-  }
+  static Future<void> startBackgroundTask() => _invoke('startBackgroundTask');
 
   /// 停止长时任务
-  static Future<void> stopBackgroundTask() async {
-    if (!OS.isHarmony) return;
-    try {
-      await _channel.invokeMethod('stopBackgroundTask');
-    } on PlatformException catch (_) {}
-  }
+  static Future<void> stopBackgroundTask() => _invoke('stopBackgroundTask');
 
   /// 缓存从 ArkTS 获取的 API 版本
   static int? _sdkApiVersion;
@@ -191,13 +273,8 @@ abstract class HarmonyChannel {
   }
 
   /// 获取系统当前字重设置（仅 Harmony 平台）
-  static Future<void> initSystemFontWeight() async {
-    if (!OS.isHarmony) return;
-    try {
-      // 触发 ArkTS 侧发送当前系统字重值
-      await _channel.invokeMethod('getSystemFontWeightScale');
-    } on PlatformException catch (_) {}
-  }
+  static Future<void> initSystemFontWeight() =>
+      _invoke('getSystemFontWeightScale');
 
   /// 横屏小窗的缩放比例固定值
   static const _miniWindowLandscapeScale = 0.75;

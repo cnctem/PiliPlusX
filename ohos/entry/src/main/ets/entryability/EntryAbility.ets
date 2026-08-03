@@ -16,6 +16,12 @@ const EVENT_TAB_HOME = 'EVENT_TAB_HOME';
 const EVENT_TAB_DYNAMICS = 'EVENT_TAB_DYNAMICS';
 const EVENT_TAB_MINE = 'EVENT_TAB_MINE';
 
+/// 顶栏相关事件，与 Index.ets 保持一致
+const EVENT_TOP_SEARCH = 'EVENT_TOP_SEARCH';
+const EVENT_TOP_MSG = 'EVENT_TOP_MSG';
+const EVENT_TOP_MINE = 'EVENT_TOP_MINE';
+const EVENT_HOME_TAB_CHANGE = 'EVENT_HOME_TAB_CHANGE';
+
 export default class EntryAbility extends FlutterAbility {
   harmonyChannel: HarmonyChannel = new HarmonyChannel();
   wasFloatingWindow: boolean = false;
@@ -41,6 +47,22 @@ export default class EntryAbility extends FlutterAbility {
     });
     this.context.eventHub.on(EVENT_TAB_MINE, () => {
       this.flutterChannel?.invokeMethod('showMine', null);
+    });
+    // 顶栏搜索框点击 → Flutter 打开搜索页
+    this.context.eventHub.on(EVENT_TOP_SEARCH, () => {
+      this.flutterChannel?.invokeMethod('onTopSearchTap', null);
+    });
+    // 顶栏私信点击 → Flutter 打开私信页
+    this.context.eventHub.on(EVENT_TOP_MSG, () => {
+      this.flutterChannel?.invokeMethod('onTopMsgTap', null);
+    });
+    // 顶栏头像点击 → Flutter 跳个人页
+    this.context.eventHub.on(EVENT_TOP_MINE, () => {
+      this.flutterChannel?.invokeMethod('onTopMineTap', null);
+    });
+    // 分类栏切换 → Flutter 切换首页 TabController
+    this.context.eventHub.on(EVENT_HOME_TAB_CHANGE, (index: number) => {
+      this.flutterChannel?.invokeMethod('onHomeTabChange', { index: index });
     });
   }
 
@@ -127,6 +149,20 @@ export default class EntryAbility extends FlutterAbility {
   async onWindowStageCreate(windowStage: window.WindowStage): Promise<void> {
     super.onWindowStageCreate(windowStage);
     let w = windowStage.getMainWindowSync();
+    // 窗口沉浸：布局延伸到状态栏区域，配合 ArkTS 顶部沉浸栏
+    // （Index.ets 顶栏自绘 + statusBarHeight 避让）实现“顶部沉浸光感”。
+    // 与「仅隐藏安全区、保留状态栏图标」的关键：setWindowLayoutFullScreen
+    // 让 surface 布局扩展到状态栏（隐藏安全区），同时状态栏背景设为
+    // 透明，使下方 ArkTS 顶栏光感罩透出、且系统状态栏图标仍保留可见。
+    // 注意：不能用 SystemChrome 隐藏整个状态栏，否则连同图标一起消失。
+    w.setWindowLayoutFullScreen(true).catch((err: BusinessError) => {
+      console.error(`setWindowLayoutFullScreen failed: ${err.code} ${err.message}`);
+    });
+    w.setWindowSystemBarProperties({
+      statusBarColor: '#00000000'
+    }).catch((err: BusinessError) => {
+      console.error(`setWindowSystemBarProperties failed: ${err.code} ${err.message}`);
+    });
     w.on("windowStatusChange", (type) => {
       if (type == window.WindowStatusType.FLOATING && !this.wasFloatingWindow) {
         this.harmonyChannel.onFloatingWindowChange(true);

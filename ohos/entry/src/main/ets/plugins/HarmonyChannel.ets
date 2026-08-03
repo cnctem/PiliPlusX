@@ -1,4 +1,4 @@
-﻿import { common, wantAgent, WantAgent } from "@kit.AbilityKit";
+import { common, wantAgent, WantAgent } from "@kit.AbilityKit";
 import { BusinessError } from "@kit.BasicServicesKit";
 import AbilityConstant from "@ohos.app.ability.AbilityConstant";
 import Want from "@ohos.app.ability.Want";
@@ -23,6 +23,9 @@ export default class HarmonyChannel implements FlutterPlugin {
   private bgTaskPromise: Promise<void> = Promise.resolve();
   private isBackgroundTaskRunning: boolean = false;
   private bgTaskWanted: boolean = false;
+  /// 当前底部页签是否为首页（由 Flutter 同步）。
+  /// 用于 dialog 隐藏/显示顶栏时的多级分支判断。
+  private topBarIsHome: boolean = false;
 
   /// 跨设备接续：对端 onCreate/onNewWant 收到的接续数据暂存于此，
   /// 由 Dart 侧就绪后主动拉取（getPendingContinuation），规避冷启动时
@@ -118,6 +121,15 @@ export default class HarmonyChannel implements FlutterPlugin {
         const hidden: boolean = call.argument('hidden') ?? false;
         console.log(`is set tabs hidden: ${hidden}`);
         AppStorage.setOrCreate('shellBarsHidden', hidden);
+        // 沉浸光感顶栏与底栏共用此显隐信号：底栏直接隐藏，
+        // 顶栏按「是否首页 + 窗口宽高比」在 ArkTS 侧多级分支。
+        this.syncTopBarVisibility(hidden);
+        result.success(true);
+        break;
+      }
+      case "setTopBarIsHome": {
+        this.topBarIsHome = call.argument('isHome') ?? false;
+        console.log(`is top bar home: ${this.topBarIsHome}`);
         result.success(true);
         break;
       }
@@ -139,6 +151,58 @@ export default class HarmonyChannel implements FlutterPlugin {
       case "setTabSelectedColor": {
         const color: string = call.argument('color') ?? '#3367D6';
         AppStorage.setOrCreate('tabSelectedColor', color);
+        result.success(true);
+        break;
+      }
+      case "setShellTopBar": {
+        const useNativeTopBar: boolean = call.argument('useNativeTopBar') ?? false;
+        AppStorage.setOrCreate('useNativeTopBar', useNativeTopBar);
+        result.success(true);
+        break;
+      }
+      case "setHomeTopBarData": {
+        const tabs: string[] = call.argument('tabs') ?? [];
+        const hideTopBar: boolean = call.argument('hideTopBar') ?? false;
+        const activeIndex: number = call.argument('activeIndex') ?? 0;
+        AppStorage.setOrCreate('homeTabs', tabs);
+        AppStorage.setOrCreate('homeHideTopBar', hideTopBar);
+        AppStorage.setOrCreate('homeActiveTabIndex', activeIndex);
+        result.success(true);
+        break;
+      }
+      case "setHomeSearchText": {
+        const text: string = call.argument('text') ?? '';
+        AppStorage.setOrCreate('homeSearchText', text);
+        result.success(true);
+        break;
+      }
+      case "setHomeUnreadCount": {
+        const count: string = call.argument('count') ?? '';
+        AppStorage.setOrCreate('homeUnreadCount', count);
+        result.success(true);
+        break;
+      }
+      case "setHomeFaceUrl": {
+        const url: string = call.argument('url') ?? '';
+        AppStorage.setOrCreate('homeFaceUrl', url);
+        result.success(true);
+        break;
+      }
+      case "setHomeTabIndex": {
+        const index: number = call.argument('index') ?? 0;
+        AppStorage.setOrCreate('homeActiveTabIndex', index);
+        result.success(true);
+        break;
+      }
+      case "setTopBarCollapsed": {
+        const collapsed: boolean = call.argument('collapsed') ?? false;
+        AppStorage.setOrCreate('topBarCollapsed', collapsed);
+        result.success(true);
+        break;
+      }
+      case "setTopBarHidden": {
+        const hidden: boolean = call.argument('hidden') ?? false;
+        AppStorage.setOrCreate('topBarHidden', hidden);
         result.success(true);
         break;
       }
@@ -213,6 +277,42 @@ export default class HarmonyChannel implements FlutterPlugin {
         }
       }
     });
+  }
+
+  /**
+   * 沉浸光感顶栏与底部导航栏共用 dialog 隐藏/显示信号时的多级分流。
+   *
+   * 宽高比 = 窗口宽 / 窗口高（Index.ets 已随窗口尺寸变化维护 winWidth/winHeight）：
+   * - 当前不是首页：不处理（顶栏仅首页显示）
+   * - 隐藏 + 宽高比 < 9/16（竖长屏）：不处理
+   * - 隐藏 + 宽高比 9/16 ~ 1:1：改为「收起」顶栏
+   * - 隐藏 + 宽高比 ≥ 1:1（正方/横屏）：隐藏顶栏
+   * - 显示 + 宽高比 9/16 ~ 1:1：放下 + 显示顶栏
+   * - 显示 + 宽高比 9/16 ~ 1:1 以外：仅显示顶栏
+   */
+  private syncTopBarVisibility(hidden: boolean): void {
+    // 顶栏未启用或不处于首页时不处理
+    if (AppStorage.get('useNativeTopBar') !== true || !this.topBarIsHome) {
+      return;
+    }
+    const width = AppStorage.get('winWidth') as number ?? 0;
+    const height = AppStorage.get('winHeight') as number ?? 0;
+    if (width <= 0 || height <= 0) return; // 尚未拿到窗口尺寸
+    const aspect = width / height;
+    const portrait = aspect < 1.0;
+    const tall = aspect < 9 / 16; // 竖长屏
+    if (hidden) {
+      if (tall) return; // 竖长屏不处理
+      if (portrait) {
+        AppStorage.setOrCreate('topBarCollapsed', true); // 9/16 ~ 1:1：收起
+      } else {
+        AppStorage.setOrCreate('topBarHidden', true); // ≥ 1:1：隐藏
+      }
+    } else {
+      // 显示：先放下（若此前收起过），再显示
+      AppStorage.setOrCreate('topBarCollapsed', false);
+      AppStorage.setOrCreate('topBarHidden', false);
+    }
   }
 
   public changeTabIndex(index: number): void {

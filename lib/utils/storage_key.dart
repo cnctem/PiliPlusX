@@ -5,6 +5,7 @@ abstract final class SettingBoxKey {
       enableStatusBarTapToTop = 'enableStatusBarTapToTop',
       showActualVolume = 'showActualVolume',
       enableHdsBar = 'enableHdsBar',
+      enableHdsTopBar = 'enableHdsTopBar',
       useBuiltInFont = 'useBuiltInFont';
 
   static const String btmProgressBehavior = 'btmProgressBehavior',

@@ -40,8 +40,15 @@ class ShellBarsObserver extends NavigatorObserver {
   }
 
   void _sync() {
-    HarmonyChannel.setShellBarsHidden(
-      _activeRoutes.length > 1 || _orientationHidden,
-    );
+    // 底栏隐藏条件：页面覆盖（无弹层）或弹层覆盖（PopupRoute 计入）或横屏。
+    // 底栏 + 顶栏宽高比分流共用此信号：dialog/bottomSheet/popupmenu 弹出时
+    // 也触发，顶栏按「首页 + 宽高比」由 ArkTS syncTopBarVisibility 收起/隐藏。
+    final hasOverlay = _activeRoutes.length > 1 || _orientationHidden;
+    HarmonyChannel.setShellBarsHidden(hasOverlay);
+    // 顶栏「强制隐藏」仅针对页面覆盖（PageRoute：如视频页/设置页）与横屏；
+    // 弹层（PopupRoute：dialog/bottomSheet/popupmenu）不计入，避免顶栏被
+    // 直接隐藏而绕过宽高比分流。
+    final hasPageOverlay = _activeRoutes.whereType<PageRoute>().length > 1;
+    HarmonyChannel.setTopBarHidden(hasPageOverlay || _orientationHidden);
   }
 }

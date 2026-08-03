@@ -14,6 +14,14 @@ List<SettingsModel> experimentalSettings = [
     defaultVal: false,
     onChanged: (_) => SmartDialog.showToast("重启生效"),
   ),
+  SwitchModel(
+    title: '鸿蒙沉浸光感顶栏',
+    subtitle: '使用鸿蒙原生顶部沉浸栏（大搜索栏+标签页）\n与底栏开关独立控制，仅在鸿蒙7及以上支持\n不支持的平台会隐藏原生顶栏',
+    leading: const Icon(Icons.blur_on_outlined),
+    setKey: SettingBoxKey.enableHdsTopBar,
+    defaultVal: false,
+    onChanged: (_) => SmartDialog.showToast("重启生效"),
+  ),
   const SwitchModel(
     title: '显示实际百分比音量',
     subtitle:

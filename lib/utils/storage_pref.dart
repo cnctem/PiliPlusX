@@ -763,6 +763,9 @@ abstract final class Pref {
   static bool get enableHdsBar =>
       _setting.get(SettingBoxKey.enableHdsBar, defaultValue: false);
 
+  static bool get enableHdsTopBar =>
+      _setting.get(SettingBoxKey.enableHdsTopBar, defaultValue: false);
+
   static bool get enableStatusBarTapToTop =>
       _setting.get(SettingBoxKey.enableStatusBarTapToTop, defaultValue: false);
 

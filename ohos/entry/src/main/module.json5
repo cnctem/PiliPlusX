@@ -4,7 +4,7 @@
     type: "entry",
     description: "$string:module_desc",
     mainElement: "EntryAbility",
-    deviceTypes: ["phone", "2in1", "tablet", "car"],
+    deviceTypes: ["phone", "2in1", "tablet"],
     deliveryWithInstall: true,
     installationFree: false,
     pages: "$profile:main_pages",

@@ -1,25 +1,38 @@
-
 import common from '@ohos.app.ability.common';
 import window from '@ohos.window';
 import { FlutterPage } from '@ohos/flutter_ohos';
-import { SymbolGlyphModifier } from '@kit.ArkUI';
+import { SymbolGlyphModifier, uiMaterial } from '@kit.ArkUI';
 import { HdsAnimationMode, hdsMaterial, HdsTabs, HdsTabsController } from '@kit.UIDesignKit';
 import { Available } from '@kit.BasicServicesKit';
 
 let storage = LocalStorage.getShared();
-const EVENT_BACK_PRESS = 'EVENT_BACK_PRESS';
-const TAG = 'Index';
 
-// 底栏相关事件，由 EntryAbility 的 eventHub 监听
+const TAG = 'Index';
+const EVENT_BACK_PRESS = 'EVENT_BACK_PRESS';
 const EVENT_TAB_HOME = 'EVENT_TAB_HOME';
 const EVENT_TAB_DYNAMICS = 'EVENT_TAB_DYNAMICS';
 const EVENT_TAB_MINE = 'EVENT_TAB_MINE';
 const EVENT_CHANGE_TAB = 'EVENT_CHANGE_TAB';
+const EVENT_TOP_SEARCH = 'EVENT_TOP_SEARCH';
+const EVENT_TOP_MSG = 'EVENT_TOP_MSG';
+const EVENT_TOP_MINE = 'EVENT_TOP_MINE';
+const EVENT_HOME_TAB_CHANGE = 'EVENT_HOME_TAB_CHANGE';
 
 const NAV_UNSELECTED = $r('sys.color.comp_focused_primary');
-
 const BOTTOM_NORMAL_AVOID_AREA_VALUE = 1;
 const BOTTOM_SPECIAL_AVOID_AREA_VALUE = 12;
+const TOP_BAR_BLUR_RADIUS = 18;
+const TOP_BAR_FRACTION_STOPS: [number, number][] = [[0,0],[0.9,0.08],[1,0.4],[1,1]];
+const TOP_BAR_COLLAPSED_HEIGHT = 80;
+const TOP_BAR_EXPANDED_HEIGHT = 144;
+
+function topBarMaterial(interactive: boolean): uiMaterial.ImmersiveMaterial {
+  return new uiMaterial.ImmersiveMaterial({
+    style: uiMaterial.ImmersiveStyle.ULTRA_THIN,
+    interactive: interactive,
+    lightEffect: {}
+  });
+}
 
 function tabSymbol(symbol: Resource, color: ResourceColor): SymbolGlyphModifier {
   return new SymbolGlyphModifier(symbol)
@@ -30,53 +43,81 @@ function tabSymbol(symbol: Resource, color: ResourceColor): SymbolGlyphModifier 
 @Entry(storage)
 @Component
 struct Index {
-  private context = getContext(this) as common.UIAbilityContext
+  private context = getContext(this) as common.UIAbilityContext;
   @LocalStorageLink('viewId') viewId: string = "";
   @StorageLink('useNativeTabs') useNativeTabs: boolean = false;
-  // 页面/弹窗切换时的即时显隐（无动画，由 Visibility 控制）
   @StorageLink('shellBarsHidden') shellBarsHidden: boolean = false;
-  // 滚动时的动画显隐（有动画，由 @Watch 驱动）
   @StorageLink('__scrollHidden') @Watch('onScrollHiddenChanged') shellBarsScrollHidden: boolean = false;
-  // 底栏选中色（由 Flutter 侧主题色同步）
   @StorageLink('tabSelectedColor') navSelected: string = '#3367D6';
-
-  // 引擎的视口尺寸只跟随 XComponent surface 的 OnSurfaceChanged，而系统
-  // 程序化改窗口（如全景多窗全屏走的 enableLandscapeMultiWindow）不会触发
-  // ArkUI 重布局，surface 停在旧尺寸，Flutter 按旧窗口尺寸布局，右/下出现
-  // 大片白区（手动拖动窗口会强制重布局所以能恢复）。这里监听窗口尺寸并把
-  // 它显式绑定到根容器，用状态变化驱动重布局，让 surface 跟上窗口。
+  @StorageLink('useNativeTopBar') useNativeTopBar: boolean = false;
+  @StorageLink('topBarHidden') topBarHidden: boolean = false;
+  @StorageLink('topBarCollapsed') topBarCollapsed: boolean = false;
+  @StorageLink('homeHideTopBar') homeHideTopBar: boolean = false;
+  @StorageLink('homeSearchText') homeSearchText: string = '';
+  @StorageLink('homeUnreadCount') homeUnreadCount: string = '';
+  @StorageLink('homeFaceUrl') homeFaceUrl: string = '';
+  @StorageLink('homeTabs') homeTabs: string[] = [];
+  @StorageLink('homeActiveTabIndex') @Watch('onHomeTabIndexChanged') homeActiveTabIndex: number = 0;
+  @State statusBarHeight: number = 0;
+  @State categoryCurrentIndex: number = 0;
   @State winWidth: number = 0;
   @State winHeight: number = 0;
+  @State bottomAvoidAreaHeight: number = 0;
+  private categoryController: TabsController = new TabsController();
+  private controller: HdsTabsController = new HdsTabsController();
   private win: window.Window | null = null;
   private sizeCallback: ((size: window.Size) => void) | null = null;
   private rectCallback: ((opts: window.RectChangeOptions) => void) | null = null;
-  // HdsTabs的controller
-  private controller: HdsTabsController = new HdsTabsController();
 
-  // 当前底部避让区变量
-  @State bottomAvoidAreaHeight: number = 0;
+  onHomeTabIndexChanged(): void {
+    if (this.homeActiveTabIndex >= 0 && this.homeActiveTabIndex < this.homeTabs.length) {
+      this.categoryCurrentIndex = this.homeActiveTabIndex;
+      this.categoryController.changeIndex(this.homeActiveTabIndex);
+    }
+  }
+
+  onScrollHiddenChanged(): void {
+    if (!this.useNativeTabs || this.shellBarsHidden) {
+      return;
+    }
+    if (this.shellBarsScrollHidden) {
+      this.controller.applyHideAnimation(HdsAnimationMode.SCROLL_ANIMATION);
+    } else {
+      this.controller.applyShowAnimation(HdsAnimationMode.SCROLL_ANIMATION);
+    }
+  }
 
   private applySize(widthPx: number, heightPx: number): void {
     this.winWidth = px2vp(widthPx);
     this.winHeight = px2vp(heightPx);
+    // 同步到 AppStorage，供 HarmonyChannel.syncTopBarWithShell
+    // 按窗口宽高比分流顶栏（收起/隐藏/显示）
+    AppStorage.setOrCreate('winWidth', this.winWidth);
+    AppStorage.setOrCreate('winHeight', this.winHeight);
   }
 
   aboutToAppear(): void {
-    // Flutter 发起的页签切换 → 同步 ArkTS HdsTabs 高亮
     this.context.eventHub.on(EVENT_CHANGE_TAB, (index: number) => {
       this.controller.changeIndex(index);
     });
 
     window.getLastWindow(this.context).then((w: window.Window) => {
       this.win = w;
+      let topAvoidArea = w.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM);
+      this.statusBarHeight = px2vp(topAvoidArea.topRect.height);
+      w.on('avoidAreaChange', (data) => {
+        if (data.type === window.AvoidAreaType.TYPE_SYSTEM) {
+          this.statusBarHeight = px2vp(data.area.topRect.height);
+        }
+      });
+
       const rect = w.getWindowProperties().windowRect;
       this.applySize(rect.width, rect.height);
       this.sizeCallback = (size: window.Size) => {
         this.applySize(size.width, size.height);
       };
       w.on('windowSizeChange', this.sizeCallback);
-      // windowSizeChange 对部分程序化窗口调整不回调，windowRectChange
-      // (@since 12) 覆盖移动/缩放全部来源，双保险。
+
       try {
         this.rectCallback = (opts: window.RectChangeOptions) => {
           this.applySize(opts.rect.width, opts.rect.height);
@@ -88,13 +129,15 @@ struct Index {
 
       let windowBottomAvoidArea = w.getWindowAvoidArea(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR);
       let uiContext = this.getUIContext();
-      // 如果下方有避让区，则只需添加正常情况下的避让offset，反而添加特殊情况下的避让offset，保证悬浮窗模式下的底栏可读性
-      this.bottomAvoidAreaHeight = windowBottomAvoidArea.bottomRect.height === 0 ? BOTTOM_SPECIAL_AVOID_AREA_VALUE : (uiContext.px2vp(windowBottomAvoidArea.bottomRect.height) + BOTTOM_NORMAL_AVOID_AREA_VALUE);
+      this.bottomAvoidAreaHeight = windowBottomAvoidArea.bottomRect.height === 0
+        ? BOTTOM_SPECIAL_AVOID_AREA_VALUE
+        : (uiContext.px2vp(windowBottomAvoidArea.bottomRect.height) + BOTTOM_NORMAL_AVOID_AREA_VALUE);
 
       w.on('avoidAreaChange', (data) => {
         if (data.type === window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR) {
-          // 如果下方有避让区，则只需添加正常情况下的避让offset，反而添加特殊情况下的避让offset，保证悬浮窗模式下的底栏可读性
-          this.bottomAvoidAreaHeight = data.area.bottomRect.height === 0 ? BOTTOM_SPECIAL_AVOID_AREA_VALUE : (uiContext.px2vp(data.area.bottomRect.height) + BOTTOM_NORMAL_AVOID_AREA_VALUE);
+          this.bottomAvoidAreaHeight = data.area.bottomRect.height === 0
+            ? BOTTOM_SPECIAL_AVOID_AREA_VALUE
+            : (uiContext.px2vp(data.area.bottomRect.height) + BOTTOM_NORMAL_AVOID_AREA_VALUE);
         }
       });
     }).catch((err: Object) => {
@@ -119,23 +162,171 @@ struct Index {
     }
   }
 
-  // 滚动时的动画显隐回调
-  onScrollHiddenChanged(): void {
-    if (!this.useNativeTabs || this.shellBarsHidden) {
-      return;
-    }
-    if (this.shellBarsScrollHidden) {
-      this.controller.applyHideAnimation(HdsAnimationMode.SCROLL_ANIMATION);
-    } else {
-      this.controller.applyShowAnimation(HdsAnimationMode.SCROLL_ANIMATION);
-    }
-  }
-
   @Builder
   emptyTabContent() {
     Column()
       .width('100%')
       .height('100%')
+  }
+
+  @Builder
+  categoryTabBuilder(index: number, name: string) {
+    Text(name)
+      .fontSize(15)
+      .fontWeight(this.categoryCurrentIndex === index ? FontWeight.Bolder : FontWeight.Medium)
+      .fontColor(this.categoryCurrentIndex === index ? this.navSelected : NAV_UNSELECTED)
+      .height(28)
+      .margin({
+        left: index === 0 ? 8 : 3,
+        right: index === this.homeTabs.length - 1 ? 8 : 3
+      })
+      .padding({ left: 15, right: 15 })
+  }
+
+  @Builder
+  circleIconButton(icon: Resource, size: number, iconSize: number, onClick: () => void) {
+    Stack() {
+      SymbolGlyph(icon)
+        .fontSize(iconSize)
+        .width(iconSize)
+        .height(iconSize)
+        .fontColor([this.navSelected])
+        .align(Alignment.Center)
+    }
+    .width(size)
+    .height(size)
+    .borderRadius(size / 2)
+    .systemMaterial(topBarMaterial(true))
+    .onClick(onClick)
+  }
+
+  @Builder
+  msgButton() {
+    Stack() {
+      this.circleIconButton($r('sys.symbol.bell'), 44, 22, () => {
+        this.context.eventHub.emit(EVENT_TOP_MSG);
+      })
+      if (this.homeUnreadCount !== '') {
+        Text(this.homeUnreadCount)
+          .fontSize(9)
+          .fontColor(Color.White)
+          .padding({ left: 5, right: 5, top: 1, bottom: 1 })
+          .backgroundColor(this.navSelected)
+          .borderRadius(8)
+          .offset({ x: 6, y: -8 })
+      }
+    }
+    .width(44)
+    .height(44)
+  }
+
+  @Builder
+  avatarButton() {
+    if (this.homeFaceUrl !== '') {
+      Image(this.homeFaceUrl)
+        .width(40)
+        .height(40)
+        .borderRadius(20)
+        .onClick(() => {
+          this.context.eventHub.emit(EVENT_TOP_MINE);
+        })
+    } else {
+      this.circleIconButton($r('sys.symbol.person_crop_circle_fill'), 44, 26, () => {
+        this.context.eventHub.emit(EVENT_TOP_MINE);
+      })
+    }
+  }
+
+  @Builder
+  homeTopBar() {
+    RelativeContainer() {
+      // 渐变模糊底层
+      Column() {}
+        .constraintSize({ maxHeight: TOP_BAR_EXPANDED_HEIGHT })
+        .linearGradientBlur(TOP_BAR_BLUR_RADIUS, {
+          fractionStops: TOP_BAR_FRACTION_STOPS,
+          direction: GradientDirection.Top
+        })
+        .alignRules({
+          top: { anchor: 'topBarContent', align: VerticalAlign.Top },
+          bottom: { anchor: 'topBarContent', align: VerticalAlign.Bottom },
+          left: { anchor: 'topBarContent', align: HorizontalAlign.Start },
+          right: { anchor: 'topBarContent', align: HorizontalAlign.End }
+        })
+        .id('topBarBg')
+        .hitTestBehavior(HitTestMode.Transparent)
+
+      Column() {
+        if (!(this.homeHideTopBar && this.topBarCollapsed)) {
+          Row({ space: 8 }) {
+            Search({
+              value: this.homeSearchText,
+              placeholder: '搜索',
+            })
+              .cancelButton({
+                style: CancelButtonStyle.INVISIBLE,
+              })
+              .focusable(false)
+              .enableKeyboardOnFocus(false)
+              .searchIcon(new SymbolGlyphModifier($r('sys.symbol.magnifyingglass'))
+                .fontColor([this.navSelected])
+                .fontSize(16))
+              .placeholderColor($r('app.color.placeholder_text'))
+              .placeholderFont({ size: 16, weight: 600})
+              .fontColor($r('app.color.placeholder_text'))
+              .textFont({ size: 16, weight: 600})
+              .backgroundColor(Color.Transparent)
+              .borderRadius(22)
+              .layoutWeight(1)
+              .height(44)
+              .systemMaterial(topBarMaterial(true))
+              .onClick(() => {
+                this.context.eventHub.emit(EVENT_TOP_SEARCH);
+              })
+            this.msgButton()
+            this.avatarButton()
+          }
+          .width('100%')
+          .padding({ left: 14, right: 14, top: 0, bottom: 0 })
+          .transition(TransitionEffect.asymmetric(
+            TransitionEffect.translate({ y: -28 }).combine(TransitionEffect.OPACITY)
+              .animation({ duration: 220, curve: Curve.EaseOut }),
+            TransitionEffect.translate({ y: -28 }).combine(TransitionEffect.OPACITY)
+              .animation({ duration: 220, curve: Curve.EaseIn })
+          ))
+        }
+        if (this.homeTabs.length > 1) {
+          Stack({ alignContent: Alignment.TopStart }) {
+            Tabs({ barPosition: BarPosition.Start, controller: this.categoryController }) {
+              ForEach(this.homeTabs, (tab: string, index: number) => {
+                TabContent() {
+                  this.emptyTabContent()
+                }
+                .tabBar(this.categoryTabBuilder(index, tab))
+              }, (tab: string, index: number) => index + '_' + tab)
+            }
+            .barMode(BarMode.Scrollable)
+            .fadingEdge(false)
+            .scrollable(false)
+            .width('100%')
+            .height(32)
+            .onTabBarClick((index: number) => {
+              this.context.eventHub.emit(EVENT_HOME_TAB_CHANGE, index);
+              this.categoryCurrentIndex = index;
+            })
+          }
+          .width('100%')
+        }
+      }
+      .width('100%')
+      .padding({ top: this.statusBarHeight - 5 })
+      .id('topBarContent')
+      .hitTestBehavior(HitTestMode.Default)
+    }
+    .height(this.homeHideTopBar && this.topBarCollapsed ? TOP_BAR_COLLAPSED_HEIGHT :TOP_BAR_EXPANDED_HEIGHT)
+    .width('100%')
+    .hitTestBehavior(HitTestMode.Default)
+    .visibility(this.topBarHidden ? Visibility.None : Visibility.Visible)
   }
 
   @Builder
@@ -175,7 +366,6 @@ struct Index {
       }))
     }
     .onTabBarClick((index: number) => {
-      // 通知 EntryAbility 切换 Flutter 页面
       if (index === 0) {
         this.context.eventHub.emit(EVENT_TAB_HOME);
       } else if (index === 1) {
@@ -184,7 +374,7 @@ struct Index {
         this.context.eventHub.emit(EVENT_TAB_MINE);
       }
     })
-    .scrollable(false) // tab不可滑动
+    .scrollable(false)
     .barOverlap(true)
     .barPosition(BarPosition.End)
     .vertical(false)
@@ -199,19 +389,26 @@ struct Index {
   }
 
   build() {
-    Stack({ alignContent: Alignment.Bottom }) {
-      FlutterPage({ viewId: this.viewId })
-        .width('100%')
-        .height('100%')
-      if (this.useNativeTabs) {
-        Column() {
-          this.hdsMainTabs()
+    Stack({ alignContent: Alignment.TopStart }) {
+      Stack({ alignContent: Alignment.Bottom }) {
+        FlutterPage({ viewId: this.viewId })
+          .width('100%')
+          .height('100%')
+        if (this.useNativeTabs) {
+          Column() {
+            this.hdsMainTabs()
+          }
+          .hitTestBehavior(HitTestMode.Transparent)
+          .width('100%')
+          .height('100%')
+          .visibility(this.shellBarsHidden ? Visibility.None : Visibility.Visible)
         }
-        .hitTestBehavior(HitTestMode.Transparent) // 透传触控操作，防止影响flutter层触摸
-        .width('100%')
-        .height('100%')
-        // 页面/弹窗切换时即时隐藏，无动画
-        .visibility(this.shellBarsHidden ? Visibility.None : Visibility.Visible)
+      }
+      .width('100%')
+      .height('100%')
+
+      if (this.useNativeTopBar) {
+        this.homeTopBar()
       }
     }
     .width(this.winWidth > 0 ? this.winWidth : '100%')

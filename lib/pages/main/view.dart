@@ -49,11 +49,10 @@ class _MainAppState extends PopScopeState<MainApp>
   final _mainController = Get.put(MainController());
   late final _setting = GStorage.setting;
   late EdgeInsets _padding;
-  /// 缓存当前主题主色值，供 ever 回调读取
-  int _primaryColorValue = 0;
   late ThemeData theme;
   Brightness? _brightness;
   Worker? _nativeTabsWorker;
+  Worker? _nativeTopBarWorker;
 
   @override
   bool get initCanPop => false;
@@ -74,11 +73,13 @@ class _MainAppState extends PopScopeState<MainApp>
       MyApp.shellBarsObserver.onOrientationChanged(
         _mainController.useBottomNav,
       );
-      if (_primaryColorValue != 0) {
-        HarmonyChannel.setTabSelectedColor(
-          '#${_primaryColorValue.toRadixString(16).padLeft(8, '0').substring(2)}',
-        );
-      }
+      _syncPrimaryColor();
+    });
+    // 仅启用沉浸光感顶栏（未启用底栏）时，也要补发主题色：
+    // 顶栏的分类高亮、图标颜色均读取 tabSelectedColor。
+    _nativeTopBarWorker = ever(_mainController.useNativeTopBar, (useNativeTopBar) {
+      if (!mounted || !useNativeTopBar) return;
+      _syncPrimaryColor();
     });
     if (PlatformUtils.isDesktop) {
       windowManager
@@ -118,14 +119,9 @@ class _MainAppState extends PopScopeState<MainApp>
         _mainController.useBottomNav,
       );
     }
-    // 缓存主题主色，供 ever 回调在 useNativeTabs 异步就绪后补发
-    _primaryColorValue = Theme.of(context).colorScheme.primary.value;
-    // 同步主题色到 ArkTS HdsTabs 底栏
-    if (_mainController.useNativeTabs.value) {
-      HarmonyChannel.setTabSelectedColor(
-        '#${_primaryColorValue.toRadixString(16).padLeft(8, '0').substring(2)}',
-      );
-    }
+    // 总是同步主题色到 ArkTS（底栏/顶栏共用 tabSelectedColor），
+    // 不依赖 useNativeTabs：仅启用顶栏时也需加载主题色。
+    _syncPrimaryColor();
   }
 
   @override
@@ -154,9 +150,18 @@ class _MainAppState extends PopScopeState<MainApp>
     }
   }
 
+  /// 将当前主题主色同步到 ArkTS（底栏选中色/顶栏高亮色共用）
+  void _syncPrimaryColor() {
+    final primary = theme.colorScheme.primary;
+    HarmonyChannel.setTabSelectedColor(
+      '#${primary.value.toRadixString(16).padLeft(8, '0').substring(2)}',
+    );
+  }
+
   @override
   void dispose() {
     _nativeTabsWorker?.dispose();
+    _nativeTopBarWorker?.dispose();
     if (PlatformUtils.isDesktop) {
       trayManager.removeListener(this);
       windowManager.removeListener(this);
@@ -323,97 +328,93 @@ class _MainAppState extends PopScopeState<MainApp>
     }
   }
 
-  Widget get _bottomNav {
-    if (_mainController.navigationBars.length <= 1) {
-      return const SizedBox.shrink();
-    }
-    // 横屏侧栏布局下不显示底栏
-    if (!_mainController.useBottomNav) {
-      return const SizedBox.shrink();
-    }
-    // 开启鸿蒙沉浸光感后需返回空组件（底栏由原生 HDS 渲染）。
-    // 这里是非响应式读取，异步就绪后的重建由 initState 中的 _nativeTabsWorker
-    // 触发；上面的提前返回分支不读 Rx，不能改成 Obx 包裹（会抛 ObxError）
-    if (_mainController.useNativeTabs.value) {
-      return const SizedBox.shrink();
-    }
-    final Widget bottomNav;
-    if (_mainController.floatingNavBar) {
-      bottomNav = Obx(
-        () => FloatingNavigationBar(
-          onDestinationSelected: _mainController.setIndex,
-          selectedIndex: _mainController.selectedIndex.value,
-          destinations: _mainController.navigationBars
-              .map(
-                (e) => FloatingNavigationDestination(
-                  label: e.label,
-                  icon: _buildIcon(type: e),
-                  selectedIcon: _buildIcon(type: e, selected: true),
-                ),
-              )
-              .toList(),
-        ),
-      );
-    } else if (_mainController.enableMYBar) {
-      bottomNav = Obx(
-        () => NavigationBar(
-          maintainBottomViewPadding: true,
-          onDestinationSelected: _mainController.setIndex,
-          selectedIndex: _mainController.selectedIndex.value,
-          destinations: _mainController.navigationBars
-              .map(
-                (e) => NavigationDestination(
-                  label: e.label,
-                  icon: _buildIcon(type: e),
-                  selectedIcon: _buildIcon(type: e, selected: true),
-                ),
-              )
-              .toList(),
-        ),
-      );
-    } else {
-      bottomNav = Obx(
-        () => BottomNavigationBar(
-          currentIndex: _mainController.selectedIndex.value,
-          onTap: _mainController.setIndex,
-          iconSize: 16,
-          selectedFontSize: 12,
-          unselectedFontSize: 12,
-          type: .fixed,
-          items: _mainController.navigationBars
-              .map(
-                (e) => BottomNavigationBarItem(
-                  label: e.label,
-                  icon: _buildIcon(type: e),
-                  activeIcon: _buildIcon(type: e, selected: true),
-                ),
-              )
-              .toList(),
-        ),
-      );
-    }
-
-    if (_mainController.hideBottomBar) {
-      if (_mainController.barOffset case final barOffset?) {
-        return Obx(
-          () => FractionalTranslation(
-            translation: Offset(
-              0.0,
-              barOffset.value / Style.topBarHeight,
-            ),
-            child: bottomNav,
+  Widget? get _bottomNav {
+    Widget? bottomNav;
+    if (_mainController.navigationBars.length > 1) {
+      // 开启鸿蒙沉浸光感后无需 Flutter 底栏（由原生 HDS 渲染）。
+      // 这里是非响应式读取，异步就绪后的重建由 initState 中的
+      // _nativeTabsWorker 触发；该提前返回分支不读 Rx，不能改成
+      // Obx 包裹（会抛 ObxError）
+      if (_mainController.useNativeTabs.value) {
+        return null;
+      }
+      if (_mainController.floatingNavBar) {
+        bottomNav = Obx(
+          () => FloatingNavigationBar(
+            onDestinationSelected: _mainController.setIndex,
+            selectedIndex: _mainController.selectedIndex.value,
+            destinations: _mainController.navigationBars
+                .map(
+                  (e) => FloatingNavigationDestination(
+                    label: e.label,
+                    icon: _buildIcon(type: e),
+                    selectedIcon: _buildIcon(type: e, selected: true),
+                  ),
+                )
+                .toList(),
+          ),
+        );
+      } else if (_mainController.enableMYBar) {
+        bottomNav = Obx(
+          () => NavigationBar(
+            maintainBottomViewPadding: true,
+            onDestinationSelected: _mainController.setIndex,
+            selectedIndex: _mainController.selectedIndex.value,
+            destinations: _mainController.navigationBars
+                .map(
+                  (e) => NavigationDestination(
+                    label: e.label,
+                    icon: _buildIcon(type: e),
+                    selectedIcon: _buildIcon(type: e, selected: true),
+                  ),
+                )
+                .toList(),
+          ),
+        );
+      } else {
+        bottomNav = Obx(
+          () => BottomNavigationBar(
+            currentIndex: _mainController.selectedIndex.value,
+            onTap: _mainController.setIndex,
+            iconSize: 16,
+            selectedFontSize: 12,
+            unselectedFontSize: 12,
+            type: .fixed,
+            items: _mainController.navigationBars
+                .map(
+                  (e) => BottomNavigationBarItem(
+                    label: e.label,
+                    icon: _buildIcon(type: e),
+                    activeIcon: _buildIcon(type: e, selected: true),
+                  ),
+                )
+                .toList(),
           ),
         );
       }
-      if (_mainController.showBottomBar case final showBottomBar?) {
-        return Obx(
-          () => AnimatedSlide(
-            curve: Curves.easeInOutCubicEmphasized,
-            duration: const Duration(milliseconds: 500),
-            offset: Offset(0, showBottomBar.value ? 0 : 1),
-            child: bottomNav,
-          ),
-        );
+
+      if (_mainController.hideBottomBar) {
+        if (_mainController.barOffset case final barOffset?) {
+          return Obx(
+            () => FractionalTranslation(
+              translation: Offset(
+                0.0,
+                barOffset.value / Style.topBarHeight,
+              ),
+              child: bottomNav,
+            ),
+          );
+        }
+        if (_mainController.showBottomBar case final showBottomBar?) {
+          return Obx(
+            () => AnimatedSlide(
+              curve: Curves.easeInOutCubicEmphasized,
+              duration: const Duration(milliseconds: 500),
+              offset: Offset(0, showBottomBar.value ? 0 : 1),
+              child: bottomNav,
+            ),
+          );
+        }
       }
     }
     return bottomNav;
@@ -504,7 +505,9 @@ class _MainAppState extends PopScopeState<MainApp>
       );
     }
 
+    Widget? bottomNav;
     if (_mainController.useBottomNav) {
+      bottomNav = _bottomNav;
       child = Row(children: [Expanded(child: child)]);
     } else {
       child = Row(
@@ -531,7 +534,7 @@ class _MainAppState extends PopScopeState<MainApp>
         ),
         child: child,
       ),
-      bottomNavigationBar: _bottomNav,
+      bottomNavigationBar: bottomNav,
     );
 
     if (PlatformUtils.isMobile) {

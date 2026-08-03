@@ -64,6 +64,9 @@ class MainController extends GetxController
   /// 修改设置后需重启应用生效
   final RxBool useNativeTabs = false.obs;
 
+  /// 鸿蒙原生顶部沉浸栏（与 useNativeTabs 同开关，API >= 23 时启用）
+  final RxBool useNativeTopBar = false.obs;
+
   final floatingNavBar = Pref.floatingNavBar;
   final useSideBar = Pref.useSideBar;
   final mainTabBarView = Pref.mainTabBarView;
@@ -134,17 +137,57 @@ class MainController extends GetxController
           setIndex(index);
         }
       };
+      // 切换到底部非首页页签（动态/我的）时隐藏顶栏，仅首页显示。
+      // 状态栏安全区由窗口沉浸全局处理（EntryAbility setWindowLayoutFullScreen
+      // + 状态栏透明，保留状态栏图标），不在此操作系统状态栏，
+      // 避免与播放页/直播页的 SystemChrome 显隐状态互相污染。
+      // 同时同步「当前是否为首页」到 ArkTS，供 dialog 显隐时的多级分流。
+      ever(selectedIndex, (index) {
+        if (useNativeTopBar.value) {
+          final isHome = navigationBars[index] == NavigationBarType.home;
+          HarmonyChannel.setTopBarTabHidden(!isHome);
+          HarmonyChannel.setTopBarIsHome(isHome);
+        }
+      });
       _initHdsBar();
     }
   }
 
-  /// 鸿蒙：查询 API 版本，结合用户偏好计算 useNativeTabs，通知 ArkTS
+  /// 鸿蒙：查询 API 版本，结合用户偏好分别计算底栏/顶栏开关，通知 ArkTS
   Future<void> _initHdsBar() async {
     final apiVersion = await HarmonyChannel.getDeviceInfo();
     final enableHdsBar = Pref.enableHdsBar;
+    final enableHdsTopBar = Pref.enableHdsTopBar;
     final useNative = apiVersion != null && apiVersion >= 23 && enableHdsBar;
+    final useNativeTop =
+        apiVersion != null && apiVersion >= 23 && enableHdsTopBar;
     useNativeTabs.value = useNative;
+    useNativeTopBar.value = useNativeTop;
     HarmonyChannel.setShellBars(useNativeTabs: useNative);
+    HarmonyChannel.setShellTopBar(useNativeTopBar: useNativeTop);
+    // 首页分类标签与顶栏设置同步到原生
+    if (useNativeTop && hasHome) {
+      // 补发初始「当前是否为首页」状态：ever(selectedIndex) 只在切换时才触发，
+      // 冷启动不切页签时 ArkTS 端 topBarIsHome 保持 false，导致 dialog 隐藏
+      // 顶栏的宽高比分流失效。
+      HarmonyChannel.setTopBarIsHome(
+        navigationBars[selectedIndex.value] == NavigationBarType.home,
+      );
+      HarmonyChannel.setHomeTopBarData(
+        tabs: homeController.tabs.map((e) => e.label).toList(),
+        hideTopBar: homeController.hideTopBar,
+        activeIndex: homeController.tabController.index,
+      );
+      // 初始头像（登录态）
+      HarmonyChannel.setHomeFaceUrl(
+        accountService.isLogin.value ? accountService.face.value : '',
+      );
+      // 初始搜索默认词（若已在异步拉取中就绪）
+      if (homeController.enableSearchWord &&
+          homeController.defaultSearch.value.isNotEmpty) {
+        HarmonyChannel.setHomeSearchText(homeController.defaultSearch.value);
+      }
+    }
   }
 
   Future<int> _msgUnread() async {
@@ -216,6 +259,10 @@ class MainController extends GetxController
       }
     } else {
       msgUnReadCount.value = countStr;
+    }
+    // 同步私信未读数到 ArkTS 原生顶栏红点
+    if (useNativeTopBar.value) {
+      HarmonyChannel.setHomeUnreadCount(countStr);
     }
   }
 
@@ -382,6 +429,12 @@ class MainController extends GetxController
       getUnreadDynamic();
     } else {
       setDynCount();
+    }
+    // 同步头像到 ArkTS 原生顶栏
+    if (useNativeTopBar.value) {
+      HarmonyChannel.setHomeFaceUrl(
+        isLogin ? accountService.face.value : '',
+      );
     }
   }
 }

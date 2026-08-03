@@ -12,6 +12,7 @@ import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:os_type/os_type.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -24,6 +25,7 @@ class _HomePageState extends CommonPageState<HomePage>
     with AutomaticKeepAliveClientMixin {
   final _homeController = Get.putOrFind(HomeController.new);
   final _mainController = Get.find<MainController>();
+  Worker? _nativeTopBarWorker;
 
   @override
   bool get needsCorrection => _homeController.hideTopBar;
@@ -32,9 +34,30 @@ class _HomePageState extends CommonPageState<HomePage>
   bool get wantKeepAlive => true;
 
   @override
+  void initState() {
+    super.initState();
+    // 鸿蒙顶栏异步就绪后重建，隐藏 Flutter 顶栏/分类栏。
+    // 状态栏安全区移除由窗口沉浸实现（EntryAbility 设置
+    // setWindowLayoutFullScreen(true) + 状态栏背景透明），保留系统状态栏
+    // 图标；此处仅负责按 useNativeTopBar 重建 UI 布局，不操作系统状态栏。
+    _nativeTopBarWorker = ever(_mainController.useNativeTopBar, (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _nativeTopBarWorker?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     super.build(context);
     final theme = Theme.of(context);
+    // 鸿蒙原生顶栏启用时隐藏 Flutter 顶部控件
+    final useNativeTopBar =
+        OS.isHarmony && _mainController.useNativeTopBar.value;
     Widget tabBar;
     if (_homeController.tabs.length > 1) {
       tabBar = Padding(
@@ -71,10 +94,11 @@ class _HomePageState extends CommonPageState<HomePage>
     }
     return Column(
       children: [
-        if (!_mainController.useSideBar &&
+        if (!useNativeTopBar &&
+            !_mainController.useSideBar &&
             MediaQuery.sizeOf(context).isPortrait)
           customAppBar(theme),
-        tabBar,
+        if (!useNativeTopBar) tabBar,
         Expanded(
           child: onBuild(
             tabBarView(
