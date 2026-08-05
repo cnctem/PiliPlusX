@@ -706,6 +706,64 @@ class RichTextEditingController extends TextEditingController {
     }
   }
 
+  /// Sync [items] from a text change that didn't come through the delta path.
+  /// This handles cases like OHOS preview text where [updateEditingValue] is
+  /// called directly instead of [updateEditingValueWithDeltas].
+  void syncItemsFromTextChange(
+    String oldText,
+    TextEditingValue newValue,
+  ) {
+    final newText = newValue.text;
+    if (oldText == newText) return;
+
+    // Find common prefix length.
+    int start = 0;
+    final minLen =
+        oldText.length < newText.length ? oldText.length : newText.length;
+    while (start < minLen &&
+        oldText.codeUnitAt(start) == newText.codeUnitAt(start)) {
+      start++;
+    }
+
+    // Find common suffix length.
+    int oldEnd = oldText.length;
+    int newEnd = newText.length;
+    while (oldEnd > start &&
+        newEnd > start &&
+        oldText.codeUnitAt(oldEnd - 1) == newText.codeUnitAt(newEnd - 1)) {
+      oldEnd--;
+      newEnd--;
+    }
+
+    final deletedLength = oldEnd - start;
+    final insertedText = newText.substring(start, newEnd);
+
+    // Apply deletion first so subsequent insertion offset is correct.
+    if (deletedLength > 0) {
+      syncRichText(
+        TextEditingDeltaDeletion(
+          composing: TextRange.empty,
+          selection: newValue.selection,
+          deletedRange: TextRange(start: start, end: oldEnd),
+          oldText: oldText,
+        ),
+      );
+    }
+
+    // Apply insertion.
+    if (insertedText.isNotEmpty) {
+      syncRichText(
+        TextEditingDeltaInsertion(
+          oldText: plainText,
+          textInserted: insertedText,
+          insertionOffset: start,
+          selection: newValue.selection,
+          composing: TextRange.empty,
+        ),
+      );
+    }
+  }
+
   TextStyle? composingStyle;
   TextStyle? richStyle;
 
@@ -752,9 +810,6 @@ class RichTextEditingController extends TextEditingController {
                   const TextStyle(decoration: TextDecoration.underline),
                 ) ??
                 const TextStyle(decoration: TextDecoration.underline);
-            if (composingRegionOutOfRange) {
-              e.type = RichTextType.text;
-            }
             return TextSpan(
               text: e.text,
               style: composingRegionOutOfRange ? null : composingStyle,

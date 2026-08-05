@@ -3403,6 +3403,11 @@ class EditableTextState extends State<EditableText>
         // overlay; the selection handle's visibility will be handled
         // by `_handleSelectionChanged`. https://github.com/flutter/flutter/issues/108673
         hideToolbar(false);
+        // Sync items for non-delta text updates (e.g., OHOS preview text
+        // path which uses updateEditingState instead of deltas).
+        if (widget.controller.plainText != value.text) {
+          widget.controller.syncItemsFromTextChange(_value.text, value);
+        }
       }
       _currentPromptRectRange = null;
 
