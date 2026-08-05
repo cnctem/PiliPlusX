@@ -4,6 +4,7 @@ import AbilityConstant from "@ohos.app.ability.AbilityConstant";
 import Want from "@ohos.app.ability.Want";
 import ConfigurationConstant from "@ohos.app.ability.ConfigurationConstant";
 import deviceInfo from "@ohos.deviceInfo";
+import settings from "@ohos.settings";
 import { backgroundTaskManager } from "@kit.BackgroundTasksKit";
 import window from "@ohos.window";
 import {
@@ -74,6 +75,12 @@ export default class HarmonyChannel implements FlutterPlugin {
         await this.autoRotateLandscape();
         result.success(true);
         break;
+      case "userRotate": {
+        const toLandscape: boolean = call.argument("landscape") ?? false;
+        await this.userRotate(toLandscape);
+        result.success(true);
+        break;
+      }
       case "setDecorButtonDark": {
         const dark: boolean = call.argument("dark") ?? false;
         await this.setDecorButtonDark(dark);
@@ -98,6 +105,10 @@ export default class HarmonyChannel implements FlutterPlugin {
       }
       case "getDeviceInfo": {
         result.success({ sdkApiVersion: deviceInfo.sdkApiVersion });
+        break;
+      }
+      case "isRotationLocked": {
+        result.success(this.isRotationLocked());
         break;
       }
       case "setShellBars": {
@@ -215,6 +226,28 @@ export default class HarmonyChannel implements FlutterPlugin {
       default:
         result.notImplemented();
         break;
+    }
+  }
+
+  /**
+   * 系统「自动旋转」开关是否关闭（即用户锁定了屏幕旋转）。
+   *
+   * ACCELEROMETER_ROTATION_STATUS：'1' 表示使用重力传感器改变屏幕方向，
+   * '0' 表示锁定。读不到（键不存在/取值异常）时一律按「已锁定」处理：
+   * 锁定分支会按视频方向强制转屏，是保守且与旧版本一致的行为；反过来误判
+   * 成未锁定会导致横屏视频点全屏后既不转屏也转不动，问题严重得多。
+   */
+  private isRotationLocked(): boolean {
+    try {
+      const value = settings.getValueSync(
+        getContext(),
+        settings.general.ACCELEROMETER_ROTATION_STATUS,
+        '0',
+      );
+      return value !== '1';
+    } catch (err) {
+      console.error("HarmonyChannel", `read rotation lock failed: ${err}`);
+      return true;
     }
   }
 
@@ -386,6 +419,21 @@ export default class HarmonyChannel implements FlutterPlugin {
   async autoRotateLandscape() {
     this.lastWindow ??= await window.getLastWindow(getContext());
     this.lastWindow.setPreferredOrientation(window.Orientation.AUTO_ROTATION_LANDSCAPE)
+  }
+
+  /**
+   * 先转到指定方向，之后继续跟随传感器（受系统旋转开关控制）。
+   * 系统未锁定旋转时进入全屏用：点全屏按钮要转到视频方向，转完仍能跟着
+   * 设备转回去。锁定旋转的场景不用它——那时需要的是不受开关控制的
+   * AUTO_ROTATION_LANDSCAPE/PORTRAIT。
+   */
+  async userRotate(landscape: boolean) {
+    this.lastWindow ??= await window.getLastWindow(getContext());
+    this.lastWindow.setPreferredOrientation(
+      landscape
+        ? window.Orientation.USER_ROTATION_LANDSCAPE
+        : window.Orientation.USER_ROTATION_PORTRAIT
+    );
   }
 
   /**

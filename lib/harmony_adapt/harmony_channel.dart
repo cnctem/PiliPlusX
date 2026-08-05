@@ -105,6 +105,23 @@ abstract class HarmonyChannel {
     return null;
   }
 
+  /// 系统「自动旋转」开关是否关闭（用户锁定了屏幕旋转）。
+  ///
+  /// 决定播放器全屏时是否强制转屏：
+  /// - 已锁定：系统不会跟着设备转，全屏需按视频方向锁定横/竖轴（轴内仍按重力
+  ///   180° 翻转，用的是不受锁定影响的 AUTO_ROTATION_LANDSCAPE/PORTRAIT）
+  /// - 未锁定：方向交给系统跟随设备，全屏不再强制
+  ///
+  /// 非鸿蒙或读取失败一律按「已锁定」处理（保守，等价旧行为）。
+  static Future<bool> isRotationLocked() async {
+    if (!OS.isHarmony) return true;
+    try {
+      return await _channel.invokeMethod<bool>('isRotationLocked') ?? true;
+    } catch (_) {
+      return true;
+    }
+  }
+
   /// 向原生发送壳配置的公共辅助：非鸿蒙直接跳过，静默失败。
   static Future<void> _invoke(String method, [Map<String, Object?>? args]) async {
     if (!OS.isHarmony) return;
@@ -311,6 +328,13 @@ abstract class HarmonyChannel {
 
   static void autoRotateLandscape() {
     _channel.invokeMethod('autoRotateLandscape');
+  }
+
+  /// 先把窗口转到指定方向，之后继续跟随传感器（USER_ROTATION_*）。
+  /// 用于系统未锁定旋转时进入全屏：点全屏按钮该转到视频方向，转完仍要能
+  /// 跟着设备转回去（转回去会触发页面自动退出全屏）。
+  static void userRotate({required bool landscape}) {
+    _channel.invokeMethod('userRotate', {'landscape': landscape});
   }
 
   /// 自由多窗装饰栏按钮（全屏/最小化/关闭）的颜色跟随应用颜色模式而非

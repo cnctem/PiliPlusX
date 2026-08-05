@@ -3,8 +3,6 @@ import 'dart:io' show Platform;
 
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/utils/device_utils.dart';
-import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:auto_orientation/auto_orientation.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter/services.dart'
@@ -37,9 +35,6 @@ Future<void> exitDesktopFullScreen() async {
   }
 }
 
-// 全向旋转开关（鸿蒙/安卓），由播放器设置页写入
-bool allowRotateScreen = Pref.allowRotateScreen;
-
 List<DeviceOrientation>? _lastOrientation;
 Future<void>? _setPreferredOrientations(List<DeviceOrientation> orientations) {
   if (_lastOrientation == orientations) {
@@ -66,6 +61,42 @@ Future<void> harmonyFullAutoMode() {
   return AutoOrientation.fullAutoMode();
 }
 
+/// 页面级「跟随设备方向」：四个方向按重力旋转，但**受系统旋转锁定控制**——
+/// 用户锁了旋转就保持当前方向不动。关闭横屏适配时的视频详情页用它，从而
+/// 「系统锁定 → 停在竖屏」「系统未锁定 → 跟着设备转」两种预期各自成立。
+///
+/// 鸿蒙走 AUTO_ROTATION_RESTRICTED（auto_orientation 的 fullAutoMode，
+/// 名字叫 full 其实是受开关控制的版本）。
+Future<void>? deviceAutoMode() {
+  if (OS.isHarmony) {
+    _invalidateOrientationCache();
+    return AutoOrientation.fullAutoMode();
+  }
+  return _setPreferredOrientations(
+    const [.portraitUp, .portraitDown, .landscapeLeft, .landscapeRight],
+  );
+}
+
+/// 全屏用：锁定竖屏轴，轴内按重力 180° 翻转，且不受系统旋转锁定影响
+/// （鸿蒙 AUTO_ROTATION_PORTRAIT）。其他平台没有等价语义，退化为固定竖屏。
+Future<void>? portraitAxisMode() {
+  if (OS.isHarmony) {
+    _invalidateOrientationCache();
+    return AutoOrientation.portraitAutoMode();
+  }
+  return portraitUpMode();
+}
+
+/// 全屏用（系统未锁定旋转时）：先转到视频所在的方向，转完继续跟随设备。
+/// 既保证点全屏按钮会转屏，又保留「转回另一方向 → 自动退出全屏」的手感；
+/// 锁死方向轴的 [portraitAxisMode] / [harmonyLandscapeAutoMode] 做不到后者。
+Future<void>? userRotateMode({required bool landscape}) {
+  if (!OS.isHarmony) return null;
+  _invalidateOrientationCache();
+  HarmonyChannel.userRotate(landscape: landscape);
+  return null;
+}
+
 /// 上面两个走的都是原生 window.setPreferredOrientation / auto_orientation 插件，
 /// 绕过了 SystemChrome，[_lastOrientation] 不会更新。必须显式作废缓存，否则退出全屏时
 /// [_setPreferredOrientations] 会误判「方向没变」而跳过，把屏幕卡在横屏。
@@ -87,11 +118,9 @@ Future<void>? landscapeRightMode() {
   return _setPreferredOrientations(const [.landscapeRight]);
 }
 
+/// 应用级「跟随系统」：开启横屏适配时的全局方向，方向由系统按设备朝向判定，
+/// 受系统旋转锁定控制（锁定 → 系统决定锁成竖屏还是横屏；未锁定 → 跟随设备）。
 Future<void>? fullMode() {
-  // 鸿蒙/安卓上「全向旋转」关闭时不放开自由旋转，等价于原 autoScreen() 的行为
-  if (PlatformUtils.isMobile && !allowRotateScreen) {
-    return null;
-  }
   final result = _setPreferredOrientations(
     const [.portraitUp, .portraitDown, .landscapeLeft, .landscapeRight],
   );
