@@ -4,12 +4,15 @@ import 'dart:typed_data';
 import 'package:PiliPlus/models/model_owner.dart';
 import 'package:PiliPlus/models/user/danmaku_rule_adapter.dart';
 import 'package:PiliPlus/models/user/info.dart';
+import 'package:PiliPlus/plugin/pl_player/models/fullscreen_mode.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/accounts/account_adapter.dart';
 import 'package:PiliPlus/utils/accounts/account_type_adapter.dart';
 import 'package:PiliPlus/utils/accounts/cookie_jar_adapter.dart';
+import 'package:PiliPlus/utils/device_utils.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/utils/set_int_adapter.dart';
+import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:hive_ce/hive.dart';
@@ -64,6 +67,8 @@ abstract final class GStorage {
       ).then((res) => watchProgress = res),
     ]);
 
+    _migrateFullScreenMode();
+
     if (Pref.saveReply) {
       reply = await Hive.openBox<Uint8List>(
         'reply',
@@ -74,6 +79,19 @@ abstract final class GStorage {
       );
     } else {
       reply = null;
+    }
+  }
+
+  /// 一次性迁移：旧版本的 Pref.fullScreenMode 会把按「平板 + 横屏适配」推导出的
+  /// 默认值落库，平板上即「不改变当前方向」。它一旦被冻结，之后无论开关怎么调，
+  /// 点全屏按钮都不会按视频方向转屏。这里把平板上的该值清掉，让它回到新的默认值
+  /// 「按视频方向」；手机上的「不改变当前方向」只可能是用户显式选的，不动。
+  static void _migrateFullScreenMode() {
+    if (setting.get(SettingBoxKey.fullScreenModeMigrated) == true) return;
+    setting.put(SettingBoxKey.fullScreenModeMigrated, true);
+    if (DeviceUtils.isTablet &&
+        setting.get(SettingBoxKey.fullScreenMode) == FullScreenMode.none.index) {
+      setting.delete(SettingBoxKey.fullScreenMode);
     }
   }
 

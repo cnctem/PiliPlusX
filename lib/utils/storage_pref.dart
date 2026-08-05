@@ -194,14 +194,14 @@ abstract final class Pref {
         defaultValue: UpPanelPosition.leftFixed.index,
       )];
 
+  /// 默认「按视频方向」：全屏方向该锁哪条轴只跟视频有关，与是否平板、是否开
+  /// 横屏适配无关（那两者决定的是页面方向，见 fullscreen.dart 的各 mode）。
+  /// 旧版本会按「平板 + 横屏适配」推导出 .none 并落库，冻结后点全屏永远不转屏，
+  /// 已由 GStorage.init 中的一次性迁移清除。
   static FullScreenMode get fullScreenMode {
     int? index = _setting.get(SettingBoxKey.fullScreenMode);
     if (index == null) {
-      final FullScreenMode mode = horizontalScreen && DeviceUtils.isTablet
-          ? .none
-          : .auto;
-      _setting.put(SettingBoxKey.fullScreenMode, mode.index);
-      return mode;
+      return .auto;
     }
     return FullScreenMode.values[index];
   }
@@ -1030,10 +1030,6 @@ abstract final class Pref {
 
   // 竖向滚动 slop 已在 main._builder 统一为 8 逻辑像素（鸿蒙），横向取 12
   // 时约 34° 以内的滑动可赢得竞技场，横竖手势按主导方向竞争。
-  // 鸿蒙/安卓全向旋转开关
-  static bool get allowRotateScreen =>
-      _setting.get(SettingBoxKey.allowRotateScreen, defaultValue: true);
-
   static double get touchSlopH =>
       _setting.get(SettingBoxKey.touchSlopH, defaultValue: 12.0);
 
