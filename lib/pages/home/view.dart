@@ -12,7 +12,6 @@ import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:os_type/os_type.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -36,11 +35,11 @@ class _HomePageState extends CommonPageState<HomePage>
   @override
   void initState() {
     super.initState();
-    // 鸿蒙顶栏异步就绪后重建，隐藏 Flutter 顶栏/分类栏。
+    // 鸿蒙顶栏异步就绪 / 横竖屏切换后重建，显示或隐藏 Flutter 顶栏、分类栏。
     // 状态栏安全区移除由窗口沉浸实现（EntryAbility 设置
     // setWindowLayoutFullScreen(true) + 状态栏背景透明），保留系统状态栏
-    // 图标；此处仅负责按 useNativeTopBar 重建 UI 布局，不操作系统状态栏。
-    _nativeTopBarWorker = ever(_mainController.useNativeTopBar, (_) {
+    // 图标；此处仅负责按顶栏是否生效重建 UI 布局，不操作系统状态栏。
+    _nativeTopBarWorker = ever(_mainController.nativeTopBarActive, (_) {
       if (mounted) setState(() {});
     });
   }
@@ -55,9 +54,10 @@ class _HomePageState extends CommonPageState<HomePage>
   Widget build(BuildContext context) {
     super.build(context);
     final theme = Theme.of(context);
-    // 鸿蒙原生顶栏启用时隐藏 Flutter 顶部控件
-    final useNativeTopBar =
-        OS.isHarmony && _mainController.useNativeTopBar.value;
+    // 鸿蒙原生顶栏生效时隐藏 Flutter 顶部控件。
+    // 横屏/侧栏布局下 ArkTS 顶栏是隐藏的，此处必须恢复 Flutter 分类栏，
+    // 否则分类栏消失且顶部留白（NativeTopSpacer）空出一大片。
+    final useNativeTopBar = _mainController.nativeTopBarActive.value;
     Widget tabBar;
     if (_homeController.tabs.length > 1) {
       tabBar = Padding(
