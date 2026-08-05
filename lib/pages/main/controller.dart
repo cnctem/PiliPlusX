@@ -36,7 +36,14 @@ class MainController extends GetxController
   RxBool? showBottomBar;
   late final bool hideBottomBar;
   late final barHideType = Pref.barHideType;
-  bool useBottomNav = false;
+  bool _useBottomNav = false;
+  bool get useBottomNav => _useBottomNav;
+  set useBottomNav(bool value) {
+    if (_useBottomNav == value) return;
+    _useBottomNav = value;
+    _syncNativeTopBarActive();
+  }
+
   late dynamic controller;
   final RxInt selectedIndex = 0.obs;
   /// ArkTS 发起的页签切换，跳过回传 ArkTS 以避免循环
@@ -66,6 +73,17 @@ class MainController extends GetxController
 
   /// 鸿蒙原生顶部沉浸栏（与 useNativeTabs 同开关，API >= 23 时启用）
   final RxBool useNativeTopBar = false.obs;
+
+  /// 原生顶栏在当前布局下是否真正生效：仅竖屏底栏布局由 ArkTS 渲染顶栏。
+  /// 横屏 / 侧栏布局（useBottomNav == false）下 ArkTS 顶栏已被
+  /// ShellBarsObserver 隐藏，此时 Flutter 必须恢复自绘分类栏并取消顶部留白，
+  /// 否则分类栏消失、顶部还留下一大片空白。
+  final RxBool nativeTopBarActive = false.obs;
+
+  /// useNativeTopBar / useBottomNav 任一变化后重算顶栏是否生效
+  void _syncNativeTopBarActive() {
+    nativeTopBarActive.value = useNativeTopBar.value && _useBottomNav;
+  }
 
   final floatingNavBar = Pref.floatingNavBar;
   final useSideBar = Pref.useSideBar;
@@ -163,6 +181,7 @@ class MainController extends GetxController
         apiVersion != null && apiVersion >= 23 && enableHdsTopBar;
     useNativeTabs.value = useNative;
     useNativeTopBar.value = useNativeTop;
+    _syncNativeTopBarActive();
     HarmonyChannel.setShellBars(useNativeTabs: useNative);
     HarmonyChannel.setShellTopBar(useNativeTopBar: useNativeTop);
     // 首页分类标签与顶栏设置同步到原生

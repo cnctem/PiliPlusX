@@ -79,6 +79,11 @@ class _MainAppState extends PopScopeState<MainApp>
     // 顶栏的分类高亮、图标颜色均读取 tabSelectedColor。
     _nativeTopBarWorker = ever(_mainController.useNativeTopBar, (useNativeTopBar) {
       if (!mounted || !useNativeTopBar) return;
+      // 同样补发首帧时因 useNativeTopBar 未就绪而跳过的顶栏显隐同步：
+      // 横屏（侧栏布局）或已有子页面覆盖主页时，原生顶栏不应显示
+      MyApp.shellBarsObserver.onOrientationChanged(
+        _mainController.useBottomNav,
+      );
       _syncPrimaryColor();
     });
     if (PlatformUtils.isDesktop) {
@@ -112,9 +117,12 @@ class _MainAppState extends PopScopeState<MainApp>
     if (!_mainController.useSideBar) {
       _mainController.useBottomNav = MediaQuery.sizeOf(context).isPortrait;
     }
-    // 横竖屏切换时同步原生 HDS 沉浸底栏显隐
-    // 由 ShellBarsObserver 统一管理，避免与路由观察者冲突
-    if (_mainController.useNativeTabs.value) {
+    // 横竖屏切换时同步原生 HDS 沉浸底栏/顶栏显隐
+    // 由 ShellBarsObserver 统一管理，避免与路由观察者冲突。
+    // 顶栏与底栏是两个独立开关，只启用其一时也要通知，否则横屏下
+    // ArkTS 顶栏不会隐藏。
+    if (_mainController.useNativeTabs.value ||
+        _mainController.useNativeTopBar.value) {
       MyApp.shellBarsObserver.onOrientationChanged(
         _mainController.useBottomNav,
       );
