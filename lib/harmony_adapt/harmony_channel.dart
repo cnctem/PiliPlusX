@@ -289,6 +289,11 @@ abstract class HarmonyChannel {
     return _channel.invokeMethod('csy', {'value': value});
   }
 
+  /// 仅控制状态栏显隐，不影响 Flutter 布局 padding。
+  /// 用于大图查看等需要隐藏状态栏但不希望 MediaQuery padding 变化的场景。
+  static Future<void> setStatusBarVisible(bool visible) =>
+      _invoke('csy', {'value': visible});
+
   /// 获取系统当前字重设置（仅 Harmony 平台）
   static Future<void> initSystemFontWeight() =>
       _invoke('getSystemFontWeightScale');

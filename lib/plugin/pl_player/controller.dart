@@ -742,7 +742,7 @@ class PlPlayerController with BlockConfigMixin {
     }
 
     final player = Player(
-      configuration: PlayerConfiguration(
+      configuration: const PlayerConfiguration(
         logLevel: kDebugMode ? .warn : .error,
       ),
     );

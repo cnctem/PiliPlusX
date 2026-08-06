@@ -67,7 +67,7 @@ abstract class MediaKitAdapt {
         options,
       );
     } catch (_) {
-      return await InitializerIsolate.create(
+      return InitializerIsolate.create(
         path,
         callback,
         options,

@@ -398,6 +398,15 @@ class MyApp extends StatelessWidget {
         ),
         child: child!,
       );
+    } else if (tmpPadding != null) {
+      child = MediaQuery(
+        data: mediaQuery.copyWith(
+          textScaler: textScaler,
+          padding: tmpPadding,
+          viewPadding: tmpPadding,
+        ),
+        child: child!,
+      );
     } else {
       child = MediaQuery(
         data: mediaQuery.copyWith(textScaler: textScaler),
