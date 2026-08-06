@@ -20,6 +20,7 @@ import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/update.dart';
 import 'package:collection/collection.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -174,15 +175,22 @@ class MainController extends GetxController
 
   /// 鸿蒙：查询 API 版本，结合用户偏好分别计算底栏/顶栏开关，通知 ArkTS
   Future<void> _initHdsBar() async {
-    final enableHdsBar = Pref.enableHdsBar;
-    final enableHdsTopBar = Pref.enableHdsTopBar;
-    useNativeTabs.value = enableHdsBar;
-    useNativeTopBar.value = enableHdsTopBar;
+    if (!OS.isHarmony) {
+      useNativeTabs.value = false;
+      useNativeTopBar.value = false;
+      return;
+    }
+    final sdkApiVersion =
+        (await DeviceInfoPlugin().ohosInfo).sdkApiVersion ?? 0;
+    final useHdsBar = Pref.enableHdsBar && sdkApiVersion > 22;
+    final useHdsTopBar = Pref.enableHdsTopBar && sdkApiVersion > 25;
+    useNativeTabs.value = useHdsBar;
+    useNativeTopBar.value = useHdsTopBar;
     _syncNativeTopBarActive();
-    HarmonyChannel.setShellBars(useNativeTabs: enableHdsBar);
-    HarmonyChannel.setShellTopBar(useNativeTopBar: enableHdsTopBar);
+    HarmonyChannel.setShellBars(useNativeTabs: useHdsBar);
+    HarmonyChannel.setShellTopBar(useNativeTopBar: useHdsTopBar);
     // 首页分类标签与顶栏设置同步到原生
-    if (enableHdsTopBar && hasHome) {
+    if (useHdsTopBar && hasHome) {
       // 补发初始「当前是否为首页」状态：ever(selectedIndex) 只在切换时才触发，
       // 冷启动不切页签时 ArkTS 端 topBarIsHome 保持 false，导致 dialog 隐藏
       // 顶栏的宽高比分流失效。
