@@ -167,6 +167,7 @@ abstract final class ImageUtils {
       });
       final result = await Future.wait(futures, eagerError: true);
       bool success = true;
+      SaveResult? saveRes;
       if (PlatformUtils.isMobile) {
         final saveList = <SaveFileData>[];
         for (final i in result) {
@@ -182,7 +183,7 @@ abstract final class ImageUtils {
             success = false;
           }
         }
-        await SaverGallery.saveFiles(saveList, skipIfExists: false);
+        saveRes = await SaverGallery.saveFiles(saveList, skipIfExists: false);
       } else {
         for (final res in result) {
           if (res.statusCode == 200) {
@@ -196,7 +197,7 @@ abstract final class ImageUtils {
         SmartDialog.showToast('已取消下载');
         return false;
       } else {
-        SmartDialog.showToast(success ? ' 已保存 ' : '保存失败');
+        SmartDialog.showToast(success && saveRes?.isSuccess==true ? ' 已保存 ' : '保存失败');
       }
       return success;
     } catch (e) {
