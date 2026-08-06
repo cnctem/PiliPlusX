@@ -32,6 +32,7 @@ jobs:
                   android/app/src/main/java/com/example/piliplusx/AndroidHelper.java \
                   android/app/src/main/java/com/example/piliplusx/MediaHelper.java \
                   lib/services/audio_handler.dart
+                sed -i 's|com/example/piliplusx|tv/danmaku/bili|g' lib/utils/android/bindings.g.dart
                 grep -n '"pink"' lib/utils/update.dart || echo "update.dart 替换失败"
                 grep -n 'tv\.danmaku\.bili' android/app/build.gradle.kts | head -2 || echo "build.gradle.kts 替换失败"
               shell: bash
