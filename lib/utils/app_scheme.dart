@@ -198,7 +198,7 @@ abstract final class PiliScheme {
             bool hasMatch = _onPushDynDetail(uri, off);
             return hasMatch;
           case 'search':
-            final keyword = uri.queryParameters['keyword'];
+            final keyword = uri.queryParameters['keyword']?? uri.pathSegments.firstOrNull;
             if (keyword != null) {
               PageUtils.toDupNamed(
                 '/searchResult',
