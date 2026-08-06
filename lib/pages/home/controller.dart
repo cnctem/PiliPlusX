@@ -20,8 +20,21 @@ import 'package:os_type/os_type.dart';
 
 class HomeController extends GetxController
     with GetSingleTickerProviderStateMixin, ScrollOrRefreshMixin {
-  late List<HomeTabType> tabs;
-  late TabController tabController;
+  final List<HomeTabType> tabs = () {
+    final tabs = GStorage.setting.get(SettingBoxKey.tabBarSort) as List?;
+    if (tabs != null) {
+      return tabs.map((i) => HomeTabType.values[i]).toList();
+    } else {
+      return HomeTabType.values;
+    }
+  }();
+
+  late final TabController tabController = TabController(
+    initialIndex: max(0, tabs.indexOf(HomeTabType.rcmd)),
+    length: tabs.length,
+    vsync: this,
+  );
+
   /// ArkTS 发起的分类切换，跳过回发 ArkTS 以避免循环
   bool _fromArkTS = false;
 
@@ -62,8 +75,6 @@ class HomeController extends GetxController
       querySearchDefault();
     }
 
-    setTabConfig();
-
     if (OS.isHarmony) {
       _initHarmonyTopBar();
     }
@@ -99,12 +110,12 @@ class HomeController extends GetxController
       Get.toNamed('/whisper');
     };
     // ArkTS 头像点击 → 跳个人页
-    HarmonyChannel.onTopMineTap =
-        Get.find<MainController>().toMinePage;
+    HarmonyChannel.onTopMineTap = Get.find<MainController>().toMinePage;
 
     // 搜索默认词异步就绪后同步到原生 Search 组件
     ever(defaultSearch, (text) {
-      if (enableSearchWord && Get.find<MainController>().useNativeTopBar.value) {
+      if (enableSearchWord &&
+          Get.find<MainController>().useNativeTopBar.value) {
         HarmonyChannel.setHomeSearchText(text);
       }
     });
@@ -159,21 +170,6 @@ class HomeController extends GetxController
     return controller.onRefresh().catchError((e) {
       if (kDebugMode) debugPrint(e.toString());
     });
-  }
-
-  void setTabConfig() {
-    final tabs = GStorage.setting.get(SettingBoxKey.tabBarSort) as List?;
-    if (tabs != null) {
-      this.tabs = tabs.map((i) => HomeTabType.values[i]).toList();
-    } else {
-      this.tabs = HomeTabType.values;
-    }
-
-    tabController = TabController(
-      initialIndex: max(0, this.tabs.indexOf(HomeTabType.rcmd)),
-      length: this.tabs.length,
-      vsync: this,
-    );
   }
 
   @override
