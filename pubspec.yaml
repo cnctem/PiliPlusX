@@ -17,7 +17,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
 # update when release
-version: 2.1.0+5592
+version: 2.1.0+5593
 
 environment:
   sdk: ">=3.11.1"
@@ -289,7 +289,7 @@ dependency_overrides:
     git:
       url: https://gitcode.com/openharmony-tpc/flutter_packages.git
       path: packages/url_launcher/url_launcher
-      ref: br_url_launcher_v6.3.1_ohos
+      ref: br_url_launcher-v6.3.2_ohos_dev
   path_provider: # 应用可用路径.鸿蒙适配
     git:
       url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"

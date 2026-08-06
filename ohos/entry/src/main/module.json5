@@ -74,6 +74,9 @@
         ]
       }
     ],
+    "querySchemes": [
+      "bilibili"
+    ],
     requestPermissions: [
       {
         name: "ohos.permission.INTERNET"
