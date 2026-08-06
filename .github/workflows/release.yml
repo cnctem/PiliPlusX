@@ -38,7 +38,7 @@ jobs:
       - name: Setup HarmonyOS toolchain
         uses: ErBWs/setup-ohos@v1
         with:
-          version: latest
+          version: "26.0.0.621"
           cache: true
 
       - name: Setup JDK17
@@ -66,7 +66,7 @@ jobs:
       - name: Rename package
         run: |
           sed -i "s/name: PiliPlus/name: piliplus/g" pubspec.yaml
-          find lib -type f -name "*.dart" -exec sed -i "s/import 'package:PiliPlus/import 'package:piliplus/g" {} \;
+          find lib -type f -name "*.dart" -exec sed -i "s/package:PiliPlus/package:piliplus/g" {} \;
         shell: bash
 
       - name: Add ohos platform
