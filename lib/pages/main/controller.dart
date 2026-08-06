@@ -46,6 +46,7 @@ class MainController extends GetxController
 
   late dynamic controller;
   final RxInt selectedIndex = 0.obs;
+
   /// ArkTS 发起的页签切换，跳过回传 ArkTS 以避免循环
   bool _fromArkTS = false;
 
@@ -173,19 +174,15 @@ class MainController extends GetxController
 
   /// 鸿蒙：查询 API 版本，结合用户偏好分别计算底栏/顶栏开关，通知 ArkTS
   Future<void> _initHdsBar() async {
-    final apiVersion = await HarmonyChannel.getDeviceInfo();
     final enableHdsBar = Pref.enableHdsBar;
     final enableHdsTopBar = Pref.enableHdsTopBar;
-    final useNative = apiVersion != null && apiVersion >= 23 && enableHdsBar;
-    final useNativeTop =
-        apiVersion != null && apiVersion >= 23 && enableHdsTopBar;
-    useNativeTabs.value = useNative;
-    useNativeTopBar.value = useNativeTop;
+    useNativeTabs.value = enableHdsBar;
+    useNativeTopBar.value = enableHdsTopBar;
     _syncNativeTopBarActive();
-    HarmonyChannel.setShellBars(useNativeTabs: useNative);
-    HarmonyChannel.setShellTopBar(useNativeTopBar: useNativeTop);
+    HarmonyChannel.setShellBars(useNativeTabs: enableHdsBar);
+    HarmonyChannel.setShellTopBar(useNativeTopBar: enableHdsTopBar);
     // 首页分类标签与顶栏设置同步到原生
-    if (useNativeTop && hasHome) {
+    if (enableHdsTopBar && hasHome) {
       // 补发初始「当前是否为首页」状态：ever(selectedIndex) 只在切换时才触发，
       // 冷启动不切页签时 ArkTS 端 topBarIsHome 保持 false，导致 dialog 隐藏
       // 顶栏的宽高比分流失效。

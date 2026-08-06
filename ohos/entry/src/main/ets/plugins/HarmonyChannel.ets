@@ -1,9 +1,8 @@
 import { common, wantAgent, WantAgent } from "@kit.AbilityKit";
-import { BusinessError } from "@kit.BasicServicesKit";
+import { BusinessError, deviceInfo } from "@kit.BasicServicesKit";
 import AbilityConstant from "@ohos.app.ability.AbilityConstant";
 import Want from "@ohos.app.ability.Want";
 import ConfigurationConstant from "@ohos.app.ability.ConfigurationConstant";
-import deviceInfo from "@ohos.deviceInfo";
 import settings from "@ohos.settings";
 import { backgroundTaskManager } from "@kit.BackgroundTasksKit";
 import window from "@ohos.window";
@@ -27,7 +26,6 @@ export default class HarmonyChannel implements FlutterPlugin {
   /// 当前底部页签是否为首页（由 Flutter 同步）。
   /// 用于 dialog 隐藏/显示顶栏时的多级分支判断。
   private topBarIsHome: boolean = false;
-
   /// 跨设备接续：对端 onCreate/onNewWant 收到的接续数据暂存于此，
   /// 由 Dart 侧就绪后主动拉取（getPendingContinuation），规避冷启动时
   /// Dart handler 尚未注册导致推送丢失的问题。
@@ -103,15 +101,15 @@ export default class HarmonyChannel implements FlutterPlugin {
         result.success(true);
         break;
       }
-      case "getDeviceInfo": {
-        result.success({ sdkApiVersion: deviceInfo.sdkApiVersion });
-        break;
-      }
       case "isRotationLocked": {
         result.success(this.isRotationLocked());
         break;
       }
       case "setShellBars": {
+        if (deviceInfo.sdkApiVersion < 23) {
+          result.success(true);
+          break;
+        }
         const useNativeTabs: boolean = call.argument('useNativeTabs') ?? false;
         console.log(`is use native tabs: ${useNativeTabs}`);
         AppStorage.setOrCreate('useNativeTabs', useNativeTabs);
@@ -129,6 +127,10 @@ export default class HarmonyChannel implements FlutterPlugin {
         break;
       }
       case "setShellBarsHidden": {
+        if (deviceInfo.sdkApiVersion < 23) {
+          result.success(true);
+          break;
+        }
         const hidden: boolean = call.argument('hidden') ?? false;
         console.log(`is set tabs hidden: ${hidden}`);
         AppStorage.setOrCreate('shellBarsHidden', hidden);
@@ -139,12 +141,20 @@ export default class HarmonyChannel implements FlutterPlugin {
         break;
       }
       case "setTopBarIsHome": {
+        if (deviceInfo.sdkApiVersion < 23) {
+          result.success(true);
+          break;
+        }
         this.topBarIsHome = call.argument('isHome') ?? false;
         console.log(`is top bar home: ${this.topBarIsHome}`);
         result.success(true);
         break;
       }
       case "setShellBarsScrollHidden": {
+        if (deviceInfo.sdkApiVersion < 23) {
+          result.success(true);
+          break;
+        }
         const hidden: boolean = call.argument('hidden') ?? false;
         console.log(`is set tabs scroll hidden: ${hidden}`);
         if (AppStorage.get('__scrollHidden') != hidden) {
@@ -154,18 +164,30 @@ export default class HarmonyChannel implements FlutterPlugin {
         break;
       }
       case "changeTabIndex": {
+        if (deviceInfo.sdkApiVersion < 23) {
+          result.success(true);
+          break;
+        }
         const index: number = call.argument('index') ?? 0;
         this.changeTabIndex(index);
         result.success(true);
         break;
       }
       case "setTabSelectedColor": {
+        if (deviceInfo.sdkApiVersion < 23) {
+          result.success(true);
+          break;
+        }
         const color: string = call.argument('color') ?? '#3367D6';
         AppStorage.setOrCreate('tabSelectedColor', color);
         result.success(true);
         break;
       }
       case "setShellTopBar": {
+        if (deviceInfo.sdkApiVersion < 26) {
+          result.success(true);
+          break;
+        }
         const useNativeTopBar: boolean = call.argument('useNativeTopBar') ?? false;
         AppStorage.setOrCreate('useNativeTopBar', useNativeTopBar);
         result.success(true);
@@ -293,7 +315,8 @@ export default class HarmonyChannel implements FlutterPlugin {
           console.info("HarmonyChannel", "Background task started (dataTransfer)");
         } catch (error) {
           console.error("HarmonyChannel",
-            `startBackgroundTask failed, code: ${(error as BusinessError).code}, msg: ${(error as BusinessError).message}`);
+            `startBackgroundTask failed, code: ${(error as BusinessError).code}, msg: ${(error as
+              BusinessError).message}`);
         }
       } else {
         // 期望停止；若实际在运行则执行停止
@@ -306,7 +329,8 @@ export default class HarmonyChannel implements FlutterPlugin {
           console.info("HarmonyChannel", "Background task stopped");
         } catch (error) {
           console.error("HarmonyChannel",
-            `stopBackgroundTask failed, code: ${(error as BusinessError).code}, msg: ${(error as BusinessError).message}`);
+            `stopBackgroundTask failed, code: ${(error as BusinessError).code}, msg: ${(error as
+              BusinessError).message}`);
         }
       }
     });
@@ -330,12 +354,16 @@ export default class HarmonyChannel implements FlutterPlugin {
     }
     const width = AppStorage.get('winWidth') as number ?? 0;
     const height = AppStorage.get('winHeight') as number ?? 0;
-    if (width <= 0 || height <= 0) return; // 尚未拿到窗口尺寸
+    if (width <= 0 || height <= 0) {
+      return;
+    } // 尚未拿到窗口尺寸
     const aspect = width / height;
     const portrait = aspect < 1.0;
     const tall = aspect < 9 / 16; // 竖长屏
     if (hidden) {
-      if (tall) return; // 竖长屏不处理
+      if (tall) {
+        return;
+      } // 竖长屏不处理
       if (portrait) {
         AppStorage.setOrCreate('topBarCollapsed', true); // 9/16 ~ 1:1：收起
       } else {
@@ -352,6 +380,7 @@ export default class HarmonyChannel implements FlutterPlugin {
     const context = getContext() as common.UIAbilityContext;
     context.eventHub.emit('EVENT_CHANGE_TAB', index);
   }
+
   public onFloatingWindowChange(isFloatingWindow: boolean) {
     this.channel?.invokeMethod("onFloatingWindowChange", { isFloatingWindow: isFloatingWindow });
   }

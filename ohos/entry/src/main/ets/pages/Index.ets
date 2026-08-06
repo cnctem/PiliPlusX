@@ -3,7 +3,7 @@ import window from '@ohos.window';
 import { FlutterPage } from '@ohos/flutter_ohos';
 import { SymbolGlyphModifier, uiMaterial } from '@kit.ArkUI';
 import { HdsAnimationMode, hdsMaterial, HdsTabs, HdsTabsController } from '@kit.UIDesignKit';
-import { Available } from '@kit.BasicServicesKit';
+import { deviceInfo } from '@kit.BasicServicesKit';
 
 let storage = LocalStorage.getShared();
 
@@ -22,7 +22,7 @@ const NAV_UNSELECTED = $r('sys.color.comp_focused_primary');
 const BOTTOM_NORMAL_AVOID_AREA_VALUE = 1;
 const BOTTOM_SPECIAL_AVOID_AREA_VALUE = 12;
 const TOP_BAR_BLUR_RADIUS = 18;
-const TOP_BAR_FRACTION_STOPS: [number, number][] = [[0,0],[0.9,0.08],[1,0.4],[1,1]];
+const TOP_BAR_FRACTION_STOPS: [number, number][] = [[0, 0], [0.9, 0.08], [1, 0.4], [1, 1]];
 const TOP_BAR_COLLAPSED_HEIGHT = 80;
 const TOP_BAR_EXPANDED_HEIGHT = 144;
 
@@ -163,13 +163,6 @@ struct Index {
   }
 
   @Builder
-  emptyTabContent() {
-    Column()
-      .width('100%')
-      .height('100%')
-  }
-
-  @Builder
   categoryTabBuilder(index: number, name: string) {
     Text(name)
       .fontSize(15)
@@ -210,7 +203,12 @@ struct Index {
         Text(this.homeUnreadCount)
           .fontSize(9)
           .fontColor(Color.White)
-          .padding({ left: 5, right: 5, top: 1, bottom: 1 })
+          .padding({
+            left: 5,
+            right: 5,
+            top: 1,
+            bottom: 1
+          })
           .backgroundColor(this.navSelected)
           .borderRadius(8)
           .offset({ x: 6, y: -8 })
@@ -242,20 +240,21 @@ struct Index {
   homeTopBar() {
     RelativeContainer() {
       // 渐变模糊底层
-      Column() {}
-        .constraintSize({ maxHeight: TOP_BAR_EXPANDED_HEIGHT })
-        .linearGradientBlur(TOP_BAR_BLUR_RADIUS, {
-          fractionStops: TOP_BAR_FRACTION_STOPS,
-          direction: GradientDirection.Top
-        })
-        .alignRules({
-          top: { anchor: 'topBarContent', align: VerticalAlign.Top },
-          bottom: { anchor: 'topBarContent', align: VerticalAlign.Bottom },
-          left: { anchor: 'topBarContent', align: HorizontalAlign.Start },
-          right: { anchor: 'topBarContent', align: HorizontalAlign.End }
-        })
-        .id('topBarBg')
-        .hitTestBehavior(HitTestMode.Transparent)
+      Column() {
+      }
+      .constraintSize({ maxHeight: TOP_BAR_EXPANDED_HEIGHT })
+      .linearGradientBlur(TOP_BAR_BLUR_RADIUS, {
+        fractionStops: TOP_BAR_FRACTION_STOPS,
+        direction: GradientDirection.Top
+      })
+      .alignRules({
+        top: { anchor: 'topBarContent', align: VerticalAlign.Top },
+        bottom: { anchor: 'topBarContent', align: VerticalAlign.Bottom },
+        left: { anchor: 'topBarContent', align: HorizontalAlign.Start },
+        right: { anchor: 'topBarContent', align: HorizontalAlign.End }
+      })
+      .id('topBarBg')
+      .hitTestBehavior(HitTestMode.Transparent)
 
       Column() {
         if (!(this.homeHideTopBar && this.topBarCollapsed)) {
@@ -273,9 +272,9 @@ struct Index {
                 .fontColor([this.navSelected])
                 .fontSize(16))
               .placeholderColor($r('app.color.placeholder_text'))
-              .placeholderFont({ size: 16, weight: 600})
+              .placeholderFont({ size: 16, weight: 600 })
               .fontColor($r('app.color.placeholder_text'))
-              .textFont({ size: 16, weight: 600})
+              .textFont({ size: 16, weight: 600 })
               .backgroundColor(Color.Transparent)
               .borderRadius(22)
               .layoutWeight(1)
@@ -288,7 +287,12 @@ struct Index {
             this.avatarButton()
           }
           .width('100%')
-          .padding({ left: 14, right: 14, top: 0, bottom: 0 })
+          .padding({
+            left: 14,
+            right: 14,
+            top: 0,
+            bottom: 0
+          })
           .transition(TransitionEffect.asymmetric(
             TransitionEffect.translate({ y: -28 }).combine(TransitionEffect.OPACITY)
               .animation({ duration: 220, curve: Curve.EaseOut }),
@@ -299,8 +303,7 @@ struct Index {
         if (this.homeTabs.length > 1) {
           Tabs({ barPosition: BarPosition.Start, controller: this.categoryController }) {
             ForEach(this.homeTabs, (tab: string, index: number) => {
-              TabContent() {
-                this.emptyTabContent()
+              TabContent() { // empty
               }
               .tabBar(this.categoryTabBuilder(index, tab))
             }, (tab: string, index: number) => index + '_' + tab)
@@ -331,8 +334,7 @@ struct Index {
   @Builder
   hdsMainTabs() {
     HdsTabs({ controller: this.controller }) {
-      TabContent() {
-        this.emptyTabContent();
+      TabContent() { // empty
       }
       .tabBar(new BottomTabBarStyle({
         normal: tabSymbol($r('sys.symbol.house_fill'), NAV_UNSELECTED),
@@ -342,8 +344,7 @@ struct Index {
         unselectedColor: NAV_UNSELECTED
       }))
 
-      TabContent() {
-        this.emptyTabContent();
+      TabContent() { // empty
       }
       .tabBar(new BottomTabBarStyle({
         normal: tabSymbol($r('sys.symbol.discover_fill'), NAV_UNSELECTED),
@@ -353,8 +354,7 @@ struct Index {
         unselectedColor: NAV_UNSELECTED
       }))
 
-      TabContent() {
-        this.emptyTabContent();
+      TabContent() { // empty
       }
       .tabBar(new BottomTabBarStyle({
         normal: tabSymbol($r('sys.symbol.person_crop_circle_fill_1'), NAV_UNSELECTED),
@@ -393,7 +393,7 @@ struct Index {
         FlutterPage({ viewId: this.viewId })
           .width('100%')
           .height('100%')
-        if (this.useNativeTabs) {
+        if (this.useNativeTabs && deviceInfo.sdkApiVersion >= 23) {
           Column() {
             this.hdsMainTabs()
           }
@@ -406,7 +406,7 @@ struct Index {
       .width('100%')
       .height('100%')
 
-      if (this.useNativeTopBar) {
+      if (this.useNativeTopBar && deviceInfo.sdkApiVersion >= 26) {
         this.homeTopBar()
       }
     }

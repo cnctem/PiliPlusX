@@ -8,9 +8,9 @@ import 'package:os_type/os_type.dart';
 
 abstract class HarmonyChannel {
   static double? _systemFontWeightScale;
-  
+
   static double? get systemFontWeightScale => _systemFontWeightScale;
-  
+
   static final MethodChannel _channel = const MethodChannel('harmonyChannel')
     ..setMethodCallHandler(handler);
 
@@ -75,7 +75,8 @@ abstract class HarmonyChannel {
 
   /// 顶栏头像点击回调
   static void Function()? _onTopMineTap;
-  static set onTopMineTap(void Function()? callback) => _onTopMineTap = callback;
+  static set onTopMineTap(void Function()? callback) =>
+      _onTopMineTap = callback;
 
   /// 分类切换回调：由 HomeController 注册
   static void Function(int index)? _onHomeTabChange;
@@ -87,23 +88,6 @@ abstract class HarmonyChannel {
 
   static set onShellTabSwitch(void Function(int)? callback) =>
       _onShellTabSwitch = callback;
-
-  /// 主动向原生拉取设备信息（API 版本等），并缓存结果
-  static Future<int?> getDeviceInfo() async {
-    if (!OS.isHarmony) return null;
-    for (int i = 0; i < 8; i++) {
-      try {
-        final Object? args =
-            await _channel.invokeMethod<Object?>('getDeviceInfo');
-        if (args is Map) {
-          _sdkApiVersion = args['sdkApiVersion'] as int?;
-          return _sdkApiVersion;
-        }
-      } catch (_) {}
-      await Future<void>.delayed(const Duration(milliseconds: 200));
-    }
-    return null;
-  }
 
   /// 系统「自动旋转」开关是否关闭（用户锁定了屏幕旋转）。
   ///
@@ -123,7 +107,10 @@ abstract class HarmonyChannel {
   }
 
   /// 向原生发送壳配置的公共辅助：非鸿蒙直接跳过，静默失败。
-  static Future<void> _invoke(String method, [Map<String, Object?>? args]) async {
+  static Future<void> _invoke(
+    String method, [
+    Map<String, Object?>? args,
+  ]) async {
     if (!OS.isHarmony) return;
     try {
       await _channel.invokeMethod(method, args);
@@ -139,7 +126,10 @@ abstract class HarmonyChannel {
   static bool get hdsBarVisible => !_hiddenByPage;
 
   /// 控制原生 HDS 底栏/顶栏的显隐（弹窗、全屏页等场景）
-  static Future<void> setShellBarsHidden(bool hidden, {bool retry = false}) async {
+  static Future<void> setShellBarsHidden(
+    bool hidden, {
+    bool retry = false,
+  }) async {
     if (!OS.isHarmony) return;
     _hiddenByPage = hidden;
     final int total = retry ? 8 : 1;
@@ -167,12 +157,11 @@ abstract class HarmonyChannel {
     required List<String> tabs,
     required bool hideTopBar,
     required int activeIndex,
-  }) =>
-      _invoke('setHomeTopBarData', {
-        'tabs': tabs,
-        'hideTopBar': hideTopBar,
-        'activeIndex': activeIndex,
-      });
+  }) => _invoke('setHomeTopBarData', {
+    'tabs': tabs,
+    'hideTopBar': hideTopBar,
+    'activeIndex': activeIndex,
+  });
 
   /// 同步搜索默认词到 ArkTS Search 组件
   static Future<void> setHomeSearchText(String text) =>
@@ -237,12 +226,6 @@ abstract class HarmonyChannel {
 
   /// 停止长时任务
   static Future<void> stopBackgroundTask() => _invoke('stopBackgroundTask');
-
-  /// 缓存从 ArkTS 获取的 API 版本
-  static int? _sdkApiVersion;
-
-  /// 获取缓存的 API 版本（仅在 getDeviceInfo 调用后可用）
-  static int? get sdkApiVersion => _sdkApiVersion;
 
   /// 取走 ETS 侧暂存的接续数据并跳转视频页。冷启动在首帧后调用，
   /// 热启动由 onContinuationRestore 推送触发；数据取走即清除，不会重复跳转。
