@@ -2306,7 +2306,7 @@ packages:
     source: git
     version: "1.2.2"
   win32:
-    dependency: "direct overridden"
+    dependency: "direct main"
     description:
       name: win32
       sha256: "015002c060f1ae9f41a818f2d5640389cc05283e368be19dc8d77cecb43c40c9"

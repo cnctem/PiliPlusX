@@ -224,12 +224,13 @@ struct Index {
   avatarButton() {
     if (this.homeFaceUrl !== '') {
       Image(this.homeFaceUrl)
-        .width(40)
-        .height(40)
-        .borderRadius(20)
+        .width(41)
+        .height(41)
+        .borderRadius(20.5)
         .onClick(() => {
           this.context.eventHub.emit(EVENT_TOP_MINE);
         })
+        .systemMaterial(topBarMaterial(true))
     } else {
       this.circleIconButton($r('sys.symbol.person_crop_circle_fill'), 44, 26, () => {
         this.context.eventHub.emit(EVENT_TOP_MINE);
@@ -296,26 +297,23 @@ struct Index {
           ))
         }
         if (this.homeTabs.length > 1) {
-          Stack({ alignContent: Alignment.TopStart }) {
-            Tabs({ barPosition: BarPosition.Start, controller: this.categoryController }) {
-              ForEach(this.homeTabs, (tab: string, index: number) => {
-                TabContent() {
-                  this.emptyTabContent()
-                }
-                .tabBar(this.categoryTabBuilder(index, tab))
-              }, (tab: string, index: number) => index + '_' + tab)
-            }
-            .barMode(BarMode.Scrollable)
-            .fadingEdge(false)
-            .scrollable(false)
-            .width('100%')
-            .height(32)
-            .onTabBarClick((index: number) => {
-              this.context.eventHub.emit(EVENT_HOME_TAB_CHANGE, index);
-              this.categoryCurrentIndex = index;
-            })
+          Tabs({ barPosition: BarPosition.Start, controller: this.categoryController }) {
+            ForEach(this.homeTabs, (tab: string, index: number) => {
+              TabContent() {
+                this.emptyTabContent()
+              }
+              .tabBar(this.categoryTabBuilder(index, tab))
+            }, (tab: string, index: number) => index + '_' + tab)
           }
+          .barMode(BarMode.Scrollable)
+          .fadingEdge(false)
+          .scrollable(false)
           .width('100%')
+          .height(32)
+          .onTabBarClick((index: number) => {
+            this.context.eventHub.emit(EVENT_HOME_TAB_CHANGE, index);
+            this.categoryCurrentIndex = index;
+          })
         }
       }
       .width('100%')
@@ -323,7 +321,8 @@ struct Index {
       .id('topBarContent')
       .hitTestBehavior(HitTestMode.Default)
     }
-    .height(this.homeHideTopBar && this.topBarCollapsed ? TOP_BAR_COLLAPSED_HEIGHT :TOP_BAR_EXPANDED_HEIGHT)
+    .height(this.homeHideTopBar && this.topBarCollapsed ? TOP_BAR_COLLAPSED_HEIGHT : TOP_BAR_EXPANDED_HEIGHT)
+    .animation({ duration: 220, curve: Curve.EaseInOut })
     .width('100%')
     .hitTestBehavior(HitTestMode.Default)
     .visibility(this.topBarHidden ? Visibility.None : Visibility.Visible)
