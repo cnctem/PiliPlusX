@@ -158,6 +158,15 @@ Future<void>? showSystemBar(String reason) {
   );
 }
 
+/// 供路由观察器在页面回到栈底时调用：若系统栏当前被隐藏则恢复。
+/// 与原生顶栏的显隐同频，避免「顶栏已先出现、状态栏要等转场结束才恢复」
+/// 导致页面布局在转场结束后下移（issue #151）。
+void restoreSystemBarIfHidden() {
+  if (!_showSystemBar) {
+    showSystemBar('observer_sync');
+  }
+}
+
 Future<void> toggleSystemBar() {
   _showSystemBar = !_showSystemBar;
   return SystemChrome.setEnabledSystemUIMode(

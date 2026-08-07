@@ -455,6 +455,12 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       return;
     }
 
+    // 从覆盖页面返回播放页时重新进入沉浸模式：移除安全边距（页面级沉浸）
+    // 或仍处于全屏（全屏沉浸）时恢复隐藏
+    if (videoDetailController.removeSafeArea || isFullScreen) {
+      hideSystemBar();
+    }
+
     HarmonyChannel.holdDecorDark(this);
     WidgetsBinding.instance.addObserver(this);
 
