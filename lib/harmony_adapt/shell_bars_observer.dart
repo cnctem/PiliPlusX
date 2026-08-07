@@ -1,4 +1,6 @@
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
+import 'package:PiliPlus/common/widgets/image_viewer/hero_dialog_route.dart';
+import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:flutter/material.dart';
 
 /// 监听全局路由变化，自动控制 ArkTS HDS 底栏的显隐。
@@ -50,5 +52,20 @@ class ShellBarsObserver extends NavigatorObserver {
     // 直接隐藏而绕过宽高比分流。
     final hasPageOverlay = _activeRoutes.whereType<PageRoute>().length > 1;
     HarmonyChannel.setTopBarHidden(hasPageOverlay || _orientationHidden);
+    // 系统状态栏跟随「最上层页面是否仍是沉浸播放页」，与原生顶栏同频：
+    // - 最上层是视频/直播播放页（/videoV、/liveRoom）：保持沉浸，不干预
+    // - 最上层是普通整页（含播放页 → UP 主主页 → 再进播放页 → 返回等嵌套
+    //   场景）：立即恢复状态栏，避免新页面继承播放页的沉浸状态
+    // - 图片查看器（HeroDialogRoute）自带状态栏逻辑，跳过
+    final pageRoutes = _activeRoutes.whereType<PageRoute>().toList();
+    final topPage = pageRoutes.isEmpty ? null : pageRoutes.last;
+    final topIsPlayer = topPage != null &&
+        (topPage.settings.name == '/videoV' ||
+            topPage.settings.name == '/liveRoom');
+    if (!_orientationHidden &&
+        (topPage == null || !topIsPlayer) &&
+        topPage is! HeroDialogRoute) {
+      restoreSystemBarIfHidden();
+    }
   }
 }
