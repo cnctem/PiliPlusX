@@ -168,7 +168,7 @@ class _DynamicsPageState extends CommonPageState<DynamicsPage>
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        primary: false,
+        primary: true, // 避让安全区
         leading: leading,
         leadingWidth: 50,
         toolbarHeight: 50,

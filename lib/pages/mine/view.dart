@@ -68,36 +68,38 @@ class _MediaPageState extends CommonPageState<MinePage>
     super.build(context);
     final theme = Theme.of(context);
     final secondary = theme.colorScheme.secondary;
-    return Column(
-      children: [
-        Padding(
-          padding: const .symmetric(vertical: 10),
-          child: _buildHeaderActions,
-        ),
-        Expanded(
-          child: Material(
-            type: .transparency,
-            child: refreshIndicator(
-              onRefresh: controller.onRefresh,
-              child: onBuild(
-                ListView(
-                  padding: const .only(bottom: 100),
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: [
-                    _buildUserInfo(theme, secondary),
-                    _buildActions(secondary),
-                    Obx(
-                      () => controller.loadingState.value is Loading
-                          ? const SizedBox.shrink()
-                          : _buildFav(theme, secondary),
-                    ),
-                  ],
+    return SafeArea( // 避让安全区
+      child: Column(
+        children: [
+          Padding(
+            padding: const .symmetric(vertical: 10),
+            child: _buildHeaderActions,
+          ),
+          Expanded(
+            child: Material(
+              type: .transparency,
+              child: refreshIndicator(
+                onRefresh: controller.onRefresh,
+                child: onBuild(
+                  ListView(
+                    padding: const .only(bottom: 100),
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      _buildUserInfo(theme, secondary),
+                      _buildActions(secondary),
+                      Obx(
+                        () => controller.loadingState.value is Loading
+                            ? const SizedBox.shrink()
+                            : _buildFav(theme, secondary),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

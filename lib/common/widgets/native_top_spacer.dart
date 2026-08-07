@@ -12,26 +12,23 @@ import 'package:get/get.dart';
 /// 重叠；用户上滑时空白随列表一起卷走，内容自然滑入 ArkTS 顶栏下方形成
 /// 沉浸重合，而非固定遮罩。
 ///
-/// 高度随顶栏显隐联动，并按分类标签数量区分：
-/// - 仅一个分类（无分类条）：展开 55vp / 收起 0vp
-/// - 多个分类（含分类条）：展开 85vp / 收起 30vp
+/// 高度随顶栏显隐联动，并按分类标签数量区分
 /// 收起信号来自 HomeController.topBarCollapsed（由滚动偏移同步），
 /// 与 ArkTS 顶栏的收起状态保持同时变化。
 class NativeTopSpacer extends StatelessWidget {
   const NativeTopSpacer({super.key});
 
   /// 多个分类标签时：顶栏展开/收起对应的留白高度
-  static const double expandedHeight = 85;
-  static const double collapsedHeight = 30;
+  static const double expandedHeight = 137;
+  static const double collapsedHeight = 82;
 
   /// 仅一个分类标签时：顶栏展开/收起对应的留白高度。
-  /// 单分类不显示分类条，收起后顶栏完全隐藏，故收起留白为 0。
-  static const double singleExpandedHeight = 55;
-  static const double singleCollapsedHeight = 0;
+  static const double singleExpandedHeight = 107;
+  static const double singleCollapsedHeight = 52;
 
   /// ArkTS 顶栏自身的高度，含状态栏，用于启用原生顶栏时调整刷新指示器高度
-  static const double barExpandedHeight = 120;
-  static const double barCollapsedHeight = 65;
+  static const double barExpandedHeight = 172;
+  static const double barCollapsedHeight = 107;
 
   /// 原生顶栏当前是否真正生效（响应式读取，供 Obx 依赖）。
   /// 仅鸿蒙的 _initHdsBar 会置位 nativeTopBarActive，无需再判平台；

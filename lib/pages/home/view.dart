@@ -97,7 +97,9 @@ class _HomePageState extends CommonPageState<HomePage>
         if (!useNativeTopBar &&
             !_mainController.useSideBar &&
             MediaQuery.sizeOf(context).isPortrait)
-          customAppBar(theme),
+          customAppBar(theme)
+        else if (!useNativeTopBar)
+          SizedBox(height: MediaQuery.of(context).padding.top),
         if (!useNativeTopBar) tabBar,
         Expanded(
           child: onBuild(
@@ -122,17 +124,41 @@ class _HomePageState extends CommonPageState<HomePage>
         userAvatar(theme: theme, mainController: _mainController),
       ],
     );
+    final statusBarHeight = MediaQuery.of(context).padding.top;
     if (_homeController.hideTopBar) {
       if (_mainController.barOffset case final barOffset?) {
         return Obx(
           () {
             final offset = barOffset.value;
-            return CustomHeightWidget(
-              offset: Offset(0, -offset),
-              height: Style.topBarHeight - offset,
-              child: Padding(
-                padding: padding,
-                child: child,
+            return SizedBox(
+              height: statusBarHeight + Style.topBarHeight - offset,
+              child: Stack(
+                // 移除顶部安全区之后，在同步收起顶栏模式下需要保证顶栏有正确的遮挡关系。
+                children: [
+                  Positioned(
+                    // 必须同时指定 left/right：只指定 top 时 Stack 会给子组件
+                    // 无界宽度约束（Positioned 未指定宽度时 child 收到
+                    // unconstrained），CustomHeightWidget 会把 constraints.maxWidth
+                    // （Infinity）直接作为自身宽度，导致 size 为
+                    // Size(Infinity, ...)，Stack 计算其偏移时产生 NaN 坐标，
+                    // 内容不显示、滑动无法命中。
+                    top: statusBarHeight,
+                    left: 0,
+                    right: 0,
+                    child: CustomHeightWidget(
+                      offset: Offset(0, -offset),
+                      height: Style.topBarHeight - offset,
+                      child: Padding(
+                        padding: padding,
+                        child: child,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    height: statusBarHeight,
+                    color: theme.colorScheme.surface,
+                  ),
+                ],
               ),
             );
           },
@@ -141,15 +167,20 @@ class _HomePageState extends CommonPageState<HomePage>
       if (_homeController.showTopBar case final showTopBar?) {
         return Obx(() {
           final showSearchBar = showTopBar.value;
-          return AnimatedOpacity(
-            opacity: showSearchBar ? 1 : 0,
-            duration: const Duration(milliseconds: 300),
-            child: AnimatedContainer(
-              curve: Curves.easeInOutCubicEmphasized,
-              duration: const Duration(milliseconds: 500),
-              height: showSearchBar ? Style.topBarHeight : 0,
-              padding: padding,
-              child: child,
+          return Container(
+            padding: EdgeInsets.only(
+              top: statusBarHeight
+            ),
+            child: AnimatedOpacity(
+              opacity: showSearchBar ? 1 : 0,
+              duration: const Duration(milliseconds: 300),
+              child: AnimatedContainer(
+                curve: Curves.easeInOutCubicEmphasized,
+                duration: const Duration(milliseconds: 500),
+                height: showSearchBar ? Style.topBarHeight : 0,
+                padding: padding,
+                child: child,
+              ),
             ),
           );
         });

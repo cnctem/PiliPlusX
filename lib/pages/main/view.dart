@@ -534,7 +534,7 @@ class _MainAppState extends PopScopeState<MainApp>
     child = Scaffold(
       extendBody: true,
       resizeToAvoidBottomInset: false,
-      appBar: AppBar(toolbarHeight: 0),
+      // 去除AppBar，扩展安全区
       body: Padding(
         padding: EdgeInsets.only(
           left: _mainController.useBottomNav ? _padding.left : 0.0,
