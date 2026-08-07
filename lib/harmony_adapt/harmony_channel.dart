@@ -281,6 +281,10 @@ abstract class HarmonyChannel {
   static Future<void> initSystemFontWeight() =>
       _invoke('getSystemFontWeightScale');
 
+  /// 将应用内设定的主题颜色传递给原生层，用于原生层的深浅色模式感知
+  static Future<void> setSystemColorMode(String colorMode) =>
+      _invoke('setSystemColorMode', {'colorMode': colorMode});
+
   /// 横屏小窗的缩放比例固定值
   static const _miniWindowLandscapeScale = 0.75;
   static bool _landscape = false;

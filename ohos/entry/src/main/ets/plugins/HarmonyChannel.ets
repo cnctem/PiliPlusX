@@ -17,6 +17,12 @@ import {
 
 // import display from "@ohos.display";
 
+const colorModeMap: Record<string, ConfigurationConstant.ColorMode> = {
+  "light": ConfigurationConstant.ColorMode.COLOR_MODE_LIGHT,
+  "dark": ConfigurationConstant.ColorMode.COLOR_MODE_DARK,
+  "system": ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET,
+};
+
 export default class HarmonyChannel implements FlutterPlugin {
   private channel: MethodChannel | null = null;
   private lastWindow: window.Window | null = null;
@@ -132,7 +138,6 @@ export default class HarmonyChannel implements FlutterPlugin {
           break;
         }
         const hidden: boolean = call.argument('hidden') ?? false;
-        console.log(`is set tabs hidden: ${hidden}`);
         AppStorage.setOrCreate('shellBarsHidden', hidden);
         // 沉浸光感顶栏与底栏共用此显隐信号：底栏直接隐藏，
         // 顶栏按「是否首页 + 窗口宽高比」在 ArkTS 侧多级分支。
@@ -156,7 +161,6 @@ export default class HarmonyChannel implements FlutterPlugin {
           break;
         }
         const hidden: boolean = call.argument('hidden') ?? false;
-        console.log(`is set tabs scroll hidden: ${hidden}`);
         if (AppStorage.get('__scrollHidden') != hidden) {
           AppStorage.setOrCreate('__scrollHidden', hidden);
         }
@@ -239,6 +243,12 @@ export default class HarmonyChannel implements FlutterPlugin {
         result.success(true);
         break;
       }
+      case "setSystemColorMode": {
+        const colorMode: string = call.argument('colorMode') ?? '';
+        this.setColorMode(colorMode);
+        result.success(true);
+        break;
+      }
       // case 'setWindowLayoutFullScreen': {
       //   this.lastWindow ??= await window.getLastWindow(getContext())
       //   this.lastWindow.setWindowLayoutFullScreen(call.argument('fullScreen'));
@@ -248,6 +258,17 @@ export default class HarmonyChannel implements FlutterPlugin {
       default:
         result.notImplemented();
         break;
+    }
+  }
+
+  // 设置应用上下文的深浅色模式。
+  private setColorMode(colorMode: string): void {
+    try {
+      const context = getContext() as common.ApplicationContext;
+      context.setColorMode(colorModeMap[colorMode]);
+      console.log('HarmonyChannel', `set color mode: ${colorMode}`);
+    } catch (err) {
+      console.error("HarmonyChannel", `get application context failed: ${err}`);
     }
   }
 

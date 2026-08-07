@@ -890,6 +890,7 @@ Future<void> _showThemeTypeDialog(
     } catch (_) {}
     GStorage.setting.put(SettingBoxKey.themeMode, res.index);
     Get.changeThemeMode(ThemeUtils.themeMode = res.toThemeMode);
+    ThemeUtils.syncColorModeToNative();
     setState();
   }
 }

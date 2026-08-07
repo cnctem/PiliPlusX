@@ -5,6 +5,7 @@ import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/cupertino.dart' show CupertinoThemeData;
 import 'package:flutter/foundation.dart' show PlatformDispatcher;
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:os_type/os_type.dart';
 
 abstract final class ThemeUtils {
@@ -12,7 +13,25 @@ abstract final class ThemeUtils {
 
   static late ThemeData darkTheme;
 
-  static late ThemeMode themeMode;
+  static final Rx<ThemeMode> _themeMode = Pref.themeMode.obs;
+
+  /// 手动将当前主题模式通知给原生层（应用内切换主题模式的开关处调用）
+  static void syncColorModeToNative() {
+    if (!OS.isHarmony) return;
+    HarmonyChannel.setSystemColorMode(themeModeMap[_themeMode.value] ?? '');
+  }
+
+  static ThemeMode get themeMode => _themeMode.value;
+
+  static set themeMode(ThemeMode value) => _themeMode.value = value;
+
+  static Rx<ThemeMode> get themeModeRx => _themeMode;
+
+  static Map<ThemeMode, String> themeModeMap = {
+    ThemeMode.light: "light",
+    ThemeMode.dark: "dark",
+    ThemeMode.system: "system",
+  };
 
   static ThemeData get theme {
     if (themeMode == .dark ||
@@ -77,7 +96,9 @@ abstract final class ThemeUtils {
       fontWeight = FontWeight.values[appFontWeight];
     }
 
-    late final fontFamily = Pref.useBuiltInFont ? "HarmonyOS_Sans" : "HarmonyOS Sans";
+    late final fontFamily = Pref.useBuiltInFont
+        ? "HarmonyOS_Sans"
+        : "HarmonyOS Sans";
     late final textStyle = TextStyle(
       fontWeight: fontWeight,
       fontFamily: fontFamily,

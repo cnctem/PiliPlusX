@@ -266,6 +266,8 @@ void main() async {
       HarmonyChannel.checkPendingContinuation();
       // 获取系统初始字重值
       HarmonyChannel.initSystemFontWeight();
+      // 将当前主题颜色模式同步给原生层（Rx 初始值相同不触发监听，需显式同步）
+      ThemeUtils.syncColorModeToNative();
     });
   }
 }
