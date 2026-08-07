@@ -78,7 +78,7 @@ abstract final class PiliScheme {
         oid: oid,
       );
     } catch (_) {
-      return Future.value(false);
+      return Future.syncValue(false);
     }
   }
 

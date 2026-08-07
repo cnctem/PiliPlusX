@@ -29,10 +29,9 @@ class NativeTopSpacer extends StatelessWidget {
   static const double singleExpandedHeight = 55;
   static const double singleCollapsedHeight = 0;
 
-  /// ArkTS 顶栏自身的高度，须与 Index.ets 的 TOP_BAR_EXPANDED_HEIGHT /
-  /// TOP_BAR_COLLAPSED_HEIGHT 保持一致（顶栏从屏幕顶端起算，含状态栏）。
-  static const double barExpandedHeight = 144;
-  static const double barCollapsedHeight = 80;
+  /// ArkTS 顶栏自身的高度，含状态栏，用于启用原生顶栏时调整刷新指示器高度
+  static const double barExpandedHeight = 120;
+  static const double barCollapsedHeight = 65;
 
   /// 原生顶栏当前是否真正生效（响应式读取，供 Obx 依赖）。
   /// 仅鸿蒙的 _initHdsBar 会置位 nativeTopBarActive，无需再判平台；

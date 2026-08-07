@@ -241,61 +241,59 @@ struct Index {
   @Builder
   homeTopBar() {
     RelativeContainer() {
-      // 渐变模糊底层
-      Column() {}
-        .constraintSize({ maxHeight: TOP_BAR_EXPANDED_HEIGHT })
-        .linearGradientBlur(TOP_BAR_BLUR_RADIUS, {
-          fractionStops: TOP_BAR_FRACTION_STOPS,
-          direction: GradientDirection.Top
-        })
-        .alignRules({
-          top: { anchor: 'topBarContent', align: VerticalAlign.Top },
-          bottom: { anchor: 'topBarContent', align: VerticalAlign.Bottom },
-          left: { anchor: 'topBarContent', align: HorizontalAlign.Start },
-          right: { anchor: 'topBarContent', align: HorizontalAlign.End }
-        })
-        .id('topBarBg')
-        .hitTestBehavior(HitTestMode.Transparent)
+      //渐变模糊底层
+      Column() {
+      }
+      .constraintSize({ maxHeight: TOP_BAR_EXPANDED_HEIGHT })
+      .linearGradientBlur(TOP_BAR_BLUR_RADIUS, {
+        fractionStops: TOP_BAR_FRACTION_STOPS,
+        direction: GradientDirection.Top
+      })
+      .alignRules({
+        top: { anchor: 'topBarContent', align: VerticalAlign.Top },
+        bottom: { anchor: 'topBarContent', align: VerticalAlign.Bottom },
+        left: { anchor: 'topBarContent', align: HorizontalAlign.Start },
+        right: { anchor: 'topBarContent', align: HorizontalAlign.End }
+      })
+      .id('topBarBg')
+      .hitTestBehavior(HitTestMode.Transparent)
 
       Column() {
-        if (!(this.homeHideTopBar && this.topBarCollapsed)) {
-          Row({ space: 8 }) {
-            Search({
-              value: this.homeSearchText,
-              placeholder: '搜索',
+        Row({ space: 8 }) {
+          Search({ value: this.homeSearchText, placeholder: '搜索' })
+            .cancelButton({ style: CancelButtonStyle.INVISIBLE })
+            .focusable(false)
+            .enableKeyboardOnFocus(false)
+            .searchIcon(new SymbolGlyphModifier($r('sys.symbol.magnifyingglass'))
+              .fontColor([this.navSelected]).fontSize(16))
+            .placeholderColor($r('app.color.placeholder_text'))
+            .placeholderFont({ size: 16, weight: 600 })
+            .fontColor($r('app.color.placeholder_text'))
+            .textFont({ size: 16, weight: 600 })
+            .backgroundColor(Color.Transparent)
+            .borderRadius(22)
+            .layoutWeight(1)
+            .height(44)
+            .systemMaterial(topBarMaterial(true))
+            .onClick(() => {
+              this.context.eventHub.emit(EVENT_TOP_SEARCH);
             })
-              .cancelButton({
-                style: CancelButtonStyle.INVISIBLE,
-              })
-              .focusable(false)
-              .enableKeyboardOnFocus(false)
-              .searchIcon(new SymbolGlyphModifier($r('sys.symbol.magnifyingglass'))
-                .fontColor([this.navSelected])
-                .fontSize(16))
-              .placeholderColor($r('app.color.placeholder_text'))
-              .placeholderFont({ size: 16, weight: 600})
-              .fontColor($r('app.color.placeholder_text'))
-              .textFont({ size: 16, weight: 600})
-              .backgroundColor(Color.Transparent)
-              .borderRadius(22)
-              .layoutWeight(1)
-              .height(44)
-              .systemMaterial(topBarMaterial(true))
-              .onClick(() => {
-                this.context.eventHub.emit(EVENT_TOP_SEARCH);
-              })
-            this.msgButton()
-            this.avatarButton()
-          }
-          .width('100%')
-          .padding({ left: 14, right: 14, top: 0, bottom: 0 })
-          .transition(TransitionEffect.asymmetric(
-            TransitionEffect.translate({ y: -28 }).combine(TransitionEffect.OPACITY)
-              .animation({ duration: 220, curve: Curve.EaseOut }),
-            TransitionEffect.translate({ y: -28 }).combine(TransitionEffect.OPACITY)
-              .animation({ duration: 220, curve: Curve.EaseIn })
-          ))
+          this.msgButton()
+          this.avatarButton()
         }
+        .width('100%')
+        .padding({
+          left: 14,
+          right: 14,
+        })
+        .margin({
+          top: this.homeHideTopBar && this.topBarCollapsed ? 0 : 5,
+          bottom: this.homeHideTopBar && this.topBarCollapsed ? -5 : 5
+        })
+        .height(this.homeHideTopBar && this.topBarCollapsed ? 0 : 44)
+        .opacity(this.homeHideTopBar && this.topBarCollapsed ? 0 : 1)
+        .animation({ duration: 220, curve: Curve.EaseInOut })
+
         if (this.homeTabs.length > 1) {
           Tabs({ barPosition: BarPosition.Start, controller: this.categoryController }) {
             ForEach(this.homeTabs, (tab: string, index: number) => {
@@ -317,11 +315,13 @@ struct Index {
         }
       }
       .width('100%')
-      .padding({ top: this.statusBarHeight - 5 })
+      .padding({ top: this.statusBarHeight})
       .id('topBarContent')
       .hitTestBehavior(HitTestMode.Default)
     }
-    .height(this.homeHideTopBar && this.topBarCollapsed ? TOP_BAR_COLLAPSED_HEIGHT : TOP_BAR_EXPANDED_HEIGHT)
+    .height(this.homeHideTopBar && this.topBarCollapsed
+      ? TOP_BAR_COLLAPSED_HEIGHT
+      : TOP_BAR_EXPANDED_HEIGHT)
     .animation({ duration: 220, curve: Curve.EaseInOut })
     .width('100%')
     .hitTestBehavior(HitTestMode.Default)
