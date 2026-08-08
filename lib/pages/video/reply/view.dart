@@ -14,7 +14,6 @@ import 'package:PiliPlus/pages/video/reply/controller.dart';
 import 'package:PiliPlus/pages/video/reply/vote/reply_vote_item.dart';
 import 'package:PiliPlus/pages/video/reply/widgets/reply_item_grpc.dart';
 import 'package:PiliPlus/pages/video/reply_reply/view.dart';
-import 'package:PiliPlus/pages/video/widgets/keyboard_scrollable.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:material_ui/material_ui.dart';
@@ -26,15 +25,11 @@ class VideoReplyPanel extends StatefulWidget {
     this.replyLevel = 1,
     required this.heroTag,
     required this.isNested,
-    this.pageScrollController,
   });
 
   final int replyLevel;
   final String heroTag;
   final bool isNested;
-
-  /// 嵌套在页面滚动（竖屏）时由页面传入的整页滚动控制器，键盘滚动评论区用
-  final ScrollController? pageScrollController;
 
   @override
   State<VideoReplyPanel> createState() => _VideoReplyPanelState();
@@ -80,15 +75,11 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
         onRefresh: _videoReplyController.onRefresh,
         isClampingScrollPhysics: widget.isNested,
         child: ScaffoldLayout(
-          body: KeyboardScrollable(
+          body: CustomScrollView(
             controller: widget.isNested
-                ? widget.pageScrollController
+                ? null
                 : _videoReplyController.scrollController,
-            child: CustomScrollView(
-              controller: widget.isNested
-                  ? null
-                  : _videoReplyController.scrollController,
-              physics: const AlwaysScrollableScrollPhysics(),
+            physics: const AlwaysScrollableScrollPhysics(),
             key: const PageStorageKey(_VideoReplyPanelState),
             slivers: [
               SliverFloatingHeaderWidget(
@@ -127,7 +118,6 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
               ),
               Obx(() => _buildBody(_videoReplyController.loadingState.value)),
             ],
-            ),
           ),
           fab: SlideTransition(
             position: fabAnimation,

@@ -238,6 +238,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   /// 播放器键盘焦点：点/悬停视频区、切换 tab 时抢回，方向键恢复音量控制
   final playerFocusNode = FocusNode();
 
+  /// tab 内容区键盘焦点：切到内容 tab 时自动聚焦，方向键免点击滚动内容
+  final tabContentFocusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -537,6 +540,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     removeObserverMobile(this);
 
     playerFocusNode.dispose();
+    tabContentFocusNode.dispose();
     super.dispose();
   }
 
@@ -946,15 +950,19 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                 children: [
                   buildTabBar(onTap: videoDetailController.animToTop),
                   Expanded(
-                    child: tabBarView(
-                      hitTestBehavior: .translucent,
-                      controller: videoDetailController.tabCtr,
-                      children: [
-                        videoIntro(isHorizontal: false, needCtr: false),
-                        if (videoDetailController.showReply)
-                          videoReplyPanel(isNested: true),
-                        if (_shouldShowSeasonPanel) seasonPanel,
-                      ],
+                    child: wrapTabContent(
+                      tabBarView(
+                        hitTestBehavior: .translucent,
+                        controller: videoDetailController.tabCtr,
+                        children: [
+                          videoIntro(isHorizontal: false, needCtr: false),
+                          if (videoDetailController.showReply)
+                            videoReplyPanel(isNested: true),
+                          if (_shouldShowSeasonPanel) seasonPanel,
+                        ],
+                      ),
+                      // 竖屏：所有 tab 都滚整页
+                      resolveCtr: () => videoDetailController.scrollCtr,
                     ),
                   ),
                 ],
@@ -1165,16 +1173,19 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                 children: [
                   buildTabBar(),
                   Expanded(
-                    child: tabBarView(
-                      controller: videoDetailController.tabCtr,
-                      children: [
-                        videoIntro(
-                          width: introWidth,
-                          height: maxHeight,
-                        ),
-                        if (videoDetailController.showReply) videoReplyPanel(),
-                        if (_shouldShowSeasonPanel) seasonPanel,
-                      ],
+                    child: wrapTabContent(
+                      tabBarView(
+                        controller: videoDetailController.tabCtr,
+                        children: [
+                          videoIntro(
+                            width: introWidth,
+                            height: maxHeight,
+                          ),
+                          if (videoDetailController.showReply) videoReplyPanel(),
+                          if (_shouldShowSeasonPanel) seasonPanel,
+                        ],
+                      ),
+                      resolveCtr: _landscapeTabScrollCtr,
                     ),
                   ),
                 ],
@@ -1228,13 +1239,20 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                       children: [
                         buildTabBar(showIntro: false),
                         Expanded(
-                          child: tabBarView(
-                            controller: videoDetailController.tabCtr,
-                            children: [
-                              if (videoDetailController.showReply)
-                                videoReplyPanel(),
-                              if (_shouldShowSeasonPanel) seasonPanel,
-                            ],
+                          child: wrapTabContent(
+                            tabBarView(
+                              controller: videoDetailController.tabCtr,
+                              children: [
+                                if (videoDetailController.showReply)
+                                  videoReplyPanel(),
+                                if (_shouldShowSeasonPanel) seasonPanel,
+                              ],
+                            ),
+                            resolveCtr: () =>
+                                videoDetailController.showReply &&
+                                    videoDetailController.tabCtr.index == 0
+                                ? _videoReplyController.scrollController
+                                : null,
                           ),
                         ),
                       ],
@@ -1314,28 +1332,31 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                         : showIntro,
                   ),
                   Expanded(
-                    child: tabBarView(
-                      controller: videoDetailController.tabCtr,
-                      children: [
-                        if (videoDetailController.isFileSource)
-                          localIntroPanel()
-                        else if (showIntro)
-                          KeepAliveWrapper(
-                            child: CustomScrollView(
-                              key: const PageStorageKey(CommonIntroController),
-                              controller:
-                                  videoDetailController.effectiveIntroScrollCtr,
-                              slivers: [
-                                RelatedVideoPanel(
-                                  key: videoRelatedKey,
-                                  heroTag: heroTag,
-                                ),
-                              ],
+                    child: wrapTabContent(
+                      tabBarView(
+                        controller: videoDetailController.tabCtr,
+                        children: [
+                          if (videoDetailController.isFileSource)
+                            localIntroPanel()
+                          else if (showIntro)
+                            KeepAliveWrapper(
+                              child: CustomScrollView(
+                                key: const PageStorageKey(CommonIntroController),
+                                controller:
+                                    videoDetailController.effectiveIntroScrollCtr,
+                                slivers: [
+                                  RelatedVideoPanel(
+                                    key: videoRelatedKey,
+                                    heroTag: heroTag,
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        if (videoDetailController.showReply) videoReplyPanel(),
-                        if (_shouldShowSeasonPanel) seasonPanel,
-                      ],
+                          if (videoDetailController.showReply) videoReplyPanel(),
+                          if (_shouldShowSeasonPanel) seasonPanel,
+                        ],
+                      ),
+                      resolveCtr: _landscapeTabScrollCtr,
                     ),
                   ),
                 ],
@@ -1681,6 +1702,33 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     return VideoPageHeroTarget(tag: heroTag, child: page);
   }
 
+  /// 包住 tab 内容区：方向键滚动当前激活 tab 的内容。
+  /// [resolveCtr] 按布局分支返回该 tab 的滚动目标，null 时放行（音量控制）
+  Widget wrapTabContent(
+    Widget child, {
+    required ScrollController? Function() resolveCtr,
+  }) {
+    return KeyboardScrollable(
+      controller: resolveCtr,
+      focusNode: tabContentFocusNode,
+      child: child,
+    );
+  }
+
+  /// 横屏 tab 滚动目标：简介/相关视频 → 简介滚动，评论 → 评论滚动
+  ScrollController? _landscapeTabScrollCtr() {
+    switch (videoDetailController.tabCtr.index) {
+      case 0:
+        return videoDetailController.effectiveIntroScrollCtr;
+      case 1:
+        return videoDetailController.showReply
+            ? _videoReplyController.scrollController
+            : null;
+      default:
+        return null;
+    }
+  }
+
   Widget buildTabBar({
     bool needIndicator = true,
     String? introText,
@@ -1718,9 +1766,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             TabBarTheme.of(context).labelStyle?.copyWith(fontSize: 13) ??
             const TextStyle(fontSize: 13),
         onTap: (value) {
-          // 切换 tab 归还键盘焦点给播放器（方向键恢复音量控制）
+          // 切 tab 后免点击直接支持方向键滚动：焦点交给 tab 内容区
           if (value != videoDetailController.tabCtr.index) {
-            playerFocusNode.requestFocus();
+            tabContentFocusNode.requestFocus();
           }
           void animToTop() {
             if (onTap != null) {
@@ -2012,26 +2060,21 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   Widget localIntroPanel({
     bool needCtr = true,
   }) {
-    return KeyboardScrollable(
+    return CustomScrollView(
       controller: needCtr
           ? videoDetailController.effectiveIntroScrollCtr
-          : videoDetailController.scrollCtr,
-      child: CustomScrollView(
-        controller: needCtr
-            ? videoDetailController.effectiveIntroScrollCtr
-            : null,
-        physics: !needCtr ? platformAlwaysClampingPhysics : null,
-        key: const PageStorageKey(CommonIntroController),
-        slivers: [
-          SliverPadding(
-            padding: EdgeInsets.only(top: 7, bottom: padding.bottom + 100),
-            sliver: LocalIntroPanel(
-              key: videoRelatedKey,
-              heroTag: heroTag,
-            ),
+          : null,
+      physics: !needCtr ? platformAlwaysClampingPhysics : null,
+      key: const PageStorageKey(CommonIntroController),
+      slivers: [
+        SliverPadding(
+          padding: EdgeInsets.only(top: 7, bottom: padding.bottom + 100),
+          sliver: LocalIntroPanel(
+            key: videoRelatedKey,
+            heroTag: heroTag,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -2270,7 +2313,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     key: videoReplyPanelKey,
     isNested: isNested,
     heroTag: heroTag,
-    pageScrollController: isNested ? videoDetailController.scrollCtr : null,
   );
 
   // ai总结
