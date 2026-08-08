@@ -49,6 +49,7 @@ import 'package:PiliPlus/pages/video/member/view.dart';
 import 'package:PiliPlus/pages/video/related/view.dart';
 import 'package:PiliPlus/pages/video/reply/controller.dart';
 import 'package:PiliPlus/pages/video/reply/view.dart';
+import 'package:PiliPlus/pages/video/widgets/keyboard_scrollable.dart';
 import 'package:PiliPlus/pages/video/view_point/view.dart';
 import 'package:PiliPlus/pages/video/widgets/header_control.dart';
 import 'package:PiliPlus/pages/video/widgets/player_focus.dart';
@@ -233,6 +234,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   /// 当前应用生命周期状态
   AppLifecycleState _lifecycleState = AppLifecycleState.resumed;
+
+  /// 播放器键盘焦点：点/悬停视频区、切换 tab 时抢回，方向键恢复音量控制
+  final playerFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -532,6 +536,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     }
     removeObserverMobile(this);
 
+    playerFocusNode.dispose();
     super.dispose();
   }
 
@@ -1657,6 +1662,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         plPlayerController: videoDetailController.plPlayerController,
         introController: introController,
         onSendDanmaku: videoDetailController.showShootDanmakuSheet,
+        focusNode: playerFocusNode,
         canPlay: () {
           if (videoDetailController.autoPlay) {
             return true;
@@ -1698,23 +1704,37 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       );
     }
 
-    final flag = !needIndicator || tabs.length == 1;
-    Widget tabBar() => TabBar(
-      labelColor: flag ? colorScheme.onSurface : null,
-      indicator: flag ? const BoxDecoration() : null,
-      padding: EdgeInsets.zero,
-      controller: videoDetailController.tabCtr,
-      labelStyle:
-          TabBarTheme.of(context).labelStyle?.copyWith(fontSize: 13) ??
-          const TextStyle(fontSize: 13),
-      labelPadding: const EdgeInsets.symmetric(horizontal: 10.0),
-      dividerColor: Colors.transparent,
-      dividerHeight: 0,
-      onTap: (value) {
-        void animToTop() {
-          if (onTap != null) {
-            onTap();
-            return;
+    Widget tabBar() {
+      final flag = !needIndicator || tabs.length == 1;
+      return TabBar(
+        padding: .zero,
+        dividerHeight: 0,
+        labelPadding: .zero,
+        dividerColor: Colors.transparent,
+        controller: videoDetailController.tabCtr,
+        indicator: flag ? const BoxDecoration() : null,
+        labelColor: flag ? colorScheme.onSurface : null,
+        labelStyle:
+            TabBarTheme.of(context).labelStyle?.copyWith(fontSize: 13) ??
+            const TextStyle(fontSize: 13),
+        onTap: (value) {
+          // 切换 tab 归还键盘焦点给播放器（方向键恢复音量控制）
+          if (value != videoDetailController.tabCtr.index) {
+            playerFocusNode.requestFocus();
+          }
+          void animToTop() {
+            if (onTap != null) {
+              onTap();
+              return;
+            }
+            String text = tabs[value];
+            if (videoDetailController.isFileSource ||
+                text == '简介' ||
+                text == '相关视频') {
+              videoDetailController.introScrollCtr?.animToTop();
+            } else if (text.startsWith('评论')) {
+              _videoReplyController.animateToTop();
+            }
           }
           String text = tabs[value];
           if (videoDetailController.isFileSource ||
@@ -1825,7 +1845,12 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   Widget videoPlayer({required double width, required double height}) {
     final isFullScreen = this.isFullScreen;
-    return Stack(
+    // 点/悬停视频区 → 归还键盘焦点给播放器（方向键恢复音量控制）
+    return MouseRegion(
+      onEnter: (_) => playerFocusNode.requestFocus(),
+      child: Listener(
+        onPointerDown: (_) => playerFocusNode.requestFocus(),
+        child: Stack(
       clipBehavior: Clip.none,
       children: [
         const Positioned.fill(
@@ -1979,27 +2004,34 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
           },
         ),
       ],
+        ),
+      ),
     );
   }
 
   Widget localIntroPanel({
     bool needCtr = true,
   }) {
-    return CustomScrollView(
+    return KeyboardScrollable(
       controller: needCtr
           ? videoDetailController.effectiveIntroScrollCtr
-          : null,
-      physics: !needCtr ? platformAlwaysClampingPhysics : null,
-      key: const PageStorageKey(CommonIntroController),
-      slivers: [
-        SliverPadding(
-          padding: EdgeInsets.only(top: 7, bottom: padding.bottom + 100),
-          sliver: LocalIntroPanel(
-            key: videoRelatedKey,
-            heroTag: heroTag,
+          : videoDetailController.scrollCtr,
+      child: CustomScrollView(
+        controller: needCtr
+            ? videoDetailController.effectiveIntroScrollCtr
+            : null,
+        physics: !needCtr ? platformAlwaysClampingPhysics : null,
+        key: const PageStorageKey(CommonIntroController),
+        slivers: [
+          SliverPadding(
+            padding: EdgeInsets.only(top: 7, bottom: padding.bottom + 100),
+            sliver: LocalIntroPanel(
+              key: videoRelatedKey,
+              heroTag: heroTag,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -2070,8 +2102,16 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
           ),
         ],
       );
-      return KeepAliveWrapper(child: child);
+      return KeepAliveWrapper(
+        child: KeyboardScrollable(
+          controller: needCtr
+              ? videoDetailController.effectiveIntroScrollCtr
+              : videoDetailController.scrollCtr,
+          child: child,
+        ),
+      );
     }
+
 
     if (videoDetailController.isPlayAll) {
       return Stack(
@@ -2230,6 +2270,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     key: videoReplyPanelKey,
     isNested: isNested,
     heroTag: heroTag,
+    pageScrollController: isNested ? videoDetailController.scrollCtr : null,
   );
 
   // ai总结

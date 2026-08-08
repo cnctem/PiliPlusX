@@ -445,6 +445,10 @@ class MyApp extends StatelessWidget {
         );
       }
     });
+    final backDetector = BackDetector(
+      onBack: _onBack,
+      child: child!,
+    );
     if (PlatformUtils.isDesktop) {
       return Focus(
         canRequestFocus: false,
@@ -476,24 +480,10 @@ class MyApp extends StatelessWidget {
           }
           return KeyEventResult.ignored;
         },
-        child: BackDetector(
-          onBack: _onBack,
-          child: child,
-        ),
+        child: backDetector,
       );
     }
-    // child = Stack(
-    //   children: [
-    //     child,
-    //      const Center(
-    //       child: ElevatedButton(
-    //         onPressed: toggleSystemBar,
-    //         child: Text('测试'),
-    //       ),
-    //     ),
-    //   ],
-    // );
-    return child;
+    return backDetector;
   }
 
   /// from [DynamicColorBuilderState.initPlatformState]
