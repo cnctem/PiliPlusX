@@ -6,9 +6,9 @@ import 'package:flutter/services.dart';
 /// 让一块区域支持键盘滚动（tab 驱动）。
 ///
 /// 包住整个 tab 内容区后，切到内容 tab 即自动获得焦点，方向键 / PgUp / PgDn
-/// 滚动当前激活 tab 的内容（[controller] 按状态返回对应滚动控制器），Home/End
-/// 跳转首尾；方向键支持长按连续滚动。点/悬停视频区会把焦点归还给播放器，
-/// 方向键恢复音量控制。[controller] 返回 null 时放行按键（冒泡给 PlayerFocus）。
+/// 滚动当前激活 tab 的内容（[controller] 按状态返回对应滚动控制器），方向键
+/// 长按持续滚动。点/悬停视频区会把焦点归还给播放器，方向键恢复音量控制。
+/// [controller] 返回 null 时放行按键（冒泡给 PlayerFocus）。
 class KeyboardScrollable extends StatefulWidget {
   const KeyboardScrollable({
     super.key,
@@ -34,6 +34,7 @@ class _KeyboardScrollableState extends State<KeyboardScrollable> {
   Timer? _repeatTimer;
 
   static const double _arrowStep = 60;
+  static const Duration _repeatDelay = Duration(milliseconds: 400);
   static const Duration _repeatInterval = Duration(milliseconds: 80);
 
   @override
@@ -63,22 +64,18 @@ class _KeyboardScrollableState extends State<KeyboardScrollable> {
   void _scrollBy(double delta) {
     final ctr = widget.controller();
     if (ctr == null || !ctr.hasClients) return;
-    final target = (ctr.offset + delta).clamp(
-      ctr.position.minScrollExtent,
-      ctr.position.maxScrollExtent,
-    );
-    ctr.animateTo(
-      target,
-      duration: const Duration(milliseconds: 100),
-      curve: Curves.easeOut,
-    );
+    // 走滚轮同路径：ExtendedNestedScrollView 的 animateTo 会把内层内容重置到
+    // 顶部（nestOffset 对范围内值返回 inner.minScrollExtent），pointerScroll
+    // 则正确分配 delta（竖屏滚轮正常即走此路径）
+    ctr.position.pointerScroll(delta);
   }
 
   void _startRepeat(double delta) {
-    // OS 按键重复会不断重启此定时器，行为等价"按一下滚一下"；
-    // OS 不重复时由它保证长按持续滚动
+    // 先等待长按阈值再进入连续滚动，短按不会被误判为长按
     _repeatTimer?.cancel();
-    _repeatTimer = Timer.periodic(_repeatInterval, (_) => _scrollBy(delta));
+    _repeatTimer = Timer(_repeatDelay, () {
+      _repeatTimer = Timer.periodic(_repeatInterval, (_) => _scrollBy(delta));
+    });
   }
 
   void _stopRepeat() {
@@ -90,9 +87,7 @@ class _KeyboardScrollableState extends State<KeyboardScrollable> {
       key == LogicalKeyboardKey.arrowUp ||
       key == LogicalKeyboardKey.arrowDown ||
       key == LogicalKeyboardKey.pageUp ||
-      key == LogicalKeyboardKey.pageDown ||
-      key == LogicalKeyboardKey.home ||
-      key == LogicalKeyboardKey.end;
+      key == LogicalKeyboardKey.pageDown;
 
   KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
     final key = event.logicalKey;
@@ -122,16 +117,6 @@ class _KeyboardScrollableState extends State<KeyboardScrollable> {
           if (ctr != null && ctr.hasClients) {
             _scrollBy(ctr.position.viewportDimension * 0.9);
             _startRepeat(ctr.position.viewportDimension * 0.9);
-          }
-          break;
-        case LogicalKeyboardKey.home:
-          if (ctr != null && ctr.hasClients) {
-            ctr.jumpTo(ctr.position.minScrollExtent);
-          }
-          break;
-        case LogicalKeyboardKey.end:
-          if (ctr != null && ctr.hasClients) {
-            ctr.jumpTo(ctr.position.maxScrollExtent);
           }
           break;
       }
