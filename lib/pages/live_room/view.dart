@@ -567,7 +567,9 @@ class _LiveRoomPageState extends State<LiveRoomPage>
 
   PreferredSizeWidget _buildAppBar(bool isFullScreen) {
     return AppBar(
-      primary: !plPlayerController.removeSafeArea,
+      // 全屏时不要吃掉状态栏高度（primary 默认会加 SafeArea），
+      // 否则状态栏显隐会带动整个正文位移，直播画面跳动。
+      primary: isFullScreen ? false : !plPlayerController.removeSafeArea,
       toolbarHeight: isFullScreen ? 0 : null,
       backgroundColor: Colors.transparent,
       foregroundColor: Colors.white,

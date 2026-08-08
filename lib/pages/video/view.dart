@@ -121,6 +121,20 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   bool get isFullScreen =>
       videoDetailController.plPlayerController.isFullScreen.value;
 
+  /// 横版视频在“竖屏窗口 + 全屏”是旋转退出全屏时的瞬态
+  /// （窗口已转回竖屏、全屏状态尚未退出）。此时按普通页面布局渲染，
+  /// 避免“竖屏全屏居中”一闪后跳到页面顶部播放位。
+  /// 强制竖屏/不改变方向模式下竖屏全屏是稳定状态，不适用。
+  bool get _layoutFullScreen {
+    if (!isFullScreen) return false;
+    final invalidPortraitFullScreen =
+        isPortrait &&
+        !videoDetailController.isVertical.value &&
+        videoDetailController.plPlayerController.mode != FullScreenMode.none &&
+        videoDetailController.plPlayerController.mode != FullScreenMode.vertical;
+    return !invalidPortraitFullScreen;
+  }
+
   bool get _shouldShowSeasonPanel {
     if (videoDetailController.isFileSource ||
         isPortrait ||
@@ -518,6 +532,11 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     } else {
       padding = MediaQuery.viewPaddingOf(context);
     }
+    // 顶部间距固定为首次捕获的状态栏高度：状态栏显隐不再改变页面布局，
+    // 避免旋转退出全屏时状态栏在动画末尾显现导致画面下移。
+    if (padding.top > 0) {
+      _fixedTopInset ??= padding.top;
+    }
 
     final size = MediaQuery.sizeOf(context);
     maxWidth = size.width;
@@ -632,27 +651,52 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         });
       } else if (isPortrait &&
           isFullScreen &&
-          !player.isManualFS &&
-          !player.controlsLock.value) {
+          // 鸿蒙手动进全屏（auto/ratio/gravity 等）同样跟随传感器转屏，
+          // 手机转回竖屏时窗口会跟着转回，需要自动退出全屏；
+          // 强制竖屏/不旋转模式除外（竖屏全屏是稳定目标状态）。
+          (!player.isManualFS ||
+              (OS.isHarmony &&
+                  player.mode != FullScreenMode.none &&
+                  player.mode != FullScreenMode.vertical)) &&
+          !player.controlsLock.value &&
+          // 竖屏视频自动进全屏后跟随设备方向：转回竖屏时保持竖屏全屏，
+          // 不退出（对齐上游安卓效果）；非竖屏视频仍按原逻辑转回竖屏即退出
+          !videoDetailController.isVertical.value) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          player.triggerFullScreen(status: false);
+          player.triggerFullScreen(status: false, isManualFS: false);
         });
       }
     }
     return Obx(
       () {
-        final isFullScreen = this.isFullScreen;
+        final isFullScreen = _layoutFullScreen;
         return SimpleScaffold(
           appBar: removeAppBar(isFullScreen)
               ? null
               : PreferredSize(
-                  preferredSize: const Size.fromHeight(0),
+                  preferredSize: Size.fromHeight(
+                    isFullScreen
+                        ? 0
+                        : (isPortrait
+                            ? (_fixedTopInset ?? padding.top)
+                            : padding.top),
+                  ),
                   child: Obx(
                     () {
                       final scrollRatio =
                           videoDetailController.scrollRatio.value;
                       return AppBar(
-                        toolbarHeight: 0,
+                        // 视频详情页不需要 AppBar 自动返回键（左上角会叠在状态栏上）。
+                        automaticallyImplyLeading: false,
+                        toolbarHeight: isFullScreen
+                            ? 0
+                            : (isPortrait
+                                ? (_fixedTopInset ?? padding.top)
+                                : padding.top),
+                        // 顶部间距显式控制：竖屏用固定值（首次状态栏高度），
+                        // 横屏用实时 padding，不再依赖 primary 隐式加 SafeArea，
+                        // 避免状态栏显隐带动正文位移。
+                        primary: false,
                         backgroundColor: isPortrait && scrollRatio > 0
                             ? Color.lerp(
                                 Colors.black,
@@ -680,8 +724,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             controller: videoDetailController.scrollCtr,
             onlyOneScrollInBody: true,
             pinnedHeaderSliverHeightBuilder: () {
-              double pinnedHeight = this.isFullScreen || !isPortrait
-                  ? maxHeight - (isWindowMode && !isPortrait ? 0 : padding.top)
+              double pinnedHeight = isFullScreen || !isPortrait
+                  ? _landscapeHeight
                   : videoDetailController.isExpanding ||
                         videoDetailController.isCollapsing
                   ? videoDetailController.animHeight
@@ -707,7 +751,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             },
             headerSliverBuilder: (context, innerBoxIsScrolled) {
               final height = isFullScreen || !isPortrait
-                  ? maxHeight - (isWindowMode && !isPortrait ? 0 : padding.top)
+                  ? _landscapeHeight
                   : videoDetailController.isExpanding ||
                         videoDetailController.isCollapsing
                   ? videoDetailController.animHeight
@@ -910,7 +954,16 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       return SimpleScaffold(
         appBar: removeAppBar(isFullScreen)
             ? null
-            : AppBar(backgroundColor: Colors.black, toolbarHeight: 0),
+            : AppBar(
+                backgroundColor: Colors.black,
+                automaticallyImplyLeading: false,
+                toolbarHeight: isFullScreen
+                    ? 0
+                    : (isPortrait
+                        ? (_fixedTopInset ?? padding.top)
+                        : padding.top),
+                primary: false,
+              ),
         body: Padding(
           padding: isFullScreen
               ? EdgeInsets.zero
@@ -922,7 +975,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   );
 
   Widget childSplit(double ratio) {
-    final double videoHeight = maxHeight - padding.vertical;
+    final double videoHeight =
+        isFullScreen ? maxHeight : maxHeight - padding.vertical;
     final double width = videoHeight * ratio;
     final videoWidth = isFullScreen ? maxWidth : width;
     final introWidth = maxWidth - width - padding.horizontal;
@@ -1045,7 +1099,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     final videoWidth = isFullScreen ? maxWidth : width;
     final double height = width / Style.aspectRatio16x9;
     final videoHeight = isFullScreen
-        ? maxHeight - (isWindowMode && !isPortrait ? 0 : padding.top)
+        ? maxHeight
         : height;
     if (height > maxHeight) {
       return childSplit(Style.aspectRatio16x9);
@@ -1134,11 +1188,17 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   }
 
   Widget get childWhenDisabledAlmostSquare => Obx(() {
-    final isFullScreen = this.isFullScreen;
+    final isFullScreen = _layoutFullScreen;
     return SimpleScaffold(
       appBar: removeAppBar(isFullScreen)
           ? null
-          : AppBar(backgroundColor: Colors.black, toolbarHeight: 0),
+          : AppBar(
+              backgroundColor: Colors.black,
+              automaticallyImplyLeading: false,
+              toolbarHeight:
+                  isFullScreen ? 0 : (_fixedTopInset ?? padding.top),
+              primary: false,
+            ),
       body: Padding(
         padding: isFullScreen
             ? EdgeInsets.zero
@@ -1168,7 +1228,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     final shouldShowSeasonPanel = _shouldShowSeasonPanel;
     final double height = maxHeight / 2.5;
     final videoHeight = isFullScreen
-        ? maxHeight - (isWindowMode && !isPortrait ? 0 : padding.top)
+        ? maxHeight
         : height;
     final bottomHeight = maxHeight - height - padding.top;
     return Column(
@@ -1399,6 +1459,16 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   late double maxHeight;
   bool isWindowMode = false;
   late EdgeInsets padding;
+  /// 顶部间距固定值：首次捕获的状态栏高度（逻辑像素）。
+  /// 状态栏显隐不再改变页面布局，避免旋转退出全屏时状态栏在动画末尾
+  /// 显现导致画面下移。null 表示未捕获到（如移除安全边距场景），退化为 0。
+  double? _fixedTopInset;
+
+  /// 横屏/全屏时的视频区域高度：全屏时固定为窗口高度，
+  /// 不随系统栏显隐导致的 padding 变化而变，避免旋转后画面跳动。
+  double get _landscapeHeight => isFullScreen
+      ? maxHeight
+      : maxHeight - (isWindowMode && !isPortrait ? 0 : padding.top);
 
   @override
   Widget build(BuildContext context) {

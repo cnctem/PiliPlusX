@@ -433,7 +433,9 @@ class _MainAppState extends PopScopeState<MainApp>
         ? context.isTablet && _mainController.optTabletNav
               ? Column(
                   children: [
-                    const SizedBox(height: 25),
+                    SizedBox(
+                      height: MediaQuery.paddingOf(context).top + 25,
+                    ),
                     userAndSearchVertical(theme),
                     const Spacer(flex: 2),
                     Expanded(

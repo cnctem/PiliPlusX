@@ -1634,6 +1634,7 @@ class PlPlayerController with BlockConfigMixin {
   Future<void>? changeOrientation({
     required bool isVertical,
     DeviceOrientation? orientation,
+    bool isManualFS = true,
   }) async {
     if (orientation == null && mode == .none) {
       return;
@@ -1641,6 +1642,14 @@ class PlPlayerController with BlockConfigMixin {
     if (orientation == null && mode == .gravity) {
       // 上游的 gravity 依赖方向监听器主动转屏，鸿蒙无该插件，改为放开四方向交给系统
       return OS.isHarmony ? harmonyFullAutoMode() : null;
+    }
+    // 自动进全屏（倾斜手机触发，isManualFS=false）时不再把窗口强制转到视频方向：
+    // 保持设备当前方向、窗口跟随重力旋转——竖屏视频横向倾斜后停在横屏全屏，
+    // 转回竖屏时停在竖屏全屏（对齐上游安卓效果）。只有手动进全屏才转到视频方向。
+    if (orientation == null &&
+        !isManualFS &&
+        (mode == .auto || mode == .ratio)) {
+      return;
     }
     final bool toPortrait =
         orientation == null &&
@@ -1710,14 +1719,40 @@ class PlPlayerController with BlockConfigMixin {
           await changeOrientation(
             isVertical: isVertical,
             orientation: orientation,
+            isManualFS: isManualFS,
           );
+          if (OS.isHarmony && isManualFS) {
+            // 手动进全屏的目标方向：横屏时等视口真正变横屏再置全屏布局，
+            // 避免全屏先在竖屏/中间尺寸渲染，导致比例错误和动画跳变。
+            final targetLandscape =
+                orientation != null ||
+                switch (mode) {
+                  .vertical => false,
+                  .horizontal => true,
+                  .auto => !isVertical,
+                  .ratio => !isVertical && screenRatio >= kScreenRatio,
+                  _ => false,
+                };
+            if (targetLandscape) {
+              await _waitForLandscapeViewport();
+            }
+          }
         } else {
           await enterDesktopFullScreen(inAppFullScreen: inAppFullScreen);
         }
       } else {
         if (PlatformUtils.isMobile) {
           if (!removeSafeArea) {
-            showSystemBar('controller_fullscreen_exit');
+            if (OS.isHarmony && isManualFS) {
+              // 手动退出：先恢复系统栏并等安全区变化在 Flutter 侧落定，
+              // 再旋转并切回普通布局，避免普通页 AppBar 在旋转结束后才增长。
+              // 自动退出（旋转回正触发）时旋转已在途中，跳过等待，
+              // 让状态栏变化被旋转动画盖住。
+              await showSystemBar('controller_fullscreen_exit');
+              await Future<void>.delayed(kSystemBarSettleDelay);
+            } else {
+              showSystemBar('controller_fullscreen_exit');
+            }
           }
           if (orientation == null && mode == .none) {
             return;
@@ -1730,6 +1765,21 @@ class PlPlayerController with BlockConfigMixin {
     } finally {
       _setFullScreen(status);
       _fsProcessing = false;
+    }
+  }
+
+  /// 等待平台视口旋转为横屏（宽>高），带超时兜底。
+  Future<void> _waitForLandscapeViewport({
+    Duration timeout = const Duration(milliseconds: 600),
+  }) async {
+    final views = WidgetsBinding.instance.platformDispatcher.views;
+    if (views.isEmpty) return;
+    final view = views.first;
+    final stopwatch = Stopwatch()..start();
+    while (stopwatch.elapsedMilliseconds < timeout.inMilliseconds) {
+      final size = view.physicalSize;
+      if (size.width > size.height) return;
+      await Future<void>.delayed(const Duration(milliseconds: 16));
     }
   }
 

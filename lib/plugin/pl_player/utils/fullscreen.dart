@@ -9,6 +9,11 @@ import 'package:flutter/services.dart'
     show SystemChrome, MethodChannel, SystemUiOverlay, DeviceOrientation;
 import 'package:os_type/os_type.dart';
 
+/// 鸿蒙侧系统栏显隐后，安全区变化传到 Flutter（MediaQuery padding）需要数帧。
+/// 退出全屏时等待该时长再旋转/切回普通布局，避免普通页 AppBar 在旋转结束后
+/// 才“长高”导致整体下移一跳。
+const Duration kSystemBarSettleDelay = Duration(milliseconds: 120);
+
 bool _isDesktopFullScreen = false;
 
 @pragma('vm:notify-debugger-on-exception')
@@ -144,6 +149,10 @@ Future<void>? hideSystemBar() {
     return null;
   }
   _showSystemBar = false;
+  if (OS.isHarmony) {
+    // 只切换系统栏显隐，不改窗口布局，避免 Flutter 视口尺寸变化导致画面跳动。
+    return HarmonyChannel.setFullScreenBars(true);
+  }
   return SystemChrome.setEnabledSystemUIMode(.immersiveSticky);
 }
 
@@ -154,6 +163,9 @@ Future<void>? showSystemBar(String reason) {
   }
   _showSystemBar = true;
   debugPrint('showSystemBar: $reason');
+  if (OS.isHarmony) {
+    return HarmonyChannel.setFullScreenBars(false);
+  }
   return SystemChrome.setEnabledSystemUIMode(
     Platform.isAndroid && DeviceUtils.sdkInt < 29 ? .manual : .edgeToEdge,
     overlays: SystemUiOverlay.values,
@@ -171,6 +183,9 @@ void restoreSystemBarIfHidden() {
 
 Future<void> toggleSystemBar() {
   _showSystemBar = !_showSystemBar;
+  if (OS.isHarmony) {
+    return HarmonyChannel.setFullScreenBars(!_showSystemBar);
+  }
   return SystemChrome.setEnabledSystemUIMode(
     _showSystemBar ? .edgeToEdge : .immersiveSticky,
   );
