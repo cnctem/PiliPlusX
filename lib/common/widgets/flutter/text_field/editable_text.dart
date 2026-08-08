@@ -26,6 +26,7 @@ import 'package:PiliPlus/common/widgets/flutter/text_field/editable.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/spell_check.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/text_selection.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
+import 'package:PiliPlus/utils/share_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart'
@@ -2754,6 +2755,11 @@ class EditableTextState extends State<EditableText>
       textEditingValue.text,
     );
     if (text.isNotEmpty) {
+      // ohos未实现Share.invoke，改用ShareUtils分享。
+      if (defaultTargetPlatform == TargetPlatform.ohos) {
+        ShareUtils.shareText(text);
+        return;
+      }
       await SystemChannels.platform.invokeMethod('Share.invoke', text);
     }
   }
