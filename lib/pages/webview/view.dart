@@ -8,6 +8,7 @@ import 'package:PiliPlus/utils/cache_manager.dart';
 import 'package:PiliPlus/utils/login_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -74,9 +75,8 @@ class _WebviewPageState extends State<WebviewPage> {
   @override
   Widget build(BuildContext context) {
     if (Platform.isLinux) {
-      return Scaffold(
+      return SimpleScaffold(
         appBar: AppBar(),
-        resizeToAvoidBottomInset: false,
         body: Center(
           child: TextButton(
             onPressed: () => PageUtils.launchURL(_url),
@@ -85,7 +85,7 @@ class _WebviewPageState extends State<WebviewPage> {
         ),
       );
     }
-    return Scaffold(
+    return SimpleScaffold(
       appBar: widget.url != null
           ? null
           : AppBar(

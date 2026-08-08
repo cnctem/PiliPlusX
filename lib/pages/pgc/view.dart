@@ -21,6 +21,7 @@ import 'package:PiliPlus/pages/pgc_index/view.dart';
 import 'package:PiliPlus/pages/pgc_index/widgets/pgc_card_v_pgc_index.dart';
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/grid.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -250,8 +251,7 @@ class _PgcPageState extends State<PgcPage> with AutomaticKeepAliveClientMixin {
                 ];
                 List<int> types = const [102, 2, 5, 3, 7];
                 Get.to(
-                  Scaffold(
-                    resizeToAvoidBottomInset: false,
+                  SimpleScaffold(
                     appBar: AppBar(title: const Text('索引')),
                     body: DefaultTabController(
                       length: types.length,

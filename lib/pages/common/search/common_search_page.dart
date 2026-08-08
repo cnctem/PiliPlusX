@@ -5,6 +5,7 @@ import 'package:PiliPlus/common/widgets/view_sliver_safe_area.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/pages/common/multi_select/base.dart';
 import 'package:PiliPlus/pages/common/search/common_search_controller.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -36,7 +37,7 @@ abstract class CommonSearchPageState<S extends StatefulWidget, R, T>
   }
 
   Widget _build(bool multiSelect) {
-    return Scaffold(
+    return SimpleScaffold(
       appBar: _buildBar(multiSelect),
       body: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),

@@ -8,6 +8,7 @@ import 'package:PiliPlus/pages/fav/topic/controller.dart';
 import 'package:PiliPlus/pages/fav/video/controller.dart';
 import 'package:PiliPlus/pages/fav_folder_sort/view.dart';
 import 'package:PiliPlus/utils/extension/scroll_controller_ext.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
@@ -51,8 +52,7 @@ class _FavPageState extends State<FavPage> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(
         title: const Text('我的收藏'),
         actions: [

@@ -13,6 +13,7 @@ import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show FilteringTextInputFormatter;
@@ -479,8 +480,7 @@ class _SponsorBlockPageState extends State<SponsorBlockPage> {
       ),
     );
 
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(title: const Text('空降助手')),
       body: CustomScrollView(
         slivers: [

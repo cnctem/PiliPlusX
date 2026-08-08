@@ -11,6 +11,7 @@ import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -515,7 +516,7 @@ class _LoginPageState extends State<LoginPage> {
         MediaQuery.viewPaddingOf(context).copyWith(top: 0) +
         const EdgeInsets.only(bottom: 25);
     final isLandscape = !MediaQuery.sizeOf(context).isPortrait;
-    return Scaffold(
+    return SimpleScaffold(
       appBar: AppBar(
         leading: IconButton(
           tooltip: '关闭',

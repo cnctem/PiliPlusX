@@ -24,6 +24,7 @@ import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart' hide TextField;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
@@ -56,8 +57,7 @@ class _WhisperDetailPageState
       theme.hoverColor,
       1,
     );
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(
         title: GestureDetector(
           behavior: HitTestBehavior.opaque,

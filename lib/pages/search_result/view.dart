@@ -8,6 +8,7 @@ import 'package:PiliPlus/pages/search_panel/pgc/view.dart';
 import 'package:PiliPlus/pages/search_panel/user/view.dart';
 import 'package:PiliPlus/pages/search_panel/video/view.dart';
 import 'package:PiliPlus/pages/search_result/controller.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -65,8 +66,7 @@ class _SearchResultPageState extends State<SearchResultPage>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(
         shape: Border(
           bottom: BorderSide(

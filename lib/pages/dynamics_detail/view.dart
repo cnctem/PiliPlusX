@@ -6,6 +6,8 @@ import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/common/widgets/pair.dart';
+import 'package:PiliPlus/common/widgets/scaffold/mini_scaffold.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart';
 import 'package:PiliPlus/common/widgets/sliver/sliver_floating_header.dart';
 import 'package:PiliPlus/common/widgets/sliver/sliver_to_box_adapter.dart';
@@ -112,8 +114,7 @@ class _DynamicDetailPageState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: _buildAppBar(),
       body: Padding(
         padding: EdgeInsets.only(left: padding.left, right: padding.right),
@@ -124,8 +125,7 @@ class _DynamicDetailPageState
               )
             : _buildBody(),
       ),
-      floatingActionButtonLocation: floatingActionButtonLocation,
-      floatingActionButton: SlideTransition(
+      fab: SlideTransition(
         position: fabAnimation,
         child: _buildBottom(),
       ),
@@ -475,9 +475,7 @@ class _DynamicDetailPageState
           flex: flex1,
           child: Padding(
             padding: EdgeInsets.only(right: padding),
-            child: Scaffold(
-              backgroundColor: Colors.transparent,
-              resizeToAvoidBottomInset: false,
+            child: MiniScaffold(
               body: Column(
                 children: [
                   _buildTabBar(),
@@ -507,7 +505,7 @@ class _DynamicDetailPageState
     } else {
       child = _buildHorizontal(padding);
     }
-    return fabAnimWrapper(child);
+    return fabAnimWrapper(child: child);
   }
 
   Widget _buildBottom() {

@@ -24,6 +24,7 @@ import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/update.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart' hide ListTile;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
@@ -91,9 +92,8 @@ class _AboutPageState extends State<AboutPage> {
     final subTitleStyle = TextStyle(fontSize: 13, color: outline);
     final showAppBar = widget.showAppBar;
     final padding = MediaQuery.viewPaddingOf(context);
-    return Scaffold(
+    return SimpleScaffold(
       appBar: showAppBar ? AppBar(title: const Text('关于')) : null,
-      resizeToAvoidBottomInset: false,
       body: ListView(
         padding: EdgeInsets.only(
           left: showAppBar ? padding.left : 0,

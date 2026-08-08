@@ -3,6 +3,7 @@ import 'package:PiliPlus/pages/webdav/webdav.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
@@ -38,7 +39,7 @@ class _WebDavSettingPageState extends State<WebDavSettingPage> {
   Widget build(BuildContext context) {
     final showAppBar = widget.showAppBar;
     final padding = MediaQuery.viewPaddingOf(context);
-    return Scaffold(
+    return SimpleScaffold(
       appBar: showAppBar ? AppBar(title: const Text('WebDAV 设置')) : null,
       body: Stack(
         clipBehavior: Clip.none,

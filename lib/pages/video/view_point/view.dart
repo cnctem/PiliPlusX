@@ -6,6 +6,7 @@ import 'package:PiliPlus/pages/common/slide/common_slide_page.dart';
 import 'package:PiliPlus/pages/video/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/utils/duration_utils.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -35,8 +36,7 @@ class _ViewPointsPageState extends State<ViewPointsPage>
 
   @override
   Widget buildPage(ThemeData theme) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(
         primary: false,
         automaticallyImplyLeading: false,

@@ -11,6 +11,7 @@ import 'package:PiliPlus/utils/app_scheme.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart' hide ListTile;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
@@ -32,8 +33,7 @@ class _SysMsgPageState extends State<SysMsgPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(title: const Text('系统通知')),
       body: refreshIndicator(
         onRefresh: _sysMsgController.onRefresh,

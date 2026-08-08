@@ -1,5 +1,6 @@
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
@@ -59,8 +60,7 @@ class _SetDisplayModeState extends State<SetDisplayMode> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(title: const Text('屏幕帧率设置')),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

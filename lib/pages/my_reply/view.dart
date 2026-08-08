@@ -13,6 +13,7 @@ import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:PiliPlus/utils/waterfall.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -42,8 +43,7 @@ class _MyReplyState extends State<MyReply> with DynMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(
         title: const Text('我的评论'),
         actions: [

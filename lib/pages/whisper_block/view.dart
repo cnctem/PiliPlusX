@@ -6,6 +6,7 @@ import 'package:PiliPlus/grpc/bilibili/app/im/v1.pb.dart'
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/pages/search/widgets/search_text.dart';
 import 'package:PiliPlus/pages/whisper_block/controller.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show LengthLimitingTextInputFormatter;
 import 'package:flutter_svg/svg.dart';
@@ -26,8 +27,7 @@ class _WhisperBlockPageState extends State<WhisperBlockPage> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(title: const Text('消息屏蔽词')),
       body: Obx(() => _buildBody(theme, _controller.loadingState.value)),
     );

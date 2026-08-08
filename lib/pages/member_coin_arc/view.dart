@@ -9,6 +9,7 @@ import 'package:PiliPlus/pages/member_coin_arc/widgets/item.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -42,8 +43,7 @@ class _MemberCoinArcPageState extends State<MemberCoinArcPage> {
   @override
   Widget build(BuildContext context) {
     final padding = MediaQuery.viewPaddingOf(context);
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(
         title: Text(
           '${widget.mid == mid ? '我' : '${widget.name}'}的最近投币',

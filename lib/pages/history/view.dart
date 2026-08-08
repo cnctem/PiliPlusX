@@ -13,6 +13,7 @@ import 'package:PiliPlus/pages/history/controller.dart';
 import 'package:PiliPlus/pages/history/widgets/item.dart';
 import 'package:PiliPlus/utils/extension/scroll_controller_ext.dart';
 import 'package:PiliPlus/utils/grid.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart' hide TabBarView;
 import 'package:get/get.dart';
 
@@ -92,8 +93,7 @@ class _HistoryPageState extends State<HistoryPage>
               currCtr().handleSelect();
             }
           },
-          child: Scaffold(
-            resizeToAvoidBottomInset: false,
+          child: SimpleScaffold(
             appBar: MultiSelectAppBarWidget(
               visible: enableMultiSelect,
               ctr: currCtr(),

@@ -3,6 +3,9 @@ import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/colored_box_transition.dart';
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
+import 'package:PiliPlus/common/widgets/scaffold/mini_scaffold.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
+import 'package:PiliPlus/common/widgets/simple_colored_box.dart';
 import 'package:PiliPlus/common/widgets/sliver/sliver_pinned_header.dart';
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/grpc/bilibili/main/community/reply/v1.pb.dart'
@@ -66,8 +69,7 @@ class VideoReplyReplyPanel extends CommonSlidePage {
         'type': type,
         'enterUri': ?uri?.toString(), // save panel
       },
-      () => Scaffold(
-        resizeToAvoidBottomInset: false,
+      () => SimpleScaffold(
         appBar: AppBar(
           title: const Text('评论详情'),
           actions: [
@@ -141,38 +143,40 @@ class _VideoReplyReplyPanelState extends State<VideoReplyReplyPanel>
   @override
   Widget buildPage(ThemeData theme) {
     Widget child() => enableSlide ? slideList(theme) : buildList(theme);
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: widget.isVideoDetail
-          ? Column(
-              children: [
-                Container(
-                  height: 45,
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        width: 1,
-                        color: theme.dividerColor.withValues(alpha: 0.1),
+    return SimpleColoredBox(
+      color: theme.canvasColor,
+      child: MiniScaffold(
+        body: widget.isVideoDetail
+            ? Column(
+                children: [
+                  Container(
+                    height: 45,
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          width: 1,
+                          color: theme.dividerColor.withValues(alpha: 0.1),
+                        ),
                       ),
                     ),
+                    padding: const EdgeInsets.only(left: 12, right: 2),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text(isDialogue ? '对话列表' : '评论详情'),
+                        IconButton(
+                          tooltip: '关闭',
+                          icon: const Icon(Icons.close, size: 20),
+                          onPressed: Get.back,
+                        ),
+                      ],
+                    ),
                   ),
-                  padding: const EdgeInsets.only(left: 12, right: 2),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text(isDialogue ? '对话列表' : '评论详情'),
-                      IconButton(
-                        tooltip: '关闭',
-                        icon: const Icon(Icons.close, size: 20),
-                        onPressed: Get.back,
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(child: child()),
-              ],
-            )
-          : child(),
+                  Expanded(child: child()),
+                ],
+              )
+            : child(),
+      ),
     );
   }
 
@@ -342,8 +346,7 @@ class _VideoReplyReplyPanelState extends State<VideoReplyReplyPanel>
       onReply: (replyItem) => _controller.onReply(replyItem, index: index),
       onDelete: (item, subIndex) => _controller.onRemove(index, item, null),
       upMid: _controller.upMid,
-      showDialogue: () => Scaffold.of(context).showBottomSheet(
-        backgroundColor: Colors.transparent,
+      showDialogue: () => MiniScaffold.of(context).showBottomSheet(
         constraints: const BoxConstraints(),
         (context) => VideoReplyReplyPanel(
           oid: replyItem.oid.toInt(),

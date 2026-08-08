@@ -4,6 +4,7 @@ import 'package:PiliPlus/models/common/member/search_type.dart';
 import 'package:PiliPlus/pages/member_search/child/view.dart';
 import 'package:PiliPlus/pages/member_search/controller.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -22,8 +23,7 @@ class _MemberSearchPageState extends State<MemberSearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(
         actions: [
           IconButton(

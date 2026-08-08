@@ -9,6 +9,7 @@ import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/extension/file_ext.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart' hide showTimePicker;
 import 'package:flutter/services.dart';
@@ -53,7 +54,7 @@ class _CreateVotePageState extends State<CreateVotePage> {
       thickness: 1,
       color: theme.colorScheme.outline.withValues(alpha: 0.1),
     );
-    return Scaffold(
+    return SimpleScaffold(
       appBar: AppBar(
         title: Text('${_controller.voteId != null ? '' : '发起'}投票'),
       ),

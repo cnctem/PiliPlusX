@@ -2,6 +2,7 @@ import 'package:PiliPlus/common/skeleton/video_reply.dart';
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
+import 'package:PiliPlus/common/widgets/scaffold/mini_scaffold.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models/common/image_type.dart';
 import 'package:PiliPlus/models_new/video/video_note_list/list.dart';
@@ -56,39 +57,43 @@ class _NoteListPageState extends State<NoteListPage>
 
   @override
   Widget buildPage(ThemeData theme) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: Column(
-        children: [
-          SizedBox(
-            height: 45,
-            child: AppBar(
-              primary: false,
-              automaticallyImplyLeading: false,
-              titleSpacing: 16,
-              toolbarHeight: 45,
-              backgroundColor: Colors.transparent,
-              title: Obx(() {
-                final count = _controller.count.value;
-                return Text('笔记${count == -1 ? '' : '($count)'}');
-              }),
-              shape: Border(
-                bottom: BorderSide(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.1),
+    return Material(
+      child: MiniScaffold(
+        body: Column(
+          children: [
+            Container(
+              height: 45,
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: theme.colorScheme.outline.withValues(alpha: 0.1),
+                  ),
                 ),
               ),
-              actions: [
-                IconButton(
-                  tooltip: '关闭',
-                  icon: const Icon(Icons.close, size: 20),
-                  onPressed: Get.back,
-                ),
-                const SizedBox(width: 2),
-              ],
+              child: Row(
+                children: [
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Obx(() {
+                      final count = _controller.count.value;
+                      return Text(
+                        '笔记${count == -1 ? '' : '($count)'}',
+                        style: const TextStyle(fontSize: 16),
+                      );
+                    }),
+                  ),
+                  IconButton(
+                    tooltip: '关闭',
+                    icon: const Icon(Icons.close, size: 20),
+                    onPressed: Get.back,
+                  ),
+                  const SizedBox(width: 2),
+                ],
+              ),
             ),
-          ),
-          Expanded(child: enableSlide ? slideList(theme) : buildList(theme)),
-        ],
+            Expanded(child: enableSlide ? slideList(theme) : buildList(theme)),
+          ],
+        ),
       ),
     );
   }
@@ -161,7 +166,7 @@ class _NoteListPageState extends State<NoteListPage>
                   SmartDialog.showToast('账号未登录');
                   return;
                 }
-                Scaffold.of(context).showBottomSheet(
+                MiniScaffold.of(context).showBottomSheet(
                   constraints: const BoxConstraints(),
                   (context) => WebviewPage(
                     oid: widget.oid,

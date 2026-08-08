@@ -9,6 +9,7 @@ import 'package:PiliPlus/pages/blacklist/controller.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/global_data.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -34,8 +35,7 @@ class _BlackListPageState extends State<BlackListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(
         title: Obx(
           () => Text(

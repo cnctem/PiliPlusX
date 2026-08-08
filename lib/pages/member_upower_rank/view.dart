@@ -10,6 +10,7 @@ import 'package:PiliPlus/models/common/image_type.dart';
 import 'package:PiliPlus/models_new/upower_rank/rank_info.dart';
 import 'package:PiliPlus/pages/member_upower_rank/controller.dart';
 import 'package:PiliPlus/utils/extension/widget_ext.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart' hide ListTile;
 import 'package:get/get.dart';
 
@@ -86,8 +87,7 @@ class _UpowerRankPageState extends State<UpowerRankPage>
       ),
     );
     if (widget.privilegeType == null) {
-      return Scaffold(
-        resizeToAvoidBottomInset: false,
+      return SimpleScaffold(
         appBar: AppBar(
           title: Text('$_name的充电排行榜${_count == null ? '' : '($_count)'}'),
           actions: [

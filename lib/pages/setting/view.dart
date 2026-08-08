@@ -11,6 +11,7 @@ import 'package:PiliPlus/pages/webdav/view.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/accounts/account.dart';
 import 'package:PiliPlus/utils/extension/size_ext.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart' hide ListTile;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
@@ -97,8 +98,7 @@ class _SettingPageState extends State<SettingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(
         title: _isPortrait ? const Text('设置') : Text(_type.title),
       ),

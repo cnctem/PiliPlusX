@@ -34,6 +34,7 @@ import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart' hide DraggableScrollableSheet;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -95,8 +96,7 @@ class _AudioPageState extends State<AudioPage> {
     final colorScheme = ColorScheme.of(context);
     final isPortrait = MediaQuery.sizeOf(context).isPortrait;
     final padding = MediaQuery.viewPaddingOf(context);
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(
         actions: [
           if (_controller.isUgc && _controller.enableSponsorBlock)

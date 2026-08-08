@@ -6,6 +6,7 @@ import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models_new/login_devices/device.dart';
 import 'package:PiliPlus/pages/login_devices/controller.dart';
 import 'package:PiliPlus/utils/extension/widget_ext.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart' hide ListTile;
 import 'package:get/get.dart';
 
@@ -22,8 +23,7 @@ class LoginDevicesPageState extends State<LoginDevicesPage> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(title: const Text('登录设备')),
       body: refreshIndicator(
         onRefresh: _controller.onRefresh,

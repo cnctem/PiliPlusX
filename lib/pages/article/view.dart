@@ -6,6 +6,8 @@ import 'package:PiliPlus/common/widgets/flutter/page/page_view.dart';
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/gesture/horizontal_drag_gesture_recognizer.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
+import 'package:PiliPlus/common/widgets/scaffold/mini_scaffold.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart';
 import 'package:PiliPlus/common/widgets/sliver/sliver_to_box_adapter.dart';
 import 'package:PiliPlus/models/common/image_preview_type.dart';
@@ -54,20 +56,19 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
 
   @override
   Widget build(BuildContext context) {
-    final child = Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: _buildAppBar(),
-      body: Padding(
-        padding: EdgeInsets.only(left: padding.left, right: padding.right),
-        child: _buildPage(),
-      ),
-      floatingActionButtonLocation: floatingActionButtonLocation,
-      floatingActionButton: SlideTransition(
-        position: fabAnimation,
-        child: _buildBottom(),
+    return fabAnimWrapper(
+      child: SimpleScaffold(
+        appBar: _buildAppBar(),
+        body: Padding(
+          padding: EdgeInsets.only(left: padding.left, right: padding.right),
+          child: _buildPage(),
+        ),
+        fab: SlideTransition(
+          position: fabAnimation,
+          child: _buildBottom(),
+        ),
       ),
     );
-    return fabAnimWrapper(child);
   }
 
   Widget _buildPage() {
@@ -137,9 +138,7 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
           flex: flex1,
           child: Padding(
             padding: .only(right: padding),
-            child: Scaffold(
-              backgroundColor: Colors.transparent,
-              resizeToAvoidBottomInset: false,
+            child: MiniScaffold(
               body: refreshIndicator(
                 onRefresh: controller.onRefresh,
                 child: CustomScrollView(

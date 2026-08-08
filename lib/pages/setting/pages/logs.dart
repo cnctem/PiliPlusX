@@ -14,6 +14,7 @@ import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:catcher_2/model/platform_type.dart';
 import 'package:catcher_2/model/report.dart' as catcher;
 import 'package:device_info_plus/device_info_plus.dart';
@@ -123,7 +124,8 @@ class _LogsPageState extends State<LogsPage> {
       BuildConfig.buildTime,
       format: DateFormatUtils.longFormatDs,
     ),
-    if (BuildConfig.commitHash.isNotEmpty) 'Commit Hash': BuildConfig.commitHash,
+    if (BuildConfig.commitHash.isNotEmpty)
+      'Commit Hash': BuildConfig.commitHash,
   };
 
   Future<void> getLog() async {
@@ -188,8 +190,7 @@ class _LogsPageState extends State<LogsPage> {
   @override
   Widget build(BuildContext context) {
     final padding = MediaQuery.viewPaddingOf(context);
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(
         title: const Text('日志'),
         actions: [

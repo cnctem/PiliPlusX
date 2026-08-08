@@ -7,6 +7,7 @@ import 'package:PiliPlus/models_new/live/live_follow/item.dart';
 import 'package:PiliPlus/pages/live_follow/controller.dart';
 import 'package:PiliPlus/pages/live_follow/widgets/live_item_follow.dart';
 import 'package:PiliPlus/utils/grid.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -23,8 +24,7 @@ class _LiveFollowPageState extends State<LiveFollowPage> {
   @override
   Widget build(BuildContext context) {
     final padding = MediaQuery.viewPaddingOf(context);
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(
         title: Obx(
           () {

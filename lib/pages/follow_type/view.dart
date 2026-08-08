@@ -7,6 +7,7 @@ import 'package:PiliPlus/models_new/follow/list.dart';
 import 'package:PiliPlus/pages/follow/widgets/follow_item.dart';
 import 'package:PiliPlus/pages/follow_type/controller.dart';
 import 'package:PiliPlus/utils/grid.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart'
     hide SliverGridDelegateWithMaxCrossAxisExtent;
 import 'package:get/get.dart';
@@ -19,8 +20,7 @@ abstract class FollowTypePageState<T extends StatefulWidget> extends State<T> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).colorScheme;
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: appBar,
       body: refreshIndicator(
         onRefresh: controller.onRefresh,

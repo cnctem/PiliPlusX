@@ -14,6 +14,7 @@ import 'package:PiliPlus/pages/video/controller.dart';
 import 'package:PiliPlus/pages/video/post_panel/popup_menu_text.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/utils/duration_utils.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
@@ -189,8 +190,7 @@ class _PostPanelState extends State<PostPanel>
 
   @override
   Widget buildPage(ThemeData theme) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(
         primary: false,
         toolbarHeight: 45,

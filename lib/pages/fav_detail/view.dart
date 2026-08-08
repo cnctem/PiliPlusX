@@ -9,8 +9,6 @@ import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models/common/fav_order_type.dart';
 import 'package:PiliPlus/models_new/fav/fav_detail/media.dart';
 import 'package:PiliPlus/models_new/fav/fav_folder/list.dart';
-import 'package:PiliPlus/pages/common/fab_mixin.dart'
-    show NoRightMarginFabLocation;
 import 'package:PiliPlus/pages/dynamics_repost/view.dart';
 import 'package:PiliPlus/pages/fav_detail/controller.dart';
 import 'package:PiliPlus/pages/fav_detail/widget/fav_video_card.dart';
@@ -19,6 +17,7 @@ import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
 import 'package:PiliPlus/utils/share_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
@@ -60,10 +59,8 @@ class _FavDetailPageState extends State<FavDetailPage> with GridMixin {
               _favDetailController.handleSelect();
             }
           },
-          child: Scaffold(
-            resizeToAvoidBottomInset: false,
-            floatingActionButtonLocation: const NoRightMarginFabLocation(),
-            floatingActionButton: Padding(
+          child: SimpleScaffold(
+            fab: Padding(
               padding: const EdgeInsets.only(
                 right: kFloatingActionButtonMargin,
               ),

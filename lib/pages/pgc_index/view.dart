@@ -11,6 +11,7 @@ import 'package:PiliPlus/pages/pgc_index/controller.dart';
 import 'package:PiliPlus/pages/pgc_index/widgets/pgc_card_v_pgc_index.dart';
 import 'package:PiliPlus/pages/search/widgets/search_text.dart';
 import 'package:PiliPlus/utils/grid.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -44,8 +45,7 @@ class _PgcIndexPageState extends State<PgcIndexPage>
     super.build(context);
     final theme = Theme.of(context);
     return widget.indexType == null
-        ? Scaffold(
-            resizeToAvoidBottomInset: false,
+        ? SimpleScaffold(
             appBar: AppBar(title: const Text('索引')),
             body: Obx(() => _buildBody(theme, _ctr.conditionState.value)),
           )

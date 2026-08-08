@@ -8,6 +8,7 @@ import 'package:PiliPlus/pages/live_area_detail/child/controller.dart';
 import 'package:PiliPlus/pages/live_area_detail/child/view.dart';
 import 'package:PiliPlus/pages/live_area_detail/controller.dart';
 import 'package:PiliPlus/pages/live_search/view.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
@@ -43,8 +44,7 @@ class _LiveAreaDetailPageState extends State<LiveAreaDetailPage> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final padding = MediaQuery.viewPaddingOf(context);
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(
         title: Text(widget.parentName),
         actions: [

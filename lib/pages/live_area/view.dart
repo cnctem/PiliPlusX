@@ -11,6 +11,7 @@ import 'package:PiliPlus/pages/live_area/controller.dart';
 import 'package:PiliPlus/pages/live_area_detail/view.dart';
 import 'package:PiliPlus/pages/search/widgets/search_text.dart';
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sortable_wrap/sortable_wrap.dart';
 import 'package:get/get.dart';
@@ -30,8 +31,7 @@ class _LiveAreaPageState extends State<LiveAreaPage> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final padding = MediaQuery.viewPaddingOf(context);
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(
         title: const Text('全部标签'),
         actions: _controller.isLogin

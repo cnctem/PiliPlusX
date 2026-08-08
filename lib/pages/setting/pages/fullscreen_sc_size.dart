@@ -10,6 +10,7 @@ import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart';
 
 const kFullScreenSCWidth = 255.0;
@@ -69,8 +70,7 @@ class _FullScreenScSizeState extends State<FullScreenScSize> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(
         title: const Text('全屏 SC 大小设置'),
         actions: [

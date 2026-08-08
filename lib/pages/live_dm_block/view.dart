@@ -9,6 +9,7 @@ import 'package:PiliPlus/pages/live_dm_block/controller.dart';
 import 'package:PiliPlus/pages/search/widgets/search_text.dart';
 import 'package:PiliPlus/utils/extension/size_ext.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:collection/collection.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
 import 'package:flutter/material.dart';
@@ -82,8 +83,7 @@ class _LiveDmBlockPageState extends State<LiveDmBlockPage> {
       ),
     );
 
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(title: const Text('弹幕屏蔽')),
       body: Padding(
         padding: EdgeInsets.only(left: padding.left, right: padding.right),

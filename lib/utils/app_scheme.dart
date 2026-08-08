@@ -22,6 +22,7 @@ import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
 import 'package:PiliPlus/utils/url_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:app_links/app_links.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -198,7 +199,8 @@ abstract final class PiliScheme {
             bool hasMatch = _onPushDynDetail(uri, off);
             return hasMatch;
           case 'search':
-            final keyword = uri.queryParameters['keyword']?? uri.pathSegments.firstOrNull;
+            final keyword =
+                uri.queryParameters['keyword'] ?? uri.pathSegments.firstOrNull;
             if (keyword != null) {
               PageUtils.toDupNamed(
                 '/searchResult',
@@ -366,8 +368,7 @@ abstract final class PiliScheme {
             return false;
           case 'livearea':
             Get.to(
-              Scaffold(
-                resizeToAvoidBottomInset: false,
+              SimpleScaffold(
                 appBar: AppBar(title: const Text('直播')),
                 body: const ViewSafeArea(child: LivePage()),
               ),
@@ -375,8 +376,7 @@ abstract final class PiliScheme {
             return true;
           case 'rank':
             Get.to(
-              Scaffold(
-                resizeToAvoidBottomInset: false,
+              SimpleScaffold(
                 appBar: AppBar(title: const Text('排行榜')),
                 body: const ViewSafeArea(child: RankPage()),
               ),

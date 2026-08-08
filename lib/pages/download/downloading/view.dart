@@ -9,6 +9,7 @@ import 'package:PiliPlus/pages/common/multi_select/base.dart'
 import 'package:PiliPlus/pages/download/detail/widgets/item.dart';
 import 'package:PiliPlus/services/download/download_service.dart';
 import 'package:PiliPlus/utils/grid.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart'
     hide SliverGridDelegateWithMaxCrossAxisExtent;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -41,8 +42,7 @@ class _DownloadingPageState extends State<DownloadingPage>
             handleSelect();
           }
         },
-        child: Scaffold(
-          resizeToAvoidBottomInset: false,
+        child: SimpleScaffold(
           appBar: MultiSelectAppBarWidget(
             ctr: this,
             child: AppBar(

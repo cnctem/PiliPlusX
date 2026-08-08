@@ -8,6 +8,7 @@ import 'package:PiliPlus/models/model_hot_video_item.dart';
 import 'package:PiliPlus/pages/popular_precious/controller.dart';
 import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -24,8 +25,7 @@ class _PopularPreciousPageState extends State<PopularPreciousPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(title: const Text('入站必刷')),
       body: refreshIndicator(
         onRefresh: _controller.onRefresh,

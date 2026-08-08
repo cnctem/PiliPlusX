@@ -15,6 +15,7 @@ import 'package:PiliPlus/utils/extension/widget_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/num_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -57,8 +58,7 @@ class _MainReplyPageState extends State<MainReplyPage>
   @override
   Widget build(BuildContext context) {
     final colorScheme = ColorScheme.of(context);
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(title: const Text('查看评论')),
       body: NotificationListener<UserScrollNotification>(
         onNotification: (notification) {
@@ -89,8 +89,7 @@ class _MainReplyPageState extends State<MainReplyPage>
           ),
         ).constraintWidth(),
       ),
-      floatingActionButtonLocation: const NoBottomPaddingFabLocation(),
-      floatingActionButton: SlideTransition(
+      fab: SlideTransition(
         position: fabAnimation,
         child: Padding(
           padding: .only(bottom: padding.bottom + kFloatingActionButtonMargin),
@@ -220,8 +219,7 @@ class _MainReplyPageState extends State<MainReplyPage>
       int oid = replyItem.oid.toInt();
       int rpid = replyItem.id.toInt();
       Get.to(
-        Scaffold(
-          resizeToAvoidBottomInset: false,
+        SimpleScaffold(
           appBar: AppBar(
             title: const Text('评论详情'),
             shape: Border(

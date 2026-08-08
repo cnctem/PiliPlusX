@@ -10,6 +10,7 @@ import 'package:PiliPlus/pages/danmaku_block/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -42,8 +43,7 @@ class _DanmakuBlockPageState extends State<DanmakuBlockPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(
         title: const Text('弹幕屏蔽'),
         bottom: TabBar(
@@ -71,7 +71,7 @@ class _DanmakuBlockPageState extends State<DanmakuBlockPage> {
             )
             .toList(),
       ),
-      floatingActionButton: FloatingActionButton(
+      fab: FloatingActionButton(
         tooltip: '添加',
         onPressed: () =>
             _showAddDialog(DmBlockType.values[_controller.tabController.index]),

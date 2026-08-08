@@ -14,6 +14,7 @@ import 'package:PiliPlus/utils/extension/size_ext.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -57,7 +58,7 @@ class _SearchPageState extends State<SearchPage> {
         ? _buildHotSearch(isTrending: false)
         : null;
 
-    return Scaffold(
+    return SimpleScaffold(
       appBar: _buildAppBar,
       body: Padding(
         padding: .only(left: padding.left, right: padding.right),

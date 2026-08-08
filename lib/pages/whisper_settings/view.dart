@@ -6,6 +6,7 @@ import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/pages/whisper_block/view.dart';
 import 'package:PiliPlus/pages/whisper_settings/controller.dart';
 import 'package:PiliPlus/pages/whisper_settings/widgets/item.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
@@ -39,8 +40,7 @@ class _WhisperSettingsPageState extends State<WhisperSettingsPage> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(
         title: Obx(() => Text(_controller.title.value)),
       ),

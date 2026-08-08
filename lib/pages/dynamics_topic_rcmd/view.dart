@@ -6,6 +6,7 @@ import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models_new/dynamic/dyn_topic_top/topic_item.dart';
 import 'package:PiliPlus/pages/dynamics_select_topic/widgets/item.dart';
 import 'package:PiliPlus/pages/dynamics_topic_rcmd/controller.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -21,8 +22,7 @@ class _DynTopicRcmdPageState extends State<DynTopicRcmdPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(title: const Text('话题')),
       body: refreshIndicator(
         onRefresh: _controller.onRefresh,

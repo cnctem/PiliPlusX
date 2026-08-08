@@ -11,6 +11,7 @@ import 'package:PiliPlus/models/horizontal_video_model.dart';
 import 'package:PiliPlus/pages/member_video_web/base/controller.dart';
 import 'package:PiliPlus/pages/search/widgets/search_text.dart';
 import 'package:PiliPlus/utils/grid.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -39,8 +40,7 @@ abstract class BaseVideoWebState<
   @override
   Widget build(BuildContext context) {
     final colorScheme = ColorScheme.of(context);
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(
         title: Text(name),
         actions: [

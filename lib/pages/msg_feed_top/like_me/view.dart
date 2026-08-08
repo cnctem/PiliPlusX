@@ -16,6 +16,7 @@ import 'package:PiliPlus/pages/whisper_settings/view.dart';
 import 'package:PiliPlus/utils/app_scheme.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart' hide ListTile;
 import 'package:get/get.dart';
 
@@ -32,8 +33,7 @@ class _LikeMePageState extends State<LikeMePage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(
         title: const Text('收到的赞'),
         actions: [

@@ -2,6 +2,8 @@ import 'package:PiliPlus/common/skeleton/video_reply.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/custom_icon.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
+import 'package:PiliPlus/common/widgets/scaffold/mini_scaffold.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:PiliPlus/common/widgets/sliver/sliver_pinned_header.dart';
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/grpc/bilibili/main/community/reply/v1.pb.dart'
@@ -21,7 +23,6 @@ import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 
 enum DynType implements EnumWithLabel {
@@ -229,8 +230,7 @@ mixin CommonDynPageMixin<T extends StatefulWidget>
           ),
         );
         if (showBackBtn) {
-          return Scaffold(
-            resizeToAvoidBottomInset: false,
+          return SimpleScaffold(
             appBar: AppBar(
               title: const Text('评论详情'),
               shape: Border(
@@ -252,11 +252,10 @@ mixin CommonDynPageMixin<T extends StatefulWidget>
           arguments: arguments,
         );
       } else {
-        final scaffoldState = Scaffold.maybeOf(context);
+        final scaffoldState = MiniScaffold.maybeOf(context);
         if (scaffoldState != null) {
           hideFab();
           scaffoldState.showBottomSheet(
-            backgroundColor: Colors.transparent,
             (context) => replyReplyPage(showBackBtn: false),
           );
         } else {
@@ -333,22 +332,4 @@ mixin CommonDynPageMixin<T extends StatefulWidget>
     tooltip: '评论',
     child: const Icon(Icons.reply),
   );
-
-  Widget fabAnimWrapper(Widget child) {
-    return NotificationListener<UserScrollNotification>(
-      onNotification: (notification) {
-        if (notification.metrics.axisDirection == .down) {
-          switch (notification.direction) {
-            case .forward:
-              showFab();
-            case .reverse:
-              hideFab();
-            default:
-          }
-        }
-        return false;
-      },
-      child: child,
-    );
-  }
 }

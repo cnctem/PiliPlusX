@@ -14,6 +14,7 @@ import 'package:PiliPlus/pages/setting/models/video_settings.dart';
 import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/waterfall.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:waterfall_flow/waterfall_flow.dart'
@@ -114,7 +115,7 @@ class _SettingsSearchPageState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
+    return SimpleScaffold(
       appBar: AppBar(
         actions: [
           IconButton(

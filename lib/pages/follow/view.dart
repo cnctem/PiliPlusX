@@ -14,6 +14,7 @@ import 'package:PiliPlus/utils/parse_int.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show LengthLimitingTextInputFormatter;
 import 'package:get/get.dart';
@@ -48,8 +49,7 @@ class _FollowPageState extends State<FollowPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: _buildAppBar,
       body: _followController.isOwner
           ? Obx(() => _buildBody(_followController.followState.value))

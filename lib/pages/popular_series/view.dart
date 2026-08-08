@@ -13,6 +13,7 @@ import 'package:PiliPlus/models_new/popular/popular_series_one/config.dart';
 import 'package:PiliPlus/pages/popular_series/controller.dart';
 import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -28,8 +29,7 @@ class _PopularSeriesPageState extends State<PopularSeriesPage> with GridMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: AppBar(
         title: Obx(() {
           final config = _controller.config.value;

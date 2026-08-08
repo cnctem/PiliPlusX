@@ -7,6 +7,8 @@ import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/image_viewer/hero.dart';
 import 'package:PiliPlus/common/widgets/marquee.dart';
+import 'package:PiliPlus/common/widgets/scaffold/mini_scaffold.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:PiliPlus/common/widgets/sliver/sliver_to_box_adapter.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/music.dart';
@@ -53,20 +55,20 @@ class _MusicDetailPageState extends CommonDynPageState<MusicDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final child = Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: _buildAppBar(),
-      body: Padding(
-        padding: EdgeInsets.only(left: padding.left, right: padding.right),
-        child: isPortrait
-            ? refreshIndicator(
-                onRefresh: controller.onRefresh,
-                child: _buildBody(),
-              )
-            : _buildBody(),
+    return fabAnimWrapper(
+      child: SimpleScaffold(
+        appBar: _buildAppBar(),
+        body: Padding(
+          padding: EdgeInsets.only(left: padding.left, right: padding.right),
+          child: isPortrait
+              ? refreshIndicator(
+                  onRefresh: controller.onRefresh,
+                  child: _buildBody(),
+                )
+              : _buildBody(),
+        ),
       ),
     );
-    return fabAnimWrapper(child);
   }
 
   PreferredSizeWidget _buildAppBar() => AppBar(
@@ -170,9 +172,7 @@ class _MusicDetailPageState extends CommonDynPageState<MusicDetailPage> {
                 flex: flex1,
                 child: Padding(
                   padding: EdgeInsets.only(right: padding),
-                  child: Scaffold(
-                    backgroundColor: Colors.transparent,
-                    resizeToAvoidBottomInset: false,
+                  child: MiniScaffold(
                     body: refreshIndicator(
                       onRefresh: controller.onRefresh,
                       child: CustomScrollView(
@@ -191,12 +191,9 @@ class _MusicDetailPageState extends CommonDynPageState<MusicDetailPage> {
             ],
           );
         }
-        return Stack(
-          clipBehavior: Clip.none,
-          children: [
-            child,
-            _buildBottom(response),
-          ],
+        return ScaffoldLayout(
+          body: child,
+          fab: _buildBottom(response),
         );
       default:
         return const SizedBox.shrink();
