@@ -40,6 +40,7 @@ import 'package:flutter/rendering.dart'
     hide RenderEditable, VerticalCaretMovementRun;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:os_type/os_type.dart';
 
 /// Signature for a widget builder that builds a context menu for the given
 /// [EditableTextState].
@@ -2756,7 +2757,7 @@ class EditableTextState extends State<EditableText>
     );
     if (text.isNotEmpty) {
       // ohos未实现Share.invoke，改用ShareUtils分享。
-      if (defaultTargetPlatform == TargetPlatform.ohos) {
+      if (OS.isHarmony) {
         ShareUtils.shareText(text);
         return;
       }
