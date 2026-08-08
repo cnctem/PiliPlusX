@@ -46,6 +46,7 @@ import 'package:PiliPlus/pages/video/member/view.dart';
 import 'package:PiliPlus/pages/video/related/view.dart';
 import 'package:PiliPlus/pages/video/reply/controller.dart';
 import 'package:PiliPlus/pages/video/reply/view.dart';
+import 'package:PiliPlus/pages/video/widgets/keyboard_scrollable.dart';
 import 'package:PiliPlus/pages/video/view_point/view.dart';
 import 'package:PiliPlus/pages/video/widgets/header_control.dart';
 import 'package:PiliPlus/pages/video/widgets/intro_layout.dart';
@@ -148,6 +149,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   final videoReplyPanelKey = GlobalKey();
   final videoRelatedKey = GlobalKey();
   final videoIntroKey = GlobalKey();
+
+  /// 播放器键盘焦点：点/悬停视频区、切换 tab 时抢回，方向键恢复音量控制
+  final playerFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -386,6 +390,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     }
     removeObserverMobile(this);
 
+    playerFocusNode.dispose();
     super.dispose();
   }
 
@@ -1385,6 +1390,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         plPlayerController: videoDetailController.plPlayerController,
         introController: introController,
         onSendDanmaku: videoDetailController.showShootDanmakuSheet,
+        focusNode: playerFocusNode,
         canPlay: () {
           if (videoDetailController.autoPlay) {
             return true;
@@ -1438,6 +1444,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             TabBarTheme.of(context).labelStyle?.copyWith(fontSize: 13) ??
             const TextStyle(fontSize: 13),
         onTap: (value) {
+          // 切换 tab 归还键盘焦点给播放器（方向键恢复音量控制）
+          if (value != videoDetailController.tabCtr.index) {
+            playerFocusNode.requestFocus();
+          }
           void animToTop() {
             if (onTap != null) {
               onTap();
@@ -1559,7 +1569,12 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   Widget videoPlayer({required double width, required double height}) {
     final isFullScreen = this.isFullScreen;
-    return Stack(
+    // 点/悬停视频区 → 归还键盘焦点给播放器（方向键恢复音量控制）
+    return MouseRegion(
+      onEnter: (_) => playerFocusNode.requestFocus(),
+      child: Listener(
+        onPointerDown: (_) => playerFocusNode.requestFocus(),
+        child: Stack(
       clipBehavior: Clip.none,
       children: [
         const Positioned.fill(
@@ -1712,27 +1727,34 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
           },
         ),
       ],
+        ),
+      ),
     );
   }
 
   Widget localIntroPanel({
     bool needCtr = true,
   }) {
-    return CustomScrollView(
+    return KeyboardScrollable(
       controller: needCtr
           ? videoDetailController.effectiveIntroScrollCtr
-          : null,
-      physics: !needCtr ? platformAlwaysClampingPhysics : null,
-      key: const PageStorageKey(CommonIntroController),
-      slivers: [
-        SliverPadding(
-          padding: EdgeInsets.only(top: 7, bottom: padding.bottom + 100),
-          sliver: LocalIntroPanel(
-            key: videoRelatedKey,
-            heroTag: heroTag,
+          : videoDetailController.scrollCtr,
+      child: CustomScrollView(
+        controller: needCtr
+            ? videoDetailController.effectiveIntroScrollCtr
+            : null,
+        physics: !needCtr ? platformAlwaysClampingPhysics : null,
+        key: const PageStorageKey(CommonIntroController),
+        slivers: [
+          SliverPadding(
+            padding: EdgeInsets.only(top: 7, bottom: padding.bottom + 100),
+            sliver: LocalIntroPanel(
+              key: videoRelatedKey,
+              heroTag: heroTag,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -1800,6 +1822,14 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         ),
       ],
     );
+      return KeepAliveWrapper(
+        child: KeyboardScrollable(
+          controller: needCtr
+              ? videoDetailController.effectiveIntroScrollCtr
+              : videoDetailController.scrollCtr,
+          child: child,
+        ),
+      );
 
     if (videoDetailController.isPlayAll) {
       child = IntroLayout(
@@ -1989,6 +2019,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     key: videoReplyPanelKey,
     isNested: isNested,
     heroTag: heroTag,
+    pageScrollController: isNested ? videoDetailController.scrollCtr : null,
   );
 
   // ai总结

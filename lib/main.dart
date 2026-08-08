@@ -360,6 +360,10 @@ class MyApp extends StatelessWidget {
         child: child!,
       );
     }
+    final backDetector = BackDetector(
+      onBack: _onBack,
+      child: child!,
+    );
     if (PlatformUtils.isDesktop) {
       return Focus(
         canRequestFocus: false,
@@ -391,13 +395,10 @@ class MyApp extends StatelessWidget {
           }
           return KeyEventResult.ignored;
         },
-        child: BackDetector(
-          onBack: _onBack,
-          child: child,
-        ),
+        child: backDetector,
       );
     }
-    return child;
+    return backDetector;
   }
 
   /// from [DynamicColorBuilderState.initPlatformState]
