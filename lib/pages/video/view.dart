@@ -1452,9 +1452,16 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         child: child,
       );
     }
-    return videoDetailController.plPlayerController.darkVideoPage
+    Widget result = videoDetailController.plPlayerController.darkVideoPage
         ? Theme(data: themeData, child: child)
         : child;
+    if (Pref.enableHeroCoverAnimation && heroTag != null) {
+      result = Hero(
+        tag: heroTag,
+        child: RepaintBoundary(child: result),
+      );
+    }
+    return result;
   }
 
   Widget buildTabBar({

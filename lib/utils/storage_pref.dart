@@ -775,6 +775,9 @@ abstract final class Pref {
   static bool get useBuiltInFont =>
       _setting.get(SettingBoxKey.useBuiltInFont, defaultValue: true);
 
+  static bool get enableHeroCoverAnimation =>
+      _setting.get(SettingBoxKey.enableHeroCoverAnimation, defaultValue: false);
+
   static Transition get pageTransition =>
       Transition.values[_setting.get(
         SettingBoxKey.pageTransition,

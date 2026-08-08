@@ -18,9 +18,9 @@ import 'package:PiliPlus/pages/common/publish/publish_route.dart';
 import 'package:PiliPlus/pages/contact/view.dart';
 import 'package:PiliPlus/pages/fav_panel/view.dart';
 import 'package:PiliPlus/pages/share/view.dart';
-import 'package:PiliPlus/utils/extension/extension.dart';
 import 'package:PiliPlus/utils/app_scheme.dart';
 import 'package:PiliPlus/utils/extension/context_ext.dart';
+import 'package:PiliPlus/utils/extension/extension.dart';
 import 'package:PiliPlus/utils/extension/size_ext.dart';
 import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
@@ -31,8 +31,8 @@ import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/url_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:floating/floating.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
@@ -562,6 +562,7 @@ abstract final class PageUtils {
     bool off = false,
     bool isVertical = false,
     Dimension? dimension,
+    String? heroTag,
   }) {
     final arguments = {
       'aid': aid ?? IdUtils.bv2av(bvid!),
@@ -575,7 +576,7 @@ abstract final class PageUtils {
       'progress': ?progress,
       'videoType': videoType,
       'isVertical': dimension?.isVertical ?? isVertical,
-      'heroTag': Utils.makeHeroTag(cid),
+      'heroTag': heroTag ?? Utils.makeHeroTag(cid),
       ...?extraArguments,
     };
     if (off) {
@@ -646,11 +647,17 @@ abstract final class PageUtils {
     dynamic epId,
     int? progress, // milliseconds
     bool off = false,
+    String? heroTag,
   }) async {
+    // hero动画启用时，隐藏加载Dialog
     try {
-      SmartDialog.showLoading(msg: '资源获取中');
+      if (heroTag == null) {
+        SmartDialog.showLoading(msg: '资源获取中');
+      }
       final res = await SearchHttp.pgcInfo(seasonId: seasonId, epId: epId);
-      SmartDialog.dismiss();
+      if (heroTag == null) {
+        SmartDialog.dismiss();
+      }
       if (res case Success(:final response)) {
         final episodes = response.episodes;
         final hasEpisode = episodes != null && episodes.isNotEmpty;
@@ -671,6 +678,7 @@ abstract final class PageUtils {
               'pgcItem': response,
             },
             off: off,
+            heroTag: heroTag,
           );
         }
 
@@ -720,6 +728,7 @@ abstract final class PageUtils {
               'pgcItem': response,
             },
             off: off,
+            heroTag: heroTag,
           );
           return;
         } else {
@@ -746,11 +755,16 @@ abstract final class PageUtils {
     dynamic epId,
     int? aid,
     bool off = false,
+    String? heroTag,
   }) async {
     try {
-      SmartDialog.showLoading(msg: '资源获取中');
+      if (heroTag == null) {
+        SmartDialog.showLoading(msg: '资源获取中');
+      }
       final res = await SearchHttp.pugvInfo(seasonId: seasonId, epId: epId);
-      SmartDialog.dismiss();
+      if (heroTag == null) {
+        SmartDialog.dismiss();
+      }
       if (res case Success(:final response)) {
         final episodes = response.episodes;
         if (episodes != null && episodes.isNotEmpty) {
@@ -774,6 +788,7 @@ abstract final class PageUtils {
               'pgcItem': response,
             },
             off: off,
+            heroTag: heroTag,
           );
         } else {
           SmartDialog.showToast('资源加载失败');

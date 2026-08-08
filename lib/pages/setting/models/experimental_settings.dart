@@ -16,7 +16,7 @@ List<SettingsModel> experimentalSettings = [
   ),
   SwitchModel(
     title: '鸿蒙沉浸光感顶栏',
-    subtitle: '使用鸿蒙原生顶部沉浸栏（大搜索栏+标签页）\n与底栏开关独立控制，仅在鸿蒙7及以上支持\n不支持的平台会隐藏原生顶栏',
+    subtitle: '使用鸿蒙沉浸光感顶栏\n仅鸿蒙7及以上支持，不支持则自动回退',
     leading: const Icon(Icons.blur_on_outlined),
     setKey: SettingBoxKey.enableHdsTopBar,
     defaultVal: false,
@@ -44,6 +44,13 @@ List<SettingsModel> experimentalSettings = [
     setKey: SettingBoxKey.useBuiltInFont,
     defaultVal: true,
     onChanged: (_) => Get.updateMyAppTheme(),
+  ),
+  const SwitchModel(
+    title: '视频封面一镜到底动画',
+    subtitle: '点击视频卡片时封面平滑展开，返回时飞回原位\n建议重启应用避免一些问题',
+    leading: Icon(Icons.motion_photos_on_outlined),
+    setKey: SettingBoxKey.enableHeroCoverAnimation,
+    defaultVal: false,
   ),
   NormalModel(
     title: '应用接续',
