@@ -1,23 +1,27 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// 让 [controller] 对应的滚动区域支持键盘滚动。
+/// 让一块区域支持键盘滚动（tab 驱动）。
 ///
-/// 点击（或桌面端鼠标悬停）进入该区域后，方向键 / PgUp / PgDn / Home / End
-/// 滚动该区域并消费事件，不再冒泡给上层 PlayerFocus 的音量控制；当焦点归还
-/// 给播放器（点/悬停视频区、切换 tab）后恢复音量控制。
-///
-/// 滚动机制本身复用各部件已有的 Scrollable（鼠标滚轮同理）——本组件只是把
-/// 键盘事件接到同一个滚动目标上。
+/// 包住整个 tab 内容区后，切到内容 tab 即自动获得焦点，方向键 / PgUp / PgDn
+/// 滚动当前激活 tab 的内容（[controller] 按状态返回对应滚动控制器），Home/End
+/// 跳转首尾；方向键支持长按连续滚动。点/悬停视频区会把焦点归还给播放器，
+/// 方向键恢复音量控制。[controller] 返回 null 时放行按键（冒泡给 PlayerFocus）。
 class KeyboardScrollable extends StatefulWidget {
   const KeyboardScrollable({
     super.key,
     required this.controller,
+    this.focusNode,
     required this.child,
   });
 
-  /// 滚动目标；为空或无客户端时不响应按键
-  final ScrollController? controller;
+  /// 按当前状态返回滚动目标（如按激活 tab 解析）
+  final ScrollController? Function() controller;
+
+  /// 外部焦点节点（页面持有，切 tab 时主动 requestFocus 实现免点击）
+  final FocusNode? focusNode;
 
   final Widget child;
 
@@ -26,18 +30,38 @@ class KeyboardScrollable extends StatefulWidget {
 }
 
 class _KeyboardScrollableState extends State<KeyboardScrollable> {
-  final FocusNode _focusNode = FocusNode();
+  late final FocusNode _focusNode = widget.focusNode ?? FocusNode();
+  Timer? _repeatTimer;
 
   static const double _arrowStep = 60;
+  static const Duration _repeatInterval = Duration(milliseconds: 80);
+
+  @override
+  void initState() {
+    super.initState();
+    // 焦点丢失时停止长按滚动，防 KeyUp 丢失导致停不下来
+    _focusNode.addListener(_onFocusChanged);
+  }
+
+  void _onFocusChanged() {
+    if (!_focusNode.hasFocus) {
+      _repeatTimer?.cancel();
+      _repeatTimer = null;
+    }
+  }
 
   @override
   void dispose() {
-    _focusNode.dispose();
+    _focusNode.removeListener(_onFocusChanged);
+    _repeatTimer?.cancel();
+    if (widget.focusNode == null) {
+      _focusNode.dispose();
+    }
     super.dispose();
   }
 
   void _scrollBy(double delta) {
-    final ctr = widget.controller;
+    final ctr = widget.controller();
     if (ctr == null || !ctr.hasClients) return;
     final target = (ctr.offset + delta).clamp(
       ctr.position.minScrollExtent,
@@ -45,38 +69,59 @@ class _KeyboardScrollableState extends State<KeyboardScrollable> {
     );
     ctr.animateTo(
       target,
-      duration: const Duration(milliseconds: 120),
+      duration: const Duration(milliseconds: 100),
       curve: Curves.easeOut,
     );
   }
 
+  void _startRepeat(double delta) {
+    // OS 按键重复会不断重启此定时器，行为等价"按一下滚一下"；
+    // OS 不重复时由它保证长按持续滚动
+    _repeatTimer?.cancel();
+    _repeatTimer = Timer.periodic(_repeatInterval, (_) => _scrollBy(delta));
+  }
+
+  void _stopRepeat() {
+    _repeatTimer?.cancel();
+    _repeatTimer = null;
+  }
+
+  bool _isScrollKey(LogicalKeyboardKey key) =>
+      key == LogicalKeyboardKey.arrowUp ||
+      key == LogicalKeyboardKey.arrowDown ||
+      key == LogicalKeyboardKey.pageUp ||
+      key == LogicalKeyboardKey.pageDown ||
+      key == LogicalKeyboardKey.home ||
+      key == LogicalKeyboardKey.end;
+
   KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
     final key = event.logicalKey;
-    if (key != LogicalKeyboardKey.arrowUp &&
-        key != LogicalKeyboardKey.arrowDown &&
-        key != LogicalKeyboardKey.pageUp &&
-        key != LogicalKeyboardKey.pageDown &&
-        key != LogicalKeyboardKey.home &&
-        key != LogicalKeyboardKey.end) {
+    if (!_isScrollKey(key)) {
       return KeyEventResult.ignored;
     }
-    if (event is KeyDownEvent) {
-      final ctr = widget.controller;
+    // OS 重复事件是 KeyRepeatEvent（不是 KeyDownEvent），同样触发滚动；
+    // 仅 KeyUp 停止长按定时器
+    if (event is KeyDownEvent || event is KeyRepeatEvent) {
+      final ctr = widget.controller();
       switch (key) {
         case LogicalKeyboardKey.arrowUp:
           _scrollBy(-_arrowStep);
+          _startRepeat(-_arrowStep);
           break;
         case LogicalKeyboardKey.arrowDown:
           _scrollBy(_arrowStep);
+          _startRepeat(_arrowStep);
           break;
         case LogicalKeyboardKey.pageUp:
           if (ctr != null && ctr.hasClients) {
             _scrollBy(-ctr.position.viewportDimension * 0.9);
+            _startRepeat(-ctr.position.viewportDimension * 0.9);
           }
           break;
         case LogicalKeyboardKey.pageDown:
           if (ctr != null && ctr.hasClients) {
             _scrollBy(ctr.position.viewportDimension * 0.9);
+            _startRepeat(ctr.position.viewportDimension * 0.9);
           }
           break;
         case LogicalKeyboardKey.home:
@@ -90,6 +135,8 @@ class _KeyboardScrollableState extends State<KeyboardScrollable> {
           }
           break;
       }
+    } else if (event is KeyUpEvent) {
+      _stopRepeat();
     }
     // KeyUp 一并消费，避免冒泡到 PlayerFocus
     return KeyEventResult.handled;
