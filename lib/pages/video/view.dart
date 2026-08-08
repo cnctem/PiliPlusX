@@ -143,6 +143,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   /// tab 内容区键盘焦点：切到内容 tab 时自动聚焦，方向键免点击滚动内容
   final tabContentFocusNode = FocusNode();
 
+  /// 播放列表 tab 的 EpisodePanel，方向键滚动其当前列表
+  final seasonEpisodeKey = GlobalKey<EpisodePanelState>();
+
   @override
   void initState() {
     super.initState();
@@ -705,8 +708,15 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                           if (_shouldShowSeasonPanel) seasonPanel,
                         ],
                       ),
-                      // 竖屏：所有 tab 都滚整页
-                      resolveCtr: () => videoDetailController.scrollCtr,
+                      // 竖屏：简介/评论滚整页，播放列表滚自身列表
+                      resolveCtr: () {
+                        final idx = videoDetailController.tabCtr.index;
+                        return _shouldShowSeasonPanel &&
+                                idx ==
+                                    (videoDetailController.showReply ? 2 : 1)
+                            ? _seasonScrollCtr()
+                            : videoDetailController.scrollCtr;
+                      },
                     ),
                   ),
                 ],
@@ -984,11 +994,19 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                                 if (_shouldShowSeasonPanel) seasonPanel,
                               ],
                             ),
-                            resolveCtr: () =>
-                                videoDetailController.showReply &&
-                                    videoDetailController.tabCtr.index == 0
-                                ? _videoReplyController.scrollController
-                                : null,
+                            resolveCtr: () {
+                              final idx = videoDetailController.tabCtr.index;
+                              if (videoDetailController.showReply && idx == 0) {
+                                return _videoReplyController.scrollController;
+                              }
+                              return _shouldShowSeasonPanel &&
+                                      idx ==
+                                          (videoDetailController.showReply
+                                              ? 1
+                                              : 0)
+                                  ? _seasonScrollCtr()
+                                  : null;
+                            },
                           ),
                         ),
                       ],
@@ -1428,17 +1446,22 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   /// 横屏 tab 滚动目标：简介/相关视频 → 简介滚动，评论 → 评论滚动
   ScrollController? _landscapeTabScrollCtr() {
-    switch (videoDetailController.tabCtr.index) {
-      case 0:
-        return videoDetailController.effectiveIntroScrollCtr;
-      case 1:
-        return videoDetailController.showReply
-            ? _videoReplyController.scrollController
-            : null;
-      default:
-        return null;
+    final idx = videoDetailController.tabCtr.index;
+    if (idx == 0) {
+      return videoDetailController.effectiveIntroScrollCtr;
     }
+    if (videoDetailController.showReply && idx == 1) {
+      return _videoReplyController.scrollController;
+    }
+    return _shouldShowSeasonPanel &&
+            idx == (videoDetailController.showReply ? 2 : 1)
+        ? _seasonScrollCtr()
+        : null;
   }
+
+  /// 播放列表 tab 的滚动目标：EpisodePanel 当前子列表
+  ScrollController? _seasonScrollCtr() =>
+      seasonEpisodeKey.currentState?.activeScrollController;
 
   Widget buildTabBar({
     bool needIndicator = true,
@@ -1923,6 +1946,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               Expanded(
                 child: Obx(
                   () => EpisodePanel(
+                    key: seasonEpisodeKey,
                     heroTag: heroTag,
                     enableSlide: false,
                     ugcIntroController: videoDetailController.isUgc
@@ -1967,6 +1991,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             Expanded(
               child: Obx(
                 () => EpisodePanel(
+                  key: seasonEpisodeKey,
                   heroTag: heroTag,
                   enableSlide: false,
                   ugcIntroController: videoDetailController.isUgc
