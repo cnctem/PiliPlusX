@@ -119,6 +119,10 @@ class EpisodePanelState extends State<EpisodePanel>
   late final List<bool> _isReversed;
   late final List<ScrollController> _itemScrollController;
 
+  /// 当前激活子列表的滚动控制器（供视频页键盘滚动播放列表使用）
+  ScrollController get activeScrollController =>
+      _itemScrollController[_currentTabIndex.value];
+
   // fav
   Rx<LoadingState<bool>>? _favState;
 
