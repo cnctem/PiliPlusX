@@ -85,6 +85,10 @@ export default class HarmonyChannel implements FlutterPlugin {
         result.success(true);
         break;
       }
+      case "fullAutoRotate":
+        await this.fullAutoRotate();
+        result.success(true);
+        break;
       case "setDecorButtonDark": {
         const dark: boolean = call.argument("dark") ?? false;
         await this.setDecorButtonDark(dark);
@@ -469,6 +473,15 @@ export default class HarmonyChannel implements FlutterPlugin {
   async autoRotateLandscape() {
     this.lastWindow ??= await window.getLastWindow(getContext());
     this.lastWindow.setPreferredOrientation(window.Orientation.AUTO_ROTATION_LANDSCAPE)
+  }
+
+  /**
+   * 忽略系统旋转锁定，放开四方向跟随重力自动旋转（AUTO_ROTATION）。
+   * 全屏「重力」模式用：即使控制中心锁定旋转，屏幕仍跟随设备转动。
+   */
+  async fullAutoRotate() {
+    this.lastWindow ??= await window.getLastWindow(getContext());
+    this.lastWindow.setPreferredOrientation(window.Orientation.AUTO_ROTATION)
   }
 
   /**

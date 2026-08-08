@@ -55,10 +55,12 @@ Future<void>? harmonyLandscapeAutoMode() {
   return null;
 }
 
-/// 鸿蒙 gravity（强制重力转屏）模式：放开四个方向交给系统按重力旋转。
+/// 鸿蒙 gravity（强制重力转屏）模式：放开四个方向交给系统按重力旋转，
+/// 且**忽略系统旋转锁定**。不用 AutoOrientation.fullAutoMode——那个在鸿蒙映射
+/// 到 AUTO_ROTATION_RESTRICTED，受旋转开关控制；这里走原生 AUTO_ROTATION。
 Future<void> harmonyFullAutoMode() {
   _invalidateOrientationCache();
-  return AutoOrientation.fullAutoMode();
+  return HarmonyChannel.fullAutoRotate();
 }
 
 /// 页面级「跟随设备方向」：四个方向按重力旋转，但**受系统旋转锁定控制**——

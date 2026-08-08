@@ -322,6 +322,11 @@ abstract class HarmonyChannel {
     _channel.invokeMethod('autoRotateLandscape');
   }
 
+  /// 鸿蒙：忽略系统旋转锁定，放开四个方向强制按重力自动旋转
+  /// （原生 window.Orientation.AUTO_ROTATION，不受控制中心旋转开关控制）。
+  /// 全屏「重力」模式用：即使系统锁定旋转，屏幕仍跟随设备重力转动。
+  static Future<void> fullAutoRotate() => _invoke('fullAutoRotate');
+
   /// 先把窗口转到指定方向，之后继续跟随传感器（USER_ROTATION_*）。
   /// 用于系统未锁定旋转时进入全屏：点全屏按钮该转到视频方向，转完仍要能
   /// 跟着设备转回去（转回去会触发页面自动退出全屏）。
