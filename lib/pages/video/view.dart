@@ -616,24 +616,26 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       // 鸿蒙自由小窗（悬浮窗/全景多窗）内窗口宽高比不代表设备方向：横屏
       // 小窗退出全屏时窗口尚未恢复竖屏尺寸，此处若按"非竖屏"自动重进
       // 全屏会形成退不出去的回环。
+      //
+      // 用 controller 的恒非空单例而非本页局部 plPlayerController：未开启自动
+      // 播放时局部引用为 null，横屏仍须自动进全屏（hideSystemBar 在
+      // triggerFullScreen 内），否则状态栏不会被隐藏。上游通过设备方向监听器
+      // 同样无条件自动进全屏（与播放器是否初始化无关），这里行为保持一致。
+      final player = videoDetailController.plPlayerController;
       final aspectIsOrientation = !OS.isHarmony || !HarmonyChannel.isMiniWindow;
-      if (!isPortrait &&
-          !isFullScreen &&
-          aspectIsOrientation &&
-          plPlayerController != null &&
-          videoDetailController.autoPlay) {
+      if (!isPortrait && !isFullScreen && aspectIsOrientation) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          plPlayerController!.triggerFullScreen(
+          player.triggerFullScreen(
             status: true,
             isManualFS: false,
           );
         });
       } else if (isPortrait &&
           isFullScreen &&
-          plPlayerController?.isManualFS == false &&
-          plPlayerController?.controlsLock.value == false) {
+          !player.isManualFS &&
+          !player.controlsLock.value) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          plPlayerController!.triggerFullScreen(status: false);
+          player.triggerFullScreen(status: false);
         });
       }
     }
