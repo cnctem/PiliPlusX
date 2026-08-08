@@ -83,10 +83,10 @@ class EpisodePanel extends CommonSlidePage {
   final VoidCallback? onClose;
 
   @override
-  State<EpisodePanel> createState() => _EpisodePanelState();
+  State<EpisodePanel> createState() => EpisodePanelState();
 }
 
-class _EpisodePanelState extends State<EpisodePanel>
+class EpisodePanelState extends State<EpisodePanel>
     with TickerProviderStateMixin, CommonSlideMixin {
   // tab
   late final TabController _tabController;
@@ -108,6 +108,10 @@ class _EpisodePanelState extends State<EpisodePanel>
 
   late final List<bool> _isReversed;
   late final List<ScrollController> _itemScrollController;
+
+  /// 当前激活子列表的滚动控制器（供视频页键盘滚动播放列表使用）
+  ScrollController get activeScrollController =>
+      _itemScrollController[_currentTabIndex.value];
 
   // fav
   Rx<LoadingState<bool>>? _favState;
