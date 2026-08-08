@@ -574,7 +574,77 @@ class PlPlayerController with BlockConfigMixin {
       AudioNormalization.getParamFromConfig(_audioNormalization);
 
   // 初始化资源
+  //
+  // 播放器是全局单例，多个视频页共享同一实例。setDataSource 内部会异步
+  // 创建 media_kit Player（_initPlayer）。若并发调用（如 preInitPlayer
+  // 页面初始化进行中，另一个 autoPlay 页面又进入——autoPlay 分支不检查
+  // processing），会同时创建多个 Player，后创建的覆盖先创建的，先创建的
+  // 失去引用后永不释放，造成原生播放器与流监听泄漏。这里用 Future 队列
+  // 将初始化串行化，保证同一时刻只有一个 _setDataSource 在执行。
   Future<void> setDataSource(
+    DataSource dataSource, {
+    bool isLive = false,
+    bool autoplay = true,
+    // 初始化播放位置
+    Duration? seekTo,
+    // 初始化播放速度
+    double speed = 1.0,
+    int? width,
+    int? height,
+    Duration? duration,
+    // 方向
+    bool? isVertical,
+    // 记录历史记录
+    int? aid,
+    String? bvid,
+    int? cid,
+    int? epid,
+    int? seasonId,
+    int? pgcType,
+    VideoType? videoType,
+    VoidCallback? onInit,
+    Volume? volume,
+    bool autoFullScreenFlag = false,
+  }) {
+    final previous = _setDataSourceQueue;
+    final run = () async {
+      if (previous != null) {
+        try {
+          await previous;
+        } catch (_) {
+          // 前一个初始化失败不阻塞本次
+        }
+      }
+      await _setDataSource(
+        dataSource,
+        isLive: isLive,
+        autoplay: autoplay,
+        seekTo: seekTo,
+        speed: speed,
+        width: width,
+        height: height,
+        duration: duration,
+        isVertical: isVertical,
+        aid: aid,
+        bvid: bvid,
+        cid: cid,
+        epid: epid,
+        seasonId: seasonId,
+        pgcType: pgcType,
+        videoType: videoType,
+        onInit: onInit,
+        volume: volume,
+        autoFullScreenFlag: autoFullScreenFlag,
+      );
+    }();
+    _setDataSourceQueue = run;
+    return run;
+  }
+
+  /// setDataSource 串行队列尾；同一时刻仅一个初始化流程在执行
+  Future<void>? _setDataSourceQueue;
+
+  Future<void> _setDataSource(
     DataSource dataSource, {
     bool isLive = false,
     bool autoplay = true,

@@ -21,7 +21,8 @@ const EVENT_HOME_TAB_CHANGE = 'EVENT_HOME_TAB_CHANGE';
 const NAV_UNSELECTED = $r('sys.color.comp_focused_primary');
 const BOTTOM_NORMAL_AVOID_AREA_VALUE = 1;
 const BOTTOM_SPECIAL_AVOID_AREA_VALUE = 12;
-const TOP_BAR_BLUR_RADIUS = 20;
+const TOP_BAR_BLUR_RADIUS = 18;
+const TOP_BAR_FRACTION_STOPS: [number, number][] = [[0, 0], [0.9, 0.08], [1, 0.4], [1, 1]];
 const TOP_BAR_COLLAPSED_HEIGHT = 80;
 const TOP_BAR_EXPANDED_HEIGHT = 144;
 
@@ -237,13 +238,15 @@ struct Index {
 
   @Builder
   homeTopBar() {
-    Stack() {
+    RelativeContainer() {
       //渐变模糊底层
       Column() {
       }
-      .width('100%')
-      .height('100%')
-      .blur(TOP_BAR_BLUR_RADIUS)
+      .constraintSize({ maxHeight: TOP_BAR_EXPANDED_HEIGHT })
+      .linearGradientBlur(TOP_BAR_BLUR_RADIUS, {
+        fractionStops: TOP_BAR_FRACTION_STOPS,
+        direction: GradientDirection.Top
+      })
       .alignRules({
         top: { anchor: 'topBarContent', align: VerticalAlign.Top },
         bottom: { anchor: 'topBarContent', align: VerticalAlign.Bottom },

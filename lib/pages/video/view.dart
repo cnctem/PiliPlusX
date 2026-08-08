@@ -1458,6 +1458,21 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     if (Pref.enableHeroCoverAnimation && heroTag != null) {
       result = Hero(
         tag: heroTag,
+        // Hero 动画期间，框架默认把 toHero 的 child 从树中移除（空
+        // SizedBox 占位），详情页整棵子树（含播放器 State）会被 dispose。
+        // 开启「提前加载播放器」时 queryVideoUrl 若在动画期间完成，
+        // _initPlayerIfNeeded 因 videoPlayerKey.currentState 已卸载而跳过
+        // 预初始化且不再重试，导致播放器初始化失败。用占位 Builder 保留
+        // 子树（Offstage 隐藏 + 禁用 Ticker，与框架默认行为一致），让
+        // 播放器 State 在动画期间保持挂载。
+        placeholderBuilder: (context, size, child) => SizedBox(
+          width: size.width,
+          height: size.height,
+          child: Offstage(
+            offstage: true,
+            child: TickerMode(enabled: false, child: child),
+          ),
+        ),
         child: RepaintBoundary(child: result),
       );
     }
