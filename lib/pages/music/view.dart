@@ -9,6 +9,7 @@ import 'package:PiliPlus/common/widgets/image_viewer/hero.dart';
 import 'package:PiliPlus/common/widgets/marquee.dart';
 import 'package:PiliPlus/common/widgets/scaffold/mini_scaffold.dart';
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
+import 'package:PiliPlus/common/widgets/selection_text.dart';
 import 'package:PiliPlus/common/widgets/sliver/sliver_to_box_adapter.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/music.dart';
@@ -550,7 +551,7 @@ class _MusicDetailPageState extends CommonDynPageState<MusicDetailPage> {
                 ],
               ),
               const SizedBox(height: 10),
-              SelectableText(
+              SelectionText(
                 [
                   if (!(item.originArtist ?? item.originArtistList)
                       .isNullOrEmpty)

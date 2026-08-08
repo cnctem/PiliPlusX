@@ -13,6 +13,8 @@ import 'package:PiliPlus/common/widgets/gesture/tap_gesture_recognizer.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/image_grid/image_grid_view.dart';
 import 'package:PiliPlus/common/widgets/pendant_avatar.dart';
+import 'package:PiliPlus/common/widgets/selection_text.dart';
+import 'package:PiliPlus/common/widgets/text_selection_toolbar.dart';
 import 'package:PiliPlus/grpc/bilibili/main/community/reply/v1.pb.dart'
     show ReplyInfo, ReplyControl, Content, Url, ReplyControl_VoteOption;
 import 'package:PiliPlus/grpc/reply.dart';
@@ -1191,11 +1193,17 @@ class ReplyItemGrpc extends StatelessWidget {
                 builder: (context) => Dialog(
                   child: Padding(
                     padding: const .symmetric(horizontal: 20, vertical: 16),
-                    child: SelectableText(
-                      message,
-                      style: const TextStyle(fontSize: 15, height: 1.7),
-                      contextMenuBuilder: (_, editableTextState) =>
-                          _filterMenuBuilder(context, editableTextState),
+                    child: Builder(
+                      builder: (context) {
+                        final capture = SelectedContentCapture();
+                        return SelectionText(
+                          message,
+                          style: const TextStyle(fontSize: 15, height: 1.7),
+                          onSelectionChanged: capture.onSelectionChanged,
+                          contextMenuBuilder: (_, state) =>
+                              _filterMenuBuilder(context, state, capture),
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -1231,18 +1239,21 @@ class ReplyItemGrpc extends StatelessWidget {
 
   static Widget _filterMenuBuilder(
     BuildContext context,
-    EditableTextState editableTextState,
+    SelectableRegionState selectableRegionState,
+    SelectedContentCapture capture,
   ) {
-    final items = editableTextState.contextMenuButtonItems;
-    if (!editableTextState.textEditingValue.selection.isCollapsed) {
+    final items = ensureShareButton(
+      selectableRegionState.contextMenuButtonItems,
+      selectedTextOf: () => capture.selectedText,
+      hideToolbar: () => selectableRegionState.hideToolbar(),
+    );
+    final String? selected = capture.selectedText;
+    if (selected != null && selected.isNotEmpty) {
       items.add(
         ContextMenuButtonItem(
           onPressed: () {
             Navigator.of(context).pop();
-            final select = editableTextState.textEditingValue;
-            String text = RegExp.escape(
-              select.selection.textInside(select.text),
-            );
+            String text = RegExp.escape(selected);
             if (ReplyGrpc.enableFilter) text = '|$text';
 
             showConfirmDialog(
@@ -1277,7 +1288,7 @@ class ReplyItemGrpc extends StatelessWidget {
     }
     return AdaptiveTextSelectionToolbar.buttonItems(
       buttonItems: items,
-      anchors: editableTextState.contextMenuAnchors,
+      anchors: selectableRegionState.contextMenuAnchors,
     );
   }
 }

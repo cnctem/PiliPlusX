@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
+import 'package:PiliPlus/common/widgets/selection_text.dart';
 import 'package:PiliPlus/models/common/image_type.dart';
 import 'package:PiliPlus/models_new/live/live_superchat/item.dart';
 import 'package:PiliPlus/pages/member/widget/medal_widget.dart';
@@ -237,18 +238,16 @@ class _SuperChatCardState extends State<SuperChatCard> {
             color: bottomColor,
           ),
           padding: const EdgeInsets.all(8),
-          child: SelectionArea(
-            child: Text(
-              item.message,
-              style: TextStyle(
-                color: ColourUtils.parseColor(item.messageFontColor),
-                decoration: widget.persistentSC && item.deleted
-                    ? TextDecoration.lineThrough
-                    : null,
-                decorationThickness: 1.5,
-                decorationStyle: TextDecorationStyle.double,
-                decorationColor: Colors.white,
-              ),
+          child: SelectionText(
+            item.message,
+            style: TextStyle(
+              color: ColourUtils.parseColor(item.messageFontColor),
+              decoration: widget.persistentSC && item.deleted
+                  ? TextDecoration.lineThrough
+                  : null,
+              decorationThickness: 1.5,
+              decorationStyle: TextDecorationStyle.double,
+              decorationColor: Colors.white,
             ),
           ),
         ),

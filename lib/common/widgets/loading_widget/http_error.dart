@@ -1,4 +1,5 @@
 import 'package:PiliPlus/common/assets.dart';
+import 'package:PiliPlus/common/widgets/selection_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -31,11 +32,10 @@ class HttpError extends StatelessWidget {
         const SizedBox(height: 30),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-          child: SelectableText(
+          child: SelectionText(
             errMsg ?? '没有数据',
             textAlign: TextAlign.center,
             style: theme.textTheme.titleSmall,
-            scrollPhysics: const NeverScrollableScrollPhysics(),
           ),
         ),
         if (onReload != null)

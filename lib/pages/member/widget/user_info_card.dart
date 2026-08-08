@@ -4,6 +4,7 @@ import 'package:PiliPlus/common/widgets/avatars.dart';
 import 'package:PiliPlus/common/widgets/image_viewer/hero.dart';
 import 'package:PiliPlus/common/widgets/pendant_avatar.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart';
+import 'package:PiliPlus/common/widgets/selection_text.dart';
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/models/common/image_preview_type.dart';
 import 'package:PiliPlus/models/common/member/user_info_type.dart';
@@ -311,7 +312,7 @@ class UserInfoCard extends StatelessWidget {
   Widget _buildSign() {
     return Padding(
       padding: const .only(left: 20, top: 6, right: 20),
-      child: SelectableText(
+      child: SelectionText(
         card.sign!.trim().replaceAll(RegExp(r'\n{2,}'), '\n'),
         style: const TextStyle(fontSize: 14),
       ),

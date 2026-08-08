@@ -1,3 +1,4 @@
+import 'package:PiliPlus/common/widgets/text_selection_toolbar.dart';
 import 'package:PiliPlus/models/common/account_type.dart';
 import 'package:PiliPlus/pages/setting/models/model.dart';
 import 'package:PiliPlus/utils/accounts.dart';
@@ -25,7 +26,23 @@ List<SettingsModel> get privacySettings => [
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('账号模式详情'),
-          content: SingleChildScrollView(child: _getAccountDetail(context)),
+          content: Builder(
+            builder: (context) {
+              final capture = SelectedContentCapture();
+              return SelectionArea(
+                onSelectionChanged: capture.onSelectionChanged,
+                contextMenuBuilder: (context, state) =>
+                    selectionAreaContextMenuBuilder(
+                  context,
+                  state,
+                  selectedTextOf: () => capture.selectedText,
+                ),
+                child: SingleChildScrollView(
+                  child: _getAccountDetail(context),
+                ),
+              );
+            },
+          ),
           actions: [
             TextButton(
               onPressed: Get.back,
@@ -50,7 +67,7 @@ Widget _getAccountDetail(BuildContext context) {
 
     slivers
       ..add(Center(child: Text(i.title, style: theme.titleMedium)))
-      ..add(SelectableText(url.join('\n')));
+      ..add(Text(url.join('\n')));
   }
   return Column(
     mainAxisSize: MainAxisSize.min,

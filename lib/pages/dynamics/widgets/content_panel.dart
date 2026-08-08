@@ -2,6 +2,8 @@
 import 'package:PiliPlus/common/widgets/custom_icon.dart';
 import 'package:PiliPlus/common/widgets/flutter/text/text.dart' as custom_text;
 import 'package:PiliPlus/common/widgets/image_grid/image_grid_view.dart';
+import 'package:PiliPlus/common/widgets/selection_text.dart';
+import 'package:PiliPlus/common/widgets/text_selection_toolbar.dart';
 import 'package:PiliPlus/models/dynamics/result.dart';
 import 'package:PiliPlus/pages/dynamics/widgets/rich_node_panel.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
@@ -25,6 +27,7 @@ Widget content(
   final pics = moduleDynamic?.major?.opus?.pics;
   final text =
       moduleDynamic?.desc?.text ?? moduleDynamic?.major?.opus?.summary?.text;
+  final capture = SelectedContentCapture();
   return Padding(
     padding: floor == 1
         ? const EdgeInsets.fromLTRB(12, 0, 12, 6)
@@ -70,14 +73,15 @@ Widget content(
           ),
         if (richNodes != null)
           isDetail && floor == 1
-              ? SelectableText.rich(
+              ? SelectionText.rich(
                   richNodes,
                   style: isSave
                       ? const TextStyle(fontSize: 15)
                       : const TextStyle(fontSize: 16),
+                  onSelectionChanged: capture.onSelectionChanged,
                   contextMenuBuilder: text == null || text.isEmpty
                       ? null
-                      : (_, state) => _contextMenuBuilder(state, text),
+                      : (_, state) => _contextMenuBuilder(state, text, capture),
                 )
               : custom_text.Text.rich(
                   style: floor == 1
@@ -107,12 +111,20 @@ Widget content(
   );
 }
 
-Widget _contextMenuBuilder(EditableTextState state, String text) {
+Widget _contextMenuBuilder(
+  SelectableRegionState state,
+  String text,
+  SelectedContentCapture capture,
+) {
+  final buttonItems = ensureShareButton(
+    state.contextMenuButtonItems,
+    selectedTextOf: () => capture.selectedText,
+    hideToolbar: () => state.hideToolbar(),
+  )..add(
+    ContextMenuButtonItem(label: '文本', onPressed: () => _onCopyText(text)),
+  );
   return AdaptiveTextSelectionToolbar.buttonItems(
-    buttonItems: state.contextMenuButtonItems
-      ..add(
-        ContextMenuButtonItem(label: '文本', onPressed: () => _onCopyText(text)),
-      ),
+    buttonItems: buttonItems,
     anchors: state.contextMenuAnchors,
   );
 }
@@ -123,7 +135,7 @@ void _onCopyText(String text) {
     builder: (context) => Dialog(
       child: Padding(
         padding: const .symmetric(horizontal: 20, vertical: 16),
-        child: SelectableText(
+        child: SelectionText(
           text,
           style: const TextStyle(fontSize: 15, height: 1.7),
         ),
