@@ -277,6 +277,11 @@ abstract class HarmonyChannel {
   static Future<void> setStatusBarVisible(bool visible) =>
       _invoke('csy', {'value': visible});
 
+  /// 全屏/退出全屏时仅切换系统栏（状态栏+导航栏）显隐，不改窗口布局，
+  /// 避免 setWindowLayoutFullScreen 改变 surface 尺寸导致画面跳动。
+  static Future<void> setFullScreenBars(bool fullscreen) =>
+      _invoke('setFullScreenBars', {'fullscreen': fullscreen});
+
   /// 获取系统当前字重设置（仅 Harmony 平台）
   static Future<void> initSystemFontWeight() =>
       _invoke('getSystemFontWeightScale');

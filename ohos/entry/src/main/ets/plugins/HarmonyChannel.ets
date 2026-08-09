@@ -65,11 +65,30 @@ export default class HarmonyChannel implements FlutterPlugin {
     return this.lastWindow.setSpecificSystemBarEnabled("status", call.argument("value"), true);
   }
 
+  /**
+   * 全屏/退出全屏时只切换系统栏显隐，不改窗口布局。
+   * 不要调用 setWindowLayoutFullScreen：它会改变 surface 尺寸，
+   * 导致 Flutter 视口变化，旋转进出全屏时画面跳动。
+   * 窗口布局保持主流程（main.dart 的 edgeToEdge）设置的普通布局。
+   */
+  async setFullScreenBars(fullscreen: boolean) {
+    this.lastWindow ??= await window.getLastWindow(getContext());
+    await this.lastWindow.setSpecificSystemBarEnabled("status", !fullscreen, false);
+    await this.lastWindow.setSpecificSystemBarEnabled("navigation", !fullscreen, false);
+    await this.lastWindow.setSpecificSystemBarEnabled("navigationIndicator", !fullscreen, false);
+  }
+
   async onMethodCall(call: MethodCall, result: MethodResult): Promise<void> {
     switch (call.method) {
       case "csy":
         result.success(await this.csy(call));
         break;
+      case "setFullScreenBars": {
+        const fullscreen: boolean = call.argument("fullscreen") ?? false;
+        await this.setFullScreenBars(fullscreen);
+        result.success(true);
+        break;
+      }
       case "setMiniWindowLandscape":
         const landscape: boolean = call.argument("landscape") ?? false;
         await this.setMiniWindowLandscape(landscape);
