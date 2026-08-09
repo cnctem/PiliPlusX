@@ -1,0 +1,16 @@
+{
+  "forms": [
+    {
+      "name": "up_card",
+      "displayName": "$string:up_card_name",
+      "description": "$string:up_card_desc",
+      "src": "./ets/widget/pages/UpCard.ets",
+      "uiSyntax": "arkts",
+      "isDefault": true,
+      "supportDimensions": ["1*2"],
+      "defaultDimension": "1*2",
+      "updateEnabled": false,
+      "isDynamic": true
+    }
+  ]
+}

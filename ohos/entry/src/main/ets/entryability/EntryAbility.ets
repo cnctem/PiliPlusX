@@ -14,6 +14,9 @@ const CONTINUATION_KEY = "pili_continuation";
 /// 桌面快捷方式跳转类型在 want.parameters 中的键，具体见shortcuts_config
 const SHORTCUT_KEY = "pili_shortcut";
 
+/// UP主卡片点击跳转：pili_up_card=1 且带 mid
+const UP_CARD_KEY = "pili_up_card";
+
 /// 快捷方式映射
 const SHORTCUT_URI_MAP: Record<string, string> = {
   "search": "bilibili://search",
@@ -147,6 +150,13 @@ export default class EntryAbility extends FlutterAbility {
       const uri = SHORTCUT_URI_MAP[type];
       if (uri !== undefined) {
         want.uri = uri;
+      }
+    }
+    // UP主卡片点击跳转：bilibili://space/{mid}
+    if (want.parameters?.[UP_CARD_KEY] === "1") {
+      const mid = want.parameters?.["mid"];
+      if (typeof mid === "string" && mid.length > 0) {
+        want.uri = `bilibili://space/${mid}`;
       }
     }
   }

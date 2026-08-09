@@ -277,6 +277,20 @@ abstract class HarmonyChannel {
   static Future<void> setFullScreenBars(bool fullscreen) =>
       _invoke('setFullScreenBars', {'fullscreen': fullscreen});
 
+  /// 添加UP主卡片到桌面（仅 Harmony）：原生保存UP数据并拉起添加引导页
+  static Future<void> addUpToDesktop({
+    required String mid,
+    required String name,
+    required String avatar,
+  }) {
+    if (!OS.isHarmony) return Future.value();
+    return _channel.invokeMethod('addUpToDesktop', {
+      'mid': mid,
+      'name': name,
+      'avatar': avatar,
+    });
+  }
+
   /// 获取系统当前字重设置（仅 Harmony 平台）
   static Future<void> initSystemFontWeight() =>
       _invoke('getSystemFontWeightScale');

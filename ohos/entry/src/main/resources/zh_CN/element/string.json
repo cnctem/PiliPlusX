@@ -35,6 +35,22 @@
     {
       "name": "shortcut_favorite",
       "value": "收藏夹"
+    },
+    {
+      "name": "EntryFormAbility_label",
+      "value": "UP主卡片"
+    },
+    {
+      "name": "EntryFormAbility_desc",
+      "value": "UP主卡片"
+    },
+    {
+      "name": "up_card_name",
+      "value": "UP主卡片"
+    },
+    {
+      "name": "up_card_desc",
+      "value": "展示UP主头像与名称，点击直达主页"
     }
   ]
 }

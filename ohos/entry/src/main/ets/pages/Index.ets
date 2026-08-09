@@ -1,7 +1,9 @@
 import common from '@ohos.app.ability.common';
 import window from '@ohos.window';
 import { FlutterPage } from '@ohos/flutter_ohos';
-import { SymbolGlyphModifier, uiMaterial } from '@kit.ArkUI';
+import { AddFormMenuItem, promptAction, SymbolGlyphModifier, uiMaterial } from '@kit.ArkUI';
+import { formBindingData } from '@kit.FormKit';
+import { preferences } from '@kit.ArkData';
 import { HdsAnimationMode, hdsMaterial, HdsTabs, HdsTabsController } from '@kit.UIDesignKit';
 import { deviceInfo } from '@kit.BasicServicesKit';
 
@@ -23,6 +25,16 @@ const TOP_BAR_BLUR_RADIUS = 18;
 const TOP_BAR_FRACTION_STOPS: [number, number][] = [[0, 0], [0.9, 0.08], [1, 0.4], [1, 1]];
 const TOP_BAR_COLLAPSED_HEIGHT = 80;
 const TOP_BAR_EXPANDED_HEIGHT = 144;
+
+// 添加UP主卡片弹窗相关
+const UP_FORM_PREFS = 'pili_form';
+const KEY_FORM_MAP = 'up_card_map';
+
+interface UpFormInfo {
+  mid: string;
+  name: string;
+  avatar: string;
+}
 
 function topBarMaterial(interactive: boolean): uiMaterial.ImmersiveMaterial {
   return new uiMaterial.ImmersiveMaterial({
@@ -87,6 +99,12 @@ struct Index {
   /// 底部 Navbar 页签（NavigationBarType 索引，由 Flutter 按设置内
   /// Navbar 编辑同步；默认 首页/动态/我的）
   @StorageLink('navTabs') navTabs: number[] = [0, 1, 2];
+  @StorageLink('pendingUpCard') @Watch('onPendingUpCardChange') pendingUpCard: string = '';
+  @StorageLink('showAddFormSheet') showAddFormSheet: boolean = false;
+  @State upCardMid: string = '';
+  @State upCardName: string = '';
+  @State upCardAvatar: string = '';
+  private upCardCompId: string = 'pili_up_card_add';
   @State statusBarHeight: number = 0;
   @State categoryCurrentIndex: number = 0;
   @State winWidth: number = 0;
@@ -113,6 +131,40 @@ struct Index {
       this.controller.applyHideAnimation(HdsAnimationMode.SCROLL_ANIMATION);
     } else {
       this.controller.applyShowAnimation(HdsAnimationMode.SCROLL_ANIMATION);
+    }
+  }
+
+  onPendingUpCardChange(): void {
+    if (this.pendingUpCard.length === 0) {
+      return;
+    }
+    try {
+      const data: UpFormInfo = JSON.parse(this.pendingUpCard);
+      this.upCardMid = data.mid ?? '';
+      this.upCardName = data.name ?? '';
+      this.upCardAvatar = data.avatar ?? '';
+    } catch (e) {
+      console.error(TAG, `parse pending up card failed: ${e}`);
+    }
+  }
+
+  private async saveUpCardMap(formId: string | number): Promise<void> {
+    try {
+      const store = await preferences.getPreferences(this.context, UP_FORM_PREFS);
+      const raw = store.getSync(KEY_FORM_MAP, '{}');
+      let map: Record<string, Object> = {};
+      try {
+        map = JSON.parse(typeof raw === 'string' ? raw : '{}');
+      } catch (e) {
+      }
+      const info: UpFormInfo = {
+        mid: this.upCardMid, name: this.upCardName, avatar: this.upCardAvatar
+      };
+      map[String(formId)] = info;
+      await store.put(KEY_FORM_MAP, JSON.stringify(map));
+      await store.flush();
+    } catch (e) {
+      console.error(TAG, `save up card map failed: ${e}`);
     }
   }
 
@@ -266,6 +318,76 @@ struct Index {
   }
 
   @Builder
+  addFormMenuBuilder() {
+    Menu() {
+      AddFormMenuItem(
+        {
+          bundleName: 'com.example.piliplus',
+          abilityName: 'EntryFormAbility',
+          parameters: {
+            'ohos.extra.param.key.form_dimension': 1,
+            'ohos.extra.param.key.form_name': 'up_card',
+            'ohos.extra.param.key.module_name': 'entry',
+          },
+        },
+        this.upCardCompId,
+        {
+          formBindingData: formBindingData.createFormBindingData({
+            mid: this.upCardMid,
+            name: this.upCardName,
+            avatar: this.upCardAvatar,
+          }),
+          callback: (error, formId) => {
+            if (error?.code === 0) {
+              this.saveUpCardMap(formId);
+              promptAction.showToast({ message: '已添加UP主卡片到桌面' });
+            } else {
+              promptAction.showToast({
+                message: `添加失败：${error?.message ?? error?.code ?? '未知错误'}`,
+              });
+            }
+            this.showAddFormSheet = false;
+          },
+        },
+      )
+    }
+  }
+
+  @Builder
+  addFormSheet() {
+    Column({ space: 20 }) {
+      Row({ space: 12 }) {
+        Image(this.upCardAvatar)
+          .width(48)
+          .height(48)
+          .borderRadius(24)
+          .objectFit(ImageFit.Cover)
+          .alt($r('app.media.icon_startwindow'))
+        Column({ space: 4 }) {
+          Text(this.upCardName)
+            .fontSize(16)
+            .fontWeight(FontWeight.Bold)
+            .maxLines(1)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+          Text('将UP主添加到桌面')
+            .fontSize(12)
+            .fontColor('#999999')
+        }
+      }
+      .alignItems(VerticalAlign.Center)
+
+      Button('添加到桌面')
+        .id(this.upCardCompId)
+        .bindMenu(this.addFormMenuBuilder)
+        .width('80%')
+        .height(42)
+        .fontSize(16)
+    }
+    .width('100%')
+    .padding({ top: 20, bottom: 24, left: 24, right: 24 })
+  }
+
+  @Builder
   homeTopBar() {
     RelativeContainer() {
       //渐变模糊底层
@@ -413,6 +535,10 @@ struct Index {
     }
     .width(this.winWidth > 0 ? this.winWidth : '100%')
     .height(this.winHeight > 0 ? this.winHeight : '100%')
+    .bindSheet($$this.showAddFormSheet, this.addFormSheet(), {
+      height: 220,
+      dragBar: true,
+    })
   }
 
   onBackPress(): boolean {

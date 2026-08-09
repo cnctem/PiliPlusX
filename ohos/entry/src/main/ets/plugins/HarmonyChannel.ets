@@ -1,5 +1,9 @@
 import { common, wantAgent, WantAgent } from "@kit.AbilityKit";
 import { BusinessError, deviceInfo } from "@kit.BasicServicesKit";
+import { preferences } from "@kit.ArkData";
+import { http } from "@kit.NetworkKit";
+import { image } from "@kit.ImageKit";
+import { util } from "@kit.ArkTS";
 import AbilityConstant from "@ohos.app.ability.AbilityConstant";
 import Want from "@ohos.app.ability.Want";
 import ConfigurationConstant from "@ohos.app.ability.ConfigurationConstant";
@@ -282,6 +286,11 @@ export default class HarmonyChannel implements FlutterPlugin {
       //   result.success(true);
       //   break;
       // }
+      case "addUpToDesktop": {
+        await this.addUpToDesktop(call);
+        result.success(true);
+        break;
+      }
       default:
         result.notImplemented();
         break;
@@ -296,6 +305,83 @@ export default class HarmonyChannel implements FlutterPlugin {
       console.log('HarmonyChannel', `set color mode: ${colorMode}`);
     } catch (err) {
       console.error("HarmonyChannel", `get application context failed: ${err}`);
+    }
+  }
+
+  /**
+   * 添加UP主卡片到桌面：先下载头像转base64并保存待添加的UP数据
+   * （卡片渲染进程加载网络图片受限，本地数据最稳），再通知 Index 弹出添加引导半模态。
+   */
+  private async addUpToDesktop(call: MethodCall): Promise<void> {
+    const mid = String(call.argument("mid") ?? "");
+    const name = String(call.argument("name") ?? "");
+    const avatar = String(call.argument("avatar") ?? "");
+    if (mid.length === 0) {
+      return;
+    }
+    const avatarData = await this.downloadAvatarBase64(avatar);
+    try {
+      const store = await preferences.getPreferences(getContext(), "pili_form");
+      await store.put("pending_up_card", JSON.stringify({
+        mid: mid, name: name, avatar: avatarData
+      }));
+      await store.flush();
+    } catch (e) {
+      console.error("HarmonyChannel", `save pending up failed: ${e}`);
+    }
+    // 通知 Index.ets 弹出添加引导半模态（先置 false 再置 true，确保每次都触发）
+    AppStorage.setOrCreate("pendingUpCard", JSON.stringify({
+      mid: mid, name: name, avatar: avatarData
+    }));
+    AppStorage.setOrCreate("showAddFormSheet", false);
+    AppStorage.setOrCreate("showAddFormSheet", true);
+  }
+
+  /** 下载头像并统一转成 JPEG base64，供卡片/引导页直接显示 */
+  private async downloadAvatarBase64(url: string): Promise<string> {
+    if (url.length === 0) {
+      return '';
+    }
+    let httpRequest: http.HttpRequest | null = null;
+    try {
+      httpRequest = http.createHttp();
+      const resp = await httpRequest.request(url, {
+        method: http.RequestMethod.GET,
+        connectTimeout: 15000,
+        readTimeout: 15000,
+      });
+      if (resp.responseCode !== 200) {
+        return '';
+      }
+      const result = resp.result;
+      let bytes: ArrayBuffer;
+      if (result instanceof ArrayBuffer) {
+        bytes = result;
+      } else if (result instanceof Uint8Array) {
+        bytes = result.buffer as ArrayBuffer;
+      } else {
+        return '';
+      }
+      if (bytes.byteLength === 0) {
+        return '';
+      }
+      const imageSource = image.createImageSource(bytes);
+      const pixelMap = await imageSource.createPixelMap();
+      const imagePacker = image.createImagePacker();
+      const packed = await imagePacker.packToData(pixelMap, {
+        format: 'image/jpeg',
+        quality: 85
+      });
+      pixelMap.release();
+      imageSource.release();
+      imagePacker.release();
+      const base64 = new util.Base64Helper().encodeToStringSync(new Uint8Array(packed));
+      return `data:image/jpeg;base64,${base64}`;
+    } catch (e) {
+      console.error("HarmonyChannel", `download avatar failed: ${e}`);
+      return '';
+    } finally {
+      httpRequest?.destroy();
     }
   }
 
