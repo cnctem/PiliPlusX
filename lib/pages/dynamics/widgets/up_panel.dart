@@ -44,6 +44,11 @@ class _UpPanelState extends State<UpPanel> {
       controller: controller.scrollController,
       slivers: [
         SliverToBoxAdapter(
+          child: SizedBox(
+            height: MediaQuery.paddingOf(context).top,
+          )
+        ),
+        SliverToBoxAdapter(
           child: InkWell(
             onTap: () => setState(() {
               controller.showLiveUp = !controller.showLiveUp;
