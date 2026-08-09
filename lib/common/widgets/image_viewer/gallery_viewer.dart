@@ -208,7 +208,7 @@ class _GalleryViewerState extends State<GalleryViewer>
         // 在整个生命周期内保持原始 padding，防止布局跳变影响 Hero 动画
         tmpPadding = padding;
         if (OS.isHarmony) {
-          HarmonyChannel.setStatusBarVisible(false);
+          HarmonyChannel.setFullScreenBars(true);
         } else {
           hideSystemBar();
         }
@@ -307,7 +307,7 @@ class _GalleryViewerState extends State<GalleryViewer>
     super.dispose();
     if (_hideSystemBar) {
       if (OS.isHarmony) {
-        HarmonyChannel.setStatusBarVisible(true);
+        HarmonyChannel.setFullScreenBars(false);
       } else {
         showSystemBar('gallery_dispose');
       }

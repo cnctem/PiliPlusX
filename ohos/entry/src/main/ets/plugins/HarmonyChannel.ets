@@ -60,10 +60,6 @@ export default class HarmonyChannel implements FlutterPlugin {
     return this.channel;
   }
 
-  async csy(call: MethodCall) {
-    this.lastWindow ??= await window.getLastWindow(getContext());
-    return this.lastWindow.setSpecificSystemBarEnabled("status", call.argument("value"), true);
-  }
 
   /**
    * 全屏/退出全屏时只切换系统栏显隐，不改窗口布局。
@@ -80,9 +76,6 @@ export default class HarmonyChannel implements FlutterPlugin {
 
   async onMethodCall(call: MethodCall, result: MethodResult): Promise<void> {
     switch (call.method) {
-      case "csy":
-        result.success(await this.csy(call));
-        break;
       case "setFullScreenBars": {
         const fullscreen: boolean = call.argument("fullscreen") ?? false;
         await this.setFullScreenBars(fullscreen);

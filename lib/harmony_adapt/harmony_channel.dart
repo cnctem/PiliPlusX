@@ -272,11 +272,6 @@ abstract class HarmonyChannel {
     return _channel.invokeMethod('csy', {'value': value});
   }
 
-  /// 仅控制状态栏显隐，不影响 Flutter 布局 padding。
-  /// 用于大图查看等需要隐藏状态栏但不希望 MediaQuery padding 变化的场景。
-  static Future<void> setStatusBarVisible(bool visible) =>
-      _invoke('csy', {'value': visible});
-
   /// 全屏/退出全屏时仅切换系统栏（状态栏+导航栏）显隐，不改窗口布局，
   /// 避免 setWindowLayoutFullScreen 改变 surface 尺寸导致画面跳动。
   static Future<void> setFullScreenBars(bool fullscreen) =>
