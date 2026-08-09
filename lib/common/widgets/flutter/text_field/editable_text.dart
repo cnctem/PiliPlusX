@@ -5277,7 +5277,7 @@ class EditableTextState extends State<EditableText>
 
     _viewId = View.of(context).viewId;
     return TextInputConfiguration(
-      enableDeltaModel: true,
+      enableDeltaModel: !OS.isHarmony, // ohos平台不支持delta模型，不要开启
       viewId: _viewId,
       inputType: widget.keyboardType,
       readOnly: widget.readOnly,

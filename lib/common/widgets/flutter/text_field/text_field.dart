@@ -18,7 +18,7 @@ import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/cupertino/spell_check_suggestions_toolbar.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/cupertino/text_field.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/editable_text.dart';
-import 'package:PiliPlus/common/widgets/flutter/text_field/spell_check.dart' hide buildTextSpanWithSpellCheckSuggestions;
+import 'package:PiliPlus/common/widgets/flutter/text_field/spell_check.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/spell_check_suggestions_toolbar.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/system_context_menu.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/text_selection.dart';
@@ -50,6 +50,7 @@ import 'package:flutter/material.dart'
         TextSelectionGestureDetectorBuilderDelegate;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:os_type/os_type.dart';
 
 class _TextFieldSelectionGestureDetectorBuilder
     extends TextSelectionGestureDetectorBuilder {
@@ -67,6 +68,31 @@ class _TextFieldSelectionGestureDetectorBuilder
   @override
   void onUserTap() {
     _state.widget.onTap?.call();
+  }
+
+  @override
+  void onSingleTapUp(TapDragUpDetails details) {
+    _state._deviceKind = details.kind;
+    super.onSingleTapUp(details);
+  }
+
+  @override
+  void onSingleLongTapStart(LongPressStartDetails details) {
+    super.onSingleLongTapStart(details);
+    if (delegate.selectionEnabled) {
+      switch (Theme.of(_state.context).platform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          Feedback.forLongPress(_state.context);
+        default:
+          Feedback.forLongPress(_state.context);
+      }
+    }
   }
 }
 
@@ -1469,7 +1495,11 @@ class RichTextFieldState extends State<RichTextField>
 
   EditableTextState? get _editableText => editableTextKey.currentState;
 
-  void _requestKeyboard() {
+  // ignore: unused_field
+  PointerDeviceKind _deviceKind = PointerDeviceKind.unknown;
+
+  void _requestKeyboard({PointerDeviceKind kind = PointerDeviceKind.unknown}) {
+    _deviceKind = kind;
     _editableText?.requestKeyboard();
   }
 
@@ -1524,14 +1554,29 @@ class RichTextFieldState extends State<RichTextField>
       });
     }
 
-    // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
-    if (cause == SelectionChangedCause.longPress) {
-      _editableText?.bringIntoView(selection.extent);
+    switch (Theme.of(context).platform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.android:
+        if (cause == SelectionChangedCause.longPress ||
+            cause == SelectionChangedCause.drag) {
+          _editableText?.bringIntoView(selection.extent);
+        }
+      default:
+        if (cause == SelectionChangedCause.longPress ||
+            cause == SelectionChangedCause.drag) {
+          _editableText?.bringIntoView(selection.extent);
+        }
     }
-    // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
 
     switch (Theme.of(context).platform) {
-      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.android:
+        break;
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
@@ -1540,7 +1585,6 @@ class RichTextFieldState extends State<RichTextField>
         }
       default:
         break;
-      // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
     }
   }
 
@@ -1676,7 +1720,14 @@ class RichTextFieldState extends State<RichTextField>
             CupertinoRichTextField.inferIOSSpellCheckConfiguration(
               widget.spellCheckConfiguration,
             );
-      // ↓↓↓ 适配flutter 3.32.4-ohos-0.0.1
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        spellCheckConfiguration =
+            RichTextField.inferAndroidSpellCheckConfiguration(
+              widget.spellCheckConfiguration,
+            );
       default:
         spellCheckConfiguration =
             RichTextField.inferAndroidSpellCheckConfiguration(
@@ -1746,22 +1797,7 @@ class RichTextFieldState extends State<RichTextField>
         handleDidLoseAccessibilityFocus = () {
           _effectiveFocusNode.unfocus();
         };
-
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        forcePressEnabled = false;
-        textSelectionControls ??= materialTextSelectionHandleControls;
-        paintCursorAboveText = false;
-        cursorOpacityAnimates ??= false;
-        cursorColor = _hasError
-            ? _errorColor
-            : widget.cursorColor ??
-                  selectionStyle.cursorColor ??
-                  theme.colorScheme.primary;
-        selectionColor =
-            selectionStyle.selectionColor ??
-            theme.colorScheme.primary.withValues(alpha: 0.40);
-
+      
       case TargetPlatform.linux:
         forcePressEnabled = false;
         textSelectionControls ??= desktopTextSelectionHandleControls;
@@ -1809,7 +1845,9 @@ class RichTextFieldState extends State<RichTextField>
         handleDidLoseAccessibilityFocus = () {
           _effectiveFocusNode.unfocus();
         };
-
+      
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
       default:
         forcePressEnabled = false;
         textSelectionControls ??= materialTextSelectionHandleControls;

@@ -3101,7 +3101,7 @@ class SelectionOverlay {
           case TargetPlatform.windows:
             break;
           default:
-            HapticFeedback.selectionClick();
+            HapticFeedback.lightImpact();
           // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
         }
       }
