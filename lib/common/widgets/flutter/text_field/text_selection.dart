@@ -3099,9 +3099,8 @@ class SelectionOverlay {
           case TargetPlatform.linux:
           case TargetPlatform.macOS:
           case TargetPlatform.windows:
-            break;
           default:
-            HapticFeedback.selectionClick();
+            break;
           // ↑↑↑ 适配flutter 3.32.4-ohos-0.0.1
         }
       }
