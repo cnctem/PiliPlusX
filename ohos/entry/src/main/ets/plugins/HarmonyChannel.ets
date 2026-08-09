@@ -149,6 +149,19 @@ export default class HarmonyChannel implements FlutterPlugin {
         result.success(true);
         break;
       }
+      case "setDynamicBadge": {
+        if (deviceInfo.sdkApiVersion < 23) {
+          result.success(true);
+          break;
+        }
+        // 动态页签角标（mode 与 Flutter DynamicBadgeMode 一致：0=隐藏 1=红点 2=数字）
+        const count: number = call.argument('count') ?? 0;
+        const mode: number = call.argument('mode') ?? 0;
+        AppStorage.setOrCreate('dynBadgeCount', count);
+        AppStorage.setOrCreate('dynBadgeMode', mode);
+        result.success(true);
+        break;
+      }
       case "startBackgroundTask": {
         this.startBackgroundTaskInner();
         result.success(true);

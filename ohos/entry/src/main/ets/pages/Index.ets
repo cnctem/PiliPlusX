@@ -32,12 +32,6 @@ function topBarMaterial(interactive: boolean): uiMaterial.ImmersiveMaterial {
   });
 }
 
-function tabSymbol(symbol: Resource, color: ResourceColor): SymbolGlyphModifier {
-  return new SymbolGlyphModifier(symbol)
-    .fontSize(22)
-    .fontColor([color]);
-}
-
 /// Navbar 页签类型（与 Flutter NavigationBarType.values 顺序一致）→ 符号
 function navTabSymbol(typeIndex: number): Resource {
   switch (typeIndex) {
@@ -87,6 +81,12 @@ struct Index {
   /// 底部 Navbar 页签（NavigationBarType 索引，由 Flutter 按设置内
   /// Navbar 编辑同步；默认 首页/动态/我的）
   @StorageLink('navTabs') navTabs: number[] = [0, 1, 2];
+  /// 动态页签角标模式（与 Flutter DynamicBadgeMode 一致：0=隐藏 1=红点 2=数字）
+  @StorageLink('dynBadgeMode') dynBadgeMode: number = 0;
+  /// 动态页签角标数量（由 Flutter 按未读动态数同步）
+  @StorageLink('dynBadgeCount') dynBadgeCount: number = 0;
+  /// 当前选中的底部 Navbar 页签索引（自定义 tabBar 需自行区分选中态）
+  @State currentNavIndex: number = 0;
   @State statusBarHeight: number = 0;
   @State categoryCurrentIndex: number = 0;
   @State winWidth: number = 0;
@@ -127,6 +127,7 @@ struct Index {
 
   aboutToAppear(): void {
     this.context.eventHub.on(EVENT_CHANGE_TAB, (index: number) => {
+      this.currentNavIndex = index;
       this.controller.changeIndex(index);
     });
 
@@ -203,6 +204,64 @@ struct Index {
         right: index === this.homeTabs.length - 1 ? 8 : 3
       })
       .padding({ left: 15, right: 15 })
+  }
+
+  @Builder
+  navTabBuilder(typeIndex: number, index: number) {
+    Column({ space: 3 }) {
+      if (typeIndex === 1 && this.dynBadgeCount > 0 && this.dynBadgeMode !== 0) {
+        if (this.dynBadgeMode === 1) {
+          // 红点角标
+          Badge({
+            value: '',
+            position: BadgePosition.RightTop,
+            style: { badgeSize: 8, badgeColor: this.navSelected, borderColor: $r('sys.color.comp_common_contrary') }
+          }) {
+            SymbolGlyph(navTabSymbol(typeIndex))
+              .fontSize(22)
+              .fontColor(
+                [this.currentNavIndex === index ? this.navSelected : NAV_UNSELECTED, $r('sys.color.icon_tertiary')])
+              .renderingStrategy(SymbolRenderingStrategy.MULTIPLE_COLOR)
+              .symbolEffect(new BounceSymbolEffect(), this.currentNavIndex === index)
+          }
+        } else {
+          // 数字角标
+          Badge({
+            count: this.dynBadgeCount,
+            position: BadgePosition.RightTop,
+            style: {
+              badgeSize: 13,
+              fontSize: 8,
+              fontWeight: FontWeight.Medium,
+              badgeColor: this.navSelected,
+              borderColor: $r('sys.color.comp_common_contrary'),
+              color: $r('sys.color.comp_common_contrary')
+            }
+          }) {
+            SymbolGlyph(navTabSymbol(typeIndex))
+              .fontSize(22)
+              .fontColor(
+                [this.currentNavIndex === index ? this.navSelected : NAV_UNSELECTED, $r('sys.color.icon_tertiary')])
+              .renderingStrategy(SymbolRenderingStrategy.MULTIPLE_COLOR)
+              .symbolEffect(new BounceSymbolEffect(), this.currentNavIndex === index)
+          }
+        }
+      } else {
+        SymbolGlyph(navTabSymbol(typeIndex))
+          .fontSize(22)
+          .fontColor(
+            [this.currentNavIndex === index ? this.navSelected : NAV_UNSELECTED, $r('sys.color.icon_tertiary')])
+          .renderingStrategy(SymbolRenderingStrategy.MULTIPLE_COLOR)
+          .symbolEffect(new BounceSymbolEffect(), this.currentNavIndex === index)
+      }
+
+      Text(navTabLabel(typeIndex))
+        .fontSize(11)
+        .fontWeight(this.currentNavIndex === index ? FontWeight.Bold : FontWeight.Normal)
+        .fontColor(this.currentNavIndex === index ? this.navSelected : NAV_UNSELECTED)
+    }
+    .width('100%')
+    .justifyContent(FlexAlign.Center)
   }
 
   @Builder
@@ -360,16 +419,11 @@ struct Index {
       ForEach(this.navTabs, (typeIndex: number, index: number) => {
         TabContent() { // empty
         }
-        .tabBar(new BottomTabBarStyle({
-          normal: tabSymbol(navTabSymbol(typeIndex), NAV_UNSELECTED),
-          selected: tabSymbol(navTabSymbol(typeIndex), this.navSelected)
-        }, navTabLabel(typeIndex)).labelStyle({
-          selectedColor: this.navSelected,
-          unselectedColor: NAV_UNSELECTED
-        }))
+        .tabBar(this.navTabBuilder(typeIndex, index))
       }, (typeIndex: number, index: number) => index + '_' + typeIndex)
     }
     .onTabBarClick((index: number) => {
+      this.currentNavIndex = index;
       this.context.eventHub.emit(EVENT_TAB_SWITCH, index);
     })
     .scrollable(false)
