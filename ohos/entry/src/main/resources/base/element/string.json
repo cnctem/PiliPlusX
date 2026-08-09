@@ -59,6 +59,22 @@
     {
       "name": "shortcut_favorite",
       "value": "Favorites"
+    },
+    {
+      "name": "EntryFormAbility_label",
+      "value": "UP card"
+    },
+    {
+      "name": "EntryFormAbility_desc",
+      "value": "UP card"
+    },
+    {
+      "name": "up_card_name",
+      "value": "UP card"
+    },
+    {
+      "name": "up_card_desc",
+      "value": "Show UP avatar and name, tap to open their page"
     }
   ]
 }

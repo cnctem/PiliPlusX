@@ -8,6 +8,7 @@ import 'package:PiliPlus/common/widgets/dynamic_sliver_app_bar/dynamic_sliver_ap
 import 'package:PiliPlus/common/widgets/gesture/tap_gesture_recognizer.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/loading_widget.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/http/live.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/user.dart';
@@ -48,6 +49,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:os_type/os_type.dart';
 
 class MemberPage extends StatefulWidget {
   const MemberPage({super.key});
@@ -726,6 +728,12 @@ class _MemberPageState extends State<MemberPage> with WidgetsBindingObserver {
       );
     } else if (Platform.isAndroid) {
       _createShortcutAndroid();
+    } else if (OS.isHarmony) {
+      HarmonyChannel.addUpToDesktop(
+        mid: _mid.toString(),
+        name: _userController.username ?? '',
+        avatar: '${_userController.userAvatar!}@200w_200h.webp'.http2https,
+      );
     }
   }
 
