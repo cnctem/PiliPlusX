@@ -1,4 +1,4 @@
-import { common } from "@kit.AbilityKit";
+import { common, ConfigurationConstant } from "@kit.AbilityKit";
 import { BusinessError } from "@kit.BasicServicesKit";
 import { fileIo, fileUri, picker } from "@kit.CoreFileKit";
 import AbilityConstant from "@ohos.app.ability.AbilityConstant";
@@ -172,7 +172,7 @@ export default class EntryAbility extends FlutterAbility {
         this.wasFloatingWindow = false;
       }
     });
-    await setTimeout(() => {
+    setTimeout(() => {
       let context = getContext() as common.UIAbilityContext;
       const documentViewPicker = new picker.DocumentViewPicker(context);
       const documentSaveOptions = new picker.DocumentSaveOptions();
@@ -180,11 +180,9 @@ export default class EntryAbility extends FlutterAbility {
       documentViewPicker
         .save(documentSaveOptions)
         .catch((err: BusinessError) => {
-          console.error('测试：' +
-            `Invoke documentViewPicker.save failed, code is ${err.code}, message is ${err.message}`,
-          );
+          console.error('EntryAbility',
+            `Invoke documentViewPicker.save failed, code is ${err.code}, message is ${err.message}`);
         });
-      console.log('测试：' + '创建下载文件夹成功')
     }, 100)
   }
 

@@ -533,10 +533,20 @@ class _MainAppState extends PopScopeState<MainApp>
       );
     }
 
+    // Flutter 在鸿蒙平台上的状态栏颜色依赖于AppBar设置的backgroundColor进行取色，因此需要写这个神人代码保证取色能力正常
+    final backgroundColor =
+        MediaQuery.platformBrightnessOf(context) == Brightness.light
+        ? const Color.fromARGB(0, 255, 255, 255)
+        : const Color.fromARGB(0, 0, 0, 0);
+
     child = Scaffold(
       extendBody: true,
       resizeToAvoidBottomInset: false,
-      // 去除AppBar，扩展安全区
+      extendBodyBehindAppBar: true, // 扩展安全区
+      appBar: AppBar(
+        toolbarHeight: 0,
+        backgroundColor: backgroundColor,
+      ),
       body: Padding(
         padding: EdgeInsets.only(
           left: _mainController.useBottomNav ? _padding.left : 0.0,
