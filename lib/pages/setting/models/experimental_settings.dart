@@ -45,12 +45,13 @@ List<SettingsModel> experimentalSettings = [
     defaultVal: true,
     onChanged: (_) => Get.updateMyAppTheme(),
   ),
-  const SwitchModel(
+  SwitchModel(
     title: '视频封面一镜到底动画',
-    subtitle: '点击视频卡片时封面平滑展开，返回时飞回原位\n建议重启应用避免一些问题',
-    leading: Icon(Icons.motion_photos_on_outlined),
+    subtitle: '点击视频卡片时封面平滑展开，返回时飞回原位\n仅支持首页的部分视频卡片和番剧/影视卡片',
+    leading: const Icon(Icons.motion_photos_on_outlined),
     setKey: SettingBoxKey.enableHeroCoverAnimation,
     defaultVal: false,
+    onChanged: (_) => SmartDialog.showToast("建议重启以应用更改"),
   ),
   NormalModel(
     title: '应用接续',
