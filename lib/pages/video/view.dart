@@ -125,13 +125,16 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   /// （窗口已转回竖屏、全屏状态尚未退出）。此时按普通页面布局渲染，
   /// 避免“竖屏全屏居中”一闪后跳到页面顶部播放位。
   /// 强制竖屏/不改变方向模式下竖屏全屏是稳定状态，不适用。
+  /// gravity 模式进全屏时不把窗口转到视频方向（交给重力），竖着拿设备
+  /// 全屏横屏视频时竖屏窗口是稳定状态而非瞬态，同样排除。
   bool get _layoutFullScreen {
     if (!isFullScreen) return false;
     final invalidPortraitFullScreen =
         isPortrait &&
         !videoDetailController.isVertical.value &&
         videoDetailController.plPlayerController.mode != FullScreenMode.none &&
-        videoDetailController.plPlayerController.mode != FullScreenMode.vertical;
+        videoDetailController.plPlayerController.mode != FullScreenMode.vertical &&
+        videoDetailController.plPlayerController.mode != FullScreenMode.gravity;
     return !invalidPortraitFullScreen;
   }
 
@@ -651,13 +654,18 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         });
       } else if (isPortrait &&
           isFullScreen &&
-          // 鸿蒙手动进全屏（auto/ratio/gravity 等）同样跟随传感器转屏，
+          // 鸿蒙手动进全屏（auto/ratio 等）同样跟随传感器转屏，
           // 手机转回竖屏时窗口会跟着转回，需要自动退出全屏；
           // 强制竖屏/不旋转模式除外（竖屏全屏是稳定目标状态）。
+          // gravity 模式手动进全屏不把窗口转到视频方向（放开方向交给
+          // 重力），竖着拿设备全屏横屏视频时竖屏窗口不代表转回竖屏，
+          // 不应自动退出，否则横屏视频全屏会刚进就退。
+          // 自动进全屏（倾斜手机触发）仍保留退出行为，对齐安卓。
           (!player.isManualFS ||
               (OS.isHarmony &&
                   player.mode != FullScreenMode.none &&
-                  player.mode != FullScreenMode.vertical)) &&
+                  player.mode != FullScreenMode.vertical &&
+                  player.mode != FullScreenMode.gravity)) &&
           !player.controlsLock.value &&
           // 竖屏视频自动进全屏后跟随设备方向：转回竖屏时保持竖屏全屏，
           // 不退出（对齐上游安卓效果）；非竖屏视频仍按原逻辑转回竖屏即退出
