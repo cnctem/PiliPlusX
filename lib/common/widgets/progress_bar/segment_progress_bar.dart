@@ -149,9 +149,13 @@ class ViewPointSegmentProgressBar
     super.height,
     required super.segments,
     this.onSeek,
+    this.fontFamily,
+    this.fontWeight,
   });
 
   final ValueSetter<Duration>? onSeek;
+  final String? fontFamily;
+  final FontWeight? fontWeight;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -159,6 +163,8 @@ class ViewPointSegmentProgressBar
       height: height,
       segments: segments,
       onSeek: onSeek,
+      fontFamily: fontFamily,
+      fontWeight: fontWeight,
     );
   }
 
@@ -170,7 +176,9 @@ class ViewPointSegmentProgressBar
     renderObject
       ..height = height
       ..segments = segments
-      ..onSeek = onSeek;
+      ..onSeek = onSeek
+      ..fontFamily = fontFamily
+      ..fontWeight = fontWeight;
   }
 }
 
@@ -180,11 +188,31 @@ class RenderViewPointProgressBar
     required super.height,
     required super.segments,
     ValueSetter<Duration>? onSeek,
+    String? fontFamily,
+    FontWeight? fontWeight,
   }) : _onSeek = onSeek,
-       _hitTestSelf = onSeek != null {
+       _hitTestSelf = onSeek != null,
+       _fontFamily = fontFamily,
+       _fontWeight = fontWeight {
     if (onSeek != null) {
       _tapGestureRecognizer = TapGestureRecognizer()..onTapUp = _onTapUp;
     }
+  }
+
+  String? _fontFamily;
+  String? get fontFamily => _fontFamily;
+  set fontFamily(String? value) {
+    if (_fontFamily == value) return;
+    _fontFamily = value;
+    markNeedsPaint();
+  }
+
+  FontWeight? _fontWeight;
+  FontWeight? get fontWeight => _fontWeight;
+  set fontWeight(FontWeight? value) {
+    if (_fontWeight == value) return;
+    _fontWeight = value;
+    markNeedsPaint();
   }
 
   @override
@@ -195,7 +223,12 @@ class RenderViewPointProgressBar
   static const double _barHeight = 15.0;
   static const double _dividerWidth = 2.0;
 
-  static ui.Paragraph _getParagraph(String title, double size) {
+  static ui.Paragraph _getParagraph(
+    String title,
+    double size, {
+    String? fontFamily,
+    FontWeight? fontWeight,
+  }) {
     final builder =
         ui.ParagraphBuilder(
             ui.ParagraphStyle(
@@ -204,10 +237,20 @@ class RenderViewPointProgressBar
                 leading: 0,
                 height: 1,
                 fontSize: size,
+                fontFamily: fontFamily,
+                fontWeight: fontWeight,
               ),
             ),
           )
-          ..pushStyle(.new(color: Colors.white, fontSize: size, height: 1))
+          ..pushStyle(
+            .new(
+              color: Colors.white,
+              fontSize: size,
+              height: 1,
+              fontFamily: fontFamily,
+              fontWeight: fontWeight,
+            ),
+          )
           ..addText(title);
     return builder.build()
       ..layout(const ui.ParagraphConstraints(width: double.infinity));
@@ -249,7 +292,12 @@ class RenderViewPointProgressBar
       final title = segment.title;
       if (title != null && title.isNotEmpty) {
         final segmentWidth = segmentEnd - prevEnd;
-        final paragraph = _getParagraph(title, 10);
+        final paragraph = _getParagraph(
+          title,
+          10,
+          fontFamily: fontFamily,
+          fontWeight: fontWeight,
+        );
         final textWidth = paragraph.maxIntrinsicWidth;
         final textHeight = paragraph.height;
 

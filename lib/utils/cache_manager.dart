@@ -14,9 +14,16 @@ abstract final class CacheManager {
   static late final DefaultCacheManager manager;
 
   static Future<void> ensureInitialized() async {
-    manager = DefaultCacheManager(
+    final m = DefaultCacheManager(
       maxNrOfCacheObjects: Pref.maxCacheSize.toInt(),
     );
+    manager = m;
+    // 与项目内所有 CachedNetworkImage 共享同一个缓存管理器实例。
+    // cached_network_image_ce 的 DefaultCacheManager 并非单例：若
+    // CacheManager.manager 与 CachedNetworkImageProvider.defaultCacheManager
+    // 各持一个实例，两个实例各自维护独立的 Hive box 内存态，getSingleFile
+    // 将查不到详情页已缓存的封面（即使 URL 相同也会 miss），造成重复下载。
+    CachedNetworkImageProvider.defaultCacheManager = m;
   }
 
   // 获取缓存目录

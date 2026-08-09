@@ -1,3 +1,4 @@
+import 'dart:async' show unawaited;
 import 'dart:io' show File, Platform;
 import 'dart:ui' show PlatformDispatcher;
 
@@ -11,6 +12,8 @@ import 'package:PiliPlus/models_new/video/video_detail/page.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/utils/android/bindings.g.dart';
+import 'package:PiliPlus/utils/cache_manager.dart';
+import 'package:PiliPlus/utils/cache_manager_ext.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
@@ -197,9 +200,40 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
     // }
     if (!PlPlayerController.instanceExists()) return;
     if (data == null) return;
+    unawaited(
+      _handleVideoDetailChange(data, cid, herotag, artist: artist, cover: cover),
+    );
+  }
 
-    Uri getUri(String? cover) => Uri.parse(ImageUtils.safeThumbnailUrl(cover));
+  /// 优先复用项目图片缓存（cached_network_image_ce）中的封面文件并返回
+  /// file:// 本地 URI：audio_service 对 file:// 的 artUri 会直接使用本地
+  /// 文件，不会再走其内置的 flutter_cache_manager（DefaultCacheManager）
+  /// 重新下载并写入 libCachedImageData。仅当该封面从未被加载过时才经
+  /// CE 缓存管理器下载一次，之后均命中缓存。
+  ///
+  /// 使用与详情页播放器封面相同的压缩率（硬编码为60）
+  /// 生成 URL：两者一致才能命中同一缓存 key，复用详情页已缓存的封面文件。
+  Future<Uri> _artUriFromCache(String? cover) async {
+    final url = ImageUtils.thumbnailUrl(
+      cover,
+      60,
+    );
+    if (url.isEmpty) return Uri();
+    try {
+      final file = await CacheManager.manager.getSingleFile(url);
+      return file.absolute.uri;
+    } catch (_) {
+      return Uri.parse(url);
+    }
+  }
 
+  Future<void> _handleVideoDetailChange(
+    dynamic data,
+    int cid,
+    String herotag, {
+    String? artist,
+    String? cover,
+  }) async {
     late final id = '$cid$herotag';
     final MediaItem mediaItem;
     switch (data) {
@@ -211,7 +245,7 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
             title: current?.part ?? '',
             artist: data.owner?.name,
             duration: Duration(seconds: current?.duration ?? 0),
-            artUri: getUri(data.pic),
+            artUri: await _artUriFromCache(data.pic),
           );
         } else {
           mediaItem = MediaItem(
@@ -219,7 +253,7 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
             title: data.title ?? '',
             artist: data.owner?.name,
             duration: Duration(seconds: data.duration ?? 0),
-            artUri: getUri(data.pic),
+            artUri: await _artUriFromCache(data.pic),
           );
         }
       case EpisodeItem():
@@ -230,14 +264,14 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
           duration: data.from == 'pugv'
               ? Duration(seconds: data.duration ?? 0)
               : Duration(milliseconds: data.duration ?? 0),
-          artUri: getUri(data.cover),
+          artUri: await _artUriFromCache(data.cover),
         );
       case RoomInfoH5Data():
         mediaItem = MediaItem(
           id: id,
           title: data.roomInfo?.title ?? '',
           artist: data.anchorInfo?.baseInfo?.uname,
-          artUri: getUri(data.roomInfo?.cover),
+          artUri: await _artUriFromCache(data.roomInfo?.cover),
           isLive: true,
           // 设置直播间时长为0，解决鸿蒙因时长为null而不显示媒体组件
           duration: Duration.zero,
@@ -248,7 +282,7 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
           title: data.part ?? '',
           artist: artist,
           duration: Duration(seconds: data.duration ?? 0),
-          artUri: getUri(cover),
+          artUri: await _artUriFromCache(cover),
         );
       case DetailItem(:final arc):
         mediaItem = MediaItem(
@@ -256,21 +290,21 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
           title: arc.title,
           artist: data.owner.name,
           duration: Duration(seconds: arc.duration.toInt()),
-          artUri: getUri(arc.cover),
+          artUri: await _artUriFromCache(arc.cover),
         );
       case BiliDownloadEntryInfo():
         final coverFile = File(
           path.join(data.entryDirPath, PathUtils.coverName),
         );
-        final uri = coverFile.existsSync()
+        final artUri = coverFile.existsSync()
             ? coverFile.absolute.uri
-            : getUri(data.cover);
+            : await _artUriFromCache(data.cover);
         mediaItem = MediaItem(
           id: id,
           title: data.showTitle,
           artist: data.ownerName,
           duration: Duration(milliseconds: data.totalTimeMilli),
-          artUri: uri,
+          artUri: artUri,
         );
       default:
         return;
