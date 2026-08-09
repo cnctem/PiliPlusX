@@ -75,8 +75,10 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Obx(
-      () => _buildUserPage(theme, _controller.userState.value),
+    return Material(
+      child: Obx(
+        () => _buildUserPage(theme, _controller.userState.value),
+      ),
     );
   }
 
