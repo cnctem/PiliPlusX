@@ -19,6 +19,22 @@
     {
       "name": "no_matter",
       "value": "这种权限给就完了你别管"
+    },
+    {
+      "name": "shortcut_search",
+      "value": "搜索"
+    },
+    {
+      "name": "shortcut_offline",
+      "value": "离线缓存"
+    },
+    {
+      "name": "shortcut_history",
+      "value": "历史记录"
+    },
+    {
+      "name": "shortcut_favorite",
+      "value": "收藏夹"
     }
   ]
 }

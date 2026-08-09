@@ -24,6 +24,12 @@
         startWindow: "$profile:start_window",
         exported: true,
         continuable: true,
+        metadata: [
+          {
+            name: "ohos.ability.shortcuts",
+            resource: "$profile:shortcuts_config"
+          }
+        ],
         backgroundModes: ["audioPlayback", "dataTransfer"],
         orientation: "auto_rotation_unspecified",
         preferMultiWindowOrientation: "landscape_auto",

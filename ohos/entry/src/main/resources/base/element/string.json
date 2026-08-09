@@ -43,6 +43,22 @@
     {
       "name": "no_matter",
       "value": "no matter"
+    },
+    {
+      "name": "shortcut_search",
+      "value": "Search"
+    },
+    {
+      "name": "shortcut_offline",
+      "value": "Offline cache"
+    },
+    {
+      "name": "shortcut_history",
+      "value": "History"
+    },
+    {
+      "name": "shortcut_favorite",
+      "value": "Favorites"
     }
   ]
 }

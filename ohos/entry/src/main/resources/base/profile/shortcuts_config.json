@@ -1,0 +1,64 @@
+{
+  "shortcuts": [
+    {
+      "shortcutId": "search",
+      "label": "$string:shortcut_search",
+      "icon": "$media:icon_shortcut_search",
+      "wants": [
+        {
+          "bundleName": "com.example.piliplus",
+          "moduleName": "entry",
+          "abilityName": "EntryAbility",
+          "parameters": {
+            "pili_shortcut": "search"
+          }
+        }
+      ]
+    },
+    {
+      "shortcutId": "offline",
+      "label": "$string:shortcut_offline",
+      "icon": "$media:icon_shortcut_offline",
+      "wants": [
+        {
+          "bundleName": "com.example.piliplus",
+          "moduleName": "entry",
+          "abilityName": "EntryAbility",
+          "parameters": {
+            "pili_shortcut": "offline"
+          }
+        }
+      ]
+    },
+    {
+      "shortcutId": "history",
+      "label": "$string:shortcut_history",
+      "icon": "$media:icon_shortcut_history",
+      "wants": [
+        {
+          "bundleName": "com.example.piliplus",
+          "moduleName": "entry",
+          "abilityName": "EntryAbility",
+          "parameters": {
+            "pili_shortcut": "history"
+          }
+        }
+      ]
+    },
+    {
+      "shortcutId": "favorite",
+      "label": "$string:shortcut_favorite",
+      "icon": "$media:icon_shortcut_favorite",
+      "wants": [
+        {
+          "bundleName": "com.example.piliplus",
+          "moduleName": "entry",
+          "abilityName": "EntryAbility",
+          "parameters": {
+            "pili_shortcut": "favorite"
+          }
+        }
+      ]
+    }
+  ]
+}

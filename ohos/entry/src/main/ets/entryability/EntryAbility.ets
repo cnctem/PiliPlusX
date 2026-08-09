@@ -11,6 +11,17 @@ import HarmonyChannel from "../plugins/HarmonyChannel";
 /// 跨设备接续数据在 want.parameters 中的键
 const CONTINUATION_KEY = "pili_continuation";
 
+/// 桌面快捷方式跳转类型在 want.parameters 中的键，具体见shortcuts_config
+const SHORTCUT_KEY = "pili_shortcut";
+
+/// 快捷方式映射
+const SHORTCUT_URI_MAP: Record<string, string> = {
+  "search": "bilibili://search",
+  "offline": "bilibili://download",
+  "history": "bilibili://history",
+  "favorite": "bilibili://main/favorite",
+};
+
 /// 底栏相关事件，与 Index.ets 保持一致
 const EVENT_TAB_SWITCH = 'EVENT_TAB_SWITCH';
 
@@ -80,6 +91,8 @@ export default class EntryAbility extends FlutterAbility {
     AppStorage.setOrCreate('shellBarsHidden', false);
     AppStorage.setOrCreate('__scrollHidden', false);
 
+    // 快捷方式拉起（冷启动）
+    this.injectShortcutUri(want);
     super.onCreate(want, launchParam);
     // 默认不可接续，播放器持有视频时才由 Dart 侧置为 ACTIVE，
     // 避免无播放时对端出现接续入口、点击后提示接续失败
@@ -96,6 +109,8 @@ export default class EntryAbility extends FlutterAbility {
   }
 
   onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam) {
+    // 快捷方式拉起（热启动）
+    this.injectShortcutUri(want);
     super.onNewWant(want, launchParam);
     // 热启动时窗口与 Flutter 引擎均已就绪，不走 restoreWindowStage，
     // 由 setPendingContinuation 推送通知 Dart 直接跳转
@@ -123,6 +138,17 @@ export default class EntryAbility extends FlutterAbility {
       this.harmonyChannel.setPendingContinuation(data);
     }
     return true;
+  }
+
+  //快捷方式拉起：转译want.parameters为url schemes塞给want.uri，供flutter侧的app_links读取
+  private injectShortcutUri(want: Want): void {
+    const type = want.parameters?.[SHORTCUT_KEY];
+    if (typeof type === "string" && type.length > 0) {
+      const uri = SHORTCUT_URI_MAP[type];
+      if (uri !== undefined) {
+        want.uri = uri;
+      }
+    }
   }
 
   /**
