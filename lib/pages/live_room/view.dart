@@ -220,6 +220,11 @@ class _LiveRoomPageState extends State<LiveRoomPage>
         plPlayerController.showDanmaku = true;
       }
     } else if (state == .paused) {
+      // 画中画（PiP）模式下进入后台会收到 paused，但视频仍然可见，不应
+      // 强制关闭弹幕：小窗是否显示弹幕由“画中画不加载弹幕”设置
+      // （pipNoDanmaku）决定，否则 PiP 内弹幕会被强制停止而非跟随设置。
+      // 与 PLVideoPlayer.didChangeAppLifecycleState 的 PiP 豁免保持一致。
+      if (plPlayerController.isPipMode) return;
       _liveRoomController.cancelLiveTimer();
       plPlayerController
         ..showDanmaku = false
