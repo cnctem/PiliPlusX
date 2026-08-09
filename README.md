@@ -1,25 +1,19 @@
 # PiliPlus鸿蒙版分支
 
-大部分功能正常，media_kit由[ErBW_s](https://github.com/ErBWs)适配
-
-- [issues看板](https://github.com/users/qinshah/projects/1)
-
-- 鸿蒙flutter应用交流群：1106472996
+此分支目前主要由[dev4harmony/flutter-dev](https://github.com/orgs/dev4harmony/teams/flutter-dev)维护
 
 > [!WARNING]
 > 此分支只是将PiliPlus适配到鸿蒙
 >
 > 几乎所有与鸿蒙平台无关的功能都是上游实现的
->
-> 生活所迫没有太多时间能花在这个项目上，更新慢请见谅
 
 ## 提issue注意事项：
 
+- [issues看板](https://github.com/users/qinshah/projects/1)
+
 - 请查看是否已存在类似issue并确保属于鸿蒙版特有问题
 
-- 此分支只做移植适配工作，一般情况下不增加新功能或更改特性
-
-- issue可能回复慢，可加上方交流群讨论
+- 分支需要同步上游，一般不增加新功能或改变特性
 
 ## 编译运行
 
@@ -38,7 +32,9 @@
 
 ## 感谢
 
-- [PiliPlus上游](https://github.com/bggRGjQaUbCoE/PiliPlus)
+- PiliPlus[上游](https://github.com/bggRGjQaUbCoE/PiliPlus)
+
+- [dev4harmony/flutter-dev](https://github.com/orgs/dev4harmony/teams/flutter-dev)成员
 
 - media_kit适配者[ErBW_s](https://github.com/ErBWs)
 
