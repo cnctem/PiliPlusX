@@ -138,6 +138,17 @@ export default class HarmonyChannel implements FlutterPlugin {
         result.success(true);
         break;
       }
+      case "setNavBarConfig": {
+        if (deviceInfo.sdkApiVersion < 23) {
+          result.success(true);
+          break;
+        }
+        // 底部 Navbar 页签（NavigationBarType 索引），与设置内 Navbar 编辑一致
+        const tabs: number[] = call.argument('tabs') ?? [0, 1, 2];
+        AppStorage.setOrCreate('navTabs', tabs);
+        result.success(true);
+        break;
+      }
       case "startBackgroundTask": {
         this.startBackgroundTaskInner();
         result.success(true);

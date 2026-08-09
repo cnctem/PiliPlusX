@@ -9,9 +9,7 @@ let storage = LocalStorage.getShared();
 
 const TAG = 'Index';
 const EVENT_BACK_PRESS = 'EVENT_BACK_PRESS';
-const EVENT_TAB_HOME = 'EVENT_TAB_HOME';
-const EVENT_TAB_DYNAMICS = 'EVENT_TAB_DYNAMICS';
-const EVENT_TAB_MINE = 'EVENT_TAB_MINE';
+const EVENT_TAB_SWITCH = 'EVENT_TAB_SWITCH';
 const EVENT_CHANGE_TAB = 'EVENT_CHANGE_TAB';
 const EVENT_TOP_SEARCH = 'EVENT_TOP_SEARCH';
 const EVENT_TOP_MSG = 'EVENT_TOP_MSG';
@@ -40,6 +38,34 @@ function tabSymbol(symbol: Resource, color: ResourceColor): SymbolGlyphModifier 
     .fontColor([color]);
 }
 
+/// Navbar 页签类型（与 Flutter NavigationBarType.values 顺序一致）→ 符号
+function navTabSymbol(typeIndex: number): Resource {
+  switch (typeIndex) {
+    case 0:
+      return $r('sys.symbol.house_fill');
+    case 1:
+      return $r('sys.symbol.discover_fill');
+    case 2:
+      return $r('sys.symbol.person_crop_circle_fill_1');
+    default:
+      return $r('sys.symbol.house_fill');
+  }
+}
+
+/// Navbar 页签类型 → 文案（与 Flutter NavigationBarType.label 一致）
+function navTabLabel(typeIndex: number): string {
+  switch (typeIndex) {
+    case 0:
+      return '首页';
+    case 1:
+      return '动态';
+    case 2:
+      return '我的';
+    default:
+      return '';
+  }
+}
+
 @Entry(storage)
 @Component
 struct Index {
@@ -58,6 +84,9 @@ struct Index {
   @StorageLink('homeFaceUrl') homeFaceUrl: string = '';
   @StorageLink('homeTabs') homeTabs: string[] = [];
   @StorageLink('homeActiveTabIndex') @Watch('onHomeTabIndexChanged') homeActiveTabIndex: number = 0;
+  /// 底部 Navbar 页签（NavigationBarType 索引，由 Flutter 按设置内
+  /// Navbar 编辑同步；默认 首页/动态/我的）
+  @StorageLink('navTabs') navTabs: number[] = [0, 1, 2];
   @State statusBarHeight: number = 0;
   @State categoryCurrentIndex: number = 0;
   @State winWidth: number = 0;
@@ -328,44 +357,20 @@ struct Index {
   @Builder
   hdsMainTabs() {
     HdsTabs({ controller: this.controller }) {
-      TabContent() { // empty
-      }
-      .tabBar(new BottomTabBarStyle({
-        normal: tabSymbol($r('sys.symbol.house_fill'), NAV_UNSELECTED),
-        selected: tabSymbol($r('sys.symbol.house_fill'), this.navSelected)
-      }, '首页').labelStyle({
-        selectedColor: this.navSelected,
-        unselectedColor: NAV_UNSELECTED
-      }))
-
-      TabContent() { // empty
-      }
-      .tabBar(new BottomTabBarStyle({
-        normal: tabSymbol($r('sys.symbol.discover_fill'), NAV_UNSELECTED),
-        selected: tabSymbol($r('sys.symbol.discover_fill'), this.navSelected)
-      }, '动态').labelStyle({
-        selectedColor: this.navSelected,
-        unselectedColor: NAV_UNSELECTED
-      }))
-
-      TabContent() { // empty
-      }
-      .tabBar(new BottomTabBarStyle({
-        normal: tabSymbol($r('sys.symbol.person_crop_circle_fill_1'), NAV_UNSELECTED),
-        selected: tabSymbol($r('sys.symbol.person_crop_circle_fill_1'), this.navSelected)
-      }, '我的').labelStyle({
-        selectedColor: this.navSelected,
-        unselectedColor: NAV_UNSELECTED
-      }))
+      ForEach(this.navTabs, (typeIndex: number, index: number) => {
+        TabContent() { // empty
+        }
+        .tabBar(new BottomTabBarStyle({
+          normal: tabSymbol(navTabSymbol(typeIndex), NAV_UNSELECTED),
+          selected: tabSymbol(navTabSymbol(typeIndex), this.navSelected)
+        }, navTabLabel(typeIndex)).labelStyle({
+          selectedColor: this.navSelected,
+          unselectedColor: NAV_UNSELECTED
+        }))
+      }, (typeIndex: number, index: number) => index + '_' + typeIndex)
     }
     .onTabBarClick((index: number) => {
-      if (index === 0) {
-        this.context.eventHub.emit(EVENT_TAB_HOME);
-      } else if (index === 1) {
-        this.context.eventHub.emit(EVENT_TAB_DYNAMICS);
-      } else if (index === 2) {
-        this.context.eventHub.emit(EVENT_TAB_MINE);
-      }
+      this.context.eventHub.emit(EVENT_TAB_SWITCH, index);
     })
     .scrollable(false)
     .barOverlap(true)
@@ -394,7 +399,9 @@ struct Index {
           .hitTestBehavior(HitTestMode.Transparent)
           .width('100%')
           .height('100%')
-          .visibility(this.shellBarsHidden ? Visibility.None : Visibility.Visible)
+          .visibility(this.navTabs.length <= 1 || this.shellBarsHidden
+            ? Visibility.None
+            : Visibility.Visible)
         }
       }
       .width('100%')

@@ -12,9 +12,7 @@ import HarmonyChannel from "../plugins/HarmonyChannel";
 const CONTINUATION_KEY = "pili_continuation";
 
 /// 底栏相关事件，与 Index.ets 保持一致
-const EVENT_TAB_HOME = 'EVENT_TAB_HOME';
-const EVENT_TAB_DYNAMICS = 'EVENT_TAB_DYNAMICS';
-const EVENT_TAB_MINE = 'EVENT_TAB_MINE';
+const EVENT_TAB_SWITCH = 'EVENT_TAB_SWITCH';
 
 /// 顶栏相关事件，与 Index.ets 保持一致
 const EVENT_TOP_SEARCH = 'EVENT_TOP_SEARCH';
@@ -39,14 +37,8 @@ export default class EntryAbility extends FlutterAbility {
 
   /// 监听 Index.ets eventHub 的底栏切换事件，转发给 Flutter
   private initShellEventListeners(): void {
-    this.context.eventHub.on(EVENT_TAB_HOME, () => {
-      this.flutterChannel?.invokeMethod('showHome', null);
-    });
-    this.context.eventHub.on(EVENT_TAB_DYNAMICS, () => {
-      this.flutterChannel?.invokeMethod('showDynamics', null);
-    });
-    this.context.eventHub.on(EVENT_TAB_MINE, () => {
-      this.flutterChannel?.invokeMethod('showMine', null);
+    this.context.eventHub.on(EVENT_TAB_SWITCH, (index: number) => {
+      this.flutterChannel?.invokeMethod('showTab', { index: index });
     });
     // 顶栏搜索框点击 → Flutter 打开搜索页
     this.context.eventHub.on(EVENT_TOP_SEARCH, () => {

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/grpc/dyn.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -189,6 +188,10 @@ class MainController extends GetxController
     _syncNativeTopBarActive();
     HarmonyChannel.setShellBars(useNativeTabs: useHdsBar);
     HarmonyChannel.setShellTopBar(useNativeTopBar: useHdsTopBar);
+    // 同步 Navbar 页签数量与顺序到原生 HDS 底栏（与设置内 Navbar 编辑一致）
+    if (useHdsBar) {
+      HarmonyChannel.setNavBarConfig(navigationBars);
+    }
     // 首页分类标签与顶栏设置同步到原生
     if (useHdsTopBar && hasHome) {
       // 补发初始「当前是否为首页」状态：ever(selectedIndex) 只在切换时才触发，

@@ -1,5 +1,6 @@
 import 'package:PiliPlus/common/widgets/scale_app.dart';
 import 'package:PiliPlus/harmony_adapt/continuation.dart';
+import 'package:PiliPlus/models/common/nav_bar_config.dart';
 import 'package:PiliPlus/utils/extension/get_ext.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/services.dart';
@@ -33,15 +34,10 @@ abstract class HarmonyChannel {
       case 'onContinuationRestore':
         checkPendingContinuation();
         break;
-      // 原生底栏切换页签
-      case 'showHome':
-        _onShellTabSwitch?.call(0);
-        break;
-      case 'showDynamics':
-        _onShellTabSwitch?.call(1);
-        break;
-      case 'showMine':
-        _onShellTabSwitch?.call(2);
+      // 原生底栏切换页签（index 为 Navbar 排序后的页签序号，与设置内
+      // Navbar 编辑保持一致；数量与顺序由 setNavBarConfig 同步）
+      case 'showTab':
+        _onShellTabSwitch?.call(call.arguments['index'] as int? ?? 0);
         break;
       // ArkTS 顶栏搜索框点击 → Flutter 跳转搜索页
       case 'onTopSearchTap':
@@ -120,6 +116,10 @@ abstract class HarmonyChannel {
   /// 向原生发送 shell 配置（Flutter 侧计算后通知 ArkTS）
   static Future<void> setShellBars({required bool useNativeTabs}) =>
       _invoke('setShellBars', {'useNativeTabs': useNativeTabs});
+
+  /// 同步 Navbar 页签（数量与顺序，与设置内「Navbar 编辑」一致）到 ArkTS HdsTabs
+  static Future<void> setNavBarConfig(List<NavigationBarType> bars) =>
+      _invoke('setNavBarConfig', {'tabs': bars.map((e) => e.index).toList()});
 
   /// HDS 底栏当前是否为显示状态
   static bool _hiddenByPage = false;
