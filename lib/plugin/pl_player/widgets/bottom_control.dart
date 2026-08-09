@@ -103,6 +103,12 @@ class BottomControl extends StatelessWidget {
                         padding: const .only(bottom: 8.75),
                         child: ViewPointSegmentProgressBar(
                           segments: videoDetailController.viewPointList,
+                          fontFamily: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.fontFamily,
+                          fontWeight: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.fontWeight,
                           onSeek: PlatformUtils.isDesktop
                               ? (position) =>
                                     controller.seekTo(position, isSeek: false)

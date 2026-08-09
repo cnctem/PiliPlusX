@@ -1855,6 +1855,12 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                           padding: const .only(bottom: 4.25),
                           child: ViewPointSegmentProgressBar(
                             segments: videoDetailController.viewPointList,
+                            fontFamily: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.fontFamily,
+                            fontWeight: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.fontWeight,
                             onSeek: PlatformUtils.isMobile
                                 ? (position) {
                                     if (!plPlayerController
