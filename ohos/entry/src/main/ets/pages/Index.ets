@@ -69,6 +69,7 @@ struct Index {
   @StorageLink('shellBarsHidden') shellBarsHidden: boolean = false;
   @StorageLink('__scrollHidden') @Watch('onScrollHiddenChanged') shellBarsScrollHidden: boolean = false;
   @StorageLink('tabSelectedColor') navSelected: string = '#3367D6';
+  @StorageLink('tabSelectedSubColor') navSelectedSub: string = '#503367D6';
   @StorageLink('useNativeTopBar') useNativeTopBar: boolean = false;
   @StorageLink('topBarHidden') topBarHidden: boolean = false;
   @StorageLink('topBarCollapsed') topBarCollapsed: boolean = false;
@@ -220,7 +221,8 @@ struct Index {
             SymbolGlyph(navTabSymbol(typeIndex))
               .fontSize(22)
               .fontColor(
-                [this.currentNavIndex === index ? this.navSelected : NAV_UNSELECTED, $r('sys.color.icon_tertiary')])
+                [this.currentNavIndex === index ? this.navSelected : NAV_UNSELECTED,
+                  this.currentNavIndex === index ? this.navSelectedSub : $r('sys.color.icon_tertiary')])
               .renderingStrategy(SymbolRenderingStrategy.MULTIPLE_COLOR)
               .symbolEffect(new BounceSymbolEffect(), this.currentNavIndex === index)
           }
@@ -241,7 +243,8 @@ struct Index {
             SymbolGlyph(navTabSymbol(typeIndex))
               .fontSize(22)
               .fontColor(
-                [this.currentNavIndex === index ? this.navSelected : NAV_UNSELECTED, $r('sys.color.icon_tertiary')])
+                [this.currentNavIndex === index ? this.navSelected : NAV_UNSELECTED,
+                  this.currentNavIndex === index ? this.navSelectedSub : $r('sys.color.icon_tertiary')])
               .renderingStrategy(SymbolRenderingStrategy.MULTIPLE_COLOR)
               .symbolEffect(new BounceSymbolEffect(), this.currentNavIndex === index)
           }
@@ -250,7 +253,8 @@ struct Index {
         SymbolGlyph(navTabSymbol(typeIndex))
           .fontSize(22)
           .fontColor(
-            [this.currentNavIndex === index ? this.navSelected : NAV_UNSELECTED, $r('sys.color.icon_tertiary')])
+            [this.currentNavIndex === index ? this.navSelected : NAV_UNSELECTED,
+              this.currentNavIndex === index ? this.navSelectedSub : $r('sys.color.icon_tertiary')])
           .renderingStrategy(SymbolRenderingStrategy.MULTIPLE_COLOR)
           .symbolEffect(new BounceSymbolEffect(), this.currentNavIndex === index)
       }

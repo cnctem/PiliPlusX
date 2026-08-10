@@ -227,7 +227,9 @@ export default class HarmonyChannel implements FlutterPlugin {
           break;
         }
         const color: string = call.argument('color') ?? '#3367D6';
+        const subColor: string = '#88'+color.substring(1);
         AppStorage.setOrCreate('tabSelectedColor', color);
+        AppStorage.setOrCreate('tabSelectedSubColor', subColor);
         result.success(true);
         break;
       }
