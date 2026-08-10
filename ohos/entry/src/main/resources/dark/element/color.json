@@ -7,6 +7,18 @@
     {
       "name": "placeholder_text",
       "value": "#50FFFFFF"
+    },
+    {
+      "name": "up_card_mask_start",
+      "value": "#FF000000"
+    },
+    {
+      "name": "up_card_mask_mid",
+      "value": "#E6000000"
+    },
+    {
+      "name": "up_card_mask_end",
+      "value": "#00000000"
     }
   ]
 }

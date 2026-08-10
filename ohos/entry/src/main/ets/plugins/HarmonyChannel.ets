@@ -4,6 +4,7 @@ import { preferences } from "@kit.ArkData";
 import { http } from "@kit.NetworkKit";
 import { image } from "@kit.ImageKit";
 import { util } from "@kit.ArkTS";
+import { formProvider } from "@kit.FormKit";
 import AbilityConstant from "@ohos.app.ability.AbilityConstant";
 import Want from "@ohos.app.ability.Want";
 import ConfigurationConstant from "@ohos.app.ability.ConfigurationConstant";
@@ -310,31 +311,41 @@ export default class HarmonyChannel implements FlutterPlugin {
 
   /**
    * 添加UP主卡片到桌面：先下载头像转base64并保存待添加的UP数据
-   * （卡片渲染进程加载网络图片受限，本地数据最稳），再通知 Index 弹出添加引导半模态。
+   * （onAddForm 时同步读取绑定卡片），再拉起系统卡片管理页让用户添加。
    */
   private async addUpToDesktop(call: MethodCall): Promise<void> {
     const mid = String(call.argument("mid") ?? "");
     const name = String(call.argument("name") ?? "");
     const avatar = String(call.argument("avatar") ?? "");
+    const topPhoto = String(call.argument("topPhoto") ?? "");
     if (mid.length === 0) {
       return;
     }
     const avatarData = await this.downloadAvatarBase64(avatar);
+    const topPhotoData = await this.downloadAvatarBase64(topPhoto);
     try {
       const store = await preferences.getPreferences(getContext(), "pili_form");
       await store.put("pending_up_card", JSON.stringify({
-        mid: mid, name: name, avatar: avatarData
+        mid: mid, name: name, avatar: avatarData, topPhoto: topPhotoData
       }));
       await store.flush();
     } catch (e) {
       console.error("HarmonyChannel", `save pending up failed: ${e}`);
     }
-    // 通知 Index.ets 弹出添加引导半模态（先置 false 再置 true，确保每次都触发）
-    AppStorage.setOrCreate("pendingUpCard", JSON.stringify({
-      mid: mid, name: name, avatar: avatarData
-    }));
-    AppStorage.setOrCreate("showAddFormSheet", false);
-    AppStorage.setOrCreate("showAddFormSheet", true);
+    try {
+      const context = getContext() as common.UIAbilityContext;
+      formProvider.openFormManager({
+        bundleName: context.abilityInfo.bundleName,
+        abilityName: "EntryFormAbility",
+        parameters: {
+          'ohos.extra.param.key.form_dimension': 1,
+          'ohos.extra.param.key.form_name': 'up_card',
+          'ohos.extra.param.key.module_name': 'entry',
+        },
+      });
+    } catch (e) {
+      console.error("HarmonyChannel", `openFormManager failed: ${e}`);
+    }
   }
 
   /** 下载头像并统一转成 JPEG base64，供卡片/引导页直接显示 */

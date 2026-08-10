@@ -282,12 +282,14 @@ abstract class HarmonyChannel {
     required String mid,
     required String name,
     required String avatar,
+    String topPhoto = '',
   }) {
     if (!OS.isHarmony) return Future.value();
     return _channel.invokeMethod('addUpToDesktop', {
       'mid': mid,
       'name': name,
       'avatar': avatar,
+      'topPhoto': topPhoto,
     });
   }
 

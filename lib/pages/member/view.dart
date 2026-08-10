@@ -729,10 +729,15 @@ class _MemberPageState extends State<MemberPage> with WidgetsBindingObserver {
     } else if (Platform.isAndroid) {
       _createShortcutAndroid();
     } else if (OS.isHarmony) {
+      final images = switch (_userController.loadingState.value) {
+        Success(:final response) => response?.images,
+        _ => null,
+      };
       HarmonyChannel.addUpToDesktop(
         mid: _mid.toString(),
         name: _userController.username ?? '',
         avatar: '${_userController.userAvatar!}@200w_200h.webp'.http2https,
+        topPhoto: images?.imgUrl?.http2https ?? '',
       );
     }
   }
