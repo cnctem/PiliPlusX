@@ -10,6 +10,7 @@ import 'package:PiliPlus/models_new/pgc/pgc_info_model/episode.dart';
 import 'package:PiliPlus/models_new/video/video_detail/data.dart';
 import 'package:PiliPlus/models_new/video/video_detail/page.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
+import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/utils/android/bindings.g.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
@@ -46,6 +47,12 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
 
   static final List<MediaItem> _item = [];
   bool enableBackgroundPlay;
+
+  /// 当前循环模式（同步给系统播控中心/实况窗显示与切换）
+  AudioServiceRepeatMode repeatMode = AudioServiceRepeatMode.none;
+
+  /// 实况窗/播控中心切换循环模式时回调给当前播放页
+  Future<void> Function(PlayRepeat repeat)? onRepeatModeChanged;
 
   Future<void>? Function()? onPlay;
   Future<void>? Function()? onPause;
@@ -160,6 +167,7 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
               action: MediaAction.fastForward,
             ),
         ],
+        repeatMode: repeatMode,
         playing: playing,
         systemActions: const {
           MediaAction.seek,
@@ -203,6 +211,30 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
     unawaited(
       _handleVideoDetailChange(data, cid, herotag, artist: artist, cover: cover),
     );
+  }
+
+  /// 应用侧循环模式变化时同步给播控中心
+  void updateRepeatMode(PlayRepeat repeat) {
+    final mode = switch (repeat) {
+      PlayRepeat.singleCycle => AudioServiceRepeatMode.one,
+      PlayRepeat.listCycle => AudioServiceRepeatMode.all,
+      _ => AudioServiceRepeatMode.none,
+    };
+    if (mode == repeatMode) return;
+    repeatMode = mode;
+    playbackState.add(playbackState.value.copyWith(repeatMode: mode));
+  }
+
+  @override
+  Future<void> setRepeatMode(AudioServiceRepeatMode repeatMode) async {
+    this.repeatMode = repeatMode;
+    playbackState.add(playbackState.value.copyWith(repeatMode: repeatMode));
+    final repeat = switch (repeatMode) {
+      AudioServiceRepeatMode.one => PlayRepeat.singleCycle,
+      AudioServiceRepeatMode.all => PlayRepeat.listCycle,
+      _ => PlayRepeat.listOrder,
+    };
+    await onRepeatModeChanged?.call(repeat);
   }
 
   /// 优先复用项目图片缓存（cached_network_image_ce）中的封面文件并返回
