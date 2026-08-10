@@ -739,6 +739,7 @@ class _MemberPageState extends State<MemberPage> with WidgetsBindingObserver {
         avatar: '${_userController.userAvatar!}@200w_200h.webp'.http2https,
         topPhoto: images?.imgUrl?.http2https ?? '',
       );
+      SmartDialog.showToast("加载中...");
     }
   }
 

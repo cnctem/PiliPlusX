@@ -7,6 +7,9 @@ struct UpCard {
   @LocalStorageProp('name') name: string = '';
   @LocalStorageProp('avatar') avatar: string = '';
   @LocalStorageProp('topPhoto') topPhoto: string = '';
+  @LocalStorageProp('latestTitle') latestTitle: string = '';
+  @LocalStorageProp('latestTime') latestTime: string = '';
+  @LocalStorageProp('latestLength') latestLength: string = '';
 
   build() {
     Stack() {
@@ -35,7 +38,7 @@ struct UpCard {
         .position({ x: '30%', y: '4%' })
       }
 
-      // 头像固定居左，文字在剩余空间居中
+      // 头像固定居左，名字与最近更新居左排列，最近更新为灰色小字
       Row({ space: 8 }) {
         Image(this.avatar)
           .width(36)
@@ -43,13 +46,27 @@ struct UpCard {
           .borderRadius(18)
           .objectFit(ImageFit.Cover)
           .alt($r('app.media.icon_startwindow'))
-        Text(this.name)
-          .layoutWeight(1)
-          .textAlign(TextAlign.Center)
-          .fontSize(14)
-          .fontWeight(FontWeight.Medium)
-          .maxLines(1)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
+        Column({ space: 3 }) {
+          Text(this.name)
+            .fontSize(14)
+            .fontWeight(FontWeight.Medium)
+            .maxLines(1)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+          Text(this.latestTitle === '' ? '最近暂无更新' : this.latestTitle)
+            .fontSize(10)
+            .opacity(0.65)
+            .maxLines(1)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+          if (this.latestTime !== '') {
+            Text(this.latestTime + (this.latestLength !== '' ? ' · ' + this.latestLength : ''))
+              .fontSize(9)
+              .opacity(0.45)
+              .maxLines(1)
+              .textOverflow({ overflow: TextOverflow.Ellipsis })
+          }
+        }
+        .layoutWeight(1)
+        .alignItems(HorizontalAlign.Start)
       }
       .width('100%')
       .height('100%')

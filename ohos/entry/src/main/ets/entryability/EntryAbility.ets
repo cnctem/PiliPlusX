@@ -1,4 +1,5 @@
 import { common, ConfigurationConstant } from "@kit.AbilityKit";
+import { formProvider } from "@kit.FormKit";
 import { BusinessError } from "@kit.BasicServicesKit";
 import { fileIo, fileUri, picker } from "@kit.CoreFileKit";
 import AbilityConstant from "@ohos.app.ability.AbilityConstant";
@@ -157,6 +158,18 @@ export default class EntryAbility extends FlutterAbility {
       const mid = want.parameters?.["mid"];
       if (typeof mid === "string" && mid.length > 0) {
         want.uri = `bilibili://space/${mid}`;
+        // 点击卡片时同步一次数据：触发所有 up_card 卡片的 onUpdateForm 刷新
+        try {
+          formProvider.reloadForms(this.context as common.UIAbilityContext, "entry", "EntryFormAbility", "up_card")
+            .then((num: number): void => {
+              console.info(`EntryAbility: reload up_card forms success: ${num}`);
+            })
+            .catch((err: BusinessError): void => {
+              console.error(`EntryAbility: reload up_card forms failed: ${err.code} ${err.message}`);
+            });
+        } catch (e) {
+          console.error(`EntryAbility: reloadForms error: ${e}`);
+        }
       }
     }
   }

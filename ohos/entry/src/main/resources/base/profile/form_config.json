@@ -9,7 +9,9 @@
       "isDefault": true,
       "supportDimensions": ["1*2"],
       "defaultDimension": "1*2",
-      "updateEnabled": false,
+      "updateEnabled": true,
+      "scheduledUpdateTime": "10:00",
+      "multiScheduledUpdateTime": "22:00",
       "isDynamic": true
     }
   ]
