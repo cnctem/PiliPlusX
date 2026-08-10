@@ -652,7 +652,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             isManualFS: false,
           );
         });
-      } else if (isPortrait &&
+      } else if (aspectIsOrientation &&
+          isPortrait &&
           isFullScreen &&
           // 鸿蒙手动进全屏（auto/ratio 等）同样跟随传感器转屏，
           // 手机转回竖屏时窗口会跟着转回，需要自动退出全屏；
@@ -730,6 +731,11 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             scrollBehavior: NoOverscrollBehavior(),
             key: videoDetailController.scrollKey,
             controller: videoDetailController.scrollCtr,
+            // 全屏时禁止页面滚动：竖屏全屏只是把视频头撑满全屏，若不锁滚动，
+            // 底部上滑会把头部视频压缩、把详情内容从底部带出来。
+            physics: isFullScreen
+                ? const NeverScrollableScrollPhysics()
+                : null,
             onlyOneScrollInBody: true,
             pinnedHeaderSliverHeightBuilder: () {
               double pinnedHeight = isFullScreen || !isPortrait
@@ -766,7 +772,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                   : videoDetailController.videoHeight;
               return [
                 VideoHeader(
-                  minExtent: kToolbarHeight,
+                  // 全屏时头部最小高度与满屏高度一致，即使保留滚动偏移
+                  // 也不能把视频压缩，详情内容被挡在屏幕外。
+                  minExtent: isFullScreen ? height : kToolbarHeight,
                   maxExtent: height,
                   minVideoHeight: videoDetailController.minVideoHeight,
                   onScrollRatioChanged: videoDetailController.scrollRatio.call,
