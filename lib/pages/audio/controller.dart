@@ -88,6 +88,20 @@ class AudioController extends GetxController
   late double speed = 1.0;
 
   late final Rx<PlayRepeat> playMode = Pref.audioPlayMode.obs;
+  StreamSubscription<PlayRepeat>? _playModeSub;
+  Future<void> Function(PlayRepeat)? _savedOnRepeatModeChanged;
+
+  /// 自动续播抑制窗口：单曲/列表循环播完瞬间不上报暂停/完成，
+  /// 避免鸿蒙后台连续任务被停（第二遍播几秒后被系统冻结/杀掉）。
+  DateTime? _suppressPauseUntil;
+
+  bool get _suppressPauseReport =>
+      _suppressPauseUntil != null &&
+      DateTime.now().isBefore(_suppressPauseUntil!);
+
+  bool get _autoContinue =>
+      playMode.value == PlayRepeat.singleCycle ||
+      playMode.value == PlayRepeat.listCycle;
 
   @override
   late final isLogin = Accounts.main.isLogin;
@@ -177,6 +191,16 @@ class AudioController extends GetxController
       _savedOnSkipToNext = handler.onSkipToNext;
       handler.onSkipToPrevious = () async => playPrev();
       handler.onSkipToNext = () async => playNext();
+      // 循环模式：应用→播控中心（实况窗图标），播控中心→应用（点按钮切换）
+      _savedOnRepeatModeChanged = handler.onRepeatModeChanged;
+      handler.onRepeatModeChanged = (repeat) async {
+        playMode.value = repeat;
+        GStorage.setting.put(SettingBoxKey.audioPlayMode, repeat.index);
+      };
+      handler.updateRepeatMode(playMode.value);
+      _playModeSub = playMode.listen(
+        (m) => videoPlayerServiceHandler?.updateRepeatMode(m),
+      );
     }
 
     animController = AnimationController(
@@ -375,16 +399,32 @@ class AudioController extends GetxController
           animController.reverse();
           playerStatus = PlayerStatus.paused;
         }
-        videoPlayerServiceHandler?.onStatusChange(playerStatus, false, false);
+        // 自然播完且会自动续播时，不向播控中心上报暂停（保持播放态，
+        // 避免后台连续任务被停）；重播窗口内的事件同样跳过
+        final naturalEnd =
+            !playing &&
+            _autoContinue &&
+            duration.value > 2 &&
+            position.value >= duration.value - 2;
+        if (!naturalEnd && !_suppressPauseReport) {
+          videoPlayerServiceHandler?.onStatusChange(playerStatus, false, false);
+        }
       }),
       stream.completed.listen((completed) {
         _videoDetailController?.playedTime = player!.state.duration;
-        videoPlayerServiceHandler?.onStatusChange(
-          PlayerStatus.completed,
-          false,
-          false,
-        );
         if (completed) {
+          if (_autoContinue) {
+            // 自动续播：进入抑制窗口，不向播控中心上报完成/停止
+            _suppressPauseUntil = DateTime.now().add(
+              const Duration(seconds: 6),
+            );
+          } else {
+            videoPlayerServiceHandler?.onStatusChange(
+              PlayerStatus.completed,
+              false,
+              false,
+            );
+          }
           if (shutdownTimerService.isWaiting) {
             shutdownTimerService.handleWaiting();
           } else {
@@ -780,7 +820,10 @@ class AudioController extends GetxController
       handler.onSeek = null;
       handler.onSkipToPrevious = _savedOnSkipToPrevious;
       handler.onSkipToNext = _savedOnSkipToNext;
+      handler.onRepeatModeChanged = _savedOnRepeatModeChanged;
     }
+    _playModeSub?.cancel();
+    _playModeSub = null;
     _subscriptions?.forEach((e) => e.cancel());
     _subscriptions?.clear();
     _subscriptions = null;
