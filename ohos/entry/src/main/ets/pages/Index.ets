@@ -256,7 +256,7 @@ struct Index {
       }
 
       Text(navTabLabel(typeIndex))
-        .fontSize(11)
+        .fontSize(10.5)
         .fontWeight(this.currentNavIndex === index ? FontWeight.Bold : FontWeight.Normal)
         .fontColor(this.currentNavIndex === index ? this.navSelected : NAV_UNSELECTED)
     }
@@ -430,6 +430,7 @@ struct Index {
     .barOverlap(true)
     .barPosition(BarPosition.End)
     .vertical(false)
+    .barHeight(56)
     .barFloatingStyle({
       barBottomMargin: this.bottomAvoidAreaHeight,
       adaptToHandedness: true,

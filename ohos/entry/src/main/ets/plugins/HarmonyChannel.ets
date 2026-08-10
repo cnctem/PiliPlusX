@@ -1,7 +1,6 @@
 import { common, wantAgent, WantAgent } from "@kit.AbilityKit";
 import { BusinessError, deviceInfo } from "@kit.BasicServicesKit";
 import { http } from "@kit.NetworkKit";
-import { image } from "@kit.ImageKit";
 import { util } from "@kit.ArkTS";
 import { fileIo } from "@kit.CoreFileKit";
 import { formProvider } from "@kit.FormKit";
@@ -366,7 +365,7 @@ export default class HarmonyChannel implements FlutterPlugin {
     }
   }
 
-  /** 下载头像并统一转成 JPEG base64，供卡片/引导页直接显示 */
+  /** 下载头像并以 base64 存储，供卡片/引导页直接显示 */
   private async downloadAvatarBase64(url: string): Promise<string> {
     if (url.length === 0) {
       return '';
@@ -394,18 +393,9 @@ export default class HarmonyChannel implements FlutterPlugin {
       if (bytes.byteLength === 0) {
         return '';
       }
-      const imageSource = image.createImageSource(bytes);
-      const pixelMap = await imageSource.createPixelMap();
-      const imagePacker = image.createImagePacker();
-      const packed = await imagePacker.packToData(pixelMap, {
-        format: 'image/jpeg',
-        quality: 85
-      });
-      pixelMap.release();
-      imageSource.release();
-      imagePacker.release();
-      const base64 = new util.Base64Helper().encodeToStringSync(new Uint8Array(packed));
-      return `data:image/jpeg;base64,${base64}`;
+      const mime = url.toLowerCase().includes('.webp') ? 'image/webp' : 'image/jpeg';
+      const base64 = new util.Base64Helper().encodeToStringSync(new Uint8Array(bytes));
+      return `data:${mime};base64,${base64}`;
     } catch (e) {
       console.error("HarmonyChannel", `download avatar failed: ${e}`);
       return '';

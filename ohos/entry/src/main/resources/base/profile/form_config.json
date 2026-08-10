@@ -11,7 +11,7 @@
       "defaultDimension": "1*2",
       "updateEnabled": true,
       "scheduledUpdateTime": "10:00",
-      "multiScheduledUpdateTime": "22:00",
+      "updateDuration": 2,
       "isDynamic": true
     }
   ]

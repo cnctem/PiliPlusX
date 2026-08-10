@@ -736,8 +736,8 @@ class _MemberPageState extends State<MemberPage> with WidgetsBindingObserver {
       HarmonyChannel.addUpToDesktop(
         mid: _mid.toString(),
         name: _userController.username ?? '',
-        avatar: '${_userController.userAvatar!}@200w_200h.webp'.http2https,
-        topPhoto: images?.imgUrl?.http2https ?? '',
+        avatar: '${_userController.userAvatar!}@150w_150h_10q.webp'.http2https,
+        topPhoto: '${images?.imgUrl}@400h_20q.webp'.http2https,
       );
       SmartDialog.showToast("加载中，最近投稿信息可能存在延时");
     }

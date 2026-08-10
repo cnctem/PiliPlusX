@@ -214,7 +214,7 @@ class MainController extends GetxController
       );
       // 初始头像（登录态）
       HarmonyChannel.setHomeFaceUrl(
-        accountService.isLogin.value ? accountService.face.value : '',
+        accountService.isLogin.value ? '${accountService.face.value}@200w_200h_10q.webp' : '',
       );
       // 初始搜索默认词（若已在异步拉取中就绪）
       if (homeController.enableSearchWord &&

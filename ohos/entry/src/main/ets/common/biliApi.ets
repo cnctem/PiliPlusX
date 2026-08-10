@@ -1,6 +1,5 @@
 import { http } from "@kit.NetworkKit";
 import { cryptoFramework } from "@kit.CryptoArchitectureKit";
-import { image } from "@kit.ImageKit";
 import { util } from "@kit.ArkTS";
 
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
@@ -239,18 +238,9 @@ export async function downloadImageBase64(url: string): Promise<string> {
     if (bytes.byteLength === 0) {
       return "";
     }
-    const imageSource = image.createImageSource(bytes);
-    const pixelMap = await imageSource.createPixelMap();
-    const imagePacker = image.createImagePacker();
-    const packed = await imagePacker.packToData(pixelMap, {
-      format: "image/jpeg",
-      quality: 85
-    });
-    pixelMap.release();
-    imageSource.release();
-    imagePacker.release();
-    const base64 = new util.Base64Helper().encodeToStringSync(new Uint8Array(packed));
-    return `data:image/jpeg;base64,${base64}`;
+    const mime = url.toLowerCase().includes(".webp") ? "image/webp" : "image/jpeg";
+    const base64 = new util.Base64Helper().encodeToStringSync(new Uint8Array(bytes));
+    return `data:${mime};base64,${base64}`;
   } catch (e) {
     return "";
   } finally {
