@@ -124,7 +124,7 @@ class _HomePageState extends CommonPageState<HomePage>
         userAvatar(theme: theme, mainController: _mainController),
       ],
     );
-    final statusBarHeight = MediaQuery.of(context).padding.top;
+    final statusBarHeight = MediaQuery.paddingOf(context).top;
     if (_homeController.hideTopBar) {
       if (_mainController.barOffset case final barOffset?) {
         return Obx(
@@ -186,9 +186,15 @@ class _HomePageState extends CommonPageState<HomePage>
         });
       }
     }
+    final paddingWithSafeArea = EdgeInsets.fromLTRB(
+      14,
+      6 + statusBarHeight,
+      14,
+      0,
+    );
     return Container(
-      height: Style.topBarHeight,
-      padding: padding,
+      height: Style.topBarHeight + statusBarHeight,
+      padding: paddingWithSafeArea,
       child: child,
     );
   }
