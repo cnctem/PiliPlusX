@@ -1,9 +1,9 @@
 import { common, wantAgent, WantAgent } from "@kit.AbilityKit";
 import { BusinessError, deviceInfo } from "@kit.BasicServicesKit";
-import { preferences } from "@kit.ArkData";
 import { http } from "@kit.NetworkKit";
 import { image } from "@kit.ImageKit";
 import { util } from "@kit.ArkTS";
+import { fileIo } from "@kit.CoreFileKit";
 import { formProvider } from "@kit.FormKit";
 import AbilityConstant from "@ohos.app.ability.AbilityConstant";
 import Want from "@ohos.app.ability.Want";
@@ -336,12 +336,17 @@ export default class HarmonyChannel implements FlutterPlugin {
     }
     const avatarData = await this.downloadAvatarBase64(avatar);
     const topPhotoData = await this.downloadAvatarBase64(topPhoto);
+    // 写沙箱文件（比 Preferences 可靠：onAddForm 同步读文件，无缓存/跨进程问题）
     try {
-      const store = await preferences.getPreferences(getContext(), "pili_form");
-      await store.put("pending_up_card", JSON.stringify({
+      const context = getContext() as common.Context;
+      const file = fileIo.openSync(
+        `${context.filesDir}/pending_up_card.json`,
+        fileIo.OpenMode.CREATE | fileIo.OpenMode.READ_WRITE | fileIo.OpenMode.TRUNC
+      );
+      fileIo.writeSync(file.fd, JSON.stringify({
         mid: mid, name: name, avatar: avatarData, topPhoto: topPhotoData
       }));
-      await store.flush();
+      fileIo.closeSync(file);
     } catch (e) {
       console.error("HarmonyChannel", `save pending up failed: ${e}`);
     }
