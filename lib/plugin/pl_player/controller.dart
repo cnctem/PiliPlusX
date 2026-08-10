@@ -128,23 +128,6 @@ class PlPlayerController with BlockConfigMixin {
   final RxBool isFullScreen = false.obs;
   bool isLive = false;
 
-  /// 自动重播抑制窗口：从单曲循环重播开始到播放稳定前，抑制所有
-  /// playing=false/buffering(completed) 上报，防止鸿蒙后台连续任务被停。
-  DateTime? _suppressPauseUntil;
-
-  bool get _suppressPauseReport =>
-      _suppressPauseUntil != null &&
-      DateTime.now().isBefore(_suppressPauseUntil!);
-
-  /// 自然播放结束且单曲循环会立即重播：播控中心保持播放态、不停后台连续任务，
-  /// 避免任务停掉后在后台无法重新拉起（表现为第二遍播几秒后被挂起）。
-  bool get _naturalEndWillReplay =>
-      !_pauseRequestedByApp &&
-      !isLive &&
-      playRepeat == PlayRepeat.singleCycle &&
-      durationInMilliseconds > 2000 &&
-      positionInMilliseconds >= durationInMilliseconds - 2000;
-
   bool _isVertical = false;
 
   final Rx<VideoFitType> videoFit = Rx(.contain);
@@ -1094,13 +1077,11 @@ class PlPlayerController with BlockConfigMixin {
           Floating().updatePipControlStatus(playing: playing);
         }
 
-        if (playing || (!_suppressPauseReport && !_naturalEndWillReplay)) {
-          videoPlayerServiceHandler?.onStatusChange(
-            playerStatus.value,
-            isBuffering.value,
-            isLive,
-          );
-        }
+        videoPlayerServiceHandler?.onStatusChange(
+          playerStatus.value,
+          isBuffering.value,
+          isLive,
+        );
 
         for (final element in _statusListeners) {
           element(playing ? .playing : .paused);
@@ -1149,13 +1130,11 @@ class PlPlayerController with BlockConfigMixin {
       }),
       stream.buffering.listen((bool buffering) {
         isBuffering.value = buffering;
-        if (!_suppressPauseReport && !_naturalEndWillReplay) {
-          videoPlayerServiceHandler?.onStatusChange(
-            playerStatus.value,
-            buffering,
-            isLive,
-          );
-        }
+        videoPlayerServiceHandler?.onStatusChange(
+          playerStatus.value,
+          buffering,
+          isLive,
+        );
       }),
       if (kDebugMode)
         stream.log.listen(((PlayerLog log) {
@@ -1271,20 +1250,7 @@ class PlPlayerController with BlockConfigMixin {
           _stallTicks = 0;
           _stallLastPosition = null;
           _audioInterrupted = true;
-          // 听视频后台模式：看门狗误判（循环重播瞬间音频输出被系统挂起）时
-          // 限次自动恢复，避免第二遍播几秒后永远停住
-          final shouldAutoResume =
-              OS.isHarmony &&
-              continuePlayInBackground.value &&
-              _bgAutoResumeAllowed();
           pause(isInterrupt: true);
-          if (shouldAutoResume) {
-            Future<void>.delayed(const Duration(milliseconds: 800), () {
-              if (continuePlayInBackground.value) {
-                play();
-              }
-            });
-          }
         }
       } else {
         _stallTicks = 0;
@@ -1375,9 +1341,6 @@ class PlPlayerController with BlockConfigMixin {
     controls = !hideControls;
     // repeat为true，将从头播放
     if (repeat) {
-      // 进入自动重播抑制窗口：6 秒内旧 playing=false / buffering(completed)
-      // 一律不向播控中心上报，防止后台连续任务被停
-      _suppressPauseUntil = DateTime.now().add(const Duration(seconds: 6));
       // await seekTo(Duration.zero);
       await seekTo(Duration.zero, isSeek: false);
     }
@@ -1402,15 +1365,6 @@ class PlPlayerController with BlockConfigMixin {
     audioSessionHandler?.setActive(true);
 
     playerStatus.value = PlayerStatus.playing;
-    if (_suppressPauseReport) {
-      // 立即把播放中状态推给播控中心，重启后台连续任务，
-      // 防止晚到的 playing=false/buffering(completed) 把它停掉
-      videoPlayerServiceHandler?.setPlaybackState(
-        PlayerStatus.playing,
-        isBuffering.value,
-        isLive,
-      );
-    }
     // screenManager.setOverlays(false);
   }
 
@@ -1421,8 +1375,6 @@ class PlPlayerController with BlockConfigMixin {
   bool _pauseRequestedByApp = false;
   int _pipAutoResumeCount = 0;
   DateTime? _pipAutoResumeWindowStart;
-  int _bgAutoResumeCount = 0;
-  DateTime? _bgAutoResumeWindowStart;
 
   /// 生命周期回调的补偿入口：处于画中画且播放被系统静默暂停（而非应用
   /// 主动暂停）时自动续播。覆盖"系统暂停发生在 isPipMode 置位之前"的
@@ -1451,21 +1403,8 @@ class PlPlayerController with BlockConfigMixin {
     return ++_pipAutoResumeCount <= 3;
   }
 
-  /// 限制听视频后台看门狗自动恢复的频率，防止与系统强制暂停陷入拉锯。
-  bool _bgAutoResumeAllowed() {
-    final now = DateTime.now();
-    if (_bgAutoResumeWindowStart == null ||
-        now.difference(_bgAutoResumeWindowStart!) >
-            const Duration(seconds: 10)) {
-      _bgAutoResumeWindowStart = now;
-      _bgAutoResumeCount = 0;
-    }
-    return ++_bgAutoResumeCount <= 3;
-  }
-
   Future<void> pause({bool notify = true, bool isInterrupt = false}) async {
     _pauseRequestedByApp = true;
-    _suppressPauseUntil = null;
     await _videoPlayerController?.pause();
     playerStatus.value = PlayerStatus.paused;
 
