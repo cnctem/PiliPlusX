@@ -191,6 +191,13 @@ class MainController extends GetxController
     // 同步 Navbar 页签数量与顺序到原生 HDS 底栏（与设置内 Navbar 编辑一致）
     if (useHdsBar) {
       HarmonyChannel.setNavBarConfig(navigationBars);
+      // 初始动态角标（数量与模式）同步到原生 HDS 底栏
+      if (hasDyn) {
+        HarmonyChannel.setDynamicBadge(
+          count: dynCount.value,
+          mode: dynamicBadgeMode.index,
+        );
+      }
     }
     // 首页分类标签与顶栏设置同步到原生
     if (useHdsTopBar && hasHome) {
@@ -307,6 +314,13 @@ class MainController extends GetxController
   void setDynCount([int count = 0]) {
     if (!hasDyn) return;
     dynCount.value = count;
+    // 同步动态角标到 ArkTS HdsTabs 底栏（与 Flutter 内角标保持一致）
+    if (useNativeTabs.value) {
+      HarmonyChannel.setDynamicBadge(
+        count: count,
+        mode: dynamicBadgeMode.index,
+      );
+    }
   }
 
   void checkUnreadDynamic() {

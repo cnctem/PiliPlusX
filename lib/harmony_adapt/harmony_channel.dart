@@ -121,6 +121,12 @@ abstract class HarmonyChannel {
   static Future<void> setNavBarConfig(List<NavigationBarType> bars) =>
       _invoke('setNavBarConfig', {'tabs': bars.map((e) => e.index).toList()});
 
+  /// 同步动态页签角标（数量与模式，与 Flutter Badge 一致）到 ArkTS HdsTabs
+  static Future<void> setDynamicBadge({
+    required int count,
+    required int mode,
+  }) => _invoke('setDynamicBadge', {'count': count, 'mode': mode});
+
   /// HDS 底栏当前是否为显示状态
   static bool _hiddenByPage = false;
   static bool get hdsBarVisible => !_hiddenByPage;
