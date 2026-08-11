@@ -9,6 +9,7 @@ class AppBarAni extends StatelessWidget {
     required this.isTop,
     required this.isFullScreen,
     required this.removeSafeArea,
+    this.topInset,
   });
 
   final Widget child;
@@ -16,6 +17,9 @@ class AppBarAni extends StatelessWidget {
   final bool isTop;
   final bool isFullScreen;
   final bool removeSafeArea;
+
+  /// 竖屏全屏时顶部控件的固定避让高度（进全屏前捕获的状态栏/挖孔高度）
+  final double? topInset;
 
   static final _topPos = Tween<Offset>(
     begin: const Offset(0.0, -1.0),
@@ -49,19 +53,32 @@ class AppBarAni extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget result = child;
+    if (!removeSafeArea) {
+      result = ViewSafeArea(
+        left: isFullScreen,
+        right: isFullScreen,
+        child: result,
+      );
+      // 竖屏全屏时用进全屏前捕获的固定高度避让挖孔/状态栏，
+      // 不依赖全屏下已归零的 MediaQuery padding
+      if (isTop &&
+          isFullScreen &&
+          MediaQuery.sizeOf(context).height >= MediaQuery.sizeOf(context).width &&
+          (topInset ?? 0) > 0) {
+        result = Padding(
+          padding: EdgeInsets.only(top: topInset!),
+          child: result,
+        );
+      }
+    }
     return SlideTransition(
       position: controller.drive(isTop ? _topPos : _bottomPos),
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: isTop ? _topDecoration : _bottomDecoration,
         ),
-        child: removeSafeArea
-            ? child
-            : ViewSafeArea(
-                left: isFullScreen,
-                right: isFullScreen,
-                child: child,
-              ),
+        child: result,
       ),
     );
   }
