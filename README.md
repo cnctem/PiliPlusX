@@ -22,9 +22,7 @@
 
 - 1、配置鸿蒙flutter3.41.9环境，参考[鸿蒙flutter3.41.9](https://gitcode.com/CPF-Flutter/flutter_flutter/tree/oh-3.41.9-dev)
 
-- 2、手动创建ohos/build-profile.json5文件，见[关于build-profile.json5](ohos/关于build-profile.json5)
-
-- 3、通过vscode运行启动配置或是build_hap任务以确保应用内所需环境变量正确写入
+- 2、通过vscode运行启动配置或是build_hap任务以确保应用内所需环境变量正确写入
 
 若遇到类似 **Package not available (the pubspec for image_picker 1.1.2 from git has version 1.0.2).** 这样的报错，可参考[这篇掘金](https://juejin.cn/post/7602936997175132212)
 

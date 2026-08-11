@@ -1,7 +1,3 @@
-// 为了避免不同设备的不同签名配置互相干扰
-// git仓库删除并忽略了build-profile.json5
-// 所以克隆代码后第一次运行请自行复制/创建build-profile.json5
-// 且不要添加到git
 {
   app: {
     signingConfigs: [],
@@ -15,7 +11,8 @@
         buildOption: {
           packOptions: {
             enableIncrementalSoCompress: true
-          }
+          },
+          "nativeCompiler": "BiSheng"
         }
       },
     ],
@@ -38,7 +35,9 @@
       targets: [
         {
           name: "default",
-          applyToProducts: ["default"],
+          applyToProducts: [
+            "default"
+          ],
         },
       ],
     },
