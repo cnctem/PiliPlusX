@@ -12,6 +12,7 @@
       "name": "ohos.arkui.UIMaterial.state",
       "value": "enable"
     }],
+    compressNativeLibs: true,
     abilities: [
       {
         name: "EntryAbility",
