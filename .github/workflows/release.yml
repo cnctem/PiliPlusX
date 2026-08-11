@@ -69,10 +69,6 @@ jobs:
           find lib -type f -name "*.dart" -exec sed -i "s/package:PiliPlus/package:piliplus/g" {} \;
         shell: bash
 
-      - name: Add ohos platform
-        run: flutter create --platforms ohos .
-        shell: bash
-
       - name: Build Flutter for ohos
         run: flutter build hap --release --dart-define-from-file=.vscode/env.json
         shell: bash
