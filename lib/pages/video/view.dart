@@ -1450,6 +1450,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                 videoDetailCtr: videoDetailController,
                 heroTag: heroTag,
               ),
+              topInset: _fixedTopInset,
               danmuWidget: isPipMode && pipNoDanmaku
                   ? null
                   : Obx(
