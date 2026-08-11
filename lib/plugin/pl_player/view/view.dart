@@ -43,6 +43,8 @@ import 'package:PiliPlus/plugin/pl_player/models/fullscreen_mode.dart';
 import 'package:PiliPlus/plugin/pl_player/models/gesture_type.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/plugin/pl_player/models/video_fit_type.dart';
+import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
+import 'package:PiliPlus/plugin/pl_player/widgets/top_inset_padding.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/app_bar_ani.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/backward_seek.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/bottom_control.dart';
@@ -1411,7 +1413,18 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         _videoWidget,
 
         if (widget.danmuWidget case final danmaku?)
-          Positioned.fill(top: 4, child: danmaku),
+          Positioned.fill(
+            top: 4,
+            child: TopInsetPadding(
+              inset: portraitFullscreenTopInset(
+                isFullScreen: isFullScreen,
+                isPortrait: maxHeight >= maxWidth,
+                removeSafeArea: plPlayerController.removeSafeArea,
+                topInset: widget.topInset,
+              ),
+              child: danmaku,
+            ),
+          ),
 
         if (!isLive)
           // 鸿蒙 media_kit fork 的 SubtitleView 没有上游 fork 的
