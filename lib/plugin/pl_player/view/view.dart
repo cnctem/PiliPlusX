@@ -43,7 +43,6 @@ import 'package:PiliPlus/plugin/pl_player/models/fullscreen_mode.dart';
 import 'package:PiliPlus/plugin/pl_player/models/gesture_type.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/plugin/pl_player/models/video_fit_type.dart';
-import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/app_bar_ani.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/backward_seek.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/bottom_control.dart';
@@ -975,26 +974,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         ),
         Row(
           mainAxisSize: .min,
-          children: [
-            if (isFullScreen)
-              const SizedBox(
-                width: 42,
-                height: 34,
-                child: IconButton(
-                  tooltip: '切换状态栏隐藏',
-                  style: ButtonStyle(
-                    padding: WidgetStatePropertyAll(EdgeInsets.zero),
-                  ),
-                  onPressed: toggleSystemBar,
-                  icon: Icon(
-                    Icons.ad_units,
-                    size: 19,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ...userSpecifyItemRight.map(progressWidget),
-          ],
+          children: userSpecifyItemRight.map(progressWidget).toList(),
         ),
       ],
     );
