@@ -133,7 +133,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         isPortrait &&
         !videoDetailController.isVertical.value &&
         videoDetailController.plPlayerController.mode != FullScreenMode.none &&
-        videoDetailController.plPlayerController.mode != FullScreenMode.vertical &&
+        videoDetailController.plPlayerController.mode !=
+            FullScreenMode.vertical &&
         videoDetailController.plPlayerController.mode != FullScreenMode.gravity;
     return !invalidPortraitFullScreen;
   }
@@ -159,53 +160,63 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   /// 当前应用生命周期状态
   AppLifecycleState _lifecycleState = AppLifecycleState.resumed;
 
+  late final _enableHero = Pref.enableHeroCoverAnimation && heroTag != null;
+  late bool _waitingHero = _enableHero;
+  final _heroDuration = const Duration(milliseconds: 300);
   @override
   void initState() {
     super.initState();
+    Future.delayed(
+      _waitingHero ? _heroDuration : Duration.zero,
+      () {
+        PlPlayerController.setPlayCallBack(playCallBack);
+        videoDetailController = Get.put(VideoDetailController(), tag: heroTag);
+        // 页面顶部是黑色播放器：自由多窗的装饰栏按钮切浅色风格，否则浅色
+        // 模式下深色按钮不可见
+        HarmonyChannel.holdDecorDark(this);
+        // 画中画状态翻转时强制重建：PiP 结束时若窗口尺寸恰好没变（如画中画
+        // 期间从智慧多窗应用栏以小窗打开 app），没有视口变化触发重建，页面
+        // 会滞留在画中画布局（黑边+播控被状态栏遮挡）。
+        _pipModeWorker = ever(
+          videoDetailController.plPlayerController.pipModeRx,
+          (_) {
+            if (mounted) setState(() {});
+          },
+        );
 
-    PlPlayerController.setPlayCallBack(playCallBack);
-    videoDetailController = Get.put(VideoDetailController(), tag: heroTag);
-    // 页面顶部是黑色播放器：自由多窗的装饰栏按钮切浅色风格，否则浅色
-    // 模式下深色按钮不可见
-    HarmonyChannel.holdDecorDark(this);
-    // 画中画状态翻转时强制重建：PiP 结束时若窗口尺寸恰好没变（如画中画
-    // 期间从智慧多窗应用栏以小窗打开 app），没有视口变化触发重建，页面
-    // 会滞留在画中画布局（黑边+播控被状态栏遮挡）。
-    _pipModeWorker = ever(
-      videoDetailController.plPlayerController.pipModeRx,
-      (_) {
-        if (mounted) setState(() {});
+        if (videoDetailController.removeSafeArea) {
+          hideSystemBar();
+        }
+
+        _unlockOrientation();
+
+        if (videoDetailController.showReply) {
+          _videoReplyController = Get.put(
+            VideoReplyController(
+              aid: videoDetailController.aid,
+              videoType: videoDetailController.videoType,
+              heroTag: heroTag,
+            ),
+            tag: heroTag,
+          );
+        }
+
+        if (videoDetailController.isFileSource) {
+          localIntroController = Get.put(LocalIntroController(), tag: heroTag);
+        } else if (videoDetailController.isUgc) {
+          ugcIntroController = Get.put(UgcIntroController(), tag: heroTag);
+        } else {
+          pgcIntroController = Get.put(PgcIntroController(), tag: heroTag);
+        }
+
+        videoSourceInit();
+
+        addObserverMobile(this);
+        setState(() {
+          _waitingHero = false;
+        });
       },
     );
-
-    if (videoDetailController.removeSafeArea) {
-      hideSystemBar();
-    }
-
-    _unlockOrientation();
-
-    if (videoDetailController.showReply) {
-      _videoReplyController = Get.put(
-        VideoReplyController(
-          aid: videoDetailController.aid,
-          videoType: videoDetailController.videoType,
-          heroTag: heroTag,
-        ),
-        tag: heroTag,
-      );
-    }
-
-    if (videoDetailController.isFileSource) {
-      localIntroController = Get.put(LocalIntroController(), tag: heroTag);
-    } else if (videoDetailController.isUgc) {
-      ugcIntroController = Get.put(UgcIntroController(), tag: heroTag);
-    } else {
-      pgcIntroController = Get.put(PgcIntroController(), tag: heroTag);
-    }
-
-    videoSourceInit();
-
-    addObserverMobile(this);
   }
 
   // 获取视频资源，初始化播放器
@@ -530,40 +541,44 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (videoDetailController.removeSafeArea) {
-      padding = .zero;
-    } else {
-      padding = MediaQuery.viewPaddingOf(context);
-    }
-    // 顶部间距固定为首次捕获的状态栏高度：状态栏显隐不再改变页面布局，
-    // 避免旋转退出全屏时状态栏在动画末尾显现导致画面下移。
-    if (padding.top > 0) {
-      _fixedTopInset ??= padding.top;
-    }
+    Future.delayed(_waitingHero ? _heroDuration : Duration.zero, () {
+      if (!mounted) return;
+      if (videoDetailController.removeSafeArea) {
+        padding = .zero;
+      } else {
+        padding = MediaQuery.viewPaddingOf(context);
+      }
+      // 顶部间距固定为首次捕获的状态栏高度：状态栏显隐不再改变页面布局，
+      // 避免旋转退出全屏时状态栏在动画末尾显现导致画面下移。
+      if (padding.top > 0) {
+        _fixedTopInset ??= padding.top;
+      }
 
-    final size = MediaQuery.sizeOf(context);
-    maxWidth = size.width;
-    maxHeight = size.height;
-    isWindowMode = MaxScreenSize.isWindowMode(
-      width: maxWidth * videoDetailController.uiScale,
-      height: maxHeight * videoDetailController.uiScale,
-    );
-    videoDetailController.plPlayerController.screenRatio = maxHeight / maxWidth;
+      final size = MediaQuery.sizeOf(context);
+      maxWidth = size.width;
+      maxHeight = size.height;
+      isWindowMode = MaxScreenSize.isWindowMode(
+        width: maxWidth * videoDetailController.uiScale,
+        height: maxHeight * videoDetailController.uiScale,
+      );
+      videoDetailController.plPlayerController.screenRatio =
+          maxHeight / maxWidth;
 
-    final shortestSide = size.shortestSide;
-    final minVideoHeight = shortestSide / Style.aspectRatio16x9;
-    final maxVideoHeight = max(size.longestSide * 0.65, shortestSide);
-    videoDetailController
-      ..isPortrait = isPortrait = maxHeight >= maxWidth
-      ..minVideoHeight = minVideoHeight
-      ..maxVideoHeight = maxVideoHeight
-      ..videoHeight = videoDetailController.isVertical.value
-          ? maxVideoHeight
-          : minVideoHeight;
+      final shortestSide = size.shortestSide;
+      final minVideoHeight = shortestSide / Style.aspectRatio16x9;
+      final maxVideoHeight = max(size.longestSide * 0.65, shortestSide);
+      videoDetailController
+        ..isPortrait = isPortrait = maxHeight >= maxWidth
+        ..minVideoHeight = minVideoHeight
+        ..maxVideoHeight = maxVideoHeight
+        ..videoHeight = videoDetailController.isVertical.value
+            ? maxVideoHeight
+            : minVideoHeight;
 
-    themeData = videoDetailController.plPlayerController.darkVideoPage
-        ? ThemeUtils.darkTheme
-        : Theme.of(context);
+      themeData = videoDetailController.plPlayerController.darkVideoPage
+          ? ThemeUtils.darkTheme
+          : Theme.of(context);
+    });
   }
 
   /// 当前放开着方向的播放页数量。视频页可以叠栈（视频里再点视频），用计数避免
@@ -687,8 +702,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                     isFullScreen
                         ? 0
                         : (isPortrait
-                            ? (_fixedTopInset ?? padding.top)
-                            : padding.top),
+                              ? (_fixedTopInset ?? padding.top)
+                              : padding.top),
                   ),
                   child: Obx(
                     () {
@@ -700,8 +715,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                         toolbarHeight: isFullScreen
                             ? 0
                             : (isPortrait
-                                ? (_fixedTopInset ?? padding.top)
-                                : padding.top),
+                                  ? (_fixedTopInset ?? padding.top)
+                                  : padding.top),
                         // 顶部间距显式控制：竖屏用固定值（首次状态栏高度），
                         // 横屏用实时 padding，不再依赖 primary 隐式加 SafeArea，
                         // 避免状态栏显隐带动正文位移。
@@ -733,9 +748,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             controller: videoDetailController.scrollCtr,
             // 全屏时禁止页面滚动：竖屏全屏只是把视频头撑满全屏，若不锁滚动，
             // 底部上滑会把头部视频压缩、把详情内容从底部带出来。
-            physics: isFullScreen
-                ? const NeverScrollableScrollPhysics()
-                : null,
+            physics: isFullScreen ? const NeverScrollableScrollPhysics() : null,
             onlyOneScrollInBody: true,
             pinnedHeaderSliverHeightBuilder: () {
               double pinnedHeight = isFullScreen || !isPortrait
@@ -976,8 +989,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                 toolbarHeight: isFullScreen
                     ? 0
                     : (isPortrait
-                        ? (_fixedTopInset ?? padding.top)
-                        : padding.top),
+                          ? (_fixedTopInset ?? padding.top)
+                          : padding.top),
                 primary: false,
               ),
         body: Padding(
@@ -991,8 +1004,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   );
 
   Widget childSplit(double ratio) {
-    final double videoHeight =
-        isFullScreen ? maxHeight : maxHeight - padding.vertical;
+    final double videoHeight = isFullScreen
+        ? maxHeight
+        : maxHeight - padding.vertical;
     final double width = videoHeight * ratio;
     final videoWidth = isFullScreen ? maxWidth : width;
     final introWidth = maxWidth - width - padding.horizontal;
@@ -1114,9 +1128,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     }
     final videoWidth = isFullScreen ? maxWidth : width;
     final double height = width / Style.aspectRatio16x9;
-    final videoHeight = isFullScreen
-        ? maxHeight
-        : height;
+    final videoHeight = isFullScreen ? maxHeight : height;
     if (height > maxHeight) {
       return childSplit(Style.aspectRatio16x9);
     }
@@ -1211,8 +1223,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
           : AppBar(
               backgroundColor: Colors.black,
               automaticallyImplyLeading: false,
-              toolbarHeight:
-                  isFullScreen ? 0 : (_fixedTopInset ?? padding.top),
+              toolbarHeight: isFullScreen ? 0 : (_fixedTopInset ?? padding.top),
               primary: false,
             ),
       body: Padding(
@@ -1243,9 +1254,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   Widget _childWhenDisabledAlmostSquareInner(bool isFullScreen) {
     final shouldShowSeasonPanel = _shouldShowSeasonPanel;
     final double height = maxHeight / 2.5;
-    final videoHeight = isFullScreen
-        ? maxHeight
-        : height;
+    final videoHeight = isFullScreen ? maxHeight : height;
     final bottomHeight = maxHeight - height - padding.top;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1476,6 +1485,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   late double maxHeight;
   bool isWindowMode = false;
   late EdgeInsets padding;
+
   /// 顶部间距固定值：首次捕获的状态栏高度（逻辑像素）。
   /// 状态栏显隐不再改变页面布局，避免旋转退出全屏时状态栏在动画末尾
   /// 显现导致画面下移。null 表示未捕获到（如移除安全边距场景），退化为 0。
@@ -1490,37 +1500,42 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   @override
   Widget build(BuildContext context) {
     Widget child;
-    if (videoDetailController.plPlayerController.isPipMode) {
-      child = plPlayer(width: maxWidth, height: maxHeight, isPipMode: true);
-    } else if (!videoDetailController.horizontalScreen) {
-      child = childWhenDisabled;
-    } else if (maxWidth / maxHeight >= kScreenRatio) {
-      child = childWhenDisabledLandscape;
-    } else if (maxWidth / Style.aspectRatio16x9 < 0.4 * maxHeight) {
-      child = childWhenDisabled;
+    Widget result;
+    if (_waitingHero) {
+      result = child = const SizedBox.shrink();
     } else {
-      child = childWhenDisabledAlmostSquare;
+      if (videoDetailController.plPlayerController.isPipMode) {
+        child = plPlayer(width: maxWidth, height: maxHeight, isPipMode: true);
+      } else if (!videoDetailController.horizontalScreen) {
+        child = childWhenDisabled;
+      } else if (maxWidth / maxHeight >= kScreenRatio) {
+        child = childWhenDisabledLandscape;
+      } else if (maxWidth / Style.aspectRatio16x9 < 0.4 * maxHeight) {
+        child = childWhenDisabled;
+      } else {
+        child = childWhenDisabledAlmostSquare;
+      }
+      if (videoDetailController.plPlayerController.keyboardControl) {
+        child = PlayerFocus(
+          plPlayerController: videoDetailController.plPlayerController,
+          introController: introController,
+          onSendDanmaku: videoDetailController.showShootDanmakuSheet,
+          canPlay: () {
+            if (videoDetailController.autoPlay) {
+              return true;
+            }
+            handlePlay();
+            return false;
+          },
+          onSkipSegment: videoDetailController.onSkipSegment,
+          child: child,
+        );
+      }
+      result = videoDetailController.plPlayerController.darkVideoPage
+          ? Theme(data: themeData, child: child)
+          : child;
     }
-    if (videoDetailController.plPlayerController.keyboardControl) {
-      child = PlayerFocus(
-        plPlayerController: videoDetailController.plPlayerController,
-        introController: introController,
-        onSendDanmaku: videoDetailController.showShootDanmakuSheet,
-        canPlay: () {
-          if (videoDetailController.autoPlay) {
-            return true;
-          }
-          handlePlay();
-          return false;
-        },
-        onSkipSegment: videoDetailController.onSkipSegment,
-        child: child,
-      );
-    }
-    Widget result = videoDetailController.plPlayerController.darkVideoPage
-        ? Theme(data: themeData, child: child)
-        : child;
-    if (Pref.enableHeroCoverAnimation && heroTag != null) {
+    if (_enableHero) {
       result = Hero(
         tag: heroTag,
         // Hero 动画期间，框架默认把 toHero 的 child 从树中移除（空
