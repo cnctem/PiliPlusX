@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:PiliPlus/models/common/video/audio_quality.dart';
-import 'package:PiliPlus/models/common/video/cdn_type.dart';
 import 'package:PiliPlus/models/common/video/live_quality.dart';
 import 'package:PiliPlus/models/common/video/video_decode_type.dart';
 import 'package:PiliPlus/models/common/video/video_quality.dart';
 import 'package:PiliPlus/pages/setting/models/model.dart';
+import 'package:PiliPlus/pages/setting/widgets/cdn_select_dialog.dart';
 import 'package:PiliPlus/pages/setting/widgets/ordered_multi_select_dialog.dart';
 import 'package:PiliPlus/pages/setting/widgets/select_dialog.dart';
 import 'package:PiliPlus/plugin/pl_player/models/audio_output_type.dart';
@@ -60,7 +60,7 @@ List<SettingsModel> get videoSettings => [
     title: 'CDN 设置',
     leading: const Icon(MdiIcons.cloudPlusOutline),
     getSubtitle: () =>
-        '当前使用：${VideoUtils.cdnService.desc}，部分 CDN 可能失效，如无法播放请尝试切换',
+        '当前使用：${VideoUtils.effectiveCdnDesc()}，部分 CDN 可能失效，如无法播放请尝试切换',
     onTap: _showCDNDialog,
   ),
   NormalModel(
@@ -192,13 +192,12 @@ List<SettingsModel> get videoSettings => [
 ];
 
 Future<void> _showCDNDialog(BuildContext context, VoidCallback setState) async {
-  final res = await showDialog<CDNService>(
+  final res = await showDialog<CdnSelectResult>(
     context: context,
     builder: (context) => const CdnSelectDialog(),
   );
   if (res != null) {
-    VideoUtils.cdnService = res;
-    await GStorage.setting.put(SettingBoxKey.CDNService, res.name);
+    await applyCdnSelectResult(res);
     setState();
   }
 }

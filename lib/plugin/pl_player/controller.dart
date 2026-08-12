@@ -46,6 +46,7 @@ import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
+import 'package:PiliPlus/utils/video_utils.dart';
 import 'package:archive/archive.dart' show getCrc32;
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:easy_debounce/easy_throttle.dart';
@@ -1042,9 +1043,14 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
                 //   debugPrint("_buffered.value: ${_buffered.value}");
                 // }
                 if (isBuffering.value && buffered.value == 0) {
+                  final customHost = VideoUtils.customCDNUrl;
                   SmartDialog.showToast(
-                    '视频链接打开失败，重试中',
-                    displayTime: const Duration(milliseconds: 500),
+                    customHost == null
+                        ? '视频链接打开失败，重试中'
+                        : '视频链接打开失败，重试中\n当前自定义CDN节点：$customHost，持续失败可尝试更换或清除',
+                    displayTime: customHost == null
+                        ? const Duration(milliseconds: 500)
+                        : const Duration(milliseconds: 3000),
                   );
                   refreshPlayer();
                 }
