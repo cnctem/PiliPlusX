@@ -171,8 +171,7 @@ class CdnSpeedTester {
   }
 }
 
-/// MD3E standard 风格列表项：未选中透明融入对话框，选中态
-/// secondaryContainer + 16dp 全圆角 + leading 勾选（Lists expressive 规范）
+/// CDN 对话框共用列表项：选项使用 radio 明确单选状态，选中项使用强调色。
 class M3eOptionItem extends StatelessWidget {
   const M3eOptionItem({
     super.key,
@@ -181,6 +180,7 @@ class M3eOptionItem extends StatelessWidget {
     this.leading,
     this.trailing,
     this.selected = false,
+    this.selectionControl = false,
     this.onTap,
   });
 
@@ -189,6 +189,7 @@ class M3eOptionItem extends StatelessWidget {
   final Widget? leading;
   final Widget? trailing;
   final bool selected;
+  final bool selectionControl;
   final VoidCallback? onTap;
 
   @override
@@ -201,8 +202,14 @@ class M3eOptionItem extends StatelessWidget {
     final secondary = selected
         ? colorScheme.onSecondaryContainer
         : colorScheme.onSurfaceVariant;
-    final effectiveLeading =
-        leading ?? (selected ? const Icon(Icons.check) : null);
+    final effectiveLeading = leading ??
+        (selectionControl
+            ? Icon(
+                selected
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_unchecked,
+              )
+            : null);
     return Material(
       color: selected ? colorScheme.secondaryContainer : Colors.transparent,
       borderRadius: const BorderRadius.all(Radius.circular(16)),
@@ -210,7 +217,9 @@ class M3eOptionItem extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 56),
+          constraints: BoxConstraints(
+            minHeight: subtitle == null ? 56 : 72,
+          ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Row(
@@ -246,7 +255,12 @@ class M3eOptionItem extends StatelessWidget {
                 if (trailing case final trailing?) ...[
                   const SizedBox(width: 8),
                   IconTheme(
-                    data: IconThemeData(size: 20, color: secondary),
+                    data: IconThemeData(
+                      size: 20,
+                      color: selected
+                          ? colorScheme.onSecondaryContainer
+                          : colorScheme.onSurface,
+                    ),
                     child: trailing,
                   ),
                 ],
@@ -359,6 +373,7 @@ class _CdnSelectDialogState extends State<CdnSelectDialog> {
             if (customHost != null) ...[
               M3eOptionItem(
                 selected: true,
+                selectionControl: true,
                 title: Text(CdnNodeStore.labelOf(customHost) ?? '自定义节点'),
                 subtitle: Text(
                   customHost,
@@ -379,12 +394,13 @@ class _CdnSelectDialogState extends State<CdnSelectDialog> {
               M3eOptionItem(
                 selected:
                     customHost == null && service == VideoUtils.cdnService,
+                selectionControl: true,
                 title: Text(service.desc),
                 subtitle: _cdnSpeedTest
                     ? ValueListenableBuilder(
                         valueListenable: _speedResults[service.index],
                         builder: (context, value, _) => Text(
-                          value ?? '---',
+                          value ?? '测速中',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
