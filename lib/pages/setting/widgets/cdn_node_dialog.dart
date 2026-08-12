@@ -252,6 +252,7 @@ class _CdnNodeDialogState extends State<CdnNodeDialog> {
                     final host = hosts[index];
                     return M3eOptionItem(
                       selected: host == currentHost,
+                      selectionControl: true,
                       title: Text(CdnNodeStore.nodeTitleOf(host)),
                       subtitle: Text(
                         host,
