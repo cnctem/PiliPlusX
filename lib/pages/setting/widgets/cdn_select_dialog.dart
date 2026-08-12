@@ -4,6 +4,8 @@ import 'package:PiliPlus/http/video.dart';
 import 'package:PiliPlus/models/common/video/cdn_type.dart';
 import 'package:PiliPlus/models/common/video/video_type.dart';
 import 'package:PiliPlus/models/video/play/url.dart';
+import 'package:PiliPlus/pages/setting/widgets/cdn_node_dialog.dart';
+import 'package:PiliPlus/utils/cdn_node_store.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
@@ -304,6 +306,17 @@ class _CdnSelectDialogState extends State<CdnSelectDialog> {
     }
   }
 
+  Future<void> _pickNode() async {
+    final host = await showDialog<String>(
+      context: context,
+      builder: (context) =>
+          CdnNodeDialog(sample: _tester?.sample ?? widget.sample),
+    );
+    if (host != null && mounted) {
+      Navigator.pop(context, CdnCustomResult(host));
+    }
+  }
+
   Future<void> _inputCustom() async {
     final host = await showDialog<String>(
       context: context,
@@ -333,7 +346,7 @@ class _CdnSelectDialogState extends State<CdnSelectDialog> {
                 isFirst: true,
                 isLast: true,
                 selected: true,
-                title: const Text('自定义节点'),
+                title: Text(CdnNodeStore.labelOf(customHost) ?? '自定义节点'),
                 subtitle: Text(
                   customHost,
                   maxLines: 1,
@@ -374,6 +387,14 @@ class _CdnSelectDialogState extends State<CdnSelectDialog> {
             const SizedBox(height: 12),
             M3eOptionItem(
               isFirst: true,
+              leading: const Icon(Icons.travel_explore_outlined),
+              title: const Text('从节点列表选择'),
+              subtitle: const Text('按地区选择全国 CDN 节点'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: _pickNode,
+            ),
+            const SizedBox(height: 2),
+            M3eOptionItem(
               isLast: true,
               leading: const Icon(Icons.edit_outlined),
               title: const Text('手动输入'),

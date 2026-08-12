@@ -5,6 +5,7 @@ import 'package:PiliPlus/models/common/video/live_quality.dart';
 import 'package:PiliPlus/models/common/video/video_decode_type.dart';
 import 'package:PiliPlus/models/common/video/video_quality.dart';
 import 'package:PiliPlus/pages/setting/models/model.dart';
+import 'package:PiliPlus/pages/setting/widgets/cdn_node_dialog.dart';
 import 'package:PiliPlus/pages/setting/widgets/cdn_select_dialog.dart';
 import 'package:PiliPlus/pages/setting/widgets/ordered_multi_select_dialog.dart';
 import 'package:PiliPlus/pages/setting/widgets/select_dialog.dart';
@@ -211,10 +212,30 @@ Future<void> _showLiveCDNDialog(
     context: context,
     builder: (context) => AlertDialog(
       title: const Text('输入CDN host'),
-      content: TextFormField(
-        initialValue: host,
-        autofocus: true,
-        onChanged: (value) => host = value,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextFormField(
+            initialValue: host,
+            autofocus: true,
+            onChanged: (value) => host = value,
+          ),
+          const SizedBox(height: 4),
+          TextButton.icon(
+            icon: const Icon(Icons.travel_explore_outlined, size: 18),
+            label: const Text('从节点列表选择'),
+            onPressed: () async {
+              final node = await showDialog<String>(
+                context: context,
+                builder: (context) => const CdnNodeDialog(isLive: true),
+              );
+              if (node != null && context.mounted) {
+                Navigator.pop(context, node);
+              }
+            },
+          ),
+        ],
       ),
       actions: [
         TextButton(

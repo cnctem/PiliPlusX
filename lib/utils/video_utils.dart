@@ -1,6 +1,7 @@
 import 'package:PiliPlus/models/common/video/cdn_type.dart';
 import 'package:PiliPlus/models/common/video/video_decode_type.dart';
 import 'package:PiliPlus/models_new/live/live_room_play_info/codec.dart';
+import 'package:PiliPlus/utils/cdn_node_store.dart';
 import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/foundation.dart' show kDebugMode, debugPrint;
@@ -62,13 +63,13 @@ abstract final class VideoUtils {
     return trimmed;
   }
 
-  /// 当前生效 CDN 的展示文本
+  /// 当前生效 CDN 的展示文本：自定义节点优先反查节点表标注地区运营商
   static String effectiveCdnDesc() {
     final host = customCDNUrl;
     if (host == null) {
       return cdnService.desc;
     }
-    return '自定义：$host';
+    return CdnNodeStore.labelOf(host) ?? '自定义：$host';
   }
 
   /// [customHost] 显式指定自定义节点（节点测速用）；未传时按 [applyCustomCDN]
