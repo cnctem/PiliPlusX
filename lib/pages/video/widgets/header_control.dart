@@ -17,7 +17,6 @@ import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/video.dart';
 import 'package:PiliPlus/models/common/super_resolution_type.dart';
 import 'package:PiliPlus/models/common/video/audio_quality.dart';
-import 'package:PiliPlus/models/common/video/cdn_type.dart';
 import 'package:PiliPlus/models/common/video/video_decode_type.dart';
 import 'package:PiliPlus/models/common/video/video_quality.dart';
 import 'package:PiliPlus/models/video/play/url.dart';
@@ -26,8 +25,8 @@ import 'package:PiliPlus/pages/common/common_intro_controller.dart';
 import 'package:PiliPlus/pages/danmaku/danmaku_model.dart';
 import 'package:PiliPlus/pages/setting/models/play_settings.dart'
     show showPlayerVolumeDialog;
+import 'package:PiliPlus/pages/setting/widgets/cdn_select_dialog.dart';
 import 'package:PiliPlus/pages/setting/widgets/popup_item.dart';
-import 'package:PiliPlus/pages/setting/widgets/select_dialog.dart';
 import 'package:PiliPlus/pages/video/controller.dart';
 import 'package:PiliPlus/pages/video/introduction/local/controller.dart';
 import 'package:PiliPlus/pages/video/introduction/pgc/controller.dart';
@@ -515,21 +514,22 @@ class HeaderControlState extends State<HeaderControl>
                     title: const Text('CDN 设置', style: titleStyle),
                     leading: const Icon(MdiIcons.cloudPlusOutline, size: 20),
                     subtitle: Text(
-                      '当前：${VideoUtils.cdnService.desc}，无法播放请切换',
+                      '当前：${VideoUtils.effectiveCdnDesc()}，无法播放请切换',
                       style: subTitleStyle,
                     ),
                     onTap: () async {
                       Get.back();
-                      final result = await showDialog<CDNService>(
+                      final result = await showDialog<CdnSelectResult>(
                         context: context,
                         builder: (context) => CdnSelectDialog(
                           sample: videoInfo.dash?.video?.firstOrNull,
                         ),
                       );
                       if (result != null) {
-                        VideoUtils.cdnService = result;
-                        setting.put(SettingBoxKey.CDNService, result.name);
-                        SmartDialog.showToast('已设置为 ${result.desc}，正在重载视频');
+                        await applyCdnSelectResult(
+                          result,
+                          toastSuffix: '，正在重载视频',
+                        );
                         videoDetailCtr.queryVideoUrl(fromReset: true);
                       }
                     },
