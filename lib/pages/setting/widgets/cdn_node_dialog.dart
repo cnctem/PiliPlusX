@@ -145,7 +145,7 @@ class _CdnNodeDialogState extends State<CdnNodeDialog> {
   Widget _buildHint(BuildContext context, String text) {
     final colorScheme = ColorScheme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -177,7 +177,7 @@ class _CdnNodeDialogState extends State<CdnNodeDialog> {
       clipBehavior: Clip.hardEdge,
       title: Text(widget.isLive ? '选择直播节点' : '选择节点'),
       constraints: const BoxConstraints.tightFor(width: 320),
-      contentPadding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      contentPadding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
       content: FutureBuilder(
         future: _future,
         builder: (context, snapshot) {
@@ -205,36 +205,39 @@ class _CdnNodeDialogState extends State<CdnNodeDialog> {
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                children: [
-                  StaticPopupMenuButton<String>(
-                    initialValue: region,
-                    onSelected: _selectRegion,
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    padding: const EdgeInsets.fromLTRB(8, 6, 4, 6),
-                    itemBuilder: (context) => [
-                      for (final item in regions)
-                        PopupMenuItem(
-                          value: item,
-                          child: Text(item),
-                        ),
-                    ],
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(region, style: textTheme.labelLarge),
-                        const Icon(Icons.arrow_drop_down, size: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Row(
+                  children: [
+                    StaticPopupMenuButton<String>(
+                      initialValue: region,
+                      onSelected: _selectRegion,
+                      borderRadius: const BorderRadius.all(Radius.circular(8)),
+                      padding: const EdgeInsets.fromLTRB(8, 6, 4, 6),
+                      itemBuilder: (context) => [
+                        for (final item in regions)
+                          PopupMenuItem(
+                            value: item,
+                            child: Text(item),
+                          ),
                       ],
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(region, style: textTheme.labelLarge),
+                          const Icon(Icons.arrow_drop_down, size: 20),
+                        ],
+                      ),
                     ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    '${hosts.length} 个节点',
-                    style: textTheme.bodySmall!.copyWith(
-                      color: colorScheme.onSurfaceVariant,
+                    const Spacer(),
+                    Text(
+                      '${hosts.length} 个节点',
+                      style: textTheme.bodySmall!.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(height: 4),
               if (widget.isLive)
@@ -242,16 +245,12 @@ class _CdnNodeDialogState extends State<CdnNodeDialog> {
               else if (region == '外建')
                 _buildHint(context, '该分组多为直播节点，点播大概率无效'),
               Flexible(
-                child: ListView.separated(
+                child: ListView.builder(
                   shrinkWrap: true,
                   itemCount: hosts.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 2),
                   itemBuilder: (context, index) {
                     final host = hosts[index];
                     return M3eOptionItem(
-                      isFirst: index == 0,
-                      isLast: index == hosts.length - 1,
                       selected: host == currentHost,
                       title: Text(CdnNodeStore.nodeTitleOf(host)),
                       subtitle: Text(
@@ -266,29 +265,32 @@ class _CdnNodeDialogState extends State<CdnNodeDialog> {
                 ),
               ),
               const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      updateTime == null
-                          ? '内置快照，可在线更新'
-                          : '更新于 ${_formatTime(updateTime)}',
-                      style: textTheme.bodySmall!.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        updateTime == null
+                            ? '内置快照，可在线更新'
+                            : '更新于 ${_formatTime(updateTime)}',
+                        style: textTheme.bodySmall!.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
-                  ),
-                  if (_refreshing)
-                    const Padding(
-                      padding: EdgeInsets.all(8),
-                      child: M3ELoadingIndicator(size: Size.square(18)),
-                    )
-                  else
-                    TextButton(
-                      onPressed: _refresh,
-                      child: const Text('更新列表'),
-                    ),
-                ],
+                    if (_refreshing)
+                      const Padding(
+                        padding: EdgeInsets.all(8),
+                        child: M3ELoadingIndicator(size: Size.square(18)),
+                      )
+                    else
+                      TextButton(
+                        onPressed: _refresh,
+                        child: const Text('更新列表'),
+                      ),
+                  ],
+                ),
               ),
             ],
           );
