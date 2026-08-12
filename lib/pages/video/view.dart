@@ -166,11 +166,23 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   @override
   void initState() {
     super.initState();
+    // 方向/布局状态必须首帧同步可用：旋转与全屏状态机在 build 里依赖
+    // isPortrait、maxWidth/maxHeight 与 _unlockOrientation，它们必须总是
+    // build 前的当前值。控制器构造本身轻量（onInit 只初始化字段，网络
+    // 请求在 videoSourceInit 中执行），同步创建即可让 _unlockOrientation
+    // 与 didChangeDependencies 立即以正确状态生效。
+    videoDetailController = Get.put(VideoDetailController(), tag: heroTag);
+    if (videoDetailController.removeSafeArea) {
+      hideSystemBar();
+    }
+    _unlockOrientation();
+
+    // 其余初始化延迟到 Hero 过渡结束后：查询播放地址、初始化播放器、创建
+    // 分页控制器、注册生命周期观察者都是较重的工作，放首帧会卡 Hero 动画。
     Future.delayed(
       _waitingHero ? _heroDuration : Duration.zero,
       () {
         PlPlayerController.setPlayCallBack(playCallBack);
-        videoDetailController = Get.put(VideoDetailController(), tag: heroTag);
         // 页面顶部是黑色播放器：自由多窗的装饰栏按钮切浅色风格，否则浅色
         // 模式下深色按钮不可见
         HarmonyChannel.holdDecorDark(this);
@@ -183,12 +195,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             if (mounted) setState(() {});
           },
         );
-
-        if (videoDetailController.removeSafeArea) {
-          hideSystemBar();
-        }
-
-        _unlockOrientation();
 
         if (videoDetailController.showReply) {
           _videoReplyController = Get.put(
@@ -541,44 +547,45 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    Future.delayed(_waitingHero ? _heroDuration : Duration.zero, () {
-      if (!mounted) return;
-      if (videoDetailController.removeSafeArea) {
-        padding = .zero;
-      } else {
-        padding = MediaQuery.viewPaddingOf(context);
-      }
-      // 顶部间距固定为首次捕获的状态栏高度：状态栏显隐不再改变页面布局，
-      // 避免旋转退出全屏时状态栏在动画末尾显现导致画面下移。
-      if (padding.top > 0) {
-        _fixedTopInset ??= padding.top;
-      }
+    // 布局/方向状态必须在这里同步计算：旋转（MediaQuery 变化）时本方法先于
+    // build 执行，保证 build 读到的 isPortrait/maxWidth/maxHeight 永远是当前值。
+    // 若像 Hero 优化那样延迟到 Future.delayed 里再算，旋转后 build 会读到过期
+    // 的 isPortrait，childWhenDisabled 的自动进/退全屏逻辑就会在错误方向上触发
+    // （例如点全屏后误判窗口已回竖屏，调度 _restorePageOrientation 又转回竖屏）。
+    if (videoDetailController.removeSafeArea) {
+      padding = .zero;
+    } else {
+      padding = MediaQuery.viewPaddingOf(context);
+    }
+    // 顶部间距固定为首次捕获的状态栏高度：状态栏显隐不再改变页面布局，
+    // 避免旋转退出全屏时状态栏在动画末尾显现导致画面下移。
+    if (padding.top > 0) {
+      _fixedTopInset ??= padding.top;
+    }
 
-      final size = MediaQuery.sizeOf(context);
-      maxWidth = size.width;
-      maxHeight = size.height;
-      isWindowMode = MaxScreenSize.isWindowMode(
-        width: maxWidth * videoDetailController.uiScale,
-        height: maxHeight * videoDetailController.uiScale,
-      );
-      videoDetailController.plPlayerController.screenRatio =
-          maxHeight / maxWidth;
+    final size = MediaQuery.sizeOf(context);
+    maxWidth = size.width;
+    maxHeight = size.height;
+    isWindowMode = MaxScreenSize.isWindowMode(
+      width: maxWidth * videoDetailController.uiScale,
+      height: maxHeight * videoDetailController.uiScale,
+    );
+    videoDetailController.plPlayerController.screenRatio = maxHeight / maxWidth;
 
-      final shortestSide = size.shortestSide;
-      final minVideoHeight = shortestSide / Style.aspectRatio16x9;
-      final maxVideoHeight = max(size.longestSide * 0.65, shortestSide);
-      videoDetailController
-        ..isPortrait = isPortrait = maxHeight >= maxWidth
-        ..minVideoHeight = minVideoHeight
-        ..maxVideoHeight = maxVideoHeight
-        ..videoHeight = videoDetailController.isVertical.value
-            ? maxVideoHeight
-            : minVideoHeight;
+    final shortestSide = size.shortestSide;
+    final minVideoHeight = shortestSide / Style.aspectRatio16x9;
+    final maxVideoHeight = max(size.longestSide * 0.65, shortestSide);
+    videoDetailController
+      ..isPortrait = isPortrait = maxHeight >= maxWidth
+      ..minVideoHeight = minVideoHeight
+      ..maxVideoHeight = maxVideoHeight
+      ..videoHeight = videoDetailController.isVertical.value
+          ? maxVideoHeight
+          : minVideoHeight;
 
-      themeData = videoDetailController.plPlayerController.darkVideoPage
-          ? ThemeUtils.darkTheme
-          : Theme.of(context);
-    });
+    themeData = videoDetailController.plPlayerController.darkVideoPage
+        ? ThemeUtils.darkTheme
+        : Theme.of(context);
   }
 
   /// 当前放开着方向的播放页数量。视频页可以叠栈（视频里再点视频），用计数避免
