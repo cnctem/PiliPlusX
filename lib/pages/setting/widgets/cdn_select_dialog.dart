@@ -171,7 +171,8 @@ class CdnSpeedTester {
   }
 }
 
-/// MD3E 分组列表项：组内首尾外角 12dp、内角 4dp，选中态容器色
+/// MD3E standard 风格列表项：未选中透明融入对话框，选中态
+/// secondaryContainer + 16dp 全圆角 + leading 勾选（Lists expressive 规范）
 class M3eOptionItem extends StatelessWidget {
   const M3eOptionItem({
     super.key,
@@ -180,8 +181,6 @@ class M3eOptionItem extends StatelessWidget {
     this.leading,
     this.trailing,
     this.selected = false,
-    this.isFirst = false,
-    this.isLast = false,
     this.onTap,
   });
 
@@ -190,8 +189,6 @@ class M3eOptionItem extends StatelessWidget {
   final Widget? leading;
   final Widget? trailing;
   final bool selected;
-  final bool isFirst;
-  final bool isLast;
   final VoidCallback? onTap;
 
   @override
@@ -204,27 +201,24 @@ class M3eOptionItem extends StatelessWidget {
     final secondary = selected
         ? colorScheme.onSecondaryContainer
         : colorScheme.onSurfaceVariant;
+    final effectiveLeading =
+        leading ?? (selected ? const Icon(Icons.check) : null);
     return Material(
-      color: selected
-          ? colorScheme.secondaryContainer
-          : colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(isFirst ? 12 : 4),
-        bottom: Radius.circular(isLast ? 12 : 4),
-      ),
+      color: selected ? colorScheme.secondaryContainer : Colors.transparent,
+      borderRadius: const BorderRadius.all(Radius.circular(16)),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 44),
+          constraints: const BoxConstraints(minHeight: 56),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Row(
               children: [
-                if (leading case final leading?) ...[
+                if (effectiveLeading case final effectiveLeading?) ...[
                   IconTheme(
                     data: IconThemeData(size: 20, color: secondary),
-                    child: leading,
+                    child: effectiveLeading,
                   ),
                   const SizedBox(width: 12),
                 ],
@@ -234,14 +228,14 @@ class M3eOptionItem extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       DefaultTextStyle(
-                        style: textTheme.labelLarge!.copyWith(
+                        style: textTheme.bodyLarge!.copyWith(
                           color: foreground,
                         ),
                         child: title,
                       ),
                       if (subtitle case final subtitle?)
                         DefaultTextStyle(
-                          style: textTheme.bodySmall!.copyWith(
+                          style: textTheme.bodyMedium!.copyWith(
                             color: secondary,
                           ),
                           child: subtitle,
@@ -357,15 +351,13 @@ class _CdnSelectDialogState extends State<CdnSelectDialog> {
       clipBehavior: Clip.hardEdge,
       title: const Text('CDN 设置'),
       constraints: const BoxConstraints.tightFor(width: 320),
-      contentPadding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      contentPadding: const EdgeInsets.fromLTRB(8, 8, 8, 12),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (customHost != null) ...[
               M3eOptionItem(
-                isFirst: true,
-                isLast: true,
                 selected: true,
                 title: Text(CdnNodeStore.labelOf(customHost) ?? '自定义节点'),
                 subtitle: Text(
@@ -381,19 +373,16 @@ class _CdnSelectDialogState extends State<CdnSelectDialog> {
                       Navigator.pop(context, const CdnClearCustomResult()),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
             ],
-            for (final (index, service) in services.indexed) ...[
-              if (index != 0) const SizedBox(height: 2),
+            for (final service in services)
               M3eOptionItem(
-                isFirst: index == 0,
-                isLast: index == services.length - 1,
                 selected:
                     customHost == null && service == VideoUtils.cdnService,
                 title: Text(service.desc),
                 subtitle: _cdnSpeedTest
                     ? ValueListenableBuilder(
-                        valueListenable: _speedResults[index],
+                        valueListenable: _speedResults[service.index],
                         builder: (context, value, _) => Text(
                           value ?? '---',
                           maxLines: 1,
@@ -404,19 +393,17 @@ class _CdnSelectDialogState extends State<CdnSelectDialog> {
                 onTap: () =>
                     Navigator.pop(context, CdnBuiltinResult(service)),
               ),
-            ],
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
+            const Divider(height: 1, indent: 8, endIndent: 8),
+            const SizedBox(height: 8),
             M3eOptionItem(
-              isFirst: true,
               leading: const Icon(Icons.travel_explore_outlined),
               title: const Text('从节点列表选择'),
               subtitle: const Text('按地区选择全国 CDN 节点'),
               trailing: const Icon(Icons.chevron_right),
               onTap: _pickNode,
             ),
-            const SizedBox(height: 2),
             M3eOptionItem(
-              isLast: true,
               leading: const Icon(Icons.edit_outlined),
               title: const Text('手动输入'),
               subtitle: const Text('输入任意节点 host 或完整 URL'),
