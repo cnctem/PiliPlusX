@@ -92,32 +92,53 @@ class CdnSpeedTester {
     return sample = item;
   }
 
-  /// 最多下载 8MB / 15s，返回速度或错误描述
+  /// 从首包到达开始计时（剔除建连与首字节耗时），下载 2MB 或 5s 即出结果
   Future<String> measure(String url) async {
-    const maxSize = 8 * 1024 * 1024;
-    const maxDuration = 15000000;
+    const maxSize = 2 * 1024 * 1024;
+    const maxDuration = 5000000;
     final token = CancelToken();
     _tokens.add(token);
-    int downloaded = 0;
+    int received = 0;
+    int baseline = 0;
+    int? dataStart;
     String? result;
-    final start = DateTime.now().microsecondsSinceEpoch;
+    final requestStart = DateTime.now().microsecondsSinceEpoch;
     String format(int bytes, int duration) =>
         '${(bytes / duration).toStringAsPrecision(3)}MB/s';
+    // 首包后无增量（如单包完成）时退回全程计时
+    String? snapshot() {
+      final now = DateTime.now().microsecondsSinceEpoch;
+      final bytes = received - baseline;
+      if (bytes > 0 && dataStart != null && now > dataStart!) {
+        return format(bytes, now - dataStart!);
+      }
+      if (received > 0 && now > requestStart) {
+        return format(received, now - requestStart);
+      }
+      return null;
+    }
+
     try {
       await dio.get(
         url,
         cancelToken: token,
         onReceiveProgress: (count, total) {
-          downloaded = count;
-          final duration = DateTime.now().microsecondsSinceEpoch - start;
-          if (downloaded >= maxSize || duration > maxDuration) {
-            result ??= format(downloaded, duration);
+          if (dataStart == null) {
+            dataStart = DateTime.now().microsecondsSinceEpoch;
+            baseline = count;
+            received = count;
+            return;
+          }
+          received = count;
+          if (count - baseline >= maxSize ||
+              DateTime.now().microsecondsSinceEpoch - dataStart! >
+                  maxDuration) {
+            result ??= snapshot();
             token.cancel();
           }
         },
       );
-      final duration = DateTime.now().microsecondsSinceEpoch - start;
-      result ??= downloaded > 0 ? format(downloaded, duration) : '测速失败';
+      result ??= snapshot() ?? '测速失败';
     } on DioException catch (e) {
       if (e.type == DioExceptionType.cancel) {
         result ??= '测速超时';
