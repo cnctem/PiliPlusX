@@ -121,6 +121,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   bool get isFullScreen =>
       videoDetailController.plPlayerController.isFullScreen.value;
 
+  /// 判断，窗口由横屏全屏旋转回竖屏：应自动退出全屏
+  /// 竖屏视频全屏时窗口自始至终为竖屏：不应退出或渲染成普通布局
+  bool _windowWasLandscapeInFullScreen = false;
+
   /// 横版视频在“竖屏窗口 + 全屏”是旋转退出全屏时的瞬态
   /// （窗口已转回竖屏、全屏状态尚未退出）。此时按普通页面布局渲染，
   /// 避免“竖屏全屏居中”一闪后跳到页面顶部播放位。
@@ -137,6 +141,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         (OS.isHarmony && HarmonyChannel.isWindowMode) || isWindowMode;
     final invalidPortraitFullScreen =
         isPortrait &&
+        // 仅确实由横屏旋转回竖屏时才退出全屏
+        // 竖屏视频全屏始终为竖屏，不受isVertical竞态影响
+        _windowWasLandscapeInFullScreen &&
         !constrainedWindow &&
         !videoDetailController.isVertical.value &&
         videoDetailController.plPlayerController.mode != FullScreenMode.none &&
@@ -578,6 +585,15 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
           ? maxVideoHeight
           : minVideoHeight;
 
+    // 跟踪本次全屏期间窗口是否曾为横屏，见定义出
+    if (isFullScreen) {
+      if (!isPortrait) {
+        _windowWasLandscapeInFullScreen = true;
+      }
+    } else {
+      _windowWasLandscapeInFullScreen = false;
+    }
+
     themeData = videoDetailController.plPlayerController.darkVideoPage
         ? ThemeUtils.darkTheme
         : Theme.of(context);
@@ -617,6 +633,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       } else if (aspectIsOrientation &&
           isPortrait &&
           isFullScreen &&
+          // 仅确实由横屏旋转回竖屏时才退出全屏
+          // 竖屏视频全屏始终为竖屏，不受isVertical竞态影响
+          _windowWasLandscapeInFullScreen &&
           // 鸿蒙手动进全屏（auto/ratio 等）同样跟随传感器转屏，
           // 手机转回竖屏时窗口会跟着转回，需要自动退出全屏；
           // 强制竖屏/不旋转模式除外（竖屏全屏是稳定目标状态）。
