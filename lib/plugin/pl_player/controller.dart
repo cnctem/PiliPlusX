@@ -526,7 +526,7 @@ class PlPlayerController with BlockConfigMixin {
 
   DeviceOrientation? _orientation;
   StreamSubscription<OrientationParams>? _orientationListener;
-  // 对齐上游 ：checkIsAutoRotate，Android/鸿蒙由原生读取系统设置
+  // 对齐上游 ：监听旋转状态，Android/鸿蒙由checkIsAutoRotate原生读取系统旋转设置
   bool get checkIsAutoRotate =>
       (Platform.isAndroid || OS.isHarmony) && mode != .gravity;
 
