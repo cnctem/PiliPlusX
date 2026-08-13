@@ -1,4 +1,6 @@
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
+import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
+import 'package:PiliPlus/plugin/pl_player/widgets/top_inset_padding.dart';
 import 'package:flutter/material.dart';
 
 class AppBarAni extends StatelessWidget {
@@ -53,6 +55,13 @@ class AppBarAni extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final top = portraitFullscreenTopInset(
+      isFullScreen: isFullScreen,
+      isPortrait:
+          MediaQuery.sizeOf(context).height >= MediaQuery.sizeOf(context).width,
+      removeSafeArea: removeSafeArea,
+      topInset: topInset,
+    );
     Widget result = child;
     if (!removeSafeArea) {
       result = ViewSafeArea(
@@ -60,17 +69,9 @@ class AppBarAni extends StatelessWidget {
         right: isFullScreen,
         child: result,
       );
-      // 竖屏全屏时用进全屏前捕获的固定高度避让挖孔/状态栏，
-      // 不依赖全屏下已归零的 MediaQuery padding
-      if (isTop &&
-          isFullScreen &&
-          MediaQuery.sizeOf(context).height >= MediaQuery.sizeOf(context).width &&
-          (topInset ?? 0) > 0) {
-        result = Padding(
-          padding: EdgeInsets.only(top: topInset!),
-          child: result,
-        );
-      }
+      // 与弹幕共用同一套顶部避让（TopInsetPadding），
+      // 仅顶部栏需要，底部栏不避让
+      result = TopInsetPadding(inset: isTop ? top : null, child: result);
     }
     return SlideTransition(
       position: controller.drive(isTop ? _topPos : _bottomPos),
