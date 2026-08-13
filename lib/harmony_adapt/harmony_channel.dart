@@ -20,6 +20,9 @@ abstract class HarmonyChannel {
       case 'onFloatingWindowChange':
         onLandscapeOrMiniWindowChange(null, call.arguments['isFloatingWindow']);
         break;
+      case 'onWindowModeChange':
+        _windowMode = call.arguments['isWindowMode'] as bool? ?? false;
+        break;
       case 'onFontWeightScaleChange':
         final fontWeightScale = call.arguments['fontWeightScale'] as double?;
         _systemFontWeightScale = fontWeightScale;
@@ -84,23 +87,6 @@ abstract class HarmonyChannel {
 
   static set onShellTabSwitch(void Function(int)? callback) =>
       _onShellTabSwitch = callback;
-
-  /// 系统「自动旋转」开关是否关闭（用户锁定了屏幕旋转）。
-  ///
-  /// 决定播放器全屏时是否强制转屏：
-  /// - 已锁定：系统不会跟着设备转，全屏需按视频方向锁定横/竖轴（轴内仍按重力
-  ///   180° 翻转，用的是不受锁定影响的 AUTO_ROTATION_LANDSCAPE/PORTRAIT）
-  /// - 未锁定：方向交给系统跟随设备，全屏不再强制
-  ///
-  /// 非鸿蒙或读取失败一律按「已锁定」处理（保守，等价旧行为）。
-  static Future<bool> isRotationLocked() async {
-    if (!OS.isHarmony) return true;
-    try {
-      return await _channel.invokeMethod<bool>('isRotationLocked') ?? true;
-    } catch (_) {
-      return true;
-    }
-  }
 
   /// 向原生发送壳配置的公共辅助：非鸿蒙直接跳过，静默失败。
   static Future<void> _invoke(
@@ -316,6 +302,14 @@ abstract class HarmonyChannel {
   /// 设备方向，基于方向的自动全屏等逻辑应据此跳过。
   static bool get isMiniWindow => _miniWindow;
 
+  static bool _windowMode = false;
+
+  /// 应用窗口是否处于受限窗口模式（分屏/自由多窗/悬浮窗等非全屏窗口）。
+  /// 此模式下窗口宽高比不代表设备方向，且窗口无法旋转到全屏横屏
+  /// 仍应按 isFullScreen 渲染全屏布局，
+  /// 此处用于修复全屏时视频与页面没变
+  static bool get isWindowMode => _windowMode;
+
   /// 当方向或小窗变化
   static Future<void> onLandscapeOrMiniWindowChange(
     bool? landscape,
@@ -338,22 +332,6 @@ abstract class HarmonyChannel {
 
   static void _setMiniWindowLandscape(bool landscape) {
     _channel.invokeMethod('setMiniWindowLandscape', {'landscape': landscape});
-  }
-
-  static void autoRotateLandscape() {
-    _channel.invokeMethod('autoRotateLandscape');
-  }
-
-  /// 鸿蒙：忽略系统旋转锁定，放开四个方向强制按重力自动旋转
-  /// （原生 window.Orientation.AUTO_ROTATION，不受控制中心旋转开关控制）。
-  /// 全屏「重力」模式用：即使系统锁定旋转，屏幕仍跟随设备重力转动。
-  static Future<void> fullAutoRotate() => _invoke('fullAutoRotate');
-
-  /// 先把窗口转到指定方向，之后继续跟随传感器（USER_ROTATION_*）。
-  /// 用于系统未锁定旋转时进入全屏：点全屏按钮该转到视频方向，转完仍要能
-  /// 跟着设备转回去（转回去会触发页面自动退出全屏）。
-  static void userRotate({required bool landscape}) {
-    _channel.invokeMethod('userRotate', {'landscape': landscape});
   }
 
   /// 自由多窗装饰栏按钮（全屏/最小化/关闭）的颜色跟随应用颜色模式而非

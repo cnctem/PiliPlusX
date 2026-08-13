@@ -129,8 +129,15 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   /// 全屏横屏视频时竖屏窗口是稳定状态而非瞬态，同样排除。
   bool get _layoutFullScreen {
     if (!isFullScreen) return false;
+    /// 应用窗口是否处于受限窗口模式（分屏/自由多窗/悬浮窗等非全屏窗口）。
+    /// 此模式下窗口宽高比不代表设备方向，且窗口无法旋转到全屏横屏
+    /// 仍应按 isFullScreen 渲染全屏布局，
+    /// 此处用于修复全屏时视频与页面没变
+    final constrainedWindow =
+        (OS.isHarmony && HarmonyChannel.isWindowMode) || isWindowMode;
     final invalidPortraitFullScreen =
         isPortrait &&
+        !constrainedWindow &&
         !videoDetailController.isVertical.value &&
         videoDetailController.plPlayerController.mode != FullScreenMode.none &&
         videoDetailController.plPlayerController.mode !=
@@ -167,15 +174,14 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   void initState() {
     super.initState();
     // 方向/布局状态必须首帧同步可用：旋转与全屏状态机在 build 里依赖
-    // isPortrait、maxWidth/maxHeight 与 _unlockOrientation，它们必须总是
-    // build 前的当前值。控制器构造本身轻量（onInit 只初始化字段，网络
-    // 请求在 videoSourceInit 中执行），同步创建即可让 _unlockOrientation
-    // 与 didChangeDependencies 立即以正确状态生效。
+    // isPortrait、maxWidth/maxHeight，它们必须总是 build 前的当前值。
+    // 控制器构造本身轻量（onInit 只初始化字段，网络请求在
+    // videoSourceInit 中执行），同步创建即可让 didChangeDependencies
+    // 立即以正确状态生效。
     videoDetailController = Get.put(VideoDetailController(), tag: heroTag);
     if (videoDetailController.removeSafeArea) {
       hideSystemBar();
     }
-    _unlockOrientation();
 
     // 其余初始化延迟到 Hero 过渡结束后：查询播放地址、初始化播放器、创建
     // 分页控制器、注册生命周期观察者都是较重的工作，放首帧会卡 Hero 动画。
@@ -398,9 +404,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   void dispose() {
     _pipModeWorker?.dispose();
     HarmonyChannel.releaseDecorDark(this);
-    // 播放器 dispose 里的 resetScreenRotation 只在播放器真正销毁时才走到
-    // （isCloseAll / 多开引用未清零时会跳过），这里按页面生命周期兜底恢复
-    _lockOrientation();
     plPlayerController
       ?..removeStatusLister(playerListener)
       ..removePositionListener(positionListener);
@@ -456,11 +459,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     HarmonyChannel.releaseDecorDark(this);
     WidgetsBinding.instance.removeObserver(this);
 
-    // 全屏（横屏）时压栈不锁方向，否则会把用户从横屏硬拽回竖屏
-    if (!isFullScreen) {
-      _lockOrientation();
-    }
-
     if ((Platform.isAndroid || OS.isHarmony) &&
         !videoDetailController.setSystemBrightness) {
       ScreenBrightnessPlatform.instance.resetApplicationScreenBrightness();
@@ -499,8 +497,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
     HarmonyChannel.holdDecorDark(this);
     WidgetsBinding.instance.addObserver(this);
-
-    _unlockOrientation();
 
     plPlayerController?.isLive = false;
     if (videoDetailController.plPlayerController.playerStatus.isPlaying &&
@@ -550,8 +546,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     // 布局/方向状态必须在这里同步计算：旋转（MediaQuery 变化）时本方法先于
     // build 执行，保证 build 读到的 isPortrait/maxWidth/maxHeight 永远是当前值。
     // 若像 Hero 优化那样延迟到 Future.delayed 里再算，旋转后 build 会读到过期
-    // 的 isPortrait，childWhenDisabled 的自动进/退全屏逻辑就会在错误方向上触发
-    // （例如点全屏后误判窗口已回竖屏，调度 _restorePageOrientation 又转回竖屏）。
+    // 的 isPortrait，childWhenDisabled 的自动进/退全屏逻辑就会在错误方向上触发。
     if (videoDetailController.removeSafeArea) {
       padding = .zero;
     } else {
@@ -588,64 +583,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         : Theme.of(context);
   }
 
-  /// 当前放开着方向的播放页数量。视频页可以叠栈（视频里再点视频），用计数避免
-  /// 上层页面 dispose 时把下层仍需要的方向锁回去，也不受两页 initState/dispose
-  /// 先后顺序的影响。
-  static int _orientationHolders = 0;
-  bool _holdsOrientation = false;
-
-  /// 关闭横屏适配时，应用启动即被锁死 portraitUp（见 main.dart），窗口永远不会
-  /// 转成横屏，下面 [childWhenDisabled] 里「窗口变横屏 → 自动进全屏 / 转回竖屏
-  /// → 自动退全屏」那段逻辑因此永远走不到，表现为转动设备毫无反应。
-  ///
-  /// 这里在播放页存续期间改用 [deviceAutoMode]（四方向、但受系统旋转锁定控制）：
-  /// 系统锁了旋转就停在竖屏，没锁就跟着设备转——正是「除播放页外一律竖屏、
-  /// 播放页跟随设备」这条预期。开启横屏适配时应用全局已是跟随系统，不必接管。
-  void _unlockOrientation() {
-    if (!PlatformUtils.isMobile || videoDetailController.horizontalScreen) {
-      return;
-    }
-    // 退出全屏时回到页面级方向，而不是被锁回竖屏。每次回到本页都重新登记：
-    // 叠栈时上层页面 dispose 会把登记清掉（播放器是单例，共用这一个字段）
-    videoDetailController.plPlayerController.restorePageOrientation =
-        _restorePageOrientation;
-    if (_holdsOrientation) return;
-    _holdsOrientation = true;
-    if (++_orientationHolders == 1) {
-      deviceAutoMode();
-    }
-  }
-
-  /// 离开播放页时恢复竖屏锁，别把放开的方向带到其他页面
-  void _lockOrientation() {
-    if (!_holdsOrientation) return;
-    _holdsOrientation = false;
-    final player = videoDetailController.plPlayerController;
-    if (player.restorePageOrientation == _restorePageOrientation) {
-      player.restorePageOrientation = null;
-    }
-    if (--_orientationHolders == 0) {
-      portraitUpMode();
-    }
-  }
-
-  /// 退出全屏后的页面级方向，两种情况都要先回到竖屏——关闭横屏适配时详情页
-  /// 没有横屏布局，留在横屏会被 [childWhenDisabled] 立刻自动重进全屏，表现为
-  /// 「点退出/侧滑返回后闪一下又回到全屏」，只能靠把设备转竖才退得出去。
-  ///
-  /// - 系统锁了旋转：直接转回竖屏（全屏期间已被转到横屏，[deviceAutoMode]
-  ///   只会原地冻结在横屏）
-  /// - 未锁定：用 USER_ROTATION_PORTRAIT「先转回竖屏、之后再跟随传感器」。
-  ///   这里不能用 [deviceAutoMode]：设备此刻多半还横着拿，立刻跟随设备就又
-  ///   转回横屏了。USER_ROTATION_* 转过去后要等下一次传感器变化才继续跟随，
-  ///   正好把「按设备方向判断」推迟到用户真的动了设备之后。
-  Future<void>? _restorePageOrientation() async {
-    if (await HarmonyChannel.isRotationLocked()) {
-      return portraitUpMode();
-    }
-    return userRotateMode(landscape: false);
-  }
-
   bool removeAppBar(bool isFullScreen) =>
       videoDetailController.removeSafeArea ||
       (isWindowMode && isFullScreen && !isPortrait);
@@ -657,16 +594,19 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       }
     }
     if (PlatformUtils.isMobile) {
-      // 鸿蒙自由小窗（悬浮窗/全景多窗）内窗口宽高比不代表设备方向：横屏
+      // 鸿蒙自由小窗/分屏等受限窗口内窗口宽高比不代表设备方向：横屏
       // 小窗退出全屏时窗口尚未恢复竖屏尺寸，此处若按"非竖屏"自动重进
-      // 全屏会形成退不出去的回环。
+      // 全屏会形成退不出去的回环；分屏等受限窗口无法旋转到横屏，竖屏
+      // 窗口同样不代表设备方向，「转回竖屏自动退全屏」会把手动全屏
+      // 刚进就退。受限窗口一律跳过方向驱动的自动进/退全屏，交给手动。
       //
       // 用 controller 的恒非空单例而非本页局部 plPlayerController：未开启自动
       // 播放时局部引用为 null，横屏仍须自动进全屏（hideSystemBar 在
       // triggerFullScreen 内），否则状态栏不会被隐藏。上游通过设备方向监听器
       // 同样无条件自动进全屏（与播放器是否初始化无关），这里行为保持一致。
       final player = videoDetailController.plPlayerController;
-      final aspectIsOrientation = !OS.isHarmony || !HarmonyChannel.isMiniWindow;
+      final aspectIsOrientation = !OS.isHarmony ||
+          (!HarmonyChannel.isMiniWindow && !HarmonyChannel.isWindowMode);
       if (!isPortrait && !isFullScreen && aspectIsOrientation) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           player.triggerFullScreen(

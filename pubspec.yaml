@@ -17,7 +17,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
 # update when release
-version: 2.1.0+5669
+version: 2.1.0+5670
 
 environment:
   sdk: ">=3.11.1"
@@ -142,14 +142,13 @@ dependencies:
   flutter_volume_controller: ^2.0.1 # 已支持鸿蒙
   wakelock_plus: 1.3.3
   wakelock_plus_ohos: ^0.0.3
-  # universal_platform: ^1.1.0
-  # auto_orientation:
-  #   git:
-  #     url: https://github.com/bggRGjQaUbCoE/auto_orientation.git
-  #     ref: master
-  auto_orientation: # 自动旋转.鸿蒙适配
+  # 设备方向检测
+  # fork添加平放识别 fix https://atomgit.com/CPF-Flutter/fluttertpc_native_device_orientation/issues/17
+  # 
+  native_device_orientation:
     git:
-      url: "https://gitcode.com/CPF-Flutter/fluttertpc_auto_orientation"
+      url: https://atomgit.com/hellozeronick/fluttertpc_native_device_orientation.git
+      ref: br_2.1.0_ohos
   protobuf: ^6.0.0
   # animations: ^2.0.11
 

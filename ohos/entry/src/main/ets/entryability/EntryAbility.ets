@@ -38,6 +38,7 @@ const EVENT_HOME_TAB_CHANGE = 'EVENT_HOME_TAB_CHANGE';
 export default class EntryAbility extends FlutterAbility {
   harmonyChannel: HarmonyChannel = new HarmonyChannel();
   wasFloatingWindow: boolean = false;
+  wasWindowMode: boolean = false;
   private flutterChannel: MethodChannel | null = null;
   private envChangeListener: number | null = null;
 
@@ -212,7 +213,28 @@ export default class EntryAbility extends FlutterAbility {
         this.harmonyChannel.onFloatingWindowChange(false);
         this.wasFloatingWindow = false;
       }
+      // 应用窗口是否处于受限窗口模式（分屏/自由多窗/悬浮窗等非全屏窗口）。
+      // 此模式下窗口宽高比不代表设备方向，且窗口无法旋转到全屏横屏
+      // 此处用于修复全屏时视频与页面没变
+      const isWindowMode =
+        type == window.WindowStatusType.SPLIT_SCREEN ||
+        type == window.WindowStatusType.FLOATING;
+      if (isWindowMode != this.wasWindowMode) {
+        this.wasWindowMode = isWindowMode;
+        this.harmonyChannel.onWindowModeChange(isWindowMode);
+      }
     });
+    // 应用启动时可能已处于分屏/多窗状态（如从分屏入口拉起），补发初始窗口模式
+    try {
+      const initStatus = w.getWindowStatus();
+      if (initStatus == window.WindowStatusType.SPLIT_SCREEN ||
+        initStatus == window.WindowStatusType.FLOATING) {
+        this.wasWindowMode = true;
+        this.harmonyChannel.onWindowModeChange(true);
+      }
+    } catch (err) {
+      console.error('EntryAbility', `read initial window status failed: ${err}`);
+    }
     setTimeout(() => {
       let context = getContext() as common.UIAbilityContext;
       const documentViewPicker = new picker.DocumentViewPicker(context);

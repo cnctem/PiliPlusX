@@ -63,6 +63,7 @@ import 'package:get/get.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:native_device_orientation/native_device_orientation.dart';
 import 'package:os_type/os_type.dart';
 import 'package:path/path.dart' as path;
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
@@ -524,12 +525,74 @@ class PlPlayerController with BlockConfigMixin {
   bool visible = true;
 
   DeviceOrientation? _orientation;
-  // 上游基于 native_device_orientation 的方向监听在鸿蒙上无插件实现，
-  // 转屏由 harmony_adapt/HarmonyChannel 与 auto_orientation 处理，故移除。
-  void _stopOrientationListener() {}
+  StreamSubscription<OrientationParams>? _orientationListener;
+  // 对齐上游 ：checkIsAutoRotate，Android/鸿蒙由原生读取系统设置
+  bool get checkIsAutoRotate =>
+      (Platform.isAndroid || OS.isHarmony) && mode != .gravity;
+
+  void _stopOrientationListener() {
+    _orientationListener?.cancel();
+    _orientationListener = null;
+  }
+
+  void _onOrientationChanged(OrientationParams param) {
+    final deviceOrientation = param.orientation;
+    if (deviceOrientation == null) return;
+    _orientation = deviceOrientation;
+    if (Platform.isIOS && !visible) return;
+    final isFullScreen = this.isFullScreen.value;
+    if (checkIsAutoRotate &&
+        param.isAutoRotate != true &&
+        (!isFullScreen ||
+            _isVertical ||
+            deviceOrientation == .portraitUp ||
+            deviceOrientation == .portraitDown)) {
+      return;
+    }
+    switch (deviceOrientation) {
+      case .portraitUp:
+        if (!_isVertical && controlsLock.value) return;
+        if (!horizontalScreen && !_isVertical && isFullScreen) {
+          if (!isManualFS) {
+            triggerFullScreen(status: false, orientation: deviceOrientation);
+          }
+        } else {
+          portraitUpMode();
+        }
+      case .portraitDown:
+        if (!horizontalScreen) return;
+        if (!_isVertical && controlsLock.value) return;
+        portraitDownMode();
+      case .landscapeLeft:
+        if (!horizontalScreen && !isFullScreen) {
+          triggerFullScreen(orientation: deviceOrientation, isManualFS: false);
+        } else {
+          landscapeLeftMode();
+        }
+      case .landscapeRight:
+        if (!horizontalScreen && !isFullScreen) {
+          triggerFullScreen(orientation: deviceOrientation, isManualFS: false);
+        } else {
+          landscapeRightMode();
+        }
+    }
+  }
 
   // 添加一个私有构造函数
   PlPlayerController._() {
+    if (PlatformUtils.isMobile) {
+      _orientationListener = NativeDeviceOrientationCommunicator()
+          .onOrientationChanged(
+            useSensor: Platform.isAndroid || OS.isHarmony,
+            // 鸿蒙传感器平放（近水平）时上报 Unknown；保持 unknown 而不是默认
+            // portraitUp，让 _onOrientationChanged 识别并忽略（deviceOrientation
+            // 为 null），避免平放触发横竖屏误切换。
+            defaultOrientation: NativeDeviceOrientation.unknown,
+            checkIsAutoRotate: checkIsAutoRotate,
+          )
+          .listen(_onOrientationChanged);
+    }
+
     if (!Accounts.heartbeat.isLogin || Pref.historyPause) {
       enableHeart = false;
     }
@@ -1634,55 +1697,19 @@ class PlPlayerController with BlockConfigMixin {
   Future<void>? changeOrientation({
     required bool isVertical,
     DeviceOrientation? orientation,
-    bool isManualFS = true,
-  }) async {
-    if (orientation == null && mode == .none) {
-      return;
+  }) {
+    if (orientation == null && (mode == .none || mode == .gravity)) {
+      return null;
     }
-    if (orientation == null && mode == .gravity) {
-      // 上游的 gravity 依赖方向监听器主动转屏，鸿蒙无该插件，改为放开四方向交给系统
-      return OS.isHarmony ? harmonyFullAutoMode() : null;
-    }
-    // 自动进全屏（倾斜手机触发，isManualFS=false）时不再把窗口强制转到视频方向：
-    // 保持设备当前方向、窗口跟随重力旋转——竖屏视频横向倾斜后停在横屏全屏，
-    // 转回竖屏时停在竖屏全屏（对齐上游安卓效果）。只有手动进全屏才转到视频方向。
     if (orientation == null &&
-        !isManualFS &&
-        (mode == .auto || mode == .ratio)) {
-      return;
-    }
-    final bool toPortrait =
-        orientation == null &&
         (mode == .vertical ||
             (mode == .auto && isVertical) ||
-            (mode == .ratio && (isVertical || screenRatio < kScreenRatio)));
-    // 自适应类模式下，若系统开着自动旋转，就不把方向轴锁死：先转到视频方向
-    // （点全屏按钮该有的反应），转完继续跟随设备，转回另一方向时页面会自动
-    // 退出全屏。「强制竖屏 / 强制横屏」是显式指定，始终锁轴，不走这里。
-    if (orientation == null &&
-        (mode == .auto || mode == .ratio) &&
-        !await HarmonyChannel.isRotationLocked()) {
-      // 窗口已经在目标方向轴上就别动：USER_ROTATION_* 是「先转到该轴的默认
-      // 朝向、之后再跟随传感器」，此时下发会把已经跟着设备转好的朝向硬掰回
-      // 默认朝向（横屏即左边在下），要等下一次传感器变化才纠正回来。
-      // screenRatio = 窗口高/宽，由播放页在尺寸变化时同步，0 表示尚未拿到。
-      if (screenRatio > 0 && (screenRatio < 1) != toPortrait) {
-        return;
-      }
-      return userRotateMode(landscape: !toPortrait);
-    }
-    if (toPortrait) {
-      // 锁定竖屏轴，轴内仍按重力 180° 翻转
-      return portraitAxisMode();
+            (mode == .ratio && (isVertical || screenRatio < kScreenRatio)))) {
+      return portraitUpMode();
     } else {
-      // 鸿蒙拿不到设备朝向（无 native_device_orientation），不能像下面那样锁定单一
-      // 横屏方向，否则只能朝一边转。交给系统在左右横屏间按重力自动切换。
-      if (OS.isHarmony) {
-        return harmonyLandscapeAutoMode();
-      }
       // https://github.com/flutter/flutter/issues/73651
       // https://github.com/flutter/flutter/issues/183708
-      if (Platform.isAndroid) {
+      if (Platform.isAndroid || OS.isHarmony) {
         if ((orientation ?? _orientation) == .landscapeRight) {
           return landscapeRightMode();
         } else {
@@ -1719,7 +1746,6 @@ class PlPlayerController with BlockConfigMixin {
           await changeOrientation(
             isVertical: isVertical,
             orientation: orientation,
-            isManualFS: isManualFS,
           );
           if (OS.isHarmony && isManualFS) {
             // 手动进全屏的目标方向：横屏时等视口真正变横屏再置全屏布局，
@@ -1757,7 +1783,7 @@ class PlPlayerController with BlockConfigMixin {
           if (orientation == null && mode == .none) {
             return;
           }
-          await (restorePageOrientation ?? resetScreenRotation)();
+          await resetScreenRotation();
         } else {
           await exitDesktopFullScreen();
         }
@@ -1878,11 +1904,6 @@ class PlPlayerController with BlockConfigMixin {
 
   // isCloseAll 由外部页面直接置位（新 ohos 提交的写法），故为公开字段
   bool isCloseAll = false;
-
-  /// 退出全屏后恢复的「页面级方向」。由播放页在存续期间注册（见
-  /// video/view.dart）：关闭横屏适配时页面本身也要跟随设备方向，不能像
-  /// 播放器销毁那样直接锁回竖屏。未注册时退回 [resetScreenRotation]。
-  Future<void>? Function()? restorePageOrientation;
 
   /// 播放器销毁时恢复应用级方向：开着横屏适配跟随系统，否则锁回竖屏
   Future<void>? resetScreenRotation() {

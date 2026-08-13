@@ -131,15 +131,6 @@ packages:
       url: "https://gitcode.com/CPF-Flutter/flutter_audio_session.git"
     source: git
     version: "0.2.2"
-  auto_orientation:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "929e6bd00f1aa5eeb4372b5a3623f78d946a71af"
-      url: "https://gitcode.com/CPF-Flutter/fluttertpc_auto_orientation"
-    source: git
-    version: "2.3.1"
   battery_plus:
     dependency: "direct main"
     description:
@@ -1369,6 +1360,15 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.0.0"
+  native_device_orientation:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: "br_2.1.0_ohos"
+      resolved-ref: a92d4918003cb32c29d3ffa0f7045d2daa8b2379
+      url: "https://atomgit.com/hellozeronick/fluttertpc_native_device_orientation.git"
+    source: git
+    version: "2.1.0"
   nm:
     dependency: transitive
     description:
