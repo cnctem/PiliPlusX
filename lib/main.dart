@@ -175,6 +175,9 @@ void main() async {
 
   SmartDialog.config.toast = SmartConfigToast(displayType: .onlyRefresh);
 
+  // ESC 全平台注册：平板/手机外接键盘也可用（PageRoute 默认不消费 escape）
+  FocusManager.instance.addEarlyKeyEventHandler(_onKeyEvent);
+
   if (PlatformUtils.isMobile) {
     if (OS.isHarmony) {
       // 鸿蒙按窗口状态选系统栏模式：自由多窗下隐藏系统装饰栏（沉浸），否则
