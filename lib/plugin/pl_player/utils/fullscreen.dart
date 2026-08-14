@@ -83,6 +83,13 @@ Future<void>? fullMode() {
   );
 }
 
+/// 鸿蒙强制窗口转回竖屏（修mate80 横屏无法退出全屏bug）
+Future<void>? harmonyForcePortrait() {
+  if (!OS.isHarmony) return null;
+  _lastOrientation = null;
+  return HarmonyChannel.setWindowOrientation(1);
+}
+
 bool _showSystemBar = true;
 bool get showSystemBar_ => _showSystemBar;
 Future<void>? hideSystemBar() {

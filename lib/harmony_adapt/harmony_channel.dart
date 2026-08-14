@@ -269,6 +269,15 @@ abstract class HarmonyChannel {
   static Future<void> setFullScreenBars(bool fullscreen) =>
       _invoke('setFullScreenBars', {'fullscreen': fullscreen});
 
+  /// 鸿蒙部分机型（Mate80）开启系统旋转锁定后无法强制窗口转回竖屏，这里走原生接口。
+  static Future<void> setWindowOrientation(int orientation) async {
+    if (!OS.isHarmony) return;
+    try {
+      await _channel.invokeMethod(
+          'setWindowOrientation', {'orientation': orientation});
+    } catch (_) {}
+  }
+
   /// 添加UP主卡片到桌面（仅 Harmony）：原生保存UP数据并拉起添加引导页
   static Future<void> addUpToDesktop({
     required String mid,

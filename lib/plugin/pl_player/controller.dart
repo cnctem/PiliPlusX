@@ -1688,6 +1688,12 @@ class PlPlayerController with BlockConfigMixin {
 
   double screenRatio = 0.0;
   bool isManualFS = true;
+  /// 最近一次手动退出全屏的时间。鸿蒙部分机型开启旋转锁定后，会被 childWhenDisabled 的窗口变
+  /// 横屏自动进全屏立即拉回，表现为退不出全屏。用该时间戳抑制退出后短暂窗口内的自动进全屏。
+  DateTime _lastManualExitAt = DateTime.fromMillisecondsSinceEpoch(0);
+  bool get suppressAutoFullScreen =>
+      DateTime.now().difference(_lastManualExitAt) <
+      const Duration(milliseconds: 600);
   // 每次读取而不缓存：播放器是跨页面存活的单例，缓存会让在设置页改完
   // 「默认全屏方向」后本次会话仍用旧值，表现为「改了没反应」
   FullScreenMode get mode => Pref.fullScreenMode;
@@ -1783,7 +1789,15 @@ class PlPlayerController with BlockConfigMixin {
           if (orientation == null && mode == .none) {
             return;
           }
-          await resetScreenRotation();
+          if (isManualFS) {
+            _lastManualExitAt = DateTime.now();
+          }
+          // 鸿蒙mate80开启旋转锁定时，原生setPreferredOrientation可能长时间
+          // 不返回。加超时保证退出
+          await resetScreenRotation()?.timeout(
+            const Duration(milliseconds: 500),
+            onTimeout: () {},
+          );
         } else {
           await exitDesktopFullScreen();
         }
@@ -1910,6 +1924,11 @@ class PlPlayerController with BlockConfigMixin {
     if (horizontalScreen) {
       return fullMode();
     } else {
+      // 鸿蒙：部分机型开启系统旋转锁定时 setPreferredOrientations 无法把窗口
+      // 从横屏转回竖屏，用不受锁控制的原生接口强制转回，避免退出全屏卡横屏。
+      if (OS.isHarmony) {
+        return harmonyForcePortrait();
+      }
       return portraitUpMode();
     }
   }

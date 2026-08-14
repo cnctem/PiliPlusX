@@ -623,7 +623,11 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       final player = videoDetailController.plPlayerController;
       final aspectIsOrientation = !OS.isHarmony ||
           (!HarmonyChannel.isMiniWindow && !HarmonyChannel.isWindowMode);
-      if (!isPortrait && !isFullScreen && aspectIsOrientation) {
+      if (!isPortrait &&
+          !isFullScreen &&
+          aspectIsOrientation &&
+          // 鸿蒙mate80开启旋转锁定后，退出全屏一段时间仍为横屏 + 非全屏，若不抑制会被自动进全屏拉回。
+          !player.suppressAutoFullScreen) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           player.triggerFullScreen(
             status: true,

@@ -77,11 +77,22 @@ export default class HarmonyChannel implements FlutterPlugin {
     await this.lastWindow.setSpecificSystemBarEnabled("navigationIndicator", !fullscreen, false);
   }
 
+  async setWindowOrientation(orientation: number) {
+    this.lastWindow ??= await window.getLastWindow(getContext());
+    await this.lastWindow.setPreferredOrientation(orientation);
+  }
+
   async onMethodCall(call: MethodCall, result: MethodResult): Promise<void> {
     switch (call.method) {
       case "setFullScreenBars": {
         const fullscreen: boolean = call.argument("fullscreen") ?? false;
         await this.setFullScreenBars(fullscreen);
+        result.success(true);
+        break;
+      }
+      case "setWindowOrientation": {
+        const orientation: number = call.argument("orientation") ?? 0;
+        await this.setWindowOrientation(orientation);
         result.success(true);
         break;
       }
