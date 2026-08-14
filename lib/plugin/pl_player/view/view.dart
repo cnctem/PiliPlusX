@@ -1965,7 +1965,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                             color: Colors.white,
                           ),
                           onLongPress:
-                              (Platform.isAndroid || kDebugMode) && !isLive
+                              (Platform.isAndroid || OS.isHarmony || kDebugMode) &&
+                                  !isLive
                               ? screenshotWebp
                               : null,
                           onTap: plPlayerController.takeScreenshot,
@@ -2273,8 +2274,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     if (!success) return;
 
     final progress = 0.0.obs;
+    // 文件名中小数点改为下划线，避免 saver_gallery ohos 的
+    // path.split('.')[1] 解析扩展名出错（photoType is null）
     final name =
-        '${ctr.cid}-${segment.first.toStringAsFixed(3)}_${segment.second.toStringAsFixed(3)}.webp';
+        '${ctr.cid}-${segment.first.toStringAsFixed(3).replaceAll('.', '_')}_${segment.second.toStringAsFixed(3).replaceAll('.', '_')}.webp';
     final file = '$tmpDirPath/$name';
 
     final mpv = MpvConvertWebp(
