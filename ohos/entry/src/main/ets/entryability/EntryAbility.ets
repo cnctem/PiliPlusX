@@ -154,22 +154,27 @@ export default class EntryAbility extends FlutterAbility {
         want.uri = uri;
       }
     }
-    // UP主卡片点击跳转：bilibili://space/{mid}
+    // UP主卡片点击跳转：优先进入投稿视频 bilibili://video/{bvid}，否则进入UP空间 bilibili://space/{mid}
     if (want.parameters?.[UP_CARD_KEY] === "1") {
-      const mid = want.parameters?.["mid"];
-      if (typeof mid === "string" && mid.length > 0) {
-        want.uri = `bilibili://space/${mid}`;
-        // 点击卡片时同步一次数据：触发所有 up_card 卡片的 onUpdateForm 刷新
-        try {
-          formProvider.reloadForms(this.context as common.UIAbilityContext, "entry", "EntryFormAbility", "up_card")
-            .then((num: number): void => {
-              console.info(`EntryAbility: reload up_card forms success: ${num}`);
-            })
-            .catch((err: BusinessError): void => {
-              console.error(`EntryAbility: reload up_card forms failed: ${err.code} ${err.message}`);
-            });
-        } catch (e) {
-          console.error(`EntryAbility: reloadForms error: ${e}`);
+      const bvid = want.parameters?.["bvid"];
+      if (typeof bvid === "string" && bvid.length > 0) {
+        want.uri = `bilibili://video/${bvid}`;
+      } else {
+        const mid = want.parameters?.["mid"];
+        if (typeof mid === "string" && mid.length > 0) {
+          want.uri = `bilibili://space/${mid}`;
+          // 点击卡片时同步一次数据：触发所有 up_card 卡片的 onUpdateForm 刷新
+          try {
+            formProvider.reloadForms(this.context as common.UIAbilityContext, "entry", "EntryFormAbility", "up_card")
+              .then((num: number): void => {
+                console.info(`EntryAbility: reload up_card forms success: ${num}`);
+              })
+              .catch((err: BusinessError): void => {
+                console.error(`EntryAbility: reload up_card forms failed: ${err.code} ${err.message}`);
+              });
+          } catch (e) {
+            console.error(`EntryAbility: reloadForms error: ${e}`);
+          }
         }
       }
     }

@@ -10,13 +10,13 @@ struct UpCardMini {
   build() {
     Row({ space: 8 }) {
       Image(this.avatar)
-        .width(32)
-        .height(32)
-        .borderRadius(16)
+        .width(36)
+        .height(36)
+        .borderRadius(18)
         .objectFit(ImageFit.Cover)
         .alt($r('app.media.icon_startwindow'))
       Text(this.name)
-        .fontSize("40px")
+        .fontSize("50px")
         .fontWeight(FontWeight.Medium)
         .maxLines(1)
         .textOverflow({ overflow: TextOverflow.Ellipsis })

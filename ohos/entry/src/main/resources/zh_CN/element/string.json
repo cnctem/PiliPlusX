@@ -59,6 +59,14 @@
     {
       "name": "up_card_mini_desc",
       "value": "极简展示UP主头像与名称，点击直达主页"
+    },
+    {
+      "name": "up_card_24_name",
+      "value": "UP主大卡片"
+    },
+    {
+      "name": "up_card_24_desc",
+      "value": "展示最近三个投稿及封面"
     }
   ]
 }

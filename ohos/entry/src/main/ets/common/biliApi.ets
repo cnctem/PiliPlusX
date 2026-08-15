@@ -13,7 +13,9 @@ const MIXIN_KEY_ENC_TAB: number[] = [
 let cachedMixinKey: string = "";
 
 export interface UploadItem {
+  bvid: string;
   title: string;
+  pic: string;
   length: string;
   created: number;
 }
@@ -55,7 +57,9 @@ interface SpaceResp {
 }
 
 interface BiliVideo {
+  bvid?: string;
   title: string;
+  pic?: string;
   length: string;
   created: number;
 }
@@ -188,11 +192,11 @@ export async function fetchUserInfo(mid: number): Promise<UserInfo> {
   };
 }
 
-export async function fetchLatestUploads(mid: number): Promise<UploadItem[]> {
+export async function fetchLatestUploads(mid: number, ps: number = 3): Promise<UploadItem[]> {
   const text = await wbiGet("/x/space/wbi/arc/search", {
     mid: String(mid),
     pn: "1",
-    ps: "1",
+    ps: String(ps),
     order: "pubdate",
     tid: "0",
     platform: "web",
@@ -203,8 +207,10 @@ export async function fetchLatestUploads(mid: number): Promise<UploadItem[]> {
     throw new Error(`arc/search code ${body.code}`);
   }
   const vlist = body.data?.list?.vlist ?? [];
-  return vlist.slice(0, 1).map((v: BiliVideo): UploadItem => ({
+  return vlist.slice(0, ps).map((v: BiliVideo): UploadItem => ({
+    bvid: v.bvid ?? "",
     title: v.title,
+    pic: v.pic ?? "",
     length: v.length,
     created: v.created
   }));

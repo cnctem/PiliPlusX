@@ -59,6 +59,14 @@
     {
       "name": "up_card_mini_desc",
       "value": "Minimal UP avatar and name card"
+    },
+    {
+      "name": "up_card_24_name",
+      "value": "UP 2x4 card"
+    },
+    {
+      "name": "up_card_24_desc",
+      "value": "Recent uploads with covers on space header background"
     }
   ]
 }

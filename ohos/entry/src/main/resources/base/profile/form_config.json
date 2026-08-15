@@ -27,6 +27,20 @@
       "scheduledUpdateTime": "10:00",
       "updateDuration": 2,
       "isDynamic": true
+    },
+    {
+      "name": "up_card_24",
+      "displayName": "$string:up_card_24_name",
+      "description": "$string:up_card_24_desc",
+      "src": "./ets/widget/pages/UpCard24.ets",
+      "uiSyntax": "arkts",
+      "isDefault": false,
+      "supportDimensions": ["2*4"],
+      "defaultDimension": "2*4",
+      "updateEnabled": true,
+      "scheduledUpdateTime": "10:00",
+      "updateDuration": 2,
+      "isDynamic": true
     }
   ]
 }

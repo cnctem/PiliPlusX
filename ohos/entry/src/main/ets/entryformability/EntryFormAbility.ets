@@ -3,6 +3,15 @@ import { fileIo } from '@kit.CoreFileKit';
 import Want from '@ohos.app.ability.Want';
 import { downloadImageBase64, fetchLatestUploads, fetchUserInfo, UploadItem, UserInfo } from '../common/biliApi';
 
+interface UpItem {
+  bvid: string;
+  title: string;
+  created: number;
+  pic: string;
+  picUrl: string;
+  time: string;
+}
+
 interface UpData {
   mid: string;
   name: string;
@@ -12,11 +21,25 @@ interface UpData {
   topPhotoUrl?: string;
   latestTitle?: string;
   latestTime?: string;
+  form: string;
+  uploads: UpItem[];
+}
+
+interface UpBindingData {
+  mid: string;
+  name: string;
+  avatar: string;
+  topPhoto: string;
+  latestTitle: string;
+  latestTime: string;
+  uploadsJson: string;
 }
 
 const PENDING_FILE = 'pending_up_card.json';
 const FACE_SUFFIX = '@150w_150h_10q.webp';
 const TOP_PHOTO_SUFFIX = '@400h_20q.webp';
+const COVER_SUFFIX = '@160w_90h_1e_1c.webp';
+const MAX_UPLOADS = 3;
 
 export default class EntryFormAbility extends FormExtensionAbility {
   /// 串行化刷新队列：避免并发 refreshForm 读取旧值覆盖已写入的最新标题
@@ -49,7 +72,23 @@ export default class EntryFormAbility extends FormExtensionAbility {
       topPhotoUrl: "",
       latestTitle: "",
       latestTime: "",
+      form: "up_card",
+      uploads: [],
     };
+  }
+
+  /// 组装下发给卡片的绑定数据：投稿列表序列化为字符串
+  private bindingData(data: UpData): formBindingData.FormBindingData {
+    const b: UpBindingData = {
+      mid: data.mid,
+      name: data.name,
+      avatar: data.avatar,
+      topPhoto: data.topPhoto,
+      latestTitle: data.latestTitle ?? "",
+      latestTime: data.latestTime ?? "",
+      uploadsJson: JSON.stringify(data.uploads),
+    };
+    return formBindingData.createFormBindingData(b);
   }
 
   private writeJson(name: string, data: UpData): void {
@@ -79,15 +118,17 @@ export default class EntryFormAbility extends FormExtensionAbility {
     console.info('EntryFormAbility', 'onAddForm called');
     // FormExtensionAbility 无 onFormCreated 回调，卡片 ID 需从 want 的 form_identity 获取
     const formId = want.parameters?.[formInfo.FormParam.IDENTITY_KEY];
+    const formName = want.parameters?.[formInfo.FormParam.NAME_KEY];
+    const form = typeof formName === 'string' && formName.length > 0 ? formName : 'up_card';
     if (typeof formId === 'string' && formId.length > 0) {
-      this.initFormFile(formId);
-      return formBindingData.createFormBindingData(this.readJson(this.formFileName(formId)));
+      this.initFormFile(formId, form);
+      return this.bindingData(this.readJson(this.formFileName(formId)));
     }
-    return formBindingData.createFormBindingData(this.readJson(PENDING_FILE));
+    return this.bindingData(this.readJson(PENDING_FILE));
   }
 
   /// 为新卡片创建独立的 form_<formId>.json（从待添加数据初始化），并立即刷新一次
-  private initFormFile(formId: string): void {
+  private initFormFile(formId: string, form: string): void {
     const pending = this.readJson(PENDING_FILE);
     const mid = pending.mid;
     if (mid.length === 0) {
@@ -107,14 +148,22 @@ export default class EntryFormAbility extends FormExtensionAbility {
       topPhotoUrl: '',
       latestTitle: '',
       latestTime: '',
+      form: form,
+      uploads: [],
     };
     this.writeJson(name, entry);
-    console.info('EntryFormAbility', `initFormFile formId=${formId} mid=${mid}`);
+    console.info('EntryFormAbility', `initFormFile formId=${formId} mid=${mid} form=${form}`);
     this.queueRefresh(formId);
   }
 
   onUpdateForm(formId: string): void {
     console.info('EntryFormAbility', `onUpdateForm formId=${formId}`);
+    this.queueRefresh(formId);
+  }
+
+  /// 卡片内消息事件（如刷新按钮点击）触发立即刷新
+  onFormEvent(formId: string, message: string): void {
+    console.info('EntryFormAbility', `onFormEvent formId=${formId} message=${message}`);
     this.queueRefresh(formId);
   }
 
@@ -151,6 +200,8 @@ export default class EntryFormAbility extends FormExtensionAbility {
           topPhotoUrl: '',
           latestTitle: '',
           latestTime: '',
+          form: 'up_card',
+          uploads: [],
         };
         this.writeJson(name, entry);
         up = entry;
@@ -166,11 +217,13 @@ export default class EntryFormAbility extends FormExtensionAbility {
         topPhotoUrl: up.topPhotoUrl,
         latestTitle: up.latestTitle,
         latestTime: up.latestTime,
+        form: up.form ?? 'up_card',
+        uploads: up.uploads ?? [],
       };
       let anySuccess: boolean = false;
       // 用户信息与最新投稿并行抓取（先发起请求再分别 await，一个失败不影响另一个）
       const infoPromise = fetchUserInfo(mid);
-      const uploadsPromise = fetchLatestUploads(mid);
+      const uploadsPromise = fetchLatestUploads(mid, MAX_UPLOADS);
       let info: UserInfo | null = null;
       let uploads: UploadItem[] | null = null;
       try {
@@ -220,6 +273,36 @@ export default class EntryFormAbility extends FormExtensionAbility {
         anySuccess = true;
         data.latestTitle = uploads[0].title;
         data.latestTime = formatTime(uploads[0].created);
+        // 投稿列表：2*4 卡片下载封面（URL 一致则复用已存 base64），其余卡片只保留标题
+        const needCovers = up.form === 'up_card_24';
+        const oldList = up.uploads ?? [];
+        const items: UpItem[] = [];
+        const count = Math.min(uploads.length, MAX_UPLOADS);
+        for (let i = 0; i < count; i++) {
+          const raw = uploads[i].pic;
+          const url = needCovers && raw.length > 0 ? raw.replace('http://', 'https://') + COVER_SUFFIX : '';
+          const old = i < oldList.length ? oldList[i] : undefined;
+          let pic = '';
+          if (url.length > 0 && old !== undefined && old.picUrl === url && old.pic.length > 0) {
+            pic = old.pic;
+          } else if (url.length > 0) {
+            const coverData = await downloadImageBase64(url);
+            if (coverData.length > 0) {
+              pic = coverData;
+            }
+          }
+          // 封面下载失败时 picUrl 置空，下次刷新会重新拉取
+          items.push({
+            bvid: uploads[i].bvid,
+            title: uploads[i].title,
+            created: uploads[i].created,
+            pic: pic,
+            picUrl: pic.length > 0 ? url : '',
+            //这里使用带年份的时间
+            time: formatFullTime(uploads[i].created),
+          });
+        }
+        data.uploads = items;
       }
       // 本轮无任何数据：不写入、不推送，保留卡片已有内容（避免覆盖最新标题）
       if (!anySuccess) {
@@ -227,7 +310,7 @@ export default class EntryFormAbility extends FormExtensionAbility {
         return;
       }
       this.writeJson(name, data);
-      await formProvider.updateForm(formId, formBindingData.createFormBindingData(data));
+      await formProvider.updateForm(formId, this.bindingData(data));
     } catch (e) {
       console.error('EntryFormAbility', `refresh ${formId} failed: ${e}`);
     }
@@ -239,5 +322,11 @@ function formatTime(ts: number): string {
   const d = new Date(ts * 1000);
   const pad = (n: number): string => (n < 10 ? '0' + n : '' + n);
   return `${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+function formatFullTime(ts: number): string {
+  const d = new Date(ts * 1000);
+  const pad = (n: number): string => (n < 10 ? '0' + n : '' + n);
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
