@@ -594,7 +594,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       _windowWasLandscapeInFullScreen = false;
     }
 
-    themeData = videoDetailController.plPlayerController.darkVideoPage
+    theme = videoDetailController.plPlayerController.darkVideoPage
         ? ThemeUtils.darkTheme
         : Theme.of(context);
   }
@@ -694,7 +694,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                         backgroundColor: isPortrait && scrollRatio > 0
                             ? Color.lerp(
                                 Colors.black,
-                                themeData.colorScheme.surface,
+                                colorScheme.surface,
                                 scrollRatio,
                               )
                             : Colors.black,
@@ -702,10 +702,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                             ? SystemUiOverlayStyle(
                                 statusBarIconBrightness:
                                     isPortrait && scrollRatio >= 0.5
-                                    ? themeData.brightness.reverse
+                                    ? theme.brightness.reverse
                                     : .light,
                                 systemNavigationBarIconBrightness:
-                                    themeData.brightness.reverse,
+                                    theme.brightness.reverse,
                               )
                             : null,
                       );
@@ -821,17 +821,17 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       spacing: 2,
       mainAxisSize: .min,
       children: [
-        Icon(icon, color: themeData.colorScheme.primary),
+        Icon(icon, color: colorScheme.primary),
         Text(
           '$playStat播放',
-          style: TextStyle(color: themeData.colorScheme.primary),
+          style: TextStyle(color: colorScheme.primary),
         ),
       ],
     );
     return Opacity(
       opacity: videoDetailController.scrollRatio.value,
       child: Container(
-        color: themeData.colorScheme.surface,
+        color: colorScheme.surface,
         alignment: .topCenter,
         child: SizedBox(
           height: kToolbarHeight,
@@ -851,7 +851,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                         icon: Icon(
                           FontAwesomeIcons.arrowLeft,
                           size: 15,
-                          color: themeData.colorScheme.onSurface,
+                          color: colorScheme.onSurface,
                         ),
                         onPressed: Get.back,
                       ),
@@ -864,7 +864,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                         icon: Icon(
                           FontAwesomeIcons.house,
                           size: 15,
-                          color: themeData.colorScheme.onSurface,
+                          color: colorScheme.onSurface,
                         ),
                         onPressed:
                             videoDetailController.plPlayerController.onCloseAll,
@@ -877,7 +877,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               Align(
                 alignment: .centerRight,
                 child: videoDetailController.playedTime == null
-                    ? _moreBtn(themeData.colorScheme.onSurface)
+                    ? _moreBtn(colorScheme.onSurface)
                     : SizedBox(
                         width: 42,
                         height: 34,
@@ -893,7 +893,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                           icon: Icon(
                             Icons.more_vert_outlined,
                             size: 19,
-                            color: themeData.colorScheme.onSurface,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -1278,7 +1278,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     );
   }
 
-  Widget get manualPlayerWidget => Obx(() {
+  Widget manualPlayerWidget(double height) => Obx(() {
     if (!videoDetailController.autoPlay) {
       return Stack(
         children: [
@@ -1341,10 +1341,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               ],
             ),
           ),
-          Positioned(
+          const Positioned(
             right: 12,
             bottom: 10,
-            child: const PlayIcon(),
+            child: PlayIcon(),
           ),
         ],
       );
@@ -1450,7 +1450,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     ),
   );
 
-  late ThemeData themeData;
+  late ThemeData theme;
+  ColorScheme get colorScheme => theme.colorScheme;
   late bool isPortrait;
   late double maxWidth;
   late double maxHeight;
@@ -1503,7 +1504,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         );
       }
       result = videoDetailController.plPlayerController.darkVideoPage
-          ? Theme(data: themeData, child: child)
+          ? Theme(data: theme, child: child)
           : child;
     }
     if (_enableHero) {
@@ -1555,7 +1556,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
     final flag = !needIndicator || tabs.length == 1;
     Widget tabBar() => TabBar(
-      labelColor: flag ? themeData.colorScheme.onSurface : null,
+      labelColor: flag ? colorScheme.onSurface : null,
       indicator: flag ? const BoxDecoration() : null,
       padding: EdgeInsets.zero,
       controller: videoDetailController.tabCtr,
@@ -1600,12 +1601,12 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         }
       }).toList(),
     );
-
+    
     return DecoratedBox(
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: themeData.dividerColor.withValues(alpha: 0.1),
+            color: theme.dividerColor.withValues(alpha: 0.1),
           ),
         ),
       ),
@@ -1616,68 +1617,62 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             if (tabs.isEmpty)
               const Spacer()
             else
-              Flexible(
-                flex: tabs.length == 3 ? 2 : 1,
-                child: tabBar(),
+              Expanded(
+                child: Align(
+                  alignment: .centerLeft,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: 96.0 * tabs.length),
+                    child: tabBar(),
+                  ),
+                ),
               ),
-            Flexible(
-              flex: 1,
-              child: Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    SizedBox(
-                      height: 32,
-                      child: TextButton(
-                        style: const ButtonStyle(
-                          padding: WidgetStatePropertyAll(EdgeInsets.zero),
-                        ),
-                        onPressed: videoDetailController.showShootDanmakuSheet,
-                        child: Text(
-                          '发弹幕',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: themeData.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 38,
-                      height: 38,
-                      child: Obx(
-                        () {
-                          final ctr = videoDetailController.plPlayerController;
-                          final enableShowDanmaku = ctr.enableShowDanmaku.value;
-                          return IconButton(
-                            onPressed: () {
-                              final newVal = !enableShowDanmaku;
-                              ctr.enableShowDanmaku.value = newVal;
-                              if (!ctr.tempPlayerConf) {
-                                GStorage.setting.put(
-                                  SettingBoxKey.enableShowDanmaku,
-                                  newVal,
-                                );
-                              }
-                            },
-                            icon: Icon(
-                              size: 22,
-                              enableShowDanmaku
-                                  ? CustomIcons.dm_on
-                                  : CustomIcons.dm_off,
-                              color: enableShowDanmaku
-                                  ? themeData.colorScheme.secondary
-                                  : themeData.colorScheme.outline,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                  ],
+            SizedBox(
+              height: 32,
+              child: TextButton(
+                style: const ButtonStyle(
+                  padding: WidgetStatePropertyAll(.zero),
+                ),
+                onPressed: videoDetailController.showShootDanmakuSheet,
+                child: Text(
+                  '发弹幕',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
             ),
+            SizedBox.square(
+              dimension: 38,
+              child: Obx(
+                () {
+                  final ctr = videoDetailController.plPlayerController;
+                  final enableShowDanmaku = ctr.enableShowDanmaku.value;
+                  return IconButton(
+                    onPressed: () {
+                      final newVal = !enableShowDanmaku;
+                      ctr.enableShowDanmaku.value = newVal;
+                      if (!ctr.tempPlayerConf) {
+                        GStorage.setting.put(
+                          SettingBoxKey.enableShowDanmaku,
+                          newVal,
+                        );
+                      }
+                    },
+                    icon: Icon(
+                      size: 22,
+                      enableShowDanmaku
+                          ? CustomIcons.dm_on
+                          : CustomIcons.dm_off,
+                      color: enableShowDanmaku
+                          ? colorScheme.secondary
+                          : colorScheme.outline,
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(width: 14),
           ],
         ),
       ),
@@ -1718,7 +1713,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
           }
           return const SizedBox.shrink();
         }),
-        manualPlayerWidget,
+        manualPlayerWidget(height),
 
         if (videoDetailController.plPlayerController.enableBlock ||
             videoDetailController.continuePlayingPart)
@@ -1801,7 +1796,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                                 shape: const RoundedRectangleBorder(
                                   borderRadius: .all(.circular(6)),
                                 ),
-                                backgroundColor: themeData
+                                backgroundColor: theme
                                     .colorScheme
                                     .secondaryContainer
                                     .withValues(alpha: 0.8),
@@ -1904,7 +1899,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                     height: 1,
                     indent: 12,
                     endIndent: 12,
-                    color: themeData.colorScheme.outline.withValues(
+                    color: colorScheme.outline.withValues(
                       alpha: 0.08,
                     ),
                   ),
@@ -1960,7 +1955,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                   height: 54,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
-                    color: themeData.colorScheme.secondaryContainer.withValues(
+                    color: colorScheme.secondaryContainer.withValues(
                       alpha: 0.95,
                     ),
                     borderRadius: const BorderRadius.all(Radius.circular(14)),
@@ -1972,7 +1967,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                       Text(
                         videoDetailController.watchLaterTitle,
                         style: TextStyle(
-                          color: themeData.colorScheme.onSecondaryContainer,
+                          color: colorScheme.onSecondaryContainer,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.2,
                         ),
@@ -2037,7 +2032,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               const SizedBox(height: 8),
               Divider(
                 height: 1,
-                color: themeData.colorScheme.outline.withValues(alpha: 0.1),
+                color: colorScheme.outline.withValues(alpha: 0.1),
               ),
             ],
             Padding(
@@ -2174,7 +2169,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       PageUtils.showVideoBottomSheet(
         context,
         child: videoDetailController.plPlayerController.darkVideoPage
-            ? Theme(data: themeData, child: child)
+            ? Theme(data: theme, child: child)
             : child,
       );
     } else {
@@ -2254,7 +2249,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       PageUtils.showVideoBottomSheet(
         context,
         child: videoDetailController.plPlayerController.darkVideoPage
-            ? Theme(data: themeData, child: child)
+            ? Theme(data: theme, child: child)
             : child,
       );
     } else {
