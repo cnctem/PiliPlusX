@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/widgets/dialog/simple_dialog_option.dart';
 import 'package:PiliPlus/grpc/audio.dart';
-import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/grpc/bilibili/app/listener/v1.pb.dart'
     show
         DetailItem,
@@ -14,6 +13,7 @@ import 'package:PiliPlus/grpc/bilibili/app/listener/v1.pb.dart'
         ListOrder,
         DashItem,
         ResponseUrl;
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/http/browser_ua.dart';
 import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -21,6 +21,8 @@ import 'package:PiliPlus/pages/common/common_intro_controller.dart'
     show FavMixin;
 import 'package:PiliPlus/pages/dynamics_repost/view.dart';
 import 'package:PiliPlus/pages/main_reply/view.dart';
+import 'package:PiliPlus/pages/setting/models/play_settings.dart'
+    show kMaxVolume;
 import 'package:PiliPlus/pages/sponsor_block/block_mixin.dart';
 import 'package:PiliPlus/pages/video/controller.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/widgets/triple_mixin.dart';
@@ -184,9 +186,10 @@ class AudioController extends GetxController
     });
     final handler = videoPlayerServiceHandler;
     if (handler != null) {
-      handler.onPlay = onPlay;
-      handler.onPause = onPause;
-      handler.onSeek = onSeek;
+      handler
+        ..onPlay = onPlay
+        ..onPause = onPause
+        ..onSeek = onSeek;
       _savedOnSkipToPrevious = handler.onSkipToPrevious;
       _savedOnSkipToNext = handler.onSkipToNext;
       handler.onSkipToPrevious = () async => playPrev();
@@ -370,7 +373,24 @@ class AudioController extends GetxController
     if (_hasInit) return;
     _hasInit = true;
     assert(player == null, _subscriptions = null);
-    player = Player();
+    player = Player(
+      configuration: PlayerConfiguration(
+        ready: () async {
+          final platform = player?.platform;
+          if (platform is! NativePlayer) return;
+          await platform.setProperty('volume-max', kMaxVolume.toString());
+          await platform.setProperty(
+            'volume',
+            PlatformUtils.isDesktop
+                ? (desktopVolume.value * 100).toString()
+                : Pref.playerVolume.toString(),
+          );
+          for (final entry in Pref.initBuffer().entries) {
+            await platform.setProperty(entry.key, entry.value);
+          }
+        },
+      ),
+    );
     if (isClosed) {
       player!.dispose();
       player = null;
@@ -812,16 +832,14 @@ class AudioController extends GetxController
       ..onPause = null
       ..isPlaying = null
       ..reset();
-    videoPlayerServiceHandler?.onVideoDetailDispose(hashCode.toString());
-    final handler = videoPlayerServiceHandler;
-    if (handler != null) {
-      handler.onPlay = null;
-      handler.onPause = null;
-      handler.onSeek = null;
-      handler.onSkipToPrevious = _savedOnSkipToPrevious;
-      handler.onSkipToNext = _savedOnSkipToNext;
-      handler.onRepeatModeChanged = _savedOnRepeatModeChanged;
-    }
+    videoPlayerServiceHandler
+      ?..onVideoDetailDispose(hashCode.toString())
+      ..onPlay = null
+      ..onPause = null
+      ..onSeek = null
+      ..onSkipToPrevious = _savedOnSkipToPrevious
+      ..onSkipToNext = _savedOnSkipToNext
+      ..onRepeatModeChanged = _savedOnRepeatModeChanged;
     _playModeSub?.cancel();
     _playModeSub = null;
     _subscriptions?.forEach((e) => e.cancel());
