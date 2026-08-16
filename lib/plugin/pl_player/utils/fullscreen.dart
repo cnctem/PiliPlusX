@@ -117,12 +117,3 @@ Future<void>? showSystemBar() {
     overlays: SystemUiOverlay.values,
   );
 }
-Future<void> toggleSystemBar() {
-  _showSystemBar = !_showSystemBar;
-  if (OS.isHarmony) {
-    return HarmonyChannel.setFullScreenBars(!_showSystemBar);
-  }
-  return SystemChrome.setEnabledSystemUIMode(
-    _showSystemBar ? .edgeToEdge : .immersiveSticky,
-  );
-}
