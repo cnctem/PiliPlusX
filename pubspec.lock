@@ -1760,13 +1760,14 @@ packages:
     source: git
     version: "5.0.1"
   shared_preferences:
-    dependency: transitive
+    dependency: "direct main"
     description:
-      name: shared_preferences
-      sha256: c3025c5534b01739267eb7d76959bbc25a6d10f6988e1c2a3036940133dd10bf
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "2.5.5"
+      path: "packages/shared_preferences/shared_preferences"
+      ref: "br_shared_preferences-v2.5.4_ohos"
+      resolved-ref: "19bd50ff6d5eaa96f18c63796c51e1b4e78a7480"
+      url: "https://gitcode.com/CPF-Flutter/flutter_packages.git"
+    source: git
+    version: "2.5.4"
   shared_preferences_android:
     dependency: transitive
     description:
@@ -1791,6 +1792,15 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.4.1"
+  shared_preferences_ohos:
+    dependency: transitive
+    description:
+      path: "packages/shared_preferences/shared_preferences_ohos"
+      ref: "br_shared_preferences-v2.5.4_ohos"
+      resolved-ref: "19bd50ff6d5eaa96f18c63796c51e1b4e78a7480"
+      url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
+    source: git
+    version: "2.5.4"
   shared_preferences_platform_interface:
     dependency: transitive
     description:

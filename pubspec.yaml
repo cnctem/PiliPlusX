@@ -17,7 +17,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
 # update when release
-version: 2.1.0+5689
+version: 2.1.0+5690
 
 environment:
   sdk: ">=3.11.1"
@@ -267,6 +267,7 @@ dependencies:
   screen_retriever: any
   characters: any
   cached_network_image_ce: 4.9.0
+  shared_preferences: ^2.2.1
 
 dependency_overrides:
   meta: ^1.18.3 # 兼容液态玻璃
@@ -370,6 +371,11 @@ dependency_overrides:
       url: https://gitcode.com/CPF-Flutter/fluttertpc_image_cropper.git
       path: ./image_cropper
       ref: br_v11.0.0_ohos
+  shared_preferences:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_packages.git
+      path: packages/shared_preferences/shared_preferences
+      ref: br_shared_preferences-v2.5.4_ohos
 
 dev_dependencies:
   flutter_test:
