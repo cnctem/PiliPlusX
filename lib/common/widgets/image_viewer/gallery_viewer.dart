@@ -309,7 +309,7 @@ class _GalleryViewerState extends State<GalleryViewer>
       if (OS.isHarmony) {
         HarmonyChannel.setFullScreenBars(false);
       } else {
-        showSystemBar('gallery_dispose');
+        showSystemBar();
       }
       WidgetsBinding.instance.addPostFrameCallback((_) => tmpPadding = null);
     }

@@ -2,7 +2,6 @@ import 'dart:io' show Platform;
 
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/utils/device_utils.dart';
-import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter/services.dart'
     show SystemChrome, MethodChannel, SystemUiOverlay, DeviceOrientation;
 import 'package:os_type/os_type.dart';
@@ -105,12 +104,11 @@ Future<void>? hideSystemBar() {
 }
 
 //退出全屏显示
-Future<void>? showSystemBar(String reason) {
+Future<void>? showSystemBar() {
   if (_showSystemBar) {
     return null;
   }
   _showSystemBar = true;
-  debugPrint('showSystemBar: $reason');
   if (OS.isHarmony) {
     return HarmonyChannel.setFullScreenBars(false);
   }
@@ -119,16 +117,6 @@ Future<void>? showSystemBar(String reason) {
     overlays: SystemUiOverlay.values,
   );
 }
-
-/// 供路由观察器在页面回到栈底时调用：若系统栏当前被隐藏则恢复。
-/// 与原生顶栏的显隐同频，避免「顶栏已先出现、状态栏要等转场结束才恢复」
-/// 导致页面布局在转场结束后下移（issue #151）。
-void restoreSystemBarIfHidden() {
-  if (!_showSystemBar) {
-    showSystemBar('observer_sync');
-  }
-}
-
 Future<void> toggleSystemBar() {
   _showSystemBar = !_showSystemBar;
   if (OS.isHarmony) {

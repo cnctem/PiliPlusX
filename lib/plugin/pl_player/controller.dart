@@ -1780,10 +1780,10 @@ class PlPlayerController with BlockConfigMixin {
               // 再旋转并切回普通布局，避免普通页 AppBar 在旋转结束后才增长。
               // 自动退出（旋转回正触发）时旋转已在途中，跳过等待，
               // 让状态栏变化被旋转动画盖住。
-              await showSystemBar('controller_fullscreen_exit');
+              await showSystemBar();
               await Future<void>.delayed(kSystemBarSettleDelay);
             } else {
-              showSystemBar('controller_fullscreen_exit');
+              showSystemBar();
             }
           }
           if (orientation == null && mode == .none) {
@@ -1953,7 +1953,7 @@ class PlPlayerController with BlockConfigMixin {
 
     _playerCount = 0;
     if (removeSafeArea) {
-      showSystemBar('controller_dispose');
+      showSystemBar();
     }
     danmakuController = null;
     _stopOrientationListener();

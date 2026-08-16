@@ -438,7 +438,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     }
 
     if (!videoDetailController.removeSafeArea) {
-      showSystemBar('video_page_portrait');
+      showSystemBar();
     }
 
     if (!videoDetailController.plPlayerController.isCloseAll) {

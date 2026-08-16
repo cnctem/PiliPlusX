@@ -1,5 +1,5 @@
-import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/common/widgets/image_viewer/hero_dialog_route.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:flutter/material.dart';
 
@@ -65,7 +65,7 @@ class ShellBarsObserver extends NavigatorObserver {
     if (!_orientationHidden &&
         (topPage == null || !topIsPlayer) &&
         topPage is! HeroDialogRoute) {
-      restoreSystemBarIfHidden();
+      showSystemBar();
     }
   }
 }
