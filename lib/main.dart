@@ -11,6 +11,7 @@ import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/harmony_adapt/shell_bars_observer.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/models/common/theme/theme_color_type.dart';
+import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/router/app_pages.dart';
 import 'package:PiliPlus/services/account_service.dart';
 import 'package:PiliPlus/services/download/download_service.dart';
@@ -30,7 +31,6 @@ import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/theme_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
-import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:catcher_2/catcher_2.dart';
 import 'package:collection/collection.dart';
 import 'package:dynamic_color/dynamic_color.dart';
@@ -202,9 +202,8 @@ void main() async {
     await MyApp.initPlatformState();
   }
 
-  // TODO: 鸿蒙待适配 异常捕获
-  if (Pref.enableLog && !OS.isHarmony) {
-    // 异常捕获 logo记录
+  if (Pref.enableLog) {
+    // 异常捕获记录
     // catcher_2 保持 ohos 使用的 pub 版本 API（上游用的是其 fork）
     final customParameters = {
       'BuildConfig':
@@ -213,7 +212,8 @@ void main() async {
     };
     final fileHandler = await JsonFileHandler.init();
     final Catcher2Options debugConfig = Catcher2Options(
-      SilentReportMode(),
+      //改用支持unknown平台的
+      LogReportMode(),
       [
         ?fileHandler,
         ConsoleHandler(
@@ -226,7 +226,7 @@ void main() async {
     );
 
     final Catcher2Options releaseConfig = Catcher2Options(
-      SilentReportMode(),
+      LogReportMode(),
       [
         ?fileHandler,
         ConsoleHandler(enableCustomParameters: true),

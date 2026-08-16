@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:PiliPlus/services/logger.dart' show LoggerUtils;
+import 'package:catcher_2/mode/silent_report_mode.dart';
 import 'package:catcher_2/model/platform_type.dart';
 import 'package:catcher_2/model/report.dart';
 import 'package:catcher_2/model/report_handler.dart';
@@ -96,8 +97,26 @@ class JsonFileHandler extends ReportHandler {
     PlatformType.linux,
     PlatformType.macOS,
     PlatformType.windows,
+    // 鸿蒙上 catcher_2 无法识别平台类型，回落到 unknown，需放行才能落盘
+    PlatformType.unknown,
   ];
 
   @override
   bool shouldHandleWhenRejected() => handleWhenRejected;
+}
+
+/// 在 [SilentReportMode] 基础上放行 [PlatformType.unknown]，用于鸿蒙设备。
+/// 鸿蒙（ohos）的 dart:io Platform 无法匹配 catcher_2 已知的平台类型，
+/// 上报的 report 平台类型会回落到 unknown，否则会在模式过滤时被丢弃。
+class LogReportMode extends SilentReportMode {
+  @override
+  List<PlatformType> getSupportedPlatforms() => const [
+    PlatformType.android,
+    PlatformType.iOS,
+    PlatformType.web,
+    PlatformType.linux,
+    PlatformType.macOS,
+    PlatformType.windows,
+    PlatformType.unknown,
+  ];
 }

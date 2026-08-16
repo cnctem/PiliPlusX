@@ -21,7 +21,9 @@ class PiliLogger extends Logger {
     DateTime? time,
   }) {
     if (level == Level.error || level == Level.fatal) {
-      Catcher2.reportCheckedError(error, stackTrace);
+      try {
+        Catcher2.reportCheckedError(error, stackTrace);
+      } catch (_) {}
     }
     super.log(level, message, error: error, stackTrace: stackTrace, time: time);
   }
