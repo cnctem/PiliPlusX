@@ -495,8 +495,6 @@ export default class HarmonyChannel implements FlutterPlugin {
         AppStorage.setOrCreate('topBarHidden', true); // ≥ 1:1：隐藏
       }
     } else {
-      // 显示：先放下（若此前收起过），再显示
-      AppStorage.setOrCreate('topBarCollapsed', false);
       AppStorage.setOrCreate('topBarHidden', false);
     }
   }
