@@ -15,6 +15,7 @@ import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/router/app_pages.dart';
 import 'package:PiliPlus/services/account_service.dart';
 import 'package:PiliPlus/services/download/download_service.dart';
+import 'package:PiliPlus/services/logger.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
 import 'package:PiliPlus/utils/calc_window_position.dart';
@@ -204,40 +205,19 @@ void main() async {
 
   if (Pref.enableLog) {
     // 异常捕获记录
-    // catcher_2 保持 ohos 使用的 pub 版本 API（上游用的是其 fork）
     final customParameters = {
-      'BuildConfig':
-          '\nBuild Time: ${DateFormatUtils.format(BuildConfig.buildTime, format: DateFormatUtils.longFormatDs)}\n'
-          'Commit Hash: ${BuildConfig.commitHash}',
+      'Build Time': DateFormatUtils.format(
+        BuildConfig.buildTime,
+        format: DateFormatUtils.longFormatDs,
+      ),
+      'Commit Hash': BuildConfig.commitHash,
     };
     final fileHandler = await JsonFileHandler.init();
-    final Catcher2Options debugConfig = Catcher2Options(
-      //改用支持unknown平台的
-      LogReportMode(),
-      [
-        ?fileHandler,
-        ConsoleHandler(
-          enableDeviceParameters: false,
-          enableApplicationParameters: false,
-          enableCustomParameters: true,
-        ),
-      ],
-      customParameters: customParameters,
-    );
-
-    final Catcher2Options releaseConfig = Catcher2Options(
-      LogReportMode(),
-      [
-        ?fileHandler,
-        ConsoleHandler(enableCustomParameters: true),
-      ],
-      customParameters: customParameters,
-    );
-
     Catcher2(
-      debugConfig: debugConfig,
-      releaseConfig: releaseConfig,
-      rootWidget: const MyApp(),
+      [?fileHandler, const ConsoleHandler()],
+      const MyApp(),
+      logger: logger,
+      customParameters: customParameters,
     );
   } else {
     runApp(const MyApp());

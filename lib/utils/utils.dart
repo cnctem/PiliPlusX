@@ -88,8 +88,6 @@ abstract final class Utils {
   /// `@pragma('vm:notify-debugger-on-exception')` to allow an attached debugger
   /// to treat the exception as unhandled.
   static void reportError(Object exception, [StackTrace? stack]) {
-    try {
-      Catcher2.reportCheckedError(exception, stack);
-    } catch (_) {}
+    Catcher2.reportCheckedError(exception, stack);
   }
 }

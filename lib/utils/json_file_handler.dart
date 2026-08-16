@@ -1,12 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:PiliPlus/services/logger.dart' show LoggerUtils;
-import 'package:catcher_2/mode/silent_report_mode.dart';
-import 'package:catcher_2/model/platform_type.dart';
-import 'package:catcher_2/model/report.dart';
-import 'package:catcher_2/model/report_handler.dart';
-import 'package:flutter/material.dart';
+import 'package:PiliPlus/services/logger.dart';
+import 'package:catcher_2/catcher_2.dart';
 
 class JsonFileHandler extends ReportHandler {
   final bool enableDeviceParameters;
@@ -49,7 +45,7 @@ class JsonFileHandler extends ReportHandler {
         handleWhenRejected: handleWhenRejected,
       );
     } catch (e, s) {
-      debugPrintStack(stackTrace: s, label: e.toString());
+      logger.e('Init log file', error: e, stackTrace: s);
       return null;
     }
   }
@@ -63,18 +59,24 @@ class JsonFileHandler extends ReportHandler {
   }
 
   @override
-  Future<bool> handle(Report report, BuildContext? context) async {
+  Future<bool> handle(Report report) async {
     try {
       await _processReport(report);
       return true;
     } catch (exc, stackTrace) {
-      _printLog('Exception occurred: $exc stack: $stackTrace');
+      logger.e(
+        'Write Json Exception occurred',
+        error: exc,
+        stackTrace: stackTrace,
+      );
       return false;
     }
   }
 
   Future<void> _processReport(Report report) {
-    _printLog('Writing report to file');
+    if (printLogs) {
+      logger.d('Writing report to file');
+    }
     final json = report.toJson(
       enableDeviceParameters: enableDeviceParameters,
       enableApplicationParameters: enableApplicationParameters,
@@ -83,40 +85,4 @@ class JsonFileHandler extends ReportHandler {
     );
     return add((raf) => raf.writeString('${jsonEncode(json)}\n'));
   }
-
-  void _printLog(String log) {
-    if (printLogs) {
-      logger.info(log);
-    }
-  }
-
-  @override
-  List<PlatformType> getSupportedPlatforms() => const [
-    PlatformType.android,
-    PlatformType.iOS,
-    PlatformType.linux,
-    PlatformType.macOS,
-    PlatformType.windows,
-    // 鸿蒙上 catcher_2 无法识别平台类型，回落到 unknown，需放行才能落盘
-    PlatformType.unknown,
-  ];
-
-  @override
-  bool shouldHandleWhenRejected() => handleWhenRejected;
-}
-
-/// 在 [SilentReportMode] 基础上放行 [PlatformType.unknown]，用于鸿蒙设备。
-/// 鸿蒙（ohos）的 dart:io Platform 无法匹配 catcher_2 已知的平台类型，
-/// 上报的 report 平台类型会回落到 unknown，否则会在模式过滤时被丢弃。
-class LogReportMode extends SilentReportMode {
-  @override
-  List<PlatformType> getSupportedPlatforms() => const [
-    PlatformType.android,
-    PlatformType.iOS,
-    PlatformType.web,
-    PlatformType.linux,
-    PlatformType.macOS,
-    PlatformType.windows,
-    PlatformType.unknown,
-  ];
 }

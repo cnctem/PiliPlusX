@@ -15,8 +15,7 @@ import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
-import 'package:catcher_2/model/platform_type.dart';
-import 'package:catcher_2/model/report.dart' as catcher;
+import 'package:catcher_2/catcher_2.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -144,8 +143,6 @@ class _LogsPageState extends State<LogsPage> {
             const {},
             const {},
             const {},
-            null,
-            PlatformType.unknown,
             null,
           ),
         );
@@ -528,68 +525,4 @@ class _ExpandedItem<T> {
 
   @override
   String toString() => item.toString();
-}
-
-class Report extends catcher.Report {
-  Report(
-    super.error,
-    super.stackTrace,
-    super.dateTime,
-    super.deviceParameters,
-    super.applicationParameters,
-    super.customParameters,
-    super.errorDetails,
-    super.platformType,
-    super.screenshot,
-  );
-
-  factory Report.fromJson(Map<String, dynamic> json) => Report(
-    json['error'],
-    json['stackTrace'],
-    DateTime.tryParse(json['dateTime'] ?? '') ?? DateTime(1970),
-    json['deviceParameters'] ?? const {},
-    json['applicationParameters'] ?? const {},
-    json['customParameters'] ?? const {},
-    null,
-    PlatformType.values.byName(json['platformType']),
-    null,
-  );
-
-  Report copyWith({
-    dynamic error,
-    dynamic stackTrace,
-    DateTime? dateTime,
-    Map<String, dynamic>? deviceParameters,
-    Map<String, dynamic>? applicationParameters,
-    Map<String, dynamic>? customParameters,
-    FlutterErrorDetails? errorDetails,
-    PlatformType? platformType,
-  }) {
-    return Report(
-      error ?? this.error,
-      stackTrace ?? this.stackTrace,
-      dateTime ?? this.dateTime,
-      deviceParameters ?? this.deviceParameters,
-      applicationParameters ?? this.applicationParameters,
-      customParameters ?? this.customParameters,
-      errorDetails ?? this.errorDetails,
-      platformType ?? this.platformType,
-      null,
-    );
-  }
-
-  String _params2String(Map<String, dynamic> params) {
-    return params.entries
-        .map((entry) => '${entry.key}: ${entry.value}\n')
-        .join();
-  }
-
-  @override
-  String toString() {
-    return '------- DEVICE INFO -------\n${_params2String(deviceParameters)}'
-        '------- APP INFO -------\n${_params2String(applicationParameters)}'
-        '------- ERROR -------\n$error\n'
-        '------- STACK TRACE -------\n${stackTrace.toString().trim()}\n'
-        '------- CUSTOM INFO -------\n${_params2String(customParameters)}';
-  }
 }

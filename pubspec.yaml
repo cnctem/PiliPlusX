@@ -17,7 +17,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
 # update when release
-version: 2.1.0+5685
+version: 2.1.0+5687
 
 environment:
   sdk: ">=3.11.1"
@@ -189,7 +189,10 @@ dependencies:
   uuid: ^4.5.3
   # scrollable_positioned_list: ^0.3.8
   # nil: ^1.1.1
-  catcher_2: ^2.1.9
+  catcher_2:
+    git:
+      url: https://github.com/My-Responsitories/catcher_2.git
+      ref: dev
   logger: ^2.7.0
   #瀑布流
   waterfall_flow: ^3.1.1
