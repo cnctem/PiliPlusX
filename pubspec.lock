@@ -127,7 +127,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "8ad650c6eb487208b9861d44755c8e58db061c88"
+      resolved-ref: ef8d0db373f5cf193f7679ef2f2bb12bc6e921ba
       url: "https://github.com/Starfallan/audio_service_win.git"
     source: git
     version: "0.0.3"
