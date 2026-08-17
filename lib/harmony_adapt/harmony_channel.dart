@@ -24,7 +24,7 @@ abstract class HarmonyChannel {
         _windowMode = call.arguments['isWindowMode'] as bool? ?? false;
         break;
       case 'onFontWeightScaleChange':
-        final fontWeightScale = call.arguments['fontWeightScale'] as double?;
+        final fontWeightScale = (call.arguments['fontWeightScale'] as num?)?.toDouble();
         _systemFontWeightScale = fontWeightScale;
         if (Pref.appFontWeight == -1) {
           Get.updateMyAppTheme();
