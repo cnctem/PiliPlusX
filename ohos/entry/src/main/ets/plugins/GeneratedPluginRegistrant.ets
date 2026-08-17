@@ -1,5 +1,6 @@
 import { FlutterEngine, Log } from '@ohos/flutter_ohos';
 import WakelockPlugin from 'wakelock_plus_ohos';
+import PackageInfoPlugin from 'package_info_plus';
 import UrlLauncherPlugin from 'url_launcher_ohos';
 import SharedPreferencesPlugin from 'shared_preferences_ohos';
 import SharePlusOhosPlugin from 'share_plus';
@@ -37,6 +38,7 @@ export class GeneratedPluginRegistrant {
   static registerWith(flutterEngine: FlutterEngine) {
     try {
       flutterEngine.getPlugins()?.add(new WakelockPlugin());
+      flutterEngine.getPlugins()?.add(new PackageInfoPlugin());
       flutterEngine.getPlugins()?.add(new UrlLauncherPlugin());
       flutterEngine.getPlugins()?.add(new SharedPreferencesPlugin());
       flutterEngine.getPlugins()?.add(new SharePlusOhosPlugin());

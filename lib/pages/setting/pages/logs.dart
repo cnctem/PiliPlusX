@@ -1,11 +1,10 @@
 import 'dart:async' show Timer;
 import 'dart:convert' show jsonDecode;
-import 'dart:io' show Platform;
 
-import 'package:PiliPlus/build_config.dart';
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/widgets/button/icon_button.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/loading_widget.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:PiliPlus/common/widgets/selection_text.dart';
 import 'package:PiliPlus/services/logger.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
@@ -14,13 +13,11 @@ import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
-import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:catcher_2/catcher_2.dart';
-import 'package:device_info_plus/device_info_plus.dart';
+import 'package:catcher_2/utils/log_printer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:os_type/os_type.dart';
 
 const _snackBarDisplayDuration = Duration(seconds: 1);
 
@@ -34,7 +31,6 @@ class LogsPage extends StatefulWidget {
 class _LogsPageState extends State<LogsPage> {
   List<_ExpandedItem<Report>> logsContent = [];
   _ExpandedItem<_DeviceInfo>? _deviceInfo;
-  Report? latestLog;
   late bool enableLog = Pref.enableLog;
 
   @override
@@ -44,95 +40,21 @@ class _LogsPageState extends State<LogsPage> {
     super.initState();
   }
 
-  @override
-  void dispose() {
-    if (latestLog != null) {
-      final time = latestLog!.dateTime;
-      if (DateTime.now().difference(time) >= const Duration(days: 14)) {
-        LoggerUtils.clearLogs();
-      }
-    }
-    super.dispose();
-  }
-
-  Future<void> _initDeviceInfo() async {
-    final device = await _loadDeviceParameters();
-    final info = _loadApplicationParameters();
-    final custom = _loadCustomParameters();
-    _deviceInfo = _ExpandedItem((device, info, custom));
-    if (mounted) {
-      setState(() {});
+  void _initDeviceInfo() {
+    if (Catcher2.instance case final c?) {
+      _deviceInfo = _ExpandedItem((
+        c.deviceParameters,
+        c.applicationParameters,
+        c.customParameters,
+      ));
     }
   }
-
-  Future<Map<String, dynamic>> _loadDeviceParameters() async {
-    final device = <String, dynamic>{};
-    try {
-      final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-      if (OS.isHarmony) {
-        final ohosInfo = await deviceInfo.ohosInfo;
-        device.addAll(ohosInfo.data);
-      } else if (Platform.isAndroid) {
-        final androidInfo = await deviceInfo.androidInfo;
-        device.addAll({
-          'brand': androidInfo.brand,
-          'model': androidInfo.model,
-          'manufacturer': androidInfo.manufacturer,
-          'version': androidInfo.version.release,
-          'sdkInt': androidInfo.version.sdkInt,
-        });
-      } else if (Platform.isIOS) {
-        final iosInfo = await deviceInfo.iosInfo;
-        device.addAll({
-          'name': iosInfo.name,
-          'model': iosInfo.model,
-          'systemName': iosInfo.systemName,
-          'systemVersion': iosInfo.systemVersion,
-        });
-      } else if (Platform.isWindows) {
-        final windowsInfo = await deviceInfo.windowsInfo;
-        device.addAll({
-          'computerName': windowsInfo.computerName,
-          'numberOfCores': windowsInfo.numberOfCores,
-          'systemMemoryInMegabytes': windowsInfo.systemMemoryInMegabytes,
-        });
-      } else if (Platform.isLinux) {
-        final linuxInfo = await deviceInfo.linuxInfo;
-        device.addAll({
-          'name': linuxInfo.name,
-          'version': linuxInfo.version,
-          'prettyName': linuxInfo.prettyName,
-        });
-      } else if (Platform.isMacOS) {
-        final macosInfo = await deviceInfo.macOsInfo;
-        device.addAll(macosInfo.data);
-      }
-    } catch (e) {
-      debugPrint('Failed to load device info: $e');
-    }
-    return device;
-  }
-
-  Map<String, dynamic> _loadApplicationParameters() => {
-    'versionName': BuildConfig.versionName,
-    'versionCode': BuildConfig.versionCode,
-  };
-
-  Map<String, dynamic> _loadCustomParameters() => {
-    'Build Time': DateFormatUtils.format(
-      BuildConfig.buildTime,
-      format: DateFormatUtils.longFormatDs,
-    ),
-    if (BuildConfig.commitHash.isNotEmpty)
-      'Commit Hash': BuildConfig.commitHash,
-  };
 
   Future<void> getLog() async {
     final logsPath = await LoggerUtils.getLogsPath();
     logsContent = (await logsPath.readAsLines()).reversed.map((i) {
       try {
         final log = Report.fromJson(jsonDecode(i));
-        latestLog ??= log;
         return _ExpandedItem(log);
       } catch (e, s) {
         return _ExpandedItem(
@@ -169,7 +91,6 @@ class _LogsPageState extends State<LogsPage> {
   }
 
   Future<void> clearLogs() async {
-    latestLog = null;
     if (await LoggerUtils.clearLogs()) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -356,18 +277,6 @@ class _InfoCard extends StatelessWidget {
   }
 }
 
-/// Formats a stack trace string into a list of non-empty lines.
-List<String> _formatStackString(String? stackTrace) {
-  if (stackTrace == null || stackTrace.isEmpty || stackTrace == 'null') {
-    return const [];
-  }
-  return stackTrace
-      .split('\n')
-      .map((line) => line.trimRight())
-      .where((line) => line.isNotEmpty)
-      .toList();
-}
-
 class _ReportCard extends StatelessWidget {
   final _ExpandedItem<Report> report;
 
@@ -376,8 +285,9 @@ class _ReportCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = ColorScheme.of(context);
-    late final stackTrace = _formatStackString(
+    late final stackTrace = PrettyLogPrinter.formatStackString(
       report.item.stackTrace?.toString(),
+      -1,
     );
     final dateTime = DateFormatUtils.longFormatDs.format(report.item.dateTime);
     return _card([
@@ -462,7 +372,7 @@ class _ReportCard extends StatelessWidget {
           ),
         ),
         // stackTrace may be null or String("null") or blank
-        if (stackTrace.isNotEmpty) ...[
+        if (stackTrace != null && stackTrace.isNotEmpty) ...[
           const SizedBox(height: 16),
           Text(
             '堆栈跟踪',

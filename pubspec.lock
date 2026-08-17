@@ -1387,13 +1387,14 @@ packages:
     source: hosted
     version: "2.2.0"
   package_info_plus:
-    dependency: transitive
+    dependency: "direct main"
     description:
-      name: package_info_plus
-      sha256: "16eee997588c60225bda0488b6dcfac69280a6b7a3cf02c741895dd370a02968"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "8.3.1"
+      path: "packages/package_info_plus/package_info_plus"
+      ref: "package_info_plus-9.0.0-ohos-1.0.0"
+      resolved-ref: bc4df814a726042a9dad1a267ebb1d2973544e24
+      url: "https://gitcode.com/CPF-Flutter/flutter_plus_plugins.git"
+    source: git
+    version: "9.0.0"
   package_info_plus_platform_interface:
     dependency: transitive
     description:

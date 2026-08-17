@@ -17,7 +17,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
 # update when release
-version: 2.1.0+5690
+version: 2.1.0+5691
 
 environment:
   sdk: ">=3.11.1"
@@ -268,6 +268,7 @@ dependencies:
   characters: any
   cached_network_image_ce: 4.9.0
   shared_preferences: ^2.2.1
+  package_info_plus: ">=4.0.0 <11.0.0"
 
 dependency_overrides:
   meta: ^1.18.3 # 兼容液态玻璃
@@ -376,6 +377,11 @@ dependency_overrides:
       url: https://gitcode.com/CPF-Flutter/flutter_packages.git
       path: packages/shared_preferences/shared_preferences
       ref: br_shared_preferences-v2.5.4_ohos
+  package_info_plus:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_plus_plugins.git
+      path: packages/package_info_plus/package_info_plus
+      ref: package_info_plus-9.0.0-ohos-1.0.0
 
 dev_dependencies:
   flutter_test:
