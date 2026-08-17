@@ -407,10 +407,14 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
   /// 使用与详情页播放器封面相同的压缩率（硬编码为60）
   /// 生成 URL：两者一致才能命中同一缓存 key，复用详情页已缓存的封面文件。
   Future<Uri> _artUriFromCache(String? cover) async {
-    final url = ImageUtils.thumbnailUrl(
+    var url = ImageUtils.thumbnailUrl(
       cover,
       60,
     );
+    if (Platform.isWindows && url.contains('@') && url.endsWith('.webp')) {
+      // Windows SMTC 由 shell 进程渲染，仅使用系统内置解码器，WebP 会静默不显示。
+      url = '${url.substring(0, url.length - '.webp'.length)}.jpg';
+    }
     if (url.isEmpty) return Uri();
     try {
       final file = await CacheManager.manager.getSingleFile(url);
