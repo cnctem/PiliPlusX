@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async' show Completer;
-import 'dart:io' show Platform;
 
 import 'package:PiliPlus/common/widgets/scroll_behavior.dart';
+import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart'
     show RefreshScrollPhysics;
@@ -542,13 +542,11 @@ class RefreshIndicatorState extends State<RefreshIndicator>
           ),
       ],
     );
-    if (!widget.isClampingScrollPhysics &&
-        (Platform.isIOS || Platform.isMacOS)) {
+    if (!widget.isClampingScrollPhysics && PlatformUtils.isDarwin) {
       return child;
     }
     return ScrollConfiguration(
       behavior: RefreshScrollBehavior(
-        desktopDragDevices,
         scrollPhysics: RefreshScrollPhysics(
           parent: const RangeMaintainingScrollPhysics(),
           onDrag: _onDrag,
@@ -611,8 +609,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
 typedef refreshIndicator = RefreshIndicator;
 
 class RefreshScrollBehavior extends CustomScrollBehavior {
-  const RefreshScrollBehavior(
-    super.dragDevices, {
+  const RefreshScrollBehavior({
     required this.scrollPhysics,
   });
 

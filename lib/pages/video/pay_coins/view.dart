@@ -303,7 +303,7 @@ class _PayCoinsPageState extends State<PayCoinsPage>
                       child: SizedBox(
                         height: 100,
                         child: PageView(
-                          physics: clampingScrollPhysics,
+                          physics: tabBarScrollPhysics,
                           controller: _controller,
                           onPageChanged: (index) {
                             _scale();

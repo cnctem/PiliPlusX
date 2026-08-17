@@ -342,8 +342,8 @@ class _GalleryViewerState extends State<GalleryViewer>
                 child: PageView<ImageHorizontalDragGestureRecognizer>.builder(
                   controller: _pageController,
                   onPageChanged: _onPageChanged,
-                  physics: const CustomTabBarViewScrollPhysics(
-                    parent: AlwaysScrollableScrollPhysics(),
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: tabBarScrollPhysics,
                   ),
                   itemCount: widget.sources.length,
                   itemBuilder: _itemBuilder,

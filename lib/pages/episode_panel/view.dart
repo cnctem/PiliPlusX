@@ -237,7 +237,7 @@ class _EpisodePanelState extends State<EpisodePanel>
     if (_isMulti) {
       return TabBarView<TabBarDragGestureRecognizer>(
         controller: _tabController,
-        physics: clampingScrollPhysics,
+        physics: tabBarScrollPhysics,
         horizontalDragGestureRecognizer: () =>
             TabBarDragGestureRecognizer(isDxAllowed: isDxAllowed),
         children: List.generate(

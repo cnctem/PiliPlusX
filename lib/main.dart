@@ -318,7 +318,7 @@ class MyApp extends StatelessWidget {
         shellBarsObserver,
       ],
       scrollBehavior: PlatformUtils.isDesktop
-          ? const CustomScrollBehavior(desktopDragDevices)
+          ? const CustomScrollBehavior()
           : null,
     );
   }
