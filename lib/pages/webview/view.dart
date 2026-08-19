@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:PiliPlus/common/widgets/scale_app.dart';
 import 'package:PiliPlus/http/browser_ua.dart';
 import 'package:PiliPlus/main.dart';
 import 'package:PiliPlus/models/common/webview_menu_type.dart';
@@ -51,6 +52,7 @@ class _WebviewPageState extends State<WebviewPage> {
     caseSensitive: false,
   );
 
+    late final double _previousScaleFactor;
   @override
   void initState() {
     super.initState();
@@ -61,6 +63,11 @@ class _WebviewPageState extends State<WebviewPage> {
           'mob' => BrowserUa.mob,
           _ => BrowserUa.platform,
         };
+    _previousScaleFactor =
+        ScaledWidgetsFlutterBinding.instance.scaleFactor;
+    if (_previousScaleFactor != 1.0) {
+      ScaledWidgetsFlutterBinding.instance.scaleFactor = 1.0;
+    }
     if (Get.arguments case final Map map) {
       _inApp = map['inApp'] ?? false;
       _off = map['off'] ?? false;
@@ -70,6 +77,9 @@ class _WebviewPageState extends State<WebviewPage> {
   @override
   void dispose() {
     _webViewController = null;
+    if (_previousScaleFactor != 1.0) {
+      ScaledWidgetsFlutterBinding.instance.scaleFactor = _previousScaleFactor;
+    }
     super.dispose();
   }
 
@@ -170,6 +180,7 @@ class _WebviewPageState extends State<WebviewPage> {
               ],
             ),
       body: SafeArea(
+        top: false,
         child: InAppWebView(
           webViewEnvironment: webViewEnvironment,
           initialSettings: InAppWebViewSettings(

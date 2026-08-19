@@ -1,6 +1,7 @@
 import 'dart:convert' show jsonDecode, jsonEncode;
 import 'dart:io' show Platform;
 
+import 'package:PiliPlus/common/widgets/scale_app.dart';
 import 'package:PiliPlus/http/browser_ua.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -36,10 +37,16 @@ class _GeetestWebviewDialogState extends State<GeetestWebviewDialog> {
 
   static String _showJs(String response) =>
       't=Geetest($response).onSuccess(()=>R("success",t.getValidate())).onError(o=>R("error",o)).onClose(o=>R("close",o));t.onReady(()=>t.verify())';
+  late final double _previousScaleFactor;
 
   @override
   void initState() {
     super.initState();
+    _previousScaleFactor =
+        ScaledWidgetsFlutterBinding.instance.scaleFactor;
+    if (_previousScaleFactor != 1.0) {
+      ScaledWidgetsFlutterBinding.instance.scaleFactor = 1.0;
+    }
     _future = _getConfig(widget.gt, widget.challenge);
   }
 
@@ -88,6 +95,9 @@ class _GeetestWebviewDialogState extends State<GeetestWebviewDialog> {
 
   @override
   void dispose() {
+    if (_previousScaleFactor != 1.0) {
+      ScaledWidgetsFlutterBinding.instance.scaleFactor = _previousScaleFactor;
+    }
     super.dispose();
   }
 
