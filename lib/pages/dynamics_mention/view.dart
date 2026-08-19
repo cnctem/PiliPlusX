@@ -32,10 +32,10 @@ class DynMentionPanel extends StatefulWidget {
     BuildContext context, {
     double offset = 0,
     ValueChanged<double>? onCachePos,
-  }) {
+  }) async {
     final wasVisible = HarmonyChannel.hdsBarVisible;
     HarmonyChannel.setShellBarsHidden(true);
-    return showModalBottomSheet(
+    final sheet = await showModalBottomSheet(
       context: Get.context!,
       useSafeArea: true,
       isScrollControlled: true,
@@ -58,6 +58,7 @@ class DynMentionPanel extends StatefulWidget {
     ).then((_) {
       if (wasVisible) HarmonyChannel.setShellBarsHidden(false);
     });
+    return sheet;
   }
 
   @override

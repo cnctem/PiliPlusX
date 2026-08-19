@@ -50,7 +50,6 @@ import 'package:flutter/material.dart'
         TextSelectionGestureDetectorBuilderDelegate;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:os_type/os_type.dart';
 
 class _TextFieldSelectionGestureDetectorBuilder
     extends TextSelectionGestureDetectorBuilder {
