@@ -12,15 +12,15 @@ extension ExtendedNestedScrollViewStateExt on ExtendedNestedScrollViewState {
   void animToTop() {
     if (mounted) {
       final position = innerNestedPositions.first;
-      if (position.pixels >= position.viewportDimension * 7) {
-        position.localJumpTo(0);
-      } else {
-        outerController.animateTo(
-          outerController.offset,
-          curve: Curves.easeInOut,
-          duration: const Duration(milliseconds: 500),
-        );
+      final maxOffset = position.viewportDimension * 2;
+      if (position.pixels >= maxOffset) {
+        position.localJumpTo(maxOffset);
       }
+      outerController.animateTo(
+        outerController.offset,
+        curve: Curves.easeOutCirc,
+        duration: const Duration(milliseconds: 800),
+      );
     }
   }
 }

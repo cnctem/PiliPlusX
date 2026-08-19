@@ -8,8 +8,9 @@ extension ScrollControllerExt on ScrollController {
     Duration duration = const Duration(milliseconds: 800),
   }) {
     if (!hasClients) return;
-    if ((offset - this.offset).abs() >= position.viewportDimension * 7) {
-      jumpTo(position.viewportDimension);
+    final maxOffset = position.viewportDimension * 2;
+    if ((offset - this.offset).abs() >= maxOffset) {
+      jumpTo(maxOffset);
     }
     animateTo(
       offset,

@@ -1,3 +1,4 @@
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:PiliPlus/pages/setting/models/experimental_settings.dart';
 import 'package:flutter/material.dart';
 
@@ -17,8 +18,7 @@ class _ExperimentalPageState extends State<ExperimentalPage> {
   Widget build(BuildContext context) {
     final showAppBar = widget.showAppBar;
     final padding = MediaQuery.viewPaddingOf(context);
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return SimpleScaffold(
       appBar: showAppBar ? AppBar(title: const Text('试验性功能')) : null,
       body: ListView(
         padding: EdgeInsets.only(
