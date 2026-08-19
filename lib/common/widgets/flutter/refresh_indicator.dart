@@ -11,6 +11,7 @@ import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart'
     show RefreshScrollPhysics;
 import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/material.dart' hide RefreshIndicator;
+import 'package:os_type/os_type.dart';
 
 /// The distance from the child's top or bottom [edgeOffset] where
 /// the refresh indicator will settle. During the drag that exposes the refresh
@@ -542,7 +543,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
           ),
       ],
     );
-    if (!widget.isClampingScrollPhysics && PlatformUtils.isDarwin) {
+    if (!widget.isClampingScrollPhysics && (PlatformUtils.isDarwin || OS.isHarmony)) {
       return child;
     }
     return ScrollConfiguration(

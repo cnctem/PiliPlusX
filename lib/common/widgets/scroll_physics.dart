@@ -2,6 +2,7 @@ import 'package:PiliPlus/common/widgets/gesture/horizontal_drag_gesture_recogniz
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/material.dart';
+import 'package:os_type/os_type.dart';
 
 Widget tabBarView({
   required List<Widget> children,
@@ -85,11 +86,11 @@ class ReloadScrollPhysics extends AlwaysScrollableScrollPhysics {
   }
 }
 
-final platformClampingPhysics = PlatformUtils.isDarwin
+final platformClampingPhysics = PlatformUtils.isDarwin || OS.isHarmony
     ? const BouncingScrollPhysicsExt()
     : const ClampingScrollPhysics();
 
-final platformAlwaysClampingPhysics = PlatformUtils.isDarwin
+final platformAlwaysClampingPhysics = PlatformUtils.isDarwin || OS.isHarmony
     ? const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysicsExt())
     : const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics());
 
