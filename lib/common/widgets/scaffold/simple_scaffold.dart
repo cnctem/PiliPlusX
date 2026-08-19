@@ -1,8 +1,14 @@
+import 'package:PiliPlus/utils/extension/scroll_controller_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart'
-    show BoxParentData, BoxHitTestResult, ChildLayoutHelper;
+    show
+        BoxParentData,
+        BoxHitTestResult,
+        ChildLayoutHelper,
+        HitTestResult,
+        RenderMetaData;
 
-class SimpleScaffold extends StatelessWidget {
+class SimpleScaffold extends StatefulWidget {
   const SimpleScaffold({
     super.key,
     this.backgroundColor,
@@ -17,29 +23,84 @@ class SimpleScaffold extends StatelessWidget {
   final Widget body;
 
   @override
+  State<SimpleScaffold> createState() => _SimpleScaffoldState();
+}
+
+class _SimpleScaffoldState extends State<SimpleScaffold>
+    with WidgetsBindingObserver {
+  final _statusBarKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void handleStatusBarTap() {
+    final primaryScrollController = PrimaryScrollController.maybeOf(context);
+    if (primaryScrollController == null ||
+        !primaryScrollController.hasClients ||
+        !_hitTestableAtOrigin()) {
+      return;
+    }
+    primaryScrollController.animToTop();
+  }
+
+  bool _hitTestableAtOrigin() {
+    final element = _statusBarKey.currentContext as Element?;
+    if (element == null) return false;
+    final renderObject = element.renderObject;
+    if (renderObject is! RenderMetaData) return false;
+    final result = HitTestResult();
+    WidgetsBinding.instance.hitTestInView(
+      result,
+      Offset.zero,
+      View.of(context).viewId,
+    );
+    return result.path.any((entry) => entry.target == renderObject);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Material(
-      color: backgroundColor,
+      color: widget.backgroundColor,
       child: ScaffoldLayout(
-        fab: fab,
-        appBar: appBar,
-        body: body,
+        statusBar: MetaData(
+          key: _statusBarKey,
+          behavior: HitTestBehavior.translucent,
+          child: SizedBox(
+            width: double.infinity,
+            height: MediaQuery.paddingOf(context).top,
+          ),
+        ),
+        fab: widget.fab,
+        appBar: widget.appBar,
+        body: widget.body,
       ),
     );
   }
 }
 
-enum ScaffoldType { fab, appBar, body }
+enum ScaffoldType { statusBar, fab, appBar, body }
 
 class ScaffoldLayout
     extends SlottedMultiChildRenderObjectWidget<ScaffoldType, RenderBox> {
   const ScaffoldLayout({
     super.key,
+    this.statusBar,
     this.fab,
     this.appBar,
     required this.body,
   });
 
+  final Widget? statusBar;
   final Widget? fab;
   final Widget? appBar;
   final Widget body;
@@ -49,6 +110,7 @@ class ScaffoldLayout
 
   @override
   Widget? childForSlot(slot) => switch (slot) {
+    .statusBar => statusBar,
     .fab => fab,
     .appBar => appBar,
     .body => body,
@@ -66,6 +128,7 @@ class _RenderScaffoldLayout extends RenderBox
     with SlottedContainerRenderObjectMixin<ScaffoldType, RenderBox> {
   RenderBox? get fab => childForSlot(.fab);
   RenderBox? get appBar => childForSlot(.appBar);
+  RenderBox? get statusBar => childForSlot(.statusBar);
   RenderBox get body => childForSlot(.body)!;
 
   Offset _getOffset(RenderBox child) {
@@ -80,6 +143,15 @@ class _RenderScaffoldLayout extends RenderBox
   void performLayout() {
     final constraints = this.constraints;
     size = constraints.biggest;
+
+    final statusBar = this.statusBar;
+    if (statusBar != null) {
+      ChildLayoutHelper.layoutChild(
+        statusBar,
+        BoxConstraints.tightFor(width: constraints.maxWidth),
+      );
+      _setOffset(statusBar, .zero);
+    }
 
     final Offset bodyOffset;
     final BoxConstraints bodyConstraints;

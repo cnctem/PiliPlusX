@@ -1228,7 +1228,7 @@ packages:
     description:
       path: media_kit
       ref: feat-ohos
-      resolved-ref: "0eb2e50708ba19128a3916f0f28ae95975e3c056"
+      resolved-ref: "531779bda653880dc62bb79a6000af77b92bc2ee"
       url: "https://github.com/cnoim/media-kit.git"
     source: git
     version: "1.2.3"
@@ -1246,7 +1246,7 @@ packages:
     description:
       path: "libs/ios/media_kit_libs_ios_video"
       ref: feat-ohos
-      resolved-ref: "0eb2e50708ba19128a3916f0f28ae95975e3c056"
+      resolved-ref: "531779bda653880dc62bb79a6000af77b92bc2ee"
       url: "https://github.com/cnoim/media-kit.git"
     source: git
     version: "1.1.4"
@@ -1255,7 +1255,7 @@ packages:
     description:
       path: "libs/linux/media_kit_libs_linux"
       ref: feat-ohos
-      resolved-ref: "0eb2e50708ba19128a3916f0f28ae95975e3c056"
+      resolved-ref: "531779bda653880dc62bb79a6000af77b92bc2ee"
       url: "https://github.com/cnoim/media-kit.git"
     source: git
     version: "1.2.1"
@@ -1264,7 +1264,7 @@ packages:
     description:
       path: "libs/macos/media_kit_libs_macos_video"
       ref: feat-ohos
-      resolved-ref: "0eb2e50708ba19128a3916f0f28ae95975e3c056"
+      resolved-ref: "531779bda653880dc62bb79a6000af77b92bc2ee"
       url: "https://github.com/cnoim/media-kit.git"
     source: git
     version: "1.1.4"
@@ -1273,7 +1273,7 @@ packages:
     description:
       path: "libs/ohos/media_kit_libs_ohos"
       ref: feat-ohos
-      resolved-ref: "0eb2e50708ba19128a3916f0f28ae95975e3c056"
+      resolved-ref: "531779bda653880dc62bb79a6000af77b92bc2ee"
       url: "https://github.com/cnoim/media-kit.git"
     source: git
     version: "1.0.0"
@@ -1282,7 +1282,7 @@ packages:
     description:
       path: "libs/universal/media_kit_libs_video"
       ref: feat-ohos
-      resolved-ref: "0eb2e50708ba19128a3916f0f28ae95975e3c056"
+      resolved-ref: "531779bda653880dc62bb79a6000af77b92bc2ee"
       url: "https://github.com/cnoim/media-kit.git"
     source: git
     version: "1.0.7"
@@ -1309,7 +1309,7 @@ packages:
     description:
       path: media_kit_video
       ref: feat-ohos
-      resolved-ref: "0eb2e50708ba19128a3916f0f28ae95975e3c056"
+      resolved-ref: "531779bda653880dc62bb79a6000af77b92bc2ee"
       url: "https://github.com/cnoim/media-kit.git"
     source: git
     version: "2.0.1"

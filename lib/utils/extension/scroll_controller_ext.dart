@@ -8,15 +8,15 @@ extension ScrollControllerExt on ScrollController {
     Duration duration = const Duration(milliseconds: 800),
   }) {
     if (!hasClients) return;
-    if ((offset - this.offset).abs() >= position.viewportDimension * 7) {
-      jumpTo(offset);
-    } else {
-      animateTo(
-        offset,
-        duration: duration,
-        curve: Curves.easeOutCirc,
-      );
+    final maxOffset = position.viewportDimension * 2;
+    if ((offset - this.offset).abs() >= maxOffset) {
+      jumpTo(maxOffset);
     }
+    animateTo(
+      offset,
+      duration: duration,
+      curve: Curves.easeOutCirc,
+    );
   }
 
   void jumpToTop() {
