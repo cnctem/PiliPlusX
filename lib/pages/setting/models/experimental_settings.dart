@@ -46,6 +46,7 @@ const Map<String, String> pageName = {
   "/myReply": "我的回复",
   "/blackListPage": "黑名单",
   "/editProfile": "资料编辑",
+  "/logs": "运行日志",
   "/memberDynamics": "用户动态",
   "/followed": "共同关注",
   "/memberSearch": "用户搜索",
@@ -68,29 +69,12 @@ Future<void> _showAntiPeepDialog(
       values: pageName,
     ),
   );
-  res?.remove(null);
   if (res != null) {
     await GStorage.setting.put(
       SettingBoxKey.antiPeep,
       res.join(','),
     );
     setState();
-  }
-}
-
-Future<void> _selectAllAntiPeep(
-  BuildContext context,
-  VoidCallback setState,
-) async {
-  if (Pref.antiPeep.split(',').length == pageName.length) {
-    await GStorage.setting.put(
-      SettingBoxKey.antiPeep, ""
-    );
-  } else {
-    await GStorage.setting.put(
-      SettingBoxKey.antiPeep,
-      pageName.keys.join(',')
-    );
   }
 }
 
@@ -129,14 +113,8 @@ List<SettingsModel> experimentalSettings = [
   NormalModel(
     title: '系统防窥页面',
     leading: const Icon(Icons.remove_red_eye_outlined),
-    getSubtitle: () => '对特定界面启用防窥',
+    getSubtitle: () => '当前防窥页面：${Pref.antiPeep.split(',').map((item)=>pageName[item]).join('、')}',
     onTap: _showAntiPeepDialog,
-  ),
-  NormalModel(
-    title: '系统防窥页面全选',
-    leading: const Icon(Icons.remove_red_eye_outlined),
-    getSubtitle: () => '点击全选/全不选',
-    onTap: _selectAllAntiPeep,
   ),
   SwitchModel(
     title: '使用内置字体',
@@ -172,7 +150,7 @@ List<SettingsModel> experimentalSettings = [
       ),
     ),
   ),
-  NormalModel(
+    NormalModel(
     title: '后台下载离线缓存视频',
     subtitle: '接入鸿蒙后台任务，切换至后台不中断离线缓存视频下载（始终开启）',
     leading: const Icon(Icons.downloading),

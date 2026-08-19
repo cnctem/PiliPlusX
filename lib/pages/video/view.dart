@@ -1442,7 +1442,13 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   /// 状态栏显隐不再改变页面布局，避免旋转退出全屏时状态栏在动画末尾
   /// 显现导致画面下移。null 表示未捕获到（如移除安全边距场景），退化为 0。
   double? _fixedTopInset;
-  
+
+  /// 横屏/全屏时的视频区域高度：全屏时固定为窗口高度，
+  /// 不随系统栏显隐导致的 padding 变化而变，避免旋转后画面跳动。
+  double get _landscapeHeight => isFullScreen
+      ? maxHeight
+      : maxHeight - (isWindowMode && !isPortrait ? 0 : padding.top);
+
   @override
   Widget build(BuildContext context) {
     Widget child;
