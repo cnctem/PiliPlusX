@@ -1,82 +1,9 @@
 import 'package:PiliPlus/pages/setting/models/model.dart';
-import 'package:PiliPlus/pages/setting/widgets/multi_select_dialog.dart';
 import 'package:PiliPlus/utils/extension/get_ext.dart';
-import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
-import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
-
-const Map<String, String> pageName = {
-  "/": "首页",
-  "/videoV": "视频播放",
-  "/home": "首页(推荐)",
-  "/hot": "热门",
-  "/search": "搜索",
-  "/searchResult": "搜索结果",
-  "/fav": "收藏夹",
-  "/favDetail": "收藏内容",
-  "/favSearch": "收藏搜索",
-  "/dynamics": "动态",
-  "/dynamicDetail": "动态详情",
-  "/history": "历史记录",
-  "/historySearch": "历史搜索",
-  "/later": "稍后再看",
-  "/laterSearch": "稍后再看搜索",
-  "/member": "用户中心",
-  "/follow": "关注列表",
-  "/followSearch": "关注搜索",
-  "/fan": "粉丝列表",
-  "/whisper": "私信",
-  "/whisperDetail": "私信详情",
-  "/replyMe": "回复我的",
-  "/atMe": "提到的我",
-  "/likeMe": "收到的赞",
-  "/msgLikeDetail": "点赞详情",
-  "/sysMsg": "系统消息",
-  "/loginPage": "登录",
-  "/liveRoom": "直播间",
-  "/webview": "网页浏览",
-  "/articlePage": "专栏阅读",
-  "/articleList": "专栏列表",
-  "/download": "下载管理",
-  "/subscription": "订阅",
-  "/subDetail": "订阅详情",
-  "/myReply": "我的回复",
-  "/blackListPage": "黑名单",
-  "/editProfile": "资料编辑",
-  "/logs": "运行日志",
-  "/memberDynamics": "用户动态",
-  "/followed": "共同关注",
-  "/memberSearch": "用户搜索",
-  "/dynTopic": "动态话题",
-  "/musicDetail": "音乐详情",
-  "/audio": "音频播放",
-  "/mainReply": "评论详情",
-  "/popularSeries": "入站必刷",
-};
-
-Future<void> _showAntiPeepDialog(
-  BuildContext context,
-  VoidCallback setState,
-) async {
-  final res = await showDialog<Set<String>>(
-    context: context,
-    builder: (context) => MultiSelectDialog<String>(
-      title: '防窥页面选择',
-      initValues: Pref.antiPeep.split(","),
-      values: pageName,
-    ),
-  );
-  if (res != null) {
-    await GStorage.setting.put(
-      SettingBoxKey.antiPeep,
-      res.join(','),
-    );
-    setState();
-  }
-}
 
 List<SettingsModel> experimentalSettings = [
   SwitchModel(
@@ -109,12 +36,6 @@ List<SettingsModel> experimentalSettings = [
     leading: Icon(Icons.vertical_align_top_outlined),
     setKey: SettingBoxKey.enableStatusBarTapToTop,
     defaultVal: false,
-  ),
-  NormalModel(
-    title: '系统防窥页面',
-    leading: const Icon(Icons.remove_red_eye_outlined),
-    getSubtitle: () => '当前防窥页面：${Pref.antiPeep.split(',').map((item)=>pageName[item]).join('、')}',
-    onTap: _showAntiPeepDialog,
   ),
   SwitchModel(
     title: '使用内置字体',

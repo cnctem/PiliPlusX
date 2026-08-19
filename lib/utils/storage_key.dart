@@ -7,8 +7,7 @@ abstract final class SettingBoxKey {
       enableHdsBar = 'enableHdsBar',
       enableHdsTopBar = 'enableHdsTopBar',
       useBuiltInFont = 'useBuiltInFont',
-      enableHeroCoverAnimation = 'enableHeroCoverAnimation',
-      antiPeep = "antiPeep";
+      enableHeroCoverAnimation = 'enableHeroCoverAnimation';
 
   static const String btmProgressBehavior = 'btmProgressBehavior',
       defaultVideoQa = 'defaultVideoQa',

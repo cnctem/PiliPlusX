@@ -41,10 +41,6 @@
       "value": "智感握姿需要根据握持手势调整界面布局"
     },
     {
-      "name": "dlp_anti_peep_reason",
-      "value": "用于启用页面防窥"
-    },
-    {
       "name": "no_matter",
       "value": "no matter"
     },
