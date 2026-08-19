@@ -77,13 +77,13 @@ abstract final class ThemeUtils {
       // 按区间直接映射到 FontWeight，超出范围的值自动取下限(w100)或上限(w900)
       if (systemScale <= 0.75) {
         fontWeight = FontWeight.w100;
-      } else if (systemScale <= 0.85) {
+      } else if (systemScale <= 0.8) {
         fontWeight = FontWeight.w200;
-      } else if (systemScale <= 0.95) {
+      } else if (systemScale <= 0.9) {
         fontWeight = FontWeight.w300;
-      } else if (systemScale <= 1.05) {
+      } else if (systemScale <= 1.1) {
         fontWeight = FontWeight.w400;
-      } else if (systemScale <= 1.15) {
+      } else if (systemScale <= 1.2) {
         fontWeight = FontWeight.w500;
       } else if (systemScale <= 1.3) {
         fontWeight = FontWeight.w600;
