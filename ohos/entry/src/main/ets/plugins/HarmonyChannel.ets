@@ -8,6 +8,8 @@ import AbilityConstant from "@ohos.app.ability.AbilityConstant";
 import Want from "@ohos.app.ability.Want";
 import ConfigurationConstant from "@ohos.app.ability.ConfigurationConstant";
 import { backgroundTaskManager } from "@kit.BackgroundTasksKit";
+import { dlpAntiPeep } from '@kit.DeviceSecurityKit';
+import { promptAction } from '@kit.ArkUI';
 import window from "@ohos.window";
 import {
   Any,
@@ -155,6 +157,13 @@ export default class HarmonyChannel implements FlutterPlugin {
         const mode: number = call.argument('mode') ?? 0;
         AppStorage.setOrCreate('dynBadgeCount', count);
         AppStorage.setOrCreate('dynBadgeMode', mode);
+        result.success(true);
+        break;
+      }
+      case "setAntiPeep": {
+        const isAntiPeep: boolean = call.argument('isAntiPeep') ?? false;
+        this.setAntiPeep(isAntiPeep);
+
         result.success(true);
         break;
       }
@@ -404,6 +413,43 @@ export default class HarmonyChannel implements FlutterPlugin {
 
   private stopBackgroundTaskInner(): void {
     this.enqueueBgTask(false);
+  }
+
+  private async setAntiPeep(isAntiPeep: boolean): Promise<void> {
+    if (!isAntiPeep) {
+      try {
+        dlpAntiPeep.off('dlpAntiPeep');
+      } catch (err) {
+        const e = err as BusinessError;
+        console.error(`disableAntiPeep failed. Code: ${e.code}, message: ${e.message}`);
+      }
+      return;
+    }
+    const context = getContext() as common.UIAbilityContext;
+    if (!canIUse('SystemCapability.Security.DlpAntiPeep')) {
+      promptAction.showToast({ message: '当前设备不支持防窥保护' });
+      return;
+    }
+
+    try {
+      const isOpen = await dlpAntiPeep.isDlpAntiPeepSwitchOn();
+      if (!isOpen) {
+        const result = await dlpAntiPeep.requestAntiPeepOptions(context);
+        if (result !== dlpAntiPeep.AntiPeepOptionsResult.SUCCESS
+          && result !== dlpAntiPeep.AntiPeepOptionsResult.ALREADY_ON) {
+          return;
+        }
+      }
+
+      dlpAntiPeep.on('dlpAntiPeep', (status: dlpAntiPeep.DlpAntiPeepStatus) => {
+        if (status === dlpAntiPeep.DlpAntiPeepStatus.HIDE) {
+          promptAction.showToast({ message: '检测到有人在窥屏，请注意隐私' });
+        }
+      });
+    } catch (err) {
+      const e = err as BusinessError;
+      console.error(`enableAntiPeep failed. Code: ${e.code}, message: ${e.message}`);
+    }
   }
 
   /**

@@ -219,6 +219,10 @@ abstract class HarmonyChannel {
   /// 停止长时任务
   static Future<void> stopBackgroundTask() => _invoke('stopBackgroundTask');
 
+  /// 设置页面隐私/防窥状态
+  static Future<void> setAntiPeep(bool isAntiPeep) =>
+      _invoke('setAntiPeep', {'isAntiPeep': isAntiPeep});
+
   /// 取走 ETS 侧暂存的接续数据并跳转视频页。冷启动在首帧后调用，
   /// 热启动由 onContinuationRestore 推送触发；数据取走即清除，不会重复跳转。
   static Future<void> checkPendingContinuation() async {

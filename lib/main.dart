@@ -55,6 +55,9 @@ WebViewEnvironment? webViewEnvironment;
 
 EdgeInsets? tmpPadding;
 
+//当前防窥状态
+bool isAntiPeep = false;
+
 Future<void> _initDownPath() async {
   if (PlatformUtils.isDesktop) {
     final customDownPath = Pref.downloadPath;
@@ -320,6 +323,16 @@ class MyApp extends StatelessWidget {
       scrollBehavior: PlatformUtils.isDesktop
           ? const CustomScrollBehavior()
           : null,
+      routingCallback: (routing) {
+        final isCurAntiPeep = Pref.antiPeep.split(',').contains(routing?.current);
+        if (isAntiPeep && !isCurAntiPeep) {
+          isAntiPeep = false;
+          HarmonyChannel.setAntiPeep(false);
+        } else if (!isAntiPeep && isCurAntiPeep) {
+          isAntiPeep = true;
+          HarmonyChannel.setAntiPeep(true);
+        }
+      },
     );
   }
 

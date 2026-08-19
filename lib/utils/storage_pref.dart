@@ -772,6 +772,9 @@ abstract final class Pref {
   static bool get showActualVolume =>
       _setting.get(SettingBoxKey.showActualVolume, defaultValue: false);
 
+  static String get antiPeep => 
+      _setting.get(SettingBoxKey.antiPeep, defaultValue: "");
+
   static bool get useBuiltInFont =>
       _setting.get(SettingBoxKey.useBuiltInFont, defaultValue: true);
 
