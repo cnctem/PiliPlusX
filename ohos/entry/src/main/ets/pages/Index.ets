@@ -93,6 +93,8 @@ struct Index {
   @State winWidth: number = 0;
   @State winHeight: number = 0;
   @State bottomAvoidAreaHeight: number = 0;
+  @State bgColor: ResourceColor = $r("app.color.start_window_background")
+
   private categoryController: TabsController = new TabsController();
   private controller: HdsTabsController = new HdsTabsController();
   private win: window.Window | null = null;
@@ -174,6 +176,9 @@ struct Index {
     }).catch((err: Object) => {
       console.error(TAG, `getLastWindow failed: ${err}`);
     });
+    setTimeout((): void => {
+      this.bgColor = Color.Black
+    }, 3000)
   }
 
   aboutToDisappear(): void {
@@ -448,7 +453,7 @@ struct Index {
   build() {
     Stack({ alignContent: Alignment.TopStart }) {
       Stack({ alignContent: Alignment.Bottom }) {
-        FlutterPage({ viewId: this.viewId })
+        FlutterPage({ viewId: this.viewId, xComponentRenderFit: RenderFit.TOP})
           .width('100%')
           .height('100%')
         if (this.useNativeTabs && deviceInfo.sdkApiVersion >= 23) {
@@ -465,6 +470,7 @@ struct Index {
       }
       .width('100%')
       .height('100%')
+      .backgroundColor(this.bgColor)
 
       if (this.useNativeTopBar && deviceInfo.sdkApiVersion >= 26) {
         this.homeTopBar()
