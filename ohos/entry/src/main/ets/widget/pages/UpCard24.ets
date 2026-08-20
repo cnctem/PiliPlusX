@@ -122,6 +122,7 @@ struct UpCard24 {
           Blank()
           Column() {
             SymbolGlyph($r('sys.symbol.arrow_clockwise'))
+              .fontColor([$r('sys.color.icon_primary')])
               .fontSize('38px')
           }
           .width(24)
