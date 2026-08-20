@@ -15,9 +15,11 @@ import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:catcher_2/catcher_2.dart';
 import 'package:catcher_2/utils/log_printer.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:os_type/os_type.dart';
 
 const _snackBarDisplayDuration = Duration(seconds: 1);
 
@@ -40,13 +42,31 @@ class _LogsPageState extends State<LogsPage> {
     super.initState();
   }
 
-  void _initDeviceInfo() {
+  Future<void> _initDeviceInfo() async {
     if (Catcher2.instance case final c?) {
-      _deviceInfo = _ExpandedItem((
-        c.deviceParameters,
-        c.applicationParameters,
-        c.customParameters,
-      ));
+      if (OS.isHarmony) {
+        try {
+          final Map<String, dynamic> ohosDeviceParameters = {};
+          final ohosInfo = await DeviceInfoPlugin().ohosInfo;
+          ohosDeviceParameters["sdkApiVersion"] = ohosInfo.sdkApiVersion;
+          ohosDeviceParameters["deviceType"] = ohosInfo.deviceType;
+          ohosDeviceParameters["marketName"] = ohosInfo.marketName;
+          ohosDeviceParameters["osFullName"] = ohosInfo.osFullName;
+          _deviceInfo = _ExpandedItem((
+            ohosDeviceParameters,
+            c.applicationParameters,
+            c.customParameters,
+          ));
+        } catch (exception) {
+          logger.w("Couldn't load ohos device info", error: exception);
+        }
+      } else {
+        _deviceInfo = _ExpandedItem((
+          c.deviceParameters,
+          c.applicationParameters,
+          c.customParameters,
+        ));
+      }
     }
   }
 
