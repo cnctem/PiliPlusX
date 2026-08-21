@@ -44,13 +44,12 @@ class _SimpleScaffoldState extends State<SimpleScaffold>
 
   @override
   void handleStatusBarTap() {
+    super.handleStatusBarTap();
+    if (!_hitTestableAtOrigin()) return;
     final primaryScrollController = PrimaryScrollController.maybeOf(context);
-    if (primaryScrollController == null ||
-        !primaryScrollController.hasClients ||
-        !_hitTestableAtOrigin()) {
-      return;
+    if (primaryScrollController?.hasClients == true) {
+      primaryScrollController!.animToTop();
     }
-    primaryScrollController.animToTop();
   }
 
   bool _hitTestableAtOrigin() {

@@ -82,10 +82,10 @@ class EpisodePanel extends CommonSlidePage {
   final VoidCallback? onClose;
 
   @override
-  State<EpisodePanel> createState() => _EpisodePanelState();
+  State<EpisodePanel> createState() => EpisodePanelState();
 }
 
-class _EpisodePanelState extends State<EpisodePanel>
+class EpisodePanelState extends State<EpisodePanel>
     with TickerProviderStateMixin, CommonSlideMixin {
   // tab
   late final TabController _tabController;
@@ -271,6 +271,15 @@ class _EpisodePanelState extends State<EpisodePanel>
       return 157; // 110 + 2 + 10 + 35
     }
     return 112;
+  }
+
+  void animToTop() {
+    _itemScrollController[_tabController.index].animToTop();
+  }
+
+  @override
+  void onStatusBarTap() {
+    animToTop();
   }
 
   Widget _buildBody(

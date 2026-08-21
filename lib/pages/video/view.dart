@@ -171,6 +171,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   final videoReplyPanelKey = GlobalKey();
   final videoRelatedKey = GlobalKey();
   final videoIntroKey = GlobalKey();
+  final _seasonPartPanelKey = GlobalKey<EpisodePanelState>();
+  final _seasonPanelKey = GlobalKey<EpisodePanelState>();
 
   Worker? _pipModeWorker;
 
@@ -280,6 +282,21 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     if (_lifecycleState != AppLifecycleState.resumed) return;
     if (videoDetailController.scrollCtr.hasClients) {
       videoDetailController.animToTop();
+      return;
+    }
+
+    // 横屏分栏没有 ExtendedNestedScrollView，各 tab 是自己维护的列表
+    final hasIntroTab = !(videoDetailController.isVertical.value && !isPortrait);
+    final tabIndex = videoDetailController.tabCtr.index;
+    final replyIndex = hasIntroTab ? 1 : 0;
+    final seasonIndex = replyIndex + (videoDetailController.showReply ? 1 : 0);
+    if (hasIntroTab && tabIndex == 0) {
+      videoDetailController.introScrollCtr?.animToTop();
+    } else if (tabIndex == replyIndex && videoDetailController.showReply) {
+      _videoReplyController.animateToTop();
+    } else if (tabIndex == seasonIndex && _shouldShowSeasonPanel) {
+      _seasonPartPanelKey.currentState?.animToTop();
+      _seasonPanelKey.currentState?.animToTop();
     }
   }
 
@@ -1443,12 +1460,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   /// 显现导致画面下移。null 表示未捕获到（如移除安全边距场景），退化为 0。
   double? _fixedTopInset;
 
-  /// 横屏/全屏时的视频区域高度：全屏时固定为窗口高度，
-  /// 不随系统栏显隐导致的 padding 变化而变，避免旋转后画面跳动。
-  double get _landscapeHeight => isFullScreen
-      ? maxHeight
-      : maxHeight - (isWindowMode && !isPortrait ? 0 : padding.top);
-
   @override
   Widget build(BuildContext context) {
     Widget child;
@@ -1998,6 +2009,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                     showTitle: false,
                     isSupportReverse: videoDetailController.isUgc,
                     onReverse: () => onReversePlay(isSeason: false),
+                    key: _seasonPartPanelKey,
                   ),
                 ),
               ),
@@ -2013,7 +2025,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Obx(
                 () => SeasonPanel(
-                  key: ValueKey(introController.videoDetail.value),
                   heroTag: heroTag,
                   canTap: false,
                   showEpisodes: showEpisodes,
@@ -2049,6 +2060,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                   showTitle: false,
                   isSupportReverse: videoDetailController.isUgc,
                   onReverse: () => onReversePlay(isSeason: true),
+                  key: _seasonPanelKey,
                 ),
               ),
             ),

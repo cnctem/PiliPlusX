@@ -1,6 +1,7 @@
 import 'dart:math' show max;
 
 import 'package:PiliPlus/common/widgets/gesture/horizontal_drag_gesture_recognizer.dart';
+import 'package:PiliPlus/utils/extension/scroll_controller_ext.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/gestures.dart' show HorizontalDragGestureRecognizer;
 import 'package:flutter/material.dart';
@@ -21,6 +22,12 @@ mixin CommonSlideMixin<T extends CommonSlidePage> on State<T>, TickerProvider {
   late final bool enableSlide;
   late final AnimationController _animController;
   SlideDragGestureRecognizer? _slideDragGestureRecognizer;
+  late final WidgetsBindingObserver _statusBarTapObserver =
+      _CommonSlideStatusBarTapObserver(onTap: onStatusBarTap);
+
+  void onStatusBarTap() {
+    PrimaryScrollController.maybeOf(context)?.animToTop();
+  }
 
   static bool slideDismissReplyPage = Pref.slideDismissReplyPage;
 
@@ -34,6 +41,7 @@ mixin CommonSlideMixin<T extends CommonSlidePage> on State<T>, TickerProvider {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(_statusBarTapObserver);
     enableSlide = widget.enableSlide && slideDismissReplyPage;
     if (enableSlide) {
       _animController = AnimationController(
@@ -61,6 +69,7 @@ mixin CommonSlideMixin<T extends CommonSlidePage> on State<T>, TickerProvider {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(_statusBarTapObserver);
     if (enableSlide) {
       _animController.dispose();
       _slideDragGestureRecognizer?.dispose();
@@ -123,6 +132,17 @@ mixin CommonSlideMixin<T extends CommonSlidePage> on State<T>, TickerProvider {
     onPointerDown: (event) => _slideDragGestureRecognizer?.addPointer(event),
     child: buildList(theme),
   );
+}
+
+class _CommonSlideStatusBarTapObserver with WidgetsBindingObserver {
+  _CommonSlideStatusBarTapObserver({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  void handleStatusBarTap() {
+    if (Pref.enableStatusBarTapToTop) onTap();
+  }
 }
 
 typedef IsDxAllowed = bool Function(double dx);
