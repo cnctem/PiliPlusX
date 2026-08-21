@@ -1775,16 +1775,7 @@ class PlPlayerController with BlockConfigMixin {
       } else {
         if (PlatformUtils.isMobile) {
           if (!removeSafeArea) {
-            if (OS.isHarmony && isManualFS) {
-              // 手动退出：先恢复系统栏并等安全区变化在 Flutter 侧落定，
-              // 再旋转并切回普通布局，避免普通页 AppBar 在旋转结束后才增长。
-              // 自动退出（旋转回正触发）时旋转已在途中，跳过等待，
-              // 让状态栏变化被旋转动画盖住。
-              await showSystemBar();
-              await Future<void>.delayed(kSystemBarSettleDelay);
-            } else {
-              showSystemBar();
-            }
+            showSystemBar();
           }
           if (orientation == null && mode == .none) {
             return;

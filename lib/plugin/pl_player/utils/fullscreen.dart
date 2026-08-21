@@ -6,11 +6,6 @@ import 'package:flutter/services.dart'
     show SystemChrome, MethodChannel, SystemUiOverlay, DeviceOrientation;
 import 'package:os_type/os_type.dart';
 
-/// 鸿蒙侧系统栏显隐后，安全区变化传到 Flutter（MediaQuery padding）需要数帧。
-/// 退出全屏时等待该时长再旋转/切回普通布局，避免普通页 AppBar 在旋转结束后
-/// 才“长高”导致整体下移一跳。
-const Duration kSystemBarSettleDelay = Duration(milliseconds: 60);
-
 /// 竖屏全屏时的顶部避让高度：仅在全屏 + 竖屏 + 未移除安全边距时返回
 /// [topInset]（进全屏前捕获的状态栏/挖孔高度），否则返回 null（不避让）。
 /// 播控顶部组件与弹幕共用这一套判断，保证两处行为一致。
