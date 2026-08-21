@@ -174,10 +174,11 @@ export default class HarmonyChannel implements FlutterPlugin {
           break;
         }
         const hidden: boolean = call.argument('hidden') ?? false;
+        const force: boolean = call.argument('force') ?? false;
         AppStorage.setOrCreate('shellBarsHidden', hidden);
         // 沉浸光感顶栏与底栏共用此显隐信号：底栏直接隐藏，
         // 顶栏按「是否首页 + 窗口宽高比」在 ArkTS 侧多级分支。
-        this.syncTopBarVisibility(hidden);
+        this.syncTopBarVisibility(hidden,force);
         result.success(true);
         break;
       }
@@ -472,7 +473,7 @@ export default class HarmonyChannel implements FlutterPlugin {
    * - 显示 + 宽高比 9/16 ~ 1:1：放下 + 显示顶栏
    * - 显示 + 宽高比 9/16 ~ 1:1 以外：仅显示顶栏
    */
-  private syncTopBarVisibility(hidden: boolean): void {
+  private syncTopBarVisibility(hidden: boolean, force: boolean): void {
     // 顶栏未启用或不处于首页时不处理
     if (AppStorage.get('useNativeTopBar') !== true || !this.topBarIsHome) {
       return;
@@ -485,6 +486,10 @@ export default class HarmonyChannel implements FlutterPlugin {
     const aspect = width / height;
     const portrait = aspect < 1.0;
     const tall = aspect < 9 / 16; // 竖长屏
+    if (force) {
+      AppStorage.setOrCreate('topBarHidden', hidden);
+      return;
+    }
     if (hidden) {
       if (tall) {
         return;
