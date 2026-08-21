@@ -119,15 +119,15 @@ abstract class HarmonyChannel {
 
   /// 控制原生 HDS 底栏/顶栏的显隐（弹窗、全屏页等场景）
   static Future<void> setShellBarsHidden(
-    bool hidden, {
-    bool retry = false,
-  }) async {
+    bool hidden, 
+    {bool retry = false, bool force = false,}
+  ) async {
     if (!OS.isHarmony) return;
     _hiddenByPage = hidden;
     final int total = retry ? 8 : 1;
     for (int i = 0; i < total; i++) {
       try {
-        _channel.invokeMethod('setShellBarsHidden', {'hidden': hidden});
+        _channel.invokeMethod('setShellBarsHidden', {'hidden': hidden,'force': force});
         return;
       } catch (_) {
         if (i == total - 1) return;
