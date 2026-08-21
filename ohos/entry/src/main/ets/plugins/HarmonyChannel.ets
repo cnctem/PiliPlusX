@@ -1,4 +1,4 @@
-import { common, wantAgent, WantAgent } from "@kit.AbilityKit";
+import { common, wantAgent, WantAgent, OpenLinkOptions } from "@kit.AbilityKit";
 import { BusinessError, deviceInfo } from "@kit.BasicServicesKit";
 import { http } from "@kit.NetworkKit";
 import { util } from "@kit.ArkTS";
@@ -299,6 +299,12 @@ export default class HarmonyChannel implements FlutterPlugin {
         result.success(true);
         break;
       }
+      case "launchAnyUrl": {
+        const link: string = call.argument('link') ?? '';
+        this.launchAnyUrl(link);
+        result.success(true);
+        break;
+      }
       default:
         result.notImplemented();
         break;
@@ -503,6 +509,20 @@ export default class HarmonyChannel implements FlutterPlugin {
       AppStorage.setOrCreate('topBarHidden', false);
     }
   }
+
+  private launchAnyUrl(link: string) {
+
+    const context = getContext() as common.UIAbilityContext;
+
+    let openLinkOptions: OpenLinkOptions = {
+      appLinkingOnly: false,
+    };
+
+    try {
+      context.openLink(link, openLinkOptions)
+    } catch (e) { }
+  }
+
 
   public changeTabIndex(index: number): void {
     const context = getContext() as common.UIAbilityContext;

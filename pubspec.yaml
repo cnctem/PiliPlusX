@@ -17,7 +17,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
 # update when release
-version: 2.1.0+5713
+version: 2.1.0+5716
 
 environment:
   sdk: ">=3.11.1"
@@ -64,8 +64,7 @@ dependencies:
 
   # 存储
   path_provider: ^2.1.5
-  hive_ce: ^2.2.3
-  hive_flutter: ^1.1.0
+  hive_ce: ^2.19.3
 
   # 设备信息
   device_info_plus: ^10.1.0
@@ -252,6 +251,7 @@ dependencies:
   battery_plus: ^7.0.0
   battery_plus_ohos: ^0.0.3
   material_new_shapes: ^1.0.0
+  # material_ui: ^0.0.1
 
   vector_math: any
   fixnum: any
@@ -290,7 +290,7 @@ dependency_overrides:
     git:
       url: https://gitcode.com/openharmony-tpc/flutter_packages.git
       path: packages/video_player/video_player
-      ref: br_video_player-v2.9.2_ohos
+      ref: br_video_player-v2.11.1_ohos
   url_launcher: # 打开链接.鸿蒙适配
     git:
       url: https://gitcode.com/openharmony-tpc/flutter_packages.git
@@ -395,7 +395,7 @@ dev_dependencies:
   flutter_lints: ^2.0.0
   flutter_launcher_icons: ^0.14.4
   # hive_generator: ^2.0.1
-  build_runner: 2.4.13
+  build_runner: ^2.10.3
   flutter_native_splash: ^2.4.6
 
 flutter_launcher_icons:
