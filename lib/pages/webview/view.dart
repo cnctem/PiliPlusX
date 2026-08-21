@@ -1,6 +1,7 @@
 import 'dart:io' show Platform;
 
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
+import 'package:PiliPlus/common/widgets/scale_app.dart';
 import 'package:PiliPlus/common/widgets/selection_text.dart';
 import 'package:PiliPlus/http/browser_ua.dart';
 import 'package:PiliPlus/main.dart';
@@ -51,6 +52,8 @@ class _WebviewPageState extends State<WebviewPage> {
     caseSensitive: false,
   );
 
+  late final double _previousScaleFactor;
+
   @override
   void initState() {
     super.initState();
@@ -61,6 +64,12 @@ class _WebviewPageState extends State<WebviewPage> {
           'mob' => BrowserUa.mob,
           _ => BrowserUa.platform,
         };
+    // CPF适配的Flutter在鸿蒙环境下对于flutter应用内调整了缩放比例（非1.0）的情况下platformview的视图大小会出现异常，非hcpp模式下会导致触摸漂移
+    // 需要主动调整缩放比例规避问题
+    _previousScaleFactor = ScaledWidgetsFlutterBinding.instance.scaleFactor;
+    if (_previousScaleFactor != 1.0) {
+      ScaledWidgetsFlutterBinding.instance.scaleFactor = 1.0;
+    }
     if (Get.arguments case final Map map) {
       _inApp = map['inApp'] ?? false;
       _off = map['off'] ?? false;
@@ -70,6 +79,11 @@ class _WebviewPageState extends State<WebviewPage> {
   @override
   void dispose() {
     _webViewController = null;
+    // CPF适配的Flutter在鸿蒙环境下对于flutter应用内调整了缩放比例（非1.0）的情况下platformview的视图大小会出现异常，非hcpp模式下会导致触摸漂移
+    // 需要主动调整缩放比例规避问题
+    if (_previousScaleFactor != 1.0) {
+      ScaledWidgetsFlutterBinding.instance.scaleFactor = _previousScaleFactor;
+    }
     super.dispose();
   }
 
@@ -170,6 +184,7 @@ class _WebviewPageState extends State<WebviewPage> {
               ],
             ),
       body: SafeArea(
+        top: false, // 屏蔽顶部的safearea，平板设备会异常带上safearea
         child: InAppWebView(
           webViewEnvironment: webViewEnvironment,
           initialSettings: InAppWebViewSettings(
