@@ -7,8 +7,6 @@ import 'package:PiliPlus/common/widgets/custom_icon.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart'
     show RichTextType;
 import 'package:PiliPlus/common/widgets/flutter/text_field/text_field.dart';
-import 'package:PiliPlus/common/widgets/scroll_physics.dart'
-    show platformClampingPhysics;
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/grpc/bilibili/main/community/reply/v1.pb.dart'
     show ReplyInfo;
@@ -286,7 +284,7 @@ class _ReplyPageState extends CommonRichTextPubPageState<ReplyPage> {
     return SizedBox(
       height: height,
       child: GridView(
-        physics: platformClampingPhysics,
+        physics: const ClampingScrollPhysics(),
         padding: const EdgeInsets.only(left: 12, bottom: 12, right: 12),
         gridDelegate: gridDelegate,
         children: [

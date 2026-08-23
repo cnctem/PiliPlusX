@@ -8,8 +8,6 @@ import 'package:PiliPlus/common/widgets/flutter/draggable_scrollable_sheet.dart'
 import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/text_field.dart';
 import 'package:PiliPlus/common/widgets/pair.dart';
-import 'package:PiliPlus/common/widgets/scroll_physics.dart'
-    show platformClampingPhysics;
 import 'package:PiliPlus/common/widgets/time_picker.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/http/dynamics.dart';
@@ -147,7 +145,7 @@ class _CreateDynPanelState extends CommonRichTextPubPageState<CreateDynPanel> {
           child: ListView(
             padding: EdgeInsets.zero,
             controller: widget.scrollController,
-            physics: platformClampingPhysics,
+            physics: const ClampingScrollPhysics(),
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -638,7 +636,7 @@ class _CreateDynPanelState extends CommonRichTextPubPageState<CreateDynPanel> {
     return SizedBox(
       height: height,
       child: GridView(
-        physics: platformClampingPhysics,
+        physics: const ClampingScrollPhysics(),
         padding: const EdgeInsets.only(left: 12, bottom: 12, right: 12),
         gridDelegate: SliverGridDelegateWithExtentAndRatio(
           maxCrossAxisExtent: 65,

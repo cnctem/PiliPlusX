@@ -1,8 +1,6 @@
 import 'package:PiliPlus/common/widgets/flutter/draggable_scrollable_sheet.dart';
 import 'package:PiliPlus/common/widgets/flutter/text_field/text_field.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
-import 'package:PiliPlus/common/widgets/scroll_physics.dart'
-    show platformClampingPhysics;
 import 'package:PiliPlus/http/dynamics.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models/common/publish_panel_type.dart';
@@ -104,7 +102,7 @@ class _RepostPanelState extends CommonRichTextPubPageState<RepostPanel> {
             child: ListView(
               padding: EdgeInsets.zero,
               controller: scrollController,
-              physics: platformClampingPhysics,
+              physics: const ClampingScrollPhysics(),
               children: _buildEditPanel(theme),
             ),
           ),
