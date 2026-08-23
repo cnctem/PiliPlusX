@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:os_type/os_type.dart';
 
 class WebviewPage extends StatefulWidget {
   const WebviewPage({
@@ -262,7 +263,7 @@ class _WebviewPageState extends State<WebviewPage> {
             //   ''',
             // );
           },
-          onDownloadStartRequest: Platform.isAndroid
+          onDownloadStartRequest: Platform.isAndroid || OS.isHarmony
               ? (controller, request) {
                   showDialog(
                     context: context,
