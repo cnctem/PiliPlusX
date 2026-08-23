@@ -294,10 +294,6 @@ abstract class HarmonyChannel {
     });
   }
 
-  /// 跳转链接至其它应用
-  static Future<void> launchAnyUrl(String link) =>
-      _invoke('launchAnyUrl', {'link': link});
-
   /// 获取系统当前字重设置（仅 Harmony 平台）
   static Future<void> initSystemFontWeight() =>
       _invoke('getSystemFontWeightScale');
