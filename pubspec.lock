@@ -398,6 +398,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.0.9"
+  cupertino_ui:
+    dependency: "direct main"
+    description:
+      path: "packages/cupertino_ui"
+      relative: true
+    source: path
+    version: "1.0.0"
   dart_style:
     dependency: transitive
     description:
@@ -1182,6 +1189,13 @@ packages:
       sha256: e4bc375205e187e8fb232573387112dd8c0dd45b03af8aa2b3c79eb4b9e3e0dc
       url: "https://pub.flutter-io.cn"
     source: hosted
+    version: "1.0.0"
+  material_ui:
+    dependency: "direct main"
+    description:
+      path: "packages/material_ui"
+      relative: true
+    source: path
     version: "1.0.0"
   media_kit:
     dependency: "direct main"

@@ -1,6 +1,6 @@
 import 'package:PiliPlus/common/assets.dart';
 import 'package:PiliPlus/common/widgets/selection_text.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class HttpError extends StatelessWidget {
@@ -44,7 +44,6 @@ class HttpError extends StatelessWidget {
             style: FilledButton.styleFrom(
               tapTargetSize: MaterialTapTargetSize.padded,
               backgroundColor: theme.colorScheme.primary.withAlpha(20),
-              shadowColor: Colors.transparent,
             ),
             child: Text(
               btnText ?? '点击重试',

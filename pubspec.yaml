@@ -17,7 +17,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
 # update when release
-version: 2.1.0+5718
+version: 2.1.1+5719
 
 environment:
   sdk: ">=3.11.1"
@@ -35,6 +35,15 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+
+  # Flutter 3.47 起 Material/Cupertino 被拆成独立 pub 包，上上游已全量迁移。
+  # 鸿蒙 fork 仍在 3.41，这里用仓库内的本地 shim 把这两个包名映射回 SDK 内置
+  # 实现，从而可以原样接受上游的 import 写法（详见 packages/*/pubspec.yaml）。
+  # 鸿蒙升到 3.47 后改回 `^1.0.0` 并删掉 packages/ 下两个目录即可。
+  material_ui:
+    path: packages/material_ui
+  cupertino_ui:
+    path: packages/cupertino_ui
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.9
@@ -251,7 +260,6 @@ dependencies:
   battery_plus: ^7.0.0
   battery_plus_ohos: ^0.0.3
   material_new_shapes: ^1.0.0
-  # material_ui: ^0.0.1
 
   vector_math: any
   fixnum: any

@@ -3,7 +3,7 @@ import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:hive_ce/hive.dart';
@@ -89,6 +89,9 @@ class _SetDisplayModeState extends State<SetDisplayMode> {
               groupValue: preferred,
               child: ListView.builder(
                 itemCount: modes.length,
+                padding: .only(
+                  bottom: MediaQuery.viewPaddingOf(context).bottom,
+                ),
                 itemBuilder: (context, index) {
                   final DisplayMode mode = modes[index];
                   return RadioListTile<DisplayMode>(

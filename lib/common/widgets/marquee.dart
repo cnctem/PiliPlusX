@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -226,17 +226,25 @@ abstract class MarqueeRender extends RenderBox
       if (_spacing.isNegative) _spacing *= -size.height;
     }
 
+    final hasTicker = this.hasTicker;
     if (_distance > 0) {
       updateSize();
       _ticker.initIfNeeded(_onTick);
-      markNeedsCompositingBitsUpdate();
+      if (!hasTicker) {
+        markNeedsCompositingBitsUpdate();
+      }
     } else {
       _ticker.cancel();
+      if (hasTicker) {
+        markNeedsCompositingBitsUpdate();
+      }
     }
   }
 
+  bool get hasTicker => _ticker._ticker != null;
+
   @override
-  bool get isRepaintBoundary => _ticker._ticker != null;
+  bool get isRepaintBoundary => hasTicker;
 
   void paintCenter(PaintingContext context, Offset offset) {
     if (_direction == Axis.horizontal) {

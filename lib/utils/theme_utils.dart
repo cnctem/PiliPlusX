@@ -2,9 +2,9 @@ import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
-import 'package:flutter/cupertino.dart' show CupertinoThemeData;
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoThemeData;
 import 'package:flutter/foundation.dart' show PlatformDispatcher;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:os_type/os_type.dart';
 
@@ -103,7 +103,7 @@ abstract final class ThemeUtils {
       fontWeight: fontWeight,
       fontFamily: fontFamily,
     );
-    ThemeData themeData = ThemeData(
+    ThemeData theme = ThemeData(
       colorScheme: colorScheme,
       useMaterial3: true,
       fontFamily: fontFamily,
@@ -139,39 +139,38 @@ abstract final class ThemeUtils {
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        surfaceTintColor: isDynamic ? colorScheme.onSurfaceVariant : null,
+        surfaceTintColor: isDark ? colorScheme.surfaceContainerHighest : null,
       ),
       snackBarTheme: SnackBarThemeData(
-        actionTextColor: colorScheme.primary,
-        backgroundColor: colorScheme.secondaryContainer,
-        closeIconColor: colorScheme.secondary,
-        contentTextStyle: TextStyle(color: colorScheme.onSecondaryContainer),
         elevation: 20,
+        actionTextColor: colorScheme.primary,
+        closeIconColor: colorScheme.secondary,
+        backgroundColor: colorScheme.secondaryContainer,
+        contentTextStyle: TextStyle(color: colorScheme.onSecondaryContainer),
       ),
       popupMenuTheme: PopupMenuThemeData(
-        surfaceTintColor: isDynamic ? colorScheme.onSurfaceVariant : null,
+        surfaceTintColor: isDark ? colorScheme.surfaceContainerHighest : null,
       ),
       cardTheme: CardThemeData(
         elevation: 1,
         margin: EdgeInsets.zero,
-        surfaceTintColor: isDynamic
-            ? colorScheme.onSurfaceVariant
-            : isDark
-            ? colorScheme.onSurfaceVariant
-            : null,
         shadowColor: Colors.transparent,
+        surfaceTintColor: isDark ? colorScheme.onSurfaceVariant : null,
       ),
-      progressIndicatorTheme: ProgressIndicatorThemeData(
-        // ignore: deprecated_member_use
-        year2023: false,
-        refreshBackgroundColor: colorScheme.onSecondary,
-      ),
+      progressIndicatorTheme: isDark
+          ? ProgressIndicatorThemeData(
+              // ignore: deprecated_member_use
+              year2023: false,
+              refreshBackgroundColor: colorScheme.onInverseSurface,
+            )
+          // ignore: deprecated_member_use
+          : const ProgressIndicatorThemeData(year2023: false),
       dialogTheme: DialogThemeData(
         titleTextStyle: TextStyle(
           fontSize: 18,
-          color: colorScheme.onSurface,
           fontWeight: fontWeight,
           fontFamily: fontFamily,
+          color: colorScheme.onSurface,
         ),
         backgroundColor: colorScheme.surface,
         constraints: const BoxConstraints(minWidth: 280, maxWidth: 420),
@@ -185,10 +184,7 @@ abstract final class ThemeUtils {
       // ignore: deprecated_member_use
       sliderTheme: const SliderThemeData(year2023: false),
       tooltipTheme: TooltipThemeData(
-        textStyle: const TextStyle(
-          color: Colors.white,
-          fontSize: 14,
-        ),
+        textStyle: const TextStyle(color: Colors.white, fontSize: 14),
         decoration: BoxDecoration(
           color: Colors.grey[700]!.withValues(alpha: 0.9),
           borderRadius: const BorderRadius.all(Radius.circular(4)),
@@ -207,53 +203,65 @@ abstract final class ThemeUtils {
           },
         ),
       ),
+      expansionTileTheme: const ExpansionTileThemeData(
+        shape: Border(),
+        collapsedShape: Border(),
+      ),
+      listTileTheme: const ListTileThemeData(controlAffinity: .leading),
+      filledButtonTheme: const FilledButtonThemeData(
+        style: ButtonStyle(
+          shadowColor: WidgetStatePropertyAll(Colors.transparent),
+        ),
+      ),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: ZoomPageTransitionsBuilder(),
+        },
+      ),
     );
-    if (isDark) {
-      if (Pref.isPureBlackTheme) {
-        themeData = darkenTheme(themeData);
-      }
+    if (isDark && Pref.isPureBlackTheme) {
+      return darkenTheme(theme);
     }
-    return themeData;
+    return theme;
   }
 
-  static ThemeData darkenTheme(ThemeData themeData) {
-    final colorScheme = themeData.colorScheme;
+  static ThemeData darkenTheme(ThemeData theme) {
+    final colorScheme = theme.colorScheme;
     final color = colorScheme.surfaceContainerHighest.darken(0.7);
-    return themeData.copyWith(
+    return theme.copyWith(
       canvasColor: Colors.black,
       scaffoldBackgroundColor: Colors.black,
-      appBarTheme: themeData.appBarTheme.copyWith(
+      appBarTheme: theme.appBarTheme.copyWith(
         backgroundColor: Colors.black,
       ),
-      cardTheme: themeData.cardTheme.copyWith(
-        color: Colors.black,
+      cardTheme: theme.cardTheme.copyWith(
+        color: colorScheme.surfaceContainer.darken(0.75),
       ),
-      dialogTheme: themeData.dialogTheme.copyWith(
+      dialogTheme: theme.dialogTheme.copyWith(backgroundColor: color),
+      bottomSheetTheme: theme.bottomSheetTheme.copyWith(
         backgroundColor: color,
       ),
-      bottomSheetTheme: themeData.bottomSheetTheme.copyWith(
+      bottomNavigationBarTheme: theme.bottomNavigationBarTheme.copyWith(
         backgroundColor: color,
       ),
-      bottomNavigationBarTheme: themeData.bottomNavigationBarTheme.copyWith(
+      navigationBarTheme: theme.navigationBarTheme.copyWith(
         backgroundColor: color,
       ),
-      navigationBarTheme: themeData.navigationBarTheme.copyWith(
-        backgroundColor: color,
-      ),
-      navigationRailTheme: themeData.navigationRailTheme.copyWith(
+      navigationRailTheme: theme.navigationRailTheme.copyWith(
         backgroundColor: Colors.black,
       ),
+      popupMenuTheme: theme.popupMenuTheme.copyWith(color: color),
       colorScheme: colorScheme.copyWith(
         primary: colorScheme.primary.darken(0.1),
         onPrimary: colorScheme.onPrimary.darken(0.1),
         primaryContainer: colorScheme.primaryContainer.darken(0.1),
         onPrimaryContainer: colorScheme.onPrimaryContainer.darken(0.1),
         inversePrimary: colorScheme.inversePrimary.darken(0.1),
-        secondary: colorScheme.secondary.darken(0.1),
-        onSecondary: colorScheme.onSecondary.darken(0.1),
-        secondaryContainer: colorScheme.secondaryContainer.darken(0.1),
-        onSecondaryContainer: colorScheme.onSecondaryContainer.darken(0.1),
-        error: colorScheme.error.darken(0.1),
+        secondary: colorScheme.secondary.darken(0.05),
+        onSecondary: colorScheme.onSecondary.darken(0.05),
+        secondaryContainer: colorScheme.secondaryContainer.darken(0.05),
+        onSecondaryContainer: colorScheme.onSecondaryContainer.darken(0.05),
+        error: colorScheme.error.darken(0.05),
         surface: Colors.black,
         onSurface: colorScheme.onSurface.darken(0.15),
         surfaceTint: colorScheme.surfaceTint.darken(),

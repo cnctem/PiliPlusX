@@ -9,7 +9,7 @@ import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/extension/three_dot_ext.dart';
 import 'package:PiliPlus/utils/theme_utils.dart';
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
@@ -112,7 +112,7 @@ class _WhisperPageState extends State<WhisperPage> {
     late final divider = Divider(
       indent: 72,
       endIndent: 20,
-      height: 1,
+      height: 0,
       color: Colors.grey.withValues(alpha: 0.1),
     );
     return switch (loadingState) {
@@ -173,9 +173,13 @@ class _WhisperPageState extends State<WhisperPage> {
                           isLabelVisible: count > 0,
                           label: Text(" $count "),
                           alignment: Alignment.topRight,
-                          child: CircleAvatar(
-                            radius: 22,
-                            backgroundColor: theme.colorScheme.onInverseSurface,
+                          child: Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              shape: .circle,
+                              color: theme.colorScheme.onInverseSurface,
+                            ),
                             child: Icon(
                               item.icon,
                               size: 20,

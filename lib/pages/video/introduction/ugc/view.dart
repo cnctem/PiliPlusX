@@ -41,7 +41,7 @@ import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/request_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -405,7 +405,7 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
             ),
             const TextSpan(text: ' '),
           ],
-          TextSpan(text: videoDetail.title ?? ''),
+          TextSpan(text: videoDetail.title),
         ],
       );
       if (isSelectable) {
@@ -825,8 +825,8 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
                     if (introController.staffRelations['status'] == true &&
                         introController.staffRelations['${item.mid}'] == null) {
                       return Material(
-                        type: .transparency,
-                        shape: const CircleBorder(),
+                        type: .circle,
+                        color: colorScheme.secondaryContainer,
                         child: InkWell(
                           customBorder: const CircleBorder(),
                           onTap: () => RequestUtils.actionRelationMod(
@@ -837,12 +837,8 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
                                 introController.staffRelations['${item.mid}'] =
                                     true,
                           ),
-                          child: Ink(
+                          child: Padding(
                             padding: const .all(2),
-                            decoration: BoxDecoration(
-                              color: colorScheme.secondaryContainer,
-                              shape: .circle,
-                            ),
                             child: Icon(
                               MdiIcons.plus,
                               size: 16,

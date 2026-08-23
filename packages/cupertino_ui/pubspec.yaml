@@ -1,0 +1,22 @@
+# 本地 shim 包：让上游 2.1.1 起使用的 `package:cupertino_ui/cupertino_ui.dart`
+# 在鸿蒙 Flutter 3.41 上直接解析到 SDK 内置的 Cupertino。
+#
+# 背景：Flutter 3.47 把 Material/Cupertino 从 SDK 拆成独立 pub 包，上游据此
+# 一次性改写了 500+ 个文件的 import。鸿蒙 fork 预计 2026-12 才会有 3.47，
+# 若每轮同步都把这些 import 反向还原成 flutter/material，鸿蒙侧 import 行
+# 将与上游永久不一致，导致此后每次同步、每个双方都改过的文件都在 import
+# 块上冲突。改用本 shim 后全树与上游写法一致，import 行不再产生冲突。
+#
+# 退出方式：鸿蒙 fork 升到 3.47 后，删除本目录并把根 pubspec.yaml 的
+# `cupertino_ui: {path: ...}` 换回 `cupertino_ui: ^1.0.0` 即可，业务代码不动。
+name: cupertino_ui
+description: Local shim mapping package:cupertino_ui to the Flutter SDK's Cupertino library.
+publish_to: none
+version: 1.0.0
+
+environment:
+  sdk: ">=3.11.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
