@@ -318,9 +318,11 @@ class MyApp extends StatelessWidget {
         FlutterSmartDialog.observer,
         shellBarsObserver,
       ],
-      scrollBehavior: PlatformUtils.isDesktop
-          ? const CustomScrollBehavior()
-          : null,
+      scrollBehavior: OS.isHarmony
+          ? const HarmonyScrollBehavior()
+          : PlatformUtils.isDesktop
+              ? const CustomScrollBehavior()
+              : null,
     );
   }
 
