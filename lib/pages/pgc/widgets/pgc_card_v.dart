@@ -7,7 +7,7 @@ import 'package:PiliPlus/models_new/fav/fav_pgc/list.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 // 视频卡片 - 垂直布局
 class PgcCardV extends StatelessWidget {

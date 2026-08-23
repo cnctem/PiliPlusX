@@ -11,7 +11,7 @@ import 'package:PiliPlus/utils/extension/scroll_controller_ext.dart';
 import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter/material.dart'
+import 'package:material_ui/material_ui.dart'
     hide ListTile, SliverGridDelegateWithMaxCrossAxisExtent;
 import 'package:get/get.dart';
 

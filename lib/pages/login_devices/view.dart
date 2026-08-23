@@ -7,7 +7,7 @@ import 'package:PiliPlus/models_new/login_devices/device.dart';
 import 'package:PiliPlus/pages/login_devices/controller.dart';
 import 'package:PiliPlus/utils/extension/widget_ext.dart';
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
-import 'package:flutter/material.dart' hide ListTile;
+import 'package:material_ui/material_ui.dart' hide ListTile;
 import 'package:get/get.dart';
 
 class LoginDevicesPage extends StatefulWidget {

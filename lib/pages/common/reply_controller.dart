@@ -12,7 +12,7 @@ import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/reply_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:fixnum/fixnum.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
@@ -64,7 +64,7 @@ abstract class ReplyController<R> extends CommonListController<R, ReplyInfo> {
     count.value = data.subjectControl.count.toInt();
     if (isRefresh) {
       subjectControl = data.subjectControl;
-      upMid ??= data.subjectControl.upMid;
+      upMid = data.subjectControl.upMid;
       if (hasUpTop = data.hasUpTop()) {
         data.replies.insert(0, data.upTop);
       }

@@ -7,7 +7,7 @@ import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/media_kit_adapt/media_kit_adapt.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:get/get_rx/get_rx.dart';
 import 'package:media_kit/ffi/src/allocation.dart';
 import 'package:media_kit/ffi/src/utf8.dart';

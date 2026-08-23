@@ -100,7 +100,7 @@ class RenderProgressBar extends RenderBox {
   set radius(double value) {
     if (_radius == value) return;
     _radius = value;
-    markNeedsLayout();
+    markNeedsPaint();
   }
 
   double _height;
@@ -108,7 +108,7 @@ class RenderProgressBar extends RenderBox {
   set height(double value) {
     if (_height == value) return;
     _height = value;
-    markNeedsPaint();
+    markNeedsLayout();
   }
 
   @override

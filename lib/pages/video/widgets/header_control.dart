@@ -65,7 +65,7 @@ import 'package:file_picker_ohos/file_picker_ohos.dart';
 import 'package:flutter/foundation.dart' show compute;
 import 'package:floating/floating.dart';
 import 'package:PiliPlus/services/service_locator.dart';
-import 'package:flutter/material.dart' hide showBottomSheet;
+import 'package:material_ui/material_ui.dart' hide showBottomSheet;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -840,7 +840,7 @@ class HeaderControlState extends State<HeaderControl>
                       title: const Text("VideoTrack"),
                       subtitle: Text(state.track.video.toString()),
                       onTap: () =>
-                          Utils.copyText('VideoTrack\n${state.track.audio}'),
+                          Utils.copyText('VideoTrack\n${state.track.video}'),
                     ),
                     ListTile(
                       dense: true,
@@ -851,7 +851,7 @@ class HeaderControlState extends State<HeaderControl>
                     ListTile(
                       dense: true,
                       title: const Text("Volume"),
-                      subtitle: Text(volume.toString()),
+                      subtitle: Text(volume),
                       onTap: () => Utils.copyText('Volume\n$volume'),
                     ),
                     ListTile(
@@ -1214,7 +1214,7 @@ class HeaderControlState extends State<HeaderControl>
                           ? videoDetailCtr.vttSubtitles[i]?.id
                           : null;
                       if (subtitle == null) {
-                        final res = await VideoHttp.vttSubtitles(
+                        final res = await VideoHttp.getSubtitles(
                           item.subtitleUrl!,
                           format: format,
                         );

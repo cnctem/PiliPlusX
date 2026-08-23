@@ -6,7 +6,7 @@ import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/pages/common/multi_select/base.dart';
 import 'package:PiliPlus/pages/common/search/common_search_controller.dart';
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 
 abstract class CommonSearchPageState<S extends StatefulWidget, R, T>

@@ -55,7 +55,7 @@ import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:floating/floating.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart' show HapticFeedback, DeviceOrientation;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:flutter_volume_controller/flutter_volume_controller.dart';
@@ -1926,6 +1926,7 @@ class PlPlayerController with BlockConfigMixin {
 
   void onCloseAll() {
     isCloseAll = true;
+    if (PlatformUtils.isDesktop) exitDesktopFullScreen();
     // dispose 已改为异步（退后台清内存），这里不阻塞路由返回
     unawaited(dispose());
     Get.until((route) => route.isFirst);

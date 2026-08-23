@@ -54,7 +54,6 @@ import 'package:PiliPlus/plugin/pl_player/widgets/mpv_convert_webp.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/play_pause_btn.dart';
 import 'package:PiliPlus/utils/android/bindings.g.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
-import 'package:PiliPlus/utils/cache_manager_ext.dart';
 import 'package:PiliPlus/utils/connectivity_utils.dart';
 import 'package:PiliPlus/utils/duration_utils.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
@@ -73,7 +72,7 @@ import 'package:easy_debounce/easy_throttle.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart'
     show RenderProxyBox, SemanticsConfiguration;
 import 'package:flutter/services.dart';

@@ -35,6 +35,15 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+
+  # Flutter 3.47 起 Material/Cupertino 被拆成独立 pub 包，上上游已全量迁移。
+  # 鸿蒙 fork 仍在 3.41，这里用仓库内的本地 shim 把这两个包名映射回 SDK 内置
+  # 实现，从而可以原样接受上游的 import 写法（详见 packages/*/pubspec.yaml）。
+  # 鸿蒙升到 3.47 后改回 `^1.0.0` 并删掉 packages/ 下两个目录即可。
+  material_ui:
+    path: packages/material_ui
+  cupertino_ui:
+    path: packages/cupertino_ui
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.9
@@ -251,7 +260,6 @@ dependencies:
   battery_plus: ^7.0.0
   battery_plus_ohos: ^0.0.3
   material_new_shapes: ^1.0.0
-  # material_ui: ^0.0.1
 
   vector_math: any
   fixnum: any
@@ -266,11 +274,23 @@ dependencies:
   http2: any
   screen_retriever: any
   characters: any
-  cached_network_image_ce: 4.9.0
+  # 上游自 66a191b01 (refa: cache manager #2266) 起改用自家 fork，
+  # 该 fork 复用 HTTP client、精简了 flutter_cache_manager 依赖。
+  # 这里 pin 到具体 commit 而非上游的 ref: develop，保证可复现。
+  cached_network_image_ce:
+    git:
+      url: https://github.com/My-Responsitories/flutter_cached_network_image_ce.git
+      path: cached_network_image
+      ref: dacec4de669b4c52c59576509db069e3194408ac
   shared_preferences: ^2.2.1
   package_info_plus: ">=4.0.0 <11.0.0"
 
 dependency_overrides:
+  # 强制第三方包里的 material_ui/cupertino_ui 也走本地 shim
+  material_ui:
+    path: packages/material_ui
+  cupertino_ui:
+    path: packages/cupertino_ui
   meta: ^1.18.3 # 兼容液态玻璃
   device_info_plus:
     git:

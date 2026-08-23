@@ -3,45 +3,27 @@ import 'dart:io' show Directory, File;
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:cached_network_image_ce/cached_network_image.dart';
+import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
-/// 鸿蒙分支使用 pub.dev 上的 cached_network_image_ce，它没有上游 fork 的
-/// `DefaultCacheManager.init` / `getTotalLength` / `cacheDir` / `getSingleFile`，
-/// 因此这里保留 ohos 原本基于临时目录统计的实现；getSingleFile 由
-/// utils/cache_manager_ext.dart 提供
-/// 以便调用点与上游保持一致。
 abstract final class CacheManager {
   static late final DefaultCacheManager manager;
 
-  static Future<void> ensureInitialized() async {
-    final m = DefaultCacheManager(
-      maxNrOfCacheObjects: Pref.maxCacheSize.toInt(),
-    );
-    manager = m;
-    // 与项目内所有 CachedNetworkImage 共享同一个缓存管理器实例。
-    // cached_network_image_ce 的 DefaultCacheManager 并非单例：若
-    // CacheManager.manager 与 CachedNetworkImageProvider.defaultCacheManager
-    // 各持一个实例，两个实例各自维护独立的 Hive box 内存态，getSingleFile
-    // 将查不到详情页已缓存的封面（即使 URL 相同也会 miss），造成重复下载。
-    CachedNetworkImageProvider.defaultCacheManager = m;
-  }
+  static Future<void> ensureInitialized() => DefaultCacheManager.init(
+    maxNrOfCacheLength: Pref.maxCacheSize.toInt(),
+  ).then((i) => manager = i);
 
   // 获取缓存目录
   @pragma('vm:notify-debugger-on-exception')
-  static Future<int> loadApplicationCache([
-    final num maxSize = double.infinity,
-  ]) async {
+  static Future<int> loadApplicationCache() async {
     try {
-      final Directory tempDirectory = await getTemporaryDirectory();
       if (PlatformUtils.isDesktop) {
-        final dir = Directory('${tempDirectory.path}/cached_network_image_ce');
-        if (dir.existsSync()) {
-          return await getTotalSizeOfFilesInDir(dir, maxSize);
-        }
-        return 0;
+        return manager.getTotalLength();
       }
+
+      final Directory tempDirectory = await getTemporaryDirectory();
       if (tempDirectory.existsSync()) {
-        return await getTotalSizeOfFilesInDir(tempDirectory, maxSize);
+        return await getTotalSizeOfFilesInDir(tempDirectory);
       }
     } catch (_) {}
     return 0;
@@ -49,15 +31,21 @@ abstract final class CacheManager {
 
   // 循环计算文件的大小
   @pragma('vm:notify-debugger-on-exception')
-  static Future<int> getTotalSizeOfFilesInDir(
-    final Directory file, [
-    final num maxSize = double.infinity,
-  ]) async {
+  static Future<int> getTotalSizeOfFilesInDir(Directory file) async {
     int total = 0;
-    await for (final child in file.list(recursive: true)) {
+    await for (final child in file.list(recursive: false)) {
       if (child is File) {
         total += await child.length();
-        if (total >= maxSize) return total;
+      } else if (child is Directory) {
+        if (path.equals(child.path, manager.cacheDir)) {
+          total += manager.getTotalLength();
+        } else {
+          await for (final i in child.list(recursive: true)) {
+            if (i is File) {
+              total += await i.length();
+            }
+          }
+        }
       }
     }
     return total;
@@ -80,16 +68,14 @@ abstract final class CacheManager {
   static Future<void> clearLibraryCache() async {
     try {
       await manager.emptyCache();
+      if (PlatformUtils.isDesktop) return;
+
       final tempDirectory = await getTemporaryDirectory();
-      if (PlatformUtils.isDesktop) {
-        final dir = Directory('${tempDirectory.path}/cached_network_image_ce');
-        if (dir.existsSync()) {
-          await dir.delete(recursive: true);
-        }
-        return;
-      }
       if (tempDirectory.existsSync()) {
         await for (final file in tempDirectory.list(recursive: false)) {
+          if (file is Directory && path.equals(file.path, manager.cacheDir)) {
+            continue;
+          }
           await file.delete(recursive: true);
         }
       }

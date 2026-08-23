@@ -222,27 +222,21 @@ packages:
   cached_network_image_ce:
     dependency: "direct main"
     description:
-      name: cached_network_image_ce
-      sha256: "9c61372fecd5f6ac6aaa66fa6808b4c303b8574875e853a0916116bf2fae6840"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "4.9.0"
+      path: cached_network_image
+      ref: dacec4de669b4c52c59576509db069e3194408ac
+      resolved-ref: dacec4de669b4c52c59576509db069e3194408ac
+      url: "https://github.com/My-Responsitories/flutter_cached_network_image_ce.git"
+    source: git
+    version: "4.6.4"
   cached_network_image_platform_interface_ce:
     dependency: transitive
     description:
-      name: cached_network_image_platform_interface_ce
-      sha256: "95343645becaeac01dd6eeb9f3a85448b6076d211010ff1973e8bbfd840b571d"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
+      path: cached_network_image_platform_interface
+      ref: dacec4de669b4c52c59576509db069e3194408ac
+      resolved-ref: dacec4de669b4c52c59576509db069e3194408ac
+      url: "https://github.com/My-Responsitories/flutter_cached_network_image_ce.git"
+    source: git
     version: "5.2.0"
-  cached_network_image_web_ce:
-    dependency: transitive
-    description:
-      name: cached_network_image_web_ce
-      sha256: "22cdf044cd013ff8d6eb06ce148bfe3f1106388ca2af244e2358739debb4459c"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "2.1.2"
   canvas_danmaku:
     dependency: "direct main"
     description:
@@ -398,6 +392,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.0.9"
+  cupertino_ui:
+    dependency: "direct main"
+    description:
+      path: "packages/cupertino_ui"
+      relative: true
+    source: path
+    version: "1.0.0"
   dart_style:
     dependency: transitive
     description:
@@ -1182,6 +1183,13 @@ packages:
       sha256: e4bc375205e187e8fb232573387112dd8c0dd45b03af8aa2b3c79eb4b9e3e0dc
       url: "https://pub.flutter-io.cn"
     source: hosted
+    version: "1.0.0"
+  material_ui:
+    dependency: "direct main"
+    description:
+      path: "packages/material_ui"
+      relative: true
+    source: path
     version: "1.0.0"
   media_kit:
     dependency: "direct main"

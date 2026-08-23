@@ -39,7 +39,7 @@ import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
@@ -453,7 +453,7 @@ class UserInfoCard extends StatelessWidget {
             ),
           Expanded(
             child: FilledButton.tonal(
-              onPressed: onFollow,
+              onPressed: !isOwner && relation == -1 ? null : onFollow,
               style: FilledButton.styleFrom(
                 backgroundColor: relation != 0
                     ? colorScheme.onInverseSurface
@@ -462,12 +462,22 @@ class UserInfoCard extends StatelessWidget {
                 visualDensity: const VisualDensity(vertical: -1.8),
               ),
               child: Text.rich(
-                style: TextStyle(
-                  color: relation != 0 ? colorScheme.outline : null,
-                ),
+                style: relation != 0
+                    ? TextStyle(color: colorScheme.outline)
+                    : null,
                 TextSpan(
                   children: [
-                    if (relation != 0 && relation != 128) ...[
+                    if (relation == -1) ...[
+                      WidgetSpan(
+                        alignment: .middle,
+                        child: Icon(
+                          Icons.block,
+                          size: 16,
+                          color: colorScheme.outline,
+                        ),
+                      ),
+                      const TextSpan(text: ' '),
+                    ] else if (relation != 0 && relation != 128) ...[
                       WidgetSpan(
                         alignment: .middle,
                         child: Icon(
@@ -482,7 +492,7 @@ class UserInfoCard extends StatelessWidget {
                       text: isOwner
                           ? '编辑资料'
                           : switch (relation) {
-                              0 => '关注',
+                              0 || -1 => '关注',
                               1 => '悄悄关注',
                               2 => '已关注',
                               // 3 => '回关',

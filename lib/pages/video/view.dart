@@ -74,7 +74,7 @@ import 'package:PiliPlus/utils/theme_utils.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
 import 'package:floating/floating.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -1742,7 +1742,12 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        const Positioned.fill(child: ColoredBox(color: Colors.black)),
+        const Positioned.fill(
+          child: ColoredBox(
+            color: Colors.black,
+            isAntiAlias: false,
+          ),
+        ),
 
         plPlayer(width: width, height: height),
 
