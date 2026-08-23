@@ -1979,10 +1979,10 @@ packages:
   url_launcher:
     dependency: "direct main"
     description:
-      path: "packages/url_launcher/url_launcher"
-      ref: "br_url_launcher-v6.3.2_ohos_dev"
-      resolved-ref: d46b0ccf718c056b49a1e0e08fb5e91da1f83cb5
-      url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
+      path: url_launcher
+      ref: main
+      resolved-ref: d3bae8643efba1924d0441fdc0fdc815caee3f27
+      url: "https://gitcode.com/hellozeronick/url_launcher.git"
     source: git
     version: "6.3.2"
   url_launcher_android:
@@ -2020,10 +2020,10 @@ packages:
   url_launcher_ohos:
     dependency: transitive
     description:
-      path: "packages/url_launcher/url_launcher_ohos"
-      ref: "br_url_launcher-v6.3.2_ohos_dev"
-      resolved-ref: d46b0ccf718c056b49a1e0e08fb5e91da1f83cb5
-      url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
+      path: url_launcher_ohos
+      ref: main
+      resolved-ref: d3bae8643efba1924d0441fdc0fdc815caee3f27
+      url: "https://gitcode.com/hellozeronick/url_launcher.git"
     source: git
     version: "6.3.2"
   url_launcher_platform_interface:
