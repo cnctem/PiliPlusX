@@ -274,11 +274,23 @@ dependencies:
   http2: any
   screen_retriever: any
   characters: any
-  cached_network_image_ce: 4.9.0
+  # 上游自 66a191b01 (refa: cache manager #2266) 起改用自家 fork，
+  # 该 fork 复用 HTTP client、精简了 flutter_cache_manager 依赖。
+  # 这里 pin 到具体 commit 而非上游的 ref: develop，保证可复现。
+  cached_network_image_ce:
+    git:
+      url: https://github.com/My-Responsitories/flutter_cached_network_image_ce.git
+      path: cached_network_image
+      ref: dacec4de669b4c52c59576509db069e3194408ac
   shared_preferences: ^2.2.1
   package_info_plus: ">=4.0.0 <11.0.0"
 
 dependency_overrides:
+  # 强制第三方包里的 material_ui/cupertino_ui 也走本地 shim
+  material_ui:
+    path: packages/material_ui
+  cupertino_ui:
+    path: packages/cupertino_ui
   meta: ^1.18.3 # 兼容液态玻璃
   device_info_plus:
     git:

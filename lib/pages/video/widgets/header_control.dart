@@ -840,7 +840,7 @@ class HeaderControlState extends State<HeaderControl>
                       title: const Text("VideoTrack"),
                       subtitle: Text(state.track.video.toString()),
                       onTap: () =>
-                          Utils.copyText('VideoTrack\n${state.track.audio}'),
+                          Utils.copyText('VideoTrack\n${state.track.video}'),
                     ),
                     ListTile(
                       dense: true,
@@ -851,7 +851,7 @@ class HeaderControlState extends State<HeaderControl>
                     ListTile(
                       dense: true,
                       title: const Text("Volume"),
-                      subtitle: Text(volume.toString()),
+                      subtitle: Text(volume),
                       onTap: () => Utils.copyText('Volume\n$volume'),
                     ),
                     ListTile(
