@@ -42,9 +42,9 @@ import 'package:PiliPlus/utils/utils.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart' show FlexSchemeVariant;
 import 'package:flutter/foundation.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:hive_ce/hive.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:os_type/os_type.dart';
 
 abstract final class Pref {
@@ -795,7 +795,7 @@ abstract final class Pref {
   static Transition get pageTransition =>
       Transition.values[_setting.get(
         SettingBoxKey.pageTransition,
-        defaultValue: Transition.native.index,
+        defaultValue: Transition.cupertino.index,
       )];
 
   static bool get enableQuickDouble =>
