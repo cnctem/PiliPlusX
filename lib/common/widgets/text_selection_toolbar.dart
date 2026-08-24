@@ -1,7 +1,11 @@
+import 'package:PiliPlus/utils/extension/get_ext.dart';
+import 'package:PiliPlus/utils/extension/iterable_ext.dart';
+import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/share_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show SelectedContent;
+import 'package:get/get.dart';
 
 /// 在选中工具栏「复制」后追加统一「分享」项（Android/iOS/OHOS，桌面端除外）。
 ///
@@ -34,14 +38,80 @@ List<ContextMenuButtonItem> ensureShareButton(
   return buttonItems;
 }
 
-/// [SelectionArea]/[SelectionText] 上下文菜单：默认按钮 + 统一分享。
+final _schemeRegex = RegExp(r'[\w\-]+://\S');
+
+/// 在选中工具栏「分享」后追加「打开 / 站内搜索」项。
+///
+/// 选中的是带 scheme 的链接 → 「打开」，交给 [PageUtils.handleWebview] 分流；
+/// 否则 → 「站内搜索」，跳搜索结果页。
+///
+/// 对齐上游 bggRGjQaUbCoE/PiliPlus#2474。上游的实现放在
+/// `lib/utils/extension/selectable_region_ext.dart`，靠 SDK 补丁把
+/// [SelectableRegionState] 的私有成员放出来才能读到选中文本；鸿蒙分支不打 SDK
+/// 补丁，所以沿用本文件既有的做法，由调用方经 [selectedTextOf] 注入。
+List<ContextMenuButtonItem> ensureSearchButton(
+  List<ContextMenuButtonItem> buttonItems, {
+  required String? Function() selectedTextOf,
+  required VoidCallback hideToolbar,
+}) {
+  final String? text = selectedTextOf()?.trim();
+  if (text == null || text.isEmpty) return buttonItems;
+  final bool isScheme = text.startsWith(_schemeRegex);
+  // 紧跟在「分享」之后；没有分享项（桌面端）时跟在「复制」之后。
+  final int anchor = buttonItems.lastIndexWhere(
+    (item) =>
+        item.type == ContextMenuButtonType.share ||
+        item.type == ContextMenuButtonType.copy,
+  );
+  buttonItems.insertOrAdd(
+    anchor == -1 ? buttonItems.length : anchor + 1,
+    ContextMenuButtonItem(
+      label: isScheme ? '打开' : '站内搜索',
+      onPressed: () {
+        hideToolbar();
+        if (isScheme) {
+          PageUtils.handleWebview(text);
+        } else {
+          Get.offOrToNamed(
+            '/searchResult',
+            parameters: {'keyword': text},
+            // 选区常出现在对话框/底部面板里，这类路由不是 PageRoute，
+            // 直接 off 掉，避免搜索结果压在浮层上面。
+            off: Get.routing.route is! PageRoute,
+          );
+        }
+      },
+    ),
+  );
+  return buttonItems;
+}
+
+/// 选中工具栏的统一加工：默认按钮 + [ensureShareButton] + [ensureSearchButton]。
+List<ContextMenuButtonItem> ensureExtraButtons(
+  List<ContextMenuButtonItem> buttonItems, {
+  required String? Function() selectedTextOf,
+  required VoidCallback hideToolbar,
+}) {
+  ensureShareButton(
+    buttonItems,
+    selectedTextOf: selectedTextOf,
+    hideToolbar: hideToolbar,
+  );
+  return ensureSearchButton(
+    buttonItems,
+    selectedTextOf: selectedTextOf,
+    hideToolbar: hideToolbar,
+  );
+}
+
+/// [SelectionArea]/[SelectionText] 上下文菜单：默认按钮 + 统一分享 + 打开/站内搜索。
 /// 选中文本由使用方经 [selectedTextOf] 注入（OHOS 引擎未暴露选中文本）。
 Widget selectionAreaContextMenuBuilder(
   BuildContext context,
   SelectableRegionState selectableRegionState, {
   String? Function()? selectedTextOf,
 }) {
-  final buttonItems = ensureShareButton(
+  final buttonItems = ensureExtraButtons(
     selectableRegionState.contextMenuButtonItems,
     selectedTextOf: selectedTextOf ?? () => null,
     hideToolbar: () => selectableRegionState.hideToolbar(),
@@ -57,7 +127,7 @@ Widget selectableTextContextMenuBuilder(
   BuildContext context,
   EditableTextState editableTextState,
 ) {
-  final buttonItems = ensureShareButton(
+  final buttonItems = ensureExtraButtons(
     editableTextState.contextMenuButtonItems,
     selectedTextOf: () => _selectedTextOf(editableTextState),
     hideToolbar: () => editableTextState.hideToolbar(),

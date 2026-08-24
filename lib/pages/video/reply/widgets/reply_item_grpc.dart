@@ -1242,7 +1242,7 @@ class ReplyItemGrpc extends StatelessWidget {
     SelectableRegionState selectableRegionState,
     SelectedContentCapture capture,
   ) {
-    final items = ensureShareButton(
+    final items = ensureExtraButtons(
       selectableRegionState.contextMenuButtonItems,
       selectedTextOf: () => capture.selectedText,
       hideToolbar: () => selectableRegionState.hideToolbar(),

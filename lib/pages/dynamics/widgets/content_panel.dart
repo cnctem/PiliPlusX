@@ -116,7 +116,7 @@ Widget _contextMenuBuilder(
   String text,
   SelectedContentCapture capture,
 ) {
-  final buttonItems = ensureShareButton(
+  final buttonItems = ensureExtraButtons(
     state.contextMenuButtonItems,
     selectedTextOf: () => capture.selectedText,
     hideToolbar: () => state.hideToolbar(),
