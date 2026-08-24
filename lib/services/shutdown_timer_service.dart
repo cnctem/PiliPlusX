@@ -178,6 +178,16 @@ class ShutdownTimerService {
         contentPadding: const .fromLTRB(20, 6, 20, 0),
         actionsPadding: const .fromLTRB(20, 0, 20, 16),
         constraints: const .tightFor(width: 320, height: 320),
+        // 必须显式关掉：鸿蒙的 Flutter fork 把 AlertDialog.scrollable 改成了
+        // `bool?`，且在 ohos 上默认为 true（material/dialog.dart 里
+        // `scrollable ?? (Theme.of(context).platform == TargetPlatform.ohos)`）。
+        // 一旦为 true，content 会被塞进 SingleChildScrollView，高度变成无界；
+        // 而 CupertinoPicker 的 Stack 里唯一的非 Positioned 子节点是
+        // `Center > ConstrainedBox(expand height: itemExtent)`，无界高度下 Center
+        // 只会收缩到 itemExtent，整个滚轮塌成一行——只剩选中项可见。
+        // 官方 Flutter 上该参数是 `bool scrollable = false`，显式传 false 等价于
+        // 默认值，不影响其它平台与 CI。
+        scrollable: false,
         content: Row(
           children: [
             Expanded(
