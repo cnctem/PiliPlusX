@@ -559,6 +559,12 @@ List<SettingsModel> get extraSettings => [
     onTap: _showReplySortDialog,
   ),
   NormalModel(
+    title: '二级评论展示',
+    leading: const Icon(Icons.subdirectory_arrow_right_outlined),
+    getSubtitle: () => '当前优先展示「${Pref.reply2SortType.title}」',
+    onTap: _showReply2SortDialog,
+  ),
+  NormalModel(
     title: '动态展示',
     leading: const Icon(Icons.dynamic_feed_rounded),
     getSubtitle: () => '当前优先展示「${Pref.defaultDynamicType.label}」',
@@ -1099,6 +1105,24 @@ Future<void> _showReplySortDialog(
   );
   if (res != null) {
     await GStorage.setting.put(SettingBoxKey.replySortType, res.index);
+    setState();
+  }
+}
+
+Future<void> _showReply2SortDialog(
+  BuildContext context,
+  VoidCallback setState,
+) async {
+  final res = await showDialog<ReplySortType>(
+    context: context,
+    builder: (context) => SelectDialog<ReplySortType>(
+      title: '二级评论展示',
+      value: Pref.reply2SortType,
+      values: ReplySortType.values.take(2).map((e) => (e, e.title)).toList(),
+    ),
+  );
+  if (res != null) {
+    await GStorage.setting.put(SettingBoxKey.reply2SortType, res.index);
     setState();
   }
 }

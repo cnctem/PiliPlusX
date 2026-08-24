@@ -96,9 +96,13 @@ abstract final class ThemeUtils {
       fontWeight = FontWeight.values[appFontWeight];
     }
 
-    late final fontFamily = Pref.useBuiltInFont
-        ? "HarmonyOS_Sans"
-        : "HarmonyOS Sans";
+    // 上游 4ca037345 起支持用户自选字体族（Pref.appFont）。鸿蒙没有枚举系统字体的
+    // 通道，FontUtils 在 ohos 上拿不到字体列表、设置页的下拉框不会出现，appFont 恒为
+    // null，因此这里回落到鸿蒙一贯的 HarmonyOS Sans；在本仓库的安卓 / Windows /
+    // Linux 构建上则由用户的选择覆盖。
+    late final fontFamily =
+        Pref.appFont ??
+        (Pref.useBuiltInFont ? "HarmonyOS_Sans" : "HarmonyOS Sans");
     late final textStyle = TextStyle(
       fontWeight: fontWeight,
       fontFamily: fontFamily,
