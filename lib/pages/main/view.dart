@@ -86,6 +86,9 @@ class _MainAppState extends PopScopeState<MainApp>
       );
       _syncPrimaryColor();
     });
+    if (Platform.isMacOS) {
+      HardwareKeyboard.instance.addHandler(_handleKeyEvent);
+    }
     if (PlatformUtils.isDesktop) {
       windowManager
         ..addListener(this)
@@ -170,6 +173,9 @@ class _MainAppState extends PopScopeState<MainApp>
   void dispose() {
     _nativeTabsWorker?.dispose();
     _nativeTopBarWorker?.dispose();
+    if (Platform.isMacOS) {
+      HardwareKeyboard.instance.removeHandler(_handleKeyEvent);
+    }
     if (PlatformUtils.isDesktop) {
       trayManager.removeListener(this);
       windowManager.removeListener(this);
@@ -178,6 +184,13 @@ class _MainAppState extends PopScopeState<MainApp>
     PiliScheme.listener?.cancel();
     GStorage.close();
     super.dispose();
+  }
+
+  bool _handleKeyEvent(KeyEvent event) {
+    return event is KeyDownEvent &&
+        event.logicalKey == LogicalKeyboardKey.keyR &&
+        HardwareKeyboard.instance.isMetaPressed &&
+        _mainController.refreshRecommendations();
   }
 
   @override
@@ -347,19 +360,35 @@ class _MainAppState extends PopScopeState<MainApp>
         return null;
       }
       if (_mainController.floatingNavBar) {
-        bottomNav = Obx(
-          () => FloatingNavigationBar(
-            onDestinationSelected: _mainController.setIndex,
-            selectedIndex: _mainController.selectedIndex.value,
-            destinations: _mainController.navigationBars
-                .map(
-                  (e) => FloatingNavigationDestination(
-                    label: e.label,
-                    icon: _buildIcon(type: e),
-                    selectedIcon: _buildIcon(type: e, selected: true),
-                  ),
-                )
-                .toList(),
+        // 悬浮底栏必须拿到「松」的宽度约束才能保持自身 destinations.length * 86 的
+        // 宽度。上游从 `e89241109 opt ui` 起把主页换成了自绘的 MainLayout，那里给
+        // bottomNav 的是 constraints.loosen() 再手动水平居中；鸿蒙没跟进这个骨架
+        // 重构（状态栏取色依赖 Scaffold 里那个零高 AppBar，换掉代价太大），而
+        // Scaffold.bottomNavigationBar 下发的是 fullWidthConstraints —— 宽度是紧
+        // 约束（material/scaffold.dart:1035 `looseConstraints.tighten(width:)`），
+        // FloatingNavigationBar 内部的 SizedBox 会被 enforce 成整屏宽。
+        //
+        // 这里用 Align 吃掉紧宽度：Align 自己撑满宽度，子节点拿到松约束、按自身
+        // 宽度水平居中；heightFactor: 1 让高度仍按子节点算，Scaffold 据此计算的
+        // body 内边距与改动前一致。两侧空白区域 Align 不参与命中测试，点击会穿透
+        // 到下面的内容，与上游 MainLayout 的表现一致。
+        bottomNav = Align(
+          alignment: Alignment.bottomCenter,
+          heightFactor: 1,
+          child: Obx(
+            () => FloatingNavigationBar(
+              onDestinationSelected: _mainController.setIndex,
+              selectedIndex: _mainController.selectedIndex.value,
+              destinations: _mainController.navigationBars
+                  .map(
+                    (e) => FloatingNavigationDestination(
+                      label: e.label,
+                      icon: _buildIcon(type: e),
+                      selectedIcon: _buildIcon(type: e, selected: true),
+                    ),
+                  )
+                  .toList(),
+            ),
           ),
         );
       } else if (_mainController.enableMYBar) {
