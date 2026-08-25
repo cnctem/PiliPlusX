@@ -92,7 +92,7 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
                       mainAxisAlignment: .spaceBetween,
                       children: [
                         Text(
-                          sortType.title,
+                          sortType.label,
                           style: const TextStyle(fontSize: 13),
                         ),
                         TextButton.icon(
@@ -104,7 +104,7 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
                             color: colorScheme.secondary,
                           ),
                           label: Text(
-                            sortType.label,
+                            sortType.label2,
                             style: TextStyle(
                               fontSize: 13,
                               color: colorScheme.secondary,
