@@ -530,9 +530,52 @@ class PlPlayerController with BlockConfigMixin {
   bool get checkIsAutoRotate =>
       (Platform.isAndroid || OS.isHarmony) && mode != .gravity;
 
+  /// 传感器报竖屏后，延迟确认再自动退出全屏的定时器。
+  ///
+  /// 鸿蒙侧的方向分类按 pitch/roll 判定（native_device_orientation fork 的
+  /// SensorOrientationListener），在侧躺、斜举、接近平放这些边界姿态下会偶发
+  /// 单帧误报竖屏。收到即退出全屏的话，紧接着下一帧回到横屏又会被 landscape
+  /// 分支自动拉回全屏，表现为「全屏自己退出又进入」。这里等设备确实稳定在
+  /// 竖屏之后再退，单帧误报会被后续的横屏事件取消掉。
+  Timer? _autoExitFsTimer;
+
+  /// 自动退出全屏前的确认时长。取值需大于误报的持续时间（几十~几百毫秒），
+  /// 同时又不至于让「真的转回竖屏」的退出手感明显变迟钝。
+  static const _autoExitFsDelay = Duration(milliseconds: 500);
+
+  void _cancelAutoExitFs() {
+    _autoExitFsTimer?.cancel();
+    _autoExitFsTimer = null;
+  }
+
+  /// 延迟确认后自动退出全屏。确认时重新校验全部前置条件，期间发生的任何变化
+  /// （转回横屏、手动进/退全屏、锁定控件、换成竖屏视频）都会让本次退出作废。
+  void _scheduleAutoExitFullScreen(DeviceOrientation orientation) {
+    _cancelAutoExitFs();
+    _autoExitFsTimer = Timer(_autoExitFsDelay, () {
+      _autoExitFsTimer = null;
+      if (_orientation != orientation ||
+          !isFullScreen.value ||
+          isManualFS ||
+          horizontalScreen ||
+          _isVertical ||
+          controlsLock.value) {
+        return;
+      }
+      // 自动退出必须显式传 isManualFS: false，否则会按默认值记成手动退出：
+      // 既翻错 isManualFS 的语义，也会白白开启 600ms 的自动进全屏抑制窗。
+      triggerFullScreen(
+        status: false,
+        orientation: orientation,
+        isManualFS: false,
+      );
+    });
+  }
+
   void _stopOrientationListener() {
     _orientationListener?.cancel();
     _orientationListener = null;
+    _cancelAutoExitFs();
   }
 
   void _onOrientationChanged(OrientationParams param) {
@@ -554,22 +597,27 @@ class PlPlayerController with BlockConfigMixin {
         if (!_isVertical && controlsLock.value) return;
         if (!horizontalScreen && !_isVertical && isFullScreen) {
           if (!isManualFS) {
-            triggerFullScreen(status: false, orientation: deviceOrientation);
+            // 自动进的全屏才跟随设备转回竖屏而退出；延迟确认，避免单帧误报
+            _scheduleAutoExitFullScreen(deviceOrientation);
           }
         } else {
+          _cancelAutoExitFs();
           portraitUpMode();
         }
       case .portraitDown:
         if (!horizontalScreen) return;
         if (!_isVertical && controlsLock.value) return;
+        _cancelAutoExitFs();
         portraitDownMode();
       case .landscapeLeft:
+        _cancelAutoExitFs();
         if (!horizontalScreen && !isFullScreen) {
           triggerFullScreen(orientation: deviceOrientation, isManualFS: false);
         } else {
           landscapeLeftMode();
         }
       case .landscapeRight:
+        _cancelAutoExitFs();
         if (!horizontalScreen && !isFullScreen) {
           triggerFullScreen(orientation: deviceOrientation, isManualFS: false);
         } else {
@@ -1688,11 +1736,15 @@ class PlPlayerController with BlockConfigMixin {
 
   double screenRatio = 0.0;
   bool isManualFS = true;
-  /// 最近一次手动退出全屏的时间。鸿蒙部分机型开启旋转锁定后，会被 childWhenDisabled 的窗口变
+  /// 最近一次退出全屏的时间。鸿蒙部分机型开启旋转锁定后，会被 childWhenDisabled 的窗口变
   /// 横屏自动进全屏立即拉回，表现为退不出全屏。用该时间戳抑制退出后短暂窗口内的自动进全屏。
-  DateTime _lastManualExitAt = DateTime.fromMillisecondsSinceEpoch(0);
+  ///
+  /// 手动与自动退出一视同仁：窗口从横屏转回竖屏总有延迟，这段时间里窗口宽高比
+  /// 仍是横屏，不抑制就会被立刻拉回全屏。传感器驱动的进全屏（landscape 分支）
+  /// 不看这个时间戳，所以退出后立刻转回横屏依然能正常进全屏。
+  DateTime _lastFsExitAt = DateTime.fromMillisecondsSinceEpoch(0);
   bool get suppressAutoFullScreen =>
-      DateTime.now().difference(_lastManualExitAt) <
+      DateTime.now().difference(_lastFsExitAt) <
       const Duration(milliseconds: 600);
   // 每次读取而不缓存：播放器是跨页面存活的单例，缓存会让在设置页改完
   // 「默认全屏方向」后本次会话仍用旧值，表现为「改了没反应」
@@ -1744,6 +1796,9 @@ class PlPlayerController with BlockConfigMixin {
 
     if (_fsProcessing) return;
     _fsProcessing = true;
+    // 任何一次真正的全屏切换都作废挂起的自动退出确认，避免刚切完又被延迟退出。
+    // 由 _scheduleAutoExitFullScreen 的回调调用时定时器已置空，这里是空操作。
+    _cancelAutoExitFs();
     this.isManualFS = isManualFS;
     try {
       if (status) {
@@ -1780,9 +1835,7 @@ class PlPlayerController with BlockConfigMixin {
           if (orientation == null && mode == .none) {
             return;
           }
-          if (isManualFS) {
-            _lastManualExitAt = DateTime.now();
-          }
+          _lastFsExitAt = DateTime.now();
           // 鸿蒙mate80开启旋转锁定时，原生setPreferredOrientation可能长时间
           // 不返回。加超时保证退出
           await resetScreenRotation()?.timeout(
