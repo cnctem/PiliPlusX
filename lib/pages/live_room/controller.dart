@@ -726,6 +726,8 @@ class LiveRoomController extends GetxController {
         },
         transitionDuration: fromEmote
             ? const Duration(milliseconds: 400)
+            : PlatformUtils.isDesktop
+            ? const Duration(milliseconds: 350)
             : const Duration(milliseconds: 500),
       ),
     );
