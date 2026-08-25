@@ -616,7 +616,7 @@ class AuthorPanel extends StatelessWidget {
                           mid: moduleAuthor.mid!,
                           dynId: item.idStr,
                           reasonType: reasonType,
-                          reasonDesc: reasonType == 0 ? reasonDesc : null,
+                          reasonDesc: reasonDesc,
                         );
                       },
                     );
