@@ -562,7 +562,7 @@ List<SettingsModel> get extraSettings => [
         .whenComplete(setState),
   ),
   PopupModel(
-    title: '二级评论展示',
+    title: '楼中楼评论展示',
     leading: const Icon(Icons.subdirectory_arrow_right_outlined),
     value: () => Pref.reply2SortType,
     items: ReplySortType.values.take(2),
