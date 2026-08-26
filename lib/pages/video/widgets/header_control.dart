@@ -39,6 +39,7 @@ import 'package:PiliPlus/pages/video/widgets/header_mixin.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/data_source.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
+import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/services/shutdown_timer_service.dart'
     show shutdownTimerService;
 import 'package:PiliPlus/utils/accounts.dart';
@@ -62,16 +63,15 @@ import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:file_picker_ohos/file_picker_ohos.dart';
-import 'package:flutter/foundation.dart' show compute;
 import 'package:floating/floating.dart';
-import 'package:PiliPlus/services/service_locator.dart';
-import 'package:material_ui/material_ui.dart' hide showBottomSheet;
+import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:material_ui/material_ui.dart' hide showBottomSheet;
 import 'package:media_kit/media_kit.dart' show Player;
 import 'package:os_type/os_type.dart';
 
@@ -692,15 +692,21 @@ class HeaderControlState extends State<HeaderControl>
                     Get.back();
                     try {
                       final result = await FilePicker.platform.pickFiles(
-                        type: FileType.custom,
-                        allowedExtensions: const ['json', 'vtt', 'srt', 'ass'],
+                        type: .custom,
+                        allowedExtensions: const [
+                          'json',
+                          'vtt',
+                          'srt',
+                          'ass',
+                          'bcc',
+                        ],
                       );
                       if (result != null) {
                         final file = result.files.first.xFile;
                         final path = file.path;
                         final name = file.name;
                         final length = videoDetailCtr.subtitles.length;
-                        if (name.endsWith('.json')) {
+                        if (name.endsWith('.json') || name.endsWith('.bcc')) {
                           final file = File(path);
                           final stream = file.openRead().transform(
                             utf8.decoder,
