@@ -40,7 +40,7 @@ Future<void> autoWrapReportDialog(
     isWithContent = withContent(reasonType);
     isContentRequired = contentRequired(reasonType);
     if (isWithContent) {
-      key.currentState?.clearError();
+      key.currentState?.validate();
     }
   }
 

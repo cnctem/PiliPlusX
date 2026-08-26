@@ -24,15 +24,11 @@ import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
-<<<<<<< HEAD
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:material_ui/material_ui.dart' hide TextField;
-=======
->>>>>>> 226bd3b (refa content check in report dialog)
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:material_ui/material_ui.dart' hide TextField;
 import 'package:mime/mime.dart';
 
 class WhisperDetailPage extends CommonRichTextPubPage {
