@@ -1,9 +1,9 @@
+import { SymbolGlyphModifier, uiMaterial } from '@kit.ArkUI';
+import { deviceInfo } from '@kit.BasicServicesKit';
+import { HdsAnimationMode, hdsMaterial, HdsTabs, HdsTabsController } from '@kit.UIDesignKit';
 import common from '@ohos.app.ability.common';
 import window from '@ohos.window';
 import { FlutterPage } from '@ohos/flutter_ohos';
-import { SymbolGlyphModifier, uiMaterial } from '@kit.ArkUI';
-import { HdsAnimationMode, hdsMaterial, HdsTabs, HdsTabsController } from '@kit.UIDesignKit';
-import { deviceInfo } from '@kit.BasicServicesKit';
 
 let storage = LocalStorage.getShared();
 
@@ -352,6 +352,7 @@ struct Index {
       })
       .id('topBarBg')
       .hitTestBehavior(HitTestMode.Transparent)
+      .align(Alignment.Top)
 
       Column() {
         Row({ space: 8 }) {
@@ -412,6 +413,7 @@ struct Index {
       .padding({ top: this.statusBarHeight})
       .id('topBarContent')
       .hitTestBehavior(HitTestMode.Default)
+      .align(Alignment.Top)
     }
     .height(this.homeHideTopBar && this.topBarCollapsed
       ? TOP_BAR_COLLAPSED_HEIGHT
@@ -420,6 +422,7 @@ struct Index {
     .width('100%')
     .hitTestBehavior(HitTestMode.Default)
     .visibility(this.topBarHidden ? Visibility.None : Visibility.Visible)
+    .align(Alignment.Top)
   }
 
   @Builder
@@ -448,36 +451,29 @@ struct Index {
         materialLevel: hdsMaterial.MaterialLevel.EXQUISITE
       }
     })
+    .visibility(this.navTabs.length <= 1 || this.shellBarsHidden
+      ? Visibility.None
+      : Visibility.Visible)
+    .align(Alignment.Bottom)
+    .hitTestBehavior(HitTestMode.Transparent)
   }
 
   build() {
-    Stack({ alignContent: Alignment.TopStart }) {
-      Stack({ alignContent: Alignment.Bottom }) {
-        FlutterPage({ viewId: this.viewId, xComponentRenderFit: RenderFit.TOP})
-          .width('100%')
-          .height('100%')
-        if (this.useNativeTabs && deviceInfo.sdkApiVersion >= 23) {
-          Column() {
-            this.hdsMainTabs()
-          }
-          .hitTestBehavior(HitTestMode.Transparent)
-          .width('100%')
-          .height('100%')
-          .visibility(this.navTabs.length <= 1 || this.shellBarsHidden
-            ? Visibility.None
-            : Visibility.Visible)
-        }
+    Stack({ alignContent: Alignment.Top }) {
+      FlutterPage({ viewId: this.viewId, xComponentRenderFit: RenderFit.TOP})
+        .width('100%')
+        .height('100%')
+        .align(Alignment.Top)
+      if (this.useNativeTabs && deviceInfo.sdkApiVersion >= 23) {
+        this.hdsMainTabs()
       }
-      .width('100%')
-      .height('100%')
-      .backgroundColor(this.bgColor)
-
       if (this.useNativeTopBar && deviceInfo.sdkApiVersion >= 26) {
         this.homeTopBar()
       }
     }
     .width(this.winWidth > 0 ? this.winWidth : '100%')
     .height(this.winHeight > 0 ? this.winHeight : '100%')
+    .backgroundColor(this.bgColor)
   }
 
   onBackPress(): boolean {
