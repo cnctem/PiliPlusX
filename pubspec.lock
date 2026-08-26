@@ -926,17 +926,17 @@ packages:
     dependency: "direct main"
     description:
       path: image_cropper
-      ref: "br_v11.0.0_ohos"
-      resolved-ref: f85b90eb094d0629042ca4aa558e4156cda88879
+      ref: "br_v12.2.1_ohos_dev"
+      resolved-ref: "702569344cc0d9a1121b851a2b9d414abef88b90"
       url: "https://gitcode.com/CPF-Flutter/fluttertpc_image_cropper.git"
     source: git
-    version: "11.0.0"
+    version: "12.2.1"
   image_cropper_for_web:
     dependency: transitive
     description:
       path: image_cropper_for_web
-      ref: f85b90eb094d0629042ca4aa558e4156cda88879
-      resolved-ref: f85b90eb094d0629042ca4aa558e4156cda88879
+      ref: "702569344cc0d9a1121b851a2b9d414abef88b90"
+      resolved-ref: "702569344cc0d9a1121b851a2b9d414abef88b90"
       url: "https://gitcode.com/CPF-Flutter/fluttertpc_image_cropper.git"
     source: git
     version: "7.0.0"
@@ -944,8 +944,8 @@ packages:
     dependency: transitive
     description:
       path: image_cropper_platform_interface
-      ref: f85b90eb094d0629042ca4aa558e4156cda88879
-      resolved-ref: f85b90eb094d0629042ca4aa558e4156cda88879
+      ref: "702569344cc0d9a1121b851a2b9d414abef88b90"
+      resolved-ref: "702569344cc0d9a1121b851a2b9d414abef88b90"
       url: "https://gitcode.com/CPF-Flutter/fluttertpc_image_cropper.git"
     source: git
     version: "8.0.0"
