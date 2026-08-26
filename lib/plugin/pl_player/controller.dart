@@ -319,6 +319,18 @@ class PlPlayerController with BlockConfigMixin {
   }
 
   Future<PiPStatus> enterPip({bool isAuto = false}) {
+    // 鸿蒙「横屏小窗」（系统小窗内切全屏，见 HarmonyChannel.isMiniWindowLandscape）
+    // 下手动进画中画只有黑屏：此时 floating 插件走 freeform 分支，先
+    // moveAbilityToBackground 再 startPiP，PiP 窗口的内容节点（customUIController，
+    // 由应用侧 ArkUI 承载）在应用已退到后台之后才创建——实测日志里主窗口
+    // visibility 1→0 比 "PiP XComponent loaded" 还早，且首帧尺寸也是错的
+    // （808x454vp，135ms 后才纠正为 413x232vp）。
+    // 小窗内不切全屏时同样走 freeform 分支但画面正常，故拦截条件取横屏小窗而非小窗。
+    // 这里直接拒绝，由调用方提示"当前处于系统小窗，无法进入画中画"。
+    // 退后台自动进入（isAuto，走系统 auto-start，次序正常）不受影响。
+    if (!isAuto && OS.isHarmony && HarmonyChannel.isMiniWindowLandscape) {
+      return Future.value(PiPStatus.unavailable);
+    }
     if (videoPlayerController != null) {
       final state = videoPlayerController!.state;
       return PageUtils.enterPip(

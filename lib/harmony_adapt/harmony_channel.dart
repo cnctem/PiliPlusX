@@ -311,6 +311,11 @@ abstract class HarmonyChannel {
   /// 设备方向，基于方向的自动全屏等逻辑应据此跳过。
   static bool get isMiniWindow => _miniWindow;
 
+  /// 是否处于「横屏小窗」：系统小窗内把横屏视频切到了全屏，此时调用过原生
+  /// enableLandscapeMultiWindow。实测仅此状态下进画中画会黑屏（小窗内不全屏
+  /// 进画中画画面正常），故用它而不是 [isMiniWindow] 作为拦截条件。
+  static bool get isMiniWindowLandscape => _miniWindow && _landscape;
+
   static bool _windowMode = false;
 
   /// 应用窗口是否处于受限窗口模式（分屏/自由多窗/悬浮窗等非全屏窗口）。
