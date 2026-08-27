@@ -1522,6 +1522,13 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     }
   }
 
+  /// 底层播放：申请音频焦点 + 启动播放，不含 UI 副作用
+  Future<void> _rawPlay() async {
+    await _videoPlayerController?.play();
+    audioSessionHandler?.setActive(true);
+    playerStatus = PlayerStatus.playing;
+  }
+
   /// 播放视频
   Future<void> play({bool repeat = false, bool hideControls = true}) async {
     if (_playerCount == 0) return;
@@ -1548,16 +1555,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       } catch (_) {}
     }
 
-    try {
-      await _videoPlayerController?.play();
-    } catch (e) {
-      // 播放器可能在 seek/音频重建的 await 期间被销毁
-      if (kDebugMode) debugPrint('play failed: $e');
-    }
-
-    audioSessionHandler?.setActive(true);
-
-    playerStatus = .playing;
+    await _rawPlay();
   }
 
   /// 暂停播放
@@ -1863,9 +1861,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   Future<void> onDoubleTapCenter() async {
     if (!isLive && isCompleted) {
       await videoPlayerController!.seek(Duration.zero);
-      videoPlayerController!.play();
+      await _rawPlay();
+    } else if (videoPlayerController!.state.playing) {
+      await pause();
     } else {
-      videoPlayerController!.playOrPause();
+      await _rawPlay();
     }
   }
 
