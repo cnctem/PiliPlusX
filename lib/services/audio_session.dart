@@ -66,6 +66,7 @@ class AudioSessionHandler {
             _playInterrupted = true;
             break;
           case AudioInterruptionType.unknown:
+            if (Pref.mixWithOthers) return;
             PlPlayerController.pauseIfExists(isInterrupt: true);
             // player.pause(isInterrupt: true);
             _playInterrupted = true;
