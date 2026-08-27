@@ -1151,6 +1151,13 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     _playbackSpeed.value = playSpeedDefault;
   }
 
+  /// 底层播放：申请音频焦点 + 启动播放，不含 UI 副作用
+  Future<void> _rawPlay() async {
+    await _videoPlayerController?.play();
+    audioSessionHandler?.setActive(true);
+    playerStatus = PlayerStatus.playing;
+  }
+
   /// 播放视频
   Future<void> play({bool repeat = false, bool hideControls = true}) async {
     if (_playerCount == 0) return;
@@ -1161,11 +1168,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       await seekTo(Duration.zero, isSeek: false);
     }
 
-    await _videoPlayerController?.play();
-
-    audioSessionHandler?.setActive(true);
-
-    playerStatus = .playing;
+    await _rawPlay();
+    // screenManager.setOverlays(false);
   }
 
   /// 暂停播放
@@ -1407,9 +1411,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   Future<void> onDoubleTapCenter() async {
     if (!isLive && isCompleted) {
       await videoPlayerController!.seek(Duration.zero);
-      videoPlayerController!.play();
+      await _rawPlay();
+    } else if (videoPlayerController!.state.playing) {
+      await pause();
     } else {
-      videoPlayerController!.playOrPause();
+      await _rawPlay();
     }
   }
 
