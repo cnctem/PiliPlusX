@@ -2120,8 +2120,14 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             ],
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
+              // key 必须在闭包内读取 videoDetail：SeasonPanel 的构造参数全是普通
+              // 字段，闭包不读任何 Rx 时 GetX 会抛「improper use of a GetX」，
+              // 而 RenderErrorBox 在高度无界的 Column 里会占满整列，表现为整个
+              // 播放列表分栏变成灰块。竖屏那处（ugc/view.dart）本就是这么写的。
+              // 同时合集数据换了也需要重建 State（episodes / seasonCid 有缓存）。
               child: Obx(
                 () => SeasonPanel(
+                  key: ValueKey(ugcIntroController.videoDetail.value),
                   heroTag: heroTag,
                   canTap: false,
                   showEpisodes: showEpisodes,

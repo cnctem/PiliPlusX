@@ -62,9 +62,12 @@ class ShellBarsObserver extends NavigatorObserver {
     final topIsPlayer = topPage != null &&
         (topPage.settings.name == '/videoV' ||
             topPage.settings.name == '/liveRoom');
-    if (!_orientationHidden &&
-        (topPage == null || !topIsPlayer) &&
-        topPage is! HeroDialogRoute) {
+    // 这里不能带上 _orientationHidden：它表示「横屏（侧栏布局）下原生 HDS 栏不
+    // 显示」，与系统状态栏无关。带上它会让横屏退出播放页时本处不恢复状态栏，
+    // 最终由 PlPlayerController.dispose() 里 removeSafeArea 的兜底恢复——那是
+    // 异步 dispose，落在退场动画之后，表现为状态栏「突然跳出」。竖屏走本处，
+    // 在 didPop 时同步恢复，所以只有横屏能看到这个跳变。
+    if ((topPage == null || !topIsPlayer) && topPage is! HeroDialogRoute) {
       showSystemBar();
     }
   }
