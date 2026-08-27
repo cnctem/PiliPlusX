@@ -25,6 +25,7 @@ import 'package:PiliPlus/models/common/episode_panel_type.dart';
 import 'package:PiliPlus/models_new/pgc/pgc_info_model/result.dart';
 import 'package:PiliPlus/models_new/video/video_detail/episode.dart' as ugc;
 import 'package:PiliPlus/models_new/video/video_detail/page.dart';
+import 'package:PiliPlus/models_new/video/video_detail/section.dart';
 import 'package:PiliPlus/models_new/video/video_detail/ugc_season.dart';
 import 'package:PiliPlus/models_new/video/video_tag/data.dart';
 import 'package:PiliPlus/pages/common/common_intro_controller.dart';
@@ -159,13 +160,34 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   bool get _shouldShowSeasonPanel {
     if (videoDetailController.isFileSource ||
         isPortrait ||
-        !videoDetailController.isUgc) {
+        !videoDetailController.isUgc ||
+        !videoDetailController.plPlayerController.horizontalSeasonPanel) {
       return false;
     }
-    late final videoDetail = ugcIntroController.videoDetail.value;
-    return videoDetailController.plPlayerController.horizontalSeasonPanel &&
-        (videoDetail.ugcSeason != null ||
-            ((videoDetail.pages?.length ?? 0) > 1));
+    final videoDetail = ugcIntroController.videoDetail.value;
+    return (videoDetail.pages?.length ?? 0) > 1 ||
+        _hasRenderableSeason(videoDetail.ugcSeason?.sections);
+  }
+
+  /// 合集数据是否足以渲染播放列表面板。
+  ///
+  /// `ugcSeason != null` 并不足以作为判据：接口的 `sections` 是可空的，也可能是
+  /// 空数组或整段没有 episodes。面板内部按下标直接取用（EpisodePanel.list 是无类型
+  /// 的 List），取空即在 initState 抛出，release 下这一整列会被替换成
+  /// 0xF0C0C0C0 的 ErrorWidget 灰块——这在竖屏下看不到，只有平板 / 分屏等宽屏布局
+  /// 才会走到这一列。
+  static bool _hasRenderableSeason(List<SectionItem>? sections) =>
+      sections?.any((section) => section.episodes?.isNotEmpty == true) ?? false;
+
+  /// seasonIndex 与 sections 不同源（前者由 SeasonPanel 查找当前集时写入），
+  /// 钳位后再取下标，越界不应把整列炸成 ErrorWidget。
+  bool _seasonSectionReversed(List<SectionItem> sections) {
+    if (sections.isEmpty) return false;
+    final index = videoDetailController.seasonIndex.value.clamp(
+      0,
+      sections.length - 1,
+    );
+    return sections[index].isReversed;
   }
 
   final videoReplyPanelKey = GlobalKey();
@@ -2045,11 +2067,14 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   Widget get seasonPanel {
     final videoDetail = ugcIntroController.videoDetail.value;
+    // 与 _shouldShowSeasonPanel 用同一判据，避免"入口显示了但内容取不到"
+    final sections = videoDetail.ugcSeason?.sections ?? const <SectionItem>[];
+    final hasSeason = _hasRenderableSeason(sections);
     return KeepAliveWrapper(
       child: Column(
         children: [
           if ((videoDetail.pages?.length ?? 0) > 1)
-            if (videoDetail.ugcSeason != null)
+            if (hasSeason)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 child: PagesPanel(
@@ -2085,7 +2110,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                   ),
                 ),
               ),
-          if (videoDetail.ugcSeason != null) ...[
+          if (hasSeason) ...[
             if ((videoDetail.pages?.length ?? 0) > 1) ...[
               const SizedBox(height: 8),
               Divider(
@@ -2116,16 +2141,11 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                   initialTabIndex: videoDetailController.seasonIndex.value,
                   cover: videoDetailController.cover.value,
                   seasonId: videoDetail.ugcSeason!.id,
-                  list: videoDetail.ugcSeason!.sections!,
+                  list: sections,
                   bvid: videoDetailController.bvid,
                   aid: videoDetailController.aid,
                   cid: videoDetailController.seasonCid ?? 0,
-                  isReversed: ugcIntroController
-                      .videoDetail
-                      .value
-                      .ugcSeason!
-                      .sections![videoDetailController.seasonIndex.value]
-                      .isReversed,
+                  isReversed: _seasonSectionReversed(sections),
                   onChangeEpisode: videoDetailController.isUgc
                       ? ugcIntroController.onChangeEpisode
                       : pgcIntroController.onChangeEpisode,

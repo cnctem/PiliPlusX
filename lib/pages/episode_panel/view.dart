@@ -88,15 +88,25 @@ class EpisodePanel extends CommonSlidePage {
 class EpisodePanelState extends State<EpisodePanel>
     with TickerProviderStateMixin, CommonSlideMixin {
   // tab
+  late final int _initialTabIndex;
   late final TabController _tabController;
   late final RxInt _currentTabIndex = _tabController.index.obs;
 
   late final showTitle = widget.showTitle;
 
-  List<ugc.BaseEpisodeItem> get _getCurrEpisodes =>
-      widget.type == EpisodeType.season
-      ? widget.list[_currentTabIndex.value].episodes
-      : widget.list[_currentTabIndex.value];
+  /// widget.list 是无类型的 List，season 时元素为 SectionItem、其 episodes 可空，
+  /// 且 sections 本身可能是空数组。此处若直接按下标取用，取空即在 initState 抛出，
+  /// release 下整个面板会被替换成 0xF0C0C0C0 的 ErrorWidget 灰块。
+  List<ugc.BaseEpisodeItem> get _getCurrEpisodes {
+    final index = _currentTabIndex.value;
+    if (index < 0 || index >= widget.list.length) {
+      return const <ugc.BaseEpisodeItem>[];
+    }
+    final item = widget.list[index];
+    final episodes = widget.type == EpisodeType.season ? item.episodes : item;
+    return episodes as List<ugc.BaseEpisodeItem>? ??
+        const <ugc.BaseEpisodeItem>[];
+  }
 
   // item
   late int _currentItemIndex;
@@ -138,9 +148,9 @@ class EpisodePanelState extends State<EpisodePanel>
     }
 
     // jump to current
-    if (_currentTabIndex.value != widget.initialTabIndex) {
+    if (_currentTabIndex.value != _initialTabIndex) {
       _tabController.animateTo(
-        widget.initialTabIndex,
+        _initialTabIndex,
         duration: const Duration(milliseconds: 200),
       );
       Future.delayed(const Duration(milliseconds: 300), jumpToCurrent);
@@ -152,8 +162,13 @@ class EpisodePanelState extends State<EpisodePanel>
   @override
   void initState() {
     super.initState();
+    // initialTabIndex 来自 VideoDetailController.seasonIndex，与 list 不同源，
+    // 越界时 TabController 只在 debug 下断言，release 会一路带到下标取用处才炸
+    _initialTabIndex = widget.list.isEmpty
+        ? 0
+        : widget.initialTabIndex.clamp(0, widget.list.length - 1);
     _tabController = TabController(
-      initialIndex: widget.initialTabIndex,
+      initialIndex: _initialTabIndex,
       length: widget.list.length,
       vsync: this,
     )..addListener(listener);
@@ -162,7 +177,7 @@ class EpisodePanelState extends State<EpisodePanel>
     _itemScrollController = List.generate(
       widget.list.length,
       (i) => ScrollController(
-        initialScrollOffset: i == widget.initialTabIndex
+        initialScrollOffset: i == _initialTabIndex
             ? _currentItemIndex == 0
                   ? 0
                   : _calcItemOffset(_currentItemIndex)
@@ -234,6 +249,11 @@ class EpisodePanelState extends State<EpisodePanel>
 
   @override
   Widget buildList(ThemeData theme) {
+    // list 为空时 _isReversed / _itemScrollController 也是空的，
+    // 继续往下按下标取用会抛，宁可渲染成空面板
+    if (widget.list.isEmpty) {
+      return const SizedBox.shrink();
+    }
     if (_isMulti) {
       return TabBarView<TabBarDragGestureRecognizer>(
         controller: _tabController,
@@ -274,7 +294,10 @@ class EpisodePanelState extends State<EpisodePanel>
   }
 
   void animToTop() {
-    _itemScrollController[_tabController.index].animToTop();
+    final index = _tabController.index;
+    if (index < _itemScrollController.length) {
+      _itemScrollController[index].animToTop();
+    }
   }
 
   @override
@@ -287,7 +310,7 @@ class EpisodePanelState extends State<EpisodePanel>
     int tabIndex,
     List<ugc.BaseEpisodeItem> episodes,
   ) {
-    final isCurrTab = tabIndex == widget.initialTabIndex;
+    final isCurrTab = tabIndex == _initialTabIndex;
     return KeepAliveWrapper(
       child: CustomScrollView(
         reverse: _isReversed[tabIndex],
@@ -667,20 +690,22 @@ class EpisodePanelState extends State<EpisodePanel>
           icon: const Icon(Icons.my_location),
           onPressed: () async {
             final currentTabIndex = _currentTabIndex.value;
-            if (currentTabIndex != widget.initialTabIndex) {
-              _tabController.animateTo(widget.initialTabIndex);
+            if (currentTabIndex != _initialTabIndex) {
+              _tabController.animateTo(_initialTabIndex);
               await Future.delayed(const Duration(milliseconds: 225));
             }
-            _itemScrollController[widget.initialTabIndex].animTo(
-              _calcItemOffset(_currentItemIndex),
-              duration: const Duration(milliseconds: 200),
-            );
+            if (_initialTabIndex < _itemScrollController.length) {
+              _itemScrollController[_initialTabIndex].animTo(
+                _calcItemOffset(_currentItemIndex),
+                duration: const Duration(milliseconds: 200),
+              );
+            }
           },
         ),
         if (widget.isSupportReverse == true)
           Obx(
             () {
-              return _currentTabIndex.value == widget.initialTabIndex
+              return _currentTabIndex.value == _initialTabIndex
                   ? _buildReverseBtn
                   : const SizedBox.shrink();
             },

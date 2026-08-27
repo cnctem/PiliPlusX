@@ -45,15 +45,13 @@ class _SeasonPanelState extends State<SeasonPanel> {
       tag: widget.heroTag,
     );
 
-    _videoDetailController.seasonCid = ugcIntroController.cid.value != 0
-        ? (videoDetail.pages?.isNotEmpty == true
-              ? videoDetail.isPageReversed
-                    ? videoDetail.pages!.last.cid
-                    : videoDetail.pages!.first.cid
-              : ugcIntroController.cid.value)
-        : videoDetail.isPageReversed
-        ? videoDetail.pages!.last.cid
-        : videoDetail.pages!.first.cid;
+    // pages 可空：cid 尚未解析（为 0）且 pages 为空时，原写法会在 initState 抛空断言
+    final pages = videoDetail.pages;
+    _videoDetailController.seasonCid = pages?.isNotEmpty == true
+        ? (videoDetail.isPageReversed ? pages!.last.cid : pages!.first.cid)
+        : (ugcIntroController.cid.value != 0
+              ? ugcIntroController.cid.value
+              : null);
 
     /// 根据 cid 找到对应集，找到对应 episodes
     /// 有多个episodes时，只显示其中一个
@@ -157,9 +155,16 @@ class _SeasonPanelState extends State<SeasonPanel> {
   }
 
   void _findEpisode() {
-    final List<SectionItem> sections = videoDetail.ugcSeason!.sections!;
+    // sections 与 episodes 都是可空的，缺任一段都不应让整个面板崩掉
+    final List<SectionItem>? sections = videoDetail.ugcSeason?.sections;
+    if (sections == null) {
+      return;
+    }
     for (int i = 0; i < sections.length; i++) {
-      final List<EpisodeItem> episodesList = sections[i].episodes!;
+      final List<EpisodeItem>? episodesList = sections[i].episodes;
+      if (episodesList == null) {
+        continue;
+      }
       for (int j = 0; j < episodesList.length; j++) {
         if (episodesList[j].cid == _videoDetailController.seasonCid) {
           if (_videoDetailController.seasonIndex.value != i) {
