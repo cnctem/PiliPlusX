@@ -54,7 +54,7 @@ dependencies:
   get:
     git:
       url: https://github.com/bggRGjQaUbCoE/getx.git
-      ref: 81b8a71982f89b46fa868b315cd71ff6a6ddf895
+      ref: dev
 
   # 网络
   dio: 5.9.2

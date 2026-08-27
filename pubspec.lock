@@ -821,8 +821,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "81b8a71982f89b46fa868b315cd71ff6a6ddf895"
-      resolved-ref: "81b8a71982f89b46fa868b315cd71ff6a6ddf895"
+      ref: dev
+      resolved-ref: "12c9d4d1517186390e92f86063369f4a26d01fdb"
       url: "https://github.com/bggRGjQaUbCoE/getx.git"
     source: git
     version: "4.7.2"
