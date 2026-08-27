@@ -171,10 +171,16 @@ class _CdnSelectDialogState extends State<CdnSelectDialog> {
 
   Future<void> _measureDownloadSpeed(String url, int index) async {
     const maxSize = 8 * 1024 * 1024;
+    const timeoutUs = 15 * Duration.microsecondsPerSecond;
     int downloaded = 0;
 
     final cancelToken = _tokens[index];
-    final start = DateTime.now().microsecondsSinceEpoch;
+    // 单调时钟：DateTime.now() 会被 NTP 校时 / 时区调整干扰
+    final watch = Stopwatch()..start();
+    // 首包时刻与首包时已收到的字节数：把建连与首包等待排除在速率的分母之外，
+    // 否则 TTFB 会被算进耗时，系统性低估吞吐
+    int? firstByteUs;
+    int firstByteBytes = 0;
 
     void onClose() {
       cancelToken?.cancel();
@@ -185,34 +191,77 @@ class _CdnSelectDialogState extends State<CdnSelectDialog> {
       url,
       cancelToken: cancelToken,
       onReceiveProgress: (count, total) {
-        if (!mounted) {
+        // onClose 之后仍可能收到若干回调，此时结果已定，不要用更差的窗口覆盖
+        if (!mounted || _tokens[index] == null) {
           return;
         }
 
-        final duration = DateTime.now().microsecondsSinceEpoch - start;
+        final elapsedUs = watch.elapsedMicroseconds;
+        if (firstByteUs == null && count > 0) {
+          firstByteUs = elapsedUs;
+          firstByteBytes = count;
+        }
 
         downloaded = count;
 
-        if (duration > 15000000) {
+        if (elapsedUs > timeoutUs) {
           onClose();
           if (downloaded > 0) {
-            _updateSpeedResult(index, downloaded, duration);
+            _updateSpeedResult(
+              index,
+              downloaded: downloaded,
+              elapsedUs: elapsedUs,
+              firstByteUs: firstByteUs,
+              firstByteBytes: firstByteBytes,
+              truncated: true,
+            );
             downloaded = 0;
           } else {
             throw TimeoutException('测速超时');
           }
         } else if (downloaded >= maxSize) {
           onClose();
-          _updateSpeedResult(index, downloaded, duration);
+          _updateSpeedResult(
+            index,
+            downloaded: downloaded,
+            elapsedUs: elapsedUs,
+            firstByteUs: firstByteUs,
+            firstByteBytes: firstByteBytes,
+            truncated: false,
+          );
           downloaded = 0;
         }
       },
     );
   }
 
-  void _updateSpeedResult(int index, int downloaded, int duration) {
-    final speed = (downloaded / duration).toStringAsPrecision(3);
-    _cdnResList[index].value = '${speed}MB/s';
+  void _updateSpeedResult(
+    int index, {
+    required int downloaded,
+    required int elapsedUs,
+    required int? firstByteUs,
+    required int firstByteBytes,
+    required bool truncated,
+  }) {
+    // 优先用「首包之后」的窗口计算；样本不足时回退到整段请求
+    var bytes = downloaded - firstByteBytes;
+    var windowUs = firstByteUs == null ? 0 : elapsedUs - firstByteUs;
+    if (bytes <= 0 || windowUs <= 0) {
+      bytes = downloaded;
+      windowUs = elapsedUs;
+    }
+    if (bytes <= 0 || windowUs <= 0) return;
+
+    // 字节 / 微秒 == MB/s（1000 进制）
+    final speed = (bytes / windowUs).toStringAsPrecision(3);
+    final buffer = StringBuffer('${speed}MB/s');
+    if (firstByteUs != null) {
+      buffer.write(' · 首包${(firstByteUs / 1000).toStringAsFixed(0)}ms');
+    }
+    if (truncated) {
+      buffer.write(' · 超时截断');
+    }
+    _cdnResList[index].value = buffer.toString();
   }
 
   void _handleSpeedTestError(dynamic error, int index) {

@@ -25,6 +25,7 @@ import 'package:PiliPlus/pages/live_room/send_danmaku/view.dart';
 import 'package:PiliPlus/pages/video/widgets/header_control.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/data_source.dart';
+import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/danmaku_options.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/tcp/live.dart';
@@ -115,7 +116,11 @@ class LiveRoomController extends GetxController {
   late final RxInt pageIndex = 0.obs;
   PageController? pageController;
 
-  int? currentQn = PlatformUtils.isMobile ? null : Pref.liveQuality;
+  // 同 cacheVideoQa：由 queryLiveUrl 按当前链路首次赋值，不再按平台预置
+  int? currentQn;
+  StreamSubscription<bool>? _networkScopeSub;
+  // queryLiveUrl 无重入保护，链路翻转与用户切线路可能撞在一起
+  bool _queryingLiveUrl = false;
   final currentQnDesc = ''.obs;
   final RxBool isPortrait = false.obs;
   late List<({int code, String desc})> acceptQnList = [];
@@ -187,6 +192,9 @@ class LiveRoomController extends GetxController {
     if (Get.parameters['onlyAudio'] == 'true') {
       plPlayerController.onlyPlayAudio.value = true;
     }
+    _networkScopeSub = ConnectivityUtils.onScopeChanged.listen(
+      _onNetworkScopeChanged,
+    );
     queryLiveUrl(
       autoplay: Get.parameters['autoplay'] != 'false',
       autoFullScreenFlag: true,
@@ -207,6 +215,7 @@ class LiveRoomController extends GetxController {
     if (videoUrl == null) {
       return null;
     }
+    plPlayerController.sourceOwner = this;
     return plPlayerController.setDataSource(
       NetworkSource(videoSource: videoUrl!, audioSource: null),
       isLive: true,
@@ -216,13 +225,43 @@ class LiveRoomController extends GetxController {
     );
   }
 
+  /// 链路在「宽带档 / 蜂窝档」之间翻转：改用该档的默认清晰度重新取流，
+  /// 并沿用翻转前的播放/暂停状态。
+  void _onNetworkScopeChanged(bool useCellular) {
+    if (isClosed) return;
+    // currentQn 是本页自己的状态，无论是否持有播放器都该保持最新
+    currentQn = useCellular ? Pref.liveQualityCellular : Pref.liveQuality;
+    // 叠加的播放页只有当前持有播放器的那个才真正换流
+    if (!identical(plPlayerController.sourceOwner, this)) return;
+    // 直播没有进度可保留，正在取流时直接丢弃本次事件即可：
+    // 那次取流会用上面刚写入的 currentQn
+    if (_queryingLiveUrl) return;
+    queryLiveUrl(autoplay: plPlayerController.playerStatus.isPlaying);
+  }
+
   Future<void> queryLiveUrl({
     bool autoplay = true,
     bool autoFullScreenFlag = false,
   }) async {
-    currentQn ??= await ConnectivityUtils.isWiFi
-        ? Pref.liveQuality
-        : Pref.liveQualityCellular;
+    if (_queryingLiveUrl) return;
+    _queryingLiveUrl = true;
+    try {
+      await _queryLiveUrl(
+        autoplay: autoplay,
+        autoFullScreenFlag: autoFullScreenFlag,
+      );
+    } finally {
+      _queryingLiveUrl = false;
+    }
+  }
+
+  Future<void> _queryLiveUrl({
+    required bool autoplay,
+    required bool autoFullScreenFlag,
+  }) async {
+    currentQn ??= await ConnectivityUtils.useCellularPrefs
+        ? Pref.liveQualityCellular
+        : Pref.liveQuality;
     final res = await LiveHttp.liveRoomInfo(
       roomId: roomId,
       qn: currentQn,
@@ -482,6 +521,11 @@ class LiveRoomController extends GetxController {
 
   @override
   void onClose() {
+    _networkScopeSub?.cancel();
+    _networkScopeSub = null;
+    if (identical(plPlayerController.sourceOwner, this)) {
+      plPlayerController.sourceOwner = null;
+    }
     HarmonyChannel.releaseContinuation(this);
     _stopSizeSub();
     closeLiveMsg();

@@ -893,6 +893,10 @@ abstract final class Pref {
   static bool get enableAutoLongPressSpeed =>
       _setting.get(SettingBoxKey.enableAutoLongPressSpeed, defaultValue: false);
 
+  /// 「动态长按倍速」的倍率系数，长按时播放速度 = 当前速度 * 该系数。
+  static double get longPressSpeedFactor =>
+      _setting.get(SettingBoxKey.longPressSpeedFactor, defaultValue: 2.0);
+
   static double get playSpeedDefault =>
       _video.get(VideoBoxKey.playSpeedDefault, defaultValue: 1.0);
 

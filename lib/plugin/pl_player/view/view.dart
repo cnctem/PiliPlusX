@@ -897,9 +897,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                       // update
                       if (!plPlayerController.tempPlayerConf) {
                         GStorage.setting.put(
-                          await ConnectivityUtils.isWiFi
-                              ? SettingBoxKey.defaultVideoQa
-                              : SettingBoxKey.defaultVideoQaCellular,
+                          await ConnectivityUtils.prefKey(
+                            SettingBoxKey.defaultVideoQa,
+                            SettingBoxKey.defaultVideoQaCellular,
+                          ),
                           quality,
                         );
                       }
@@ -1511,7 +1512,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                       ),
                       child: Obx(
                         () => Text(
-                          '${plPlayerController.enableAutoLongPressSpeed ? (plPlayerController.longPressStatus.value ? plPlayerController.lastPlaybackSpeed : plPlayerController.playbackSpeed) * 2 : plPlayerController.longPressSpeed}倍速中',
+                          '${plPlayerController.longPressDisplaySpeed.value}倍速中',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 13,

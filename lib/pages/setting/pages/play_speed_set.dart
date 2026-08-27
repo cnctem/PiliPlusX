@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:PiliPlus/common/widgets/flutter/list_tile.dart';
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/pages/setting/widgets/switch_item.dart';
+import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/utils/extension/context_ext.dart';
 import 'package:PiliPlus/utils/filtering_text.dart';
 import 'package:PiliPlus/utils/storage.dart';
@@ -26,6 +27,7 @@ class _PlaySpeedPageState extends State<PlaySpeedPage> {
   late double longPressSpeedDefault = Pref.longPressSpeedDefault;
   late List<double> speedList = Pref.speedList;
   late bool enableAutoLongPressSpeed = Pref.enableAutoLongPressSpeed;
+  late double longPressSpeedFactor = Pref.longPressSpeedFactor;
   List<({int id, String title, Icon icon})> sheetMenu = [
     (
       id: 1,
@@ -54,6 +56,73 @@ class _PlaySpeedPageState extends State<PlaySpeedPage> {
   ];
 
   Box video = GStorage.video;
+
+  static const double _minFactor = 0.5;
+  static const double _maxFactor = 3.0;
+  // 手动输入允许超出滑块范围，但仍需有界：播放器会把最终速率钳在 10x
+  static const double _maxInputFactor = 10.0;
+
+  // 拖动过程中只更新界面与正在播放的实例，松手（onChangeEnd）时才落盘
+  void _updateSpeedFactor(double value) {
+    longPressSpeedFactor = value;
+    PlPlayerController.instance?.longPressSpeedFactor = value;
+    setState(() {});
+  }
+
+  Future<void> _saveSpeedFactor(double value) async {
+    _updateSpeedFactor(value);
+    await GStorage.setting.put(SettingBoxKey.longPressSpeedFactor, value);
+  }
+
+  // 滑块只覆盖 0.5x~3x，需要更极端的值时走手动输入
+  void _inputSpeedFactor() {
+    String initialValue = longPressSpeedFactor.toString();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('长按倍速系数'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            TextFormField(
+              autofocus: true,
+              initialValue: initialValue,
+              keyboardType: const .numberWithOptions(decimal: true),
+              decoration: const InputDecoration(
+                labelText: '倍数',
+                suffixText: '倍',
+                border: OutlineInputBorder(borderRadius: .all(.circular(6))),
+              ),
+              onChanged: (value) => initialValue = value,
+              inputFormatters: FilteringText.decimal,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: Get.back,
+            child: Text(
+              '取消',
+              style: TextStyle(color: Theme.of(context).colorScheme.outline),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              final val = double.tryParse(initialValue);
+              if (val == null || val <= 0 || val > _maxInputFactor) {
+                SmartDialog.showToast('请输入 0 ~ $_maxInputFactor 之间的数值');
+                return;
+              }
+              Get.back();
+              _saveSpeedFactor(val);
+            },
+            child: const Text('确认'),
+          ),
+        ],
+      ),
+    );
+  }
 
   // 添加自定义倍速
   void onAddSpeed() {
@@ -218,12 +287,38 @@ class _PlaySpeedPageState extends State<PlaySpeedPage> {
             ),
             SetSwitchItem(
               title: '动态长按倍速',
-              subtitle: '根据默认倍速长按时自动双倍',
+              subtitle: '长按时在当前倍速基础上乘以系数',
               setKey: SettingBoxKey.enableAutoLongPressSpeed,
               defaultVal: enableAutoLongPressSpeed,
-              onChanged: (val) =>
-                  setState(() => enableAutoLongPressSpeed = val),
+              onChanged: (val) {
+                enableAutoLongPressSpeed = val;
+                PlPlayerController.instance?.enableAutoLongPressSpeed = val;
+                setState(() {});
+              },
             ),
+            if (enableAutoLongPressSpeed) ...[
+              ListTile(
+                title: const Text('长按倍速系数'),
+                subtitle: Text('长按时播放速度 = 当前倍速 × $longPressSpeedFactor'),
+                trailing: TextButton(
+                  onPressed: _inputSpeedFactor,
+                  child: const Text('手动输入'),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Slider(
+                  value: longPressSpeedFactor.clamp(_minFactor, _maxFactor),
+                  min: _minFactor,
+                  max: _maxFactor,
+                  divisions: 10,
+                  label:
+                      '×${longPressSpeedFactor.clamp(_minFactor, _maxFactor)}',
+                  onChanged: _updateSpeedFactor,
+                  onChangeEnd: _saveSpeedFactor,
+                ),
+              ),
+            ],
             if (!enableAutoLongPressSpeed)
               ListTile(
                 title: const Text('默认长按倍速'),

@@ -41,7 +41,6 @@ class LiveRoomChatPanel extends StatelessWidget {
     late final nameColor = isPP
         ? Colors.white.withValues(alpha: 0.9)
         : Colors.white.withValues(alpha: 0.6);
-    late final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
     late final colorScheme = ColorScheme.of(context);
     late final primary = colorScheme.isDark
         ? colorScheme.primary
@@ -119,7 +118,7 @@ class LiveRoomChatPanel extends StatelessWidget {
                                     ..onTap = () =>
                                         Get.toNamed('/member?mid=${reply.mid}'),
                                 ),
-                              _buildMsg(devicePixelRatio, item),
+                              _buildMsg(item),
                             ],
                           ),
                         ),
@@ -233,16 +232,22 @@ class LiveRoomChatPanel extends StatelessWidget {
     );
   }
 
-  InlineSpan _buildMsg(double devicePixelRatio, DanmakuMsg obj) {
+  /// 直播表情素材按 3x 出图，接口返回的 width/height 是素材像素而非逻辑像素，
+  /// 需按此固定倍率折算。此前这里除的是 devicePixelRatio，在 DPR=3 的设备上
+  /// 恰好等价，但 DPR=1 的鸿蒙 2in1 / PC 上会放大三倍（上游 #2686）。
+  static const double _emoteAssetScale = 3.0;
+
+  InlineSpan _buildMsg(DanmakuMsg obj) {
     final uemote = obj.uemote;
     if (uemote != null) {
       // "room_{{room_id}}_{{int}}" , "upower_[{{emote}}]" , "official_{{int}}"
       final double width, height;
       if (uemote.isOfficial) {
-        width = uemote.width / devicePixelRatio;
-        height = uemote.height / devicePixelRatio;
+        width = uemote.width / _emoteAssetScale;
+        height = uemote.height / _emoteAssetScale;
       } else {
-        width = height = 162.0 / devicePixelRatio;
+        // 非官方表情固定 162 素材像素 -> 54 逻辑像素
+        width = height = 162.0 / _emoteAssetScale;
       }
       return WidgetSpan(
         child: NetworkImgLayer(

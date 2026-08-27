@@ -83,6 +83,9 @@ class AudioController extends GetxController
   late final AnimationController animController;
 
   List<StreamSubscription>? _subscriptions;
+  StreamSubscription<bool>? _networkScopeSub;
+  // _queryPlayUrl 无重入保护，链路翻转可能与首次取流撞在一起
+  bool _queryingPlayUrl = false;
 
   int? index;
   List<DetailItem>? playlist;
@@ -178,8 +181,14 @@ class AudioController extends GetxController
       _querySponsorBlock();
       _onOpenMedia(audioUrl, ua: BrowserUa.pc, referer: HttpString.baseUrl);
     }
-    ConnectivityUtils.isWiFi.then((isWiFi) {
-      cacheAudioQa = isWiFi ? Pref.defaultAudioQa : Pref.defaultAudioQaCellular;
+    ConnectivityUtils.useCellularPrefs.then((useCellular) {
+      if (isClosed) return;
+      cacheAudioQa = useCellular
+          ? Pref.defaultAudioQaCellular
+          : Pref.defaultAudioQa;
+      _networkScopeSub = ConnectivityUtils.onScopeChanged.listen(
+        _onNetworkScopeChanged,
+      );
       if (!hasAudioUrl) {
         _queryPlayUrl();
       }
@@ -304,19 +313,45 @@ class AudioController extends GetxController
     }
   }
 
+  /// 链路在「宽带档 / 蜂窝档」之间翻转：改用该档的默认音质重新取流，
+  /// 保留当前进度与播放/暂停状态。
+  Future<void> _onNetworkScopeChanged(bool useCellular) async {
+    if (isClosed) return;
+    cacheAudioQa = useCellular
+        ? Pref.defaultAudioQaCellular
+        : Pref.defaultAudioQa;
+    final player = this.player;
+    // 正在取流时丢弃本次事件即可：那次取流会用上面刚写入的 cacheAudioQa
+    if (player == null || _queryingPlayUrl) return;
+    final previousStart = _start;
+    _start = player.state.position;
+    _autoplayOnOpen = player.state.playing;
+    // 取流失败时不会走到 _onOpenMedia，两个一次性状态需要自己还原
+    if (!await _queryPlayUrl()) {
+      _start = previousStart;
+      _autoplayOnOpen = true;
+    }
+  }
+
   Future<bool> _queryPlayUrl() async {
-    _querySponsorBlock();
-    final res = await AudioGrpc.audioPlayUrl(
-      itemType: itemType,
-      oid: oid,
-      subId: subId,
-    );
-    if (res case Success(:final response)) {
-      _onPlay(response);
-      return true;
-    } else {
-      res.toast();
-      return false;
+    if (_queryingPlayUrl) return false;
+    _queryingPlayUrl = true;
+    try {
+      _querySponsorBlock();
+      final res = await AudioGrpc.audioPlayUrl(
+        itemType: itemType,
+        oid: oid,
+        subId: subId,
+      );
+      if (res case Success(:final response)) {
+        _onPlay(response);
+        return true;
+      } else {
+        res.toast();
+        return false;
+      }
+    } finally {
+      _queryingPlayUrl = false;
     }
   }
 
@@ -329,7 +364,7 @@ class AudioController extends GetxController
         if (audios.isEmpty) {
           return;
         }
-        position.value = 0;
+        if (_start == null) position.value = 0;
         final audio = audios.findClosestTarget(
           (e) => e.id <= cacheAudioQa,
           (a, b) => a.id > b.id ? a : b,
@@ -342,7 +377,7 @@ class AudioController extends GetxController
           return;
         }
         final durl = durls.first;
-        position.value = 0;
+        if (_start == null) position.value = 0;
         _onOpenMedia(VideoUtils.getCdnUrl(durl.playUrls));
       }
     }
@@ -845,6 +880,8 @@ class AudioController extends GetxController
     _subscriptions?.forEach((e) => e.cancel());
     _subscriptions?.clear();
     _subscriptions = null;
+    _networkScopeSub?.cancel();
+    _networkScopeSub = null;
     player?.dispose();
     player = null;
     animController.dispose();

@@ -142,6 +142,11 @@ class PlPlayerController with BlockConfigMixin {
   int? _aid;
   String? _bvid;
   int? cid;
+
+  /// 当前数据源由哪个页面控制器建立。播放器是单例，而视频页 / 直播页可以叠加
+  /// （从视频页再点开一个视频），链路变化这类被动事件必须据此判断自己是否仍是
+  /// 播放器的持有者，否则后台的页面会把播放器抢回自己的源。
+  Object? sourceOwner;
   int? _epid;
   int? _seasonId;
   int? _pgcType;
@@ -370,6 +375,7 @@ class PlPlayerController with BlockConfigMixin {
 
   late List<double> speedList = Pref.speedList;
   late bool enableAutoLongPressSpeed = Pref.enableAutoLongPressSpeed;
+  late double longPressSpeedFactor = Pref.longPressSpeedFactor;
   late final showControlDuration = Pref.enableLongShowControl
       ? const Duration(seconds: 30)
       : const Duration(seconds: 3);
@@ -416,7 +422,10 @@ class PlPlayerController with BlockConfigMixin {
 
   late final bool tempPlayerConf = Pref.tempPlayerConf;
 
-  late int? cacheVideoQa = PlatformUtils.isMobile ? null : Pref.defaultVideoQa;
+  // 统一由 VideoDetailController.queryVideoUrl 按当前链路首次赋值，不再按平台预置。
+  // 上游的 `PlatformUtils.isMobile ? null : ...` 是为了绕开 isWiFi 在桌面恒 false，
+  // 该守卫已在 ConnectivityUtils 中移除。
+  int? cacheVideoQa;
   late int cacheAudioQa = Pref.defaultAudioQa;
   bool enableHeart = true;
   late final String? hwdec = Pref.enableHA ? Pref.hardwareDecoding : null;
@@ -1648,6 +1657,18 @@ class PlPlayerController with BlockConfigMixin {
   }
 
   Timer? longPressTimer;
+
+  /// 长按倍速的上下界，避免自定义系数把速率放到 mpv 无法处理的区间
+  static const double _minLongPressSpeed = 0.25;
+  static const double _maxLongPressSpeed = 10.0;
+
+  /// 进入长按前的播放速度，松手后恢复到它
+  double? _longPressRestoreSpeed;
+
+  /// 「x 倍速中」提示所显示的速度。只在进入长按时写入，松手后保持不变，
+  /// 这样提示条 150ms 淡出期间不会闪回已恢复的原速。
+  late final RxDouble longPressDisplaySpeed = longPressSpeed.obs;
+
   void cancelLongPressTimer() {
     longPressTimer?.cancel();
     longPressTimer = null;
@@ -1666,16 +1687,23 @@ class PlPlayerController with BlockConfigMixin {
     }
     if (val) {
       if (playerStatus.isPlaying) {
+        _longPressRestoreSpeed = playbackSpeed;
+        final targetSpeed = enableAutoLongPressSpeed
+            ? (playbackSpeed * longPressSpeedFactor).clamp(
+                _minLongPressSpeed,
+                _maxLongPressSpeed,
+              )
+            : longPressSpeed;
+        longPressDisplaySpeed.value = targetSpeed;
         longPressStatus.value = val;
         HapticFeedback.lightImpact();
-        await setPlaybackSpeed(
-          enableAutoLongPressSpeed ? playbackSpeed * 2 : longPressSpeed,
-        );
+        await setPlaybackSpeed(targetSpeed);
       }
     } else {
-      // if (kDebugMode) debugPrint('$playbackSpeed');
       longPressStatus.value = val;
-      await setPlaybackSpeed(lastPlaybackSpeed);
+      final restoreSpeed = _longPressRestoreSpeed ?? lastPlaybackSpeed;
+      _longPressRestoreSpeed = null;
+      await setPlaybackSpeed(restoreSpeed);
     }
   }
 
