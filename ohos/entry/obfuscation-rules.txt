@@ -77,6 +77,46 @@
   floating
   mode
 
+# --- 保留 @ohos/flutter_ohos TextInputChannel 通信属性名 ---
+# flutter_ohos 的 consumer-rules.txt 仅保留 flutter/native*，不足以保护
+# TextInputChannel 与 Dart 侧的 MethodChannel 通信字段。
+# 若被混淆重命名，输入法将无法向 Flutter 传递编辑状态/配置。
+#
+# EditingState / TextEditingDeltaJson / TextEditState.fromJson (→ Dart & Dart →)
+  text
+  selectionBase
+  selectionExtent
+  composingBase
+  composingExtent
+# TextEditingDeltaJson (→ Dart)
+  oldText
+  deltaText
+  deltaStart
+  deltaEnd
+# EditingDelta (→ Dart)
+  deltas
+# Configuration.fromJson / fromMap (Dart →)
+  obscureText
+  autocorrect
+  enableSuggestions
+  enableIMEPersonalizedLearning
+  enableDeltaModel
+  inputType
+  inputAction
+  actionLabel
+  autofill
+  deviceKind
+  contentCommitMimeTypes
+  fields
+# InputType.fromJson (Dart →)
+  signed
+  decimal
+# Autofill.fromJson (Dart →)
+  uniqueIdentifier
+  hints
+  hintText
+  editingValue
+
 # --- 保留被配置文件以字符串引用的全局名 ---
 # module.json5: mainElement / abilities[].name / extensionAbilities[].name
 # EntryAbility.ets: formProvider.reloadForms(..., "EntryFormAbility", ...)
