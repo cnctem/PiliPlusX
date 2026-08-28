@@ -13,7 +13,6 @@ import 'package:PiliPlus/common/widgets/gesture/tap_gesture_recognizer.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/image_grid/image_grid_view.dart';
 import 'package:PiliPlus/common/widgets/pendant_avatar.dart';
-import 'package:PiliPlus/common/widgets/selection_text.dart';
 import 'package:PiliPlus/common/widgets/text_selection_toolbar.dart';
 import 'package:PiliPlus/grpc/bilibili/main/community/reply/v1.pb.dart'
     show ReplyInfo, ReplyControl, Content, Url, ReplyControl_VoteOption;
@@ -1200,19 +1199,17 @@ class ReplyItemGrpc extends StatelessWidget {
               showDialog(
                 context: context,
                 builder: (context) => Dialog(
+                  constraints: const BoxConstraints.tightFor(width: 380),
                   child: Padding(
                     padding: const .symmetric(horizontal: 20, vertical: 16),
-                    child: Builder(
-                      builder: (context) {
-                        final capture = SelectedContentCapture();
-                        return SelectionText(
-                          message,
-                          style: const TextStyle(fontSize: 15, height: 1.7),
-                          onSelectionChanged: capture.onSelectionChanged,
-                          contextMenuBuilder: (_, state) =>
-                              _filterMenuBuilder(context, state, capture),
-                        );
-                      },
+                    // OHOS 引擎上 SelectionArea 长按拖选跨行会跳变，
+                    // 这里沿用 EditableText 路径的 SelectableText（按字符拖选、
+                    // 高度受限时自带滚动），行为与上游 Android 端一致。
+                    child: SelectableText(
+                      message,
+                      style: const TextStyle(fontSize: 15, height: 1.7),
+                      contextMenuBuilder: (_, state) =>
+                          _filterMenuBuilder(context, state),
                     ),
                   ),
                 ),
@@ -1248,15 +1245,21 @@ class ReplyItemGrpc extends StatelessWidget {
 
   static Widget _filterMenuBuilder(
     BuildContext context,
-    SelectableRegionState selectableRegionState,
-    SelectedContentCapture capture,
+    EditableTextState editableTextState,
   ) {
+    String? selectedText() {
+      final TextEditingValue value = editableTextState.textEditingValue;
+      final TextSelection selection = value.selection;
+      if (!selection.isValid || selection.isCollapsed) return null;
+      return selection.textInside(value.text);
+    }
+
     final items = ensureExtraButtons(
-      selectableRegionState.contextMenuButtonItems,
-      selectedTextOf: () => capture.selectedText,
-      hideToolbar: () => selectableRegionState.hideToolbar(),
+      editableTextState.contextMenuButtonItems,
+      selectedTextOf: selectedText,
+      hideToolbar: () => editableTextState.hideToolbar(),
     );
-    final String? selected = capture.selectedText;
+    final String? selected = selectedText();
     if (selected != null && selected.isNotEmpty) {
       items.add(
         ContextMenuButtonItem(
@@ -1297,7 +1300,7 @@ class ReplyItemGrpc extends StatelessWidget {
     }
     return AdaptiveTextSelectionToolbar.buttonItems(
       buttonItems: items,
-      anchors: selectableRegionState.contextMenuAnchors,
+      anchors: editableTextState.contextMenuAnchors,
     );
   }
 }
