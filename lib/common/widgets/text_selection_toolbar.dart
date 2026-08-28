@@ -4,7 +4,6 @@ import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/share_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show SelectedContent;
 import 'package:get/get.dart';
 
 /// 在选中工具栏「复制」后追加统一「分享」项（Android/iOS/OHOS，桌面端除外）。
@@ -104,24 +103,6 @@ List<ContextMenuButtonItem> ensureExtraButtons(
   );
 }
 
-/// [SelectionArea]/[SelectionText] 上下文菜单：默认按钮 + 统一分享 + 打开/站内搜索。
-/// 选中文本由使用方经 [selectedTextOf] 注入（OHOS 引擎未暴露选中文本）。
-Widget selectionAreaContextMenuBuilder(
-  BuildContext context,
-  SelectableRegionState selectableRegionState, {
-  String? Function()? selectedTextOf,
-}) {
-  final buttonItems = ensureExtraButtons(
-    selectableRegionState.contextMenuButtonItems,
-    selectedTextOf: selectedTextOf ?? () => null,
-    hideToolbar: () => selectableRegionState.hideToolbar(),
-  );
-  return AdaptiveTextSelectionToolbar.buttonItems(
-    anchors: selectableRegionState.contextMenuAnchors,
-    buttonItems: buttonItems,
-  );
-}
-
 /// 标准 [SelectableText] 上下文菜单（内部为只读 [EditableText]）。
 Widget selectableTextContextMenuBuilder(
   BuildContext context,
@@ -143,14 +124,4 @@ String? _selectedTextOf(EditableTextState state) {
   final TextSelection selection = state.textEditingValue.selection;
   if (!selection.isValid || selection.isCollapsed) return null;
   return selection.textInside(state.textEditingValue.text);
-}
-
-/// 捕获当前选中文本，供自定义上下文菜单使用。
-class SelectedContentCapture {
-  SelectedContent? _content;
-
-  String? get selectedText => _content?.plainText;
-
-  /// 挂到 [SelectionArea]/[SelectionText] 的 `onSelectionChanged`。
-  void onSelectionChanged(SelectedContent? content) => _content = content;
 }

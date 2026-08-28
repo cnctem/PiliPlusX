@@ -27,7 +27,6 @@ Widget content(
   final pics = moduleDynamic?.major?.opus?.pics;
   final text =
       moduleDynamic?.desc?.text ?? moduleDynamic?.major?.opus?.summary?.text;
-  final capture = SelectedContentCapture();
   return Padding(
     padding: floor == 1
         ? const EdgeInsets.fromLTRB(12, 0, 12, 6)
@@ -78,10 +77,9 @@ Widget content(
                   style: isSave
                       ? const TextStyle(fontSize: 15)
                       : const TextStyle(fontSize: 16),
-                  onSelectionChanged: capture.onSelectionChanged,
                   contextMenuBuilder: text == null || text.isEmpty
                       ? null
-                      : (_, state) => _contextMenuBuilder(state, text, capture),
+                      : (_, state) => _contextMenuBuilder(state, text),
                 )
               : custom_text.Text.rich(
                   style: floor == 1
@@ -112,13 +110,19 @@ Widget content(
 }
 
 Widget _contextMenuBuilder(
-  SelectableRegionState state,
+  EditableTextState state,
   String text,
-  SelectedContentCapture capture,
 ) {
+  String? selectedText() {
+    final TextEditingValue value = state.textEditingValue;
+    final TextSelection selection = value.selection;
+    if (!selection.isValid || selection.isCollapsed) return null;
+    return selection.textInside(value.text);
+  }
+
   final buttonItems = ensureExtraButtons(
     state.contextMenuButtonItems,
-    selectedTextOf: () => capture.selectedText,
+    selectedTextOf: selectedText,
     hideToolbar: () => state.hideToolbar(),
   )..add(
     ContextMenuButtonItem(label: '文本', onPressed: () => _onCopyText(text)),
@@ -133,6 +137,7 @@ void _onCopyText(String text) {
   showDialog(
     context: Get.context!,
     builder: (context) => Dialog(
+      constraints: const BoxConstraints.tightFor(width: 380),
       child: Padding(
         padding: const .symmetric(horizontal: 20, vertical: 16),
         child: SelectionText(
