@@ -23,14 +23,22 @@ jobs:
           node -e '
             const sharp = require("sharp");
             const glob = require("glob");
+            const fs = require("fs");
+
             (async () => {
               const files = glob.sync("assets/images/**/*.@(png|jpg|jpeg|webp)");
               for (const f of files) {
-                const buf = await sharp(f)
-                  .png({ quality: 80 }).jpeg({ quality: 85 }).webp({ quality: 85 })
-                  .toBuffer();
-                const { size } = require("fs").statSync(f);
-                if (buf.length < size) require("fs").writeFileSync(f, buf);
+                const img = sharp(f);
+                const { format } = await img.metadata();
+
+                const buf = await (format === "jpeg"
+                  ? img.jpeg({ quality: 85, mozjpeg: true })
+                  : format === "webp"
+                    ? img.webp({ quality: 85 })
+                    : img.png({ compressionLevel: 9, palette: true })
+                ).toBuffer();
+
+                if (buf.length < fs.statSync(f).size) fs.writeFileSync(f, buf);
               }
             })();
           '
