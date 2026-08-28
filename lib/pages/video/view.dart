@@ -241,7 +241,15 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   /// 当前应用生命周期状态
   AppLifecycleState _lifecycleState = AppLifecycleState.resumed;
 
-  late final _enableHero = Pref.enableHeroCoverAnimation && heroTag != null;
+  // heroTag 恒非空（兼任 GetX 控制器 tag，toVideoPage 有随机值兜底），只有
+  // 真正被 Hero 包裹的卡片（首页视频卡/番剧卡）会生成带这两个前缀的稳定
+  // tag。其他入口（搜索等）没有源端 Hero，若也进入 _waitingHero 等待，
+  // 转场期间会滑入 300ms 空白页导致动画不连贯。
+  late final _enableHero =
+      Pref.enableHeroCoverAnimation &&
+      heroTag is String &&
+      ((heroTag as String).startsWith('video_hero_') ||
+          (heroTag as String).startsWith('pgc_hero_'));
   late bool _waitingHero = _enableHero;
   final _heroDuration = const Duration(milliseconds: 300);
   @override
