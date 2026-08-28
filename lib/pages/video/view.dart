@@ -75,10 +75,10 @@ import 'package:PiliPlus/utils/theme_utils.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart';
 import 'package:floating/floating.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:os_type/os_type.dart';
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
 
@@ -250,7 +250,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       heroTag is String &&
       ((heroTag as String).startsWith('video_hero_') ||
           (heroTag as String).startsWith('pgc_hero_'));
-  late bool _waitingHero = _enableHero;
+  late bool _waitingHero = _enableHero && (heroTag as String).startsWith('video_hero_');
   final _heroDuration = const Duration(milliseconds: 300);
   @override
   void initState() {
