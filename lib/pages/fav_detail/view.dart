@@ -61,8 +61,9 @@ class _FavDetailPageState extends State<FavDetailPage> with GridMixin {
           },
           child: SimpleScaffold(
             fab: Padding(
-              padding: const EdgeInsets.only(
-                right: kFloatingActionButtonMargin,
+              padding: EdgeInsets.only(
+                right: kFloatingActionButtonMargin + padding.right,
+                bottom: kFloatingActionButtonMargin + padding.bottom,
               ),
               child: Obx(
                 () => _favDetailController.folderInfo.value.mediaCount > 0

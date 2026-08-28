@@ -62,6 +62,7 @@ class _LaterPageState extends State<LaterPage>
 
   @override
   Widget build(BuildContext context) {
+    final padding = MediaQuery.viewPaddingOf(context);
     return Obx(
       () {
         final enableMultiSelect = _baseCtr.enableMultiSelect.value;
@@ -75,7 +76,10 @@ class _LaterPageState extends State<LaterPage>
           child: SimpleScaffold(
             appBar: _buildAppbar(enableMultiSelect),
             fab: Padding(
-              padding: const .only(right: kFloatingActionButtonMargin),
+              padding: .only(
+                right: kFloatingActionButtonMargin + padding.right,
+                bottom: kFloatingActionButtonMargin + padding.bottom,
+              ),
               child: Obx(
                 () => currCtr().loadingState.value.isSuccess
                     ? AnimatedSlide(
