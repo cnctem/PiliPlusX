@@ -9,6 +9,14 @@
         excludes: ["**/x86/**", "**/x86_64/**", "**/x86_64/*.so"],
       },
     },
+    "arkOptions": {
+      "obfuscation": {
+        "ruleOptions": {
+          "enable": true,
+          "files": ["./obfuscation-rules.txt"]
+        }
+      }
+    }
   },
   targets: [
     {

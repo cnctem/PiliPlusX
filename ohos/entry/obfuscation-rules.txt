@@ -1,0 +1,97 @@
+# ============================================================
+# PiliPlus HarmonyOS Obfuscation Rules
+# Flutter + ArkTS 混编项目 — 最小化风险配置
+# ============================================================
+
+# --- 基础混淆开关 ---
+-enable-property-obfuscation
+-enable-toplevel-obfuscation
+-enable-filename-obfuscation
+
+# --- 代码压缩：移除不必要的空白和换行 ---
+# 风险评估：✅ 安全
+# 仅压缩输出格式，不影响运行时行为、逻辑或语义。
+# 唯一副作用：release 堆栈跟踪可读性下降（混淆后本就如此）。
+-compact
+
+# --- 移除所有 console.* 日志语句 ---
+# 风险评估：⚠️ 不启用
+# 本项目为 Flutter + ArkTS 混编，ArkTS 侧是平台层。
+# 42 处 console.* 调用中含大量 console.error（窗口/卡片/API/接续/文件IO 错误），
+# 是排查 Flutter↔ArkTS 集成问题的首要诊断手段。
+# hilog 不受此选项影响，但本项目中 hilog 仅用于测试代码。
+# 如需启用，请先将关键 console.error 迁移至 hilog。
+# -remove-log
+
+# ============================================================
+# Keep Rules
+# ============================================================
+
+# --- 保留 JSON 序列化/反序列化涉及的属性名 ---
+# biliApi.ets: B站 API 响应字段
+# -keep-property-name
+#   code data message
+#   wbi_img img_url sub_url
+#   name face top_photo
+#   list vlist
+#   bvid title pic length created
+
+# EntryFormAbility.ets / UpCard24.ets: 卡片持久化与绑定数据字段
+# -keep-property-name
+#   mid avatar topPhoto
+#   latestTitle latestTime uploadsJson
+#   form uploads avatarUrl topPhotoUrl
+#   picUrl time
+
+# 合并去重后：
+-keep-property-name
+  code
+  data
+  message
+  wbi_img
+  img_url
+  sub_url
+  name
+  face
+  top_photo
+  list
+  vlist
+  bvid
+  title
+  pic
+  length
+  created
+  mid
+  avatar
+  topPhoto
+  latestTitle
+  latestTime
+  uploadsJson
+  form
+  uploads
+  avatarUrl
+  topPhotoUrl
+  picUrl
+  time
+  index
+  floating
+  mode
+
+# --- 保留被配置文件以字符串引用的全局名 ---
+# module.json5: mainElement / abilities[].name / extensionAbilities[].name
+# EntryAbility.ets: formProvider.reloadForms(..., "EntryFormAbility", ...)
+-keep-global-name
+  EntryAbility
+  EntryFormAbility
+
+# --- 保留被配置文件引用的文件名 ---
+# main_pages.json: "pages/Index"
+# module.json5: srcEntry → EntryAbility.ets / EntryFormAbility.ets
+# form_config.json: src → UpCard.ets / UpCardMini.ets / UpCard24.ets
+-keep-file-name
+  Index
+  EntryAbility
+  EntryFormAbility
+  UpCard
+  UpCardMini
+  UpCard24
