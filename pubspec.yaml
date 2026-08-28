@@ -155,7 +155,7 @@ dependencies:
   # 2.添加自动旋转检测，对齐上游安卓行为
   native_device_orientation:
     git:
-      url: https://atomgit.com/hellozeronick/fluttertpc_native_device_orientation.git
+      url: https://gitcode.com/hellozeronick/fluttertpc_native_device_orientation.git
       ref: br_2.1.0_ohos
   protobuf: ^6.0.0
   # animations: ^2.0.11
