@@ -1,4 +1,5 @@
 import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
 
 class CustomToast extends StatelessWidget {
@@ -13,7 +14,8 @@ class CustomToast extends StatelessWidget {
     final colorScheme = ColorScheme.of(context);
     return Container(
       margin: .only(
-        bottom: MediaQuery.viewPaddingOf(context).bottom + 30,
+        bottom: MediaQuery.viewPaddingOf(context).bottom 
+          +((Get.currentRoute=='/'&&Pref.enableHdsBar) ? 80 : 30), //避免toast被沉浸光感底栏覆盖
       ),
       padding: const .symmetric(horizontal: 17, vertical: 10),
       decoration: BoxDecoration(
