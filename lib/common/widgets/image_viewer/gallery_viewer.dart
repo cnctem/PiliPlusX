@@ -25,7 +25,6 @@ import 'package:PiliPlus/common/widgets/image_viewer/image.dart';
 import 'package:PiliPlus/common/widgets/image_viewer/loading_indicator.dart';
 import 'package:PiliPlus/common/widgets/image_viewer/viewer.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart';
-import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/main.dart' show tmpPadding;
 import 'package:PiliPlus/models/common/image_preview_type.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
@@ -41,9 +40,9 @@ import 'package:PiliPlus/utils/utils.dart';
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/gestures.dart';
-import 'package:material_ui/material_ui.dart' hide Image, PageView;
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart' hide Image, PageView;
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:os_type/os_type.dart';
@@ -205,13 +204,8 @@ class _GalleryViewerState extends State<GalleryViewer>
       _padding = padding;
       _initHideSystemBar();
       if (_hideSystemBar) {
-        // 在整个生命周期内保持原始 padding，防止布局跳变影响 Hero 动画
         tmpPadding = padding;
-        if (OS.isHarmony) {
-          HarmonyChannel.setFullScreenBars(true);
-        } else {
-          hideSystemBar();
-        }
+        hideSystemBar();
       }
     }
   }
@@ -306,11 +300,7 @@ class _GalleryViewerState extends State<GalleryViewer>
     Future.delayed(const Duration(milliseconds: 200), _currIndex.close);
     super.dispose();
     if (_hideSystemBar) {
-      if (OS.isHarmony) {
-        HarmonyChannel.setFullScreenBars(false);
-      } else {
-        showSystemBar();
-      }
+      showSystemBar();
       WidgetsBinding.instance.addPostFrameCallback((_) => tmpPadding = null);
     }
   }

@@ -674,7 +674,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     isWindowMode = MaxScreenSize.isWindowMode(
       width: maxWidth * videoDetailController.uiScale,
       height: maxHeight * videoDetailController.uiScale,
-    );
+    ) ||
+        (OS.isHarmony && HarmonyChannel.isWindowMode);
     videoDetailController.plPlayerController.screenRatio = maxHeight / maxWidth;
 
     final shortestSide = size.shortestSide;
@@ -707,6 +708,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   bool removeAppBar(bool isFullScreen) =>
       videoDetailController.removeSafeArea ||
+      (OS.isHarmony && HarmonyChannel.isWindowMode && isFullScreen) ||
       (isWindowMode && isFullScreen && !isPortrait);
 
   Widget get childWhenDisabled {
@@ -810,7 +812,11 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             scrollBehavior: const NoOverscrollIndicator(),
             pinnedHeaderSliverHeightBuilder: () {
               double pinnedHeight = this.isFullScreen || !isPortrait
-                  ? maxHeight - (isWindowMode && !isPortrait ? 0 : padding.top)
+                  ? maxHeight -
+                        ((isWindowMode && !isPortrait) ||
+                                _harmonyFullscreenNoSafeArea
+                            ? 0
+                            : padding.top)
                   : videoDetailController.isExpanding ||
                         videoDetailController.isCollapsing
                   ? videoDetailController.animHeight
@@ -836,7 +842,11 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             },
             headerSliverBuilder: (context, innerBoxIsScrolled) {
               final height = isFullScreen || !isPortrait
-                  ? maxHeight - (isWindowMode && !isPortrait ? 0 : padding.top)
+                  ? maxHeight -
+                        ((isWindowMode && !isPortrait) ||
+                                _harmonyFullscreenNoSafeArea
+                            ? 0
+                            : padding.top)
                   : videoDetailController.isExpanding ||
                         videoDetailController.isCollapsing
                   ? videoDetailController.animHeight
@@ -1512,7 +1522,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                 videoDetailCtr: videoDetailController,
                 heroTag: heroTag,
               ),
-              topInset: _fixedTopInset,
+              topInset: _harmonyFullscreenNoSafeArea ? null : _fixedTopInset,
               danmuWidget: isPipMode && pipNoDanmaku
                   ? null
                   : Obx(
@@ -1524,7 +1534,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                         isFullScreen: plPlayerController!.isFullScreen.value,
                         isFileSource: videoDetailController.isFileSource,
                         size: Size(width, height),
-                        topInset: _fixedTopInset,
+                        topInset: _harmonyFullscreenNoSafeArea
+                            ? null
+                            : _fixedTopInset,
                       ),
                     ),
               showEpisodes: showEpisodes,
@@ -1545,6 +1557,12 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   /// 状态栏显隐不再改变页面布局，避免旋转退出全屏时状态栏在动画末尾
   /// 显现导致画面下移。null 表示未捕获到（如移除安全边距场景），退化为 0。
   double? _fixedTopInset;
+
+  /// 鸿蒙受限窗口（分屏/自由多窗/悬浮窗）内没有系统状态栏，但引擎仍会上报
+  /// 设备状态栏高度。仅在全屏时顶部安全区应被移除（视频铺满窗口、plplayer
+  /// 顶部控件/弹幕不再避让），非全屏仍按正常布局避让，故只作用于全屏路径。
+  bool get _harmonyFullscreenNoSafeArea =>
+      OS.isHarmony && HarmonyChannel.isWindowMode && isFullScreen;
 
   /// 「左视频 + 右侧栏」的横屏布局（childWhenDisabledLandscape）是否生效。
   bool get _usesLandscapeLayout =>
@@ -1689,7 +1707,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         }
       }).toList(),
     );
-    
+
     return DecoratedBox(
       decoration: BoxDecoration(
         border: Border(
