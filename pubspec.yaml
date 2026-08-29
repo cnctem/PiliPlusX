@@ -111,7 +111,7 @@ dependencies:
       url: https://github.com/bggRGjQaUbCoE/getx.git
       ref: dev
   hive_ce: ^2.19.3
-  html: ^0.15.4
+  html: 0.15.6 # flutter_html 3.0.0 依赖 html 内部 query_selector 旧 API，0.15.7 起不兼容
   http2: ^2.3.1
   image_cropper: ^12.0.0
   image_picker: ^1.1.2
