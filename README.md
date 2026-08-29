@@ -5,12 +5,12 @@
 
 
 <div align="center">
-    <h1>PiliPlus</h1>
+    <h1>PiliPlusX</h1>
 <div align="center">
     
-![GitHub repo size](https://img.shields.io/github/repo-size/bggRGjQaUbCoE/PiliPlus) 
-![GitHub Repo stars](https://img.shields.io/github/stars/bggRGjQaUbCoE/PiliPlus) 
-![GitHub all releases](https://img.shields.io/github/downloads/bggRGjQaUbCoE/PiliPlus/total) 
+![GitHub repo size](https://img.shields.io/github/repo-size/cnctem/PiliPlusX) 
+![GitHub Repo stars](https://img.shields.io/github/stars/cnctem/PiliPlusX) 
+![GitHub all releases](https://img.shields.io/github/downloads/cnctem/PiliPlusX/total) 
 </div>
     <p>使用Flutter开发的BiliBili第三方客户端</p>
     
@@ -219,7 +219,7 @@
 
 ## 港澳台代理
 
-由于PiliPlus使用了web接口,所以不能直接使用哔哩漫游的公共服务器
+由于PiliPlusX使用了web接口,所以不能直接使用哔哩漫游的公共服务器
 
 搭建方法: 直接反向代理api.bilibili.com或添加下面几个路由的支持:
 ```text
@@ -243,7 +243,7 @@
 
 ## 声明
 
-此项目（PiliPlus）是个人为了兴趣而开发，仅用于学习和测试，请于下载后24小时内删除。
+此项目（PiliPlusX）是个人为了兴趣而开发，仅用于学习和测试，请于下载后24小时内删除。
 所用API皆从官方网站收集，不提供任何破解内容。
 在此致敬原作者：[guozhigq/pilipala](https://github.com/guozhigq/pilipala)
 在此致敬上游作者：[orz12/PiliPalaX](https://github.com/orz12/PiliPalaX)
@@ -268,10 +268,10 @@
 
 ## Star History
 
-<a href="https://star-history.dera.page/#bggRGjQaUbCoE/PiliPlus&Date">
+<a href="https://star-history.dera.page/#cnctem/PiliPlusX&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=bggRGjQaUbCoE/PiliPlus&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=bggRGjQaUbCoE/PiliPlus&type=Date" />
-   <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=bggRGjQaUbCoE/PiliPlus&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=cnctem/PiliPlusX&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=cnctem/PiliPlusX&type=Date" />
+   <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=cnctem/PiliPlusX&type=Date" />
  </picture>
 </a>
