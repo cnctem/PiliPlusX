@@ -1,27 +1,15 @@
-# ============================================================
-# PiliPlus HarmonyOS Obfuscation Rules
-# Flutter + ArkTS 混编项目 — 最小化风险配置
-# ============================================================
-
-# --- 基础混淆开关 ---
--enable-property-obfuscation
+#-enable-property-obfuscation
 -enable-toplevel-obfuscation
--enable-filename-obfuscation
+#-enable-filename-obfuscation
 
 # --- 代码压缩：移除不必要的空白和换行 ---
 # 风险评估：✅ 安全
 # 仅压缩输出格式，不影响运行时行为、逻辑或语义。
 # 唯一副作用：release 堆栈跟踪可读性下降（混淆后本就如此）。
 -compact
-
-# --- 移除所有 console.* 日志语句 ---
-# 风险评估：⚠️ 不启用
-# 本项目为 Flutter + ArkTS 混编，ArkTS 侧是平台层。
-# 42 处 console.* 调用中含大量 console.error（窗口/卡片/API/接续/文件IO 错误），
-# 是排查 Flutter↔ArkTS 集成问题的首要诊断手段。
-# hilog 不受此选项影响，但本项目中 hilog 仅用于测试代码。
-# 如需启用，请先将关键 console.error 迁移至 hilog。
-# -remove-log
+-remove-comments
+-extra-options strip-not-compiled-module-name
+-remove-log
 
 # ============================================================
 # Keep Rules
