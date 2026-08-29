@@ -189,7 +189,7 @@ dependencies:
       ref: 3eefccb759c4ea8114e722f1511fe1dbce70dc9f
 
     # html解析
-  html: ^0.15.6
+  html: 0.15.6
   # html渲染
   flutter_html: ^3.0.0
   # 极验
