@@ -1,5 +1,5 @@
 #-enable-property-obfuscation
--enable-toplevel-obfuscation
+#-enable-toplevel-obfuscation
 #-enable-filename-obfuscation
 
 # --- 代码压缩：移除不必要的空白和换行 ---
@@ -8,7 +8,7 @@
 # 唯一副作用：release 堆栈跟踪可读性下降（混淆后本就如此）。
 -compact
 -remove-comments
-#-extra-options strip-not-compiled-module-name
+-extra-options strip-not-compiled-module-name
 -remove-log
 
 # ============================================================
