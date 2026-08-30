@@ -29,8 +29,11 @@ jobs:
                   android/app/src/profile/AndroidManifest.xml \
                   android/app/src/main/AndroidManifest.xml \
                   android/app/src/main/kotlin/com/example/piliplusx/MainActivity.kt \
+                  android/app/src/main/kotlin/com/example/piliplusx/Utils.kt \
+                  android/app/src/main/kotlin/com/example/piliplusx/BiliDocumentsProvider.kt \
                   android/app/src/main/java/com/example/piliplusx/AndroidHelper.java \
                   android/app/src/main/java/com/example/piliplusx/MediaHelper.java \
+                  android/app/src/main/res/xml-v25/shortcuts.xml \
                   lib/services/audio_handler.dart
                 sed -i 's|com/example/piliplusx|tv/danmaku/bili|g' lib/utils/android/bindings.g.dart
                 grep -n '"pink"' lib/utils/update.dart || echo "update.dart 替换失败"
