@@ -6,8 +6,10 @@ import 'package:PiliPlus/pages/common/multi_select/base.dart'
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:PiliPlus/utils/utils.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:get/route_manager.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart' as path;
 import 'package:share_plus/share_plus.dart';
@@ -123,6 +125,12 @@ class BiliDownloadEntryInfo with MultiSelectData {
                 SmartDialog.showToast(e.toString());
               }
             },
+          )
+        else
+          PopupMenuItem(
+            height: 38,
+            child: const Text('复制缓存路径', style: TextStyle(fontSize: 13)),
+            onTap: () => Utils.copyText(entryDirPath),
           ),
         if (ownerId case final mid?)
           PopupMenuItem(

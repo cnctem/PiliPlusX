@@ -1,4 +1,5 @@
 import 'package:PiliPlus/common/skeleton/video_reply.dart';
+import 'package:PiliPlus/common/sliver_single_child_delegate.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/colored_box_transition.dart';
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
@@ -232,8 +233,7 @@ class _VideoReplyReplyPanelState extends State<VideoReplyReplyPanel>
             needDivider: false,
             onReply: (replyItem) => _controller.onReply(replyItem, index: -1),
             upMid: widget.upMid ?? _controller.upMid,
-            onCheckReply: (item) =>
-                _controller.onCheckReply(item, isManual: true),
+            onCheckReply: _controller.onCheckReply,
           ),
         ),
         SliverToBoxAdapter(
@@ -289,10 +289,12 @@ class _VideoReplyReplyPanelState extends State<VideoReplyReplyPanel>
   ) {
     final jumpIndex = _controller.index.value;
     return switch (loadingState) {
-      Loading() => SliverPrototypeExtentList.builder(
-        prototypeItem: const VideoReplySkeleton(),
-        itemBuilder: (_, _) => const VideoReplySkeleton(),
-        itemCount: 8,
+      Loading() => const SliverPrototypeExtentList(
+        prototypeItem: VideoReplySkeleton(),
+        delegate: SliverSingleChildDelegate(
+          count: 8,
+          child: VideoReplySkeleton(),
+        ),
       ),
       Success(:final response!) => SuperSliverList.builder(
         listController: _controller.listController,
@@ -362,7 +364,7 @@ class _VideoReplyReplyPanelState extends State<VideoReplyReplyPanel>
           SmartDialog.showToast('评论可能已被删除');
         }
       },
-      onCheckReply: (item) => _controller.onCheckReply(item, isManual: true),
+      onCheckReply: _controller.onCheckReply,
     );
   }
 }

@@ -33,6 +33,8 @@ abstract final class AndroidHelper {
   static int sdkInt() => 0;
 
   static void updatePipActions(int engineId, bool isLive, bool playing) {}
+
+  static void updateDocProvider(bool enabled) {}
 }
 
 /// 对应 jnigen 生成的 Java -> Dart 回调注册点。

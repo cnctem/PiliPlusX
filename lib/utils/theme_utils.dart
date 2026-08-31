@@ -1,6 +1,7 @@
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
+import 'package:PiliPlus/utils/font_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoThemeData;
 import 'package:flutter/foundation.dart' show PlatformDispatcher;
@@ -96,12 +97,12 @@ abstract final class ThemeUtils {
       fontWeight = FontWeight.values[appFontWeight];
     }
 
-    // 上游 4ca037345 起支持用户自选字体族（Pref.appFont）。鸿蒙没有枚举系统字体的
-    // 通道，FontUtils 在 ohos 上拿不到字体列表、设置页的下拉框不会出现，appFont 恒为
-    // null，因此这里回落到鸿蒙一贯的 HarmonyOS Sans；在本仓库的安卓 / Windows /
-    // Linux 构建上则由用户的选择覆盖。
+    // 上游 4ca037345 起支持用户自选字体族，db77169b4 起改为 FontUtils.fontFamily
+    //（含自定义导入字体）。鸿蒙没有枚举系统字体的通道，用户不导入字体时它为
+    // null，回落到鸿蒙一贯的 HarmonyOS Sans；在本仓库的安卓 / Windows / Linux
+    // 构建上则由用户的选择覆盖。
     late final fontFamily =
-        Pref.appFont ??
+        FontUtils.fontFamily ??
         (Pref.useBuiltInFont ? "HarmonyOS_Sans" : "HarmonyOS Sans");
     late final textStyle = TextStyle(
       fontWeight: fontWeight,
@@ -137,9 +138,9 @@ abstract final class ThemeUtils {
         backgroundColor: colorScheme.surface,
         titleTextStyle: TextStyle(
           fontSize: 16,
-          color: colorScheme.onSurface,
           fontWeight: fontWeight,
           fontFamily: fontFamily,
+          color: colorScheme.onSurface,
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
@@ -150,7 +151,11 @@ abstract final class ThemeUtils {
         actionTextColor: colorScheme.primary,
         closeIconColor: colorScheme.secondary,
         backgroundColor: colorScheme.secondaryContainer,
-        contentTextStyle: TextStyle(color: colorScheme.onSecondaryContainer),
+        contentTextStyle: TextStyle(
+          fontFamily: fontFamily,
+          fontWeight: fontWeight,
+          color: colorScheme.onSecondaryContainer,
+        ),
       ),
       popupMenuTheme: PopupMenuThemeData(
         surfaceTintColor: isDark ? colorScheme.surfaceContainerHighest : null,
@@ -188,10 +193,15 @@ abstract final class ThemeUtils {
       // ignore: deprecated_member_use
       sliderTheme: const SliderThemeData(year2023: false),
       tooltipTheme: TooltipThemeData(
-        textStyle: const TextStyle(color: Colors.white, fontSize: 14),
-        decoration: BoxDecoration(
-          color: Colors.grey[700]!.withValues(alpha: 0.9),
-          borderRadius: const BorderRadius.all(Radius.circular(4)),
+        textStyle: TextStyle(
+          fontSize: 14,
+          color: Colors.white,
+          fontFamily: fontFamily,
+          fontWeight: fontWeight,
+        ),
+        decoration: const BoxDecoration(
+          color: Color(0xE6616161), // Colors.grey[700]!.withValues(alpha: 0.9)
+          borderRadius: BorderRadius.all(Radius.circular(4)),
         ),
       ),
       cupertinoOverrideTheme: CupertinoThemeData(

@@ -287,6 +287,14 @@ public final class AndroidHelper {
         return null;
     }
 
+    public static void updateDocProvider(boolean enabled) {
+        Context context = getContext();
+        final ComponentName componentName = new ComponentName(context, BiliDocumentsProvider.class);
+        final int state = enabled ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                : PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+        context.getPackageManager().setComponentEnabledSetting(componentName, state, PackageManager.DONT_KILL_APP);
+    }
+
     @Keep
     public static final class ToDart {
         public static volatile Runnable onUserLeaveHint;
