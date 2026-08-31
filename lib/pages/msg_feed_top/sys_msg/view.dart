@@ -1,4 +1,5 @@
 import 'package:PiliPlus/common/skeleton/msg_feed_sys_msg_.dart';
+import 'package:PiliPlus/common/sliver_single_child_delegate.dart';
 import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
 import 'package:PiliPlus/common/widgets/flutter/list_tile.dart';
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
@@ -65,10 +66,13 @@ class _SysMsgPageState extends State<SysMsgPage> {
       color: Colors.grey.withValues(alpha: 0.1),
     );
     return switch (loadingState) {
-      Loading() => SliverSafeArea(
-        sliver: SliverList.builder(
-          itemCount: 12,
-          itemBuilder: (context, index) => const MsgFeedSysMsgSkeleton(),
+      Loading() => const SliverSafeArea(
+        sliver: SliverPrototypeExtentList(
+          prototypeItem: MsgFeedSysMsgSkeleton(),
+          delegate: SliverSingleChildDelegate(
+            count: 12,
+            child: MsgFeedSysMsgSkeleton(),
+          ),
         ),
       ),
       Success(:final response) =>

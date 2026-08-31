@@ -1,4 +1,4 @@
-/// 鸿蒙分支差异（上游原文见 4ca037345 `feat: font setting page`）：
+/// 鸿蒙分支差异（上游原文见 `db77169b4 refa: font setting`）：
 ///
 /// - **安卓分支已摘除**：上游走 JNI 调 `AndroidHelper.fontFamilies()`，而本分支没有
 ///   `jni` 依赖、`lib/utils/android/bindings.g.dart` 是手写的空实现存根。
@@ -7,32 +7,135 @@
 ///   （鸿蒙化的插件链要求），两者 API 不兼容。哪天 win32 的 override 放开了，
 ///   把上游那段 `_initWindows()` / `_enumFontCallback()` 抄回来即可。
 /// - Linux 的 fontconfig 分支是纯 `dart:ffi`，原样保留。
+/// - **自定义字体导入**（[pickFonts] / [init] / [fontFile]）与平台无关，全部保留；
+///   只是文件选择器换成鸿蒙适配 fork（`file_picker_ohos`）的
+///   `FilePicker.platform.pickFiles()` 实例 API。
 ///
-/// 鸿蒙本身也还没有枚举系统字体的通道，[FontUtils.getFont] 在 ohos 上返回空集合——
-/// 设置页的字体下拉框因此不会出现（`font_setting.dart` 里有 `_fonts.isNotEmpty`
-/// 守卫），只剩字重和字号可调。将来若接了 ArkTS 侧的字体枚举，在这里补一条
-/// `_initHarmony()` 即可。
+/// 鸿蒙本身没有枚举系统字体的通道，[FontUtils.getFont] 在 ohos 上返回空集合——
+/// 字体设置页的系统字体列表因此为空，只剩「默认」与用户导入的自定义字体。
 library;
 
 import 'dart:ffi';
-import 'dart:io';
+import 'dart:io' show File, Platform;
+import 'dart:typed_data';
+import 'dart:ui' show loadFontFromList;
 
 import 'package:PiliPlus/utils/fontconfig.g.dart';
+import 'package:PiliPlus/utils/path_utils.dart';
+import 'package:PiliPlus/utils/storage.dart';
+import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:ffi/ffi.dart';
-import 'package:flutter/foundation.dart';
+import 'package:file_picker_ohos/file_picker_ohos.dart';
+import 'package:flutter/foundation.dart' show kDebugMode, debugPrint;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:path/path.dart' as path;
+
+typedef AppFont = ({String? fontFamily, bool isCustom});
 
 abstract final class FontUtils {
   static final _fonts = <String>{};
   static bool _initialized = false;
+
+  static const _kFontExts = ['ttf', 'ttc', 'otf'];
+
+  static AppFont _appFont = _initAppFont();
+  static AppFont get appFont => _appFont;
+  static set appFont(AppFont value) {
+    assert(isCustom == _isCutsomFont(fontFamily));
+    _appFont = value;
+  }
+
+  static bool _isCutsomFont(String? fontFamily) {
+    return fontFamily?.contains('/') ?? false;
+  }
+
+  static AppFont _initAppFont() {
+    final appFont = GStorage.setting.get(SettingBoxKey.appFont);
+    if (_isCutsomFont(appFont)) {
+      if (fontFile.existsSync()) {
+        return (fontFamily: appFont, isCustom: true);
+      } else {
+        GStorage.setting.delete(SettingBoxKey.appFont);
+        return (fontFamily: null, isCustom: false);
+      }
+    } else {
+      return (fontFamily: appFont, isCustom: false);
+    }
+  }
+
+  static String? get fontFamily => _appFont.fontFamily;
+  static bool get isCustom => _appFont.isCustom;
+
+  static final fontFile = File(path.join(appSupportDirPath, 'customFont.otf'));
+
+  static Future<void>? init() {
+    if (isCustom) {
+      return _readAndLoad();
+    }
+    return null;
+  }
+
+  @pragma('vm:notify-debugger-on-exception')
+  static Future<void> _readAndLoad() async {
+    try {
+      final bytes = await fontFile.readAsBytes();
+      await _loadFont(bytes, fontFamily: fontFamily!);
+    } catch (_) {}
+  }
+
+  static void removeFontIfExists() {
+    final file = fontFile;
+    if (file.existsSync()) {
+      file.delete();
+    }
+  }
+
+  @pragma('vm:notify-debugger-on-exception')
+  static Future<void> _loadFont(
+    Uint8List bytes, {
+    required String fontFamily,
+  }) async {
+    try {
+      await loadFontFromList(bytes, fontFamily: fontFamily);
+    } catch (_) {}
+  }
+
+  @pragma('vm:notify-debugger-on-exception')
+  static Future<Map<String, Uint8List>?> pickFonts() async {
+    try {
+      // 鸿蒙适配 fork 仅提供 FilePicker.platform 实例方法（上游是静态的
+      // FilePicker.pickFiles），返回值也仍是旧版的 FilePickerResult。
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: _kFontExts,
+        allowMultiple: true,
+      );
+      final files = result?.files;
+      if (files != null && files.isNotEmpty) {
+        final Map<String, Uint8List> fonts = {};
+        final now = DateTime.now().millisecondsSinceEpoch.toString();
+        await Future.wait(
+          files.map((file) async {
+            final name = '$now/${path.basenameWithoutExtension(file.name)}';
+            final bytes = await file.xFile.readAsBytes();
+            await _loadFont(bytes, fontFamily: name);
+            fonts[name] = bytes;
+          }),
+        );
+        return fonts;
+      }
+    } catch (_) {
+      if (kDebugMode) rethrow;
+    }
+    return null;
+  }
 
   static Set<String> getFont() {
     if (_initialized) return _fonts;
     _initialized = true;
     // 只有真正实现了枚举的平台才在失败时提示。ohos / 安卓 / Windows / ios / macos
     // 在本分支没有实现（原因见文件头），静默返回空集合即可，弹「加载失败」只会
-    // 误导用户——`font_setting.dart` 里有 `_fonts.isNotEmpty` 守卫，字体下拉框
-    // 自己就不会出现。
+    // 误导用户——字体页在系统字体列表为空时只显示「默认」与自定义字体。
     if (Platform.isLinux && !_initLinux()) {
       SmartDialog.showToast('加载系统字体失败');
     }

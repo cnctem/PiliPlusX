@@ -22,6 +22,7 @@ import 'package:PiliPlus/utils/calc_window_position.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/extension/core_palettes_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
+import 'package:PiliPlus/utils/font_utils.dart';
 import 'package:PiliPlus/utils/image_memory_cleaner.dart';
 import 'package:PiliPlus/utils/json_file_handler.dart';
 import 'package:PiliPlus/utils/max_screen_size.dart';
@@ -113,6 +114,7 @@ void main() async {
     _initDownPath(),
     _initTmpPath(),
     CacheManager.ensureInitialized(),
+    ?FontUtils.init(),
   ]);
   Get
     ..lazyPut(AccountService.new)
@@ -321,8 +323,8 @@ class MyApp extends StatelessWidget {
       scrollBehavior: OS.isHarmony
           ? const HarmonyScrollBehavior()
           : PlatformUtils.isDesktop
-              ? const CustomScrollBehavior()
-              : null,
+          ? const CustomScrollBehavior()
+          : null,
     );
   }
 
