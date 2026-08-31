@@ -1112,6 +1112,8 @@ abstract final class Pref {
 
   static List? get liveStream => _setting.get(SettingBoxKey.liveStream);
 
+  static String? get appFont => _setting.get(SettingBoxKey.appFont);
+
   static bool get enableDocProvider =>
       _setting.get(SettingBoxKey.enableDocProvider, defaultValue: false);
 
