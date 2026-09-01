@@ -57,6 +57,94 @@ export default class HarmonyChannel implements FlutterPlugin {
 
   onDetachedFromEngine(binding: FlutterPluginBinding): void {
     this.channel?.setMethodCallHandler(null);
+    this.stopCutoutListener();
+  }
+
+  /**
+   * 摄像头挖孔（TYPE_CUTOUT）避让区上报。
+   *
+   * 鸿蒙 Flutter embedding（FlutterView.onAreaChange）算 viewPadding 时只读
+   * TYPE_SYSTEM（状态栏/导航栏）避让区，从不读 TYPE_CUTOUT：
+   * - 横屏时挖孔在左/右侧，TYPE_SYSTEM 的 leftRect/rightRect 为 0，
+   *   viewPadding.left/right 恒为 0，页面内容压到挖孔下面；
+   * - 竖屏隐藏状态栏（播放页全屏）后 TYPE_SYSTEM.topRect 归 0，
+   *   viewPadding.top 也归 0，挖孔仍在，顶部控件被遮。
+   * Android embedding 会把 cutout 并进 viewPadding，上上游代码都按这个语义
+   * 写。这里把窗口相对的 TYPE_CUTOUT 避让区（物理像素）交给 Dart，在根
+   * MediaQuery 里按边取 max 合并，见 Dart 侧 HarmonyChannel.cutoutInsets。
+   */
+  private cutoutListening: boolean = false;
+  private lastCutout: Record<string, number> | null = null;
+  private cutoutAvoidAreaCallback = (data: window.AvoidAreaOptions): void => {
+    if (data.type === window.AvoidAreaType.TYPE_CUTOUT) {
+      this.pushCutout(HarmonyChannel.cutoutToRecord(data.area));
+    }
+  };
+  // 旋转/窗口尺寸变化后兜底重读一次：部分机型旋转时不会单独推送
+  // TYPE_CUTOUT 的 avoidAreaChange。
+  private cutoutSizeCallback = (_size: window.Size): void => {
+    this.pushCutout(this.readCutout());
+  };
+
+  private static cutoutToRecord(area: window.AvoidArea): Record<string, number> {
+    const rec: Record<string, number> = {
+      'left': area.leftRect.width,
+      'top': area.topRect.height,
+      'right': area.rightRect.width,
+      'bottom': area.bottomRect.height,
+    };
+    return rec;
+  }
+
+  private readCutout(): Record<string, number> {
+    try {
+      const area = this.lastWindow?.getWindowAvoidArea(window.AvoidAreaType.TYPE_CUTOUT);
+      if (area) {
+        return HarmonyChannel.cutoutToRecord(area);
+      }
+    } catch (err) {
+      console.error("HarmonyChannel", `getWindowAvoidArea(TYPE_CUTOUT) failed: ${err}`);
+    }
+    const zero: Record<string, number> = { 'left': 0, 'top': 0, 'right': 0, 'bottom': 0 };
+    return zero;
+  }
+
+  private pushCutout(cutout: Record<string, number>): void {
+    const last = this.lastCutout;
+    if (last != null &&
+      last['left'] === cutout['left'] && last['top'] === cutout['top'] &&
+      last['right'] === cutout['right'] && last['bottom'] === cutout['bottom']) {
+      return;
+    }
+    this.lastCutout = cutout;
+    this.channel?.invokeMethod("onCutoutAvoidAreaChange", cutout);
+  }
+
+  private async startCutoutListener(): Promise<void> {
+    if (this.cutoutListening) {
+      return;
+    }
+    this.cutoutListening = true;
+    this.lastWindow ??= await window.getLastWindow(getContext());
+    try {
+      this.lastWindow.on('avoidAreaChange', this.cutoutAvoidAreaCallback);
+      this.lastWindow.on('windowSizeChange', this.cutoutSizeCallback);
+    } catch (err) {
+      console.error("HarmonyChannel", `cutout listener failed: ${err}`);
+    }
+  }
+
+  private stopCutoutListener(): void {
+    if (!this.cutoutListening) {
+      return;
+    }
+    this.cutoutListening = false;
+    try {
+      this.lastWindow?.off('avoidAreaChange', this.cutoutAvoidAreaCallback);
+      this.lastWindow?.off('windowSizeChange', this.cutoutSizeCallback);
+    } catch (err) {
+      console.error("HarmonyChannel", `cutout listener off failed: ${err}`);
+    }
   }
 
   public getChannel(): MethodChannel | null {
@@ -125,6 +213,15 @@ export default class HarmonyChannel implements FlutterPlugin {
           'isWindowMode': isFloating || status == window.WindowStatusType.SPLIT_SCREEN,
         };
         result.success(state);
+        break;
+      }
+      case "getCutoutAvoidArea": {
+        // 启动时供 Dart 拉取挖孔避让区初值，并从此开始监听变化推送
+        // onCutoutAvoidAreaChange。见 Dart 侧 HarmonyChannel.initWindowState。
+        await this.startCutoutListener();
+        const cutout = this.readCutout();
+        this.lastCutout = cutout;
+        result.success(cutout);
         break;
       }
       case "getPendingContinuation": {

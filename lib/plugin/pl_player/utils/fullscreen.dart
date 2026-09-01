@@ -7,8 +7,9 @@ import 'package:flutter/services.dart'
 import 'package:os_type/os_type.dart';
 
 /// 竖屏全屏时的顶部避让高度：仅在全屏 + 竖屏 + 未移除安全边距时返回
-/// [topInset]（进全屏前捕获的状态栏/挖孔高度），否则返回 null（不避让）。
-/// 播控顶部组件与弹幕共用这一套判断，保证两处行为一致。
+/// [topInset]（页面传入的状态栏/挖孔高度，如直播页的 viewPadding.top），
+/// 否则返回 null（不避让）。播控顶部组件与弹幕共用这一套判断，保证两处
+/// 行为一致。页面自身已在播放器上方留出安全区（如视频页的黑边）时应传 null。
 double? portraitFullscreenTopInset({
   required bool isFullScreen,
   required bool isPortrait,

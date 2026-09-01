@@ -1,9 +1,12 @@
+import 'dart:math' show max;
+
 import 'package:PiliPlus/common/widgets/scale_app.dart';
 import 'package:PiliPlus/harmony_adapt/continuation.dart';
 import 'package:PiliPlus/models/common/nav_bar_config.dart';
 import 'package:PiliPlus/utils/extension/get_ext.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:os_type/os_type.dart';
 
@@ -22,6 +25,9 @@ abstract class HarmonyChannel {
         break;
       case 'onWindowModeChange':
         _windowMode = call.arguments['isWindowMode'] as bool? ?? false;
+        break;
+      case 'onCutoutAvoidAreaChange':
+        _updateCutout(call.arguments);
         break;
       case 'onFontWeightScaleChange':
         final fontWeightScale = (call.arguments['fontWeightScale'] as num?)?.toDouble();
@@ -371,7 +377,51 @@ abstract class HarmonyChannel {
         );
       }
     } catch (_) {}
+    try {
+      _updateCutout(await _channel.invokeMethod<Map>('getCutoutAvoidArea'));
+    } catch (_) {}
     _syncWindowDecor();
+  }
+
+  /// 摄像头挖孔（TYPE_CUTOUT）避让区，**物理像素**，窗口相对坐标，随旋转
+  /// 变化；由原生 getCutoutAvoidArea / onCutoutAvoidAreaChange 维护。
+  ///
+  /// 鸿蒙 embedding 算 viewPadding 只读 TYPE_SYSTEM（状态栏/导航栏），不读
+  /// 挖孔：横屏时 viewPadding.left/right 恒为 0、竖屏隐藏状态栏后
+  /// viewPadding.top 归 0，ViewSafeArea/SafeArea 都避不开挖孔。Android
+  /// embedding 会把 cutout 并进 viewPadding，上上游代码按该语义写，故在
+  /// main.dart 的根 MediaQuery 里把这里的值按边取 max 合并进
+  /// padding/viewPadding，让下游无需感知平台差异。
+  static final ValueNotifier<EdgeInsets> cutoutInsets = ValueNotifier(
+    EdgeInsets.zero,
+  );
+
+  static void _updateCutout(dynamic args) {
+    if (args is! Map) return;
+    double side(String key) => (args[key] as num?)?.toDouble() ?? 0;
+    final insets = EdgeInsets.fromLTRB(
+      side('left'),
+      side('top'),
+      side('right'),
+      side('bottom'),
+    );
+    if (insets != cutoutInsets.value) {
+      cutoutInsets.value = insets;
+    }
+  }
+
+  /// 把 [cutoutInsets]（物理像素）换算为逻辑像素后与 [padding] 按边取 max。
+  /// [devicePixelRatio] 须是引擎上报的原始 DPR（uiScale 缩放前）。
+  static EdgeInsets mergeCutout(EdgeInsets padding, double devicePixelRatio) {
+    final cutout = cutoutInsets.value;
+    if (cutout == EdgeInsets.zero) return padding;
+    final c = cutout / devicePixelRatio;
+    return EdgeInsets.fromLTRB(
+      max(padding.left, c.left),
+      max(padding.top, c.top),
+      max(padding.right, c.right),
+      max(padding.bottom, c.bottom),
+    );
   }
 
   /// 已下发给 embedding 的装饰栏策略：true = 隐藏（自由多窗沉浸），

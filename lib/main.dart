@@ -340,8 +340,13 @@ class MyApp extends StatelessWidget {
     // 均来自引擎），本方法不会因此重建，下面的缩放校正会失效、页面布局与
     // 渲染画布脱节（如平板全景多窗内点全屏后内容只占 75%、右/下露白底）。
     // 必须显式监听缩放变化触发重建。
+    // 鸿蒙挖孔避让区由原生异步上报/随旋转变化，同样不会触发根 MediaQuery
+    // 重建，一并监听。
     return ListenableBuilder(
-      listenable: ScaledWidgetsFlutterBinding.instance.scaleFactorNotifier,
+      listenable: Listenable.merge([
+        ScaledWidgetsFlutterBinding.instance.scaleFactorNotifier,
+        if (OS.isHarmony) HarmonyChannel.cutoutInsets,
+      ]),
       builder: (context, _) => _scaledBuilder(context, child),
     );
   }
@@ -362,8 +367,15 @@ class MyApp extends StatelessWidget {
     // copyWith 参数里，跟进上游 2.1.0 时 uiScale == 1.0 的分支被整体覆盖，
     // 覆盖参数被静默丢掉，手机上（uiScale 恒为 1.0）该修复完全失效。
     if (OS.isHarmony) {
+      // 鸿蒙 embedding 上报的 padding 不含摄像头挖孔（只读 TYPE_SYSTEM 避让区），
+      // 横屏时 left/right 恒为 0、竖屏隐藏状态栏后 top 归 0。此处把原生上报的
+      // TYPE_CUTOUT 避让区按边取 max 合并进来，对齐 Android 语义，下游
+      // ViewSafeArea/SafeArea 无需再区分平台。见 HarmonyChannel.cutoutInsets。
+      final dpr = mediaQuery.devicePixelRatio;
       mediaQuery = mediaQuery.copyWith(
         gestureSettings: const DeviceGestureSettings(touchSlop: 8),
+        padding: HarmonyChannel.mergeCutout(mediaQuery.padding, dpr),
+        viewPadding: HarmonyChannel.mergeCutout(mediaQuery.viewPadding, dpr),
       );
     }
     if (uiScale != 1.0) {

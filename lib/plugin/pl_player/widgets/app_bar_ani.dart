@@ -20,7 +20,8 @@ class AppBarAni extends StatelessWidget {
   final bool isFullScreen;
   final bool removeSafeArea;
 
-  /// 竖屏全屏时顶部控件的固定避让高度（进全屏前捕获的状态栏/挖孔高度）
+  /// 竖屏全屏时顶部控件的避让高度（页面传入的状态栏/挖孔高度），
+  /// 见 [portraitFullscreenTopInset]
   final double? topInset;
 
   static final _topPos = Tween<Offset>(
