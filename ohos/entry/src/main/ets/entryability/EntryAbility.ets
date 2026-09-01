@@ -210,7 +210,10 @@ export default class EntryAbility extends FlutterAbility {
     }).catch((err: BusinessError) => {
       console.error(`setWindowSystemBarProperties failed: ${err.code} ${err.message}`);
     });
+    this.hideWindowDecorIfFloating(w);
     w.on("windowStatusChange", (type) => {
+      // 原生先行隐藏，避免 Dart 侧（首帧前）下发前装饰栏先露一下
+      this.hideWindowDecorIfFloating(w, type);
       if (type == window.WindowStatusType.FLOATING && !this.wasFloatingWindow) {
         this.harmonyChannel.onFloatingWindowChange(true);
         this.wasFloatingWindow = true;
@@ -252,6 +255,34 @@ export default class EntryAbility extends FlutterAbility {
             `Invoke documentViewPicker.save failed, code is ${err.code}, message is ${err.message}`);
         });
     }, 100)
+  }
+
+  /**
+   * 自由多窗（FLOATING）/ 最大化（MAXIMIZE，2in1）下提前隐藏系统装饰栏。
+   *
+   * 真正的策略由 Dart 侧 HarmonyChannel._syncWindowDecor 通过 embedding 的
+   * SystemChrome 通道维护（只保留 'navigation' → embedding 自己会
+   * setWindowDecorVisible(false) 并把 viewPadding.top 钉成三键高度）；这里
+   * 只是在窗口创建 / 进入自由窗口的第一时间先隐藏一次，否则 Dart 首帧前
+   * 装饰栏会先出现再收回。非自由窗口不调用：手机全屏下该接口会抛 1300004。
+   */
+  private hideWindowDecorIfFloating(w: window.Window, status?: window.WindowStatusType): void {
+    if (status === undefined) {
+      try {
+        status = w.getWindowStatus();
+      } catch (err) {
+        return;
+      }
+    }
+    if (status != window.WindowStatusType.FLOATING && status != window.WindowStatusType.MAXIMIZE) {
+      return;
+    }
+    try {
+      w.setWindowDecorVisible(false);
+    } catch (err) {
+      const e = err as BusinessError;
+      console.warn('EntryAbility', `setWindowDecorVisible(false) skipped: ${e.code} ${e.message}`);
+    }
   }
 
   onDestroy(): void {

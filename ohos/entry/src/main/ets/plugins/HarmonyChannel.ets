@@ -107,6 +107,26 @@ export default class HarmonyChannel implements FlutterPlugin {
         result.success(true);
         break;
       }
+      case "getWindowState": {
+        // 启动时供 Dart 拉取窗口初始状态：是否自由多窗（FLOATING）、是否受限
+        // 窗口模式（分屏/自由多窗）。见 Dart 侧 HarmonyChannel.initWindowState。
+        this.lastWindow ??= await window.getLastWindow(getContext());
+        let status: window.WindowStatusType = window.WindowStatusType.UNDEFINED;
+        try {
+          status = this.lastWindow.getWindowStatus();
+        } catch (err) {
+          console.error("HarmonyChannel", `getWindowStatus failed: ${err}`);
+        }
+        const isFloating = status == window.WindowStatusType.FLOATING;
+        // ArkTS 不允许无类型对象字面量（arkts-no-untyped-obj-literals），
+        // 显式声明为 Record 再填值
+        const state: Record<string, boolean> = {
+          'isFloatingWindow': isFloating,
+          'isWindowMode': isFloating || status == window.WindowStatusType.SPLIT_SCREEN,
+        };
+        result.success(state);
+        break;
+      }
       case "getPendingContinuation": {
         const data = this.pendingContinuation;
         this.pendingContinuation = null;

@@ -155,7 +155,14 @@ void main() async {
   SmartDialog.config.toast = SmartConfigToast(displayType: .onlyRefresh);
 
   if (PlatformUtils.isMobile) {
-    SystemChrome.setEnabledSystemUIMode(.edgeToEdge);
+    if (OS.isHarmony) {
+      // 鸿蒙按窗口状态选系统栏模式：自由多窗下隐藏系统装饰栏（沉浸），否则
+      // edgeToEdge。必须在首帧前一次到位——先 edgeToEdge 再改会让装饰栏先
+      // 出现再收回。见 HarmonyChannel.initWindowState / _syncWindowDecor。
+      await HarmonyChannel.initWindowState();
+    } else {
+      SystemChrome.setEnabledSystemUIMode(.edgeToEdge);
+    }
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         systemNavigationBarColor: Colors.transparent,

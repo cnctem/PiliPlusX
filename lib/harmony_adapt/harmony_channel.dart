@@ -332,8 +332,10 @@ abstract class HarmonyChannel {
     landscape ??= _landscape;
     miniWindow ??= _miniWindow;
     if (_landscape == landscape && _miniWindow == miniWindow) return;
+    final miniWindowChanged = _miniWindow != miniWindow;
     _landscape = landscape;
     _miniWindow = miniWindow;
+    if (miniWindowChanged) _syncWindowDecor();
     if (_miniWindow && _landscape) {
       _setMiniWindowLandscape(true);
       ScaledWidgetsFlutterBinding.instance.scaleFactor =
@@ -346,6 +348,74 @@ abstract class HarmonyChannel {
 
   static void _setMiniWindowLandscape(bool landscape) {
     _channel.invokeMethod('setMiniWindowLandscape', {'landscape': landscape});
+  }
+
+  /// 启动时（runApp 之前）拉取窗口初始状态（是否自由多窗 / 受限窗口模式），
+  /// 并据此一次性下发系统栏模式（代替 main.dart 里的 edgeToEdge）。
+  ///
+  /// 原生只在 windowStatusChange 时推送 onFloatingWindowChange，应用直接在
+  /// 自由多窗里启动时收不到；且 Dart 侧 handler 注册前的通道消息最多缓存
+  /// 一条，靠原生「补发」不可靠，这里改为主动拉取。放在首帧之前、且不先发
+  /// edgeToEdge，是为了避免装饰栏「先出现再收回」的闪动；原生侧
+  /// EntryAbility 在窗口创建时已先隐藏一次，这里只是让 embedding 的状态与之
+  /// 一致（并把 viewPadding.top 钉成三键高度）。
+  static Future<void> initWindowState() async {
+    if (!OS.isHarmony) return;
+    try {
+      final state = await _channel.invokeMethod<Map>('getWindowState');
+      if (state != null) {
+        _windowMode = state['isWindowMode'] as bool? ?? _windowMode;
+        await onLandscapeOrMiniWindowChange(
+          null,
+          state['isFloatingWindow'] as bool?,
+        );
+      }
+    } catch (_) {}
+    _syncWindowDecor();
+  }
+
+  /// 已下发给 embedding 的装饰栏策略：true = 隐藏（自由多窗沉浸），
+  /// false = 显示，null = 尚未下发。
+  static bool? _decorHidden;
+
+  /// 自由多窗（平板全景多窗 / 2in1）下隐藏系统装饰栏，让窗口顶部随内容沉浸。
+  ///
+  /// 系统装饰栏是一条带应用图标 + 标题的独立色条（浅/深色各一套灰），与
+  /// colorScheme.surface 永远对不上色；只调 setDecorButtonStyle 改按钮颜色
+  /// 是不够的，栏本身得隐藏。
+  ///
+  /// 不能直接调 window.setWindowDecorVisible(false)：鸿蒙 embedding 的
+  /// PlatformPlugin.updateSystemUiOverlays 在每次 SystemChrome 设置系统栏、
+  /// 以及 app 回前台 restoreSystemUiOverlays 时，都会按自己的
+  /// showBarOrNavigation 重写装饰栏可见性——edgeToEdge（['status',
+  /// 'navigation']）→ 显示装饰栏并把 paddingTop 钉 0，直接调的隐藏会被覆盖。
+  /// embedding 约定的隐藏方式是只保留 'navigation'，即
+  /// setEnabledSystemUIOverlays([SystemUiOverlay.bottom])：它会
+  /// setWindowDecorVisible(false) 并把 viewPadding.top 钉成右上角三键区域
+  /// 高度（getTitleButtonRect），SimpleScaffold 的状态栏占位、首页零高
+  /// AppBar、视频页顶部黑条都据此避让，内容不会压到按钮下面。三键仍由系统
+  /// 悬浮绘制，颜色跟随应用颜色模式，视频/直播页顶部为黑时由
+  /// [setDecorDark] 切浅色。
+  ///
+  /// 自由窗口内没有状态栏，去掉 'status' 无副作用；回到全屏窗口时必须恢复
+  /// edgeToEdge，否则状态栏会被隐藏。代价：没有标题栏后不能再拖标题栏移动
+  /// 窗口（边缘缩放、三键不受影响）。
+  static void _syncWindowDecor() {
+    if (!OS.isHarmony) return;
+    final hide = _miniWindow;
+    if (_decorHidden == hide) return;
+    _decorHidden = hide;
+    if (hide) {
+      // SystemChrome.setEnabledSystemUIOverlays 在 Dart 侧已被移除，但鸿蒙
+      // embedding 的 PlatformChannel 仍处理这条消息，参数为
+      // SystemUiOverlay 的枚举名列表。
+      SystemChannels.platform.invokeMethod<void>(
+        'SystemChrome.setEnabledSystemUIOverlays',
+        const ['SystemUiOverlay.bottom'],
+      );
+    } else {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
   }
 
   /// 自由多窗装饰栏按钮（全屏/最小化/关闭）的颜色跟随「按钮下方那条顶栏
