@@ -17,7 +17,11 @@ import 'package:material_ui/material_ui.dart';
 
 abstract final class Update {
   // 检查更新
+  static bool get _checkDisabled => true;
+
+  // TODO: 临时屏蔽检查更新，恢复时删除此返回。
   static Future<void> checkUpdate([bool isAuto = true]) async {
+    if (_checkDisabled) return;
     // if (kDebugMode) return;
     // 获取到默认值，没有构建时间信息
     if (BuildConfig.buildTime == 0) {
