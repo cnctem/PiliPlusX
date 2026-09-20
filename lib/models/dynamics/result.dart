@@ -19,6 +19,8 @@ class DynamicsDataModel {
   int? total;
   bool? loadNext;
 
+  DynamicsDataModel.empty() : items = <DynamicItemModel>[], hasMore = false;
+
   static String _getMatchText(DynamicItemModel item) {
     final moduleDynamic = item.modules.moduleDynamic;
     final opus = moduleDynamic?.major?.opus;

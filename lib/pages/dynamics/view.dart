@@ -5,6 +5,7 @@ import 'package:PiliPlus/models/common/dynamic/up_panel_position.dart';
 import 'package:PiliPlus/models/dynamics/up.dart';
 import 'package:PiliPlus/pages/common/common_page.dart';
 import 'package:PiliPlus/pages/dynamics/controller.dart';
+import 'package:PiliPlus/pages/dynamics/widgets/group_panel.dart';
 import 'package:PiliPlus/pages/dynamics/widgets/up_panel.dart';
 import 'package:PiliPlus/pages/dynamics_create/view.dart';
 import 'package:PiliPlus/pages/dynamics_tab/view.dart';
@@ -76,6 +77,9 @@ class _DynamicsPageState extends CommonPageState<DynamicsPage>
       ),
     );
   }
+
+  Widget get groupPanelPart =>
+      DynamicsGroupPanel(controller: _dynamicsController);
 
   Widget _buildUpPanel(LoadingState<FollowUpModel> upState) {
     return switch (upState) {
@@ -172,6 +176,7 @@ class _DynamicsPageState extends CommonPageState<DynamicsPage>
         leading: leading,
         leadingWidth: 50,
         toolbarHeight: 50,
+        bottom: _dynamicsController.groupEnabled ? groupPanelPart : null,
         backgroundColor: Colors.transparent,
         title: SizedBox(
           height: 50,
