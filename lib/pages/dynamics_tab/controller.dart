@@ -40,6 +40,7 @@ class DynamicsTabController
   @override
   List<DynamicItemModel>? getDataList(DynamicsDataModel response) {
     offset = response.offset;
+    dynamicsController.recordDynamicsPubTs(response.items);
     return response.items;
   }
 
@@ -50,6 +51,7 @@ class DynamicsTabController
         type: dynamicsType,
         hostMid: dynamicsController.hostMid,
         tempBannedList: dynamicsController.tempBannedList,
+        followMids: dynamicsController.selectedGroupMids,
       );
 
   Future<void> onRemove(int index, dynamic dynamicId) async {

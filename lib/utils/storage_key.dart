@@ -241,6 +241,7 @@ abstract final class SettingBoxKey {
       dynamicsWaterfallFlow = 'dynamicsWaterfallFlow',
       upPanelPosition = 'upPanelPosition',
       dynamicsShowAllFollowedUp = 'dynamicsShowAllFollowedUp',
+      dynamicsGroupEnabled = 'dynamicsGroupEnabled',
       useSideBar = 'useSideBar',
       enableMYBar = 'enableMYBar',
       hideTopBar = 'hideSearchBar',

@@ -37,8 +37,12 @@ abstract final class DynamicsHttp {
     int? hostMid,
     String? offset,
     Set<int>? tempBannedList,
+    Set<int>? followMids,
     DynamicsTabType type = .all,
   }) async {
+    if (followMids != null && followMids.isEmpty) {
+      return Success(DynamicsDataModel.empty());
+    }
     Map<String, dynamic> data = {
       if (type == .up) 'host_mid': hostMid else 'type': type.name,
       'offset': ?offset,
@@ -53,12 +57,19 @@ abstract final class DynamicsHttp {
           type: type,
           tempBannedList: tempBannedList,
         );
+        if (followMids != null) {
+          data.items?.removeWhere(
+            (item) => !followMids.contains(item.modules.moduleAuthor?.mid),
+          );
+          if (data.items?.isEmpty ?? true) data.loadNext = data.hasMore;
+        }
         if (data.loadNext == true) {
           return await followDynamic(
             type: type,
             offset: data.offset,
             hostMid: hostMid,
             tempBannedList: tempBannedList,
+            followMids: followMids,
           );
         }
         return Success(data);

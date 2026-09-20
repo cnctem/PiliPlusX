@@ -765,6 +765,9 @@ abstract final class Pref {
     defaultValue: false,
   );
 
+  static bool get dynamicsGroupEnabled =>
+      _setting.get(SettingBoxKey.dynamicsGroupEnabled, defaultValue: false);
+
   static bool get enableShowDanmaku =>
       _setting.get(SettingBoxKey.enableShowDanmaku, defaultValue: true);
 
@@ -1122,9 +1125,8 @@ abstract final class Pref {
     ),
   );
 
-  static bool get enableLandscapeAutoFullscreen =>
-      _setting.get(
-        SettingBoxKey.enableLandscapeAutoFullscreen,
-        defaultValue: false,
-      );
+  static bool get enableLandscapeAutoFullscreen => _setting.get(
+    SettingBoxKey.enableLandscapeAutoFullscreen,
+    defaultValue: false,
+  );
 }

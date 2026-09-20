@@ -190,6 +190,14 @@ List<SettingsModel> get styleSettings => [
     needReboot: true,
   ),
   const SwitchModel(
+    title: '分组动态',
+    subtitle: '开启后动态页显示关注分组标签，可按分组筛选动态',
+    leading: Icon(Icons.group_outlined),
+    setKey: SettingBoxKey.dynamicsGroupEnabled,
+    defaultVal: false,
+    needReboot: true,
+  ),
+  const SwitchModel(
     title: '动态页展开正在直播UP列表',
     leading: Icon(Icons.live_tv),
     setKey: SettingBoxKey.expandDynLivePanel,
