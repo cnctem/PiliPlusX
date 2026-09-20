@@ -785,6 +785,9 @@ abstract final class Pref {
     defaultValue: false,
   );
 
+  static bool get dynamicsGroupEnabled =>
+      _setting.get(SettingBoxKey.dynamicsGroupEnabled, defaultValue: false);
+
   static bool get enableShowDanmaku =>
       _setting.get(SettingBoxKey.enableShowDanmaku, defaultValue: true);
 

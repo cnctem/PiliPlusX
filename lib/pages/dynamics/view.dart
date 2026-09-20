@@ -5,6 +5,7 @@ import 'package:PiliPlus/models/common/dynamic/up_panel_position.dart';
 import 'package:PiliPlus/models/dynamics/up.dart';
 import 'package:PiliPlus/pages/common/common_page.dart';
 import 'package:PiliPlus/pages/dynamics/controller.dart';
+import 'package:PiliPlus/pages/dynamics/widgets/group_panel.dart';
 import 'package:PiliPlus/pages/dynamics/widgets/up_panel.dart';
 import 'package:PiliPlus/pages/dynamics_create/view.dart';
 import 'package:PiliPlus/pages/dynamics_tab/view.dart';
@@ -29,27 +30,23 @@ class _DynamicsPageState extends CommonPageState<DynamicsPage>
   @override
   bool get wantKeepAlive => true;
 
-  Widget _createDynamicBtn(ColorScheme colorScheme, {bool isRight = true}) =>
-      Container(
-        width: 34,
-        height: 34,
-        margin: isRight ? const .only(right: 16) : const .only(left: 16),
-        child: IconButton(
-          tooltip: '发布动态',
-          style: ButtonStyle(
-            padding: const WidgetStatePropertyAll(EdgeInsets.zero),
-            backgroundColor: WidgetStatePropertyAll(
-              colorScheme.secondaryContainer,
-            ),
-          ),
-          onPressed: () => CreateDynPanel.onCreateDyn(context),
-          icon: Icon(
-            Icons.add,
-            size: 18,
-            color: colorScheme.onSecondaryContainer,
-          ),
-        ),
-      );
+  Widget _createDynamicBtn(
+    ColorScheme colorScheme, {
+    bool isRight = true,
+  }) => Container(
+    width: 34,
+    height: 34,
+    margin: isRight ? const .only(right: 16) : const .only(left: 16),
+    child: IconButton(
+      tooltip: '发布动态',
+      style: ButtonStyle(
+        padding: const WidgetStatePropertyAll(EdgeInsets.zero),
+        backgroundColor: WidgetStatePropertyAll(colorScheme.secondaryContainer),
+      ),
+      onPressed: () => CreateDynPanel.onCreateDyn(context),
+      icon: Icon(Icons.add, size: 18, color: colorScheme.onSecondaryContainer),
+    ),
+  );
 
   Widget upPanelPart(ColorScheme colorScheme) {
     final isTop = upPanelPosition == .top;
@@ -75,6 +72,9 @@ class _DynamicsPageState extends CommonPageState<DynamicsPage>
       ),
     );
   }
+
+  Widget get groupPanelPart =>
+      DynamicsGroupPanel(controller: _dynamicsController);
 
   Widget _buildUpPanel(LoadingState<FollowUpModel> upState) {
     return switch (upState) {
@@ -170,35 +170,47 @@ class _DynamicsPageState extends CommonPageState<DynamicsPage>
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.transparent,
       appBar: PreferredSize(
-        preferredSize: const .fromHeight(50),
-        child: Row(
+        preferredSize: .fromHeight(
+          _dynamicsController.groupEnabled ? 96 : 50,
+        ),
+        child: Column(
           children: [
-            ?leading,
-            Expanded(
-              child: TabBar(
-                dividerHeight: 0,
-                isScrollable: true,
-                tabAlignment: .start,
-                dividerColor: Colors.transparent,
-                labelColor: colorScheme.primary,
-                indicatorColor: colorScheme.primary,
-                controller: _dynamicsController.tabController,
-                unselectedLabelColor: colorScheme.onSurface,
-                labelStyle:
-                    TabBarTheme.of(context).labelStyle
-                        ?.copyWith(fontSize: 13) ??
-                    const TextStyle(fontSize: 13),
-                tabs: DynamicsTabType.values
-                    .map((e) => Tab(text: e.label))
-                    .toList(),
-                onTap: (index) {
-                  if (!_dynamicsController.tabController.indexIsChanging) {
-                    _dynamicsController.animateToTop();
-                  }
-                },
+            SizedBox(
+              height: 50,
+              child: Row(
+                children: [
+                  ?leading,
+                  Expanded(
+                    child: TabBar(
+                      dividerHeight: 0,
+                      isScrollable: true,
+                      tabAlignment: .start,
+                      dividerColor: Colors.transparent,
+                      labelColor: colorScheme.primary,
+                      indicatorColor: colorScheme.primary,
+                      controller: _dynamicsController.tabController,
+                      unselectedLabelColor: colorScheme.onSurface,
+                      labelStyle:
+                          TabBarTheme.of(context).labelStyle
+                              ?.copyWith(fontSize: 13) ??
+                          const TextStyle(fontSize: 13),
+                      tabs: DynamicsTabType.values
+                          .map((e) => Tab(text: e.label))
+                          .toList(),
+                      onTap: (index) {
+                        if (!_dynamicsController
+                            .tabController
+                            .indexIsChanging) {
+                          _dynamicsController.animateToTop();
+                        }
+                      },
+                    ),
+                  ),
+                  actions,
+                ],
               ),
             ),
-            actions,
+            if (_dynamicsController.groupEnabled) groupPanelPart,
           ],
         ),
       ),
