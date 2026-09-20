@@ -34,102 +34,139 @@ class _UpPanelState extends State<UpPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final upData = widget.upData;
-    final upList = upData.upList;
-    final liveList = upData.liveUsers?.items;
-    return CustomScrollView(
-      scrollDirection: isTop ? .horizontal : .vertical,
-      physics: const AlwaysScrollableScrollPhysics(),
-      controller: controller.scrollController,
-      slivers: [
-        SliverToBoxAdapter(
-          child: InkWell(
-            onTap: () => setState(() {
-              controller.showLiveUp = !controller.showLiveUp;
-            }),
-            onLongPress: toFollowPage,
-            onSecondaryTap: PlatformUtils.isMobile ? null : toFollowPage,
-            child: Container(
-              alignment: .center,
-              height: isTop ? 76 : 60,
-              padding: isTop ? const .only(left: 12, right: 6) : null,
-              child: Text.rich(
-                textAlign: .center,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: theme.colorScheme.primary,
-                ),
-                TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'Live(${upData.liveUsers?.count ?? 0})',
-                    ),
-                    if (!isTop) ...[
-                      const TextSpan(text: '\n'),
-                      WidgetSpan(
-                        alignment: .middle,
-                        child: Icon(
-                          controller.showLiveUp
-                              ? Icons.expand_less
-                              : Icons.expand_more,
-                          size: 12,
-                          color: theme.colorScheme.primary,
-                        ),
+    return Obx(() {
+      final theme = Theme.of(context);
+      final upData = widget.upData;
+      final groupUps = controller.selectedGroupUps.value;
+      final allLiveList = upData.liveUsers?.items;
+      // 分组模式：直播中的组员从主列表剔除；Live 区只显示本组正在直播的 UP
+      final liveMids = <int>{
+        for (final e in allLiveList ?? const <LiveUserItem>[]) e.mid,
+      };
+      final memberMids = <int>{
+        for (final e in groupUps ?? const <UpItem>[]) e.mid,
+      };
+      final upList = controller.sortUpListByLastPost(
+        groupUps == null
+            ? upData.upList
+            : groupUps.where((e) => !liveMids.contains(e.mid)).toList(),
+      );
+      final liveList = groupUps == null
+          ? allLiveList
+          : allLiveList?.where((e) => memberMids.contains(e.mid)).toList();
+      final liveCount = groupUps == null
+          ? (upData.liveUsers?.count ?? 0)
+          : (liveList?.length ?? 0);
+      return CustomScrollView(
+        scrollDirection: isTop ? .horizontal : .vertical,
+        physics: const AlwaysScrollableScrollPhysics(),
+        controller: controller.scrollController,
+        slivers: [
+          SliverToBoxAdapter(
+            child: InkWell(
+              onTap: () => setState(() {
+                controller.showLiveUp = !controller.showLiveUp;
+              }),
+              onLongPress: toFollowPage,
+              onSecondaryTap: PlatformUtils.isMobile ? null : toFollowPage,
+              child: Container(
+                alignment: .center,
+                height: isTop ? 76 : 60,
+                padding: isTop ? const .only(left: 12, right: 6) : null,
+                child: Text.rich(
+                  textAlign: .center,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: theme.colorScheme.primary,
+                  ),
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'Live($liveCount)',
                       ),
-                    ] else
-                      WidgetSpan(
-                        alignment: .middle,
-                        child: Icon(
-                          controller.showLiveUp
-                              ? Icons.keyboard_arrow_right
-                              : Icons.keyboard_arrow_left,
-                          color: theme.colorScheme.primary,
-                          size: 14,
+                      if (!isTop) ...[
+                        const TextSpan(text: '\n'),
+                        WidgetSpan(
+                          alignment: .middle,
+                          child: Icon(
+                            controller.showLiveUp
+                                ? Icons.expand_less
+                                : Icons.expand_more,
+                            size: 12,
+                            color: theme.colorScheme.primary,
+                          ),
                         ),
-                      ),
-                  ],
+                      ] else
+                        WidgetSpan(
+                          alignment: .middle,
+                          child: Icon(
+                            controller.showLiveUp
+                                ? Icons.keyboard_arrow_right
+                                : Icons.keyboard_arrow_left,
+                            color: theme.colorScheme.primary,
+                            size: 14,
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        if (controller.showLiveUp && liveList != null && liveList.isNotEmpty)
-          SliverList.builder(
-            itemCount: liveList.length,
-            itemBuilder: (context, index) {
-              return upItemBuild(theme, liveList[index]);
-            },
-          ),
-        SliverToBoxAdapter(
-          child: upItemBuild(theme, UpItem(face: '', uname: '全部动态', mid: -1)),
-        ),
-        SliverToBoxAdapter(
-          child: Obx(
-            () => upItemBuild(
+          if (controller.showLiveUp && liveList != null && liveList.isNotEmpty)
+            SliverList.builder(
+              itemCount: liveList.length,
+              itemBuilder: (context, index) {
+                return upItemBuild(theme, liveList[index]);
+              },
+            ),
+          SliverToBoxAdapter(
+            child: upItemBuild(
               theme,
               UpItem(
-                uname: '我',
-                face: controller.accountService.face.value,
-                mid: Accounts.main.mid,
+                face: '',
+                uname: controller.hasSelectedGroup ? '本组动态' : '全部动态',
+                mid: -1,
               ),
             ),
           ),
-        ),
-        if (upList != null && upList.isNotEmpty)
-          SliverList.builder(
-            itemCount: upList.length,
-            itemBuilder: (context, index) {
-              return upItemBuild(theme, upList[index]);
-            },
-          ),
-        if (!isTop) const SliverToBoxAdapter(child: SizedBox(height: 200)),
-      ],
-    );
+          // "我"只在全部分组模式下显示
+          if (!controller.hasSelectedGroup)
+            SliverToBoxAdapter(
+              child: Obx(
+                () => upItemBuild(
+                  theme,
+                  UpItem(
+                    uname: '我',
+                    face: controller.accountService.face.value,
+                    mid: Accounts.main.mid,
+                  ),
+                ),
+              ),
+            ),
+          if (upList != null && upList.isNotEmpty)
+            SliverList.builder(
+              itemCount: upList.length,
+              itemBuilder: (context, index) {
+                return upItemBuild(theme, upList[index]);
+              },
+            ),
+          if (!isTop) const SliverToBoxAdapter(child: SizedBox(height: 200)),
+        ],
+      );
+    });
   }
 
   void _onSelect(UpItem item) {
     item.hasUpdate = false;
+    // 同步清除全部关注列表里的未读标记，避免切回"全部分组"时红点又出现
+    if (widget.upData.upList case final upList?) {
+      for (final e in upList) {
+        if (e.mid == item.mid) {
+          e.hasUpdate = false;
+        }
+      }
+    }
     controller.onSelectUp(item.mid);
     setState(() {});
   }
