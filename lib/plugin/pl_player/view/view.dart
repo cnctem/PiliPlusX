@@ -276,16 +276,23 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             FlutterVolumeController.updateShowSystemUI(true);
             plPlayerController.systemVolume.value =
                 (await FlutterVolumeController.getVolume()) ?? 1.0;
-            FlutterVolumeController.addListener((double value) {
-              if (mounted && !plPlayerController.volumeInterceptEventStream) {
-                plPlayerController.systemVolume.value = value;
-              }
-            }, emitOnStart: false);
+            FlutterVolumeController.addListener(
+              (double value) {
+                if (mounted && !plPlayerController.volumeInterceptEventStream) {
+                  plPlayerController.systemVolume.value = value;
+                }
+              },
+              // The plugin defaults to ambient and overwrites AVAudioSession.
+              category: AudioSessionCategory.playback,
+              emitOnStart: false,
+            );
           } else {
             FlutterVolumeController.updateShowSystemUI(true);
             _getCurrVolume();
             FlutterVolumeController.addListener(
               _onVolumeChanged,
+              // The plugin defaults to ambient and overwrites AVAudioSession.
+              category: AudioSessionCategory.playback,
               emitOnStart: false,
             );
           }
