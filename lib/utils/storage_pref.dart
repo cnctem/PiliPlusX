@@ -10,6 +10,7 @@ import 'package:PiliPlus/models/common/dynamic/dynamic_badge_mode.dart';
 import 'package:PiliPlus/models/common/dynamic/dynamics_type.dart';
 import 'package:PiliPlus/models/common/dynamic/up_panel_position.dart';
 import 'package:PiliPlus/models/common/follow_order_type.dart';
+import 'package:PiliPlus/models/common/media_control_button.dart';
 import 'package:PiliPlus/models/common/member/tab_type.dart';
 import 'package:PiliPlus/models/common/msg/msg_unread_type.dart';
 import 'package:PiliPlus/models/common/nav_bar_config.dart';
@@ -723,6 +724,11 @@ abstract final class Pref {
   static bool get enableBackgroundPlay =>
       _setting.get(SettingBoxKey.enableBackgroundPlay, defaultValue: true);
 
+  static List<MediaControlButton> get mediaControlButtons =>
+      parseMediaControlButtons(
+        _setting.get(SettingBoxKey.mediaControlButtons),
+      );
+
   static bool get disableLikeMsg =>
       _setting.get(SettingBoxKey.disableLikeMsg, defaultValue: false);
 
@@ -1158,9 +1164,8 @@ abstract final class Pref {
     ),
   );
 
-  static bool get enableLandscapeAutoFullscreen =>
-      _setting.get(
-        SettingBoxKey.enableLandscapeAutoFullscreen,
-        defaultValue: false,
-      );
+  static bool get enableLandscapeAutoFullscreen => _setting.get(
+    SettingBoxKey.enableLandscapeAutoFullscreen,
+    defaultValue: false,
+  );
 }
