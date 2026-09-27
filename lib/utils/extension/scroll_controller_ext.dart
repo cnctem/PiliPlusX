@@ -7,12 +7,15 @@ extension ScrollControllerExt on ScrollController {
     double offset, {
     Duration duration = const Duration(milliseconds: 800),
   }) {
-    if (!hasClients) return;
+    final positions = this.positions;
+    if (positions.length != 1) return;
+
+    final position = positions.single;
     final maxOffset = position.viewportDimension * 2;
-    if ((offset - this.offset).abs() >= maxOffset) {
-      jumpTo(maxOffset);
+    if ((offset - position.pixels).abs() >= maxOffset) {
+      position.jumpTo(maxOffset);
     }
-    animateTo(
+    position.animateTo(
       offset,
       duration: duration,
       curve: Curves.easeOutCirc,
@@ -20,7 +23,8 @@ extension ScrollControllerExt on ScrollController {
   }
 
   void jumpToTop() {
-    if (!hasClients) return;
-    jumpTo(0);
+    final positions = this.positions;
+    if (positions.length != 1) return;
+    positions.single.jumpTo(0);
   }
 }
