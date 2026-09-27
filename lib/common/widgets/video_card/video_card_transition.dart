@@ -14,6 +14,7 @@ bool _isHorizontalFlight(Size card, Size viewport) =>
     viewport.width > viewport.height;
 
 const double _veilFadeEnd = 0.37;
+
 const Curve _veilFadeCurve = Interval(
   0,
   _veilFadeEnd,
@@ -36,6 +37,7 @@ const Curve _cardFadeCurve = Interval(0.3, 1, curve: Curves.easeIn);
 const double _entryContentReadyAt = 0.5;
 
 const Duration videoPageTransitionDuration = Duration(milliseconds: 350);
+
 const Duration videoPageReverseTransitionDuration = Duration(milliseconds: 240);
 
 const double _paintEpsilon = 0.02;
@@ -48,7 +50,7 @@ const bool _snapshotVideoPage = true;
 /// 快照分辨率上限：快照是一次性全屏光栅化，成本与 dpr² 成正比，
 /// 故按 min(设备 dpr, 该值) 封顶（0 = 不限制）。
 /// 快照只在转场期间显示，略微降采样换来的省时很划算。
-const double _snapshotMaxPixelRatio = 1.6;
+const double _snapshotMaxPixelRatio = 1.5;
 
 /// 同时允许存在的整屏快照总数。快照很吃 GPU 表面/缓冲，
 /// 连点叠加时会同时存在多个（首页 + 退场页 + 进场页），
@@ -64,15 +66,27 @@ bool _acquireSnapshotSlot() {
 }
 
 void _releaseSnapshotSlot() {
+  // [fix] 断言：捕捉“释放次数多于获取次数”的异常路径，便于定位名额泄漏/双释放。
+  assert(_activeSnapshots > 0, 'snapshot slot released without acquire');
   if (_activeSnapshots > 0) _activeSnapshots--;
 }
 
 /// 新页面压上来时下层页面（首页）下沉的缩放幅度
 const double _belowPageSinkScale = 0.07;
 
-typedef _PendingVideoTransition = ({Object tag, RenderBox box});
+/// 下层页面（首页）的快照持有策略：
+/// - false（默认，保持原行为）：整个播放页驻留期都持有整屏快照，返回时复用
+///   同一张，返回更顺滑；代价是常驻占用一张全屏 GPU 纹理。
+/// - true：仅在转场动画进行期间持有，页面就位后立即释放；更省 GPU 显存，
+///   但返回时会重新栅格化一次（首页字体/布局复杂时，返回首帧可能略卡）。
+const bool _snapshotOnlyWhileAnimating = false;
+
+/// [fix] 不再直接持有 RenderBox（可能长期存活、阻止回收，甚至悬挂），
+/// 改用弱引用；若渲染对象已被回收（滚走/列表重建），消费点会退化为普通进入。
+typedef _PendingVideoTransition = ({Object tag, WeakReference<RenderBox> box});
 
 _PendingVideoTransition? _pendingVideoTransition;
+
 final _enteringVideoPages = <Object, Completer<bool>>{};
 
 /// 卡片已被移出树（滚走/列表重建）时丢弃待用的矩形
@@ -126,7 +140,8 @@ bool isVideoPageTransitionActive(Object tag) =>
 void prepareVideoCardTransition(Object tag, BuildContext context) {
   final box = context.findRenderObject();
   if (box is RenderBox && box.hasSize) {
-    _pendingVideoTransition = (tag: tag, box: box);
+    // [fix] 弱引用保存：避免全局静态变量长期持有 RenderBox、阻止其回收。
+    _pendingVideoTransition = (tag: tag, box: WeakReference(box));
   }
 }
 
@@ -159,7 +174,15 @@ class VideoPageTransitionRoute<T> extends GetPageRoute<T> {
   @override
   void install() {
     super.install();
-    if (_entryTag case final tag?) _enteringVideoPages[tag] = _entryReady;
+    if (_entryTag case final tag?) {
+      // [fix] 同一 tag 若已有上一个等待者（快速返回后立刻重入同一张卡片），
+      // 先把它完成，避免其 future 悬空、Completer 无法回收。
+      final previous = _enteringVideoPages[tag];
+      if (previous != null && !previous.isCompleted) {
+        previous.complete(true);
+      }
+      _enteringVideoPages[tag] = _entryReady;
+    }
     controller
       ?..addStatusListener(_entryStatus)
       ..addListener(_entryProgress);
@@ -333,24 +356,56 @@ class _BelowPageSink extends StatefulWidget {
 class _BelowPageSinkState extends State<_BelowPageSink> {
   final SnapshotController _controller = SnapshotController();
   bool _slotHeld = false;
+  bool _snapshotOn = false;
 
   @override
   void initState() {
     super.initState();
-    // 挂载即开、整个"播放页驻留期"都不关：
-    // 进入时生成一次，退出时复用同一张，退场动画结束后本 widget 被卸载才释放
-    _slotHeld = _acquireSnapshotSlot();
-    _controller.allowSnapshotting = _slotHeld && widget.allowSnapshotting;
+    // [fix] 快照名额改为“按需持有 + 与 allowSnapshotting 联动”：
+    // 原实现无条件 acquire，即使 allowSnapshotting=false 也会白占一个名额；
+    // 现在不满足条件即释放，且 _snapshotOnlyWhileAnimating 打开时，页面就位
+    // 后立即释放整屏快照（更省 GPU 显存）。
+    _syncSnapshotting();
+    widget.animation.addStatusListener(_onAnimationStatus);
   }
 
   @override
   void didUpdateWidget(covariant _BelowPageSink oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _controller.allowSnapshotting = _slotHeld && widget.allowSnapshotting;
+    if (oldWidget.animation != widget.animation) {
+      oldWidget.animation.removeStatusListener(_onAnimationStatus);
+      widget.animation.addStatusListener(_onAnimationStatus);
+    }
+    _syncSnapshotting();
+  }
+
+  void _onAnimationStatus(AnimationStatus status) => _syncSnapshotting();
+
+  /// 依据当前策略决定是否持有快照名额；名额不足时退化为实时绘制。
+  void _syncSnapshotting() {
+    final want =
+        widget.allowSnapshotting &&
+        (!_snapshotOnlyWhileAnimating || widget.animation.isAnimating);
+    if (want == _snapshotOn) {
+      _controller.allowSnapshotting = _slotHeld && want;
+      return;
+    }
+    if (want) {
+      if (!_slotHeld) {
+        _slotHeld = _acquireSnapshotSlot();
+        if (!_slotHeld) return; // 名额用完：保持实时绘制，本次放弃
+      }
+    } else if (_slotHeld) {
+      _releaseSnapshotSlot();
+      _slotHeld = false;
+    }
+    _snapshotOn = want;
+    _controller.allowSnapshotting = want;
   }
 
   @override
   void dispose() {
+    widget.animation.removeStatusListener(_onAnimationStatus);
     if (_slotHeld) _releaseSnapshotSlot();
     _controller.dispose();
     super.dispose();
@@ -459,7 +514,10 @@ class VideoPageHeroTarget extends StatefulWidget {
 class _VideoPageHeroTargetState extends State<VideoPageHeroTarget> {
   ModalRoute<dynamic>? _route;
   Animation<double>? _routeAnimation;
-  RenderBox? _sourceBox;
+
+  /// [fix] 弱引用持有来源卡片：原实现直接持有 RenderBox，若播放页长期驻留，
+  /// 会一直拖住首页那张卡片（可能早已滚出/重建）的 RenderBox，阻止其回收。
+  WeakReference<RenderBox>? _sourceBox;
   Rect? _sourceRect;
   bool _entryCompleted = false;
 
@@ -475,10 +533,10 @@ class _VideoPageHeroTargetState extends State<VideoPageHeroTarget> {
   void initState() {
     super.initState();
     if (hasPendingVideoCardTransition(widget.tag)) {
-      final box = _pendingVideoTransition!.box;
+      final box = _pendingVideoTransition!.box.target;
       // 取 cid 等异步流程期间卡片可能已被移出树，此时退化为普通进入
-      if (box.attached && box.hasSize) {
-        _sourceBox = box;
+      if (box != null && box.attached && box.hasSize) {
+        _sourceBox = WeakReference(box);
         _sourceRect = box.localToGlobal(Offset.zero) & box.size;
       }
       _pendingVideoTransition = null;
@@ -504,7 +562,7 @@ class _VideoPageHeroTargetState extends State<VideoPageHeroTarget> {
     if (status == AnimationStatus.completed && _route?.offstage == false) {
       _entryCompleted = true;
     }
-    final box = _sourceBox;
+    final box = _sourceBox?.target;
     if (status == AnimationStatus.reverse &&
         box != null &&
         box.attached &&
@@ -534,6 +592,7 @@ class _VideoPageHeroTargetState extends State<VideoPageHeroTarget> {
     _routeAnimation?.removeStatusListener(_handleAnimationStatus);
     if (_snapshotSlotHeld) _releaseSnapshotSlot();
     _snapshotController.dispose();
+    _sourceBox = null;
     super.dispose();
   }
 
@@ -580,7 +639,10 @@ class _VideoPageHeroTargetState extends State<VideoPageHeroTarget> {
             final fallback = returning && sourceViewport != size;
             if (fallback) {
               final route = _route;
-              if (route is VideoPageTransitionRoute) route.heroDisabled = true;
+              // [fix] 仅在需要时改写，避免 build 期间每帧重复赋值
+              if (route is VideoPageTransitionRoute && !route.heroDisabled) {
+                route.heroDisabled = true;
+              }
             }
             final visualRect = fallback ? viewport : pageRect;
             final scrimAlpha = _scrimOpacity * expansion;
