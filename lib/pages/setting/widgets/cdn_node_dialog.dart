@@ -209,11 +209,9 @@ class _CdnNodeDialogState extends State<CdnNodeDialog> {
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Row(
                   children: [
-                    StaticPopupMenuButton<String>(
+                    PopupMenuButton<String>(
                       initialValue: region,
                       onSelected: _selectRegion,
-                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                      padding: const EdgeInsets.fromLTRB(8, 6, 4, 6),
                       itemBuilder: (context) => [
                         for (final item in regions)
                           PopupMenuItem(

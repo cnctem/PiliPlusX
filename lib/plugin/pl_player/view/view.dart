@@ -289,7 +289,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     );
 
     if (PlatformUtils.isMobile) {
-      Future.microtask(() {
+      Future.microtask(() async {
         try {
           if (Pref.enableAppVolume) {
             // 应用内音量模式：显示系统原生 HUD，不显示应用内指示器

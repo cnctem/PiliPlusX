@@ -600,86 +600,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
     plPlayerController?.isLive = false;
 
-    // 如果是从应用内小窗返回（例如从子页面 Pop 回来，或者手动点击展开）
-    if (PipOverlayService.isInPipMode) {
-      // 用视频上下文 key 比较（而非 controller 实例），因为 controller 可能已被
-      // dispose 再重建，实例比较会失败
-      final isSameVideo =
-          PipOverlayService.savedVideoContextKey ==
-          PipOverlayService.contextKeyFromArgs(videoDetailController.args);
-      if (isSameVideo) {
-        _logSponsorBlock(
-          'Returning to video page with matching active PiP, closing PiP overlay',
-        );
-        PipOverlayService.stopPip(
-          callOnClose: false,
-          immediate: true,
-          targetContextKey: PipOverlayService.contextKeyFromArgs(
-            videoDetailController.args,
-          ),
-        );
-        videoDetailController.isEnteringPip = false;
-        // 重置 IntroController 的 isEnteringPip 标志
-        try {
-          if (videoDetailController.isFileSource) {
-            Get.find<LocalIntroController>(tag: heroTag).isEnteringPip = false;
-          } else if (videoDetailController.isUgc) {
-            Get.find<UgcIntroController>(tag: heroTag).isEnteringPip = false;
-          } else {
-            Get.find<PgcIntroController>(tag: heroTag).isEnteringPip = false;
-          }
-        } catch (_) {}
-        // 小窗模式下控制栏可能被隐藏了，恢复它
-        plPlayerController?.controls = true;
-        // 如果播放器正在播放，临时启用 autoPlay 以确保 UI 正确显示
-        if (plPlayerController?.playerStatus.isPlaying ?? false) {
-          videoDetailController.autoPlay = true;
-        }
-      } else {
-        // 小窗里播放的是其他视频，返回到新的视频页面时必须关闭小窗，否则会同时播放两个视频
-        _logSponsorBlock(
-          'Returning to video page but PiP has different controller, closing PiP',
-        );
-        PipOverlayService.stopPip(callOnClose: true, immediate: true);
-        // 当前页面之前可能曾尝试进入小窗（didPushNext 设置了 _isEnteringPipMode = true），
-        // 但被其他视频抢占。需要重置该标志，否则 dispose 会跳过播放器清理，
-        // 且 PopScope 不在 widget tree 中导致后续返回无法触发新的小窗
-        _isEnteringPipMode = false;
-        // 标记需要重试 PiP：关了别人的 PiP，恢复播放器后应尝试启动自己的 PiP
-        _pipRetryPending = true;
-      }
-    }
-    // 视频页返回时，若直播小窗仍在运行，也需关闭
-    if (LivePipOverlayService.isInPipMode) {
-      LivePipOverlayService.stopLivePip(callOnClose: true, immediate: true);
-    }
-
-    // 如果是从开启新页面方式（Get.toNamed）从小窗手动返回，播放器应已在运行，跳过部分重置逻辑
-    final bool fromPip = Get.arguments?['fromPip'] ?? false;
-    if (fromPip) {
-      isShowing = true;
-      PlPlayerController.setPlayCallBack(playCallBack);
-      introController.startTimer();
-
-      // 重新恢复 SponsorBlock
-      if (videoDetailController.plPlayerController.enableSponsorBlock &&
-          videoDetailController.segmentList.isNotEmpty) {
-        videoDetailController.initSkip();
-      }
-
-      // didPushNext 时 videoState 被置为 false，需要在这里恢复
-      // 场景：fromPip 页面（如听视频）返回时，播放器已在运行但 videoState 未恢复
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        videoDetailController.videoState.value = true;
-        videoDetailController.videoState.refresh();
-        setState(() {});
-      });
-
-      super.didPopNext();
-      return;
-    }
-
     if (videoDetailController.plPlayerController.playerStatus.isPlaying &&
         videoDetailController.playerStatus != PlayerStatus.playing) {
       videoDetailController.plPlayerController.pause();
@@ -2166,17 +2086,17 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                   padding.bottom,
             ),
           ),
-        ],
-      );
-      return KeepAliveWrapper(
-        child: KeyboardScrollable(
-          controller: needCtr
-              ? videoDetailController.effectiveIntroScrollCtr
-              : videoDetailController.scrollCtr,
-          child: child,
+        SliverToBoxAdapter(
+          child: SizedBox(
+            height:
+                (videoDetailController.isPlayAll && !isPortrait
+                    ? 80
+                    : Style.safeSpace) +
+                padding.bottom,
+          ),
         ),
-      );
-    }
+      ],
+    );
 
 
     if (videoDetailController.isPlayAll) {
