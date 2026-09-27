@@ -419,6 +419,7 @@ class _MainAppState extends PopScopeState<MainApp>
               child: Obx(
                 () => NavigationDrawer(
                   /// apply `lib/scripts/navigation_drawer.patch`
+                  flex: 5,
                   backgroundColor: Colors.transparent,
                   onDestinationSelected: _mainController.setIndex,
                   selectedIndex: _mainController.selectedIndex.value,
