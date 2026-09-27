@@ -450,7 +450,7 @@ class MyApp extends StatelessWidget {
     });
     final backDetector = BackDetector(
       onBack: _onBack,
-      child: child!,
+      child: child,
     );
     if (PlatformUtils.isDesktop) {
       return Focus(
