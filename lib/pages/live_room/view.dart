@@ -753,8 +753,6 @@ class _LiveRoomPageState extends State<LiveRoomPage>
               controller: _liveRoomController.pageController,
               physics: tabBarScrollPhysics,
               onPageChanged: _liveRoomController.pageIndex.call,
-              horizontalDragGestureRecognizer:
-                  CustomHorizontalDragGestureRecognizer.new,
               children: [
                 KeepAliveWrapper(child: chat()),
                 SuperChatPanel(

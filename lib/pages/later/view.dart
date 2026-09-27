@@ -137,8 +137,6 @@ class _LaterPageState extends State<LaterPage>
                           ? const NeverScrollableScrollPhysics()
                           : tabBarScrollPhysics,
                       controller: _tabController,
-                      horizontalDragGestureRecognizer:
-                          CustomHorizontalDragGestureRecognizer.new,
                       children: LaterViewType.values
                           .map((item) => item.page)
                           .toList(),
