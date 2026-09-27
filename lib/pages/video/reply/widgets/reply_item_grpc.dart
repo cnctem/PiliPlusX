@@ -886,7 +886,7 @@ class ReplyItemGrpc extends StatelessWidget {
               final ctr = Get.find<AudioController>(tag: heroTag);
               isValid =
                   DurationUtils.parseDuration(matchStr) * 1000 <=
-                  ctr.duration.value.inMilliseconds;
+                  ctr.duration.value * 1000;
             } catch (_) {}
           }
           spanChildren.add(
