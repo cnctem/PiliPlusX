@@ -1,11 +1,13 @@
 import 'dart:io' show Platform;
 
 import 'package:PiliPlus/common/widgets/custom_icon.dart';
+import 'package:PiliPlus/models/common/media_control_button.dart';
 import 'package:PiliPlus/models/common/super_chat_type.dart';
 import 'package:PiliPlus/models/common/video/subtitle_pref_type.dart';
 import 'package:PiliPlus/pages/main/controller.dart';
 import 'package:PiliPlus/pages/setting/models/model.dart';
 import 'package:PiliPlus/pages/setting/pages/fullscreen_sc_size.dart';
+import 'package:PiliPlus/pages/setting/widgets/media_control_order_dialog.dart';
 import 'package:PiliPlus/pages/setting/widgets/select_dialog.dart';
 import 'package:PiliPlus/pages/setting/widgets/slider_dialog.dart';
 import 'package:PiliPlus/pages/setting/widgets/shortcut_keys_dialog.dart';
@@ -338,6 +340,15 @@ List<SettingsModel> get playSettings => [
       onChanged: (value) =>
           videoPlayerServiceHandler!.enableBackgroundPlay = value,
     ),
+  if (PlatformUtils.isMobile)
+    NormalModel(
+      title: '系统媒体控制按钮',
+      subtitle: '自定义通知栏和锁屏上的播放按钮及顺序',
+      leading: const Icon(Icons.tune),
+      getSubtitle: () =>
+          Pref.mediaControlButtons.map((button) => button.label).join('、'),
+      onTap: _showMediaControlButtonsDialog,
+    ),
   PopupModel(
     title: '播放顺序',
     leading: const Icon(Icons.repeat),
@@ -355,6 +366,26 @@ List<SettingsModel> get playSettings => [
     defaultVal: false,
   ),
 ];
+
+Future<void> _showMediaControlButtonsDialog(
+  BuildContext context,
+  VoidCallback setState,
+) async {
+  final result = await showDialog<List<MediaControlButton>>(
+    context: context,
+    builder: (context) => MediaControlOrderDialog(
+      selectedValues: Pref.mediaControlButtons,
+    ),
+  );
+  if (result == null) return;
+
+  await GStorage.setting.put(
+    SettingBoxKey.mediaControlButtons,
+    result.map((button) => button.name).toList(),
+  );
+  videoPlayerServiceHandler?.refreshMediaControls();
+  setState();
+}
 
 Future<void> _showSubtitleDialog(
   BuildContext context,
