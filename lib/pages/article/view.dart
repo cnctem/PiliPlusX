@@ -508,8 +508,6 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
           margin: const .only(bottom: 10),
           child: PageView.builder(
             physics: tabBarScrollPhysics,
-            horizontalDragGestureRecognizer:
-                CustomHorizontalDragGestureRecognizer.new,
             onPageChanged: controller.topIndex.call,
             itemCount: length,
             itemBuilder: (context, index) {

@@ -97,7 +97,6 @@ class _IntroDetailState extends State<PgcIntroPanel>
     return TabBarView(
       controller: _tabController,
       physics: tabBarScrollPhysics,
-      horizontalDragGestureRecognizer: horizontalDragGestureRecognizer,
       children: [
         KeepAliveWrapper(child: _buildInfo(theme)),
         PgcReviewPage(

@@ -38,7 +38,6 @@ class _LiveDmBlockPageState extends State<LiveDmBlockPage> {
     );
 
     Widget view = tabBarView(
-      hitTestBehavior: .translucent,
       controller: _controller.tabController,
       children: [
         KeepAliveWrapper(

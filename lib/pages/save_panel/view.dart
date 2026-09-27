@@ -345,7 +345,6 @@ class _SavePanelState extends State<SavePanel> {
       alignment: .center,
       children: [
         SingleChildScrollView(
-          hitTestBehavior: .deferToChild,
           padding: .only(
             top: 12 + padding.top,
             bottom: 80 + padding.bottom,
