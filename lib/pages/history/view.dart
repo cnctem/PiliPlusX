@@ -136,8 +136,6 @@ class _HistoryPageState extends State<HistoryPage>
                             ? const NeverScrollableScrollPhysics()
                             : tabBarScrollPhysics,
                         controller: _historyController.tabController,
-                        horizontalDragGestureRecognizer:
-                            CustomHorizontalDragGestureRecognizer.new,
                         children: [
                           KeepAliveWrapper(child: child),
                           ...tabs.map(

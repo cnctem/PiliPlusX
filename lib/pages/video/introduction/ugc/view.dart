@@ -738,7 +738,6 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
           Expanded(
             child: SingleChildScrollView(
               scrollDirection: .horizontal,
-              hitTestBehavior: .translucent,
               physics: ReloadScrollPhysics(controller: introController),
               child: Row(
                 spacing: 25,

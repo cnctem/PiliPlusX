@@ -242,7 +242,6 @@ class EpisodePanelState extends State<EpisodePanel>
       return TabBarView(
         controller: _tabController,
         physics: tabBarScrollPhysics,
-        horizontalDragGestureRecognizer: horizontalDragGestureRecognizer,
         children: List.generate(
           widget.list.length,
           (index) => _buildBody(
