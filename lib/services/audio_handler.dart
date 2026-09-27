@@ -9,6 +9,7 @@ import 'package:PiliPlus/pages/audio/controller.dart';
 
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/grpc/bilibili/app/listener/v1.pb.dart' show DetailItem;
+import 'package:PiliPlus/models/common/media_control_button.dart';
 import 'package:PiliPlus/models_new/download/bili_download_entry_info.dart';
 import 'package:PiliPlus/models_new/live/live_room_info_h5/data.dart';
 import 'package:PiliPlus/models_new/pgc/pgc_info_model/episode.dart';
@@ -16,6 +17,7 @@ import 'package:PiliPlus/models_new/video/video_detail/data.dart';
 import 'package:PiliPlus/models_new/video/video_detail/page.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
+import 'package:PiliPlus/services/media_control.dart';
 import 'package:PiliPlus/utils/android/bindings.g.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
@@ -57,6 +59,11 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
   Future<void>? Function()? onSkipToNext;
   Future<void>? Function()? onSkipToPrevious;
   String? currentHeroTag;
+  PlayerStatus? _lastStatus;
+  bool _lastIsBuffering = false;
+  bool _lastIsLive = false;
+  Duration _lastPosition = Duration.zero;
+  double _lastSpeed = 1.0;
 
   @override
   Future<void> skipToNext() async {
@@ -212,6 +219,12 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
 
     if (onPlay != null && debugLabel == 'onVideoPaused') return;
 
+    _lastStatus = status;
+    _lastIsBuffering = isBuffering;
+    _lastIsLive = isLive;
+    _lastPosition = position;
+    _lastSpeed = speed;
+
     final newConfig = (status, isBuffering, isLive, speed);
     if (_lastConfig == newConfig) {
       if (_lastPos != null) {
@@ -253,38 +266,41 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
     required double speed,
   }) {
     final hasEpisodes = _hasEpisodes();
-
-    final controls = <MediaControl>[
-      if (!isLive && hasEpisodes) MediaControl.skipToPrevious,
-      if (!isLive)
-        MediaControl.rewind.copyWith(
-          androidIcon: 'drawable/ic_player_rewind_10s',
-        ),
-      if (playing) MediaControl.pause else MediaControl.play,
-      if (!isLive)
-        MediaControl.fastForward.copyWith(
-          androidIcon: 'drawable/ic_player_fast_forward_10s',
-        ),
-      if (!isLive && hasEpisodes) MediaControl.skipToNext,
-    ];
-
-    int playPauseIndex = controls.indexWhere(
-      (c) => c.action == MediaAction.play || c.action == MediaAction.pause,
+    final effectiveButtons = effectiveMediaControlButtons(
+      configured: Pref.mediaControlButtons,
+      isLive: isLive,
+      hasEpisodes: hasEpisodes,
     );
-    List<int> compactIndices;
-    if (controls.length >= 3) {
-      if (playPauseIndex > 0 && playPauseIndex < controls.length - 1) {
-        compactIndices = [
-          playPauseIndex - 1,
-          playPauseIndex,
-          playPauseIndex + 1,
-        ];
-      } else {
-        compactIndices = [0, 1, 2];
+    final controls = <MediaControl>[];
+    final systemActions = <MediaAction>{if (!isLive) MediaAction.seek};
+    for (final button in effectiveButtons) {
+      switch (button) {
+        case MediaControlButton.previous:
+          controls.add(MediaControl.skipToPrevious);
+          systemActions.add(MediaAction.skipToPrevious);
+        case MediaControlButton.rewind:
+          controls.add(
+            MediaControl.rewind.copyWith(
+              androidIcon: 'drawable/ic_player_rewind_10s',
+            ),
+          );
+          systemActions.add(MediaAction.rewind);
+        case MediaControlButton.playPause:
+          controls.add(playing ? MediaControl.pause : MediaControl.play);
+        case MediaControlButton.fastForward:
+          controls.add(
+            MediaControl.fastForward.copyWith(
+              androidIcon: 'drawable/ic_player_fast_forward_10s',
+            ),
+          );
+          systemActions.add(MediaAction.fastForward);
+        case MediaControlButton.next:
+          controls.add(MediaControl.skipToNext);
+          systemActions.add(MediaAction.skipToNext);
       }
-    } else {
-      compactIndices = List.generate(controls.length, (i) => i);
     }
+
+    final compactIndices = androidCompactActionIndices(effectiveButtons);
 
     playbackState.add(
       playbackState.value.copyWith(
@@ -294,13 +310,7 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
         controls: controls,
         androidCompactActionIndices: compactIndices,
         playing: playing,
-        systemActions: {
-          MediaAction.seek,
-          if (!isLive && hasEpisodes) MediaAction.skipToPrevious,
-          MediaAction.rewind,
-          MediaAction.fastForward,
-          if (!isLive && hasEpisodes) MediaAction.skipToNext,
-        },
+        systemActions: systemActions,
       ),
     );
     if (Platform.isAndroid &&
@@ -312,6 +322,20 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
         playing,
       );
     }
+  }
+
+  void refreshMediaControls() {
+    final status = _lastStatus;
+    if (status == null) return;
+    _lastConfig = null;
+    _lastPos = null;
+    onUpdateState(
+      status,
+      _lastIsBuffering,
+      _lastIsLive,
+      position: _lastPosition,
+      speed: _lastSpeed,
+    );
   }
 
   void onVideoDetailChange(
