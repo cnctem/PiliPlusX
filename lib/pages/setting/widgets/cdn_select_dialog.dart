@@ -93,30 +93,38 @@ class CdnSpeedTester {
     return sample = item;
   }
 
-  /// 从首包到达开始计时（剔除建连与首字节耗时），下载 2MB 或 5s 即出结果
+  /// 从首包到达开始计时（剔除建连与首字节等待），下载 2MB 或 5s 即出结果
   Future<String> measure(String url) async {
     const maxSize = 2 * 1024 * 1024;
-    const maxDuration = 5000000;
+    const timeoutUs = 5 * Duration.microsecondsPerSecond;
     final token = CancelToken();
     _tokens.add(token);
+    // NTP/时区调整不会影响单调时钟。
+    final watch = Stopwatch()..start();
     int received = 0;
-    int baseline = 0;
-    int? dataStart;
+    int firstByteBytes = 0;
+    int? firstByteUs;
+    bool finished = false;
     String? result;
-    final requestStart = DateTime.now().microsecondsSinceEpoch;
-    String format(int bytes, int duration) =>
-        '${(bytes / duration).toStringAsPrecision(3)}MB/s';
-    // 首包后无增量（如单包完成）时退回全程计时
-    String? snapshot() {
-      final now = DateTime.now().microsecondsSinceEpoch;
-      final bytes = received - baseline;
-      if (bytes > 0 && dataStart != null && now > dataStart!) {
-        return format(bytes, now - dataStart!);
+
+    String format(int bytes, int durationUs) =>
+        '${(bytes / durationUs).toStringAsPrecision(3)}MB/s';
+
+    String? snapshot({bool truncated = false}) {
+      final elapsedUs = watch.elapsedMicroseconds;
+      var bytes = received - firstByteBytes;
+      var windowUs = firstByteUs == null ? 0 : elapsedUs - firstByteUs!;
+      // 单包完成或样本不足时退回整段请求计时。
+      if (bytes <= 0 || windowUs <= 0) {
+        bytes = received;
+        windowUs = elapsedUs;
       }
-      if (received > 0 && now > requestStart) {
-        return format(received, now - requestStart);
-      }
-      return null;
+      if (bytes <= 0 || windowUs <= 0) return null;
+      final speed = format(bytes, windowUs);
+      final firstByte = firstByteUs == null
+          ? ''
+          : ' · 首包${(firstByteUs! / 1000).toStringAsFixed(0)}ms';
+      return '$speed$firstByte${truncated ? ' · 超时截断' : ''}';
     }
 
     try {
@@ -124,17 +132,18 @@ class CdnSpeedTester {
         url,
         cancelToken: token,
         onReceiveProgress: (count, total) {
-          if (dataStart == null) {
-            dataStart = DateTime.now().microsecondsSinceEpoch;
-            baseline = count;
-            received = count;
-            return;
+          if (finished) return;
+          final elapsedUs = watch.elapsedMicroseconds;
+          if (firstByteUs == null && count > 0) {
+            firstByteUs = elapsedUs;
+            firstByteBytes = count;
           }
           received = count;
-          if (count - baseline >= maxSize ||
-              DateTime.now().microsecondsSinceEpoch - dataStart! >
-                  maxDuration) {
-            result ??= snapshot();
+          final reachedSize = count - firstByteBytes >= maxSize;
+          final reachedTimeout = elapsedUs > timeoutUs;
+          if (reachedSize || reachedTimeout) {
+            result ??= snapshot(truncated: reachedTimeout);
+            finished = true;
             token.cancel();
           }
         },
@@ -142,7 +151,7 @@ class CdnSpeedTester {
       result ??= snapshot() ?? '测速失败';
     } on DioException catch (e) {
       if (e.type == DioExceptionType.cancel) {
-        result ??= '测速超时';
+        result ??= snapshot(truncated: true) ?? '测速超时';
       } else {
         result ??= _describeError(e);
       }
@@ -203,7 +212,8 @@ class M3eOptionItem extends StatelessWidget {
     final secondary = selected
         ? colorScheme.onSecondaryContainer
         : colorScheme.onSurfaceVariant;
-    final effectiveLeading = leading ??
+    final effectiveLeading =
+        leading ??
         (selectionControl
             ? Icon(
                 selected
@@ -407,8 +417,7 @@ class _CdnSelectDialogState extends State<CdnSelectDialog> {
                         ),
                       )
                     : null,
-                onTap: () =>
-                    Navigator.pop(context, CdnBuiltinResult(service)),
+                onTap: () => Navigator.pop(context, CdnBuiltinResult(service)),
               ),
             const SizedBox(height: 8),
             const Divider(height: 1, indent: 8, endIndent: 8),
