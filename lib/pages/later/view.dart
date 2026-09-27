@@ -1,6 +1,5 @@
 import 'package:PiliPlus/common/widgets/appbar/appbar.dart';
 import 'package:PiliPlus/common/widgets/flutter/pop_scope.dart';
-import 'package:PiliPlus/common/widgets/gesture/horizontal_drag_gesture_recognizer.dart';
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart'
     show tabBarScrollPhysics;

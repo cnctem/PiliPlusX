@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/custom_icon.dart';
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
-import 'package:PiliPlus/common/widgets/gesture/horizontal_drag_gesture_recognizer.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/scaffold/mini_scaffold.dart';
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';

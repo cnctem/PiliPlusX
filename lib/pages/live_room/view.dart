@@ -8,7 +8,6 @@ import 'package:PiliPlus/common/widgets/button/icon_button.dart';
 import 'package:PiliPlus/common/widgets/custom_icon.dart';
 import 'package:PiliPlus/common/widgets/extra_hittest_stack.dart';
 import 'package:PiliPlus/common/widgets/flutter/pop_scope.dart';
-import 'package:PiliPlus/common/widgets/gesture/horizontal_drag_gesture_recognizer.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/keep_alive_wrapper.dart';
 import 'package:PiliPlus/common/widgets/route_aware_mixin.dart';

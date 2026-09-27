@@ -53,7 +53,6 @@ import 'package:PiliPlus/plugin/pl_player/widgets/play_pause_btn.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/speed_lock_arrows.dart';
 import 'package:PiliPlus/utils/android/bindings.g.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
-import 'package:PiliPlus/utils/connectivity_utils.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/duration_utils.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
