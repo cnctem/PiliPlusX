@@ -1621,23 +1621,19 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
   final double maxVolume = PlatformUtils.isDesktop ? Pref.maxVolume : 1.0;
   Future<void> setVolume(double volume, {bool showIndicator = true}) async {
-    if (this.volume.value != volume ||
-        (PlatformUtils.isMobile &&
-            await FlutterVolumeController.getVolume() != this.volume.value)) {
-      this.volume.value = volume;
-      try {
-        if (PlatformUtils.isDesktop) {
-          await _videoPlayerController!.setVolume(volume * 100);
-          actualVolume.value = volume;
-        } else {
-          FlutterVolumeController.updateShowSystemUI(false);
-          await FlutterVolumeController.setVolume(volume);
-          actualVolume.value =
-              await FlutterVolumeController.getVolume() ?? actualVolume.value;
-        }
-      } catch (err) {
-        if (kDebugMode) debugPrint(err.toString());
+    try {
+      if (PlatformUtils.isDesktop) {
+        await _videoPlayerController!.setVolume(volume * 100);
+        actualVolume.value = volume;
+      } else {
+        FlutterVolumeController.updateShowSystemUI(false);
+        await FlutterVolumeController.setVolume(volume);
+        actualVolume.value =
+            await FlutterVolumeController.getVolume() ?? actualVolume.value;
       }
+      this.volume.value = volume;
+    } catch (err) {
+      if (kDebugMode) debugPrint(err.toString());
     }
     if (showIndicator) {
       volumeIndicator.value = true;
@@ -1820,6 +1816,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
   double screenRatio = 0.0;
   bool isManualFS = true;
+
   /// 最近一次退出全屏的时间。鸿蒙部分机型开启旋转锁定后，会被 childWhenDisabled 的窗口变
   /// 横屏自动进全屏立即拉回，表现为退不出全屏。用该时间戳抑制退出后短暂窗口内的自动进全屏。
   ///

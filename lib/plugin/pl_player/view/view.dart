@@ -65,6 +65,7 @@ import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:collection/collection.dart';
@@ -1005,7 +1006,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   @override
   void didUpdateWidget(covariant PLVideoPlayer oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (Platform.isAndroid && AndroidHelper.isPipMode || 
+    if (Platform.isAndroid && AndroidHelper.isPipMode ||
         OS.isHarmony && plPlayerController.isPipMode) {
       plPlayerController.controls = false;
     }
@@ -1619,7 +1620,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             alignment: Alignment.center,
             child: Obx(
               () {
-                final volume = plPlayerController.volume.value;
+                final volume = Pref.showActualVolume
+                    ? plPlayerController.actualVolume.value
+                    : plPlayerController.volume.value;
                 return AnimatedOpacity(
                   curve: Curves.easeInOut,
                   opacity: plPlayerController.volumeIndicator.value ? 1.0 : 0.0,
@@ -1996,7 +1999,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                             color: Colors.white,
                           ),
                           onLongPress:
-                              (Platform.isAndroid || OS.isHarmony || kDebugMode) &&
+                              (Platform.isAndroid ||
+                                      OS.isHarmony ||
+                                      kDebugMode) &&
                                   !isLive
                               ? _screenshotWebp
                               : null,
