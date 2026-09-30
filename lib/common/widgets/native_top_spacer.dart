@@ -28,7 +28,7 @@ class NativeTopSpacer extends StatelessWidget {
   static const double singleCollapsedHeight = 0;
 
   /// ArkTS 顶栏自身的高度，用于启用原生顶栏时调整刷新指示器高度
-  static const double barExpandedHeight = 100;
+  static const double barExpandedHeight = 90;
   static const double barCollapsedHeight = 32;
 
   /// 留白高度的过渡节奏，须与 Index.ets 的 TOP_BAR_MOTION_DURATION /
