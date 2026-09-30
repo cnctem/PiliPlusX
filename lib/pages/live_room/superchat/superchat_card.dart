@@ -18,50 +18,7 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
 
-/// 超级聊天文本选中菜单。
-///
-/// 鸿蒙分支不打 SDK 补丁（上游把实现放在
-/// `lib/utils/extension/selectable_region_ext.dart`，依赖补丁放出
-/// [SelectableRegionState] 的私有成员），这里沿用本分支
-/// [selectableTextContextMenuBuilder] 的做法，从 [EditableTextState]
-/// 读取选中文本。
-Widget scMenuBuilder(
-  BuildContext context,
-  EditableTextState editableTextState,
-) {
-  final buttonItems = editableTextState.contextMenuButtonItems;
-  final selection = editableTextState.textEditingValue.selection;
-  final String? text = selection.isValid && !selection.isCollapsed
-      ? selection.textInside(editableTextState.textEditingValue.text)
-      : null;
-  if (text != null && text.isNotEmpty) {
-    buttonItems
-      ..insertOrAdd(
-        3,
-        ContextMenuButtonItem(
-          label: '视频',
-          onPressed: () {
-            editableTextState.hideToolbar();
-            PiliScheme.videoPush(null, text);
-          },
-        ),
-      )
-      ..insertOrAdd(
-        4,
-        ContextMenuButtonItem(
-          label: '搜索',
-          onPressed: () {
-            editableTextState.hideToolbar();
-            Get.toNamed('/searchResult', parameters: {'keyword': text});
-          },
-        ),
-      );
-  }
-  return AdaptiveTextSelectionToolbar.buttonItems(
-    buttonItems: buttonItems,
-    anchors: editableTextState.contextMenuAnchors,
-  );
-}
+part 'package:PiliPlus/common/widgets/context_menu/live_menu_helper.dart';
 
 class SuperChatCard extends StatefulWidget {
   const SuperChatCard({
