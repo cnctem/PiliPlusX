@@ -30,15 +30,12 @@ Curve _openCurveFor(bool horizontal) =>
 
 const Curve _closeCurve = Cubic(0.54, 0.15, 0.68, 0.95);
 
-/// 卡片占位：进入时先显后隐、返回时后显
-const Curve _cardFadeCurve = Interval(0.3, 1, curve: Curves.easeIn);
-
 /// 入场进度到此值即认为页面已就位，播放页据此开始取流（0.5 ≈ 175ms）
 const double _entryContentReadyAt = 0.5;
 
 const Duration videoPageTransitionDuration = Duration(milliseconds: 350);
 
-const Duration videoPageReverseTransitionDuration = Duration(milliseconds: 240);
+const Duration videoPageReverseTransitionDuration = Duration(milliseconds: 180);
 
 const double _paintEpsilon = 0.02;
 
@@ -50,7 +47,7 @@ const bool _snapshotVideoPage = true;
 /// 快照分辨率上限：快照是一次性全屏光栅化，成本与 dpr² 成正比，
 /// 故按 min(设备 dpr, 该值) 封顶（0 = 不限制）。
 /// 快照只在转场期间显示，略微降采样换来的省时很划算。
-const double _snapshotMaxPixelRatio = 1.5;
+const double _snapshotMaxPixelRatio = 1.4;
 
 /// 同时允许存在的整屏快照总数。快照很吃 GPU 表面/缓冲，
 /// 连点叠加时会同时存在多个（首页 + 退场页 + 进场页），
@@ -464,28 +461,10 @@ class _VideoCardHeroState extends State<VideoCardHero> {
       transitionOnUserGestures: true,
       flightShuttleBuilder: _buildFlightShuttle,
       // 飞行期间原位显示卡片副本：进入时淡出、返回时淡入
-      placeholderBuilder: _buildCardPlaceholder,
       child: _CardSurface(
         radius: widget.cornerRadius,
         cardColor: widget.surfaceColor,
         child: widget.child,
-      ),
-    );
-  }
-
-  static Widget _buildCardPlaceholder(
-    BuildContext context,
-    Size heroSize,
-    Widget child,
-  ) {
-    final animation = ModalRoute.of(context)?.secondaryAnimation;
-    if (animation == null) return child;
-    return AnimatedBuilder(
-      animation: animation,
-      child: child,
-      builder: (context, child) => Opacity(
-        opacity: _cardFadeCurve.transform(1 - animation.value),
-        child: child,
       ),
     );
   }
@@ -634,8 +613,6 @@ class _VideoPageHeroTargetState extends State<VideoPageHeroTarget> {
             final pageRect = returning
                 ? Rect.lerp(viewport, source, contraction)!
                 : Rect.lerp(source, viewport, expansion)!;
-            // 返回时窗口尺寸和进入时不一致（旋转/折叠/分屏/小窗）：卡片矩形
-            // 已失真，放弃几何动画，交给路由的默认页面切换动画
             final fallback = returning && sourceViewport != size;
             if (fallback) {
               final route = _route;
@@ -645,10 +622,11 @@ class _VideoPageHeroTargetState extends State<VideoPageHeroTarget> {
               }
             }
             final visualRect = fallback ? viewport : pageRect;
+            // 飞行卡片圆角：贴近卡片时取卡片圆角，展开到全屏时收敛到 0
+            final cardRadius = fallback
+                ? 0.0
+                : _cardRadius * (returning ? contraction : 1 - expansion);
             final scrimAlpha = _scrimOpacity * expansion;
-            // 全屏纯色压暗（比挖洞 Path 便宜）。动画结束后页面铺满视口，
-            // 此时必须透明，否则会从页面圆角缺口透出黑边；
-            // 走默认转场时也不需要它（否则黑罩会跟着转场一起动）
             final scrimVisible =
                 !fallback &&
                 animation.status != AnimationStatus.completed &&
@@ -691,8 +669,8 @@ class _VideoPageHeroTargetState extends State<VideoPageHeroTarget> {
                   key: const ValueKey('video-transition-page-position'),
                   child: ClipPath(
                     key: const ValueKey('video-transition-page-container'),
-                    clipBehavior: Clip.hardEdge,
-                    clipper: _PageRectClipper(visualRect),
+                    clipBehavior: Clip.antiAlias,
+                    clipper: _PageRectClipper(visualRect, cardRadius),
                     // 快照按 1:1 栅格化，缩放只作用于纹理
                     child: Transform(
                       transform: pageTransform,
@@ -726,17 +704,22 @@ class _VideoPageHeroTargetState extends State<VideoPageHeroTarget> {
   }
 }
 
-/// 把整页内容裁到当前页面矩形（直角），使页面子树可以静态布局
+/// 把整页内容裁到当前页面矩形；圆角随展开进度由卡片圆角收敛到 0，
+/// 使飞行中的“卡片”与卡片本体圆角一致，落到全屏时不残留圆角。
 class _PageRectClipper extends CustomClipper<Path> {
-  const _PageRectClipper(this.rect);
+  const _PageRectClipper(this.rect, this.radius);
 
   final Rect rect;
 
-  @override
-  Path getClip(Size size) => Path()..addRect(rect);
+  final double radius;
 
   @override
-  bool shouldReclip(_PageRectClipper oldClipper) => oldClipper.rect != rect;
+  Path getClip(Size size) => Path()
+    ..addRRect(RRect.fromRectAndRadius(rect, Radius.circular(radius)));
+
+  @override
+  bool shouldReclip(_PageRectClipper oldClipper) =>
+      oldClipper.rect != rect || oldClipper.radius != radius;
 }
 
 /// 卡片侧 Hero 的类型标记（[_buildFlightShuttle] 靠它识别），并携带飞行层的底色与圆角。
