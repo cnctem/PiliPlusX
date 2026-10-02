@@ -120,9 +120,10 @@ class _SeasonPanelState extends State<SeasonPanel> {
               children: <Widget>[
                 Expanded(
                   child: Text(
-                    '合集：${videoDetail.ugcSeason!.title!}',
+                    '合集：${videoDetail.ugcSeason!.title}',
                     style: theme.textTheme.labelMedium,
-                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    overflow: .ellipsis,
                   ),
                 ),
                 const SizedBox(width: 15),
