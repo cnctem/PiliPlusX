@@ -367,6 +367,7 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
                       oid: videoDetailCtr.aid,
                       replyType: videoDetailCtr.videoType.replyType,
                     ),
+                    mentionItem: videoDetail.owner?.mentionItem,
                   ),
                 );
               },

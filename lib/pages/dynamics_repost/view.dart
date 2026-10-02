@@ -10,6 +10,7 @@ import 'package:PiliPlus/http/dynamics.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/video.dart';
 import 'package:PiliPlus/models/dynamics/result.dart';
+import 'package:PiliPlus/models_new/dynamic/dyn_mention/item.dart';
 import 'package:PiliPlus/pages/common/publish/common_rich_text_pub_page.dart';
 import 'package:PiliPlus/pages/dynamics_mention/controller.dart';
 import 'package:PiliPlus/pages/emote/controller.dart';
@@ -34,6 +35,8 @@ class RepostPanel extends CommonRichTextPubPage {
     this.uname,
     // reply
     this.replyInfo,
+    // mention
+    this.mentionItem,
     super.autofocus = false,
   });
 
@@ -46,6 +49,9 @@ class RepostPanel extends CommonRichTextPubPage {
 
   // reply
   final ({int oid, int replyType})? replyInfo;
+
+  // mention
+  final MentionItem? mentionItem;
 
   final DynamicItemModel? item;
   final String? dynIdStr;
@@ -506,4 +512,7 @@ class _RepostPanelState extends CommonRichTextPubPageState<RepostPanel>
 
   @override
   void onSave() {}
+
+  @override
+  MentionItem? get topMentionItem => widget.mentionItem;
 }

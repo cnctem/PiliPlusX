@@ -48,6 +48,7 @@ class ActionPanel extends StatelessWidget {
                       }
                     },
                     replyInfo: item.basic?.replyInfo,
+                    mentionItem: item.modules.moduleAuthor?.mentionItem,
                   ),
                 ),
                 icon: Icon(
