@@ -1163,13 +1163,6 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     }
   }
 
-  // 还原默认速度
-  double playSpeedDefault = Pref.playSpeedDefault;
-  Future<void> setDefaultSpeed() async {
-    await _videoPlayerController?.setRate(playSpeedDefault);
-    _playbackSpeed.value = playSpeedDefault;
-  }
-
   /// 播放视频
   Future<void> play({bool repeat = false, bool hideControls = true}) async {
     if (_playerCount == 0) return;
