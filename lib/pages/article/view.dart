@@ -432,6 +432,10 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
                                 pic: summary.cover,
                                 title: summary.title,
                                 uname: summary.author?.name,
+                                replyInfo: (
+                                  oid: controller.oid,
+                                  replyType: controller.replyType,
+                                ),
                                 onSuccess: () {
                                   if (forward != null) {
                                     int count = forward.count ?? 0;

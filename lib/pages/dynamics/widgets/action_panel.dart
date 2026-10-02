@@ -47,6 +47,7 @@ class ActionPanel extends StatelessWidget {
                         (context as Element?)?.markNeedsBuild();
                       }
                     },
+                    replyInfo: item.basic?.replyInfo,
                   ),
                 ),
                 icon: Icon(

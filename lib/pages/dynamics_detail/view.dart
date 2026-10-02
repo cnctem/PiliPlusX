@@ -587,6 +587,10 @@ class _DynamicDetailPageState
                                 }
                               }
                             },
+                            replyInfo: (
+                              oid: controller.oid,
+                              replyType: controller.replyType,
+                            ),
                           ),
                         ),
                       );
