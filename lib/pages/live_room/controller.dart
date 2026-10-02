@@ -621,9 +621,9 @@ class LiveRoomController extends GetxController {
               uemote: uemote,
               extra: liveExtra,
               reply: reply,
-              medalInfo: !GlobalData().showMedal || user['medal'] == null
-                  ? null
-                  : UinfoMedal.fromJson(user['medal']),
+              medalInfo: GlobalData().showMedal
+                  ? UinfoMedal.lightMedal(user['medal'])
+                  : null,
             ),
             DanmakuContentItem(
               msg,
