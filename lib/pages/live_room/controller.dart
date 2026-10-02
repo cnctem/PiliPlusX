@@ -584,7 +584,7 @@ class LiveRoomController extends GetxController {
           final content = first[15];
           final user = content['user'];
           // final midHash = first[7];
-          final uid = user['uid'];
+          final uid = user['uid'] as int;
           final msg = info[1];
           if (isBlocked(msg, uid)) {
             return;
