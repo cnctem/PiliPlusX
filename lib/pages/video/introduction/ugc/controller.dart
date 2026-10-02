@@ -571,8 +571,7 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
     bool isPart = false;
 
     final videoDetail = this.videoDetail.value;
-
-    if (!skipPart && (videoDetail.pages?.length ?? 0) > 1) {
+    if (!skipPart && videoDetail.hasParts) {
       isPart = true;
       episodes.addAll(videoDetail.pages!);
     } else if (videoDetailCtr.isPlayAll) {
@@ -638,7 +637,7 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
       final videoDetail = this.videoDetail.value;
 
       // part -> playall -> season
-      if (!skipPart && (videoDetail.pages?.length ?? 0) > 1) {
+      if (!skipPart && videoDetail.hasParts) {
         isPart = true;
         final List<Part> pages = videoDetail.pages!;
         episodes.addAll(pages);

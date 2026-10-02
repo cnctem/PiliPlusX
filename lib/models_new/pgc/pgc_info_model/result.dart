@@ -34,7 +34,9 @@ class PgcInfoModel {
   Brief? brief;
   List<Season>? seasons;
 
-  bool get isMultiSeason => seasons != null && seasons!.length > 1;
+  bool get hasSeasons => seasons != null && seasons!.length > 1;
+
+  bool get hasEpisodes => episodes?.isNotEmpty ?? false;
 
   PgcInfoModel({
     this.actors,

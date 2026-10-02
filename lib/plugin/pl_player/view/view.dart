@@ -397,7 +397,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   ) {
     final videoDetail = introController.videoDetail.value;
     final isSeason = videoDetail.ugcSeason != null;
-    final isPart = videoDetail.pages != null && videoDetail.pages!.length > 1;
+    final isPart = videoDetail.hasParts;
     final isPgc = !videoDetailController.isUgc;
     final isPlayAll = videoDetailController.isPlayAll;
     final anySeason = isSeason || isPart || isPgc || isPlayAll;
