@@ -14,6 +14,7 @@ import 'package:PiliPlus/models_new/pgc/pgc_info_model/stat.dart';
 import 'package:PiliPlus/pages/video/controller.dart';
 import 'package:PiliPlus/pages/video/introduction/pgc/controller.dart';
 import 'package:PiliPlus/pages/video/introduction/pgc/widgets/pgc_panel.dart';
+import 'package:PiliPlus/pages/video/introduction/pgc/widgets/season.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/widgets/action_item.dart';
 import 'package:PiliPlus/utils/extension/get_ext.dart';
 import 'package:PiliPlus/utils/num_utils.dart';
@@ -78,8 +79,20 @@ class _PgcIntroPageState extends State<PgcIntroPage> {
           const SizedBox(height: 6),
           // 点赞收藏转发 布局样式2
           if (introController.isPgc) actionGrid(item.stat!, introController),
+          // seasons
+          if (item.isMultiSeason)
+            Padding(
+              padding: const .only(top: 5),
+              child: SeasonPanel(
+                seasons: item.seasons!,
+                pgcController: introController,
+                onSeasonChanged: () {
+                  if (mounted) setState(() {});
+                },
+              ),
+            ),
           // 番剧分集
-          if (item.episodes?.isNotEmpty == true)
+          if (item.episodes?.isNotEmpty ?? false)
             PgcPanel(
               heroTag: widget.heroTag,
               pages: item.episodes!,
