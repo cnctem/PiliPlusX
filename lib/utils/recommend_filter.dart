@@ -13,7 +13,7 @@ abstract final class RecommendFilter {
   );
   static bool enableFilter = rcmdRegExp.pattern.isNotEmpty;
 
-  static bool filter(BaseVideoItemModel videoItem) {
+  static bool filterWithExempt(BaseVideoItemModel videoItem) {
     //由于相关视频中没有已关注标签，只能视为非关注视频
     if (videoItem.isFollowed && exemptFilterForFollowed) {
       return false;
@@ -35,9 +35,12 @@ abstract final class RecommendFilter {
     return (enableFilter && rcmdRegExp.hasMatch(title));
   }
 
+  static bool filterDuration(int duration) {
+    return duration > 0 && duration < minDurationForRcmd;
+  }
+
   static bool filterAll(BaseVideoItemModel videoItem) {
-    return (videoItem.duration > 0 &&
-            videoItem.duration < minDurationForRcmd) ||
+    return filterDuration(videoItem.duration) ||
         filterLikeRatio(videoItem.stat.like, videoItem.stat.view) ||
         filterTitle(videoItem.title);
   }
