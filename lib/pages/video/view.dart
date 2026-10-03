@@ -2064,6 +2064,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   void onShowMemberPage(int? mid) {
     videoDetailController.childKey.currentState?.showBottomSheet(
       constraints: const BoxConstraints(),
+      dragHeight: 100,
       (context) {
         return HorizontalMemberPage(
           mid: mid,
