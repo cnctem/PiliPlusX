@@ -273,6 +273,14 @@ void main() async {
   }
 }
 
+KeyEventResult _onKeyEvent(KeyEvent event) {
+  if (event.logicalKey == LogicalKeyboardKey.escape && event is KeyDownEvent) {
+    MyApp._onBack();
+    return KeyEventResult.handled;
+  }
+  return KeyEventResult.ignored;
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 

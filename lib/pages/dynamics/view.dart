@@ -176,7 +176,12 @@ class _DynamicsPageState extends CommonPageState<DynamicsPage>
         leading: leading,
         leadingWidth: 50,
         toolbarHeight: 50,
-        bottom: _dynamicsController.groupEnabled ? groupPanelPart : null,
+        bottom: _dynamicsController.groupEnabled
+            ? PreferredSize(
+                preferredSize: const Size.fromHeight(46),
+                child: groupPanelPart,
+              )
+            : null,
         backgroundColor: Colors.transparent,
         title: SizedBox(
           height: 50,

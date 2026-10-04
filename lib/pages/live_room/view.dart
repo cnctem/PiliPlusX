@@ -1,3 +1,4 @@
+import 'package:PiliPlus/common/widgets/gesture/horizontal_drag_gesture_recognizer.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
@@ -128,7 +129,8 @@ class _LiveRoomPageState extends State<LiveRoomPage>
   @override
   Future<void> didPopNext() async {
     // 从覆盖页面返回直播页时重新进入沉浸模式：移除安全边距或仍处于全屏时
-    if (plPlayerController.removeSafeArea || plPlayerController.isFullScreen.value) {
+    if (plPlayerController.removeSafeArea ||
+        plPlayerController.isFullScreen.value) {
       hideSystemBar();
     }
     addObserverMobile(this);

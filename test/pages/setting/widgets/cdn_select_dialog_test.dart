@@ -1,3 +1,4 @@
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'dart:io';
 
 import 'package:PiliPlus/pages/setting/widgets/cdn_select_dialog.dart';

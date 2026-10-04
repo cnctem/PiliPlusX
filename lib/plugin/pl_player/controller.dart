@@ -864,7 +864,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       _processing = true;
       final nextVideoContextKey =
           '${videoType ?? VideoType.ugc}:$bvid:$cid:$epid:$seasonId';
-      final shouldResetTempSettings = _activeVideoContextKey != null &&
+      final shouldResetTempSettings =
+          _activeVideoContextKey != null &&
           _activeVideoContextKey != nextVideoContextKey;
       _activeVideoContextKey = nextVideoContextKey;
       // 换视频/换P：解除倍速锁定并恢复锁定前速度。
@@ -1726,11 +1727,6 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       }
     }
 
-      }
-      this.volume.value = volume;
-    } catch (err) {
-      if (kDebugMode) debugPrint(err.toString());
-    }
     if (showIndicator) {
       volumeIndicator.value = true;
     }
@@ -1984,7 +1980,6 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     speedLockHint.value = SpeedLockHint.none;
     if (restoreSpeed) {
       await setPlaybackSpeed(lastPlaybackSpeed);
-
     }
   }
 

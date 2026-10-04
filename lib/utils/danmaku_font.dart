@@ -4,7 +4,7 @@ import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:file_picker_ohos/file_picker_ohos.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
 
@@ -37,13 +37,14 @@ abstract final class DanmakuFont {
   }
 
   static Future<bool> pickAndApply() async {
-    final picked = await FilePicker.pickFile(
+    final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: allowedExtensions,
     );
-    if (picked == null) {
+    if (result == null || result.files.isEmpty) {
       return false;
     }
+    final picked = result.files.first;
 
     final extension = path
         .extension(picked.path ?? picked.name)
@@ -67,7 +68,10 @@ abstract final class DanmakuFont {
     if (picked.path case final String sourcePath) {
       await File(sourcePath).copy(targetPath);
     } else {
-      await targetFile.writeAsBytes(await picked.readAsBytes(), flush: true);
+      await targetFile.writeAsBytes(
+        await picked.xFile.readAsBytes(),
+        flush: true,
+      );
     }
 
     final fontFamily = 'custom_danmaku_font_$timestamp';

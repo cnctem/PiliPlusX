@@ -588,25 +588,18 @@ abstract final class Pref {
     defaultValue: LiveQuality.superHD.code,
   );
 
-  static FontWeight get appFontWeight {
-    // TODO: remove next 2 version
+  /// `FontWeight.values` 的下标；`-1` 表示跟随系统字重，由 ThemeUtils 在
+  /// HarmonyOS 上读取系统字重映射。
+  static int get appFontWeight {
     const appFontWeightV1 = 'appFontWeight';
     final int? valV1 = _setting.get(appFontWeightV1);
     if (valV1 != null) {
-      _setting.delete(appFontWeightV1);
-      if (valV1 == -1) {
-        return .normal;
-      } else {
-        _setting.put(SettingBoxKey.appFontWeightV2, valV1);
-        return .values[valV1];
-      }
+      _setting
+        ..delete(appFontWeightV1)
+        ..put(SettingBoxKey.appFontWeightV2, valV1);
+      return valV1;
     }
-
-    final int? val = _setting.get(SettingBoxKey.appFontWeightV2);
-    if (val == null) {
-      return .normal;
-    }
-    return .values[val];
+    return _setting.get(SettingBoxKey.appFontWeightV2, defaultValue: -1);
   }
 
   static DanmakuFontSyncMode get danmakuFontSyncMode =>
@@ -1169,4 +1162,28 @@ abstract final class Pref {
     SettingBoxKey.enableLandscapeAutoFullscreen,
     defaultValue: false,
   );
+
+  static bool get hideStatusBar =>
+      _setting.get(SettingBoxKey.hideStatusBar, defaultValue: false);
+
+  static bool get enableLGBar =>
+      _setting.get(SettingBoxKey.enableLGBar, defaultValue: false);
+
+  static bool get enableHdsBar =>
+      _setting.get(SettingBoxKey.enableHdsBar, defaultValue: false);
+
+  static bool get enableHdsTopBar =>
+      _setting.get(SettingBoxKey.enableHdsTopBar, defaultValue: false);
+
+  static bool get enableStatusBarTapToTop =>
+      _setting.get(SettingBoxKey.enableStatusBarTapToTop, defaultValue: false);
+
+  static bool get showActualVolume =>
+      _setting.get(SettingBoxKey.showActualVolume, defaultValue: false);
+
+  static bool get enableHeroCoverAnimation =>
+      _setting.get(SettingBoxKey.enableHeroCoverAnimation, defaultValue: false);
+
+  static double get longPressSpeedFactor =>
+      _setting.get(SettingBoxKey.longPressSpeedFactor, defaultValue: 2.0);
 }
