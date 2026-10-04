@@ -470,6 +470,31 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     super.dispose();
   }
 
+  Widget _buildControlBar({
+    required bool isTop,
+    required bool isFullScreen,
+    required Widget child,
+    double? topInset,
+  }) {
+    final controlBar = AppBarAni(
+      isTop: isTop,
+      controller: _animationController,
+      isFullScreen: isFullScreen,
+      removeSafeArea: plPlayerController.removeSafeArea,
+      topInset: topInset,
+      child: child,
+    );
+    if (!PlatformUtils.isDesktop) {
+      return controlBar;
+    }
+    // PC 端仅在鼠标进入顶部/底部控制栏区域时显示控件。
+    return MouseRegion(
+      onEnter: (_) => plPlayerController.controls = true,
+      onHover: (_) => plPlayerController.controls = true,
+      child: controlBar,
+    );
+  }
+
   // 动态构建底部控制条
   Widget buildBottomControl(
     VideoDetailController videoDetailController,
@@ -1903,11 +1928,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  AppBarAni(
+                  _buildControlBar(
                     isTop: true,
-                    controller: _animationController,
                     isFullScreen: isFullScreen,
-                    removeSafeArea: plPlayerController.removeSafeArea,
                     topInset: widget.topInset,
                     child: plPlayerController.isDesktopPip
                         ? GestureDetector(
@@ -1917,11 +1940,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                           )
                         : widget.headerControl,
                   ),
-                  AppBarAni(
+                  _buildControlBar(
                     isTop: false,
-                    controller: _animationController,
                     isFullScreen: isFullScreen,
-                    removeSafeArea: plPlayerController.removeSafeArea,
                     child:
                         widget.bottomControl ??
                         BottomControl(
@@ -2280,8 +2301,6 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           cursor: !plPlayerController.showControls.value && isFullScreen
               ? SystemMouseCursors.none
               : MouseCursor.defer,
-          onEnter: (_) => plPlayerController.controls = true,
-          onHover: (_) => plPlayerController.controls = true,
           onExit: (_) => plPlayerController.controls =
               widget.videoDetailController?.showSteinEdgeInfo.value ?? false,
           child: child,
