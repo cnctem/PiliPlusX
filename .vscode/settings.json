@@ -2,4 +2,5 @@
   "editor.codeActionsOnSave": {
     "source.organizeImports": "explicit"
   },
+  "dart.flutterSdkPath": ".fvm/versions/oh-3.44.9-dev"
 }
