@@ -2089,7 +2089,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       );
       return KeepAliveWrapper(
         child: KeyboardScrollable(
-          focusNode: tabContentFocusNode,
+          // 此组件可能已被外层 wrapTabContent 包裹；若复用同一个
+          // tabContentFocusNode，会在它自己的 Focus 祖先中形成焦点树自环。
           controller: () => needCtr
               ? videoDetailController.effectiveIntroScrollCtr
               : videoDetailController.scrollCtr,
