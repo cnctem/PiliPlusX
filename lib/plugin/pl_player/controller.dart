@@ -643,7 +643,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     switch (orientation) {
       case .portraitUp:
         if (!_isVertical && controlsLock.value) return;
-        if (!_isVertical && isFullScreen &&
+        if (!_isVertical &&
+            isFullScreen &&
             (!horizontalScreen || enableLandscapeAutoFullscreen)) {
           if (!isManualFS) {
             triggerFullScreen(status: false, orientation: orientation);
@@ -720,8 +721,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     if (!tempPlayerConf) {
       return;
     }
-    if (_playbackSpeed.value != playSpeedDefault) {
-      unawaited(setPlaybackSpeed(playSpeedDefault));
+    final defaultSpeed = Pref.playSpeedDefault;
+    if (_playbackSpeed.value != defaultSpeed) {
+      unawaited(setPlaybackSpeed(defaultSpeed));
     }
   }
 
@@ -761,7 +763,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       _processing = true;
       final nextVideoContextKey =
           '${videoType ?? VideoType.ugc}:$bvid:$cid:$epid:$seasonId';
-      final shouldResetTempSettings = _activeVideoContextKey != null &&
+      final shouldResetTempSettings =
+          _activeVideoContextKey != null &&
           _activeVideoContextKey != nextVideoContextKey;
       _activeVideoContextKey = nextVideoContextKey;
       // 换视频/换P：解除倍速锁定并恢复锁定前速度。
